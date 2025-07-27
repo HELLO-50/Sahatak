@@ -1,0 +1,13 @@
+﻿{
+  "name": "sahatak-frontend",
+  "version": "1.0.0",
+  "description": "Sahatak Telemedicine Platform Frontend",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "test": "echo 'No tests specified'"
+  },
+  "keywords": ["telemedicine", "healthcare", "arabic", "sudan"],
+  "author": "Ahmed & Awab",
+  "license": "MIT"
+}

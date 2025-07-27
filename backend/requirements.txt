@@ -1,0 +1,11 @@
+﻿Flask==2.3.3
+SQLAlchemy==2.0.23
+Flask-SQLAlchemy==3.0.5
+Flask-Login==0.6.3
+Flask-CORS==4.0.0
+Flask-Mail==0.9.1
+Werkzeug==2.3.7
+python-dotenv==1.0.0
+africastalking==1.2.5
+APScheduler==3.10.4
+cryptography==41.0.7

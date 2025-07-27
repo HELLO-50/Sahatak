@@ -1,0 +1,11 @@
+﻿{
+  "app_name": "Sahatak",
+  "language_selection": "Choose your preferred language",
+  "login": "Login",
+  "register": "Register",
+  "patient": "Patient",
+  "doctor": "Doctor",
+  "book_appointment": "Book Appointment",
+  "medical_records": "Medical Records",
+  "profile": "Profile"
+}
