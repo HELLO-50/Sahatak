@@ -243,3 +243,97 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: #1d4ed8;
 }
+
+/* Footer Styling */
+.footer {
+    background: #f8f9fa;
+    color: var(--dark-color);
+    border-top: 3px solid var(--medical-blue);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.footer h5, .footer h6 {
+    color: var(--medical-blue);
+    font-weight: 600;
+}
+
+.footer .text-muted {
+    color: #6c757d;
+}
+
+.footer a {
+    color: #495057;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.footer a:hover {
+    color: var(--medical-blue);
+    transform: translateY(-1px);
+}
+
+.footer .text-danger {
+    color: #dc3545;
+}
+
+.footer hr {
+    border-color: #dee2e6;
+    opacity: 1;
+}
+
+.footer .social-links a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e9ecef;
+    color: var(--medical-blue);
+    transition: all 0.3s ease;
+}
+
+.footer .social-links a:hover {
+    background: var(--medical-blue);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Footer RTL/Arabic Layout Fixes */
+.footer .row {
+    align-items: flex-start;
+}
+
+.footer .col-lg-2,
+.footer .col-lg-3,
+.footer .col-lg-4 {
+    display: flex;
+    flex-direction: column;
+    min-height: auto;
+}
+
+/* Ensure consistent vertical alignment in RTL */
+[dir="rtl"] .footer .col-lg-2,
+[dir="rtl"] .footer .col-lg-3 {
+    align-items: flex-start;
+}
+
+[dir="rtl"] .footer ul {
+    padding-right: 0;
+    text-align: right;
+}
+
+[dir="rtl"] .footer .social-links {
+    justify-content: flex-end;
+}
+
+/* Fix for Emergency section alignment */
+.footer .emergency-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+[dir="rtl"] .footer .emergency-section {
+    text-align: right;
+}

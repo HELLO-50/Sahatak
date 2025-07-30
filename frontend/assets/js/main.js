@@ -72,6 +72,10 @@ function showLanguageSelection() {
     document.getElementById('login-form').classList.add('d-none');
     document.getElementById('register-form').classList.add('d-none');
     
+    // Remove any loading states from language buttons
+    const buttons = document.querySelectorAll('#language-selection .btn');
+    buttons.forEach(btn => btn.classList.remove('loading'));
+    
     // Show language selection
     document.getElementById('language-selection').classList.remove('d-none');
 }
@@ -139,7 +143,23 @@ function updateContentByLanguage(lang) {
             regPasswordLabel: 'كلمة المرور',
             userTypeLabel: 'نوع الحساب',
             registerSubmit: 'إنشاء الحساب',
-            backToAuthReg: 'العودة'
+            backToAuthReg: 'العودة',
+            
+            // Footer
+            footerBrand: 'صحتك | Sahatak',
+            footerDescription: 'منصة طبية آمنة وموثوقة للتواصل مع الأطباء عن بُعد',
+            footerLinksTitle: 'روابط سريعة',
+            footerAbout: 'عن المنصة',
+            footerServices: 'الخدمات',
+            footerSupportTitle: 'الدعم والمساعدة',
+            footerHelp: 'مركز المساعدة',
+            footerContact: 'اتصل بنا',
+            footerEmergencyTitle: 'الطوارئ',
+            footerEmergencyText: 'في حالات الطوارئ الطبية',
+            footerEmergencyAction: 'اذهب إلى أقرب مستشفى طوارئ',
+            footerEmergencyNote: 'للاستشارات غير العاجلة استخدم المنصة',
+            footerCopyright: '© 2024 صحتك Sahatak. جميع الحقوق محفوظة.',
+            footerMedicalDisclaimer: 'هذه المنصة لا تغني عن زيارة الطبيب في الحالات الطارئة'
         },
         en: {
             // Welcome section
@@ -170,7 +190,23 @@ function updateContentByLanguage(lang) {
             regPasswordLabel: 'Password',
             userTypeLabel: 'Account Type',
             registerSubmit: 'Create Account',
-            backToAuthReg: 'Back'
+            backToAuthReg: 'Back',
+            
+            // Footer
+            footerBrand: 'صحتك | Sahatak',
+            footerDescription: 'A secure and trusted medical platform to connect with doctors remotely',
+            footerLinksTitle: 'Quick Links',
+            footerAbout: 'About Platform',
+            footerServices: 'Services',
+            footerSupportTitle: 'Support & Help',
+            footerHelp: 'Help Center',
+            footerContact: 'Contact Us',
+            footerEmergencyTitle: 'Emergency',
+            footerEmergencyText: 'For medical emergencies',
+            footerEmergencyAction: 'Go to nearest ER hospital',
+            footerEmergencyNote: 'For non-urgent consultations use the platform',
+            footerCopyright: '© 2024 Sahatak | صحتك. All rights reserved.',
+            footerMedicalDisclaimer: 'This platform does not replace visiting a doctor in emergency cases'
         }
     };
     
@@ -208,6 +244,22 @@ function updateContentByLanguage(lang) {
     
     // Update select options
     updateSelectOptions(lang);
+    
+    // Update footer
+    updateElementText('footer-brand', t.footerBrand);
+    updateElementText('footer-description', t.footerDescription);
+    updateElementText('footer-links-title', t.footerLinksTitle);
+    updateElementText('footer-about', t.footerAbout);
+    updateElementText('footer-services', t.footerServices);
+    updateElementText('footer-support-title', t.footerSupportTitle);
+    updateElementText('footer-help', t.footerHelp);
+    updateElementText('footer-contact', t.footerContact);
+    updateElementText('footer-emergency-title', t.footerEmergencyTitle);
+    updateElementText('footer-emergency-text', t.footerEmergencyText);
+    updateElementText('footer-emergency-action', t.footerEmergencyAction);
+    updateElementText('footer-emergency-note', t.footerEmergencyNote);
+    updateElementText('footer-copyright', t.footerCopyright);
+    updateElementText('footer-medical-disclaimer', t.footerMedicalDisclaimer);
 }
 
 // Helper function to update element text
