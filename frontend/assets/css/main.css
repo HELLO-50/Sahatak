@@ -1,4 +1,4 @@
-/* Sahatak Custom CSS - Arabic/English Support */
+/* Sahatak main CSS with Arabic/English Support */
 
 /* Root Variables for Medical Theme */
 :root {
@@ -109,19 +109,87 @@ body {
     font-feature-settings: "lnum" 0;
 }
 
-/* Responsive Design */
+/* Auth Selection & Forms Styling */
+#auth-selection {
+    background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-teal) 100%);
+}
+
+#login-form, #register-form {
+    background: linear-gradient(135deg, var(--medical-green) 0%, var(--medical-teal) 100%);
+}
+
+.welcome-title {
+    color: white;
+    font-weight: 600;
+    font-size: 2.5rem;
+}
+
+.welcome-title .text-primary {
+    color: white !important;
+}
+
+#auth-selection .card,
+#login-form .card,
+#register-form .card {
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--dark-color);
+}
+
+.auth-btn {
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 1.1rem;
+    padding: 12px 24px;
+    transition: all 0.3s ease;
+}
+
+.auth-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Form Styling */
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 2px solid #e1e5e9;
+    padding: 12px 16px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--medical-blue);
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
+}
+
+.form-label {
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: var(--dark-color);
+}
+
+/* Language Switcher */
+.border-top {
+    border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Responsive adjustments for auth pages */
 @media (max-width: 768px) {
-    #language-selection h1 {
+    .welcome-title {
         font-size: 2rem;
     }
     
-    #language-selection .btn {
+    .auth-btn {
         font-size: 1rem;
         padding: 10px 20px;
     }
     
-    .navbar-brand {
-        font-size: 1.3rem;
+    #auth-selection .card,
+    #login-form .card,
+    #register-form .card {
+        margin: 20px;
     }
 }
 

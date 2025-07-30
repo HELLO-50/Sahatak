@@ -1,4 +1,4 @@
-// Sahatak Main JavaScript - Language Management & Core Functions
+// Sahatak main JavaScript - Language Management & Core Functions
 
 // Language Management Object
 const LanguageManager = {
@@ -52,8 +52,8 @@ function selectLanguage(lang) {
         // Hide language selection screen
         document.getElementById('language-selection').classList.add('d-none');
         
-        // Show main application
-        document.getElementById('main-app').classList.remove('d-none');
+        // Show auth selection screen
+        document.getElementById('auth-selection').classList.remove('d-none');
         
         // Apply language settings
         LanguageManager.applyLanguage(lang);
@@ -65,41 +65,177 @@ function selectLanguage(lang) {
     }, 500);
 }
 
+// Show language selection (for language switcher)
+function showLanguageSelection() {
+    // Hide all other screens
+    document.getElementById('auth-selection').classList.add('d-none');
+    document.getElementById('login-form').classList.add('d-none');
+    document.getElementById('register-form').classList.add('d-none');
+    
+    // Show language selection
+    document.getElementById('language-selection').classList.remove('d-none');
+}
+
+// Show auth selection screen
+function showAuthSelection() {
+    // Hide all other screens
+    document.getElementById('language-selection').classList.add('d-none');
+    document.getElementById('login-form').classList.add('d-none');
+    document.getElementById('register-form').classList.add('d-none');
+    
+    // Show auth selection
+    document.getElementById('auth-selection').classList.remove('d-none');
+}
+
+// Show login form
+function showLogin() {
+    // Hide all other screens
+    document.getElementById('auth-selection').classList.add('d-none');
+    document.getElementById('register-form').classList.add('d-none');
+    
+    // Show login form
+    document.getElementById('login-form').classList.remove('d-none');
+}
+
+// Show register form
+function showRegister() {
+    // Hide all other screens
+    document.getElementById('auth-selection').classList.add('d-none');
+    document.getElementById('login-form').classList.add('d-none');
+    
+    // Show register form
+    document.getElementById('register-form').classList.remove('d-none');
+}
+
 // Update page content based on selected language
 function updateContentByLanguage(lang) {
     const translations = {
         ar: {
-            home: 'الرئيسية',
-            bookAppointment: 'حجز موعد',
-            login: 'تسجيل الدخول',
-            welcome: 'مرحباً بك في منصة صحتك للطب عن بُعد',
-            description: 'منصة آمنة وسهلة الاستخدام للتواصل مع الأطباء'
+            // Welcome section
+            welcomeTitle: 'مرحباً بك في منصة صحتك للطب عن بُعد',
+            welcomeDescription: 'منصة آمنة وسهلة الاستخدام للتواصل مع الأطباء',
+            
+            // Auth selection
+            authPrompt: 'ابدأ رحلتك الصحية',
+            loginText: 'تسجيل الدخول',
+            registerText: 'إنشاء حساب جديد',
+            languageSwitchText: 'تغيير اللغة',
+            currentLanguage: 'العربية',
+            
+            // Login form
+            loginTitle: 'تسجيل الدخول',
+            loginSubtitle: 'أدخل بياناتك للوصول إلى حسابك',
+            emailLabel: 'البريد الإلكتروني',
+            passwordLabel: 'كلمة المرور',
+            loginSubmit: 'دخول',
+            backToAuth: 'العودة',
+            
+            // Register form
+            registerTitle: 'إنشاء حساب جديد',
+            registerSubtitle: 'انضم إلى منصة صحتك اليوم',
+            firstNameLabel: 'الاسم الأول',
+            lastNameLabel: 'الاسم الأخير',
+            regEmailLabel: 'البريد الإلكتروني',
+            regPasswordLabel: 'كلمة المرور',
+            userTypeLabel: 'نوع الحساب',
+            registerSubmit: 'إنشاء الحساب',
+            backToAuthReg: 'العودة'
         },
         en: {
-            home: 'Home',
-            bookAppointment: 'Book Appointment',
-            login: 'Login',
-            welcome: 'Welcome to Sahatak Telemedicine Platform',
-            description: 'A secure and user-friendly platform to connect with doctors'
+            // Welcome section
+            welcomeTitle: 'Welcome to Sahatak Telemedicine Platform',
+            welcomeDescription: 'A secure and user-friendly platform to connect with doctors',
+            
+            // Auth selection
+            authPrompt: 'Start Your Health Journey',
+            loginText: 'Login',
+            registerText: 'Create New Account',
+            languageSwitchText: 'Change Language',
+            currentLanguage: 'English',
+            
+            // Login form
+            loginTitle: 'Login',
+            loginSubtitle: 'Enter your credentials to access your account',
+            emailLabel: 'Email Address',
+            passwordLabel: 'Password',
+            loginSubmit: 'Login',
+            backToAuth: 'Back',
+            
+            // Register form
+            registerTitle: 'Create New Account',
+            registerSubtitle: 'Join Sahatak platform today',
+            firstNameLabel: 'First Name',
+            lastNameLabel: 'Last Name',
+            regEmailLabel: 'Email Address',
+            regPasswordLabel: 'Password',
+            userTypeLabel: 'Account Type',
+            registerSubmit: 'Create Account',
+            backToAuthReg: 'Back'
         }
     };
     
     const t = translations[lang];
     
-    // Update navigation
-    const navLinks = document.querySelectorAll('.nav-link');
-    if (navLinks.length >= 3) {
-        navLinks[0].textContent = t.home;
-        navLinks[1].textContent = t.bookAppointment;
-        navLinks[2].textContent = t.login;
+    // Update welcome section
+    updateElementText('welcome-text', t.welcomeTitle);
+    updateElementText('welcome-description', t.welcomeDescription);
+    
+    // Update auth selection
+    updateElementText('auth-prompt', t.authPrompt);
+    updateElementText('login-text', t.loginText);
+    updateElementText('register-text', t.registerText);
+    updateElementText('language-switch-text', t.languageSwitchText);
+    updateElementText('current-language', t.currentLanguage);
+    
+    // Update login form
+    updateElementText('login-title', t.loginTitle);
+    updateElementText('login-subtitle', t.loginSubtitle);
+    updateElementText('email-label', t.emailLabel);
+    updateElementText('password-label', t.passwordLabel);
+    updateElementText('login-submit', t.loginSubmit);
+    updateElementText('back-to-auth', t.backToAuth);
+    
+    // Update register form
+    updateElementText('register-title', t.registerTitle);
+    updateElementText('register-subtitle', t.registerSubtitle);
+    updateElementText('firstName-label', t.firstNameLabel);
+    updateElementText('lastName-label', t.lastNameLabel);
+    updateElementText('regEmail-label', t.regEmailLabel);
+    updateElementText('regPassword-label', t.regPasswordLabel);
+    updateElementText('userType-label', t.userTypeLabel);
+    updateElementText('register-submit', t.registerSubmit);
+    updateElementText('back-to-auth-reg', t.backToAuthReg);
+    
+    // Update select options
+    updateSelectOptions(lang);
+}
+
+// Helper function to update element text
+function updateElementText(elementId, text) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.textContent = text;
     }
-    
-    // Update main content
-    const mainTitle = document.querySelector('main h2');
-    const mainDescription = document.querySelector('main .lead');
-    
-    if (mainTitle) mainTitle.textContent = t.welcome;
-    if (mainDescription) mainDescription.textContent = t.description;
+}
+
+// Update select options based on language
+function updateSelectOptions(lang) {
+    const userTypeSelect = document.getElementById('userType');
+    if (userTypeSelect) {
+        if (lang === 'ar') {
+            userTypeSelect.innerHTML = `
+                <option value="">اختر نوع الحساب</option>
+                <option value="patient">مريض</option>
+                <option value="doctor">طبيب</option>
+            `;
+        } else {
+            userTypeSelect.innerHTML = `
+                <option value="">Choose Account Type</option>
+                <option value="patient">Patient</option>
+                <option value="doctor">Doctor</option>
+            `;
+        }
+    }
 }
 
 // Initialize application on page load
@@ -111,9 +247,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const savedLanguage = LanguageManager.getLanguage();
         console.log(`Saved language found: ${savedLanguage}`);
         
-        // Skip language selection and go directly to app
+        // Skip language selection and go directly to auth selection
         document.getElementById('language-selection').classList.add('d-none');
-        document.getElementById('main-app').classList.remove('d-none');
+        document.getElementById('auth-selection').classList.remove('d-none');
         
         // Apply the saved language
         LanguageManager.applyLanguage(savedLanguage);
@@ -173,7 +309,7 @@ const ApiHelper = {
 };
 
 // Console welcome message
-console.log('%cSahatak Telemedicine Platform', 'color: #2563eb; font-size: 16px; font-weight: bold;');
+console.log('%c🏥 Sahatak Telemedicine Platform', 'color: #2563eb; font-size: 16px; font-weight: bold;');
 console.log('%cBootstrap 5 loaded successfully ✓', 'color: #059669;');
 console.log('%cArabic font support enabled ✓', 'color: #059669;');
 console.log('%cLanguage management ready ✓', 'color: #059669;');

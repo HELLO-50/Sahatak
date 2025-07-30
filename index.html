@@ -17,7 +17,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="frontend\assets\css\main.css">
 </head>
 <body>
     <!-- Language Selection Section - This will be the first feature to implement -->
@@ -27,7 +27,7 @@
                 <div class="col-md-6">
                     <div class="card shadow-lg border-0">
                         <div class="card-body text-center p-5">
-                            <h1 class="mb-4">صحتك Sahatak</h1>
+                            <h1 class="mb-4">صحتك | Sahatak</h1>
                             <p class="lead mb-4">Choose your preferred language / اختر اللغة المفضلة</p>
                             
                             <div class="d-grid gap-3">
@@ -47,47 +47,159 @@
         </div>
     </div>
 
-    <!-- Main Application (Hidden initially) -->
-    <div id="main-app" class="d-none">
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-            <div class="container">
-                <a class="navbar-brand" href="#">
-                    <i class="bi bi-heart-pulse me-2"></i>
-                    صحتك Sahatak
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">الرئيسية</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">حجز موعد</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">تسجيل الدخول</a>
-                        </li>
-                    </ul>
+    <!-- Login/Register Selection (Hidden initially) -->
+    <div id="auth-selection" class="d-none min-vh-100 d-flex align-items-center justify-content-center">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <!-- Welcome Header -->
+                    <div class="text-center mb-4">
+                        <h1 class="welcome-title mb-3">
+                            <i class="bi bi-heart-pulse me-2 text-primary"></i>
+                            <span id="welcome-text">مرحباً بك في منصة صحتك للطب عن بُعد</span>
+                        </h1>
+                        <p class="lead text-muted" id="welcome-description">
+                            منصة آمنة وسهلة الاستخدام للتواصل مع الأطباء
+                        </p>
+                    </div>
+                    
+                    <!-- Auth Selection Card -->
+                    <div class="card shadow-lg border-0">
+                        <div class="card-body text-center p-5">
+                            <h3 class="mb-4" id="auth-prompt">ابدأ رحلتك الصحية</h3>
+                            
+                            <div class="d-grid gap-3">
+                                <button class="btn btn-primary btn-lg auth-btn" onclick="showLogin()">
+                                    <i class="bi bi-box-arrow-in-right me-2"></i>
+                                    <span id="login-text">تسجيل الدخول</span>
+                                </button>
+                                <button class="btn btn-outline-primary btn-lg auth-btn" onclick="showRegister()">
+                                    <i class="bi bi-person-plus me-2"></i>
+                                    <span id="register-text">إنشاء حساب جديد</span>
+                                </button>
+                            </div>
+                            
+                            <!-- Language Switcher -->
+                            <div class="mt-4 pt-3 border-top">
+                                <small class="text-muted d-block mb-2" id="language-switch-text">تغيير اللغة</small>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="showLanguageSelection()">
+                                    <i class="bi bi-globe2 me-1"></i>
+                                    <span id="current-language">العربية</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </nav>
+        </div>
+    </div>
 
-        <main class="container my-5">
-            <div class="row">
-                <div class="col-12">
-                    <h2>مرحباً بك في منصة صحتك للطب عن بُعد</h2>
-                    <p class="lead">منصة آمنة وسهلة الاستخدام للتواصل مع الأطباء</p>
+    <!-- Login Form (Hidden initially) -->
+    <div id="login-form" class="d-none min-vh-100 d-flex align-items-center justify-content-center">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-5">
+                    <div class="card shadow-lg border-0">
+                        <div class="card-body p-5">
+                            <div class="text-center mb-4">
+                                <h2 id="login-title">تسجيل الدخول</h2>
+                                <p class="text-muted" id="login-subtitle">أدخل بياناتك للوصول إلى حسابك</p>
+                            </div>
+                            
+                            <form>
+                                <div class="mb-3">
+                                    <label for="email" class="form-label" id="email-label">البريد الإلكتروني</label>
+                                    <input type="email" class="form-control" id="email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="password" class="form-label" id="password-label">كلمة المرور</label>
+                                    <input type="password" class="form-control" id="password" required>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-lg" id="login-submit">
+                                        <i class="bi bi-box-arrow-in-right me-2"></i>
+                                        دخول
+                                    </button>
+                                </div>
+                            </form>
+                            
+                            <div class="text-center mt-4">
+                                <button class="btn btn-link" onclick="showAuthSelection()" id="back-to-auth">
+                                    <i class="bi bi-arrow-left me-1"></i>
+                                    العودة
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </main>
+        </div>
+    </div>
+
+    <!-- Register Form (Hidden initially) -->
+    <div id="register-form" class="d-none min-vh-100 d-flex align-items-center justify-content-center">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card shadow-lg border-0">
+                        <div class="card-body p-5">
+                            <div class="text-center mb-4">
+                                <h2 id="register-title">إنشاء حساب جديد</h2>
+                                <p class="text-muted" id="register-subtitle">انضم إلى منصة صحتك اليوم</p>
+                            </div>
+                            
+                            <form>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="firstName" class="form-label" id="firstName-label">الاسم الأول</label>
+                                        <input type="text" class="form-control" id="firstName" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="lastName" class="form-label" id="lastName-label">الاسم الأخير</label>
+                                        <input type="text" class="form-control" id="lastName" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="regEmail" class="form-label" id="regEmail-label">البريد الإلكتروني</label>
+                                    <input type="email" class="form-control" id="regEmail" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="regPassword" class="form-label" id="regPassword-label">كلمة المرور</label>
+                                    <input type="password" class="form-control" id="regPassword" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="userType" class="form-label" id="userType-label">نوع الحساب</label>
+                                    <select class="form-select" id="userType" required>
+                                        <option value="">اختر نوع الحساب</option>
+                                        <option value="patient">مريض</option>
+                                        <option value="doctor">طبيب</option>
+                                    </select>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-lg" id="register-submit">
+                                        <i class="bi bi-person-plus me-2"></i>
+                                        إنشاء الحساب
+                                    </button>
+                                </div>
+                            </form>
+                            
+                            <div class="text-center mt-4">
+                                <button class="btn btn-link" onclick="showAuthSelection()" id="back-to-auth-reg">
+                                    <i class="bi bi-arrow-left me-1"></i>
+                                    العودة
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Bootstrap 5 JavaScript CDN -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     
     <!-- Custom JavaScript -->
-    <script src="js/app.js"></script>
+    <script src="frontend\assets\js\main.js"></script>
 </body>
 </html>
