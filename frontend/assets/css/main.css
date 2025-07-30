@@ -325,6 +325,12 @@ body {
 
 [dir="rtl"] .footer .social-links {
     justify-content: flex-end;
+    direction: ltr;
+}
+
+/* Fix for brand section in RTL */
+[dir="rtl"] .footer .col-lg-4 {
+    text-align: right;
 }
 
 /* Fix for Emergency section alignment */
