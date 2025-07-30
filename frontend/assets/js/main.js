@@ -2,6 +2,53 @@
 
 // Language Management Object
 const LanguageManager = {
+    translations: {},
+    
+    // Load translations from JSON files
+    async loadTranslations() {
+        try {
+            const [arResponse, enResponse] = await Promise.all([
+                fetch('frontend/locales/ar.json'),
+                fetch('frontend/locales/en.json')
+            ]);
+            
+            this.translations.ar = await arResponse.json();
+            this.translations.en = await enResponse.json();
+            
+            console.log('Translations loaded successfully');
+        } catch (error) {
+            console.error('Failed to load translations:', error);
+            // Fallback to hardcoded translations if JSON fails
+            this.loadFallbackTranslations();
+        }
+    },
+    
+    // Fallback translations in case JSON loading fails
+    loadFallbackTranslations() {
+        this.translations = {
+            ar: {
+                welcome: { title: 'مرحباً بك في منصة صحتك للطب عن بُعد' },
+                auth: { login: 'تسجيل الدخول' }
+            },
+            en: {
+                welcome: { title: 'Welcome to Sahatak Telemedicine Platform' },
+                auth: { login: 'Login' }
+            }
+        };
+    },
+    
+    // Get translation by key path (e.g., 'welcome.title')
+    getTranslation(lang, keyPath) {
+        const keys = keyPath.split('.');
+        let value = this.translations[lang];
+        
+        for (const key of keys) {
+            value = value?.[key];
+        }
+        
+        return value || keyPath; // Return key if translation not found
+    },
+    
     // Set user's language preference
     setLanguage: (lang) => {
         localStorage.setItem('sahatak_language', lang);
@@ -111,155 +158,63 @@ function showRegister() {
     document.getElementById('register-form').classList.remove('d-none');
 }
 
-// Update page content based on selected language
+// Update page content based on selected language using JSON translations
 function updateContentByLanguage(lang) {
-    const translations = {
-        ar: {
-            // Welcome section
-            welcomeTitle: 'مرحباً بك في منصة صحتك للطب عن بُعد',
-            welcomeDescription: 'منصة آمنة وسهلة الاستخدام للتواصل مع الأطباء',
-            
-            // Auth selection
-            authPrompt: 'ابدأ رحلتك الصحية',
-            loginText: 'تسجيل الدخول',
-            registerText: 'إنشاء حساب جديد',
-            languageSwitchText: 'تغيير اللغة',
-            currentLanguage: 'العربية',
-            
-            // Login form
-            loginTitle: 'تسجيل الدخول',
-            loginSubtitle: 'أدخل بياناتك للوصول إلى حسابك',
-            emailLabel: 'البريد الإلكتروني',
-            passwordLabel: 'كلمة المرور',
-            loginSubmit: 'دخول',
-            backToAuth: 'العودة',
-            
-            // Register form
-            registerTitle: 'إنشاء حساب جديد',
-            registerSubtitle: 'انضم إلى منصة صحتك اليوم',
-            firstNameLabel: 'الاسم الأول',
-            lastNameLabel: 'الاسم الأخير',
-            regEmailLabel: 'البريد الإلكتروني',
-            regPasswordLabel: 'كلمة المرور',
-            userTypeLabel: 'نوع الحساب',
-            registerSubmit: 'إنشاء الحساب',
-            backToAuthReg: 'العودة',
-            
-            // Footer
-            footerBrand: 'صحتك | Sahatak',
-            footerDescription: 'منصة طبية آمنة وموثوقة للتواصل مع الأطباء عن بُعد',
-            footerLinksTitle: 'روابط سريعة',
-            footerAbout: 'عن المنصة',
-            footerServices: 'الخدمات',
-            footerSupportTitle: 'الدعم والمساعدة',
-            footerHelp: 'مركز المساعدة',
-            footerContact: 'اتصل بنا',
-            footerEmergencyTitle: 'الطوارئ',
-            footerEmergencyText: 'في حالات الطوارئ الطبية',
-            footerEmergencyAction: 'اذهب إلى أقرب مستشفى طوارئ',
-            footerEmergencyNote: 'للاستشارات غير العاجلة استخدم المنصة',
-            footerCopyright: '© 2024 صحتك Sahatak. جميع الحقوق محفوظة.',
-            footerMedicalDisclaimer: 'هذه المنصة لا تغني عن زيارة الطبيب في الحالات الطارئة'
-        },
-        en: {
-            // Welcome section
-            welcomeTitle: 'Welcome to Sahatak Telemedicine Platform',
-            welcomeDescription: 'A secure and user-friendly platform to connect with doctors',
-            
-            // Auth selection
-            authPrompt: 'Start Your Health Journey',
-            loginText: 'Login',
-            registerText: 'Create New Account',
-            languageSwitchText: 'Change Language',
-            currentLanguage: 'English',
-            
-            // Login form
-            loginTitle: 'Login',
-            loginSubtitle: 'Enter your credentials to access your account',
-            emailLabel: 'Email Address',
-            passwordLabel: 'Password',
-            loginSubmit: 'Login',
-            backToAuth: 'Back',
-            
-            // Register form
-            registerTitle: 'Create New Account',
-            registerSubtitle: 'Join Sahatak platform today',
-            firstNameLabel: 'First Name',
-            lastNameLabel: 'Last Name',
-            regEmailLabel: 'Email Address',
-            regPasswordLabel: 'Password',
-            userTypeLabel: 'Account Type',
-            registerSubmit: 'Create Account',
-            backToAuthReg: 'Back',
-            
-            // Footer
-            footerBrand: 'صحتك | Sahatak',
-            footerDescription: 'A secure and trusted medical platform to connect with doctors remotely',
-            footerLinksTitle: 'Quick Links',
-            footerAbout: 'About Platform',
-            footerServices: 'Services',
-            footerSupportTitle: 'Support & Help',
-            footerHelp: 'Help Center',
-            footerContact: 'Contact Us',
-            footerEmergencyTitle: 'Emergency',
-            footerEmergencyText: 'For medical emergencies',
-            footerEmergencyAction: 'Go to nearest ER hospital',
-            footerEmergencyNote: 'For non-urgent consultations use the platform',
-            footerCopyright: '© 2024 Sahatak | صحتك. All rights reserved.',
-            footerMedicalDisclaimer: 'This platform does not replace visiting a doctor in emergency cases'
-        }
-    };
-    
-    const t = translations[lang];
+    // Use the new LanguageManager to get translations
+    const t = LanguageManager.translations[lang];
+    if (!t) {
+        console.error(`Translations not found for language: ${lang}`);
+        return;
+    }
     
     // Update welcome section
-    updateElementText('welcome-text', t.welcomeTitle);
-    updateElementText('welcome-description', t.welcomeDescription);
+    updateElementText('welcome-text', t.welcome?.title);
+    updateElementText('welcome-description', t.welcome?.description);
     
     // Update auth selection
-    updateElementText('auth-prompt', t.authPrompt);
-    updateElementText('login-text', t.loginText);
-    updateElementText('register-text', t.registerText);
-    updateElementText('language-switch-text', t.languageSwitchText);
-    updateElementText('current-language', t.currentLanguage);
+    updateElementText('auth-prompt', t.auth?.prompt);
+    updateElementText('login-text', t.auth?.login);
+    updateElementText('register-text', t.auth?.register);
+    updateElementText('language-switch-text', t.auth?.language_switch);
+    updateElementText('current-language', t.auth?.current_language);
     
     // Update login form
-    updateElementText('login-title', t.loginTitle);
-    updateElementText('login-subtitle', t.loginSubtitle);
-    updateElementText('email-label', t.emailLabel);
-    updateElementText('password-label', t.passwordLabel);
-    updateElementText('login-submit', t.loginSubmit);
-    updateElementText('back-to-auth', t.backToAuth);
+    updateElementText('login-title', t.login?.title);
+    updateElementText('login-subtitle', t.login?.subtitle);
+    updateElementText('email-label', t.login?.email);
+    updateElementText('password-label', t.login?.password);
+    updateElementText('login-submit', t.login?.submit);
+    updateElementText('back-to-auth', t.auth?.back);
     
     // Update register form
-    updateElementText('register-title', t.registerTitle);
-    updateElementText('register-subtitle', t.registerSubtitle);
-    updateElementText('firstName-label', t.firstNameLabel);
-    updateElementText('lastName-label', t.lastNameLabel);
-    updateElementText('regEmail-label', t.regEmailLabel);
-    updateElementText('regPassword-label', t.regPasswordLabel);
-    updateElementText('userType-label', t.userTypeLabel);
-    updateElementText('register-submit', t.registerSubmit);
-    updateElementText('back-to-auth-reg', t.backToAuthReg);
+    updateElementText('register-title', t.register?.title);
+    updateElementText('register-subtitle', t.register?.subtitle);
+    updateElementText('firstName-label', t.register?.first_name);
+    updateElementText('lastName-label', t.register?.last_name);
+    updateElementText('regEmail-label', t.register?.email);
+    updateElementText('regPassword-label', t.register?.password);
+    updateElementText('userType-label', t.register?.user_type);
+    updateElementText('register-submit', t.register?.submit);
+    updateElementText('back-to-auth-reg', t.auth?.back);
     
     // Update select options
     updateSelectOptions(lang);
     
     // Update footer
-    updateElementText('footer-brand', t.footerBrand);
-    updateElementText('footer-description', t.footerDescription);
-    updateElementText('footer-links-title', t.footerLinksTitle);
-    updateElementText('footer-about', t.footerAbout);
-    updateElementText('footer-services', t.footerServices);
-    updateElementText('footer-support-title', t.footerSupportTitle);
-    updateElementText('footer-help', t.footerHelp);
-    updateElementText('footer-contact', t.footerContact);
-    updateElementText('footer-emergency-title', t.footerEmergencyTitle);
-    updateElementText('footer-emergency-text', t.footerEmergencyText);
-    updateElementText('footer-emergency-action', t.footerEmergencyAction);
-    updateElementText('footer-emergency-note', t.footerEmergencyNote);
-    updateElementText('footer-copyright', t.footerCopyright);
-    updateElementText('footer-medical-disclaimer', t.footerMedicalDisclaimer);
+    updateElementText('footer-brand', t.footer?.brand);
+    updateElementText('footer-description', t.footer?.description);
+    updateElementText('footer-links-title', t.footer?.quick_links);
+    updateElementText('footer-about', t.footer?.about);
+    updateElementText('footer-services', t.footer?.services);
+    updateElementText('footer-support-title', t.footer?.support);
+    updateElementText('footer-help', t.footer?.help);
+    updateElementText('footer-contact', t.footer?.contact);
+    updateElementText('footer-emergency-title', t.footer?.emergency?.title);
+    updateElementText('footer-emergency-text', t.footer?.emergency?.text);
+    updateElementText('footer-emergency-action', t.footer?.emergency?.action);
+    updateElementText('footer-emergency-note', t.footer?.emergency?.note);
+    updateElementText('footer-copyright', t.footer?.copyright);
+    updateElementText('footer-medical-disclaimer', t.footer?.disclaimer);
 }
 
 // Helper function to update element text
@@ -273,26 +228,22 @@ function updateElementText(elementId, text) {
 // Update select options based on language
 function updateSelectOptions(lang) {
     const userTypeSelect = document.getElementById('userType');
-    if (userTypeSelect) {
-        if (lang === 'ar') {
-            userTypeSelect.innerHTML = `
-                <option value="">اختر نوع الحساب</option>
-                <option value="patient">مريض</option>
-                <option value="doctor">طبيب</option>
-            `;
-        } else {
-            userTypeSelect.innerHTML = `
-                <option value="">Choose Account Type</option>
-                <option value="patient">Patient</option>
-                <option value="doctor">Doctor</option>
-            `;
-        }
+    if (userTypeSelect && LanguageManager.translations[lang]) {
+        const t = LanguageManager.translations[lang];
+        userTypeSelect.innerHTML = `
+            <option value="">${t.register?.choose_type || 'Choose Account Type'}</option>
+            <option value="patient">${t.register?.patient || 'Patient'}</option>
+            <option value="doctor">${t.register?.doctor || 'Doctor'}</option>
+        `;
     }
 }
 
 // Initialize application on page load
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     console.log('Sahatak application initializing...');
+    
+    // Load translations first
+    await LanguageManager.loadTranslations();
     
     // Check if user has already selected a language
     if (!LanguageManager.isFirstVisit()) {

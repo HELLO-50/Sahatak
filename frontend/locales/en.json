@@ -1,11 +1,59 @@
-﻿{
+{
   "app_name": "Sahatak",
   "language_selection": "Choose your preferred language",
-  "login": "Login",
-  "register": "Register",
-  "patient": "Patient",
-  "doctor": "Doctor",
-  "book_appointment": "Book Appointment",
-  "medical_records": "Medical Records",
-  "profile": "Profile"
+  
+  "welcome": {
+    "title": "Welcome to Sahatak Telemedicine Platform",
+    "description": "A secure and user-friendly platform to connect with doctors"
+  },
+  
+  "auth": {
+    "prompt": "Start Your Health Journey",
+    "login": "Login",
+    "register": "Create New Account",
+    "language_switch": "Change Language",
+    "current_language": "English",
+    "back": "Back"
+  },
+  
+  "login": {
+    "title": "Login",
+    "subtitle": "Enter your credentials to access your account",
+    "email": "Email Address",
+    "password": "Password",
+    "submit": "Login"
+  },
+  
+  "register": {
+    "title": "Create New Account",
+    "subtitle": "Join Sahatak platform today",
+    "first_name": "First Name",
+    "last_name": "Last Name",
+    "email": "Email Address",
+    "password": "Password",
+    "user_type": "Account Type",
+    "choose_type": "Choose Account Type",
+    "patient": "Patient",
+    "doctor": "Doctor",
+    "submit": "Create Account"
+  },
+  
+  "footer": {
+    "brand": "صحتك | Sahatak",
+    "description": "A secure and trusted medical platform to connect with doctors remotely",
+    "quick_links": "Quick Links",
+    "about": "About Platform",
+    "services": "Services",
+    "support": "Support & Help",
+    "help": "Help Center",
+    "contact": "Contact Us",
+    "emergency": {
+      "title": "Emergency",
+      "text": "For medical emergencies",
+      "action": "Go to nearest ER hospital",
+      "note": "For non-urgent consultations use the platform"
+    },
+    "copyright": "© 2025 Sahatak | صحتك. All rights reserved.",
+    "disclaimer": "This platform does not replace visiting a doctor in emergency cases"
+  }
 }
