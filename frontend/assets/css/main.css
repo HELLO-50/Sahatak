@@ -343,3 +343,47 @@ body {
 [dir="rtl"] .footer .emergency-section {
     text-align: right;
 }
+
+/* Mobile responsive footer centering */
+@media (max-width: 768px) {
+    .footer .col-lg-4,
+    .footer .col-lg-2,
+    .footer .col-lg-3 {
+        text-align: center !important;
+        margin-bottom: 2rem;
+    }
+    
+    .footer .social-links {
+        justify-content: center !important;
+    }
+    
+    .footer ul {
+        list-style: none;
+        text-align: center;
+    }
+    
+    .footer .emergency-section {
+        text-align: center;
+    }
+    
+    /* Override RTL alignment on mobile */
+    [dir="rtl"] .footer .col-lg-4,
+    [dir="rtl"] .footer .col-lg-2,
+    [dir="rtl"] .footer .col-lg-3 {
+        text-align: center !important;
+    }
+    
+    [dir="rtl"] .footer .social-links {
+        justify-content: center !important;
+        direction: ltr;
+    }
+    
+    [dir="rtl"] .footer ul {
+        text-align: center;
+        padding-right: 0;
+    }
+    
+    [dir="rtl"] .footer .emergency-section {
+        text-align: center;
+    }
+}
