@@ -38,6 +38,114 @@
     "submit": "إنشاء الحساب"
   },
   
+  "dashboard": {
+    "patient": {
+      "title": "لوحة تحكم المريض",
+      "subtitle": "مرحباً بك في منصة صحتك الطبية",
+      "user_status": "نشط",
+      "logout": "تسجيل خروج",
+      "nav": {
+        "title": "التنقل السريع",
+        "home": "الرئيسية",
+        "appointments": "المواعيد",
+        "records": "السجلات الطبية",
+        "prescriptions": "الوصفات الطبية",
+        "profile": "الملف الشخصي",
+        "settings": "الإعدادات"
+      },
+      "quick_actions": {
+        "book": "حجز موعد جديد",
+        "book_desc": "احجز استشارة مع طبيب",
+        "records": "سجلاتي الطبية",
+        "records_desc": "عرض التقارير والنتائج",
+        "chat": "محادثة مع طبيب",
+        "chat_desc": "رسائل نصية مع الطبيب"
+      },
+      "stats": {
+        "appointments": "المواعيد المجدولة",
+        "prescriptions": "الوصفات النشطة",
+        "reports": "التقارير الطبية"
+      },
+      "dropdown": {
+        "profile": "الملف الشخصي",
+        "settings": "الإعدادات",
+        "logout": "تسجيل خروج"
+      },
+      "upcoming": {
+        "title": "المواعيد القادمة",
+        "join_call": "انضم الآن",
+        "reschedule": "إعادة جدولة",
+        "status_pending": "في الانتظار",
+        "view_all": "عرض جميع المواعيد"
+      },
+      "health_summary": {
+        "title": "ملخص الحالة الصحية",
+        "blood_pressure": "ضغط الدم",
+        "temperature": "درجة الحرارة",
+        "blood_sugar": "السكر في الدم",
+        "weight": "الوزن",
+        "normal": "طبيعي",
+        "ideal": "مثالي"
+      }
+    },
+    "doctor": {
+      "title": "لوحة تحكم الطبيب",
+      "subtitle": "إدارة المرضى والاستشارات الطبية",
+      "user_status": "متاح للاستشارات",
+      "available": "متاح",
+      "unavailable": "غير متاح",
+      "logout": "تسجيل خروج",
+      "nav": {
+        "title": "التنقل السريع",
+        "home": "الرئيسية",
+        "patients": "المرضى",
+        "appointments": "المواعيد",
+        "consultations": "الاستشارات",
+        "prescriptions": "الوصفات الطبية",
+        "schedule": "جدولي",
+        "profile": "الملف الشخصي",
+        "settings": "الإعدادات"
+      },
+      "quick_actions": {
+        "prescription": "كتابة وصفة طبية",
+        "prescription_desc": "إضافة دواء للمريض",
+        "records": "مراجعة السجلات",
+        "records_desc": "عرض ملفات المرضى",
+        "schedule": "إدارة الجدول",
+        "schedule_desc": "تعديل المواعيد المتاحة"
+      },
+      "dropdown": {
+        "profile": "الملف الشخصي",
+        "settings": "الإعدادات",
+        "logout": "تسجيل خروج"
+      },
+      "schedule": {
+        "title": "جدول اليوم",
+        "start_consultation": "بدء الاستشارة",
+        "view_file": "عرض الملف",
+        "view_full": "عرض الجدول الكامل",
+        "status_active": "جاري الآن",
+        "status_upcoming": "قادم"
+      },
+      "quick_stats": {
+        "title": "إحصائيات سريعة",
+        "appointments_today": "مواعيد اليوم",
+        "consultations": "استشارة مكتملة",
+        "rating": "تقييم الأطباء",
+        "new_patients": "مرضى جدد هذا الأسبوع"
+      },
+      "activity": {
+        "title": "النشاط الأخير",
+        "view_all": "عرض جميع الأنشطة"
+      },
+      "waiting": {
+        "title": "مرضى في انتظار الرد",
+        "reply": "رد",
+        "view_all": "عرض جميع الرسائل"
+      }
+    }
+  },
+
   "footer": {
     "brand": "صحتك | Sahatak",
     "description": "منصة طبية آمنة وموثوقة للتواصل مع الأطباء عن بُعد",

@@ -7,9 +7,13 @@ const LanguageManager = {
     // Load translations from JSON files
     async loadTranslations() {
         try {
+            // Determine correct path based on current location
+            const isInSubdirectory = window.location.pathname.includes('/pages/');
+            const basePath = isInSubdirectory ? '../../locales/' : 'frontend/locales/';
+            
             const [arResponse, enResponse] = await Promise.all([
-                fetch('frontend/locales/ar.json'),
-                fetch('frontend/locales/en.json')
+                fetch(`${basePath}ar.json`),
+                fetch(`${basePath}en.json`)
             ]);
             
             this.translations.ar = await arResponse.json();

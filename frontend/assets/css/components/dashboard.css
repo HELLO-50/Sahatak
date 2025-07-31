@@ -1,0 +1,409 @@
+/* Sahatak Dashboards CSS - Arabic/English Support */
+
+/* Root Variables - Matching main.css medical theme */
+:root {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --info-color: #0dcaf0;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+    
+    /* Medical Theme Colors */
+    --medical-blue: #2563eb;
+    --medical-green: #059669;
+    --medical-teal: #0891b2;
+    --soft-gray: #f1f5f9;
+    --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    --hover-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Dashboard Layout */
+.dashboard-container {
+    background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-teal) 100%);
+    min-height: 100vh;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+/* Dashboard Header */
+.dashboard-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--card-shadow);
+}
+
+.dashboard-title {
+    color: var(--medical-blue);
+    font-weight: 600;
+    margin: 0;
+}
+
+.dashboard-subtitle {
+    color: var(--secondary-color);
+    margin: 0;
+    font-size: 1rem;
+}
+
+/* User Info */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.user-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, var(--medical-blue), var(--medical-teal));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+/* Dashboard Cards */
+.dashboard-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: none;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--hover-shadow);
+}
+
+.dashboard-card h5 {
+    color: var(--medical-blue);
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+/* Quick Action Cards */
+.quick-action-card {
+    text-align: center;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.quick-action-card:hover {
+    border-color: var(--medical-blue);
+    transform: translateY(-5px);
+}
+
+.quick-action-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, var(--medical-blue), var(--medical-teal));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    color: white;
+    font-size: 1.5rem;
+}
+
+/* Statistics Cards */
+.stat-card {
+    text-align: center;
+    padding: 1rem;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--medical-blue);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+/* Navigation Sidebar */
+.dashboard-sidebar {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: var(--card-shadow);
+    height: fit-content;
+}
+
+.sidebar-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-nav li {
+    margin-bottom: 0.5rem;
+}
+
+.sidebar-nav a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    color: var(--dark-color);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+    background: linear-gradient(45deg, var(--medical-blue), var(--medical-teal));
+    color: white;
+    transform: translateX(5px);
+}
+
+/* Appointment Cards */
+.appointment-card {
+    border-left: 4px solid var(--medical-green);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: var(--light-color);
+    border-radius: 8px;
+}
+
+.appointment-time {
+    color: var(--medical-blue);
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.appointment-doctor {
+    color: var(--dark-color);
+    font-weight: 500;
+    margin: 0.25rem 0;
+}
+
+.appointment-type {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.status-active {
+    background: rgba(25, 135, 84, 0.1);
+    color: var(--success-color);
+}
+
+.status-pending {
+    background: rgba(255, 193, 7, 0.1);
+    color: var(--warning-color);
+}
+
+.status-completed {
+    background: rgba(13, 202, 240, 0.1);
+    color: var(--info-color);
+}
+
+/* Buttons */
+.btn-medical {
+    background: linear-gradient(45deg, var(--medical-blue), var(--medical-teal));
+    border: none;
+    color: white;
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-medical:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+    color: white;
+}
+
+.btn-outline-medical {
+    border: 2px solid var(--medical-blue);
+    color: var(--medical-blue);
+    background: transparent;
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-medical:hover {
+    background: var(--medical-blue);
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Recent Activity */
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--medical-teal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-title {
+    font-weight: 500;
+    color: var(--dark-color);
+    margin: 0 0 0.25rem 0;
+}
+
+.activity-time {
+    color: var(--secondary-color);
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+    
+    .dashboard-header {
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .dashboard-title {
+        font-size: 1.5rem;
+    }
+    
+    .dashboard-card {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .user-info {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+    
+    .user-avatar {
+        width: 50px;
+        height: 50px;
+        font-size: 1.25rem;
+    }
+    
+    .quick-action-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.25rem;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+    }
+    
+    .sidebar-nav a {
+        justify-content: center;
+        text-align: center;
+        gap: 0.5rem;
+    }
+    
+    .sidebar-nav a span {
+        display: none;
+    }
+    
+    .appointment-card {
+        padding: 0.75rem;
+    }
+}
+
+/* RTL Support */
+[dir="rtl"] .sidebar-nav a:hover,
+[dir="rtl"] .sidebar-nav a.active {
+    transform: translateX(-5px);
+}
+
+[dir="rtl"] .appointment-card {
+    border-left: none;
+    border-right: 4px solid var(--medical-green);
+}
+
+[dir="rtl"] .activity-item {
+    flex-direction: row-reverse;
+}
+
+/* Loading States */
+.loading-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 8px;
+    height: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .dashboard-container {
+        background: white !important;
+    }
+    
+    .dashboard-card {
+        background: white !important;
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+    }
+}

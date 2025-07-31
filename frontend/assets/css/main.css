@@ -1,4 +1,4 @@
-/* Sahatak main CSS with Arabic/English Support */
+/* Sahatak main CSS - Arabic/English Support */
 
 /* Root Variables for Medical Theme */
 :root {
@@ -345,12 +345,13 @@ body {
 }
 
 /* Mobile responsive footer centering */
-@media (max-width: 768px) {
-    .footer .col-lg-4,
-    .footer .col-lg-2,
-    .footer .col-lg-3 {
+@media (max-width: 767px) {
+    .footer [class*="col-"] {
         text-align: center !important;
         margin-bottom: 2rem;
+        width: 100% !important;
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
     }
     
     .footer .social-links {
@@ -358,18 +359,22 @@ body {
     }
     
     .footer ul {
-        list-style: none;
-        text-align: center;
+        list-style: none !important;
+        text-align: center !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
     }
     
     .footer .emergency-section {
-        text-align: center;
+        text-align: center !important;
+    }
+    
+    .footer h5, .footer h6 {
+        text-align: center !important;
     }
     
     /* Override RTL alignment on mobile */
-    [dir="rtl"] .footer .col-lg-4,
-    [dir="rtl"] .footer .col-lg-2,
-    [dir="rtl"] .footer .col-lg-3 {
+    [dir="rtl"] .footer [class*="col-"] {
         text-align: center !important;
     }
     
@@ -379,11 +384,17 @@ body {
     }
     
     [dir="rtl"] .footer ul {
-        text-align: center;
-        padding-right: 0;
+        text-align: center !important;
+        padding-right: 0 !important;
+        padding-left: 0 !important;
     }
     
     [dir="rtl"] .footer .emergency-section {
-        text-align: center;
+        text-align: center !important;
+    }
+    
+    [dir="rtl"] .footer h5, 
+    [dir="rtl"] .footer h6 {
+        text-align: center !important;
     }
 }

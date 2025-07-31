@@ -38,6 +38,114 @@
     "submit": "Create Account"
   },
   
+  "dashboard": {
+    "patient": {
+      "title": "Patient Dashboard",
+      "subtitle": "Welcome to Sahatak Medical Platform",
+      "user_status": "Active",
+      "logout": "Logout",
+      "nav": {
+        "title": "Quick Navigation",
+        "home": "Home",
+        "appointments": "Appointments",
+        "records": "Medical Records",
+        "prescriptions": "Prescriptions",
+        "profile": "Profile",
+        "settings": "Settings"
+      },
+      "quick_actions": {
+        "book": "Book New Appointment",
+        "book_desc": "Schedule consultation with doctor",
+        "records": "My Medical Records",
+        "records_desc": "View reports and results",
+        "chat": "Chat with Doctor",
+        "chat_desc": "Text messages with doctor"
+      },
+      "stats": {
+        "appointments": "Scheduled Appointments",
+        "prescriptions": "Active Prescriptions",
+        "reports": "Medical Reports"
+      },
+      "dropdown": {
+        "profile": "Profile",
+        "settings": "Settings",
+        "logout": "Logout"
+      },
+      "upcoming": {
+        "title": "Upcoming Appointments",
+        "join_call": "Join Now",
+        "reschedule": "Reschedule",
+        "status_pending": "Pending",
+        "view_all": "View All Appointments"
+      },
+      "health_summary": {
+        "title": "Health Summary",
+        "blood_pressure": "Blood Pressure",
+        "temperature": "Temperature",
+        "blood_sugar": "Blood Sugar",
+        "weight": "Weight",
+        "normal": "Normal",
+        "ideal": "Ideal"
+      }
+    },
+    "doctor": {
+      "title": "Doctor Dashboard",
+      "subtitle": "Manage Patients and Medical Consultations",
+      "user_status": "Available for Consultations",
+      "available": "Available",
+      "unavailable": "Unavailable",
+      "logout": "Logout", 
+      "nav": {
+        "title": "Quick Navigation",
+        "home": "Home",
+        "patients": "Patients",
+        "appointments": "Appointments",
+        "consultations": "Consultations",
+        "prescriptions": "Prescriptions",
+        "schedule": "My Schedule",
+        "profile": "Profile",
+        "settings": "Settings"
+      },
+      "quick_actions": {
+        "prescription": "Write Prescription",
+        "prescription_desc": "Add medication for patient",
+        "records": "Review Records",
+        "records_desc": "View patient files",
+        "schedule": "Manage Schedule",
+        "schedule_desc": "Edit available appointments"
+      },
+      "dropdown": {
+        "profile": "Profile",
+        "settings": "Settings",
+        "logout": "Logout"
+      },
+      "schedule": {
+        "title": "Today's Schedule",
+        "start_consultation": "Start Consultation",
+        "view_file": "View File",
+        "view_full": "View Full Schedule",
+        "status_active": "Active Now",
+        "status_upcoming": "Upcoming"
+      },
+      "quick_stats": {
+        "title": "Quick Statistics",
+        "appointments_today": "Today's Appointments",
+        "consultations": "Completed Consultations",
+        "rating": "Doctor Rating",
+        "new_patients": "New patients this week"
+      },
+      "activity": {
+        "title": "Recent Activity",
+        "view_all": "View All Activities"
+      },
+      "waiting": {
+        "title": "Patients Waiting for Response",
+        "reply": "Reply",
+        "view_all": "View All Messages"
+      }
+    }
+  },
+
   "footer": {
     "brand": "صحتك | Sahatak",
     "description": "A secure and trusted medical platform to connect with doctors remotely",
