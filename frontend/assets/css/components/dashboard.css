@@ -83,9 +83,45 @@
     height: 100%;
 }
 
-.dashboard-card:hover {
+/* Remove hover effects from non-clickable cards */
+.stat-card:hover,
+.activity-item:hover,
+.appointment-card:not([onclick]):hover {
+    transform: none;
+    box-shadow: var(--card-shadow);
+}
+
+/* Clickable Cards - Add hover gradient effect and shadow/transform */
+.quick-action-card,
+.appointment-card[onclick] {
+    position: relative;
+    overflow: hidden;
+}
+
+.quick-action-card::before,
+.appointment-card[onclick]::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.15) 0%, rgba(8, 145, 178, 0.15) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: 15px;
+    pointer-events: none;
+}
+
+.quick-action-card:hover,
+.appointment-card[onclick]:hover {
     transform: translateY(-2px);
     box-shadow: var(--hover-shadow);
+}
+
+.quick-action-card:hover::before,
+.appointment-card[onclick]:hover::before {
+    opacity: 1;
 }
 
 .dashboard-card h5 {
@@ -244,6 +280,247 @@
     transform: translateY(-1px);
     box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
     color: white;
+}
+
+/* Mobile Dashboard Optimization */
+@media (max-width: 768px) {
+    /* Dashboard container mobile */
+    .dashboard-container {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+    
+    /* Dashboard header mobile */
+    .dashboard-header {
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        border-radius: 12px;
+    }
+    
+    .dashboard-title {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .dashboard-subtitle {
+        font-size: 0.9rem;
+    }
+    
+    /* User info mobile layout */
+    .user-info {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .user-info .ms-auto {
+        margin: 0 !important;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .user-info .btn {
+        min-height: 40px;
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+    
+    /* User avatar mobile */
+    .user-avatar {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+    
+    /* Dashboard cards mobile */
+    .dashboard-card {
+        margin-bottom: 1rem;
+        border-radius: 12px;
+    }
+    
+    /* Quick action cards mobile */
+    .quick-action-card {
+        padding: 1.5rem;
+        min-height: 120px;
+        text-align: center;
+    }
+    
+    .quick-action-icon {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+    
+    .quick-action-card h6 {
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .quick-action-card p {
+        font-size: 0.85rem;
+        margin: 0;
+    }
+    
+    /* Stat cards mobile */
+    .stat-card {
+        padding: 1.5rem;
+        text-align: center;
+        min-height: 100px;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+    }
+    
+    /* Activity items mobile */
+    .activity-item {
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+    
+    .activity-title {
+        font-size: 0.9rem;
+    }
+    
+    .activity-time {
+        font-size: 0.8rem;
+    }
+    
+    /* Appointment cards mobile */
+    .appointment-card {
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .appointment-time {
+        font-size: 0.9rem;
+    }
+    
+    .appointment-doctor {
+        font-size: 1rem;
+    }
+    
+    .appointment-type {
+        font-size: 0.85rem;
+    }
+    
+    /* Button mobile optimization */
+    .btn-medical,
+    .btn-outline-medical {
+        min-height: 40px;
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+    
+    .btn-sm {
+        min-height: 36px;
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+    
+    /* Status badges mobile */
+    .status-badge {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    /* Sidebar mobile (if shown) */
+    .dashboard-sidebar {
+        margin-bottom: 1.5rem;
+    }
+    
+    .sidebar-nav a {
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+    
+    /* Container fluid mobile */
+    .dashboard-container .container-fluid {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    /* Dropdown menu mobile */
+    .dropdown-menu {
+        min-width: 180px;
+        border-radius: 8px;
+    }
+    
+    .dropdown-item {
+        padding: 12px 16px;
+        font-size: 14px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+}
+
+/* Extra small devices dashboard optimization */
+@media (max-width: 576px) {
+    .dashboard-header {
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    
+    .dashboard-title {
+        font-size: 1.25rem;
+    }
+    
+    /* Stack columns on very small screens */
+    .col-lg-4,
+    .col-lg-6,
+    .col-lg-8 {
+        margin-bottom: 1rem;
+    }
+    
+    /* Smaller cards for mobile */
+    .quick-action-card {
+        padding: 1.25rem;
+        min-height: 100px;
+    }
+    
+    .quick-action-icon {
+        font-size: 1.75rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .stat-card {
+        padding: 1.25rem;
+        min-height: 80px;
+    }
+    
+    .stat-number {
+        font-size: 1.75rem;
+    }
+    
+    /* Tighter spacing */
+    .activity-item,
+    .appointment-card {
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* User info very small screens */
+    .user-info h5 {
+        font-size: 1.1rem;
+    }
+    
+    .user-info .btn {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
 }
 
 .btn-outline-medical {

@@ -24,6 +24,16 @@
     "submit": "Login"
   },
   
+  "user_type_selection": {
+    "title": "Choose Your Account Type",
+    "subtitle": "Select the appropriate type for your account to provide you with the optimal experience",
+    "patient_title": "Patient",
+    "patient_desc": "I'm looking for medical consultation or follow-up on my health condition",
+    "doctor_title": "Doctor",
+    "doctor_desc": "I want to provide medical consultations to patients",
+    "back": "Back"
+  },
+
   "register": {
     "title": "Create New Account",
     "subtitle": "Join Sahatak platform today",
@@ -36,6 +46,54 @@
     "patient": "Patient",
     "doctor": "Doctor",
     "submit": "Create Account"
+  },
+
+  "patient_register": {
+    "title": "Create Patient Account",
+    "subtitle": "Join Sahatak platform as a patient",
+    "first_name": "First Name",
+    "last_name": "Last Name",
+    "email": "Email Address",
+    "phone": "Phone Number",
+    "age": "Age",
+    "gender": "Gender",
+    "choose_gender": "Choose Gender",
+    "male": "Male",
+    "female": "Female",
+    "password": "Password",
+    "password_help": "Password must be at least 6 characters long",
+    "submit": "Create Patient Account",
+    "back": "Back"
+  },
+
+  "doctor_register": {
+    "title": "Create Doctor Account",
+    "subtitle": "Join Sahatak platform as a doctor",
+    "first_name": "First Name",
+    "last_name": "Last Name",
+    "email": "Email Address",
+    "phone": "Phone Number",
+    "license": "Medical License Number",
+    "specialty": "Medical Specialty",
+    "choose_specialty": "Choose Specialty",
+    "experience": "Years of Experience",
+    "password": "Password",
+    "password_help": "Password must be at least 6 characters long",
+    "submit": "Create Doctor Account",
+    "back": "Back"
+  },
+
+  "validation": {
+    "required": "This field is required",
+    "email_invalid": "Please enter a valid email address",
+    "password_min": "Password must be at least 6 characters long",
+    "name_min": "Name must be at least 2 characters long",
+    "first_name_min": "First name must be at least 2 characters long",
+    "last_name_min": "Last name must be at least 2 characters long",
+    "user_type_required": "Please select an account type",
+    "login_failed": "Login failed. Please try again.",
+    "registration_failed": "Registration failed. Please try again.",
+    "registration_success": "Account created successfully! You can now login."
   },
   
   "dashboard": {

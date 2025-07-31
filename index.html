@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>صحتك | Sahatak</title>
     
     <!-- Bootstrap 5 CSS CDN -->
@@ -17,26 +17,33 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Main CSS -->
-    <link rel="stylesheet" href="frontend\assets\css\main.css">
+    <link rel="stylesheet" href="frontend/assets/css/main.css">
 </head>
 <body>
     <!-- Language Selection Section - This will be the first feature to implement -->
-    <div id="language-selection" class="min-vh-100 d-flex align-items-center justify-content-center">
+    <div id="language-selection" class="min-vh-100 d-flex align-items-center justify-content-center" role="main">
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-md-6">
                     <div class="card shadow-lg border-0">
                         <div class="card-body text-center p-5">
-                            <h1 class="mb-4">صحتك | Sahatak</h1>
-                            <p class="lead mb-4">Choose your preferred language / اختر اللغة المفضلة</p>
+                            <h1 class="mb-4" role="banner">صحتك | Sahatak</h1>
+                            <p class="lead mb-4" aria-describedby="language-instructions">Choose your preferred language / اختر اللغة المفضلة</p>
+                            <div id="language-instructions" class="visually-hidden">Select your preferred language to continue to the platform</div>
                             
-                            <div class="d-grid gap-3">
-                                <button class="btn btn-primary btn-lg" onclick="selectLanguage('ar')">
-                                    <i class="bi bi-globe me-2"></i>
+                            <div class="d-grid gap-3" role="group" aria-labelledby="language-instructions">
+                                <button class="btn btn-primary btn-lg" 
+                                        onclick="selectLanguage('ar')" 
+                                        aria-label="اختر العربية كلغة مفضلة - Choose Arabic as preferred language"
+                                        data-lang="ar">
+                                    <i class="bi bi-globe me-2" aria-hidden="true"></i>
                                     العربية
                                 </button>
-                                <button class="btn btn-outline-primary btn-lg" onclick="selectLanguage('en')">
-                                    <i class="bi bi-globe me-2"></i>
+                                <button class="btn btn-outline-primary btn-lg" 
+                                        onclick="selectLanguage('en')" 
+                                        aria-label="Choose English as preferred language - اختر الإنجليزية كلغة مفضلة"
+                                        data-lang="en">
+                                    <i class="bi bi-globe me-2" aria-hidden="true"></i>
                                     English
                                 </button>
                             </div>
@@ -48,7 +55,7 @@
     </div>
 
     <!-- Login/Register Selection (Hidden initially) -->
-    <div id="auth-selection" class="d-none min-vh-100 d-flex align-items-center justify-content-center">
+    <div id="auth-selection" class="d-none min-vh-100 d-flex align-items-center justify-content-center" style="display: none !important;">
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-md-6">
@@ -73,7 +80,7 @@
                                     <i class="bi bi-box-arrow-in-right me-2"></i>
                                     <span id="login-text">تسجيل الدخول</span>
                                 </button>
-                                <button class="btn btn-outline-primary btn-lg auth-btn" onclick="showRegister()">
+                                <button class="btn btn-outline-primary btn-lg auth-btn" onclick="showUserTypeSelection()">
                                     <i class="bi bi-person-plus me-2"></i>
                                     <span id="register-text">إنشاء حساب جديد</span>
                                 </button>
@@ -94,8 +101,48 @@
         </div>
     </div>
 
+    <!-- User Type Selection (Hidden initially) -->
+    <div id="user-type-selection" class="d-none min-vh-100 d-flex align-items-center justify-content-center" style="display: none !important;">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card shadow-lg border-0">
+                        <div class="card-body text-center p-5">
+                            <h2 class="mb-4" id="user-type-title">اختر نوع حسابك</h2>
+                            <p class="lead mb-4" id="user-type-subtitle">اختر النوع المناسب لحسابك لنقدم لك التجربة الأمثل</p>
+                            
+                            <div class="d-grid gap-3">
+                                <button class="btn btn-primary btn-lg user-type-btn" onclick="selectUserType('patient')">
+                                    <i class="bi bi-person me-2"></i>
+                                    <div class="text-start">
+                                        <div class="fw-bold" id="patient-title">مريض</div>
+                                        <small class="opacity-75" id="patient-desc">أبحث عن استشارة طبية أو متابعة حالتي الصحية</small>
+                                    </div>
+                                </button>
+                                <button class="btn btn-outline-primary btn-lg user-type-btn" onclick="selectUserType('doctor')">
+                                    <i class="bi bi-person-badge me-2"></i>
+                                    <div class="text-start">
+                                        <div class="fw-bold" id="doctor-title">طبيب</div>
+                                        <small class="opacity-75" id="doctor-desc">أريد تقديم الاستشارات الطبية للمرضى</small>
+                                    </div>
+                                </button>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <button class="btn btn-link" onclick="showAuthSelection()" id="back-to-auth-type">
+                                    <i class="bi bi-arrow-left me-1"></i>
+                                    العودة
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Login Form (Hidden initially) -->
-    <div id="login-form" class="d-none min-vh-100 d-flex align-items-center justify-content-center">
+    <div id="login-form" class="d-none min-vh-100 d-flex align-items-center justify-content-center" style="display: none !important;">
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-md-5">
@@ -106,21 +153,25 @@
                                 <p class="text-muted" id="login-subtitle">أدخل بياناتك للوصول إلى حسابك</p>
                             </div>
                             
-                            <form>
+                            <form id="loginForm" onsubmit="handleLogin(event)">
                                 <div class="mb-3">
                                     <label for="email" class="form-label" id="email-label">البريد الإلكتروني</label>
                                     <input type="email" class="form-control" id="email" required>
+                                    <div class="invalid-feedback" id="email-error"></div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="password" class="form-label" id="password-label">كلمة المرور</label>
                                     <input type="password" class="form-control" id="password" required>
+                                    <div class="invalid-feedback" id="password-error"></div>
                                 </div>
                                 <div class="d-grid">
                                     <button type="submit" class="btn btn-primary btn-lg" id="login-submit">
-                                        <i class="bi bi-box-arrow-in-right me-2"></i>
-                                        دخول
+                                        <span class="spinner-border spinner-border-sm me-2 d-none" id="login-spinner"></span>
+                                        <i class="bi bi-box-arrow-in-right me-2" id="login-icon"></i>
+                                        <span id="login-text-btn">دخول</span>
                                     </button>
                                 </div>
+                                <div class="alert alert-danger mt-3 d-none" id="login-error-alert"></div>
                             </form>
                             
                             <div class="text-center mt-4">
@@ -148,24 +199,29 @@
                                 <p class="text-muted" id="register-subtitle">انضم إلى منصة صحتك اليوم</p>
                             </div>
                             
-                            <form>
+                            <form id="registerForm" onsubmit="handleRegister(event)">
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="firstName" class="form-label" id="firstName-label">الاسم الأول</label>
                                         <input type="text" class="form-control" id="firstName" required>
+                                        <div class="invalid-feedback" id="firstName-error"></div>
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="lastName" class="form-label" id="lastName-label">الاسم الأخير</label>
                                         <input type="text" class="form-control" id="lastName" required>
+                                        <div class="invalid-feedback" id="lastName-error"></div>
                                     </div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="regEmail" class="form-label" id="regEmail-label">البريد الإلكتروني</label>
                                     <input type="email" class="form-control" id="regEmail" required>
+                                    <div class="invalid-feedback" id="regEmail-error"></div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="regPassword" class="form-label" id="regPassword-label">كلمة المرور</label>
-                                    <input type="password" class="form-control" id="regPassword" required>
+                                    <label for="regPassword" class="form-label" id="regPassword-label">كलمة المرور</label>
+                                    <input type="password" class="form-control" id="regPassword" required minlength="6">
+                                    <div class="invalid-feedback" id="regPassword-error"></div>
+                                    <div class="form-text" id="password-help">كلمة المرور يجب أن تكون 6 أحرف على الأقل</div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="userType" class="form-label" id="userType-label">نوع الحساب</label>
@@ -174,17 +230,195 @@
                                         <option value="patient">مريض</option>
                                         <option value="doctor">طبيب</option>
                                     </select>
+                                    <div class="invalid-feedback" id="userType-error"></div>
                                 </div>
                                 <div class="d-grid">
                                     <button type="submit" class="btn btn-primary btn-lg" id="register-submit">
-                                        <i class="bi bi-person-plus me-2"></i>
-                                        إنشاء الحساب
+                                        <span class="spinner-border spinner-border-sm me-2 d-none" id="register-spinner"></span>
+                                        <i class="bi bi-person-plus me-2" id="register-icon"></i>
+                                        <span id="register-text-btn">إنشاء الحساب</span>
                                     </button>
                                 </div>
+                                <div class="alert alert-danger mt-3 d-none" id="register-error-alert"></div>
+                                <div class="alert alert-success mt-3 d-none" id="register-success-alert"></div>
                             </form>
                             
                             <div class="text-center mt-4">
                                 <button class="btn btn-link" onclick="showAuthSelection()" id="back-to-auth-reg">
+                                    <i class="bi bi-arrow-left me-1"></i>
+                                    العودة
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patient Registration Form (Hidden initially) -->
+    <div id="patient-register-form" class="d-none min-vh-100 d-flex align-items-center justify-content-center" style="display: none !important;">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card shadow-lg border-0">
+                        <div class="card-body p-5">
+                            <div class="text-center mb-4">
+                                <h2 id="patient-register-title">إنشاء حساب مريض</h2>
+                                <p class="text-muted" id="patient-register-subtitle">انضم إلى منصة صحتك كمريض</p>
+                            </div>
+                            
+                            <form id="patientRegisterForm" onsubmit="handlePatientRegister(event)">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="patientFirstName" class="form-label" id="patient-firstName-label">الاسم الأول</label>
+                                        <input type="text" class="form-control" id="patientFirstName" required>
+                                        <div class="invalid-feedback" id="patientFirstName-error"></div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="patientLastName" class="form-label" id="patient-lastName-label">الاسم الأخير</label>
+                                        <input type="text" class="form-control" id="patientLastName" required>
+                                        <div class="invalid-feedback" id="patientLastName-error"></div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="patientEmail" class="form-label" id="patient-email-label">البريد الإلكتروني</label>
+                                    <input type="email" class="form-control" id="patientEmail" required>
+                                    <div class="invalid-feedback" id="patientEmail-error"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="patientPhone" class="form-label" id="patient-phone-label">رقم الهاتف</label>
+                                    <input type="tel" class="form-control" id="patientPhone" required>
+                                    <div class="invalid-feedback" id="patientPhone-error"></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="patientAge" class="form-label" id="patient-age-label">العمر</label>
+                                        <input type="number" class="form-control" id="patientAge" min="1" max="120" required>
+                                        <div class="invalid-feedback" id="patientAge-error"></div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="patientGender" class="form-label" id="patient-gender-label">الجنس</label>
+                                        <select class="form-select" id="patientGender" required>
+                                            <option value="">اختر الجنس</option>
+                                            <option value="male">ذكر</option>
+                                            <option value="female">أنثى</option>
+                                        </select>
+                                        <div class="invalid-feedback" id="patientGender-error"></div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="patientPassword" class="form-label" id="patient-password-label">كلمة المرور</label>
+                                    <input type="password" class="form-control" id="patientPassword" required minlength="6">
+                                    <div class="invalid-feedback" id="patientPassword-error"></div>
+                                    <div class="form-text" id="patient-password-help">كلمة المرور يجب أن تكون 6 أحرف على الأقل</div>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-lg" id="patient-register-submit">
+                                        <span class="spinner-border spinner-border-sm me-2 d-none" id="patient-register-spinner"></span>
+                                        <i class="bi bi-person-plus me-2" id="patient-register-icon"></i>
+                                        <span id="patient-register-text-btn">إنشاء حساب المريض</span>
+                                    </button>
+                                </div>
+                                <div class="alert alert-danger mt-3 d-none" id="patient-register-error-alert"></div>
+                                <div class="alert alert-success mt-3 d-none" id="patient-register-success-alert"></div>
+                            </form>
+                            
+                            <div class="text-center mt-4">
+                                <button class="btn btn-link" onclick="showUserTypeSelection()" id="back-to-user-type-patient">
+                                    <i class="bi bi-arrow-left me-1"></i>
+                                    العودة
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Doctor Registration Form (Hidden initially) -->
+    <div id="doctor-register-form" class="d-none min-vh-100 d-flex align-items-center justify-content-center" style="display: none !important;">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-7">
+                    <div class="card shadow-lg border-0">
+                        <div class="card-body p-5">
+                            <div class="text-center mb-4">
+                                <h2 id="doctor-register-title">إنشاء حساب طبيب</h2>
+                                <p class="text-muted" id="doctor-register-subtitle">انضم إلى منصة صحتك كطبيب</p>
+                            </div>
+                            
+                            <form id="doctorRegisterForm" onsubmit="handleDoctorRegister(event)">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="doctorFirstName" class="form-label" id="doctor-firstName-label">الاسم الأول</label>
+                                        <input type="text" class="form-control" id="doctorFirstName" required>
+                                        <div class="invalid-feedback" id="doctorFirstName-error"></div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="doctorLastName" class="form-label" id="doctor-lastName-label">الاسم الأخير</label>
+                                        <input type="text" class="form-control" id="doctorLastName" required>
+                                        <div class="invalid-feedback" id="doctorLastName-error"></div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="doctorEmail" class="form-label" id="doctor-email-label">البريد الإلكتروني</label>
+                                    <input type="email" class="form-control" id="doctorEmail" required>
+                                    <div class="invalid-feedback" id="doctorEmail-error"></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="doctorPhone" class="form-label" id="doctor-phone-label">رقم الهاتف</label>
+                                        <input type="tel" class="form-control" id="doctorPhone" required>
+                                        <div class="invalid-feedback" id="doctorPhone-error"></div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="doctorLicense" class="form-label" id="doctor-license-label">رقم الترخيص الطبي</label>
+                                        <input type="text" class="form-control" id="doctorLicense" required>
+                                        <div class="invalid-feedback" id="doctorLicense-error"></div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="doctorSpecialty" class="form-label" id="doctor-specialty-label">التخصص</label>
+                                        <select class="form-select" id="doctorSpecialty" required>
+                                            <option value="">اختر التخصص</option>
+                                            <option value="cardiology">أمراض القلب</option>
+                                            <option value="pediatrics">طب الأطفال</option>
+                                            <option value="dermatology">الأمراض الجلدية</option>
+                                            <option value="internal">الطب الباطني</option>
+                                            <option value="psychiatry">الطب النفسي</option>
+                                            <option value="orthopedics">العظام</option>
+                                            <option value="general">طب عام</option>
+                                        </select>
+                                        <div class="invalid-feedback" id="doctorSpecialty-error"></div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="doctorExperience" class="form-label" id="doctor-experience-label">سنوات الخبرة</label>
+                                        <input type="number" class="form-control" id="doctorExperience" min="0" max="50" required>
+                                        <div class="invalid-feedback" id="doctorExperience-error"></div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="doctorPassword" class="form-label" id="doctor-password-label">كلمة المرور</label>
+                                    <input type="password" class="form-control" id="doctorPassword" required minlength="6">
+                                    <div class="invalid-feedback" id="doctorPassword-error"></div>
+                                    <div class="form-text" id="doctor-password-help">كلمة المرور يجب أن تكون 6 أحرف على الأقل</div>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-lg" id="doctor-register-submit">
+                                        <span class="spinner-border spinner-border-sm me-2 d-none" id="doctor-register-spinner"></span>
+                                        <i class="bi bi-person-badge me-2" id="doctor-register-icon"></i>
+                                        <span id="doctor-register-text-btn">إنشاء حساب الطبيب</span>
+                                    </button>
+                                </div>
+                                <div class="alert alert-danger mt-3 d-none" id="doctor-register-error-alert"></div>
+                                <div class="alert alert-success mt-3 d-none" id="doctor-register-success-alert"></div>
+                            </form>
+                            
+                            <div class="text-center mt-4">
+                                <button class="btn btn-link" onclick="showUserTypeSelection()" id="back-to-user-type-doctor">
                                     <i class="bi bi-arrow-left me-1"></i>
                                     العودة
                                 </button>
@@ -282,6 +516,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     
     <!-- Custom JavaScript -->
-    <script src="frontend\assets\js\main.js"></script>
+    <script src="frontend/assets/js/main.js"></script>
 </body>
 </html>

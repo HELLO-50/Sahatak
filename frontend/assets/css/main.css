@@ -37,7 +37,14 @@ body {
 #language-selection {
     background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-teal) 100%);
     color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
 }
+
 
 #language-selection .card {
     border-radius: 15px;
@@ -114,7 +121,7 @@ body {
     background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-teal) 100%);
 }
 
-#login-form, #register-form {
+#login-form, #patient-register-form, #doctor-register-form {
     background: linear-gradient(135deg, var(--medical-green) 0%, var(--medical-teal) 100%);
 }
 
@@ -175,21 +182,178 @@ body {
     border-color: rgba(0, 0, 0, 0.1) !important;
 }
 
-/* Responsive adjustments for auth pages */
+/* Mobile Optimization Styles */
+
+/* Touch Target Optimization - Minimum 44px for all interactive elements */
 @media (max-width: 768px) {
+    /* Button optimization */
+    .btn {
+        min-height: 44px;
+        padding: 12px 20px;
+        font-size: 16px; /* Prevents zoom on iOS */
+        font-weight: 500;
+    }
+    
+    .btn-lg {
+        min-height: 48px;
+        padding: 14px 24px;
+        font-size: 18px;
+    }
+    
+    .btn-sm {
+        min-height: 40px;
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+    
+    /* Form inputs optimization */
+    .form-control,
+    .form-select {
+        min-height: 44px;
+        padding: 12px 16px;
+        font-size: 16px; /* Prevents zoom on iOS */
+        border-radius: 8px;
+    }
+    
+    .form-control:focus,
+    .form-select:focus {
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    }
+    
+    /* Language selection mobile optimization */
+    #language-selection .btn {
+        min-height: 52px;
+        padding: 16px 24px;
+        font-size: 18px;
+        font-weight: 500;
+        margin-bottom: 12px;
+    }
+    
+    #language-selection .card-body {
+        padding: 2rem 1.5rem;
+    }
+    
+    /* Auth pages mobile optimization */
     .welcome-title {
-        font-size: 2rem;
+        font-size: 1.75rem;
+        margin-bottom: 1rem;
     }
     
     .auth-btn {
-        font-size: 1rem;
-        padding: 10px 20px;
+        min-height: 48px;
+        font-size: 16px;
+        padding: 12px 20px;
     }
     
     #auth-selection .card,
     #login-form .card,
     #register-form .card {
-        margin: 20px;
+        margin: 1rem;
+    }
+    
+    /* Form mobile optimization */
+    .form-label {
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+    
+    .invalid-feedback {
+        font-size: 13px;
+        margin-top: 4px;
+    }
+    
+    .form-text {
+        font-size: 12px;
+    }
+    
+    /* Mobile typography */
+    h1 {
+        font-size: 1.75rem;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+    }
+    
+    h3 {
+        font-size: 1.25rem;
+    }
+    
+    .lead {
+        font-size: 1.1rem;
+    }
+    
+    /* Mobile spacing */
+    .mb-4 {
+        margin-bottom: 2rem !important;
+    }
+    
+    .p-5 {
+        padding: 2rem !important;
+    }
+    
+    /* Container mobile optimization */
+    .container-fluid {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    /* Alert mobile optimization */
+    .alert {
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+    
+    /* Card layouts for mobile */
+    .card {
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+}
+
+/* Extra small devices optimization */
+@media (max-width: 576px) {
+    .col-md-6,
+    .col-md-5 {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .card-body {
+        padding: 1.25rem;
+    }
+    
+    #language-selection .card-body,
+    #auth-selection .card-body,
+    #login-form .card-body,
+    #register-form .card-body {
+        padding: 1.5rem;
+    }
+    
+    .welcome-title {
+        font-size: 1.5rem;
+    }
+    
+    .lead {
+        font-size: 1rem;
+    }
+    
+    /* Extra touch target size for very small screens */
+    .btn {
+        min-height: 48px;
+        padding: 14px 20px;
+    }
+    
+    .form-control,
+    .form-select {
+        min-height: 48px;
+        padding: 14px 16px;
     }
 }
 
@@ -224,6 +388,125 @@ body {
 .form-select:focus {
     box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
     border-color: var(--medical-blue);
+}
+
+/* User Type Selection Styling */
+#user-type-selection {
+    background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-teal) 100%);
+}
+
+/* Ensure hidden screens are completely hidden */
+.d-none {
+    display: none !important;
+}
+
+#user-type-selection .card {
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--dark-color);
+}
+
+.user-type-btn {
+    display: flex !important;
+    align-items: center;
+    text-align: left !important;
+    padding: 1.5rem !important;
+    min-height: 100px;
+    border-radius: 12px !important;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.user-type-btn i {
+    font-size: 2.5rem;
+    margin-right: 1.5rem;
+    flex-shrink: 0;
+    color: var(--medical-blue);
+}
+
+[dir="rtl"] .user-type-btn i {
+    margin-right: 0;
+    margin-left: 1.5rem;
+}
+
+.user-type-btn .text-start {
+    text-align: left !important;
+    flex: 1;
+}
+
+[dir="rtl"] .user-type-btn .text-start {
+    text-align: right !important;
+}
+
+.user-type-btn .fw-bold {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: var(--dark-color);
+}
+
+.user-type-btn small {
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+    line-height: 1.4;
+}
+
+.user-type-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(37, 99, 235, 0.2);
+    border-color: var(--medical-blue);
+}
+
+.user-type-btn:hover i {
+    color: var(--medical-teal);
+}
+
+.user-type-btn.btn-primary {
+    background: linear-gradient(45deg, var(--medical-blue), var(--medical-teal));
+    color: white;
+}
+
+.user-type-btn.btn-primary .fw-bold,
+.user-type-btn.btn-primary small {
+    color: white;
+}
+
+.user-type-btn.btn-primary i {
+    color: white;
+}
+
+.user-type-btn.btn-primary:hover i {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Mobile optimization for user type buttons */
+@media (max-width: 768px) {
+    .user-type-btn {
+        min-height: 120px;
+        padding: 1.25rem !important;
+        flex-direction: column;
+        text-align: center !important;
+    }
+    
+    .user-type-btn i {
+        font-size: 3rem;
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+    
+    [dir="rtl"] .user-type-btn i {
+        margin-left: 0;
+        margin-bottom: 1rem;
+    }
+    
+    .user-type-btn .text-start {
+        text-align: center !important;
+    }
+    
+    [dir="rtl"] .user-type-btn .text-start {
+        text-align: center !important;
+    }
 }
 
 /* Custom Scrollbar */
@@ -344,18 +627,35 @@ body {
     text-align: right;
 }
 
-/* Mobile responsive footer centering */
-@media (max-width: 767px) {
+/* Mobile responsive footer centering - Enhanced */
+@media (max-width: 768px) {
+    /* Force all footer elements to center */
+    .footer * {
+        text-align: center !important;
+    }
+    
     .footer [class*="col-"] {
         text-align: center !important;
-        margin-bottom: 2rem;
+        margin-bottom: 2rem !important;
         width: 100% !important;
         flex: 0 0 100% !important;
         max-width: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    .footer .row {
+        text-align: center !important;
+        justify-content: center !important;
     }
     
     .footer .social-links {
         justify-content: center !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 1rem !important;
     }
     
     .footer ul {
@@ -363,38 +663,124 @@ body {
         text-align: center !important;
         padding-left: 0 !important;
         padding-right: 0 !important;
+        margin: 0 auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+    }
+    
+    .footer ul li {
+        text-align: center !important;
+        width: 100% !important;
+    }
+    
+    .footer ul li a {
+        text-align: center !important;
+        display: block !important;
     }
     
     .footer .emergency-section {
         text-align: center !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    .footer .emergency-section p {
+        text-align: center !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
     }
     
     .footer h5, .footer h6 {
         text-align: center !important;
+        width: 100% !important;
+        margin: 0 auto !important;
     }
     
-    /* Override RTL alignment on mobile */
-    [dir="rtl"] .footer [class*="col-"] {
+    /* Brand section centering */
+    .footer .col-lg-4 {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
         text-align: center !important;
     }
     
-    [dir="rtl"] .footer .social-links {
+    .footer .col-lg-4 h5 {
+        text-align: center !important;
+        display: flex !important;
+        align-items: center !important;
         justify-content: center !important;
-        direction: ltr;
     }
     
-    [dir="rtl"] .footer ul {
+    /* Links sections centering */
+    .footer .col-lg-2,
+    .footer .col-lg-3 {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+    }
+    
+    /* Override RTL alignment on mobile - stronger rules */
+    [dir="rtl"] .footer *,
+    [dir="ltr"] .footer * {
+        text-align: center !important;
+    }
+    
+    [dir="rtl"] .footer [class*="col-"],
+    [dir="ltr"] .footer [class*="col-"] {
+        text-align: center !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    [dir="rtl"] .footer .social-links,
+    [dir="ltr"] .footer .social-links {
+        justify-content: center !important;
+        direction: ltr !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+    
+    [dir="rtl"] .footer ul,
+    [dir="ltr"] .footer ul {
         text-align: center !important;
         padding-right: 0 !important;
         padding-left: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        margin: 0 auto !important;
     }
     
-    [dir="rtl"] .footer .emergency-section {
+    [dir="rtl"] .footer .emergency-section,
+    [dir="ltr"] .footer .emergency-section {
         text-align: center !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
     }
     
     [dir="rtl"] .footer h5, 
-    [dir="rtl"] .footer h6 {
+    [dir="rtl"] .footer h6,
+    [dir="ltr"] .footer h5,
+    [dir="ltr"] .footer h6 {
+        text-align: center !important;
+        width: 100% !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+    
+    [dir="rtl"] .footer .col-lg-4 h5,
+    [dir="ltr"] .footer .col-lg-4 h5 {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
         text-align: center !important;
     }
 }
