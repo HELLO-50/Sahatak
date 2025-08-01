@@ -2,7 +2,7 @@
 backend/__pycache__/
 backend/*.pyc
 backend/instance/
-backend/.env
+backend/.env*
 backend/sahatak.db
 backend/static/uploads/audio/*
 
