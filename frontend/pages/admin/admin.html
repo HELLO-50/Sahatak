@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Sahatak</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="../../assets/css/main.css" rel="stylesheet">
+    <style>
+        .admin-sidebar {
+            background-color: #2c3e50;
+            min-height: 100vh;
+            color: white;
+        }
+        .admin-content {
+            padding: 20px;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .placeholder-section {
+            border: 2px dashed #ddd;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+        }
+        .todo-item {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Admin Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-shield-check"></i> Sahatak Admin
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="#"><i class="bi bi-person-circle"></i> Admin User</a>
+                <a class="nav-link" href="#"><i class="bi bi-box-arrow-right"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Admin Sidebar -->
+            <div class="col-md-3 admin-sidebar p-0">
+                <div class="p-3">
+                    <h5><i class="bi bi-speedometer2"></i> Admin Panel</h5>
+                    
+                    <div class="placeholder-section">
+                        <h6>Navigation Menu</h6>
+                        <p><strong>Awab, you need to implement:</strong></p>
+                        <ul class="list-unstyled text-start">
+                            <li><i class="bi bi-house"></i> Dashboard</li>
+                            <li><i class="bi bi-people"></i> User Management</li>
+                            <li><i class="bi bi-person-check"></i> Doctor Verification</li>
+                            <li><i class="bi bi-gear"></i> System Settings</li>
+                            <li><i class="bi bi-activity"></i> Platform Health</li>
+                            <li><i class="bi bi-bar-chart"></i> Analytics</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Admin Content -->
+            <div class="col-md-9 admin-content">
+                <!-- Dashboard Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Admin Dashboard</h2>
+                    <div>
+                        <button class="btn btn-outline-primary">
+                            <i class="bi bi-download"></i> Export Report
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Platform Statistics -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <h3>125</h3>
+                            <p>Total Users</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <h3>45</h3>
+                            <p>Verified Doctors</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <h3>230</h3>
+                            <p>Appointments</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <h3>98%</h3>
+                            <p>System Health</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Tasks for Awab -->
+                <div class="row">
+                    <div class="col-12">
+                        <h4>Frontend Development Tasks</h4>
+                        <div class="alert alert-info">
+                            <strong>Awab, these are your admin frontend tasks:</strong>
+                        </div>
+                        
+                        <!-- User Management Section -->
+                        <div class="placeholder-section">
+                            <h5><i class="bi bi-people"></i> User Management</h5>
+                            <p><strong>Awab, implement the following:</strong></p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="todo-item">
+                                        <strong>User List Table</strong>
+                                        <ul class="text-start mt-2">
+                                            <li>Show users with filters (Patient/Doctor/Admin)</li>
+                                            <li>Search by name, email, phone</li>
+                                            <li>Pagination for large user lists</li>
+                                            <li>Actions: View, Activate/Deactivate, Delete</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="todo-item">
+                                        <strong>User Actions</strong>
+                                        <ul class="text-start mt-2">
+                                            <li>Modal for user details (NO medical data)</li>
+                                            <li>Toggle user active status</li>
+                                            <li>Send system notifications to users</li>
+                                            <li>Reset user passwords</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Doctor Verification Section -->
+                        <div class="placeholder-section">
+                            <h5><i class="bi bi-person-check"></i> Doctor Verification</h5>
+                            <p><strong>Awab, create these components:</strong></p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="todo-item">
+                                        <strong>Pending Verifications</strong>
+                                        <ul class="text-start mt-2">
+                                            <li>List of unverified doctors</li>
+                                            <li>Show license documents</li>
+                                            <li>Verify/Reject buttons</li>
+                                            <li>Add verification notes</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="todo-item">
+                                        <strong>Manual Doctor Management</strong>
+                                        <ul class="text-start mt-2">
+                                            <li>Add new doctor manually</li>
+                                            <li>Edit doctor information</li>
+                                            <li>Remove doctor access</li>
+                                            <li>Update specialties list</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- System Settings Section -->
+                        <div class="placeholder-section">
+                            <h5><i class="bi bi-gear"></i> System Settings</h5>
+                            <p><strong>Awab, build settings interface for:</strong></p>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="todo-item">
+                                        <strong>General Settings</strong>
+                                        <ul class="text-start mt-2">
+                                            <li>Site maintenance mode</li>
+                                            <li>Registration open/closed</li>
+                                            <li>Default language</li>
+                                            <li>Time zone settings</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="todo-item">
+                                        <strong>Notification Settings</strong>
+                                        <ul class="text-start mt-2">
+                                            <li>Email notification toggles</li>
+                                            <li>SMS notification settings</li>
+                                            <li>System announcement banner</li>
+                                            <li>Push notification config</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="todo-item">
+                                        <strong>Security Settings</strong>
+                                        <ul class="text-start mt-2">
+                                            <li>Password policy settings</li>
+                                            <li>Session timeout config</li>
+                                            <li>Failed login attempt limits</li>
+                                            <li>API rate limiting controls</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Platform Health & Analytics -->
+                        <div class="placeholder-section">
+                            <h5><i class="bi bi-activity"></i> Platform Health & Analytics</h5>
+                            <p><strong>Awab, create dashboards showing:</strong></p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="todo-item">
+                                        <strong>Health Monitoring</strong>
+                                        <ul class="text-start mt-2">
+                                            <li>System uptime display</li>
+                                            <li>Database connection status</li>
+                                            <li>API response times chart</li>
+                                            <li>Error rate monitoring</li>
+                                            <li>Server resource usage (CPU, Memory)</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="todo-item">
+                                        <strong>Usage Analytics</strong>
+                                        <ul class="text-start mt-2">
+                                            <li>Daily/Monthly user registrations</li>
+                                            <li>Appointment booking trends</li>
+                                            <li>Most active doctors/specialties</li>
+                                            <li>Geographic user distribution</li>
+                                            <li>Platform usage by time of day</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Technical Implementation Notes -->
+                        <div class="alert alert-warning">
+                            <h6><i class="bi bi-info-circle"></i> Implementation Notes for Awab:</h6>
+                            <ul class="mb-0">
+                                <li><strong>API Integration:</strong> Use the admin endpoints that Ahmed will create in the backend</li>
+                                <li><strong>Authentication:</strong> Admin users should have elevated permissions</li>
+                                <li><strong>Data Privacy:</strong> Never display patient medical records or sensitive data</li>
+                                <li><strong>Real-time Updates:</strong> Consider using WebSocket for live health monitoring</li>
+                                <li><strong>Responsive Design:</strong> Ensure admin panel works on tablets and mobile devices</li>
+                                <li><strong>Language Support:</strong> Include Arabic/English switching for admin interface</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../assets/js/main.js"></script>
+    <script>
+        // Placeholder JavaScript for admin functionality
+        console.log('Admin dashboard loaded');
+        
+        // Awab: Add your admin-specific JavaScript here
+        // - User management functions
+        // - Doctor verification handlers
+        // - Settings form submissions
+        // - Real-time health monitoring
+        // - Analytics chart rendering
+    </script>
+</body>
+</html>

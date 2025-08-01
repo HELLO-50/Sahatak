@@ -1,0 +1,631 @@
+/*
+==============================================================================
+SAHATAK ADMIN DASHBOARD CSS
+==============================================================================
+
+Awab, this is your dedicated CSS file for the admin dashboard.
+Implement all admin-specific styling here to keep it organized.
+
+Color Scheme for Admin:
+- Primary: #2c3e50 (Dark blue-gray)
+- Secondary: #34495e (Lighter blue-gray) 
+- Success: #27ae60 (Green)
+- Warning: #f39c12 (Orange)
+- Danger: #e74c3c (Red)
+- Info: #3498db (Blue)
+*/
+
+/* =============================================================================
+   ADMIN LAYOUT & STRUCTURE
+============================================================================= */
+
+.admin-wrapper {
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+.admin-sidebar {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    min-height: 100vh;
+    color: white;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.admin-sidebar .sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.admin-sidebar .sidebar-header h4 {
+    margin: 0;
+    font-weight: 600;
+    color: #ecf0f1;
+}
+
+/* Awab: Style the navigation menu */
+.admin-nav {
+    padding: 0;
+    list-style: none;
+}
+
+.admin-nav-item {
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.admin-nav-link {
+    display: block;
+    padding: 15px 20px;
+    color: #bdc3c7;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+
+.admin-nav-link:hover {
+    background-color: rgba(255,255,255,0.1);
+    color: #ecf0f1;
+    border-left-color: #3498db;
+}
+
+.admin-nav-link.active {
+    background-color: rgba(52, 152, 219, 0.2);
+    color: #3498db;
+    border-left-color: #3498db;
+}
+
+.admin-nav-link i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+/* =============================================================================
+   ADMIN CONTENT AREA
+============================================================================= */
+
+.admin-content {
+    padding: 20px;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+}
+
+.admin-header {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.admin-page-title {
+    margin: 0;
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.admin-breadcrumb {
+    margin: 0;
+    background: none;
+    padding: 0;
+    font-size: 14px;
+}
+
+/* =============================================================================
+   STATISTICS CARDS
+============================================================================= */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stats-card {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stats-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.stats-card.primary::before {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+}
+
+.stats-card.success::before {
+    background: linear-gradient(135deg, #27ae60, #229954);
+}
+
+.stats-card.warning::before {
+    background: linear-gradient(135deg, #f39c12, #d68910);
+}
+
+.stats-card.danger::before {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+.stats-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.stats-label {
+    color: #7f8c8d;
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stats-icon {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 3rem;
+    color: rgba(52, 152, 219, 0.1);
+}
+
+/* =============================================================================
+   DATA TABLES
+============================================================================= */
+
+.admin-table-wrapper {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.admin-table-header {
+    padding: 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    justify-content: between;
+    align-items: center;
+}
+
+.admin-table {
+    width: 100%;
+    margin: 0;
+}
+
+.admin-table th {
+    background-color: #f8f9fa;
+    color: #2c3e50;
+    font-weight: 600;
+    padding: 15px;
+    border: none;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.admin-table td {
+    padding: 15px;
+    border-bottom: 1px solid #f1f2f6;
+    vertical-align: middle;
+}
+
+.admin-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Table Action Buttons */
+.table-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.btn-table-action {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 12px;
+}
+
+.btn-table-action.view {
+    background-color: #3498db;
+    color: white;
+}
+
+.btn-table-action.edit {
+    background-color: #f39c12;
+    color: white;
+}
+
+.btn-table-action.delete {
+    background-color: #e74c3c;
+    color: white;
+}
+
+/* =============================================================================
+   FORMS & INPUTS
+============================================================================= */
+
+.admin-form-section {
+    background: white;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.admin-form-title {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f1f2f6;
+}
+
+.form-group-admin {
+    margin-bottom: 20px;
+}
+
+.form-label-admin {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.form-control-admin {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #f1f2f6;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.form-control-admin:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+/* =============================================================================
+   BUTTONS
+============================================================================= */
+
+.btn-admin {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-admin-primary {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+}
+
+.btn-admin-primary:hover {
+    background: linear-gradient(135deg, #2980b9, #21618c);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+}
+
+.btn-admin-success {
+    background: linear-gradient(135deg, #27ae60, #229954);
+    color: white;
+}
+
+.btn-admin-warning {
+    background: linear-gradient(135deg, #f39c12, #d68910);
+    color: white;
+}
+
+.btn-admin-danger {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+}
+
+/* =============================================================================
+   MODALS & OVERLAYS
+============================================================================= */
+
+.admin-modal {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+    border: none;
+}
+
+.admin-modal-header {
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    border-radius: 15px 15px 0 0;
+    padding: 20px 25px;
+}
+
+.admin-modal-title {
+    color: #2c3e50;
+    font-weight: 600;
+    margin: 0;
+}
+
+.admin-modal-body {
+    padding: 25px;
+}
+
+/* =============================================================================
+   ALERTS & NOTIFICATIONS
+============================================================================= */
+
+.admin-alert {
+    border-radius: 10px;
+    border: none;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.admin-alert-info {
+    background: linear-gradient(135deg, #d6eaf8, #aed6f1);
+    color: #1b4f72;
+}
+
+.admin-alert-success {
+    background: linear-gradient(135deg, #d5f4e6, #a9dfbf);
+    color: #0e4b2a;
+}
+
+.admin-alert-warning {
+    background: linear-gradient(135deg, #fcf3cf, #f9e79f);
+    color: #7d6608;
+}
+
+.admin-alert-danger {
+    background: linear-gradient(135deg, #fadbd8, #f5b7b1);
+    color: #641e16;
+}
+
+/* =============================================================================
+   CHARTS & ANALYTICS
+============================================================================= */
+
+.chart-container {
+    background: white;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.chart-title {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Awab: Add styles for Chart.js or other charting libraries */
+.chart-wrapper {
+    position: relative;
+    height: 300px;
+}
+
+/* =============================================================================
+   SEARCH & FILTERS
+============================================================================= */
+
+.admin-search-bar {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.search-input-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.search-input {
+    flex: 1;
+    padding: 12px 15px;
+    border: 2px solid #f1f2f6;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.search-btn {
+    padding: 12px 20px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.filter-tags {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+}
+
+.filter-tag {
+    background: #ecf0f1;
+    color: #2c3e50;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.filter-tag.active {
+    background: #3498db;
+    color: white;
+}
+
+/* =============================================================================
+   RESPONSIVE DESIGN
+============================================================================= */
+
+@media (max-width: 768px) {
+    .admin-sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+        z-index: 1000;
+        width: 280px;
+    }
+    
+    .admin-sidebar.show {
+        transform: translateX(0);
+    }
+    
+    .admin-content {
+        padding: 15px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .admin-table-wrapper {
+        overflow-x: auto;
+    }
+    
+    .search-input-group {
+        flex-direction: column;
+    }
+    
+    .search-input {
+        margin-bottom: 10px;
+    }
+}
+
+@media (max-width: 576px) {
+    .admin-header {
+        padding: 15px;
+    }
+    
+    .stats-card {
+        padding: 20px;
+    }
+    
+    .stats-number {
+        font-size: 2rem;
+    }
+    
+    .admin-modal-body {
+        padding: 20px 15px;
+    }
+}
+
+/* =============================================================================
+   LOADING STATES
+============================================================================= */
+
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+/* =============================================================================
+   AWAB'S TODO SECTIONS
+============================================================================= */
+
+/*
+AWAB - IMPLEMENTATION TASKS:
+
+1. DASHBOARD COMPONENTS:
+   - Real-time stats widgets
+   - Chart.js integration for analytics
+   - Live notification system
+   - Activity feed styling
+
+2. DATA TABLES:
+   - Sortable columns
+   - Advanced filtering
+   - Bulk actions styling
+   - Export buttons
+
+3. FORMS:
+   - Multi-step forms for settings
+   - File upload styling
+   - Form validation styles
+   - Rich text editor integration
+
+4. INTERACTIVE ELEMENTS:
+   - Hover effects for cards
+   - Smooth transitions
+   - Loading states
+   - Success/error feedback
+
+5. MOBILE OPTIMIZATION:
+   - Responsive navigation
+   - Touch-friendly buttons
+   - Mobile table scrolling
+   - Optimized form layouts
+
+6. ACCESSIBILITY:
+   - High contrast mode
+   - Keyboard navigation styles
+   - Screen reader friendly
+   - Focus indicators
+
+Remember: Keep the admin interface professional, 
+clean, and user-friendly!
+*/
