@@ -41,8 +41,9 @@ try:
     # Log successful import
     print(f"Successfully imported Flask app from {project_home}")
     
-except ImportError as e:
-    print(f"Error importing Flask app: {e}")
+except ImportError as import_error:
+    error_message = str(import_error)
+    print(f"Error importing Flask app: {error_message}")
     print(f"Python path: {sys.path}")
     print(f"Current working directory: {os.getcwd()}")
     print(f"Project home contents: {os.listdir(project_home) if os.path.exists(project_home) else 'Directory not found'}")
@@ -52,7 +53,7 @@ except ImportError as e:
         status = '500 Internal Server Error'
         headers = [('Content-type', 'text/plain')]
         start_response(status, headers)
-        return [f"Import Error: {str(e)}".encode('utf-8')]
+        return [f"Import Error: {error_message}".encode('utf-8')]
 
 # For debugging - remove in production
 if __name__ == '__main__':
