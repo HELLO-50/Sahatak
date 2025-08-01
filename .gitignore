@@ -9,7 +9,7 @@ backend/static/uploads/audio/*
 # Frontend
 frontend/node_modules/
 frontend/dist/
-frontend/.env.local
+frontend/.env*
 
 # IDE
 .vscode/
@@ -23,4 +23,4 @@ frontend/.env.local
 Thumbs.db
 
 # Deployment
-deployment/pythonanywhere/.env
+deployment/pythonanywhere/.env*
