@@ -39,6 +39,7 @@ class Config:
 class DevelopmentConfig(Config):
     """Development configuration"""
     DEBUG = True
+    # For development, use SQLite as fallback (no sensitive credentials)
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///sahatak_dev.db')
     
 class TestingConfig(Config):
@@ -52,10 +53,8 @@ class ProductionConfig(Config):
     DEBUG = False
     
     # MySQL Database configuration for PythonAnywhere
-    SQLALCHEMY_DATABASE_URI = os.getenv(
-        'DATABASE_URL', 
-        'mysql+pymysql://sahatak:HELLO-50@30@sahatak.mysql.pythonanywhere-services.com/sahatak$sahatak_db'
-    )
+    # Note: DATABASE_URL must be set in .env file for production
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     
     # MySQL specific settings
     SQLALCHEMY_ENGINE_OPTIONS = {
