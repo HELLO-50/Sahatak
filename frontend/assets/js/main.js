@@ -552,11 +552,12 @@ function initializeBootstrapComponents() {
     console.log('Bootstrap components initialized');
 }
 
-// Utility function for API calls (to be used later)
+// API Helper for backend communication
 const ApiHelper = {
-    baseUrl: 'https://your-backend-url.com/api', // Update this when backend is deployed
+    // Update this to your deployed backend URL
+    baseUrl: 'https://sahatak.pythonanywhere.com/api', // Your PythonAnywhere backend URL
     
-    // Make API call with language preference
+    // Make API call with language preference and proper credentials
     async makeRequest(endpoint, options = {}) {
         const language = LanguageManager.getLanguage() || 'ar';
         
@@ -565,20 +566,39 @@ const ApiHelper = {
                 'Content-Type': 'application/json',
                 'Accept-Language': language,
                 ...options.headers
-            }
+            },
+            credentials: 'include' // Important for session-based authentication
         };
         
         const requestOptions = { ...defaultOptions, ...options };
         
         try {
             const response = await fetch(`${this.baseUrl}${endpoint}`, requestOptions);
-            return await response.json();
+            const data = await response.json();
+            
+            // Handle standardized API response format
+            if (data.success === false) {
+                throw new ApiError(data.message, data.status_code, data.error_code, data.field);
+            }
+            
+            return data;
         } catch (error) {
             console.error('API request failed:', error);
             throw error;
         }
     }
 };
+
+// Custom API Error class
+class ApiError extends Error {
+    constructor(message, statusCode, errorCode, field) {
+        super(message);
+        this.name = 'ApiError';
+        this.statusCode = statusCode;
+        this.errorCode = errorCode;
+        this.field = field;
+    }
+}
 
 // Form Handling Functions
 
@@ -602,28 +622,56 @@ async function handleLogin(event) {
     
     try {
         const formData = {
-            email: document.getElementById('email').value,
+            email: document.getElementById('email').value.trim(),
             password: document.getElementById('password').value
         };
         
-        // Simulate API call (replace with actual API call)
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        // Validate form data
+        if (!formData.email || !formData.password) {
+            throw new Error('Email and password are required');
+        }
         
-        // For demo purposes, simulate successful login and redirect
-        const userType = formData.email.includes('doctor') ? 'doctor' : 'patient';
+        // Make API call to login endpoint
+        const response = await ApiHelper.makeRequest('/auth/login', {
+            method: 'POST',
+            body: JSON.stringify(formData)
+        });
         
-        // Store user session (in production, use proper authentication)
-        localStorage.setItem('sahatak_user_type', userType);
-        localStorage.setItem('sahatak_user_email', formData.email);
+        console.log('Login successful:', response);
+        
+        // Store user session data
+        if (response.data && response.data.user) {
+            localStorage.setItem('sahatak_user_type', response.data.user.user_type);
+            localStorage.setItem('sahatak_user_email', response.data.user.email);
+            localStorage.setItem('sahatak_user_id', response.data.user.id);
+            localStorage.setItem('sahatak_user_name', response.data.user.full_name);
+        }
         
         // Redirect to dashboard
+        const userType = response.data.user.user_type;
         redirectToDashboard(userType);
         
     } catch (error) {
         console.error('Login error:', error);
         const lang = LanguageManager.getLanguage() || 'ar';
         const t = LanguageManager.translations[lang];
-        showFormError(errorAlert, t.validation?.login_failed || 'Login failed. Please try again.');
+        
+        let errorMessage = t.validation?.login_failed || 'Login failed. Please try again.';
+        
+        // Handle specific API errors
+        if (error instanceof ApiError) {
+            errorMessage = error.message;
+            
+            // Show field-specific error if available
+            if (error.field) {
+                showFieldError(error.field, error.message);
+                return;
+            }
+        } else if (error.message) {
+            errorMessage = error.message;
+        }
+        
+        showFormError(errorAlert, errorMessage);
     } finally {
         // Hide loading state
         spinner.classList.add('d-none');
@@ -654,28 +702,35 @@ async function handlePatientRegister(event) {
     
     try {
         const formData = {
-            firstName: document.getElementById('patientFirstName').value,
-            lastName: document.getElementById('patientLastName').value,
-            email: document.getElementById('patientEmail').value,
-            phone: document.getElementById('patientPhone').value,
-            age: document.getElementById('patientAge').value,
+            first_name: document.getElementById('patientFirstName').value.trim(),
+            last_name: document.getElementById('patientLastName').value.trim(),
+            email: document.getElementById('patientEmail').value.trim(),
+            phone: document.getElementById('patientPhone').value.trim(),
+            age: parseInt(document.getElementById('patientAge').value),
             gender: document.getElementById('patientGender').value,
             password: document.getElementById('patientPassword').value,
-            userType: 'patient'
+            user_type: 'patient',
+            language_preference: LanguageManager.getLanguage() || 'ar'
         };
         
-        // Validate form data
-        if (!validatePatientRegistrationForm(formData)) {
-            return;
+        // Basic client-side validation
+        if (!formData.first_name || !formData.last_name || !formData.email || 
+            !formData.phone || !formData.age || !formData.gender || !formData.password) {
+            throw new Error('All fields are required');
         }
         
-        // Simulate API call (replace with actual API call)
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Make API call to registration endpoint
+        const response = await ApiHelper.makeRequest('/auth/register', {
+            method: 'POST',
+            body: JSON.stringify(formData)
+        });
+        
+        console.log('Patient registration successful:', response);
         
         // Show success message
         const lang = LanguageManager.getLanguage() || 'ar';
         const t = LanguageManager.translations[lang];
-        showFormSuccess(successAlert, t.validation?.registration_success || 'Account created successfully! You can now login.');
+        showFormSuccess(successAlert, response.message || t.validation?.registration_success || 'Account created successfully! You can now login.');
         
         // Clear form
         document.getElementById('patientRegisterForm').reset();
@@ -689,7 +744,35 @@ async function handlePatientRegister(event) {
         console.error('Patient registration error:', error);
         const lang = LanguageManager.getLanguage() || 'ar';
         const t = LanguageManager.translations[lang];
-        showFormError(errorAlert, t.validation?.registration_failed || 'Registration failed. Please try again.');
+        
+        let errorMessage = t.validation?.registration_failed || 'Registration failed. Please try again.';
+        
+        // Handle specific API errors
+        if (error instanceof ApiError) {
+            errorMessage = error.message;
+            
+            // Show field-specific error if available
+            if (error.field) {
+                // Map backend field names to frontend field names
+                const fieldMap = {
+                    'first_name': 'patientFirstName',
+                    'last_name': 'patientLastName',
+                    'email': 'patientEmail',
+                    'phone': 'patientPhone',
+                    'age': 'patientAge',
+                    'gender': 'patientGender',
+                    'password': 'patientPassword'
+                };
+                
+                const frontendField = fieldMap[error.field] || error.field;
+                showFieldError(frontendField, error.message);
+                return;
+            }
+        } else if (error.message) {
+            errorMessage = error.message;
+        }
+        
+        showFormError(errorAlert, errorMessage);
     } finally {
         // Hide loading state
         spinner.classList.add('d-none');
@@ -720,29 +803,37 @@ async function handleDoctorRegister(event) {
     
     try {
         const formData = {
-            firstName: document.getElementById('doctorFirstName').value,
-            lastName: document.getElementById('doctorLastName').value,
-            email: document.getElementById('doctorEmail').value,
-            phone: document.getElementById('doctorPhone').value,
-            license: document.getElementById('doctorLicense').value,
+            first_name: document.getElementById('doctorFirstName').value.trim(),
+            last_name: document.getElementById('doctorLastName').value.trim(),
+            email: document.getElementById('doctorEmail').value.trim(),
+            phone: document.getElementById('doctorPhone').value.trim(),
+            license_number: document.getElementById('doctorLicense').value.trim(),
             specialty: document.getElementById('doctorSpecialty').value,
-            experience: document.getElementById('doctorExperience').value,
+            years_of_experience: parseInt(document.getElementById('doctorExperience').value),
             password: document.getElementById('doctorPassword').value,
-            userType: 'doctor'
+            user_type: 'doctor',
+            language_preference: LanguageManager.getLanguage() || 'ar'
         };
         
-        // Validate form data
-        if (!validateDoctorRegistrationForm(formData)) {
-            return;
+        // Basic client-side validation
+        if (!formData.first_name || !formData.last_name || !formData.email || 
+            !formData.phone || !formData.license_number || !formData.specialty || 
+            !formData.years_of_experience || !formData.password) {
+            throw new Error('All fields are required');
         }
         
-        // Simulate API call (replace with actual API call)
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Make API call to registration endpoint
+        const response = await ApiHelper.makeRequest('/auth/register', {
+            method: 'POST',
+            body: JSON.stringify(formData)
+        });
+        
+        console.log('Doctor registration successful:', response);
         
         // Show success message
         const lang = LanguageManager.getLanguage() || 'ar';
         const t = LanguageManager.translations[lang];
-        showFormSuccess(successAlert, t.validation?.registration_success || 'Account created successfully! You can now login.');
+        showFormSuccess(successAlert, response.message || t.validation?.registration_success || 'Account created successfully! You can now login.');
         
         // Clear form
         document.getElementById('doctorRegisterForm').reset();
@@ -756,7 +847,36 @@ async function handleDoctorRegister(event) {
         console.error('Doctor registration error:', error);
         const lang = LanguageManager.getLanguage() || 'ar';
         const t = LanguageManager.translations[lang];
-        showFormError(errorAlert, t.validation?.registration_failed || 'Registration failed. Please try again.');
+        
+        let errorMessage = t.validation?.registration_failed || 'Registration failed. Please try again.';
+        
+        // Handle specific API errors
+        if (error instanceof ApiError) {
+            errorMessage = error.message;
+            
+            // Show field-specific error if available
+            if (error.field) {
+                // Map backend field names to frontend field names
+                const fieldMap = {
+                    'first_name': 'doctorFirstName',
+                    'last_name': 'doctorLastName',
+                    'email': 'doctorEmail',
+                    'phone': 'doctorPhone',
+                    'license_number': 'doctorLicense',
+                    'specialty': 'doctorSpecialty',
+                    'years_of_experience': 'doctorExperience',
+                    'password': 'doctorPassword'
+                };
+                
+                const frontendField = fieldMap[error.field] || error.field;
+                showFieldError(frontendField, error.message);
+                return;
+            }
+        } else if (error.message) {
+            errorMessage = error.message;
+        }
+        
+        showFormError(errorAlert, errorMessage);
     } finally {
         // Hide loading state
         spinner.classList.add('d-none');

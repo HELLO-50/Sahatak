@@ -51,7 +51,14 @@ mail = Mail(app)
 
 # Configure CORS
 CORS(app, 
-     origins=['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:8000', 'http://127.0.0.1:8000'],
+     origins=[
+         'http://localhost:3000', 
+         'http://127.0.0.1:3000', 
+         'http://localhost:8000', 
+         'http://127.0.0.1:8000',
+         'https://hmb104.github.io',
+         'https://hello-50.github.io'
+     ],
      allow_headers=['Content-Type', 'Authorization', 'Accept-Language'],
      methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
      supports_credentials=True)
