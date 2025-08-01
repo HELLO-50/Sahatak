@@ -50,12 +50,28 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     """Production configuration"""
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///sahatak.db')
+    
+    # MySQL Database configuration for PythonAnywhere
+    SQLALCHEMY_DATABASE_URI = os.getenv(
+        'DATABASE_URL', 
+        'mysql+pymysql://sahatak:HELLO-50@30@sahatak.mysql.pythonanywhere-services.com/sahatak$sahatak_db'
+    )
+    
+    # MySQL specific settings
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_pre_ping': True,
+        'pool_recycle': 300,
+        'pool_timeout': 20,
+        'max_overflow': 0
+    }
     
     # Production security settings
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
+    
+    # CORS settings
+    CORS_ORIGINS = os.getenv('CORS_ORIGINS', 'https://hello-50.github.io,https://hmb104.github.io').split(',')
 
 # Configuration dictionary
 config = {

@@ -22,6 +22,9 @@ os.chdir(project_home)
 os.environ['FLASK_ENV'] = 'production'
 os.environ.setdefault('FLASK_APP', 'app.py')
 
+# MySQL configuration for PythonAnywhere
+os.environ.setdefault('DATABASE_URL', 'mysql+pymysql://sahatak:HELLO-50@30@sahatak.mysql.pythonanywhere-services.com/sahatak$sahatak_db')
+
 # Load environment variables from .env file if it exists
 env_path = os.path.join(project_home, '.env')
 if os.path.exists(env_path):
