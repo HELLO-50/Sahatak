@@ -120,7 +120,7 @@ class Doctor(db.Model):
     years_of_experience = db.Column(db.Integer, nullable=False)
     qualification = db.Column(db.Text, nullable=True)
     hospital_affiliation = db.Column(db.String(200), nullable=True)
-    consultation_fee = db.Column(db.Decimal(10, 2), nullable=True)
+    consultation_fee = db.Column(db.Numeric(10, 2), nullable=True)
     available_hours = db.Column(db.JSON, nullable=True)  # Store as JSON
     bio = db.Column(db.Text, nullable=True)
     is_verified = db.Column(db.Boolean, default=False, nullable=False)
@@ -170,7 +170,7 @@ class Appointment(db.Model):
     diagnosis = db.Column(db.Text, nullable=True)
     prescription = db.Column(db.Text, nullable=True)
     follow_up_date = db.Column(db.DateTime, nullable=True)
-    consultation_fee = db.Column(db.Decimal(10, 2), nullable=True)
+    consultation_fee = db.Column(db.Numeric(10, 2), nullable=True)
     payment_status = db.Column(db.Enum('pending', 'paid', 'refunded', name='payment_statuses'), default='pending', nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
