@@ -7,6 +7,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="../../assets/css/main.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
         .admin-sidebar {
             background-color: #2c3e50;
@@ -87,6 +89,7 @@
                         </button>
                     </div>
                 </div>
+                
 
                 <!-- Platform Statistics -->
                 <div class="row mb-4">
@@ -127,6 +130,36 @@
                         <!-- User Management Section -->
                         <div class="placeholder-section">
                             <h5><i class="bi bi-people"></i> User Management</h5>
+                            <!-- جدول المستخدمين -->
+<table class="table table-bordered text-center mt-3">
+  <thead class="table-dark">
+    <tr>
+      <th>الاسم</th>
+      <th>البريد الإلكتروني</th>
+      <th>الهاتف</th>
+      <th>الدور</th>
+      <th>الحالة</th>
+      <th>إجراءات</th>
+    </tr>
+  </thead>
+  <tbody id="userTable"></tbody>
+</table>
+
+<!-- مودال تفاصيل المستخدم -->
+<div class="modal fade" id="userModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">تفاصيل المستخدم</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p id="userDetails"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
                             <p><strong>Awab, implement the following:</strong></p>
                             <div class="row">
                                 <div class="col-md-6">
@@ -136,7 +169,7 @@
                                             <li>Show users with filters (Patient/Doctor/Admin)</li>
                                             <li>Search by name, email, phone</li>
                                             <li>Pagination for large user lists</li>
-                                            <li>Actions: View, Activate/Deactivate, Delete</li>
+                                        <li>Actions: View, Activate/Deactivate, Delete</li>                            
                                         </ul>
                                     </div>
                                 </div>
@@ -157,6 +190,9 @@
                         <!-- Doctor Verification Section -->
                         <div class="placeholder-section">
                             <h5><i class="bi bi-person-check"></i> Doctor Verification</h5>
+                            <div id="doctorList" class="mt-3"></div>
+<div id="doctorList" class="mt-3"></div>
+ 
                             <p><strong>Awab, create these components:</strong></p>
                             <div class="row">
                                 <div class="col-md-6">
@@ -167,6 +203,7 @@
                                             <li>Show license documents</li>
                                             <li>Verify/Reject buttons</li>
                                             <li>Add verification notes</li>
+
                                         </ul>
                                     </div>
                                 </div>
@@ -224,10 +261,42 @@
                                 </div>
                             </div>
                         </div>
+                        <form id="settingsForm" class="mt-4">
+  <div class="mb-3">
+    <label>وضع الصيانة</label>
+    <select id="maintenance" class="form-control">
+      <option value="on">مفعل</option>
+      <option value="off">متوقف</option>
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label>اللغة</label>
+    <select id="language" class="form-control">
+      <option value="ar">عربي</option>
+      <option value="en">إنجليزي</option>
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label>المنطقة الزمنية</label>
+    <input type="text" id="timezone" class="form-control" value="Africa/Cairo" />
+  </div>
+
+  <button type="submit" class="btn btn-primary">حفظ الإعدادات</button>
+</form>
+
 
                         <!-- Platform Health & Analytics -->
                         <div class="placeholder-section">
                             <h5><i class="bi bi-activity"></i> Platform Health & Analytics</h5>
+                            <div>
+  <p>استخدام المعالج: <span id="cpuUsage">0%</span></p>
+  <p>استخدام الذاكرة: <span id="memUsage">0%</span></p>
+</div>
+<canvas id="analyticsChart" width="400" height="200"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
                             <p><strong>Awab, create dashboards showing:</strong></p>
                             <div class="row">
                                 <div class="col-md-6">
@@ -283,11 +352,126 @@
         console.log('Admin dashboard loaded');
         
         // Awab: Add your admin-specific JavaScript here
+        const users = [
+  { name: "أحمد", email: "ahmed@test.com", phone: "02110114532", role: "doctor", active: true },
+  { name: "منى", email: "mona@test.com", phone: "0213021435", role: "patient", active: false }
+];
+
+function renderUsersTable() {
+  const table = document.getElementById("userTable");
+  if (!table) return;
+  table.innerHTML = "";
+  users.forEach((u, i) => {
+    table.innerHTML += `
+      <tr>
+        <td>${u.name}</td>
+        <td>${u.email}</td>
+        <td>${u.phone}</td>
+        <td>${u.role}</td>
+        <td>${u.active ? 'نشط' : 'معطل'}</td>
+        <td>
+          <button class="btn btn-sm btn-info" onclick="showUserModal(${i})">عرض</button>
+          <button class="btn btn-sm btn-warning" onclick="toggleUser(${i})">${u.active ? 'تعطيل' : 'تفعيل'}</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function showUserModal(i) {
+  const u = users[i];
+  const modalBody = document.getElementById("userDetails");
+  if (!modalBody) return;
+  modalBody.innerHTML = `الاسم: ${u.name}<br>البريد: ${u.email}<br>الهاتف: ${u.phone}`;
+  new bootstrap.Modal(document.getElementById("userModal")).show();
+}
+
+function toggleUser(i) {
+  users[i].active = !users[i].active;
+  renderUsersTable();
+}
+
+renderUsersTable();
+const doctors = [
+  { name: "د. خالد", license: "license1.pdf", verified: false },
+  { name: "د. سامية", license: "license2.pdf", verified: false }
+];
+
+function renderDoctors() {
+  const section = document.getElementById("doctorList");
+  if (!section) return;
+  section.innerHTML = "";
+  doctors.forEach((d, i) => {
+    if (!d.verified) {
+      section.innerHTML += `
+        <div class="todo-item">
+          <strong>${d.name}</strong> - <a href="${d.license}" target="_blank">عرض الترخيص</a>
+          <br/>
+          <button onclick="verifyDoctor(${i})" class="btn btn-success btn-sm mt-1">توثيق</button>
+          <button onclick="rejectDoctor(${i})" class="btn btn-danger btn-sm mt-1">رفض</button>
+        </div>
+      `;
+    }
+  });
+}
+
+function verifyDoctor(i) {
+  doctors[i].verified = true;
+  alert("تم توثيق الطبيب");
+  renderDoctors();
+}
+
+function rejectDoctor(i) {
+  alert("تم رفض الطبيب");
+  renderDoctors();
+}
+
+renderDoctors();
+
+
         // - User management functions
         // - Doctor verification handlers
         // - Settings form submissions
+        const settingsForm = document.getElementById("settingsForm");
+if (settingsForm) {
+  settingsForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    const data = {
+      maintenance: document.getElementById("maintenance").value,
+      language: document.getElementById("language").value,
+      timezone: document.getElementById("timezone").value,
+    };
+    alert("تم حفظ الإعدادات:\n" + JSON.stringify(data, null, 2));
+  });
+}
+
         // - Real-time health monitoring
+        function simulateHealthData() {
+  const cpu = Math.floor(Math.random() * 100);
+  const mem = Math.floor(Math.random() * 100);
+  document.getElementById("cpuUsage").innerText = cpu + "%";
+  document.getElementById("memUsage").innerText = mem + "%";
+}
+setInterval(simulateHealthData, 2000);
+
         // - Analytics chart rendering
+      document.addEventListener("DOMContentLoaded", () => {
+  const ctx = document.getElementById("analyticsChart");
+  if (ctx) {
+    new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: ["يناير", "فبراير", "مارس", "أبريل"],
+        datasets: [{
+          label: "عدد المستخدمين الجدد",
+          data: [40, 55, 65, 90],
+          backgroundColor: "#667eea"
+        }]
+      }
+    });
+  }
+});
+  
     </script>
 </body>
 </html>
