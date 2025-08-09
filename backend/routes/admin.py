@@ -17,7 +17,10 @@ from flask import Blueprint, request, jsonify, current_app
 from flask_login import login_required, current_user
 from functools import wraps
 from datetime import datetime, timedelta
+from sqlalchemy import func, text, and_, or_
+from sqlalchemy.orm import joinedload
 import logging
+import re
 
 from utils.responses import APIResponse
 from utils.error_handlers import RequestValidationError
@@ -30,14 +33,10 @@ admin_bp = Blueprint('admin', __name__)
 # Admin Authentication Decorator
 def admin_required(f):
     """
-    Ahmed: Implement this decorator to check if user is admin
-    - Check if user is logged in
-    - Check if user has admin role
-    - Return 403 if not authorized
+    Decorator to check if user is admin with proper permissions
     """
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        # TODO: Ahmed - Implement admin permission check
         if not current_user.is_authenticated:
             return APIResponse.error(
                 message="Authentication required",
@@ -45,16 +44,46 @@ def admin_required(f):
                 error_code="AUTH_REQUIRED"
             )
         
-        # TODO: Ahmed - Add admin role check
-        # if not current_user.is_admin:
-        #     return APIResponse.error(
-        #         message="Admin access required",
-        #         status_code=403,
-        #         error_code="ADMIN_REQUIRED"
-        #     )
+        # Check if user has admin role
+        if not hasattr(current_user, 'user_type') or current_user.user_type != 'admin':
+            log_user_action(
+                current_user.id if current_user.is_authenticated else None,
+                'admin_access_denied',
+                {'endpoint': request.endpoint, 'ip': request.remote_addr}
+            )
+            return APIResponse.error(
+                message="Admin access required",
+                status_code=403,
+                error_code="ADMIN_REQUIRED"
+            )
         
         return f(*args, **kwargs)
     return decorated_function
+
+# Input validation helpers
+def validate_pagination_params(page=1, per_page=20):
+    """Validate and sanitize pagination parameters"""
+    try:
+        page = max(1, int(page))
+        per_page = min(100, max(1, int(per_page)))  # Cap at 100 items per page
+        return page, per_page
+    except ValueError:
+        raise RequestValidationError("Invalid pagination parameters")
+
+def validate_date_range(start_date, end_date):
+    """Validate date range parameters"""
+    try:
+        if start_date:
+            start_date = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
+        if end_date:
+            end_date = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
+        
+        if start_date and end_date and start_date > end_date:
+            raise RequestValidationError("Start date must be before end date")
+            
+        return start_date, end_date
+    except ValueError:
+        raise RequestValidationError("Invalid date format")
 
 # =============================================================================
 # USER MANAGEMENT ENDPOINTS
@@ -64,23 +93,7 @@ def admin_required(f):
 @login_required
 @admin_required
 def get_users():
-    """
-    Ahmed: Get paginated list of users
-    
-    Query Parameters:
-    - page: Page number (default: 1)
-    - per_page: Items per page (default: 20)
-    - user_type: Filter by user type (patient/doctor/admin)
-    - search: Search by name, email, or phone
-    - status: Filter by active status
-    
-    TODO Ahmed - Implement:
-    1. Parse query parameters
-    2. Build dynamic filters
-    3. Apply pagination
-    4. Return user list (NO medical records)
-    5. Include total count for pagination
-    """
+    """Get paginated list of users with filtering and search"""
     try:
         # Placeholder implementation
         page = request.args.get('page', 1, type=int)
@@ -89,33 +102,105 @@ def get_users():
         search = request.args.get('search')
         status = request.args.get('status')
         
-        # TODO: Ahmed - Implement actual filtering and pagination
-        users = User.query.paginate(
+        page, per_page = validate_pagination_params(page, per_page)
+        
+        # Build base query
+        query = User.query.options(
+            joinedload(User.patient),
+            joinedload(User.doctor)
+        )
+        
+        # Apply filters
+        if user_type and user_type in ['patient', 'doctor', 'admin']:
+            query = query.filter(User.user_type == user_type)
+        
+        if status is not None:
+            is_active = status.lower() == 'true'
+            query = query.filter(User.is_active == is_active)
+        
+        if search:
+            search_filter = or_(
+                User.first_name.ilike(f'%{search}%'),
+                User.last_name.ilike(f'%{search}%'),
+                User.email.ilike(f'%{search}%'),
+                User.phone.ilike(f'%{search}%')
+            )
+            query = query.filter(search_filter)
+        
+        # Apply pagination
+        users_pagination = query.paginate(
             page=page, 
             per_page=per_page, 
             error_out=False
         )
         
+        # Format user data (exclude sensitive information)
+        users_data = []
+        for user in users_pagination.items:
+            user_info = {
+                'id': user.id,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'phone': user.phone,
+                'user_type': user.user_type,
+                'is_active': user.is_active,
+                'is_verified': user.is_verified,
+                'created_at': user.created_at.isoformat(),
+                'last_login': user.last_login.isoformat() if user.last_login else None,
+                'profile_completed': user.profile_completed
+            }
+            
+            # Add type-specific information
+            if user.user_type == 'doctor' and user.doctor:
+                user_info['doctor_info'] = {
+                    'specialty': user.doctor.specialty,
+                    'license_number': user.doctor.license_number,
+                    'is_verified': user.doctor.is_verified,
+                    'years_of_experience': user.doctor.years_of_experience
+                }
+            elif user.user_type == 'patient' and user.patient:
+                user_info['patient_info'] = {
+                    'date_of_birth': user.patient.date_of_birth.isoformat() if user.patient.date_of_birth else None,
+                    'gender': user.patient.gender,
+                    'emergency_contact': user.patient.emergency_contact
+                }
+            
+            users_data.append(user_info)
+        
         # Log admin action
         log_user_action(
-            current_user.id, 
+            current_user.id,
             'admin_view_users',
-            {'page': page, 'filters': {'user_type': user_type, 'search': search}}
+            {
+                'page': page,
+                'per_page': per_page,
+                'filters': {
+                    'user_type': user_type,
+                    'search': bool(search),
+                    'status': status
+                },
+                'total_results': users_pagination.total
+            }
         )
         
         return APIResponse.success(
             data={
-                'users': [],  # TODO: Ahmed - Return formatted user data
+                'users': users_data,
                 'pagination': {
-                    'page': users.page,
-                    'pages': users.pages,
-                    'per_page': users.per_page,
-                    'total': users.total
+                    'page': users_pagination.page,
+                    'pages': users_pagination.pages,
+                    'per_page': users_pagination.per_page,
+                    'total': users_pagination.total,
+                    'has_next': users_pagination.has_next,
+                    'has_prev': users_pagination.has_prev
                 }
             },
             message="Users retrieved successfully"
         )
         
+    except RequestValidationError as e:
+        return APIResponse.error(message=str(e), status_code=400)
     except Exception as e:
         app_logger.error(f"Admin get users error: {str(e)}")
         return APIResponse.error(
@@ -127,32 +212,85 @@ def get_users():
 @login_required
 @admin_required
 def get_user_details(user_id):
-    """
-    Ahmed: Get user details for admin view
-    
-    TODO Ahmed - Implement:
-    1. Find user by ID
-    2. Return user info (NO medical records)
-    3. Include account status and activity logs
-    4. Handle user not found
-    """
+    """Get user details for admin view"""
     try:
-        user = User.query.get_or_404(user_id)
+        user = User.query.options(
+            joinedload(User.patient),
+            joinedload(User.doctor)
+        ).get(user_id)
         
-        # TODO: Ahmed - Format user data (exclude sensitive info)
+        if not user:
+            return APIResponse.error(
+                message="User not found",
+                status_code=404,
+                error_code="USER_NOT_FOUND"
+            )
+        
+        # Format comprehensive user data (exclude medical records) 
         user_data = {
             'id': user.id,
             'email': user.email,
             'first_name': user.first_name,
             'last_name': user.last_name,
+            'phone': user.phone,
             'user_type': user.user_type,
             'is_active': user.is_active,
             'is_verified': user.is_verified,
             'created_at': user.created_at.isoformat(),
+            'updated_at': user.updated_at.isoformat(),
             'last_login': user.last_login.isoformat() if user.last_login else None,
-            # TODO: Add more non-sensitive fields
+            'locked_until': user.locked_until.isoformat() if user.locked_until else None
         }
+          # Add type-specific detailed information
+        if user.user_type == 'doctor' and user.doctor:
+            user_data['doctor_details'] = {
+                'specialty': user.doctor.specialty,
+                'license_number': user.doctor.license_number,
+                'years_of_experience': user.doctor.years_of_experience,
+                'bio': user.doctor.bio,
+                'consultation_fee': float(user.doctor.consultation_fee) if user.doctor.consultation_fee else None,
+                'is_verified': user.doctor.is_verified,
+                'verification_date': user.doctor.verification_date.isoformat() if user.doctor.verification_date else None,
+                'verification_notes': user.doctor.verification_notes,
+                'rating': float(user.doctor.rating) if user.doctor.rating else None,
+                'total_consultations': user.doctor.total_consultations,
+                'available_days': user.doctor.available_days,
+                'available_time_start': user.doctor.available_time_start.isoformat() if user.doctor.available_time_start else None,
+                'available_time_end': user.doctor.available_time_end.isoformat() if user.doctor.available_time_end else None
+            }
+        elif user.user_type == 'patient' and user.patient:
+            user_data['patient_details'] = {
+                'date_of_birth': user.patient.date_of_birth.isoformat() if user.patient.date_of_birth else None,
+                'gender': user.patient.gender,
+                'blood_type': user.patient.blood_type,
+                'height_cm': user.patient.height_cm,
+                'weight_kg': user.patient.weight_kg,
+                'emergency_contact': user.patient.emergency_contact,
+                'emergency_phone': user.patient.emergency_phone,
+                'address': user.patient.address,
+                'city': user.patient.city,
+                'total_appointments': user.patient.total_appointments
+            }
         
+        # Get recent activity (last 10 appointments)
+        recent_appointments = Appointment.query.filter_by(
+            patient_id=user_id if user.user_type == 'patient' else None,
+            doctor_id=user_id if user.user_type == 'doctor' else None
+        ).order_by(Appointment.created_at.desc()).limit(10).all()
+        
+        user_data['recent_activity'] = [{
+            'id': apt.id,
+            'date': apt.appointment_date.isoformat(),
+            'status': apt.status,
+            'type': 'appointment',
+            'with_user': apt.doctor.user.first_name + ' ' + apt.doctor.user.last_name if user.user_type == 'patient' else apt.patient.user.first_name + ' ' + apt.patient.user.last_name
+        } for apt in recent_appointments]
+        
+        log_user_action(
+            current_user.id,
+            'admin_view_user_details',
+            {'target_user_id': user_id, 'user_type': user.user_type}
+        )
         return APIResponse.success(
             data={'user': user_data},
             message="User details retrieved"
@@ -169,23 +307,42 @@ def get_user_details(user_id):
 @login_required
 @admin_required
 def toggle_user_status(user_id):
-    """
-    Ahmed: Toggle user active status
-    
-    TODO Ahmed - Implement:
-    1. Find user by ID
-    2. Toggle is_active status
-    3. Log the action
-    4. Send notification to user
-    5. Return updated status
-    """
+    """Ahmed: Toggle user active status"""
     try:
         user = User.query.get_or_404(user_id)
         
-        # TODO: Ahmed - Implement status toggle
+        if not user:
+            return APIResponse.error(
+                message="User not found",
+                status_code=404,
+                error_code="USER_NOT_FOUND"
+            )
+        
+        # Prevent admin from deactivating themselves
+        if user_id == current_user.id:
+            return APIResponse.error(
+                message="Cannot change your own status",
+                status_code=400,
+                error_code="CANNOT_MODIFY_SELF"
+            )
+        
         old_status = user.is_active
         user.is_active = not user.is_active
+        user.updated_at = datetime.utcnow()
         db.session.commit()
+            
+        # Send notification to user
+        notification_title = "Account Status Update"
+        notification_message = f"Your account has been {'activated' if user.is_active else 'deactivated'} by an administrator."
+              
+        queue_notification(
+            user_id=user_id,
+            title=notification_title,
+            message=notification_message,
+            notification_type='warning' if not user.is_active else 'info',
+            send_email=True,
+            send_sms=False
+        )
         
         # Log admin action
         log_user_action(
@@ -193,6 +350,7 @@ def toggle_user_status(user_id):
             'admin_toggle_user_status',
             {
                 'target_user_id': user_id,
+                'target_email': user.email, # i add the email
                 'old_status': old_status,
                 'new_status': user.is_active
             }
