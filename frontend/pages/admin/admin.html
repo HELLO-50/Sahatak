@@ -134,48 +134,121 @@
                         <div class="placeholder-section">
                             <h5><i class="bi bi-people"></i> User Management</h5>
                             <!-- جدول المستخدمين -->
-<!-- User Management Table -->
-<div class="container mt-4">
-    <h2>User Management</h2>
-    <table class="table table-bordered table-hover table-striped">
-        <thead class="table-dark">
-            <tr>
-                <th>#</th>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>1</td>
-                <td>JohnDoe</td>
-                <td>john@example.com</td>
-                <td>User</td>
-                <td><span class="badge bg-success">Active</span></td>
-                <td>
-                    <button class="btn btn-sm btn-primary">Edit</button>
-                    <button class="btn btn-sm btn-danger">Delete</button>
-                    <button class="btn btn-sm btn-info">View</button>
-                </td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td>JaneSmith</td>
-                <td>jane@example.com</td>
-                <td>Doctor</td>
-                <td><span class="badge bg-warning text-dark">Pending</span></td>
-                <td>
-                    <button class="btn btn-sm btn-primary">Edit</button>
-                    <button class="btn btn-sm btn-danger">Delete</button>
-                    <button class="btn btn-sm btn-info">View</button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+<!-- ========== User Management Controls ========== -->
+<div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
+  <!-- Filters -->
+  <div class="btn-group" role="group" aria-label="User type filters">
+    <button type="button" class="btn btn-outline-secondary user-filter-btn active" data-filter="all">All</button>
+    <button type="button" class="btn btn-outline-secondary user-filter-btn" data-filter="patient">Patient</button>
+    <button type="button" class="btn btn-outline-secondary user-filter-btn" data-filter="doctor">Doctor</button>
+    <button type="button" class="btn btn-outline-secondary user-filter-btn" data-filter="admin">Admin</button>
+  </div>
+
+  <!-- Search -->
+  <div class="ms-3" style="min-width:280px;">
+    <input id="user-search" type="search" class="form-control" placeholder="Search name, email or phone">
+  </div>
+
+  <!-- Per-page -->
+  <div class="ms-auto">
+    <select id="per-page" class="form-select form-select-sm">
+      <option value="5">5 / page</option>
+      <option value="10" selected>10 / page</option>
+      <option value="20">20 / page</option>
+    </select>
+  </div>
 </div>
+
+<!-- ========== Users Table ========== -->
+<div class="table-responsive">
+  <table class="table table-hover table-bordered text-center">
+    <thead class="table-dark">
+      <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="users-table-body">
+      <!-- filled by JS -->
+    </tbody>
+  </table>
+</div>
+
+<!-- Pagination -->
+<nav>
+  <ul id="users-pagination" class="pagination justify-content-center"></ul>
+</nav>
+
+<!-- User View Modal (Bootstrap) -->
+<div class="modal fade" id="userViewModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">User Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="userViewBody">
+        <!-- filled by JS -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- User Details Modal -->
+<div class="modal fade" id="userModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">User Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Name:</strong> <span id="modalName"></span></p>
+        <p><strong>Email:</strong> <span id="modalEmail"></span></p>
+        <p><strong>Phone:</strong> <span id="modalPhone"></span></p>
+        <p><strong>Role:</strong> <span id="modalRole"></span></p>
+        <p><strong>Status:</strong> <span id="modalStatus"></span></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-warning" id="toggleStatusBtn"></button>
+        <button class="btn btn-info" onclick="sendNotification()">Send Notification</button>
+        <button class="btn btn-secondary" onclick="resetPassword()">Reset Password</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function openUserModal(user) {
+    document.getElementById("modalName").innerText = user.name;
+    document.getElementById("modalEmail").innerText = user.email;
+    document.getElementById("modalPhone").innerText = user.phone;
+    document.getElementById("modalRole").innerText = user.role;
+    document.getElementById("modalStatus").innerText = user.status;
+    
+    document.getElementById("toggleStatusBtn").innerText = user.status === "Active" ? "Deactivate" : "Activate";
+    document.getElementById("toggleStatusBtn").onclick = () => toggleStatus(user.name);
+
+    new bootstrap.Modal(document.getElementById("userModal")).show();
+}
+
+function sendNotification() {
+    alert("Notification sent!");
+}
+
+function resetPassword() {
+    alert("Password reset!");
+}
+</script>
+
+                            
 
 
 <!-- مودال تفاصيل المستخدم -->
@@ -318,6 +391,231 @@
 
   <button type="submit" class="btn btn-primary">حفظ الإعدادات</button>
 </form>
+<!-- General Settings Section -->
+<section id="general-settings" class="container my-4">
+    <h2 class="mb-4">⚙️ General Settings</h2>
+    <form>
+        <!-- Site Maintenance Mode -->
+        <div class="mb-3">
+            <label class="form-label">Site Maintenance Mode</label>
+            <select class="form-select">
+                <option value="off">Off</option>
+                <option value="on">On</option>
+            </select>
+        </div>
+
+        <!-- Registration Status -->
+        <div class="mb-3">
+            <label class="form-label">Registration Status</label>
+            <select class="form-select">
+                <option value="open">Open</option>
+                <option value="closed">Closed</option>
+            </select>
+        </div>
+
+        <!-- Default Language -->
+        <div class="mb-3">
+            <label class="form-label">Default Language</label>
+            <select class="form-select">
+                <option value="en">English</option>
+                <option value="ar">Arabic</option>
+                <option value="fr">French</option>
+            </select>
+        </div>
+
+        <!-- Time Zone -->
+        <div class="mb-3">
+            <label class="form-label">Time Zone</label>
+            <select class="form-select">
+                <option value="UTC">UTC</option>
+                <option value="Africa/Cairo">Africa/Cairo</option>
+                <option value="Asia/Riyadh">Asia/Riyadh</option>
+                <option value="America/New_York">America/New_York</option>
+            </select>
+        </div>
+
+        <!-- Save Button -->
+        <button type="submit" class="btn btn-primary">Save Settings</button>
+    </form>
+</section>
+<!-- Notification Settings -->
+<div class="card mt-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Notification Settings</h5>
+    </div>
+    <div class="card-body">
+
+        <!-- Notification Toggles -->
+        <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+            <label class="form-check-label" for="emailNotifications">Enable Email Notifications</label>
+        </div>
+        <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="smsNotifications">
+            <label class="form-check-label" for="smsNotifications">Enable SMS Notifications</label>
+        </div>
+        <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="pushNotifications">
+            <label class="form-check-label" for="pushNotifications">Enable Push Notifications</label>
+        </div>
+
+        <!-- SMS Notification Settings -->
+        <div class="mb-3">
+            <label for="smsProvider" class="form-label">SMS Provider</label>
+            <input type="text" id="smsProvider" class="form-control" placeholder="e.g. Twilio, Nexmo">
+        </div>
+        <div class="mb-3">
+            <label for="smsApiKey" class="form-label">SMS API Key</label>
+            <input type="password" id="smsApiKey" class="form-control" placeholder="Enter API Key">
+        </div>
+
+        <!-- System Announcement Banner -->
+        <div class="mb-3">
+            <label for="systemAnnouncement" class="form-label">System Announcement Banner</label>
+            <textarea id="systemAnnouncement" class="form-control" rows="3" placeholder="Write your announcement here..."></textarea>
+        </div>
+
+        <!-- Save Button -->
+        <button class="btn btn-success">Save Notification Settings</button>
+    </div>
+</div>
+<!-- Security Settings Section -->
+<div class="card mb-4">
+    <div class="card-header bg-danger text-white">
+        <h5 class="mb-0">Security Settings</h5>
+    </div>
+    <div class="card-body">
+        
+        <!-- Password Policy -->
+        <div class="mb-3">
+            <label for="passwordPolicy" class="form-label">Password Policy</label>
+            <select class="form-select" id="passwordPolicy">
+                <option value="weak">Weak (Minimum 6 characters)</option>
+                <option value="medium" selected>Medium (8+ characters, at least 1 number)</option>
+                <option value="strong">Strong (10+ characters, 1 uppercase, 1 number, 1 special char)</option>
+            </select>
+        </div>
+
+        <!-- Session Timeout -->
+        <div class="mb-3">
+            <label for="sessionTimeout" class="form-label">Session Timeout (minutes)</label>
+            <input type="number" id="sessionTimeout" class="form-control" value="30" min="5">
+        </div>
+
+        <!-- Failed Login Attempts -->
+        <div class="mb-3">
+            <label for="failedAttempts" class="form-label">Failed Login Attempt Limit</label>
+            <input type="number" id="failedAttempts" class="form-control" value="5" min="1">
+        </div>
+
+        <!-- API Rate Limiting -->
+        <div class="mb-3">
+            <label for="apiRateLimit" class="form-label">API Rate Limit (requests per minute)</label>
+            <input type="number" id="apiRateLimit" class="form-control" value="60" min="10">
+        </div>
+
+        <!-- Save Button -->
+        <button class="btn btn-danger w-100">Save Security Settings</button>
+    </div>
+</div>
+<!-- Security Settings Section -->
+<div class="card mb-4">
+    <div class="card-header bg-danger text-white">
+        <h5 class="mb-0">Security Settings</h5>
+    </div>
+    <div class="card-body">
+        
+        <!-- Password Policy -->
+        <div class="mb-3">
+            <label for="passwordPolicy" class="form-label">Password Policy</label>
+            <select class="form-select" id="passwordPolicy">
+                <option value="weak">Weak (Minimum 6 characters)</option>
+                <option value="medium" selected>Medium (8+ characters, at least 1 number)</option>
+                <option value="strong">Strong (10+ characters, 1 uppercase, 1 number, 1 special char)</option>
+            </select>
+        </div>
+
+        <!-- Session Timeout -->
+        <div class="mb-3">
+            <label for="sessionTimeout" class="form-label">Session Timeout (minutes)</label>
+            <input type="number" id="sessionTimeout" class="form-control" value="30" min="5">
+        </div>
+
+        <!-- Failed Login Attempts -->
+        <div class="mb-3">
+            <label for="failedAttempts" class="form-label">Failed Login Attempt Limit</label>
+            <input type="number" id="failedAttempts" class="form-control" value="5" min="1">
+        </div>
+
+        <!-- API Rate Limiting -->
+        <div class="mb-3">
+            <label for="apiRateLimit" class="form-label">API Rate Limit (requests per minute)</label>
+            <input type="number" id="apiRateLimit" class="form-control" value="60" min="10">
+        </div>
+
+        <!-- Save Button -->
+        <button class="btn btn-danger w-100">Save Security Settings</button>
+    </div>
+</div>
+<!-- Health Monitoring Section -->
+<div class="card mt-4">
+    <div class="card-header bg-success text-white">
+        <h5 class="mb-0">Health Monitoring</h5>
+    </div>
+    <div class="card-body">
+        <!-- Database Connection Status -->
+        <div class="mb-3">
+            <label class="form-label">Database Connection Status:</label>
+            <span class="badge bg-success">Connected</span>
+        </div>
+
+        <!-- API Response Times Chart -->
+        <div class="mb-3">
+            <label class="form-label">API Response Times:</label>
+            <canvas id="apiResponseChart" height="100"></canvas>
+        </div>
+
+        <!-- Error Rate Monitoring -->
+        <div class="mb-3">
+            <label class="form-label">Error Rate Monitoring:</label>
+            <span class="badge bg-warning">Low</span>
+        </div>
+
+        <!-- Server Resource Usage -->
+        <div class="mb-3">
+            <label class="form-label">Server Resource Usage:</label>
+            <div class="progress mb-1">
+                <div class="progress-bar bg-info" style="width: 65%">CPU: 65%</div>
+            </div>
+            <div class="progress">
+                <div class="progress-bar bg-primary" style="width: 78%">Memory: 78%</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Script for API Response Times -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('apiResponseChart').getContext('2d');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+        datasets: [{
+            label: 'API Response Time (ms)',
+            data: [120, 100, 150, 130, 140, 110],
+            borderColor: 'green',
+            borderWidth: 2,
+            fill: false
+        }]
+    }
+});
+</script>
+
+
+<!-- End General Settings Section -->
+
 
 
                         <!-- Platform Health & Analytics -->
@@ -373,6 +671,41 @@
             </div>
         </div>
     </div>
+<!-- Usage Analytics Section -->
+<section id="usage-analytics" class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Usage Analytics</h5>
+    </div>
+    <div class="card-body">
+        <!-- Daily/Monthly Registrations -->
+        <h6>Daily/Monthly User Registrations</h6>
+        <canvas id="registrationChart" height="100"></canvas>
+        <hr>
+
+        <!-- Appointment Booking Trends -->
+        <h6>Appointment Booking Trends</h6>
+        <canvas id="bookingChart" height="100"></canvas>
+        <hr>
+
+        <!-- Most Active Doctors/Specialties -->
+        <h6>Most Active Doctors/Specialties</h6>
+        <ul id="topDoctorsList">
+            <li>Dr. Ahmed (Cardiology)</li>
+            <li>Dr. Sara (Dermatology)</li>
+            <li>Dr. Khalid (Orthopedics)</li>
+        </ul>
+        <hr>
+
+        <!-- Geographic User Distribution -->
+        <h6>Geographic User Distribution</h6>
+        <canvas id="geoChart" height="100"></canvas>
+        <hr>
+
+        <!-- Platform Usage by Time of Day -->
+        <h6>Platform Usage by Time of Day</h6>
+        <canvas id="timeUsageChart" height="100"></canvas>
+    </div>
+</section>
 
     <!-- Chart -->
     <div class="card mt-4 shadow-sm">
@@ -384,6 +717,8 @@
         </div>
     </div>
 </section>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 
 <!-- Chart.js Script -->
 <script>
@@ -398,7 +733,7 @@
                     data: [1200, 1400, 1350, 1500, 1600, 1550, 1700],
                     borderColor: '#007bff',
                     backgroundColor: 'rgba(0,123,255,0.2)',
-                    fill: true,
+                  fill: true,
                     tension: 0.3
                 },
                 {
@@ -645,6 +980,201 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
+// ====== Demo data (replace with API data) ======
+const demoUsers = [];
+for (let i=1;i<=57;i++){
+  demoUsers.push({
+    id: i,
+    name: `User ${i}`,
+    email: `user${i}@example.com`,
+    phone: `010${(10000000 + i).toString().slice(-8)}`,
+    role: (i%3===0 ? 'admin' : (i%2===0 ? 'doctor' : 'patient')),
+    is_active: i % 4 !== 0,
+    last_login: new Date(Date.now() - i*3600*1000).toISOString()
+  });
+}
+
+// ====== State ======
+const UserState = {
+  all: demoUsers,      // replace with fetched users
+  filtered: [],
+  page: 1,
+  perPage: parseInt(document.getElementById('per-page').value || 10),
+  currentFilter: 'all',
+  searchQuery: ''
+};
+
+// ====== Utilities ======
+function formatDateISO(iso) {
+  const d = new Date(iso);
+  return d.toLocaleString();
+}
+
+// debounce helper
+function debounce(fn, delay=300){
+  let t;
+  return (...args)=>{ clearTimeout(t); t = setTimeout(()=>fn(...args), delay); };
+}
+
+// ====== Core: apply filters/search & paginate ======
+function applyFiltersAndRender(){
+  const { all, currentFilter, searchQuery } = UserState;
+  let list = all.slice();
+
+  // filter by role
+  if (currentFilter && currentFilter !== 'all') {
+    list = list.filter(u => u.role === currentFilter);
+  }
+
+  // search by name/email/phone (case-insensitive)
+  if (searchQuery && searchQuery.trim() !== '') {
+    const q = searchQuery.trim().toLowerCase();
+    list = list.filter(u => (
+      u.name.toLowerCase().includes(q) ||
+      u.email.toLowerCase().includes(q) ||
+      (u.phone || '').toLowerCase().includes(q)
+    ));
+  }
+
+  UserState.filtered = list;
+  renderUsersTable();
+  renderPagination();
+}
+
+// ====== Render users table for current page ======
+function renderUsersTable(){
+  const tbody = document.getElementById('users-table-body');
+  tbody.innerHTML = '';
+
+  const start = (UserState.page - 1) * UserState.perPage;
+  const end = start + UserState.perPage;
+  const pageItems = UserState.filtered.slice(start, end);
+
+  if(pageItems.length === 0){
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center">No users found</td></tr>`;
+    return;
+  }
+
+  const rows = pageItems.map((u, idx) => {
+    return `
+      <tr id="user-row-${u.id}">
+        <td>${start + idx + 1}</td>
+        <td>${u.name}</td>
+        <td>${u.email}</td>
+        <td>${u.phone}</td>
+        <td><span class="badge bg-${u.role === 'doctor' ? 'primary' : (u.role === 'admin' ? 'dark' : 'secondary')}">${u.role}</span></td>
+        <td><span id="status-${u.id}" class="badge ${u.is_active ? 'bg-success' : 'bg-danger'}">${u.is_active ? 'Active' : 'Inactive'}</span></td>
+        <td>
+          <button class="btn btn-sm btn-info" onclick="viewUser(${u.id})"><i class="bi bi-eye"></i></button>
+          <button class="btn btn-sm btn-warning" onclick="toggleUser(${u.id})"><i class="bi bi-toggle-${u.is_active ? 'on' : 'off'}"></i></button>
+          <button class="btn btn-sm btn-danger" onclick="deleteUser(${u.id})"><i class="bi bi-trash"></i></button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  tbody.innerHTML = rows;
+}
+
+// ====== Pagination rendering ======
+function renderPagination(){
+  const container = document.getElementById('users-pagination');
+  container.innerHTML = '';
+  const total = UserState.filtered.length;
+  const totalPages = Math.max(1, Math.ceil(total / UserState.perPage));
+  const current = UserState.page;
+
+  // helper to add page item
+  function addPageItem(label, page, disabled=false, active=false){
+    const li = document.createElement('li');
+    li.className = 'page-item' + (disabled ? ' disabled' : '') + (active ? ' active' : '');
+    const a = document.createElement('a');
+    a.className = 'page-link';
+    a.href = '#';
+    a.textContent = label;
+    a.addEventListener('click', (e) => { e.preventDefault(); if(!disabled){ UserState.page = page; applyFiltersAndRender(); } });
+    li.appendChild(a);
+    container.appendChild(li);
+  }
+
+  addPageItem('«', Math.max(1, current-1), current===1);
+  // show first, last, and neighbors (simple strategy)
+  const start = Math.max(1, current-2);
+  const end = Math.min(totalPages, current+2);
+  for(let p=start;p<=end;p++){
+    addPageItem(p, p, false, p===current);
+  }
+  addPageItem('»', Math.min(totalPages, current+1), current===totalPages);
+}
+
+// ====== Actions: view / toggle / delete ======
+function viewUser(id){
+  const u = UserState.all.find(x => x.id === id);
+  if(!u) return alert('User not found');
+  const body = document.getElementById('userViewBody');
+  body.innerHTML = `
+    <p><strong>Name:</strong> ${u.name}</p>
+    <p><strong>Email:</strong> ${u.email}</p>
+    <p><strong>Phone:</strong> ${u.phone}</p>
+    <p><strong>Role:</strong> ${u.role}</p>
+    <p><strong>Last login:</strong> ${formatDateISO(u.last_login)}</p>
+  `;
+  new bootstrap.Modal(document.getElementById('userViewModal')).show();
+}
+
+function toggleUser(id){
+  // Here you would call API to toggle. For demo we toggle local array.
+  const user = UserState.all.find(x => x.id === id);
+  if(!user) return;
+  user.is_active = !user.is_active;
+  // update status badge text/color
+  const badge = document.getElementById(`status-${id}`);
+  if(badge){
+    badge.textContent = user.is_active ? 'Active' : 'Inactive';
+    badge.className = user.is_active ? 'badge bg-success' : 'badge bg-danger';
+  }
+  // optionally show toast/alert
+  // AdminUI.showSuccess('User status updated'); // if AdminUI exists
+}
+
+function deleteUser(id){
+  if(!confirm('Delete this user?')) return;
+  // normally call API to delete then refresh. Here remove from demo array:
+  UserState.all = UserState.all.filter(u => u.id !== id);
+  applyFiltersAndRender();
+}
+
+// ====== Bind controls ======
+document.querySelectorAll('.user-filter-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    document.querySelectorAll('.user-filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    UserState.currentFilter = btn.dataset.filter;
+    UserState.page = 1;
+    applyFiltersAndRender();
+  });
+});
+
+document.getElementById('per-page').addEventListener('change', (e) => {
+  UserState.perPage = parseInt(e.target.value, 10);
+  UserState.page = 1;
+  applyFiltersAndRender();
+});
+
+// search with debounce
+document.getElementById('user-search').addEventListener('input', debounce((e)=>{
+  UserState.searchQuery = e.target.value;
+  UserState.page = 1;
+  applyFiltersAndRender();
+}, 350));
+
+// ====== Init ======
+(function initUserManagement(){
+  UserState.filtered = UserState.all.slice();
+  renderUsersTable();
+  renderPagination();
+})();
+
 </script>
 
 </html>
