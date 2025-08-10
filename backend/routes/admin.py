@@ -460,7 +460,7 @@ def verify_doctor(doctor_id):
                 message="Request body required",
                 status_code=400
             )
-       doctor = Doctor.query.options(joinedload(Doctor.user)).get(doctor_id)
+        doctor = Doctor.query.options(joinedload(Doctor.user)).get(doctor_id)
         if not doctor:
             return APIResponse.error(
                 message="Doctor not found",
@@ -639,44 +639,44 @@ def add_doctor_manually():
                 status_code=400
             )
 
-       `try:
+    try:
             # Create User account
-            new_user = User(
-                email=email,
-                first_name=data['first_name'].strip(),
-                last_name=data['last_name'].strip(),
-                phone=data.get('phone', '').strip(),
-                user_type='doctor',
-                is_active=True,
-                is_verified=True,
-                profile_completed=True,
-                created_at=datetime.utcnow()
-            )
-            new_user.set_password(password)
-            db.session.add(new_user)
-            db.session.flush()  # Get user ID
+        new_user = User(
+            email=email,
+            first_name=data['first_name'].strip(),
+            last_name=data['last_name'].strip(),
+            phone=data.get('phone', '').strip(),
+            user_type='doctor',
+            is_active=True,
+            is_verified=True,
+            profile_completed=True,
+            created_at=datetime.utcnow()
+        )
+        new_user.set_password(password)
+        db.session.add(new_user)
+        db.session.flush()  # Get user ID
             
             # Create Doctor profile
-            new_doctor = Doctor(
-                user_id=new_user.id,
-                specialty=data['specialty'].strip(),
-                license_number=data['license_number'].strip(),
-                years_of_experience=years_exp,
-                bio=data.get('bio', '').strip(),
-                consultation_fee=data.get('consultation_fee', 0),
-                is_verified=True,
-                verification_date=datetime.utcnow(),
-                verified_by=current_user.id,
-                verification_notes=f"Manually added by admin {current_user.email}",
-                created_at=datetime.utcnow()
-            )
-            db.session.add(new_doctor)
+        new_doctor = Doctor(
+            user_id=new_user.id,
+            specialty=data['specialty'].strip(),
+            license_number=data['license_number'].strip(),
+            years_of_experience=years_exp,
+            bio=data.get('bio', '').strip(),
+            consultation_fee=data.get('consultation_fee', 0),
+            is_verified=True,
+            verification_date=datetime.utcnow(),
+            verified_by=current_user.id,
+            verification_notes=f"Manually added by admin {current_user.email}",
+            created_at=datetime.utcnow()
+        )
+        db.session.add(new_doctor)
             
-            db.session.commit()
+        db.session.commit()
             
             # Send welcome email with login credentials
-            welcome_subject = "Welcome to Sahatak Telemedicine Platform"
-            welcome_body = f"""
+        welcome_subject = "Welcome to Sahatak Telemedicine Platform"
+        welcome_body = f"""
             Dear Dr. {new_user.first_name} {new_user.last_name},
 
             Welcome to the Sahatak Telemedicine Platform! Your doctor account has been created and verified.
@@ -699,15 +699,15 @@ def add_doctor_manually():
             The Sahatak Team
             """ 
          
-         send_email(
+        send_email(
                 to_email=email,
                 subject=welcome_subject,
                 body=welcome_body
-            )
+        )
             
             # Log admin action
-            log_user_action(
-                current_user.id,
+        log_user_action(
+            current_user.id,
                 'admin_add_doctor_manually',
                 {
                     'new_doctor_id': new_doctor.id,
@@ -716,7 +716,7 @@ def add_doctor_manually():
                     'specialty': data['specialty'],
                     'license_number': data['license_number']
                 }
-            )
+        )
         
         return APIResponse.success(
             data={'message': 'Doctor added successfully'},
