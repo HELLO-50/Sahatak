@@ -371,41 +371,74 @@ def toggle_user_status(user_id):
 # =============================================================================
 # DOCTOR VERIFICATION ENDPOINTS
 # =============================================================================
-
+# Get list of doctors pending verification
 @admin_bp.route('/doctors/pending-verification', methods=['GET'])
 @login_required
 @admin_required
 def get_pending_verifications():
-    """
-    Ahmed: Get list of doctors pending verification
-    
-    TODO Ahmed - Implement:
-    1. Query doctors with is_verified=False
-    2. Include submitted documents info
-    3. Order by application date
-    4. Return paginated results
-    """
     try:
-        # TODO: Ahmed - Implement pending verifications query
         pending_doctors = Doctor.query.filter_by(is_verified=False).all()
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 20, type=int)
+        page, per_page = validate_pagination_params(page, per_page)
         
+        # Query unverified doctors with user details
+        pending_query = Doctor.query.options(
+            joinedload(Doctor.user)
+        ).filter(
+            and_(
+                Doctor.is_verified == False,
+                User.is_active == True
+            )
+        ).join(User).order_by(Doctor.created_at.asc())
+        
+        pending_pagination = pending_query.paginate(
+            page=page,
+            per_page=per_page,
+            error_out=False
+        )
+        
+        # Format doctor data for verification
         doctors_data = []
         for doctor in pending_doctors:
-            # TODO: Ahmed - Format doctor data for verification
             doctors_data.append({
                 'id': doctor.id,
                 'user_id': doctor.user_id,
                 'name': f"{doctor.user.first_name} {doctor.user.last_name}",
                 'email': doctor.user.email,
+                'phone': doctor.user.phone,
                 'specialty': doctor.specialty,
                 'license_number': doctor.license_number,
+                'bio': doctor.bio,
                 'years_of_experience': doctor.years_of_experience,
                 'submitted_at': doctor.created_at.isoformat(),
-                # TODO: Add document verification fields
+                'days_waiting': (datetime.utcnow() - doctor.created_at).days,
+                'documents_submitted': {
+                    'license_document': bool(doctor.license_document_path),
+                    'cv_document': bool(doctor.cv_document_path),
+                    'profile_photo': bool(doctor.profile_photo_path)
+                }
             })
+            doctors_data.append(doctor_info)
+        
+        log_user_action(
+            current_user.id,
+            'admin_view_pending_verifications',
+            {'page': page, 'total_pending': pending_pagination.total}
+        )
         
         return APIResponse.success(
-            data={'pending_doctors': doctors_data},
+            data={
+                'pending_doctors': doctors_data,
+                'pagination': {
+                    'page': pending_pagination.page,
+                    'pages': pending_pagination.pages,
+                    'per_page': pending_pagination.per_page,
+                    'total': pending_pagination.total,
+                    'has_next': pending_pagination.has_next,
+                    'has_prev': pending_pagination.has_prev
+                }
+            },
             message="Pending verifications retrieved"
         )
         
@@ -415,42 +448,96 @@ def get_pending_verifications():
             message="Failed to retrieve pending verifications",
             status_code=500
         )
-
+#Verify a doctor
 @admin_bp.route('/doctors/<int:doctor_id>/verify', methods=['POST'])
 @login_required
 @admin_required
-def verify_doctor(doctor_id):
-    """
-    Ahmed: Verify a doctor
-    
-    Request Body:
-    {
-        "verification_notes": "Optional notes",
-        "approved": true/false
-    }
-    
-    TODO Ahmed - Implement:
-    1. Find doctor by ID
-    2. Update verification status
-    3. Send notification email to doctor
-    4. Log verification action
-    5. Handle rejection with notes
-    """
+def verify_doctor(doctor_id):    
     try:
         data = request.get_json()
-        doctor = Doctor.query.get_or_404(doctor_id)
-        
-        approved = data.get('approved', True)
-        notes = data.get('verification_notes', '')
-        
+        if not data:
+            return APIResponse.error(
+                message="Request body required",
+                status_code=400
+            )
+       doctor = Doctor.query.options(joinedload(Doctor.user)).get(doctor_id)
+        if not doctor:
+            return APIResponse.error(
+                message="Doctor not found",
+                status_code=404,
+                error_code="DOCTOR_NOT_FOUND"
+            )
+      
+       # Verification notes field 
         if approved:
             doctor.is_verified = True
             doctor.verification_date = datetime.utcnow()
-            # TODO: Ahmed - Set verification notes field
+            doctor.verification_notes = notes
+            doctor.verified_by = current_user.id
+            
+             # Send approval email
+            email_subject = "Doctor Verification Approved - Sahatak Platform"
+            email_body = f"""
+            Dear Dr. {doctor.user.first_name} {doctor.user.last_name},
+
+            Congratulations! Your doctor profile has been verified and approved on the Sahatak Telemedicine Platform.
+
+            You can now:
+            - Set your availability schedule
+            - Accept patient appointments
+            - Conduct online consultations
+            - Access patient appointment history
+
+            Thank you for joining our healthcare community.
+
+            Best regards,
+            The Sahatak Team
+            """
+            send_email(
+                to_email=doctor.user.email,
+                subject=email_subject,
+                body=email_body
+            )
+            
         else:
-            # TODO: Ahmed - Handle rejection
-            pass
+            # rejection
+            if not notes:
+                return APIResponse.error(
+                    message="Rejection notes are required",
+                    status_code=400,
+                    error_code="REJECTION_NOTES_REQUIRED"
+                )
+            
+            doctor.verification_notes = notes
+            doctor.rejection_date = datetime.utcnow()
+            doctor.rejected_by = current_user.id
+            
+            # Send rejection email
+            email_subject = "Doctor Verification - Additional Information Required"
+            email_body = f"""
+            Dear Dr. {doctor.user.first_name} {doctor.user.last_name},
+
+            Thank you for your application to join the Sahatak Telemedicine Platform.
+
+            We need additional information or documentation before we can approve your account:
+
+            {notes}
+
+            Please update your profile with the requested information and we will review your application again.
+
+            If you have any questions, please contact our support team.
+
+            Best regards,
+            The Sahatak Team
+            """
+            
+            send_email(
+                to_email=doctor.user.email,
+                subject=email_subject,
+                body=email_body
+            )
         
+    try:
         db.session.commit()
         
         # Log admin action
@@ -461,13 +548,30 @@ def verify_doctor(doctor_id):
                 'doctor_id': doctor_id,
                 'approved': approved,
                 'notes': notes
+                'verification_date': datetime.utcnow().isoformat()
             }
         )
-        
-        # TODO: Ahmed - Send notification email to doctor
-        
+            
+        # Queue notification to doctor
+        notification_title = f"Application {'Approved' if approved else 'Needs Attention'}"
+        notification_message = f"Your doctor verification has been {'approved' if approved else 'reviewed'}. Check your email for details."
+            
+        queue_notification(
+            user_id=doctor.user_id,
+            title=notification_title,
+            message=notification_message,
+            notification_type='success' if approved else 'warning',
+            send_email=False,  # Already sent detailed email above
+            send_sms=True if approved else False
+            )
+            
         return APIResponse.success(
-            data={'doctor_id': doctor_id, 'verified': approved},
+            data={
+                'doctor_id': doctor_id,
+                'verified': approved,
+                'verification_date': doctor.verification_date.isoformat() if approved else None,
+                'notes': notes
+            },
             message=f"Doctor {'verified' if approved else 'rejected'} successfully"
         )
         
@@ -478,40 +582,141 @@ def verify_doctor(doctor_id):
             status_code=500
         )
 
+#add a verified doctor
 @admin_bp.route('/doctors', methods=['POST'])
 @login_required
 @admin_required
-def add_doctor_manually():
-    """
-    Ahmed: Manually add a verified doctor
-    
-    Request Body:
-    {
-        "email": "doctor@example.com",
-        "first_name": "Dr. John",
-        "last_name": "Smith",
-        "password": "temporary_password",
-        "specialty": "cardiology",
-        "license_number": "MD12345",
-        "years_of_experience": 10
-    }
-    
-    TODO Ahmed - Implement:
-    1. Validate required fields
-    2. Create User account
-    3. Create Doctor profile
-    4. Set as verified by default
-    5. Send welcome email with login info
-    """
+def add_doctor_manually(): 
     try:
         data = request.get_json()
+        if not data:
+            return APIResponse.error(
+                message="Request body required",
+                status_code=400
+            )
         
-        # TODO: Ahmed - Implement manual doctor creation
-        # 1. Validate input data
-        # 2. Check if email already exists
-        # 3. Create User account
-        # 4. Create Doctor profile
-        # 5. Set verification status
+        # Validate required fields
+        required_fields = ['email', 'first_name', 'last_name', 'password', 'specialty', 'license_number', 'years_of_experiance']
+        for field in required_fields:
+            if not data.get(field):
+                return APIResponse.error(
+                    message=f"Field '{field}' is required",
+                    status_code=400,
+                    error_code="MISSING_REQUIRED_FIELD"
+                )
+        # Validate email format
+        email = data['email'].lower().strip()
+        if not validate_email(email):
+            return APIResponse.error(
+                message="Invalid email format",
+                status_code=400,
+                error_code="INVALID_EMAIL"
+            )
+        
+        # Check if email already exists
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            return APIResponse.error(
+                message="Email already exists",
+                status_code=400,
+                error_code="EMAIL_EXISTS"
+            )
+        
+        # Validate password
+        password = data['password']
+        if not validate_password(password):
+            return APIResponse.error(
+                message="Password does not meet requirements",
+                status_code=400,
+                error_code="WEAK_PASSWORD"
+            )
+        
+        # Validate years of experience
+        years_exp = data.get('years_of_experience', 10)
+        if not isinstance(years_exp, int) or years_exp < 10:
+            return APIResponse.error(
+                message="Invalid years of experience",
+                status_code=400
+            )
+
+       `try:
+            # Create User account
+            new_user = User(
+                email=email,
+                first_name=data['first_name'].strip(),
+                last_name=data['last_name'].strip(),
+                phone=data.get('phone', '').strip(),
+                user_type='doctor',
+                is_active=True,
+                is_verified=True,
+                profile_completed=True,
+                created_at=datetime.utcnow()
+            )
+            new_user.set_password(password)
+            db.session.add(new_user)
+            db.session.flush()  # Get user ID
+            
+            # Create Doctor profile
+            new_doctor = Doctor(
+                user_id=new_user.id,
+                specialty=data['specialty'].strip(),
+                license_number=data['license_number'].strip(),
+                years_of_experience=years_exp,
+                bio=data.get('bio', '').strip(),
+                consultation_fee=data.get('consultation_fee', 0),
+                is_verified=True,
+                verification_date=datetime.utcnow(),
+                verified_by=current_user.id,
+                verification_notes=f"Manually added by admin {current_user.email}",
+                created_at=datetime.utcnow()
+            )
+            db.session.add(new_doctor)
+            
+            db.session.commit()
+            
+            # Send welcome email with login credentials
+            welcome_subject = "Welcome to Sahatak Telemedicine Platform"
+            welcome_body = f"""
+            Dear Dr. {new_user.first_name} {new_user.last_name},
+
+            Welcome to the Sahatak Telemedicine Platform! Your doctor account has been created and verified.
+
+            Your login credentials:
+            Email: {email}
+            Password: {password}
+
+            Please login to your account and:
+            1. Change your password
+            2. Complete your profile information  
+            3. Set your availability schedule
+            4. Upload your profile photo and documents
+
+            You can start accepting patient appointments immediately.
+
+            Login at: {current_app.config.get('FRONTEND_URL', '')}/login
+
+            Best regards,
+            The Sahatak Team
+            """ 
+         
+         send_email(
+                to_email=email,
+                subject=welcome_subject,
+                body=welcome_body
+            )
+            
+            # Log admin action
+            log_user_action(
+                current_user.id,
+                'admin_add_doctor_manually',
+                {
+                    'new_doctor_id': new_doctor.id,
+                    'new_user_id': new_user.id,
+                    'email': email,
+                    'specialty': data['specialty'],
+                    'license_number': data['license_number']
+                }
+            )
         
         return APIResponse.success(
             data={'message': 'Doctor added successfully'},
