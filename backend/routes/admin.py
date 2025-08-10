@@ -733,31 +733,55 @@ def add_doctor_manually():
 # =============================================================================
 # SYSTEM SETTINGS ENDPOINTS
 # =============================================================================
-
+# current system settings
 @admin_bp.route('/settings', methods=['GET'])
 @login_required
 @admin_required
 def get_system_settings():
-    """
-    Ahmed: Get current system settings
-    
-    TODO Ahmed - Implement:
-    1. Create SystemSettings model
-    2. Return current configuration
-    3. Include maintenance mode, registration status, etc.
-    """
     try:
-        # TODO: Ahmed - Implement settings retrieval
-        settings = {
-            'maintenance_mode': False,
-            'registration_enabled': True,
-            'default_language': 'ar',
-            'max_appointment_days_ahead': 30,
-            'session_timeout_minutes': 60,
-            'password_min_length': 8,
-            'max_login_attempts': 5,
-            # TODO: Add more settings
+    # Get settings from database or return defaults
+        settings_data = {}
+        
+        settings_query = SystemSettings.query.all()
+        for setting in settings_query:
+            settings_data[setting.key] = {
+                'value': setting.value,
+                'data_type': setting.data_type,
+                'description': setting.description,
+                'updated_at': setting.updated_at.isoformat(),
+                'updated_by': setting.updated_by
+            }
+            
+    # Add default settings if not in database
+        default_settings = {
+            'maintenance_mode': {'value': False, 'type': 'boolean', 'desc': 'Enable maintenance mode'},
+            'registration_enabled': {'value': True, 'type': 'boolean', 'desc': 'Allow new user registration'},
+            'default_language': {'value': 'ar', 'type': 'string', 'desc': 'Default platform language'},
+            'max_appointment_days_ahead': {'value': 30, 'type': 'integer', 'desc': 'Maximum days ahead for booking'},
+            'session_timeout_minutes': {'value': 60, 'type': 'integer', 'desc': 'User session timeout'},
+            'password_min_length': {'value': 8, 'type': 'integer', 'desc': 'Minimum password length'},
+            'max_login_attempts': {'value': 5, 'type': 'integer', 'desc': 'Max failed login attempts'},
+            'consultation_duration_minutes': {'value': 30, 'type': 'integer', 'desc': 'Default consultation duration'},
+            'platform_commission_percent': {'value': 10.0, 'type': 'float', 'desc': 'Platform commission percentage'},
+            'email_notifications_enabled': {'value': True, 'type': 'boolean', 'desc': 'Enable email notifications'},
+            'sms_notifications_enabled': {'value': True, 'type': 'boolean', 'desc': 'Enable SMS notifications'}
         }
+        
+        for key, config in default_settings.items():
+            if key not in settings_data:
+                settings_data[key] = {
+                    'value': config['value'],
+                    'data_type': config['type'],
+                    'description': config['desc'],
+                    'updated_at': None,
+                    'updated_by': None
+                }
+        
+        log_user_action(
+            current_user.id,
+            'admin_view_settings',
+            {'settings_count': len(settings_data)}
+        )
         
         return APIResponse.success(
             data={'settings': settings},
@@ -775,23 +799,113 @@ def get_system_settings():
 @login_required
 @admin_required
 def update_system_settings():
-    """
-    Ahmed: Update system settings
-    
-    TODO Ahmed - Implement:
-    1. Validate settings data
-    2. Update SystemSettings model
-    3. Apply changes immediately where possible
-    4. Log settings changes
-    5. Notify other admins of changes
-    """
+    #Update system settings
     try:
         data = request.get_json()
+        if not data:
+            return APIResponse.error(
+                message="Request body required",
+                status_code=400
+            )
         
-        # TODO: Ahmed - Implement settings update
-        # 1. Validate each setting
-        # 2. Update database
-        # 3. Apply runtime changes
+        updated_settings = []
+        validation_errors = []
+        
+        # Define setting validation rules
+        setting_rules = {
+            'maintenance_mode': {'type': bool, 'required': False},
+            'registration_enabled': {'type': bool, 'required': False},
+            'default_language': {'type': str, 'required': False, 'choices': ['ar', 'en']},
+            'max_appointment_days_ahead': {'type': int, 'required': False, 'min': 1, 'max': 365},
+            'session_timeout_minutes': {'type': int, 'required': False, 'min': 15, 'max': 480},
+            'password_min_length': {'type': int, 'required': False, 'min': 6, 'max': 50},
+            'max_login_attempts': {'type': int, 'required': False, 'min': 3, 'max': 20},
+            'consultation_duration_minutes': {'type': int, 'required': False, 'min': 15, 'max': 180},
+            'platform_commission_percent': {'type': float, 'required': False, 'min': 0.0, 'max': 50.0},
+            'email_notifications_enabled': {'type': bool, 'required': False},
+            'sms_notifications_enabled': {'type': bool, 'required': False}
+        }
+        
+        # Validate each setting
+        for key, value in data.items():
+            if key not in setting_rules:
+                validation_errors.append(f"Unknown setting: {key}")
+                continue
+            
+            rule = setting_rules[key]
+            
+            # Type validation
+            if not isinstance(value, rule['type']):
+                try:
+                    if rule['type'] == bool:
+                        value = str(value).lower() in ['true', '1', 'yes', 'on']
+                    elif rule['type'] == int:
+                        value = int(value)
+                    elif rule['type'] == float:
+                        value = float(value)
+                    else:
+                        value = str(value)
+                except (ValueError, TypeError):
+                    validation_errors.append(f"Invalid type for {key}")
+                    continue
+            
+            # Range validation
+            if rule['type'] in [int, float]:
+                if 'min' in rule and value < rule['min']:
+                    validation_errors.append(f"{key} must be at least {rule['min']}")
+                    continue
+                if 'max' in rule and value > rule['max']:
+                    validation_errors.append(f"{key} must be at most {rule['max']}")
+                    continue
+            
+            # Choice validation
+            if 'choices' in rule and value not in rule['choices']:
+                validation_errors.append(f"{key} must be one of: {rule['choices']}")
+                continue
+            
+            updated_settings.append((key, value, rule['type'].__name__))
+        
+        if validation_errors:
+            return APIResponse.error(
+                message="Settings validation failed",
+                status_code=400,
+                error_code="VALIDATION_ERROR",
+                details=validation_errors
+            )
+        
+        try:
+            # Update settings in database
+            for key, value, data_type in updated_settings:
+                setting = SystemSettings.query.filter_by(key=key).first()
+                
+                if setting:
+                    setting.value = str(value)
+                    setting.data_type = data_type
+                    setting.updated_at = datetime.utcnow()
+                    setting.updated_by = current_user.id
+                else:
+                    new_setting = SystemSettings(
+                        key=key,
+                        value=str(value),
+                        data_type=data_type,
+                        description=f"Updated by admin {current_user.email}",
+                        created_at=datetime.utcnow(),
+                        updated_at=datetime.utcnow(),
+                        updated_by=current_user.id
+                    )
+                    db.session.add(new_setting)
+            
+            db.session.commit()
+            
+            # Log admin action
+            log_user_action(
+                current_user.id,
+                'admin_update_settings',
+                {
+                    'updated_settings': [key for key, _, _ in updated_settings],
+                    'settings_count': len(updated_settings)
+                }
+            )
         
         log_user_action(
             current_user.id,
