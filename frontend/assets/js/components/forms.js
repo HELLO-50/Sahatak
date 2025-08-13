@@ -120,8 +120,7 @@ function handleRegister(event) {
     
     // Get form data
     const formData = {
-        firstName: document.getElementById('firstName').value.trim(),
-        lastName: document.getElementById('lastName').value.trim(),
+        fullName: document.getElementById('fullName').value.trim(),
         email: document.getElementById('regEmail').value.trim(),
         password: document.getElementById('regPassword').value,
         userType: document.getElementById('userType').value
@@ -175,8 +174,7 @@ function handlePatientRegister(event) {
     
     // Get form data
     const formData = {
-        firstName: document.getElementById('patientFirstName').value.trim(),
-        lastName: document.getElementById('patientLastName').value.trim(),
+        fullName: document.getElementById('patientFullName').value.trim(),
         email: document.getElementById('patientEmail').value.trim(),
         phone: document.getElementById('patientPhone').value.trim(),
         age: parseInt(document.getElementById('patientAge').value),
@@ -187,8 +185,7 @@ function handlePatientRegister(event) {
     
     // Validate form using ValidationManager
     const validationData = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
+        fullName: formData.fullName,
         email: formData.email,
         phoneNumber: formData.phone,
         nationalId: '',
@@ -256,8 +253,7 @@ function handleDoctorRegister(event) {
     
     // Get form data
     const formData = {
-        firstName: document.getElementById('doctorFirstName').value.trim(),
-        lastName: document.getElementById('doctorLastName').value.trim(),
+        fullName: document.getElementById('doctorFullName').value.trim(),
         email: document.getElementById('doctorEmail').value.trim(),
         phone: document.getElementById('doctorPhone').value.trim(),
         licenseNumber: document.getElementById('doctorLicense').value.trim(),
@@ -269,8 +265,7 @@ function handleDoctorRegister(event) {
     
     // Validate form using ValidationManager
     const validationData = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
+        fullName: formData.fullName,
         email: formData.email,
         phoneNumber: formData.phone,
         nationalId: '',

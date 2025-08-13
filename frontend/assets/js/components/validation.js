@@ -50,6 +50,23 @@ const ValidationManager = {
         return this.patterns.name.test(trimmedName);
     },
 
+    validateFullName(fullName, minLength = 3, maxLength = 200) {
+        if (!fullName || typeof fullName !== 'string') return false;
+        
+        const trimmedName = fullName.trim();
+        
+        // Check length constraints (matching backend)
+        if (trimmedName.length < minLength || trimmedName.length > maxLength) return false;
+        
+        // Check character pattern - allow Arabic characters (matching backend)
+        if (!this.patterns.name.test(trimmedName)) return false;
+        
+        // Ensure it contains at least one space (indicating first + last name)
+        if (!trimmedName.includes(' ')) return false;
+        
+        return true;
+    },
+
     validatePhoneNumber(phone, preferJordan = true) {
         if (!phone || typeof phone !== 'string') return false;
         
@@ -130,24 +147,15 @@ const ValidationManager = {
         const errors = {};
         let isValid = true;
 
-        if (!this.validateName(data.firstName)) {
-            if (!data.firstName || data.firstName.trim().length < 2) {
-                errors.firstName = 'First name must be at least 2 characters long';
-            } else if (data.firstName.trim().length > 50) {
-                errors.firstName = 'First name must be less than 50 characters long';
+        if (!this.validateFullName(data.fullName)) {
+            if (!data.fullName || data.fullName.trim().length < 3) {
+                errors.fullName = 'Full name must be at least 3 characters long';
+            } else if (data.fullName.trim().length > 200) {
+                errors.fullName = 'Full name must be less than 200 characters long';
+            } else if (!data.fullName.trim().includes(' ')) {
+                errors.fullName = 'Please enter your full name (first and last name)';
             } else {
-                errors.firstName = 'First name contains invalid characters';
-            }
-            isValid = false;
-        }
-
-        if (!this.validateName(data.lastName)) {
-            if (!data.lastName || data.lastName.trim().length < 2) {
-                errors.lastName = 'Last name must be at least 2 characters long';
-            } else if (data.lastName.trim().length > 50) {
-                errors.lastName = 'Last name must be less than 50 characters long';
-            } else {
-                errors.lastName = 'Last name contains invalid characters';
+                errors.fullName = 'Full name contains invalid characters';
             }
             isValid = false;
         }
@@ -182,26 +190,16 @@ const ValidationManager = {
         const errors = {};
         let isValid = true;
 
-        // Validate first name
-        if (!this.validateName(data.firstName)) {
-            if (!data.firstName || data.firstName.trim().length < 2) {
-                errors.firstName = 'First name must be at least 2 characters long';
-            } else if (data.firstName.trim().length > 50) {
-                errors.firstName = 'First name must be less than 50 characters long';
+        // Validate full name
+        if (!this.validateFullName(data.fullName)) {
+            if (!data.fullName || data.fullName.trim().length < 3) {
+                errors.fullName = 'Full name must be at least 3 characters long';
+            } else if (data.fullName.trim().length > 200) {
+                errors.fullName = 'Full name must be less than 200 characters long';
+            } else if (!data.fullName.trim().includes(' ')) {
+                errors.fullName = 'Please enter your full name (first and last name)';
             } else {
-                errors.firstName = 'First name contains invalid characters';
-            }
-            isValid = false;
-        }
-
-        // Validate last name
-        if (!this.validateName(data.lastName)) {
-            if (!data.lastName || data.lastName.trim().length < 2) {
-                errors.lastName = 'Last name must be at least 2 characters long';
-            } else if (data.lastName.trim().length > 50) {
-                errors.lastName = 'Last name must be less than 50 characters long';
-            } else {
-                errors.lastName = 'Last name contains invalid characters';
+                errors.fullName = 'Full name contains invalid characters';
             }
             isValid = false;
         }
@@ -251,26 +249,16 @@ const ValidationManager = {
         const errors = {};
         let isValid = true;
 
-        // Validate first name
-        if (!this.validateName(data.firstName)) {
-            if (!data.firstName || data.firstName.trim().length < 2) {
-                errors.firstName = 'First name must be at least 2 characters long';
-            } else if (data.firstName.trim().length > 50) {
-                errors.firstName = 'First name must be less than 50 characters long';
+        // Validate full name
+        if (!this.validateFullName(data.fullName)) {
+            if (!data.fullName || data.fullName.trim().length < 3) {
+                errors.fullName = 'Full name must be at least 3 characters long';
+            } else if (data.fullName.trim().length > 200) {
+                errors.fullName = 'Full name must be less than 200 characters long';
+            } else if (!data.fullName.trim().includes(' ')) {
+                errors.fullName = 'Please enter your full name (first and last name)';
             } else {
-                errors.firstName = 'First name contains invalid characters';
-            }
-            isValid = false;
-        }
-
-        // Validate last name
-        if (!this.validateName(data.lastName)) {
-            if (!data.lastName || data.lastName.trim().length < 2) {
-                errors.lastName = 'Last name must be at least 2 characters long';
-            } else if (data.lastName.trim().length > 50) {
-                errors.lastName = 'Last name must be less than 50 characters long';
-            } else {
-                errors.lastName = 'Last name contains invalid characters';
+                errors.fullName = 'Full name contains invalid characters';
             }
             isValid = false;
         }

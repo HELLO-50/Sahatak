@@ -85,9 +85,63 @@ def validate_phone(phone: str) -> bool:
     pattern = r'^\+?[1-9]\d{7,14}$'
     return bool(re.match(pattern, clean_phone))
 
+def validate_full_name(full_name: str, min_length: int = 3, max_length: int = 200) -> Dict[str, Union[bool, str]]:
+    """
+    Validate full name field (replaces separate first_name/last_name validation)
+    
+    Args:
+        full_name: Full name string to validate
+        min_length: Minimum length (default: 3)
+        max_length: Maximum length (default: 200)
+        
+    Returns:
+        dict: Contains 'valid' (bool) and 'message' (str)
+    """
+    if not full_name or not isinstance(full_name, str):
+        return {
+            'valid': False,
+            'message': 'Full name is required'
+        }
+    
+    full_name = full_name.strip()
+    
+    if len(full_name) < min_length:
+        return {
+            'valid': False,
+            'message': f'Full name must be at least {min_length} characters long'
+        }
+    
+    if len(full_name) > max_length:
+        return {
+            'valid': False,
+            'message': f'Full name must be less than {max_length} characters long'
+        }
+    
+    # Allow letters, spaces, hyphens, apostrophes, dots, and Arabic characters
+    # More permissive for full names which may contain multiple words
+    pattern = r"^[a-zA-Z\u0600-\u06FF\s\-'\.]+$"
+    if not re.match(pattern, full_name):
+        return {
+            'valid': False,
+            'message': 'Full name contains invalid characters'
+        }
+    
+    # Ensure it contains at least one space (indicating first + last name)
+    if ' ' not in full_name:
+        return {
+            'valid': False,
+            'message': 'Please enter your full name (first and last name)'
+        }
+    
+    return {
+        'valid': True,
+        'message': 'Full name is valid'
+    }
+
 def validate_name(name: str, min_length: int = 2, max_length: int = 50) -> Dict[str, Union[bool, str]]:
     """
-    Validate name field
+    Validate individual name field (kept for backwards compatibility)
+    For new implementations, use validate_full_name instead
     
     Args:
         name: Name string to validate

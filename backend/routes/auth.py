@@ -17,7 +17,7 @@ def register():
         data = request.get_json()
         
         # Validate required fields
-        required_fields = ['email', 'password', 'first_name', 'last_name', 'user_type']
+        required_fields = ['email', 'password', 'full_name', 'user_type']
         for field in required_fields:
             if not data.get(field):
                 return APIResponse.validation_error(
@@ -56,11 +56,19 @@ def register():
                 message='Invalid user type. Must be patient or doctor'
             )
         
+        # Validate full name
+        from backend.utils.validators import validate_full_name
+        full_name_validation = validate_full_name(data['full_name'])
+        if not full_name_validation['valid']:
+            return APIResponse.validation_error(
+                field='full_name',
+                message=full_name_validation['message']
+            )
+        
         # Create user
         user = User(
             email=data['email'].lower().strip(),
-            first_name=data['first_name'].strip(),
-            last_name=data['last_name'].strip(),
+            full_name=data['full_name'].strip(),
             user_type=data['user_type'],
             language_preference=data.get('language_preference', 'ar')
         )

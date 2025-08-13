@@ -120,10 +120,8 @@ def get_users():
         
         if search:
             search_filter = or_(
-                User.first_name.ilike(f'%{search}%'),
-                User.last_name.ilike(f'%{search}%'),
-                User.email.ilike(f'%{search}%'),
-                User.phone.ilike(f'%{search}%')
+                User.full_name.ilike(f'%{search}%'),
+                User.email.ilike(f'%{search}%')
             )
             query = query.filter(search_filter)
         
@@ -140,8 +138,7 @@ def get_users():
             user_info = {
                 'id': user.id,
                 'email': user.email,
-                'first_name': user.first_name,
-                'last_name': user.last_name,
+                'full_name': user.full_name,
                 'phone': user.phone,
                 'user_type': user.user_type,
                 'is_active': user.is_active,
@@ -230,8 +227,7 @@ def get_user_details(user_id):
         user_data = {
             'id': user.id,
             'email': user.email,
-            'first_name': user.first_name,
-            'last_name': user.last_name,
+            'full_name': user.full_name,
             'phone': user.phone,
             'user_type': user.user_type,
             'is_active': user.is_active,
@@ -283,7 +279,7 @@ def get_user_details(user_id):
             'date': apt.appointment_date.isoformat(),
             'status': apt.status,
             'type': 'appointment',
-            'with_user': apt.doctor.user.first_name + ' ' + apt.doctor.user.last_name if user.user_type == 'patient' else apt.patient.user.first_name + ' ' + apt.patient.user.last_name
+            'with_user': apt.doctor.user.full_name if user.user_type == 'patient' else apt.patient.user.full_name
         } for apt in recent_appointments]
         
         log_user_action(
@@ -404,7 +400,7 @@ def get_pending_verifications():
             doctors_data.append({
                 'id': doctor.id,
                 'user_id': doctor.user_id,
-                'name': f"{doctor.user.first_name} {doctor.user.last_name}",
+                'name': doctor.user.full_name,
                 'email': doctor.user.email,
                 'phone': doctor.user.phone,
                 'specialty': doctor.specialty,
@@ -478,7 +474,7 @@ def verify_doctor(doctor_id):
              # Send approval email
             email_subject = "Doctor Verification Approved - Sahatak Platform"
             email_body = f"""
-            Dear Dr. {doctor.user.first_name} {doctor.user.last_name},
+            Dear Dr. {doctor.user.full_name},
 
             Congratulations! Your doctor profile has been verified and approved on the Sahatak Telemedicine Platform.
 
@@ -515,7 +511,7 @@ def verify_doctor(doctor_id):
             # Send rejection email
             email_subject = "Doctor Verification - Additional Information Required"
             email_body = f"""
-            Dear Dr. {doctor.user.first_name} {doctor.user.last_name},
+            Dear Dr. {doctor.user.full_name},
 
             Thank you for your application to join the Sahatak Telemedicine Platform.
 
@@ -596,7 +592,7 @@ def add_doctor_manually():
             )
         
         # Validate required fields
-        required_fields = ['email', 'first_name', 'last_name', 'password', 'specialty', 'license_number', 'years_of_experiance']
+        required_fields = ['email', 'full_name', 'password', 'specialty', 'license_number', 'years_of_experiance']
         for field in required_fields:
             if not data.get(field):
                 return APIResponse.error(
@@ -643,8 +639,7 @@ def add_doctor_manually():
             # Create User account
         new_user = User(
             email=email,
-            first_name=data['first_name'].strip(),
-            last_name=data['last_name'].strip(),
+            full_name=data['full_name'].strip(),
             phone=data.get('phone', '').strip(),
             user_type='doctor',
             is_active=True,
@@ -677,7 +672,7 @@ def add_doctor_manually():
             # Send welcome email with login credentials
         welcome_subject = "Welcome to Sahatak Telemedicine Platform"
         welcome_body = f"""
-            Dear Dr. {new_user.first_name} {new_user.last_name},
+            Dear Dr. {new_user.full_name},
 
             Welcome to the Sahatak Telemedicine Platform! Your doctor account has been created and verified.
 

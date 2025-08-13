@@ -37,25 +37,16 @@ def update_profile():
         data = request.get_json()
         
         # Update basic user information
-        if 'first_name' in data:
-            name_validation = validate_name(data['first_name'])
+        if 'full_name' in data:
+            from backend.utils.validators import validate_full_name
+            name_validation = validate_full_name(data['full_name'])
             if not name_validation['valid']:
                 return jsonify({
                     'success': False,
                     'message': name_validation['message'],
-                    'field': 'first_name'
+                    'field': 'full_name'
                 }), 400
-            current_user.first_name = data['first_name'].strip()
-        
-        if 'last_name' in data:
-            name_validation = validate_name(data['last_name'])
-            if not name_validation['valid']:
-                return jsonify({
-                    'success': False,
-                    'message': name_validation['message'],
-                    'field': 'last_name'
-                }), 400
-            current_user.last_name = data['last_name'].strip()
+            current_user.full_name = data['full_name'].strip()
         
         if 'language_preference' in data:
             if data['language_preference'] not in ['ar', 'en']:

@@ -353,8 +353,7 @@ function updateContentByLanguage(lang) {
     // Update patient registration form
     updateElementText('patient-register-title', t.patient_register?.title);
     updateElementText('patient-register-subtitle', t.patient_register?.subtitle);
-    updateElementText('patient-firstName-label', t.patient_register?.first_name);
-    updateElementText('patient-lastName-label', t.patient_register?.last_name);
+    updateElementText('patient-fullName-label', t.patient_register?.full_name);
     updateElementText('patient-email-label', t.patient_register?.email);
     updateElementText('patient-phone-label', t.patient_register?.phone);
     updateElementText('patient-age-label', t.patient_register?.age);
@@ -367,8 +366,7 @@ function updateContentByLanguage(lang) {
     // Update doctor registration form
     updateElementText('doctor-register-title', t.doctor_register?.title);
     updateElementText('doctor-register-subtitle', t.doctor_register?.subtitle);
-    updateElementText('doctor-firstName-label', t.doctor_register?.first_name);
-    updateElementText('doctor-lastName-label', t.doctor_register?.last_name);
+    updateElementText('doctor-fullName-label', t.doctor_register?.full_name);
     updateElementText('doctor-email-label', t.doctor_register?.email);
     updateElementText('doctor-phone-label', t.doctor_register?.phone);
     updateElementText('doctor-license-label', t.doctor_register?.license);
@@ -702,8 +700,7 @@ async function handlePatientRegister(event) {
     
     try {
         const formData = {
-            first_name: document.getElementById('patientFirstName').value.trim(),
-            last_name: document.getElementById('patientLastName').value.trim(),
+            full_name: document.getElementById('patientFullName').value.trim(),
             email: document.getElementById('patientEmail').value.trim(),
             phone: document.getElementById('patientPhone').value.trim(),
             age: parseInt(document.getElementById('patientAge').value),
@@ -714,7 +711,7 @@ async function handlePatientRegister(event) {
         };
         
         // Basic client-side validation
-        if (!formData.first_name || !formData.last_name || !formData.email || 
+        if (!formData.full_name || !formData.email || 
             !formData.phone || !formData.age || !formData.gender || !formData.password) {
             throw new Error('All fields are required');
         }
@@ -755,8 +752,7 @@ async function handlePatientRegister(event) {
             if (error.field) {
                 // Map backend field names to frontend field names
                 const fieldMap = {
-                    'first_name': 'patientFirstName',
-                    'last_name': 'patientLastName',
+                    'full_name': 'patientFullName',
                     'email': 'patientEmail',
                     'phone': 'patientPhone',
                     'age': 'patientAge',
@@ -803,8 +799,7 @@ async function handleDoctorRegister(event) {
     
     try {
         const formData = {
-            first_name: document.getElementById('doctorFirstName').value.trim(),
-            last_name: document.getElementById('doctorLastName').value.trim(),
+            full_name: document.getElementById('doctorFullName').value.trim(),
             email: document.getElementById('doctorEmail').value.trim(),
             phone: document.getElementById('doctorPhone').value.trim(),
             license_number: document.getElementById('doctorLicense').value.trim(),
@@ -816,7 +811,7 @@ async function handleDoctorRegister(event) {
         };
         
         // Basic client-side validation
-        if (!formData.first_name || !formData.last_name || !formData.email || 
+        if (!formData.full_name || !formData.email || 
             !formData.phone || !formData.license_number || !formData.specialty || 
             !formData.years_of_experience || !formData.password) {
             throw new Error('All fields are required');
@@ -858,8 +853,7 @@ async function handleDoctorRegister(event) {
             if (error.field) {
                 // Map backend field names to frontend field names
                 const fieldMap = {
-                    'first_name': 'doctorFirstName',
-                    'last_name': 'doctorLastName',
+                    'full_name': 'doctorFullName',
                     'email': 'doctorEmail',
                     'phone': 'doctorPhone',
                     'license_number': 'doctorLicense',
@@ -915,8 +909,7 @@ function validatePatientRegistrationForm(data) {
     
     // Map form data to ValidationManager expected format
     const validationData = {
-        firstName: data.firstName,
-        lastName: data.lastName,
+        fullName: data.fullName,
         email: data.email,
         phoneNumber: data.phone,
         nationalId: data.nationalId || '',
@@ -971,8 +964,7 @@ function validateDoctorRegistrationForm(data) {
     
     // Map form data to ValidationManager expected format
     const validationData = {
-        firstName: data.firstName,
-        lastName: data.lastName,
+        fullName: data.fullName,
         email: data.email,
         phoneNumber: data.phone,
         nationalId: data.nationalId || '',

@@ -12,8 +12,7 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
-    first_name = db.Column(db.String(100), nullable=False)
-    last_name = db.Column(db.String(100), nullable=False)
+    full_name = db.Column(db.String(200), nullable=False)
     user_type = db.Column(db.Enum('patient', 'doctor', 'admin', name='user_types'), nullable=False)
     language_preference = db.Column(db.Enum('ar', 'en', name='languages'), default='ar', nullable=False)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
@@ -37,7 +36,7 @@ class User(UserMixin, db.Model):
     
     def get_full_name(self):
         """Get user's full name"""
-        return f"{self.first_name} {self.last_name}"
+        return self.full_name
     
     def is_admin(self):
         """Check if user is an admin"""
@@ -56,9 +55,7 @@ class User(UserMixin, db.Model):
         data = {
             'id': self.id,
             'email': self.email,
-            'first_name': self.first_name,
-            'last_name': self.last_name,
-            'full_name': self.get_full_name(),
+            'full_name': self.full_name,
             'user_type': self.user_type,
             'language_preference': self.language_preference,
             'is_active': self.is_active,
