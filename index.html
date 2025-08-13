@@ -18,6 +18,8 @@
     
     <!-- Main CSS -->
     <link rel="stylesheet" href="frontend/assets/css/main.css">
+    <!-- Authentication CSS -->
+    <link rel="stylesheet" href="frontend/assets/css/components/auth.css">
 </head>
 <body>
     <!-- Language Selection Section - This will be the first feature to implement -->
@@ -33,14 +35,14 @@
                             
                             <div class="d-grid gap-3" role="group" aria-labelledby="language-instructions">
                                 <button class="btn btn-primary btn-lg" 
-                                        onclick="selectLanguage('ar')" 
+ 
                                         aria-label="اختر العربية كلغة مفضلة - Choose Arabic as preferred language"
                                         data-lang="ar">
                                     <i class="bi bi-globe me-2" aria-hidden="true"></i>
                                     العربية
                                 </button>
                                 <button class="btn btn-outline-primary btn-lg" 
-                                        onclick="selectLanguage('en')" 
+ 
                                         aria-label="Choose English as preferred language - اختر الإنجليزية كلغة مفضلة"
                                         data-lang="en">
                                     <i class="bi bi-globe me-2" aria-hidden="true"></i>
@@ -76,11 +78,11 @@
                             <h3 class="mb-4" id="auth-prompt">ابدأ رحلتك الصحية</h3>
                             
                             <div class="d-grid gap-3">
-                                <button class="btn btn-primary btn-lg auth-btn" onclick="showLogin()">
+                                <button class="btn btn-primary btn-lg auth-btn" id="login-btn">
                                     <i class="bi bi-box-arrow-in-right me-2"></i>
                                     <span id="login-text">تسجيل الدخول</span>
                                 </button>
-                                <button class="btn btn-outline-primary btn-lg auth-btn" onclick="showUserTypeSelection()">
+                                <button class="btn btn-outline-primary btn-lg auth-btn" id="register-btn">
                                     <i class="bi bi-person-plus me-2"></i>
                                     <span id="register-text">إنشاء حساب جديد</span>
                                 </button>
@@ -89,7 +91,7 @@
                             <!-- Language Switcher -->
                             <div class="mt-4 pt-3 border-top">
                                 <small class="text-muted d-block mb-2" id="language-switch-text">تغيير اللغة</small>
-                                <button class="btn btn-sm btn-outline-secondary" onclick="showLanguageSelection()">
+                                <button class="btn btn-sm btn-outline-secondary" id="language-switch-btn">
                                     <i class="bi bi-globe2 me-1"></i>
                                     <span id="current-language">العربية</span>
                                 </button>
@@ -112,14 +114,14 @@
                             <p class="lead mb-4" id="user-type-subtitle">اختر النوع المناسب لحسابك لنقدم لك التجربة الأمثل</p>
                             
                             <div class="d-grid gap-3">
-                                <button class="btn btn-primary btn-lg user-type-btn" onclick="selectUserType('patient')">
+                                <button class="btn btn-primary btn-lg user-type-btn" id="patient-type-btn">
                                     <i class="bi bi-person me-2"></i>
                                     <div class="text-start">
                                         <div class="fw-bold" id="patient-title">مريض</div>
                                         <small class="opacity-75" id="patient-desc">أبحث عن استشارة طبية أو متابعة حالتي الصحية</small>
                                     </div>
                                 </button>
-                                <button class="btn btn-outline-primary btn-lg user-type-btn" onclick="selectUserType('doctor')">
+                                <button class="btn btn-outline-primary btn-lg user-type-btn" id="doctor-type-btn">
                                     <i class="bi bi-person-badge me-2"></i>
                                     <div class="text-start">
                                         <div class="fw-bold" id="doctor-title">طبيب</div>
@@ -129,7 +131,7 @@
                             </div>
                             
                             <div class="text-center mt-4">
-                                <button class="btn btn-link" onclick="showAuthSelection()" id="back-to-auth-type">
+                                <button class="btn btn-link" id="back-to-auth-type">
                                     <i class="bi bi-arrow-left me-1"></i>
                                     العودة
                                 </button>
@@ -153,7 +155,7 @@
                                 <p class="text-muted" id="login-subtitle">أدخل بياناتك للوصول إلى حسابك</p>
                             </div>
                             
-                            <form id="loginForm" onsubmit="handleLogin(event)">
+                            <form id="loginForm">
                                 <div class="mb-3">
                                     <label for="email" class="form-label" id="email-label">البريد الإلكتروني</label>
                                     <input type="email" class="form-control" id="email" required>
@@ -175,7 +177,7 @@
                             </form>
                             
                             <div class="text-center mt-4">
-                                <button class="btn btn-link" onclick="showAuthSelection()" id="back-to-auth">
+                                <button class="btn btn-link" id="back-to-auth">
                                     <i class="bi bi-arrow-left me-1"></i>
                                     العودة
                                 </button>
@@ -199,7 +201,7 @@
                                 <p class="text-muted" id="register-subtitle">انضم إلى منصة صحتك اليوم</p>
                             </div>
                             
-                            <form id="registerForm" onsubmit="handleRegister(event)">
+                            <form id="registerForm">
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="firstName" class="form-label" id="firstName-label">الاسم الأول</label>
@@ -244,7 +246,7 @@
                             </form>
                             
                             <div class="text-center mt-4">
-                                <button class="btn btn-link" onclick="showAuthSelection()" id="back-to-auth-reg">
+                                <button class="btn btn-link" id="back-to-auth-reg">
                                     <i class="bi bi-arrow-left me-1"></i>
                                     العودة
                                 </button>
@@ -268,7 +270,7 @@
                                 <p class="text-muted" id="patient-register-subtitle">انضم إلى منصة صحتك كمريض</p>
                             </div>
                             
-                            <form id="patientRegisterForm" onsubmit="handlePatientRegister(event)">
+                            <form id="patientRegisterForm">
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="patientFirstName" class="form-label" id="patient-firstName-label">الاسم الأول</label>
@@ -325,7 +327,7 @@
                             </form>
                             
                             <div class="text-center mt-4">
-                                <button class="btn btn-link" onclick="showUserTypeSelection()" id="back-to-user-type-patient">
+                                <button class="btn btn-link" id="back-to-user-type-patient">
                                     <i class="bi bi-arrow-left me-1"></i>
                                     العودة
                                 </button>
@@ -349,7 +351,7 @@
                                 <p class="text-muted" id="doctor-register-subtitle">انضم إلى منصة صحتك كطبيب</p>
                             </div>
                             
-                            <form id="doctorRegisterForm" onsubmit="handleDoctorRegister(event)">
+                            <form id="doctorRegisterForm">
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="doctorFirstName" class="form-label" id="doctor-firstName-label">الاسم الأول</label>
@@ -418,7 +420,7 @@
                             </form>
                             
                             <div class="text-center mt-4">
-                                <button class="btn btn-link" onclick="showUserTypeSelection()" id="back-to-user-type-doctor">
+                                <button class="btn btn-link" id="back-to-user-type-doctor">
                                     <i class="bi bi-arrow-left me-1"></i>
                                     العودة
                                 </button>
@@ -517,5 +519,38 @@
     
     <!-- Custom JavaScript -->
     <script src="frontend/assets/js/main.js"></script>
+    <script src="frontend/assets/js/components/auth.js"></script>
+    <script src="frontend/assets/js/components/forms.js"></script>
+    
+    <!-- Initialize event listeners after all scripts are loaded -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Language selection buttons
+            document.querySelector('[data-lang="ar"]').addEventListener('click', () => selectLanguage('ar'));
+            document.querySelector('[data-lang="en"]').addEventListener('click', () => selectLanguage('en'));
+            
+            // Auth navigation buttons
+            document.getElementById('login-btn').addEventListener('click', showLogin);
+            document.getElementById('register-btn').addEventListener('click', showUserTypeSelection);
+            document.getElementById('language-switch-btn').addEventListener('click', showLanguageSelection);
+            
+            // User type selection buttons
+            document.getElementById('patient-type-btn').addEventListener('click', () => selectUserType('patient'));
+            document.getElementById('doctor-type-btn').addEventListener('click', () => selectUserType('doctor'));
+            
+            // Back buttons
+            document.getElementById('back-to-auth-type').addEventListener('click', showAuthSelection);
+            document.getElementById('back-to-auth').addEventListener('click', showAuthSelection);
+            document.getElementById('back-to-auth-reg').addEventListener('click', showAuthSelection);
+            document.getElementById('back-to-user-type-patient').addEventListener('click', showUserTypeSelection);
+            document.getElementById('back-to-user-type-doctor').addEventListener('click', showUserTypeSelection);
+            
+            // Form submissions
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('registerForm').addEventListener('submit', handleRegister);
+            document.getElementById('patientRegisterForm').addEventListener('submit', handlePatientRegister);
+            document.getElementById('doctorRegisterForm').addEventListener('submit', handleDoctorRegister);
+        });
+    </script>
 </body>
 </html>

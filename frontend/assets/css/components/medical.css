@@ -1,0 +1,579 @@
+/* Sahatak Medical CSS - Records, Assessments and Health Data */
+
+/* Root Variables - Matching medical theme */
+:root {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --info-color: #0dcaf0;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+    
+    /* Medical Theme Colors */
+    --medical-blue: #2563eb;
+    --medical-green: #059669;
+    --medical-teal: #0891b2;
+    --soft-gray: #f1f5f9;
+    --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    --hover-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    
+    /* Medical Specific Colors */
+    --vital-red: #e74c3c;
+    --vital-orange: #f39c12;
+    --vital-green: #27ae60;
+    --lab-blue: #3498db;
+    --prescription-purple: #9b59b6;
+}
+
+/* Medical Records Layout */
+.medical-container {
+    background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-teal) 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+/* Medical Record Cards */
+.medical-record-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: none;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+}
+
+.medical-record-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--hover-shadow);
+}
+
+/* Record Type Headers */
+.record-type-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.record-type-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    margin-right: 1rem;
+}
+
+.record-type-icon.vitals {
+    background: linear-gradient(45deg, var(--vital-red), var(--vital-orange));
+}
+
+.record-type-icon.lab-results {
+    background: linear-gradient(45deg, var(--lab-blue), var(--medical-teal));
+}
+
+.record-type-icon.prescriptions {
+    background: linear-gradient(45deg, var(--prescription-purple), #8e44ad);
+}
+
+.record-type-icon.imaging {
+    background: linear-gradient(45deg, var(--medical-blue), var(--medical-teal));
+}
+
+.record-type-icon.diagnosis {
+    background: linear-gradient(45deg, var(--medical-green), var(--vital-green));
+}
+
+/* Vital Signs */
+.vital-signs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.vital-sign-item {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: var(--card-shadow);
+    border-left: 4px solid var(--medical-blue);
+    transition: all 0.3s ease;
+}
+
+.vital-sign-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--hover-shadow);
+}
+
+.vital-sign-item.normal {
+    border-left-color: var(--vital-green);
+}
+
+.vital-sign-item.warning {
+    border-left-color: var(--vital-orange);
+}
+
+.vital-sign-item.critical {
+    border-left-color: var(--vital-red);
+}
+
+.vital-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--medical-blue);
+    margin-bottom: 0.5rem;
+}
+
+.vital-value.normal {
+    color: var(--vital-green);
+}
+
+.vital-value.warning {
+    color: var(--vital-orange);
+}
+
+.vital-value.critical {
+    color: var(--vital-red);
+}
+
+.vital-label {
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.vital-unit {
+    font-size: 1rem;
+    color: var(--secondary-color);
+    margin-left: 0.25rem;
+}
+
+/* Lab Results */
+.lab-results-table {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 1.5rem;
+}
+
+.lab-results-table table {
+    margin: 0;
+}
+
+.lab-results-table th {
+    background: linear-gradient(45deg, var(--medical-blue), var(--medical-teal));
+    color: white;
+    font-weight: 600;
+    border: none;
+    padding: 1rem;
+}
+
+.lab-results-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    vertical-align: middle;
+}
+
+.lab-results-table tr:last-child td {
+    border-bottom: none;
+}
+
+.lab-value {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.lab-value.normal {
+    color: var(--vital-green);
+}
+
+.lab-value.abnormal {
+    color: var(--vital-red);
+}
+
+.lab-value.borderline {
+    color: var(--vital-orange);
+}
+
+.lab-reference {
+    color: var(--secondary-color);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* Prescription Cards */
+.prescription-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--card-shadow);
+    border-left: 4px solid var(--prescription-purple);
+    transition: all 0.3s ease;
+}
+
+.prescription-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--hover-shadow);
+}
+
+.prescription-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.medication-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--medical-blue);
+}
+
+.prescription-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.prescription-status.active {
+    background: rgba(25, 135, 84, 0.2);
+    color: var(--success-color);
+}
+
+.prescription-status.completed {
+    background: rgba(108, 117, 125, 0.2);
+    color: var(--secondary-color);
+}
+
+.prescription-status.discontinued {
+    background: rgba(220, 53, 69, 0.2);
+    color: var(--danger-color);
+}
+
+.dosage-info {
+    background: var(--soft-gray);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.dosage-amount {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--medical-blue);
+}
+
+.dosage-frequency {
+    color: var(--secondary-color);
+    margin-top: 0.25rem;
+}
+
+/* Imaging Results */
+.imaging-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.imaging-item {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+}
+
+.imaging-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--hover-shadow);
+}
+
+.imaging-thumbnail {
+    width: 100%;
+    height: 200px;
+    background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: var(--secondary-color);
+}
+
+.imaging-info {
+    padding: 1.5rem;
+}
+
+.imaging-type {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--medical-blue);
+    margin-bottom: 0.5rem;
+}
+
+.imaging-date {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+/* Symptom Assessment */
+.symptom-assessment {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 1.5rem;
+}
+
+.symptom-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.symptom-card {
+    background: var(--light-color);
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.symptom-card:hover {
+    border-color: var(--medical-blue);
+    background: rgba(37, 99, 235, 0.05);
+}
+
+.symptom-card.selected {
+    border-color: var(--medical-blue);
+    background: rgba(37, 99, 235, 0.1);
+}
+
+.symptom-icon {
+    font-size: 2.5rem;
+    color: var(--medical-blue);
+    margin-bottom: 0.5rem;
+}
+
+.symptom-name {
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+/* Severity Scale */
+.severity-scale {
+    background: var(--soft-gray);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.severity-options {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+}
+
+.severity-option {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid #e9ecef;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.severity-option:hover {
+    border-color: var(--medical-blue);
+    transform: scale(1.1);
+}
+
+.severity-option.selected {
+    border-color: var(--medical-blue);
+    background: var(--medical-blue);
+    color: white;
+}
+
+/* Health Timeline */
+.health-timeline {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: var(--card-shadow);
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 3rem;
+    margin-bottom: 2rem;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: #e9ecef;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -8px;
+    top: 0;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--medical-blue);
+    border: 3px solid white;
+    box-shadow: 0 0 0 2px var(--medical-blue);
+}
+
+.timeline-date {
+    color: var(--secondary-color);
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.timeline-content {
+    background: var(--soft-gray);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .vital-signs-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.75rem;
+    }
+    
+    .vital-sign-item {
+        padding: 1rem;
+    }
+    
+    .vital-value {
+        font-size: 1.5rem;
+    }
+    
+    .imaging-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .symptom-selector {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+    
+    .severity-options {
+        gap: 0.5rem;
+    }
+    
+    .severity-option {
+        width: 40px;
+        height: 40px;
+        font-size: 0.875rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .medical-container {
+        padding: 1rem 0;
+    }
+    
+    .medical-record-card {
+        padding: 1rem;
+    }
+    
+    .record-type-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+        margin-right: 0.75rem;
+    }
+    
+    .vital-signs-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .lab-results-table th,
+    .lab-results-table td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .prescription-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
+
+/* RTL Support */
+[dir="rtl"] .record-type-icon {
+    margin-left: 1rem;
+    margin-right: 0;
+}
+
+[dir="rtl"] .timeline-item {
+    padding-right: 3rem;
+    padding-left: 0;
+}
+
+[dir="rtl"] .timeline-item::before {
+    left: auto;
+    right: 0;
+}
+
+[dir="rtl"] .timeline-marker {
+    left: auto;
+    right: -8px;
+}
+
+/* Print Styles */
+@media print {
+    .medical-container {
+        background: white;
+        padding: 0;
+    }
+    
+    .medical-record-card {
+        background: white;
+        box-shadow: none;
+        border: 1px solid #ddd;
+        break-inside: avoid;
+    }
+    
+    .vital-sign-item,
+    .prescription-card,
+    .imaging-item {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+}

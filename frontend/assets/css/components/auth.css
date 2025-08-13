@@ -1,0 +1,411 @@
+/* Sahatak Authentication CSS - Landing Page and Auth Forms */
+
+/* Root Variables - Matching medical theme */
+:root {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --info-color: #0dcaf0;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+    
+    /* Medical Theme Colors */
+    --medical-blue: #2563eb;
+    --medical-green: #059669;
+    --medical-teal: #0891b2;
+    --soft-gray: #f1f5f9;
+    --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    --hover-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Authentication Layout */
+.auth-container {
+    background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-teal) 100%);
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="medical-pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23medical-pattern)"/></svg>');
+    opacity: 0.3;
+}
+
+/* Authentication Cards */
+.auth-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: none;
+    border-radius: 20px;
+    box-shadow: var(--hover-shadow);
+    position: relative;
+    z-index: 1;
+}
+
+/* Welcome Section */
+.welcome-title {
+    color: var(--medical-blue);
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.welcome-title i {
+    color: var(--medical-teal);
+}
+
+/* Language Selection */
+.language-selection-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-teal) 100%);
+}
+
+.language-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 3rem;
+    box-shadow: var(--hover-shadow);
+    text-align: center;
+    max-width: 500px;
+    width: 100%;
+    margin: 2rem;
+}
+
+.language-card h1 {
+    color: var(--medical-blue);
+    font-weight: 700;
+    margin-bottom: 2rem;
+    font-size: 2.5rem;
+}
+
+/* Language Buttons */
+.language-btn {
+    width: 100%;
+    padding: 1rem 2rem;
+    border-radius: 15px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.language-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--hover-shadow);
+}
+
+.language-btn.btn-primary {
+    background: linear-gradient(45deg, var(--medical-blue), var(--medical-teal));
+    border-color: var(--medical-blue);
+}
+
+.language-btn.btn-outline-primary {
+    border-color: var(--medical-blue);
+    color: var(--medical-blue);
+}
+
+.language-btn.btn-outline-primary:hover {
+    background: linear-gradient(45deg, var(--medical-blue), var(--medical-teal));
+    border-color: var(--medical-blue);
+}
+
+/* Authentication Buttons */
+.auth-btn {
+    width: 100%;
+    padding: 1rem 2rem;
+    border-radius: 15px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--hover-shadow);
+}
+
+.auth-btn.btn-primary {
+    background: linear-gradient(45deg, var(--medical-blue), var(--medical-teal));
+    border: none;
+}
+
+.auth-btn.btn-outline-primary {
+    border: 2px solid var(--medical-blue);
+    color: var(--medical-blue);
+}
+
+.auth-btn.btn-outline-primary:hover {
+    background: linear-gradient(45deg, var(--medical-blue), var(--medical-teal));
+    border-color: var(--medical-blue);
+}
+
+/* User Type Selection */
+.user-type-btn {
+    width: 100%;
+    padding: 1.5rem;
+    border-radius: 15px;
+    text-align: left;
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.user-type-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--hover-shadow);
+}
+
+.user-type-btn i {
+    font-size: 2rem;
+    margin-right: 1rem;
+    vertical-align: middle;
+}
+
+.user-type-btn .fw-bold {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.user-type-btn.btn-primary {
+    background: linear-gradient(45deg, var(--medical-blue), var(--medical-teal));
+    border-color: var(--medical-blue);
+}
+
+.user-type-btn.btn-outline-primary {
+    border-color: var(--medical-blue);
+    color: var(--medical-blue);
+}
+
+.user-type-btn.btn-outline-primary:hover {
+    background: linear-gradient(45deg, var(--medical-blue), var(--medical-teal));
+    border-color: var(--medical-blue);
+    color: white;
+}
+
+/* Form Styling */
+.auth-form {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2.5rem;
+    box-shadow: var(--hover-shadow);
+}
+
+.form-control {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--medical-blue);
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+}
+
+.form-control.is-invalid {
+    border-color: var(--danger-color);
+}
+
+.form-select {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-select:focus {
+    border-color: var(--medical-blue);
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+}
+
+/* Form Labels */
+.form-label {
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+}
+
+/* Form Submit Buttons */
+.form-submit-btn {
+    width: 100%;
+    padding: 1rem 2rem;
+    border-radius: 15px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    background: linear-gradient(45deg, var(--medical-blue), var(--medical-teal));
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.form-submit-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--hover-shadow);
+}
+
+.form-submit-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Loading State */
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+    position: relative;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid var(--medical-blue);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Back Buttons */
+.back-btn {
+    color: var(--secondary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+    color: var(--medical-blue);
+    text-decoration: none;
+}
+
+/* Language Switcher */
+.language-switcher {
+    border-top: 1px solid #dee2e6;
+    padding-top: 1rem;
+    margin-top: 1rem;
+}
+
+.language-switcher small {
+    color: var(--secondary-color);
+}
+
+/* Footer Emergency Section */
+.emergency-section {
+    background: rgba(220, 53, 69, 0.1);
+    border-radius: 10px;
+    padding: 1rem;
+    border: 1px solid rgba(220, 53, 69, 0.2);
+}
+
+.emergency-section .text-danger {
+    color: var(--danger-color) !important;
+}
+
+/* Social Links */
+.social-links a {
+    color: var(--secondary-color);
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.social-links a:hover {
+    color: var(--medical-blue);
+    transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .language-card {
+        margin: 1rem;
+        padding: 2rem;
+    }
+    
+    .language-card h1 {
+        font-size: 2rem;
+    }
+    
+    .auth-form {
+        padding: 2rem;
+    }
+    
+    .user-type-btn {
+        text-align: center;
+    }
+    
+    .user-type-btn i {
+        display: block;
+        margin: 0 0 1rem 0;
+    }
+}
+
+@media (max-width: 576px) {
+    .language-card {
+        margin: 0.5rem;
+        padding: 1.5rem;
+    }
+    
+    .auth-form {
+        padding: 1.5rem;
+    }
+    
+    .language-btn,
+    .auth-btn,
+    .form-submit-btn {
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+    }
+}
+
+/* RTL Support */
+[dir="rtl"] .user-type-btn i {
+    margin-left: 1rem;
+    margin-right: 0;
+}
+
+[dir="rtl"] .back-btn i {
+    margin-right: 0;
+    margin-left: 0.25rem;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    .auth-card,
+    .language-card,
+    .auth-form {
+        background: white;
+        border: 2px solid var(--dark-color);
+    }
+    
+    .form-control,
+    .form-select {
+        border-width: 2px;
+    }
+}
