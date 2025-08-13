@@ -1,56 +1,30 @@
 // Sahatak Forms JavaScript - Registration and Form Handling Functions
 
-// Form Management and Validation
+// Form Management using ValidationManager
 const FormManager = {
-    // Validate email format
+    // Delegate to ValidationManager for validation
     validateEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
+        return ValidationManager.validateEmail(email);
     },
 
-    // Validate password strength
+    // Delegate to ValidationManager for validation
     validatePassword(password) {
-        return password && password.length >= 6;
+        return ValidationManager.validatePassword(password);
     },
 
-    // Show form error
+    // Delegate to ValidationManager for error handling
     showFieldError(fieldId, message) {
-        const field = document.getElementById(fieldId);
-        const errorDiv = document.getElementById(`${fieldId}-error`);
-        
-        if (field) {
-            field.classList.add('is-invalid');
-        }
-        if (errorDiv) {
-            errorDiv.textContent = message;
-        }
+        return ValidationManager.showFieldError(fieldId, message);
     },
 
-    // Clear field error
+    // Delegate to ValidationManager for error handling
     clearFieldError(fieldId) {
-        const field = document.getElementById(fieldId);
-        const errorDiv = document.getElementById(`${fieldId}-error`);
-        
-        if (field) {
-            field.classList.remove('is-invalid');
-        }
-        if (errorDiv) {
-            errorDiv.textContent = '';
-        }
+        return ValidationManager.clearFieldError(fieldId);
     },
 
-    // Clear all form errors
+    // Delegate to ValidationManager for error handling
     clearFormErrors(formId) {
-        const form = document.getElementById(formId);
-        if (!form) return;
-
-        // Remove is-invalid class from all inputs
-        const invalidInputs = form.querySelectorAll('.is-invalid');
-        invalidInputs.forEach(input => input.classList.remove('is-invalid'));
-
-        // Clear all error messages
-        const errorDivs = form.querySelectorAll('[id$="-error"]');
-        errorDivs.forEach(div => div.textContent = '');
+        return ValidationManager.clearFormErrors(formId);
     },
 
     // Show form alert
@@ -153,35 +127,21 @@ function handleRegister(event) {
         userType: document.getElementById('userType').value
     };
     
-    // Validate form
-    let isValid = true;
+    // Validate form using ValidationManager
+    const validation = ValidationManager.validateRegistrationForm(formData);
     
-    if (!formData.firstName) {
-        FormManager.showFieldError('firstName', 'First name is required');
-        isValid = false;
+    if (!validation.isValid) {
+        // Map field names and show errors
+        Object.keys(validation.errors).forEach(field => {
+            let fieldId = field;
+            // Map email field name for this form
+            if (field === 'email') fieldId = 'regEmail';
+            if (field === 'password') fieldId = 'regPassword';
+            
+            ValidationManager.showFieldError(fieldId, validation.errors[field]);
+        });
+        return false;
     }
-    
-    if (!formData.lastName) {
-        FormManager.showFieldError('lastName', 'Last name is required');
-        isValid = false;
-    }
-    
-    if (!FormManager.validateEmail(formData.email)) {
-        FormManager.showFieldError('regEmail', 'Please enter a valid email address');
-        isValid = false;
-    }
-    
-    if (!FormManager.validatePassword(formData.password)) {
-        FormManager.showFieldError('regPassword', 'Password must be at least 6 characters');
-        isValid = false;
-    }
-    
-    if (!formData.userType) {
-        FormManager.showFieldError('userType', 'Please select account type');
-        isValid = false;
-    }
-    
-    if (!isValid) return false;
     
     // Set loading state
     FormManager.setFormLoading(formId, true);
@@ -225,41 +185,37 @@ function handlePatientRegister(event) {
         userType: 'patient'
     };
     
-    // Validate form
-    let isValid = true;
+    // Validate form using ValidationManager
+    const validationData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phoneNumber: formData.phone,
+        nationalId: '',
+        dateOfBirth: '',
+        password: formData.password
+    };
     
-    if (!formData.firstName) {
-        FormManager.showFieldError('patientFirstName', 'First name is required');
-        isValid = false;
+    const validation = ValidationManager.validatePatientRegistrationForm(validationData);
+    let isValid = validation.isValid;
+    
+    // Show ValidationManager errors
+    if (!validation.isValid) {
+        Object.keys(validation.errors).forEach(field => {
+            let fieldId = 'patient' + field.charAt(0).toUpperCase() + field.slice(1);
+            if (field === 'phoneNumber') fieldId = 'patientPhone';
+            ValidationManager.showFieldError(fieldId, validation.errors[field]);
+        });
     }
     
-    if (!formData.lastName) {
-        FormManager.showFieldError('patientLastName', 'Last name is required');
-        isValid = false;
-    }
-    
-    if (!FormManager.validateEmail(formData.email)) {
-        FormManager.showFieldError('patientEmail', 'Please enter a valid email address');
-        isValid = false;
-    }
-    
-    if (!formData.phone) {
-        FormManager.showFieldError('patientPhone', 'Phone number is required');
-        isValid = false;
-    }
-    
+    // Additional custom validations not in ValidationManager
     if (!formData.age || formData.age < 1 || formData.age > 120) {
-        FormManager.showFieldError('patientAge', 'Please enter a valid age (1-120)');
+        ValidationManager.showFieldError('patientAge', 'Please enter a valid age (1-120)');
         isValid = false;
     }
     
     if (!formData.gender) {
-        FormManager.showFieldError('patientGender', 'Please select gender');
-        isValid = false;
-    }
-    
-    if (!FormManager.validatePassword(formData.password)) {
-        FormManager.showFieldError('patientPassword', 'Password must be at least 6 characters');
+        ValidationManager.showFieldError('patientGender', 'Please select gender');
         isValid = false;
     }
     
@@ -311,46 +267,35 @@ function handleDoctorRegister(event) {
         userType: 'doctor'
     };
     
-    // Validate form
-    let isValid = true;
+    // Validate form using ValidationManager
+    const validationData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phoneNumber: formData.phone,
+        nationalId: '',
+        specialization: formData.specialty,
+        licenseNumber: formData.licenseNumber,
+        password: formData.password
+    };
     
-    if (!formData.firstName) {
-        FormManager.showFieldError('doctorFirstName', 'First name is required');
-        isValid = false;
+    const validation = ValidationManager.validateDoctorRegistrationForm(validationData);
+    let isValid = validation.isValid;
+    
+    // Show ValidationManager errors
+    if (!validation.isValid) {
+        Object.keys(validation.errors).forEach(field => {
+            let fieldId = 'doctor' + field.charAt(0).toUpperCase() + field.slice(1);
+            if (field === 'phoneNumber') fieldId = 'doctorPhone';
+            if (field === 'specialization') fieldId = 'doctorSpecialty';
+            if (field === 'licenseNumber') fieldId = 'doctorLicense';
+            ValidationManager.showFieldError(fieldId, validation.errors[field]);
+        });
     }
     
-    if (!formData.lastName) {
-        FormManager.showFieldError('doctorLastName', 'Last name is required');
-        isValid = false;
-    }
-    
-    if (!FormManager.validateEmail(formData.email)) {
-        FormManager.showFieldError('doctorEmail', 'Please enter a valid email address');
-        isValid = false;
-    }
-    
-    if (!formData.phone) {
-        FormManager.showFieldError('doctorPhone', 'Phone number is required');
-        isValid = false;
-    }
-    
-    if (!formData.licenseNumber) {
-        FormManager.showFieldError('doctorLicense', 'Medical license number is required');
-        isValid = false;
-    }
-    
-    if (!formData.specialty) {
-        FormManager.showFieldError('doctorSpecialty', 'Please select specialty');
-        isValid = false;
-    }
-    
+    // Additional custom validation for years of experience
     if (isNaN(formData.yearsOfExperience) || formData.yearsOfExperience < 0 || formData.yearsOfExperience > 50) {
-        FormManager.showFieldError('doctorExperience', 'Please enter valid years of experience (0-50)');
-        isValid = false;
-    }
-    
-    if (!FormManager.validatePassword(formData.password)) {
-        FormManager.showFieldError('doctorPassword', 'Password must be at least 6 characters');
+        ValidationManager.showFieldError('doctorExperience', 'Please enter valid years of experience (0-50)');
         isValid = false;
     }
     

@@ -885,152 +885,133 @@ async function handleDoctorRegister(event) {
     }
 }
 
-// Validate registration form
+// Validate registration form using ValidationManager
 function validateRegistrationForm(data) {
-    let isValid = true;
     const lang = LanguageManager.getLanguage() || 'ar';
     const t = LanguageManager.translations[lang];
     
-    // Validate first name
-    if (data.firstName.length < 2) {
-        showFieldError('firstName', t.validation?.first_name_min || 'First name must be at least 2 characters long');
-        isValid = false;
+    const validation = ValidationManager.validateRegistrationForm(data);
+    
+    if (!validation.isValid) {
+        // Map field names and show errors with translations
+        Object.keys(validation.errors).forEach(field => {
+            let fieldId = field;
+            // Map email field name for this form
+            if (field === 'email') fieldId = 'regEmail';
+            if (field === 'password') fieldId = 'regPassword';
+            
+            const translatedMessage = t.validation?.[field + '_error'] || validation.errors[field];
+            ValidationManager.showFieldError(fieldId, translatedMessage);
+        });
     }
     
-    // Validate last name
-    if (data.lastName.length < 2) {
-        showFieldError('lastName', t.validation?.last_name_min || 'Last name must be at least 2 characters long');
-        isValid = false;
-    }
-    
-    // Validate email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(data.email)) {
-        showFieldError('regEmail', t.validation?.email_invalid || 'Please enter a valid email address');
-        isValid = false;
-    }
-    
-    // Validate password
-    if (data.password.length < 6) {
-        showFieldError('regPassword', t.validation?.password_min || 'Password must be at least 6 characters long');
-        isValid = false;
-    }
-    
-    // Validate user type
-    if (!data.userType) {
-        showFieldError('userType', t.validation?.user_type_required || 'Please select an account type');
-        isValid = false;
-    }
-    
-    return isValid;
+    return validation.isValid;
 }
 
-// Validate patient registration form
+// Validate patient registration form using ValidationManager
 function validatePatientRegistrationForm(data) {
-    let isValid = true;
     const lang = LanguageManager.getLanguage() || 'ar';
     const t = LanguageManager.translations[lang];
     
-    // Validate first name
-    if (data.firstName.length < 2) {
-        showFieldError('patientFirstName', t.validation?.first_name_min || 'First name must be at least 2 characters long');
-        isValid = false;
-    }
+    // Map form data to ValidationManager expected format
+    const validationData = {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        phoneNumber: data.phone,
+        nationalId: data.nationalId || '',
+        dateOfBirth: data.dateOfBirth || '',
+        password: data.password
+    };
     
-    // Validate last name
-    if (data.lastName.length < 2) {
-        showFieldError('patientLastName', t.validation?.last_name_min || 'Last name must be at least 2 characters long');
-        isValid = false;
-    }
+    const validation = ValidationManager.validatePatientRegistrationForm(validationData);
     
-    // Validate email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(data.email)) {
-        showFieldError('patientEmail', t.validation?.email_invalid || 'Please enter a valid email address');
-        isValid = false;
-    }
+    // Additional custom validations not in ValidationManager
+    let isValid = validation.isValid;
+    const customErrors = {};
     
-    // Validate phone
-    if (data.phone.length < 8) {
-        showFieldError('patientPhone', 'Phone number must be at least 8 digits');
-        isValid = false;
-    }
-    
-    // Validate age
-    if (data.age < 1 || data.age > 120) {
-        showFieldError('patientAge', 'Please enter a valid age between 1 and 120');
+    // Validate age (legacy field)
+    if (data.age && (data.age < 1 || data.age > 120)) {
+        customErrors.age = 'Please enter a valid age between 1 and 120';
         isValid = false;
     }
     
     // Validate gender
     if (!data.gender) {
-        showFieldError('patientGender', 'Please select gender');
+        customErrors.gender = 'Please select gender';
         isValid = false;
     }
     
-    // Validate password
-    if (data.password.length < 6) {
-        showFieldError('patientPassword', t.validation?.password_min || 'Password must be at least 6 characters long');
-        isValid = false;
+    if (!validation.isValid) {
+        // Show ValidationManager errors with translations
+        Object.keys(validation.errors).forEach(field => {
+            let fieldId = 'patient' + field.charAt(0).toUpperCase() + field.slice(1);
+            if (field === 'phoneNumber') fieldId = 'patientPhone';
+            if (field === 'nationalId') fieldId = 'patientNationalId';
+            if (field === 'dateOfBirth') fieldId = 'patientDateOfBirth';
+            
+            const translatedMessage = t.validation?.[field + '_error'] || validation.errors[field];
+            ValidationManager.showFieldError(fieldId, translatedMessage);
+        });
     }
+    
+    // Show custom validation errors
+    Object.keys(customErrors).forEach(field => {
+        const fieldId = 'patient' + field.charAt(0).toUpperCase() + field.slice(1);
+        ValidationManager.showFieldError(fieldId, customErrors[field]);
+    });
     
     return isValid;
 }
 
-// Validate doctor registration form
+// Validate doctor registration form using ValidationManager
 function validateDoctorRegistrationForm(data) {
-    let isValid = true;
     const lang = LanguageManager.getLanguage() || 'ar';
     const t = LanguageManager.translations[lang];
     
-    // Validate first name
-    if (data.firstName.length < 2) {
-        showFieldError('doctorFirstName', t.validation?.first_name_min || 'First name must be at least 2 characters long');
-        isValid = false;
-    }
+    // Map form data to ValidationManager expected format
+    const validationData = {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        phoneNumber: data.phone,
+        nationalId: data.nationalId || '',
+        specialization: data.specialty,
+        licenseNumber: data.license,
+        password: data.password
+    };
     
-    // Validate last name
-    if (data.lastName.length < 2) {
-        showFieldError('doctorLastName', t.validation?.last_name_min || 'Last name must be at least 2 characters long');
-        isValid = false;
-    }
+    const validation = ValidationManager.validateDoctorRegistrationForm(validationData);
     
-    // Validate email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(data.email)) {
-        showFieldError('doctorEmail', t.validation?.email_invalid || 'Please enter a valid email address');
-        isValid = false;
-    }
+    // Additional custom validations not in ValidationManager
+    let isValid = validation.isValid;
+    const customErrors = {};
     
-    // Validate phone
-    if (data.phone.length < 8) {
-        showFieldError('doctorPhone', 'Phone number must be at least 8 digits');
-        isValid = false;
-    }
-    
-    // Validate license
-    if (data.license.length < 3) {
-        showFieldError('doctorLicense', 'Medical license number is required');
-        isValid = false;
-    }
-    
-    // Validate specialty
-    if (!data.specialty) {
-        showFieldError('doctorSpecialty', 'Please select a specialty');
-        isValid = false;
-    }
-    
-    // Validate experience
+    // Validate experience (custom field)
     if (data.experience < 0 || data.experience > 50) {
-        showFieldError('doctorExperience', 'Please enter valid years of experience (0-50)');
+        customErrors.experience = 'Please enter valid years of experience (0-50)';
         isValid = false;
     }
     
-    // Validate password
-    if (data.password.length < 6) {
-        showFieldError('doctorPassword', t.validation?.password_min || 'Password must be at least 6 characters long');
-        isValid = false;
+    if (!validation.isValid) {
+        // Show ValidationManager errors with translations
+        Object.keys(validation.errors).forEach(field => {
+            let fieldId = 'doctor' + field.charAt(0).toUpperCase() + field.slice(1);
+            if (field === 'phoneNumber') fieldId = 'doctorPhone';
+            if (field === 'nationalId') fieldId = 'doctorNationalId';
+            if (field === 'specialization') fieldId = 'doctorSpecialty';
+            if (field === 'licenseNumber') fieldId = 'doctorLicense';
+            
+            const translatedMessage = t.validation?.[field + '_error'] || validation.errors[field];
+            ValidationManager.showFieldError(fieldId, translatedMessage);
+        });
     }
+    
+    // Show custom validation errors
+    Object.keys(customErrors).forEach(field => {
+        const fieldId = 'doctor' + field.charAt(0).toUpperCase() + field.slice(1);
+        ValidationManager.showFieldError(fieldId, customErrors[field]);
+    });
     
     return isValid;
 }
