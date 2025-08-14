@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Confirmed</title>
+    <style>
+        body { font-family: Arial; margin: 0; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 400px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+        .header { text-align: center; color: #198754; margin-bottom: 20px; }
+        .info { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        .footer { text-align: center; color: #666; font-size: 12px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Appointment Confirmed</h2>
+        </div>
+        
+        <div class="info">
+            <strong>Doctor:</strong> Dr. {{ doctor_name }}<br>
+            <strong>Date:</strong> {{ appointment_date }}<br>
+            <strong>Time:</strong> {{ appointment_time }}<br>
+            <strong>Type:</strong> {{ appointment_type }}
+        </div>
+        
+        <p>Your appointment has been successfully booked</p>
+        
+        <div class="footer">
+            {{ app_name }}
+        </div>
+    </div>
+</body>
+</html>

@@ -281,7 +281,45 @@ class ErrorCodes:
     APPOINTMENT_NOT_FOUND = "APPOINTMENT_NOT_FOUND"
     APPOINTMENT_CONFLICT = "APPOINTMENT_CONFLICT"
     
+    # Prescriptions
+    PRESCRIPTION_NOT_FOUND = "PRESCRIPTION_NOT_FOUND"
+    INVALID_PRESCRIPTION_DATA = "INVALID_PRESCRIPTION_DATA"
+    PRESCRIPTION_ACCESS_DENIED = "PRESCRIPTION_ACCESS_DENIED"
+    
     # System
     DATABASE_ERROR = "DATABASE_ERROR"
     EXTERNAL_SERVICE_ERROR = "EXTERNAL_SERVICE_ERROR"
     FILE_UPLOAD_ERROR = "FILE_UPLOAD_ERROR"
+
+# Convenience functions for common responses
+def success_response(message: str = "Operation successful", data: Any = None, status_code: int = 200, meta: Optional[Dict] = None) -> tuple:
+    """Convenience function for success responses"""
+    return APIResponse.success(data, message, status_code, meta)
+
+def error_response(message: str = "An error occurred", status_code: int = 400, error_code: Optional[str] = None, details: Optional[Dict] = None, field: Optional[str] = None) -> tuple:
+    """Convenience function for error responses"""
+    return APIResponse.error(message, status_code, error_code, details, field)
+
+def validation_error_response(field: str, message: str, details: Optional[Dict] = None) -> tuple:
+    """Convenience function for validation error responses"""
+    return APIResponse.validation_error(field, message, details)
+
+def not_found_response(resource: str = "Resource", resource_id: Optional[Union[int, str]] = None) -> tuple:
+    """Convenience function for not found responses"""
+    return APIResponse.not_found(resource, resource_id)
+
+def unauthorized_response(message: str = "Authentication required") -> tuple:
+    """Convenience function for unauthorized responses"""
+    return APIResponse.unauthorized(message)
+
+def forbidden_response(message: str = "Access denied") -> tuple:
+    """Convenience function for forbidden responses"""
+    return APIResponse.forbidden(message)
+
+def conflict_response(message: str = "Resource already exists", field: Optional[str] = None) -> tuple:
+    """Convenience function for conflict responses"""
+    return APIResponse.conflict(message, field)
+
+def internal_error_response(message: str = "Internal server error", error_id: Optional[str] = None) -> tuple:
+    """Convenience function for internal error responses"""
+    return APIResponse.internal_error(message, error_id)

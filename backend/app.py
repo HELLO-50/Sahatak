@@ -49,6 +49,13 @@ login_manager.login_message_category = 'info'
 
 mail = Mail(app)
 
+# Initialize notification services
+from services.email_service import email_service
+from services.sms_service import sms_service
+email_service.init_app(app)
+sms_service.init_app(app)
+app_logger.info("Notification services initialized")
+
 # Configure CORS
 CORS(app, 
      origins=[
@@ -64,7 +71,7 @@ CORS(app,
      supports_credentials=True)
 
 # Import models after db initialization
-from models import User, Doctor, Patient, Appointment
+from models import User, Doctor, Patient, Appointment, Prescription, MedicalHistoryUpdate
 
 # Import and register error handlers
 from utils.error_handlers import register_error_handlers, register_custom_error_handlers
@@ -81,6 +88,9 @@ from routes.users import users_bp
 from routes.appointments import appointments_bp
 from routes.medical import medical_bp
 from routes.ai_assessment import ai_bp
+from routes.notifications import notifications_bp
+from routes.prescriptions import prescriptions_bp
+from routes.medical_history import medical_history_bp
 
 # Register blueprints with logging
 app_logger.info("Registering API blueprints")
@@ -89,6 +99,9 @@ app.register_blueprint(users_bp, url_prefix='/api/users')
 app.register_blueprint(appointments_bp, url_prefix='/api/appointments')
 app.register_blueprint(medical_bp, url_prefix='/api/medical')
 app.register_blueprint(ai_bp, url_prefix='/api/ai')
+app.register_blueprint(notifications_bp, url_prefix='/api/notifications')
+app.register_blueprint(prescriptions_bp, url_prefix='/api/prescriptions')
+app.register_blueprint(medical_history_bp, url_prefix='/api/medical-history')
 
 @login_manager.user_loader
 def load_user(user_id):

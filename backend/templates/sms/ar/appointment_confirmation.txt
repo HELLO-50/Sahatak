@@ -1,0 +1,1 @@
+تأكيد: تم حجز موعد مع د.{{ doctor_name }} يوم {{ appointment_date }} في {{ appointment_time }}. صحتك

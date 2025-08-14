@@ -82,9 +82,27 @@ class Patient(db.Model):
     gender = db.Column(db.Enum('male', 'female', name='genders'), nullable=False)
     blood_type = db.Column(db.String(5), nullable=True)
     emergency_contact = db.Column(db.String(20), nullable=True)
-    medical_history = db.Column(db.Text, nullable=True)
+    # Enhanced medical history fields
+    medical_history = db.Column(db.Text, nullable=True)  # General medical history
     allergies = db.Column(db.Text, nullable=True)
     current_medications = db.Column(db.Text, nullable=True)
+    chronic_conditions = db.Column(db.Text, nullable=True)  # Diabetes, hypertension, etc.
+    family_history = db.Column(db.Text, nullable=True)  # Family medical history
+    surgical_history = db.Column(db.Text, nullable=True)  # Previous surgeries
+    smoking_status = db.Column(db.Enum('never', 'former', 'current', name='smoking_status'), nullable=True)
+    alcohol_consumption = db.Column(db.Enum('none', 'occasional', 'moderate', 'heavy', name='alcohol_consumption'), nullable=True)
+    exercise_frequency = db.Column(db.Enum('none', 'rare', 'weekly', 'daily', name='exercise_frequency'), nullable=True)
+    
+    # Health metrics
+    height = db.Column(db.Float, nullable=True)  # in cm
+    weight = db.Column(db.Float, nullable=True)  # in kg
+    
+    # History completion status
+    medical_history_completed = db.Column(db.Boolean, default=False, nullable=False)
+    medical_history_last_updated = db.Column(db.DateTime, nullable=True)
+    # Notification preferences
+    preferred_contact_method = db.Column(db.Enum('email', 'sms', 'both', name='contact_methods'), default='email', nullable=False)
+    notification_preferences = db.Column(db.JSON, nullable=True)  # Store detailed notification settings
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     
@@ -104,6 +122,18 @@ class Patient(db.Model):
             'medical_history': self.medical_history,
             'allergies': self.allergies,
             'current_medications': self.current_medications,
+            'chronic_conditions': self.chronic_conditions,
+            'family_history': self.family_history,
+            'surgical_history': self.surgical_history,
+            'smoking_status': self.smoking_status,
+            'alcohol_consumption': self.alcohol_consumption,
+            'exercise_frequency': self.exercise_frequency,
+            'height': self.height,
+            'weight': self.weight,
+            'medical_history_completed': self.medical_history_completed,
+            'medical_history_last_updated': self.medical_history_last_updated.isoformat() if self.medical_history_last_updated else None,
+            'preferred_contact_method': self.preferred_contact_method,
+            'notification_preferences': self.notification_preferences,
             'created_at': self.created_at.isoformat()
         }
     
@@ -127,6 +157,9 @@ class Doctor(db.Model):
     is_verified = db.Column(db.Boolean, default=False, nullable=False)
     rating = db.Column(db.Float, default=0.0, nullable=False)
     total_reviews = db.Column(db.Integer, default=0, nullable=False)
+    # Notification preferences for communicating with patients
+    patient_notification_method = db.Column(db.Enum('email', 'sms', 'both', name='doctor_contact_methods'), default='email', nullable=False)
+    notification_settings = db.Column(db.JSON, nullable=True)  # Detailed notification settings
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     
@@ -150,6 +183,8 @@ class Doctor(db.Model):
             'is_verified': self.is_verified,
             'rating': self.rating,
             'total_reviews': self.total_reviews,
+            'patient_notification_method': self.patient_notification_method,
+            'notification_settings': self.notification_settings,
             'created_at': self.created_at.isoformat()
         }
     
@@ -199,6 +234,123 @@ class Appointment(db.Model):
     
     def __repr__(self):
         return f'<Appointment {self.id} - {self.patient.user.get_full_name()} with {self.doctor.user.get_full_name()}>'
+
+class Prescription(db.Model):
+    __tablename__ = 'prescriptions'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    appointment_id = db.Column(db.Integer, db.ForeignKey('appointments.id'), nullable=False)
+    patient_id = db.Column(db.Integer, db.ForeignKey('patients.id'), nullable=False)
+    doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=False)
+    
+    # Prescription details
+    medication_name = db.Column(db.String(200), nullable=False)
+    dosage = db.Column(db.String(100), nullable=False)
+    frequency = db.Column(db.String(100), nullable=False)  # e.g., "3 times daily", "every 8 hours"
+    duration = db.Column(db.String(100), nullable=False)   # e.g., "7 days", "2 weeks"
+    quantity = db.Column(db.String(50), nullable=True)     # e.g., "30 tablets"
+    
+    # Instructions and notes
+    instructions = db.Column(db.Text, nullable=True)       # How to take the medication
+    notes = db.Column(db.Text, nullable=True)              # Doctor's notes
+    
+    # Status and tracking
+    status = db.Column(db.Enum('active', 'completed', 'cancelled', 'expired', name='prescription_statuses'), default='active', nullable=False)
+    refills_allowed = db.Column(db.Integer, default=0, nullable=False)
+    refills_used = db.Column(db.Integer, default=0, nullable=False)
+    
+    # Dates
+    prescribed_date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    start_date = db.Column(db.DateTime, nullable=True)
+    end_date = db.Column(db.DateTime, nullable=True)
+    
+    # Audit fields
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    
+    # Relationships
+    appointment = db.relationship('Appointment', backref='prescriptions', lazy=True)
+    patient = db.relationship('Patient', backref='prescriptions', lazy=True)
+    doctor = db.relationship('Doctor', backref='issued_prescriptions', lazy=True)
+    
+    def to_dict(self):
+        """Convert prescription to dictionary"""
+        return {
+            'id': self.id,
+            'appointment_id': self.appointment_id,
+            'patient_id': self.patient_id,
+            'doctor_id': self.doctor_id,
+            'medication_name': self.medication_name,
+            'dosage': self.dosage,
+            'frequency': self.frequency,
+            'duration': self.duration,
+            'quantity': self.quantity,
+            'instructions': self.instructions,
+            'notes': self.notes,
+            'status': self.status,
+            'refills_allowed': self.refills_allowed,
+            'refills_used': self.refills_used,
+            'prescribed_date': self.prescribed_date.isoformat(),
+            'start_date': self.start_date.isoformat() if self.start_date else None,
+            'end_date': self.end_date.isoformat() if self.end_date else None,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat(),
+            # Include related data
+            'doctor_name': self.doctor.user.get_full_name() if self.doctor else None,
+            'patient_name': self.patient.user.get_full_name() if self.patient else None
+        }
+    
+    def __repr__(self):
+        return f'<Prescription {self.id} - {self.medication_name} for {self.patient.user.get_full_name()}>'
+
+class MedicalHistoryUpdate(db.Model):
+    __tablename__ = 'medical_history_updates'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    patient_id = db.Column(db.Integer, db.ForeignKey('patients.id'), nullable=False)
+    appointment_id = db.Column(db.Integer, db.ForeignKey('appointments.id'), nullable=True)  # If updated during appointment
+    updated_by_doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=True)  # If doctor updated
+    
+    # What was updated
+    update_type = db.Column(db.Enum('initial_registration', 'appointment_update', 'patient_self_update', 'doctor_update', name='history_update_types'), nullable=False)
+    
+    # Fields that were updated (JSON to track which fields changed)
+    updated_fields = db.Column(db.JSON, nullable=False)  # ['allergies', 'medications', etc.]
+    
+    # Previous and new values for audit trail
+    previous_values = db.Column(db.JSON, nullable=True)  # Store previous values
+    new_values = db.Column(db.JSON, nullable=False)  # Store new values
+    
+    # Additional info
+    notes = db.Column(db.Text, nullable=True)  # Notes about the update
+    
+    # Timestamps
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    
+    # Relationships
+    patient = db.relationship('Patient', backref='medical_history_updates', lazy=True)
+    appointment = db.relationship('Appointment', backref='medical_history_updates', lazy=True)
+    updated_by_doctor = db.relationship('Doctor', backref='medical_history_updates', lazy=True)
+    
+    def to_dict(self):
+        """Convert medical history update to dictionary"""
+        return {
+            'id': self.id,
+            'patient_id': self.patient_id,
+            'appointment_id': self.appointment_id,
+            'updated_by_doctor_id': self.updated_by_doctor_id,
+            'update_type': self.update_type,
+            'updated_fields': self.updated_fields,
+            'previous_values': self.previous_values,
+            'new_values': self.new_values,
+            'notes': self.notes,
+            'created_at': self.created_at.isoformat(),
+            'patient_name': self.patient.user.get_full_name() if self.patient else None,
+            'doctor_name': self.updated_by_doctor.user.get_full_name() if self.updated_by_doctor else None
+        }
+    
+    def __repr__(self):
+        return f'<MedicalHistoryUpdate {self.id} - {self.update_type} for {self.patient.user.get_full_name()}>'
 
 
 # =============================================================================

@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مواعيدي | صحتك</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Arabic Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS - following established patterns -->
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../../assets/css/components/appointments.css">
+</head>
+<body>
+    <!-- Header -->
+    <nav class="navbar navbar-expand-lg bg-primary navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-heart-pulse me-2"></i>
+                صحتك | Sahatak
+            </a>
+            <div>
+                <button class="btn btn-success me-2" onclick="bookNewAppointment()">
+                    <i class="bi bi-plus me-1"></i>
+                    حجز موعد جديد
+                </button>
+                <button class="btn btn-outline-light" onclick="goToDashboard()">
+                    <i class="bi bi-house me-1"></i>
+                    الرئيسية
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <!-- Page Header -->
+        <div class="text-center mb-5">
+            <h1 class="display-6 mb-3">
+                <i class="bi bi-calendar-event text-primary me-3"></i>
+                مواعيدي
+            </h1>
+            <p class="lead text-muted">عرض وإدارة مواعيدك الطبية</p>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <ul class="nav nav-pills justify-content-center" id="appointment-tabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" data-filter="all">جميع المواعيد</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-filter="upcoming">المواعيد القادمة</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-filter="completed">المواعيد المكتملة</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-filter="cancelled">المواعيد المُلغاة</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Appointments List -->
+        <div id="appointments-container">
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">جاري التحميل...</span>
+                </div>
+                <p class="mt-3 text-muted">جاري تحميل مواعيدك...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointment Details Modal -->
+    <div class="modal fade" id="appointment-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">تفاصيل الموعد</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="appointment-details">
+                    <!-- Appointment details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning d-none me-2" id="reschedule-btn">
+                        <i class="bi bi-calendar-event me-1"></i>
+                        إعادة جدولة
+                    </button>
+                    <button type="button" class="btn btn-danger d-none" id="cancel-btn">
+                        <i class="bi bi-x-circle me-1"></i>
+                        إلغاء الموعد
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancel Confirmation Modal -->
+    <div class="modal fade" id="cancel-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <span id="cancel-modal-title">تأكيد الإلغاء</span>
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <p id="cancel-modal-message">هل أنت متأكد من رغبتك في إلغاء هذا الموعد؟</p>
+                    <div class="mb-3">
+                        <label for="cancellation-reason" class="form-label" id="cancellation-reason-label">سبب الإلغاء (اختياري)</label>
+                        <textarea class="form-control" id="cancellation-reason" rows="3" placeholder="اكتب سبب إلغاء الموعد..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" onclick="confirmCancellation()">
+                        <i class="bi bi-check me-1"></i>
+                        <span id="confirm-cancel-btn">نعم، إلغاء الموعد</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="keep-appointment-btn">لا، الاحتفاظ بالموعد</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reschedule Modal -->
+    <div class="modal fade" id="reschedule-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-calendar-event text-primary me-2"></i>
+                        <span id="reschedule-modal-title">إعادة جدولة الموعد</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="reschedule-modal-subtitle">اختر التاريخ والوقت الجديد</p>
+                    
+                    <!-- Current appointment info -->
+                    <div class="alert alert-info mb-4">
+                        <h6 class="mb-2">الموعد الحالي:</h6>
+                        <div id="current-appointment-info">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <!-- New date selection -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label for="new-appointment-date" class="form-label" id="new-date-label">التاريخ الجديد</label>
+                            <input type="date" class="form-control" id="new-appointment-date">
+                        </div>
+                    </div>
+                    
+                    <!-- Available time slots -->
+                    <div id="reschedule-time-slots-container" class="mb-4">
+                        <h6 class="mb-3" id="new-time-label">الأوقات المتاحة</h6>
+                        <div id="reschedule-time-slots" class="d-flex flex-wrap gap-2">
+                            <!-- Time slots will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Reschedule reason -->
+                    <div class="mb-3">
+                        <label for="reschedule-reason" class="form-label" id="reschedule-reason-label">سبب إعادة الجدولة (اختياري)</label>
+                        <textarea class="form-control" id="reschedule-reason" rows="3" placeholder="اكتب سبب إعادة جدولة الموعد..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="confirmReschedule()" id="confirm-reschedule" disabled>
+                        <i class="bi bi-calendar-check me-1"></i>
+                        <span id="confirm-reschedule-btn">تأكيد إعادة الجدولة</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS - following established patterns -->
+    <script src="../../assets/js/main.js"></script>
+    
+    <script>
+        let currentAppointmentId = null;
+        let currentAppointment = null;
+        let currentFilter = 'all';
+        let appointments = [];
+        let selectedNewDateTime = null;
+
+        // Initialize when page loads - following main.js patterns
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Ensure translations are loaded
+            if (!LanguageManager.translations || !LanguageManager.translations.ar) {
+                await LanguageManager.loadTranslations();
+            }
+            
+            updateUITranslations();
+            loadAppointments();
+            setupEventListeners();
+        });
+
+        // Update UI with translations - following established patterns
+        function updateUITranslations() {
+            const lang = LanguageManager.getLanguage() || 'ar';
+            const t = LanguageManager.translations[lang];
+            if (!t || !t.appointments) return;
+
+            // Update modal titles and buttons
+            updateElementText('cancel-modal-title', t.appointments.cancel_confirm_title);
+            updateElementText('cancel-modal-message', t.appointments.cancel_confirm_message);
+            updateElementText('cancellation-reason-label', t.appointments.cancellation_reason);
+            updateElementText('confirm-cancel-btn', t.appointments.confirm_cancel);
+            updateElementText('keep-appointment-btn', t.appointments.keep_appointment);
+            
+            updateElementText('reschedule-modal-title', t.appointments.reschedule_title);
+            updateElementText('reschedule-modal-subtitle', t.appointments.select_new_time);
+            updateElementText('new-date-label', t.appointments.new_date);
+            updateElementText('new-time-label', t.appointments.new_time);
+            updateElementText('reschedule-reason-label', t.appointments.reschedule_reason);
+            updateElementText('confirm-reschedule-btn', t.appointments.confirm_reschedule);
+            
+            // Update placeholders
+            const cancellationTextarea = document.getElementById('cancellation-reason');
+            if (cancellationTextarea) {
+                cancellationTextarea.placeholder = t.appointments.cancellation_reason_placeholder;
+            }
+            
+            const rescheduleTextarea = document.getElementById('reschedule-reason');
+            if (rescheduleTextarea) {
+                rescheduleTextarea.placeholder = t.appointments.reschedule_reason_placeholder;
+            }
+        }
+
+        // Helper function following main.js patterns
+        function updateElementText(elementId, text) {
+            const element = document.getElementById(elementId);
+            if (element && text) {
+                element.textContent = text;
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Tab filters
+            document.querySelectorAll('#appointment-tabs .nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Update active tab
+                    document.querySelectorAll('#appointment-tabs .nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Filter appointments
+                    currentFilter = this.getAttribute('data-filter');
+                    renderAppointments();
+                });
+            });
+
+            // Date change for reschedule
+            document.getElementById('new-appointment-date').addEventListener('change', loadRescheduleTimeSlots);
+            
+            // Set minimum date to today for reschedule
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('new-appointment-date').min = today;
+        }
+
+        // Load appointments from API
+        async function loadAppointments() {
+            try {
+                const response = await ApiHelper.makeRequest('/appointments/');
+                
+                if (response.success) {
+                    appointments = response.data.appointments;
+                    renderAppointments();
+                } else {
+                    showError('فشل في تحميل المواعيد');
+                }
+            } catch (error) {
+                console.error('Error loading appointments:', error);
+                showError('خطأ في الاتصال بالخادم');
+            }
+        }
+
+        // Render appointments based on current filter
+        function renderAppointments() {
+            const container = document.getElementById('appointments-container');
+            
+            // Filter appointments
+            let filteredAppointments = appointments;
+            
+            switch (currentFilter) {
+                case 'upcoming':
+                    filteredAppointments = appointments.filter(apt => 
+                        ['scheduled', 'confirmed'].includes(apt.status) && 
+                        new Date(apt.appointment_date) > new Date()
+                    );
+                    break;
+                case 'completed':
+                    filteredAppointments = appointments.filter(apt => apt.status === 'completed');
+                    break;
+                case 'cancelled':
+                    filteredAppointments = appointments.filter(apt => apt.status === 'cancelled');
+                    break;
+            }
+
+            if (filteredAppointments.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="bi bi-calendar-x display-4 text-muted mb-3"></i>
+                        <h5 class="text-muted mb-3">لا توجد مواعيد</h5>
+                        <p class="text-muted mb-4">لم يتم العثور على مواعيد في هذه الفئة</p>
+                        <button class="btn btn-primary" onclick="bookNewAppointment()">
+                            <i class="bi bi-plus me-1"></i>
+                            احجز موعدك الأول
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            const appointmentsHtml = filteredAppointments.map(appointment => {
+                const date = new Date(appointment.appointment_date);
+                const statusClass = getStatusClass(appointment.status);
+                const statusText = getStatusArabic(appointment.status);
+                const typeText = getAppointmentTypeArabic(appointment.appointment_type);
+                const canModify = ['scheduled', 'confirmed'].includes(appointment.status) && 
+                                 new Date(appointment.appointment_date) > new Date(Date.now() + 60*60*1000); // 1 hour from now
+                
+                return `
+                    <div class="card mb-3 appointment-card">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="bi bi-person-badge text-primary me-2 fs-5"></i>
+                                        <h6 class="mb-0">د. ${appointment.doctor_name || 'غير متوفر'}</h6>
+                                    </div>
+                                    
+                                    <div class="row text-muted small">
+                                        <div class="col-sm-6 mb-2">
+                                            <i class="bi bi-calendar me-1"></i>
+                                            ${date.toLocaleDateString('ar-SA')} - ${date.toLocaleTimeString('ar-SA', {hour: '2-digit', minute: '2-digit'})}
+                                        </div>
+                                        <div class="col-sm-6 mb-2">
+                                            <i class="bi bi-camera-video me-1"></i>
+                                            ${typeText}
+                                        </div>
+                                        ${appointment.reason_for_visit ? `
+                                            <div class="col-12">
+                                                <i class="bi bi-chat-dots me-1"></i>
+                                                ${appointment.reason_for_visit}
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4 text-end">
+                                    <div class="mb-3">
+                                        <span class="badge ${statusClass} fs-6">${statusText}</span>
+                                    </div>
+                                    
+                                    <div class="btn-group-vertical btn-group-sm">
+                                        <button class="btn btn-outline-primary btn-sm" onclick="viewAppointment(${appointment.id})">
+                                            <i class="bi bi-eye me-1"></i>
+                                            التفاصيل
+                                        </button>
+                                        ${canModify ? `
+                                            <button class="btn btn-outline-warning btn-sm" onclick="rescheduleAppointment(${appointment.id})">
+                                                <i class="bi bi-calendar-event me-1"></i>
+                                                إعادة جدولة
+                                            </button>
+                                            <button class="btn btn-outline-danger btn-sm" onclick="cancelAppointment(${appointment.id})">
+                                                <i class="bi bi-x-circle me-1"></i>
+                                                إلغاء
+                                            </button>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = appointmentsHtml;
+        }
+
+        // View appointment details
+        async function viewAppointment(appointmentId) {
+            try {
+                const response = await ApiHelper.makeRequest(`/appointments/${appointmentId}`);
+                
+                if (response.success) {
+                    currentAppointment = response.data.appointment;
+                    const appointment = currentAppointment;
+                    const date = new Date(appointment.appointment_date);
+                    
+                    const detailsHtml = `
+                        <div class="row">
+                            <div class="col-sm-6 mb-3">
+                                <strong>الطبيب:</strong><br>
+                                د. ${appointment.doctor_name || 'غير متوفر'}
+                            </div>
+                            <div class="col-sm-6 mb-3">
+                                <strong>التاريخ والوقت:</strong><br>
+                                ${date.toLocaleDateString('ar-SA')} - ${date.toLocaleTimeString('ar-SA', {hour: '2-digit', minute: '2-digit'})}
+                            </div>
+                            <div class="col-sm-6 mb-3">
+                                <strong>نوع الاستشارة:</strong><br>
+                                ${getAppointmentTypeArabic(appointment.appointment_type)}
+                            </div>
+                            <div class="col-sm-6 mb-3">
+                                <strong>حالة الموعد:</strong><br>
+                                <span class="badge ${getStatusClass(appointment.status)}">${getStatusArabic(appointment.status)}</span>
+                            </div>
+                            ${appointment.reason_for_visit ? `
+                                <div class="col-12 mb-3">
+                                    <strong>سبب الزيارة:</strong><br>
+                                    ${appointment.reason_for_visit}
+                                </div>
+                            ` : ''}
+                            ${appointment.symptoms ? `
+                                <div class="col-12 mb-3">
+                                    <strong>الأعراض:</strong><br>
+                                    ${appointment.symptoms}
+                                </div>
+                            ` : ''}
+                            ${appointment.diagnosis ? `
+                                <div class="col-12 mb-3">
+                                    <strong>التشخيص:</strong><br>
+                                    ${appointment.diagnosis}
+                                </div>
+                            ` : ''}
+                            ${appointment.prescription ? `
+                                <div class="col-12 mb-3">
+                                    <strong>الوصفة الطبية:</strong><br>
+                                    ${appointment.prescription}
+                                </div>
+                            ` : ''}
+                            ${appointment.notes ? `
+                                <div class="col-12 mb-3">
+                                    <strong>ملاحظات:</strong><br>
+                                    ${appointment.notes}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                    
+                    document.getElementById('appointment-details').innerHTML = detailsHtml;
+                    
+                    // Show/hide action buttons based on status
+                    const canModify = ['scheduled', 'confirmed'].includes(appointment.status) && 
+                                     new Date(appointment.appointment_date) > new Date(Date.now() + 60*60*1000);
+                    
+                    const cancelBtn = document.getElementById('cancel-btn');
+                    const rescheduleBtn = document.getElementById('reschedule-btn');
+                    
+                    if (canModify) {
+                        cancelBtn.classList.remove('d-none');
+                        rescheduleBtn.classList.remove('d-none');
+                        cancelBtn.onclick = () => cancelAppointment(appointment.id);
+                        rescheduleBtn.onclick = () => rescheduleAppointment(appointment.id);
+                    } else {
+                        cancelBtn.classList.add('d-none');
+                        rescheduleBtn.classList.add('d-none');
+                    }
+                    
+                    const modal = new bootstrap.Modal(document.getElementById('appointment-modal'));
+                    modal.show();
+                } else {
+                    showError('فشل في تحميل تفاصيل الموعد');
+                }
+            } catch (error) {
+                console.error('Error loading appointment details:', error);
+                showError('خطأ في تحميل تفاصيل الموعد');
+            }
+        }
+
+        // Cancel appointment
+        function cancelAppointment(appointmentId) {
+            currentAppointmentId = appointmentId;
+            document.getElementById('cancellation-reason').value = '';
+            const cancelModal = new bootstrap.Modal(document.getElementById('cancel-modal'));
+            cancelModal.show();
+        }
+
+        // Reschedule appointment
+        function rescheduleAppointment(appointmentId) {
+            currentAppointmentId = appointmentId;
+            currentAppointment = appointments.find(apt => apt.id === appointmentId);
+            
+            if (currentAppointment) {
+                // Show current appointment info
+                const date = new Date(currentAppointment.appointment_date);
+                document.getElementById('current-appointment-info').innerHTML = `
+                    <strong>التاريخ:</strong> ${date.toLocaleDateString('ar-SA')}<br>
+                    <strong>الوقت:</strong> ${date.toLocaleTimeString('ar-SA', {hour: '2-digit', minute: '2-digit'})}<br>
+                    <strong>الطبيب:</strong> د. ${currentAppointment.doctor_name || 'غير متوفر'}
+                `;
+                
+                // Reset form
+                document.getElementById('new-appointment-date').value = '';
+                document.getElementById('reschedule-reason').value = '';
+                document.getElementById('reschedule-time-slots').innerHTML = '';
+                document.getElementById('confirm-reschedule').disabled = true;
+                selectedNewDateTime = null;
+                
+                const rescheduleModal = new bootstrap.Modal(document.getElementById('reschedule-modal'));
+                rescheduleModal.show();
+            }
+        }
+
+        // Load available time slots for reschedule
+        async function loadRescheduleTimeSlots() {
+            if (!currentAppointment) return;
+            
+            const date = document.getElementById('new-appointment-date').value;
+            if (!date) return;
+
+            try {
+                const response = await ApiHelper.makeRequest(
+                    `/appointments/doctors/${currentAppointment.doctor_id}/availability?date=${date}`
+                );
+                
+                if (response.success) {
+                    renderRescheduleTimeSlots(response.data.available_slots);
+                } else {
+                    showError('فشل في تحميل الأوقات المتاحة');
+                }
+            } catch (error) {
+                console.error('Error loading time slots:', error);
+                showError('خطأ في تحميل الأوقات المتاحة');
+            }
+        }
+
+        // Render time slots for reschedule
+        function renderRescheduleTimeSlots(slots) {
+            const container = document.getElementById('reschedule-time-slots');
+            
+            if (slots.length === 0) {
+                container.innerHTML = '<p class="text-muted">لا توجد أوقات متاحة في هذا اليوم</p>';
+                return;
+            }
+
+            const slotsHtml = slots.map(slot => `
+                <button type="button" 
+                        class="btn btn-outline-primary time-slot ${!slot.available ? 'disabled' : ''}"
+                        data-time="${slot.datetime}"
+                        onclick="selectRescheduleTimeSlot('${slot.datetime}', '${slot.start}')"
+                        ${!slot.available ? 'disabled' : ''}>
+                    ${slot.start}
+                </button>
+            `).join('');
+
+            container.innerHTML = slotsHtml;
+        }
+
+        // Select time slot for reschedule
+        function selectRescheduleTimeSlot(datetime, displayTime) {
+            // Remove previous selection
+            document.querySelectorAll('#reschedule-time-slots .time-slot').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add selection to clicked button
+            event.target.classList.add('active');
+            
+            // Store selected time
+            selectedNewDateTime = datetime;
+            
+            // Enable confirm button
+            document.getElementById('confirm-reschedule').disabled = false;
+        }
+
+        // Confirm cancellation
+        async function confirmCancellation() {
+            if (!currentAppointmentId) return;
+
+            try {
+                const reason = document.getElementById('cancellation-reason').value;
+                const response = await ApiHelper.makeRequest(`/appointments/${currentAppointmentId}/cancel`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ cancellation_reason: reason })
+                });
+
+                if (response.success) {
+                    // Close modals
+                    bootstrap.Modal.getInstance(document.getElementById('cancel-modal')).hide();
+                    const appointmentModal = bootstrap.Modal.getInstance(document.getElementById('appointment-modal'));
+                    if (appointmentModal) appointmentModal.hide();
+                    
+                    // Reload appointments
+                    loadAppointments();
+                    
+                    showSuccess('تم إلغاء الموعد بنجاح');
+                } else {
+                    showError(response.message || 'فشل في إلغاء الموعد');
+                }
+            } catch (error) {
+                console.error('Error cancelling appointment:', error);
+                showError('خطأ في إلغاء الموعد');
+            }
+        }
+
+        // Confirm reschedule
+        async function confirmReschedule() {
+            if (!currentAppointmentId || !selectedNewDateTime) return;
+
+            try {
+                const reason = document.getElementById('reschedule-reason').value;
+                const response = await ApiHelper.makeRequest(`/appointments/${currentAppointmentId}/reschedule`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ 
+                        new_appointment_date: selectedNewDateTime,
+                        reschedule_reason: reason 
+                    })
+                });
+
+                if (response.success) {
+                    // Close modals
+                    bootstrap.Modal.getInstance(document.getElementById('reschedule-modal')).hide();
+                    const appointmentModal = bootstrap.Modal.getInstance(document.getElementById('appointment-modal'));
+                    if (appointmentModal) appointmentModal.hide();
+                    
+                    // Reload appointments
+                    loadAppointments();
+                    
+                    showSuccess('تم إعادة جدولة الموعد بنجاح');
+                } else {
+                    showError(response.message || 'فشل في إعادة جدولة الموعد');
+                }
+            } catch (error) {
+                console.error('Error rescheduling appointment:', error);
+                showError('خطأ في إعادة جدولة الموعد');
+            }
+        }
+
+        // Helper functions
+        function getStatusClass(status) {
+            const classes = {
+                scheduled: 'bg-info',
+                confirmed: 'bg-success',
+                in_progress: 'bg-primary',
+                completed: 'bg-secondary',
+                cancelled: 'bg-danger',
+                no_show: 'bg-warning'
+            };
+            return classes[status] || 'bg-secondary';
+        }
+
+        function getStatusArabic(status) {
+            const statuses = {
+                scheduled: 'مجدول',
+                confirmed: 'مؤكد',
+                in_progress: 'جاري',
+                completed: 'مكتمل',
+                cancelled: 'مُلغى',
+                no_show: 'لم يحضر'
+            };
+            return statuses[status] || status;
+        }
+
+        function getAppointmentTypeArabic(type) {
+            const types = {
+                video: 'مكالمة فيديو',
+                audio: 'مكالمة صوتية',
+                chat: 'محادثة نصية'
+            };
+            return types[type] || type;
+        }
+
+        function showError(message) {
+            // Simple error display - enhance with better UI following main.js patterns
+            alert(message);
+        }
+
+        function showSuccess(message) {
+            // Simple success display - enhance with better UI following main.js patterns
+            alert(message);
+        }
+
+        function bookNewAppointment() {
+            window.location.href = 'book-appointment.html';
+        }
+
+        function goToDashboard() {
+            window.location.href = '../dashboard/patient.html';
+        }
+    </script>
+</body>
+</html>

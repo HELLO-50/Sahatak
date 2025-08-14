@@ -1,0 +1,494 @@
+// Appointment Booking System - following main.js patterns
+const AppointmentBooking = {
+    currentStep: 1,
+    maxSteps: 3,
+    selectedDoctor: null,
+    selectedDateTime: null,
+    selectedType: 'video',
+    
+    // Initialize the booking system
+    async init() {
+        // Ensure translations are loaded first
+        if (!LanguageManager.translations || !LanguageManager.translations.ar) {
+            await LanguageManager.loadTranslations();
+        }
+        
+        // Update UI with translations
+        this.updateUITranslations();
+        this.loadDoctors();
+        this.setupEventListeners();
+        this.setMinDate();
+    },
+
+    // Update UI with current language translations
+    updateUITranslations() {
+        const lang = LanguageManager.getLanguage() || 'ar';
+        const t = LanguageManager.translations[lang];
+        if (!t || !t.appointments) return;
+
+        // Update page title and main headings
+        this.updateElementText('page-title', t.appointments.book_title);
+        this.updateElementText('page-subtitle', t.appointments.book_subtitle);
+        
+        // Update step indicators
+        this.updateElementText('step1-text', t.appointments.step_select_doctor);
+        this.updateElementText('step2-text', t.appointments.step_select_time);
+        this.updateElementText('step3-text', t.appointments.step_confirm);
+        
+        // Update form labels
+        this.updateElementText('choose-doctor-label', t.appointments.choose_doctor);
+        this.updateElementText('specialty-label', t.appointments.specialty);
+        this.updateElementText('date-time-label', t.appointments.date_time);
+        this.updateElementText('date-label', t.appointments.date);
+        this.updateElementText('consultation-type-label', t.appointments.consultation_type);
+        this.updateElementText('available-times-label', t.appointments.available_times);
+        this.updateElementText('reason-visit-label', t.appointments.reason_visit);
+        this.updateElementText('confirm-appointment-label', t.appointments.confirm_appointment);
+        
+        // Update buttons
+        this.updateElementText('prev-btn-text', t.appointments.previous);
+        this.updateElementText('next-btn-text', t.appointments.next);
+        this.updateElementText('confirm-btn-text', t.appointments.confirm_booking);
+        
+        // Update specialty options
+        this.updateSpecialtyOptions(lang);
+        
+        // Update consultation type options
+        this.updateConsultationTypeOptions(lang);
+    },
+
+    // Helper function to update element text
+    updateElementText(elementId, text) {
+        const element = document.getElementById(elementId);
+        if (element && text) {
+            element.textContent = text;
+        }
+    },
+
+    // Update specialty select options
+    updateSpecialtyOptions(lang) {
+        const specialtySelect = document.getElementById('specialty-filter');
+        const t = LanguageManager.translations[lang];
+        if (!specialtySelect || !t) return;
+
+        specialtySelect.innerHTML = `
+            <option value="">${t.appointments.all_specialties}</option>
+            <option value="cardiology">${lang === 'ar' ? 'أمراض القلب' : 'Cardiology'}</option>
+            <option value="pediatrics">${lang === 'ar' ? 'طب الأطفال' : 'Pediatrics'}</option>
+            <option value="dermatology">${lang === 'ar' ? 'الأمراض الجلدية' : 'Dermatology'}</option>
+            <option value="internal">${lang === 'ar' ? 'الطب الباطني' : 'Internal Medicine'}</option>
+            <option value="general">${lang === 'ar' ? 'طب عام' : 'General Medicine'}</option>
+        `;
+    },
+
+    // Update consultation type options
+    updateConsultationTypeOptions(lang) {
+        const typeSelect = document.getElementById('appointment-type');
+        const t = LanguageManager.translations[lang];
+        if (!typeSelect || !t) return;
+
+        typeSelect.innerHTML = `
+            <option value="video">${t.appointments.video_call}</option>
+            <option value="audio">${t.appointments.audio_call}</option>
+            <option value="chat">${t.appointments.text_chat}</option>
+        `;
+    },
+
+    // Setup event listeners
+    setupEventListeners() {
+        // Navigation buttons
+        document.getElementById('next-btn').addEventListener('click', () => this.nextStep());
+        document.getElementById('prev-btn').addEventListener('click', () => this.prevStep());
+        document.getElementById('confirm-btn').addEventListener('click', () => this.confirmBooking());
+        
+        // Specialty filter
+        document.getElementById('specialty-filter').addEventListener('change', () => this.loadDoctors());
+        
+        // Date change
+        document.getElementById('appointment-date').addEventListener('change', () => this.loadTimeSlots());
+        
+        // Appointment type change
+        document.getElementById('appointment-type').addEventListener('change', (e) => {
+            this.selectedType = e.target.value;
+        });
+    },
+
+    // Set minimum date to today
+    setMinDate() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('appointment-date').min = today;
+        document.getElementById('appointment-date').value = today;
+    },
+
+    // Load doctors list
+    async loadDoctors() {
+        try {
+            const specialty = document.getElementById('specialty-filter').value;
+            const params = specialty ? `?specialty=${specialty}` : '';
+            
+            const response = await ApiHelper.makeRequest(`/users/doctors${params}`);
+            
+            if (response.success) {
+                this.renderDoctors(response.doctors);
+            } else {
+                this.showError('A4D AJ *-EJD B'&E) 'D#7('!');
+            }
+        } catch (error) {
+            console.error('Error loading doctors:', error);
+            this.showError('.7# AJ 'D'*5'D ('D.'/E');
+        }
+    },
+
+    // Render doctors list
+    renderDoctors(doctors) {
+        const container = document.getElementById('doctors-list');
+        
+        if (doctors.length === 0) {
+            container.innerHTML = `
+                <div class="col-12 text-center py-5">
+                    <i class="bi bi-person-x display-4 text-muted mb-3"></i>
+                    <p class="text-muted">D' JH,/ #7('! E*'-HF AJ G0' 'D*.55</p>
+                </div>
+            `;
+            return;
+        }
+
+        const doctorsHtml = doctors.map(doctor => `
+            <div class="col-md-6 mb-4">
+                <div class="card doctor-card h-100 ${this.selectedDoctor?.id === doctor.id ? 'selected' : ''}" 
+                     onclick="AppointmentBooking.selectDoctor(${doctor.id})">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="doctor-avatar me-3">
+                                <i class="bi bi-person-circle display-6 text-primary"></i>
+                            </div>
+                            <div>
+                                <h5 class="card-title mb-1">/. ${doctor.user.full_name}</h5>
+                                <p class="text-muted small mb-0">${this.getSpecialtyArabic(doctor.specialty)}</p>
+                                <div class="rating mt-1">
+                                    ${this.renderStars(doctor.rating)}
+                                    <small class="text-muted">(${doctor.total_reviews} *BJJE)</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <small class="text-muted d-block">'D.(1)</small>
+                                <strong>${doctor.years_of_experience} 3F)</strong>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted d-block">'D#,1</small>
+                                <strong>${doctor.consultation_fee ? doctor.consultation_fee + ' /.3' : 'E,'FJ'}</strong>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted d-block">'D-'D)</small>
+                                <span class="badge bg-success">E*'-</span>
+                            </div>
+                        </div>
+                        
+                        ${doctor.bio ? `<p class="text-muted small mt-3">${doctor.bio}</p>` : ''}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        container.innerHTML = doctorsHtml;
+    },
+
+    // Select a doctor
+    selectDoctor(doctorId) {
+        // Remove previous selection
+        document.querySelectorAll('.doctor-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        
+        // Add selection to clicked card
+        event.currentTarget.classList.add('selected');
+        
+        // Store selected doctor
+        this.selectedDoctor = { id: doctorId };
+        
+        // Enable next button
+        document.getElementById('next-btn').disabled = false;
+    },
+
+    // Load available time slots
+    async loadTimeSlots() {
+        if (!this.selectedDoctor) return;
+        
+        const date = document.getElementById('appointment-date').value;
+        if (!date) return;
+
+        try {
+            const response = await ApiHelper.makeRequest(
+                `/appointments/doctors/${this.selectedDoctor.id}/availability?date=${date}`
+            );
+            
+            if (response.success) {
+                this.renderTimeSlots(response.data.available_slots);
+            } else {
+                this.showError('A4D AJ *-EJD 'D#HB'* 'DE*'-)');
+            }
+        } catch (error) {
+            console.error('Error loading time slots:', error);
+            this.showError('.7# AJ *-EJD 'D#HB'* 'DE*'-)');
+        }
+    },
+
+    // Render time slots
+    renderTimeSlots(slots) {
+        const container = document.getElementById('time-slots');
+        
+        if (slots.length === 0) {
+            container.innerHTML = '<p class="text-muted">D' *H,/ #HB'* E*'-) AJ G0' 'DJHE</p>';
+            return;
+        }
+
+        const slotsHtml = slots.map(slot => `
+            <button type="button" 
+                    class="btn btn-outline-primary time-slot ${!slot.available ? 'disabled' : ''}"
+                    data-time="${slot.datetime}"
+                    onclick="AppointmentBooking.selectTimeSlot('${slot.datetime}', '${slot.start}')"
+                    ${!slot.available ? 'disabled' : ''}>
+                ${slot.start}
+            </button>
+        `).join('');
+
+        container.innerHTML = slotsHtml;
+    },
+
+    // Select time slot
+    selectTimeSlot(datetime, displayTime) {
+        // Remove previous selection
+        document.querySelectorAll('.time-slot').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        // Add selection to clicked button
+        event.target.classList.add('active');
+        
+        // Store selected time
+        this.selectedDateTime = {
+            datetime: datetime,
+            displayTime: displayTime
+        };
+    },
+
+    // Move to next step
+    nextStep() {
+        if (this.currentStep === 1 && !this.selectedDoctor) {
+            this.showError('J1,I '.*J'1 7(J(');
+            return;
+        }
+        
+        if (this.currentStep === 2 && !this.selectedDateTime) {
+            this.showError('J1,I '.*J'1 HB* DDEH9/');
+            return;
+        }
+
+        if (this.currentStep < this.maxSteps) {
+            this.currentStep++;
+            this.updateStepDisplay();
+            
+            if (this.currentStep === 2) {
+                this.loadTimeSlots();
+            } else if (this.currentStep === 3) {
+                this.showSummary();
+            }
+        }
+    },
+
+    // Move to previous step
+    prevStep() {
+        if (this.currentStep > 1) {
+            this.currentStep--;
+            this.updateStepDisplay();
+        }
+    },
+
+    // Update step display
+    updateStepDisplay() {
+        // Update progress bar
+        const progress = (this.currentStep / this.maxSteps) * 100;
+        document.getElementById('progress-bar').style.width = `${progress}%`;
+        
+        // Update step indicators
+        for (let i = 1; i <= this.maxSteps; i++) {
+            const stepText = document.getElementById(`step${i}-text`);
+            if (i === this.currentStep) {
+                stepText.classList.remove('text-muted');
+                stepText.classList.add('text-primary', 'fw-bold');
+            } else if (i < this.currentStep) {
+                stepText.classList.remove('text-muted');
+                stepText.classList.add('text-success');
+            } else {
+                stepText.classList.add('text-muted');
+                stepText.classList.remove('text-primary', 'fw-bold', 'text-success');
+            }
+        }
+        
+        // Show/hide steps
+        for (let i = 1; i <= this.maxSteps; i++) {
+            const stepDiv = document.getElementById(`step${i}`);
+            if (i === this.currentStep) {
+                stepDiv.classList.remove('d-none');
+            } else {
+                stepDiv.classList.add('d-none');
+            }
+        }
+        
+        // Update navigation buttons
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const confirmBtn = document.getElementById('confirm-btn');
+        
+        if (this.currentStep === 1) {
+            prevBtn.style.display = 'none';
+        } else {
+            prevBtn.style.display = 'block';
+        }
+        
+        if (this.currentStep === this.maxSteps) {
+            nextBtn.classList.add('d-none');
+            confirmBtn.classList.remove('d-none');
+        } else {
+            nextBtn.classList.remove('d-none');
+            confirmBtn.classList.add('d-none');
+        }
+    },
+
+    // Show appointment summary
+    async showSummary() {
+        try {
+            // Get doctor details
+            const response = await ApiHelper.makeRequest(`/users/doctors/${this.selectedDoctor.id}`);
+            
+            if (response.success) {
+                const doctor = response.doctor;
+                const date = new Date(this.selectedDateTime.datetime);
+                
+                const summaryHtml = `
+                    <div class="row">
+                        <div class="col-sm-6 mb-3">
+                            <strong>'D7(J(:</strong><br>
+                            /. ${doctor.user.full_name}
+                        </div>
+                        <div class="col-sm-6 mb-3">
+                            <strong>'D*.55:</strong><br>
+                            ${this.getSpecialtyArabic(doctor.specialty)}
+                        </div>
+                        <div class="col-sm-6 mb-3">
+                            <strong>'D*'1J.:</strong><br>
+                            ${date.toLocaleDateString('ar-SA')}
+                        </div>
+                        <div class="col-sm-6 mb-3">
+                            <strong>'DHB*:</strong><br>
+                            ${this.selectedDateTime.displayTime}
+                        </div>
+                        <div class="col-sm-6 mb-3">
+                            <strong>FH9 'D'3*4'1):</strong><br>
+                            ${this.getAppointmentTypeArabic(this.selectedType)}
+                        </div>
+                        <div class="col-sm-6 mb-3">
+                            <strong>'D#,1:</strong><br>
+                            ${doctor.consultation_fee ? doctor.consultation_fee + ' /.3' : 'E,'FJ'}
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('appointment-summary').innerHTML = summaryHtml;
+            }
+        } catch (error) {
+            console.error('Error loading doctor details:', error);
+        }
+    },
+
+    // Confirm booking
+    async confirmBooking() {
+        const termsAgreed = document.getElementById('terms-agreement').checked;
+        if (!termsAgreed) {
+            this.showError('J1,I 'DEH'AB) 9DI 'D41H7 H'D#-C'E');
+            return;
+        }
+
+        try {
+            const bookingData = {
+                doctor_id: this.selectedDoctor.id,
+                appointment_date: this.selectedDateTime.datetime,
+                appointment_type: this.selectedType,
+                reason_for_visit: document.getElementById('reason-visit').value
+            };
+
+            const response = await ApiHelper.makeRequest('/appointments/', {
+                method: 'POST',
+                body: JSON.stringify(bookingData)
+            });
+
+            if (response.success) {
+                // Show success modal
+                const modal = new bootstrap.Modal(document.getElementById('success-modal'));
+                modal.show();
+            } else {
+                this.showError(response.message || 'A4D AJ -,2 'DEH9/');
+            }
+        } catch (error) {
+            console.error('Error confirming booking:', error);
+            this.showError('.7# AJ *#CJ/ 'D-,2');
+        }
+    },
+
+    // Helper functions
+    getSpecialtyArabic(specialty) {
+        const specialties = {
+            cardiology: '#E1'6 'DBD(',
+            pediatrics: '7( 'D#7A'D',
+            dermatology: ''D#E1'6 'D,D/J)',
+            internal: ''D7( 'D('7FJ',
+            psychiatry: ''D7( 'DFA3J',
+            orthopedics: ''D98'E',
+            general: '7( 9'E'
+        };
+        return specialties[specialty] || specialty;
+    },
+
+    getAppointmentTypeArabic(type) {
+        const types = {
+            video: 'EC'DE) AJ/JH',
+            audio: 'EC'DE) 5H*J)',
+            chat: 'E-'/+) F5J)'
+        };
+        return types[type] || type;
+    },
+
+    renderStars(rating) {
+        const stars = [];
+        const fullStars = Math.floor(rating);
+        const hasHalfStar = rating % 1 >= 0.5;
+        
+        for (let i = 0; i < fullStars; i++) {
+            stars.push('<i class="bi bi-star-fill text-warning"></i>');
+        }
+        
+        if (hasHalfStar) {
+            stars.push('<i class="bi bi-star-half text-warning"></i>');
+        }
+        
+        const remainingStars = 5 - Math.ceil(rating);
+        for (let i = 0; i < remainingStars; i++) {
+            stars.push('<i class="bi bi-star text-warning"></i>');
+        }
+        
+        return stars.join('');
+    },
+
+    showError(message) {
+        // Simple error display - you can enhance this with better UI
+        alert(message);
+    }
+};
+
+// Make sure ApiHelper is available
+if (typeof ApiHelper === 'undefined') {
+    console.error('ApiHelper is required for appointment booking');
+}

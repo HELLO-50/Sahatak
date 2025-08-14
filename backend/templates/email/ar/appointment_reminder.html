@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>*#CJ/ 'DEH9/</title>
+    <title>تذكير موعد</title>
     <style>
         body { font-family: Arial; margin: 0; padding: 20px; background: #f5f5f5; }
         .container { max-width: 400px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
-        .header { text-align: center; color: #198754; margin-bottom: 20px; }
+        .header { text-align: center; color: #0d6efd; margin-bottom: 20px; }
         .info { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; }
         .footer { text-align: center; color: #666; font-size: 12px; margin-top: 20px; }
     </style>
@@ -15,20 +15,26 @@
 <body>
     <div class="container">
         <div class="header">
-            <h2>*E *#CJ/ EH9/C</h2>
+            <h2>تذكير: موعدك الطبي</h2>
         </div>
         
         <div class="info">
-            <strong>'D7(J(:</strong> /. {{ doctor_name }}<br>
-            <strong>'D*'1J.:</strong> {{ appointment_date }}<br>
-            <strong>'DHB*:</strong> {{ appointment_time }}<br>
-            <strong>'DFH9:</strong> {{ appointment_type }}
+            <strong>الطبيب:</strong> د. {{ doctor_name }}<br>
+            <strong>التاريخ:</strong> {{ appointment_date }}<br>
+            <strong>الوقت:</strong> {{ appointment_time }}<br>
+            <strong>النوع:</strong> {{ appointment_type }}
         </div>
         
-        <p>*E -,2 EH9/C (F,'-</p>
+        {% if reminder_type == '1h' %}
+        <p>موعدك خلال ساعة واحدة</p>
+        {% elif reminder_type == 'now' %}
+        <p>موعدك الآن</p>
+        {% else %}
+        <p>موعدك غداً</p>
+        {% endif %}
         
         <div class="footer">
-            {{ app_name }} | 5-*C
+            {{ app_name }} | صحتك
         </div>
     </div>
 </body>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حجز موعد | صحتك</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Arabic Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS - using main.css first, then component-specific -->
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../../assets/css/components/appointments.css">
+</head>
+<body>
+    <!-- Header -->
+    <nav class="navbar navbar-expand-lg bg-primary navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-heart-pulse me-2"></i>
+                صحتك | Sahatak
+            </a>
+            <button class="btn btn-outline-light" onclick="goBack()">
+                <i class="bi bi-arrow-right me-1"></i>
+                العودة
+            </button>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Page Header -->
+                <div class="text-center mb-5">
+                    <h1 class="display-6 mb-3">
+                        <i class="bi bi-calendar-plus text-primary me-3"></i>
+                        <span id="page-title">حجز موعد جديد</span>
+                    </h1>
+                    <p class="lead text-muted" id="page-subtitle">اختر الطبيب والوقت المناسب لك</p>
+                </div>
+
+                <!-- Booking Steps -->
+                <div class="card shadow-lg border-0">
+                    <div class="card-body p-4">
+                        <!-- Step Indicator -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="progress" style="height: 3px;">
+                                    <div class="progress-bar" id="progress-bar" style="width: 33%"></div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-4 text-center">
+                                        <small class="text-primary fw-bold" id="step1-text">1. اختيار الطبيب</small>
+                                    </div>
+                                    <div class="col-4 text-center">
+                                        <small class="text-muted" id="step2-text">2. اختيار الوقت</small>
+                                    </div>
+                                    <div class="col-4 text-center">
+                                        <small class="text-muted" id="step3-text">3. تأكيد الموعد</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 1: Doctor Selection -->
+                        <div id="step1" class="booking-step">
+                            <h4 class="mb-4">
+                                <i class="bi bi-person-badge text-primary me-2"></i>
+                                <span id="choose-doctor-label">اختر الطبيب المناسب</span>
+                            </h4>
+
+                            <!-- Specialty Filter -->
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label for="specialty-filter" class="form-label" id="specialty-label">التخصص</label>
+                                    <select class="form-select" id="specialty-filter">
+                                        <option value="">جميع التخصصات</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Doctors List -->
+                            <div id="doctors-list" class="row">
+                                <div class="col-12 text-center py-5">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">جاري التحميل...</span>
+                                    </div>
+                                    <p class="mt-3 text-muted" id="loading-text">جاري تحميل قائمة الأطباء...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Time Selection -->
+                        <div id="step2" class="booking-step d-none">
+                            <h4 class="mb-4">
+                                <i class="bi bi-clock text-primary me-2"></i>
+                                <span id="date-time-label">اختر التاريخ والوقت</span>
+                            </h4>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label for="appointment-date" class="form-label" id="date-label">التاريخ</label>
+                                    <input type="date" class="form-control" id="appointment-date">
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <label for="appointment-type" class="form-label" id="consultation-type-label">نوع الاستشارة</label>
+                                    <select class="form-select" id="appointment-type">
+                                        <option value="video">مكالمة فيديو</option>
+                                        <option value="audio">مكالمة صوتية</option>
+                                        <option value="chat">محادثة نصية</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Available Time Slots -->
+                            <div id="time-slots-container" class="mb-4">
+                                <h6 class="mb-3" id="available-times-label">الأوقات المتاحة</h6>
+                                <div id="time-slots" class="d-flex flex-wrap gap-2">
+                                    <!-- Time slots will be populated here -->
+                                </div>
+                            </div>
+
+                            <!-- Reason for Visit -->
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label for="reason-visit" class="form-label" id="reason-visit-label">سبب الزيارة</label>
+                                    <textarea class="form-control" id="reason-visit" rows="3" placeholder="اكتب سبب زيارتك للطبيب..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Confirmation -->
+                        <div id="step3" class="booking-step d-none">
+                            <h4 class="mb-4">
+                                <i class="bi bi-check-circle text-primary me-2"></i>
+                                <span id="confirm-appointment-label">تأكيد الموعد</span>
+                            </h4>
+
+                            <div id="appointment-summary" class="border rounded p-4 bg-light mb-4">
+                                <!-- Appointment summary will be populated here -->
+                            </div>
+
+                            <div class="form-check mb-4">
+                                <input class="form-check-input" type="checkbox" id="terms-agreement">
+                                <label class="form-check-label" for="terms-agreement" id="terms-label">
+                                    أوافق على <a href="#" class="text-primary">شروط الاستخدام</a> و <a href="#" class="text-primary">سياسة الخصوصية</a>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Navigation Buttons -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="button" class="btn btn-outline-secondary" id="prev-btn" style="display: none;">
+                                <i class="bi bi-arrow-right me-1"></i>
+                                <span id="prev-btn-text">السابق</span>
+                            </button>
+                            
+                            <div class="ms-auto">
+                                <button type="button" class="btn btn-primary" id="next-btn">
+                                    <span id="next-btn-text">التالي</span>
+                                    <i class="bi bi-arrow-left ms-1"></i>
+                                </button>
+                                <button type="button" class="btn btn-success d-none" id="confirm-btn">
+                                    <i class="bi bi-calendar-check me-1"></i>
+                                    <span id="confirm-btn-text">تأكيد الحجز</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal fade" id="success-modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                        <span id="success-title">تم الحجز بنجاح</span>
+                    </h5>
+                </div>
+                <div class="modal-body text-center">
+                    <p class="mb-3" id="success-message">تم حجز موعدك بنجاح!</p>
+                    <p class="text-muted small" id="success-email">سيتم إرسال تفاصيل الموعد إلى بريدك الإلكتروني</p>
+                </div>
+                <div class="modal-footer border-0 justify-content-center">
+                    <button type="button" class="btn btn-primary" onclick="goToAppointments()">
+                        <span id="view-appointments-btn">عرض مواعيدي</span>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="goToDashboard()">
+                        <span id="back-home-btn">العودة للرئيسية</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS - following main.js pattern: main.js first, then components -->
+    <script src="../../assets/js/main.js"></script>
+    <script src="../../assets/js/components/appointment-booking.js"></script>
+    
+    <script>
+        // Initialize booking system when page loads - following main.js patterns
+        document.addEventListener('DOMContentLoaded', async function() {
+            await AppointmentBooking.init();
+        });
+
+        function goBack() {
+            window.history.back();
+        }
+
+        function goToAppointments() {
+            window.location.href = 'appointment-list.html';
+        }
+
+        function goToDashboard() {
+            window.location.href = '../dashboard/patient.html';
+        }
+    </script>
+</body>
+</html>

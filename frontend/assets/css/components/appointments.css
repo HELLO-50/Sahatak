@@ -1,24 +1,5 @@
 /* Sahatak Appointments CSS - Booking, Management and Video Consultation */
-
-/* Root Variables - Matching medical theme */
-:root {
-    --primary-color: #0d6efd;
-    --secondary-color: #6c757d;
-    --success-color: #198754;
-    --info-color: #0dcaf0;
-    --warning-color: #ffc107;
-    --danger-color: #dc3545;
-    --light-color: #f8f9fa;
-    --dark-color: #212529;
-    
-    /* Medical Theme Colors */
-    --medical-blue: #2563eb;
-    --medical-green: #059669;
-    --medical-teal: #0891b2;
-    --soft-gray: #f1f5f9;
-    --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-    --hover-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
+/* Uses CSS variables from main.css for consistency */
 
 /* Appointment Layout */
 .appointments-container {
@@ -35,13 +16,13 @@
     border-radius: 15px;
     padding: 1.5rem;
     margin-bottom: 1.5rem;
-    box-shadow: var(--card-shadow);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
     transition: all 0.3s ease;
 }
 
 .appointment-card:hover {
     transform: translateY(-2px);
-    box-shadow: var(--hover-shadow);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 /* Appointment Status Badges */
@@ -84,7 +65,7 @@
     border-radius: 15px;
     padding: 1.5rem;
     margin-bottom: 1rem;
-    box-shadow: var(--card-shadow);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
     transition: all 0.3s ease;
     cursor: pointer;
     border: 2px solid transparent;
@@ -92,7 +73,7 @@
 
 .doctor-card:hover {
     transform: translateY(-2px);
-    box-shadow: var(--hover-shadow);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
     border-color: var(--medical-blue);
 }
 
@@ -142,7 +123,7 @@
     background: white;
     border-radius: 15px;
     padding: 1.5rem;
-    box-shadow: var(--card-shadow);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
     margin-bottom: 1.5rem;
 }
 
@@ -189,7 +170,7 @@
     background: white;
     border-radius: 15px;
     padding: 1.5rem;
-    box-shadow: var(--card-shadow);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
     margin-bottom: 1.5rem;
 }
 
@@ -350,7 +331,7 @@
     background: white;
     border-radius: 15px;
     padding: 2rem;
-    box-shadow: var(--card-shadow);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
 }
 
 .appointment-form .form-control,
@@ -372,7 +353,7 @@
     background: white;
     border-radius: 15px;
     overflow: hidden;
-    box-shadow: var(--card-shadow);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
 }
 
 .appointment-item {
@@ -410,7 +391,7 @@
     border-radius: 15px;
     margin-bottom: 1.5rem;
     text-align: center;
-    box-shadow: var(--card-shadow);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
 }
 
 .emergency-banner .btn {

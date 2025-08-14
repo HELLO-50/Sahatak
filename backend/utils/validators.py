@@ -296,6 +296,371 @@ def validate_specialty(specialty: str) -> Dict[str, Union[bool, str]]:
         'message': 'Specialty is valid'
     }
 
+def validate_date(date_str: str) -> Dict[str, Union[bool, str]]:
+    """
+    Validate date string in YYYY-MM-DD format
+    
+    Args:
+        date_str: Date string to validate
+        
+    Returns:
+        dict: Contains 'valid' (bool) and 'message' (str)
+    """
+    if not date_str or not isinstance(date_str, str):
+        return {
+            'valid': False,
+            'message': 'Date is required'
+        }
+    
+    try:
+        from datetime import datetime
+        datetime.strptime(date_str, '%Y-%m-%d')
+        return {
+            'valid': True,
+            'message': 'Date is valid'
+        }
+    except ValueError:
+        return {
+            'valid': False,
+            'message': 'Invalid date format. Use YYYY-MM-DD'
+        }
+
+def validate_appointment_type(appointment_type: str) -> Dict[str, Union[bool, str]]:
+    """
+    Validate appointment type
+    
+    Args:
+        appointment_type: Appointment type to validate
+        
+    Returns:
+        dict: Contains 'valid' (bool) and 'message' (str)
+    """
+    valid_types = ['video', 'audio', 'chat']
+    
+    if not appointment_type or not isinstance(appointment_type, str):
+        return {
+            'valid': False,
+            'message': 'Appointment type is required'
+        }
+    
+    if appointment_type.lower() not in valid_types:
+        return {
+            'valid': False,
+            'message': f'Invalid appointment type. Must be one of: {", ".join(valid_types)}'
+        }
+    
+    return {
+        'valid': True,
+        'message': 'Appointment type is valid'
+    }
+
+def validate_prescription_data(prescription_data: dict) -> Dict[str, Union[bool, str]]:
+    """
+    Validate prescription data
+    
+    Args:
+        prescription_data: Dictionary containing prescription details
+        
+    Returns:
+        dict: Contains 'valid' (bool) and 'message' (str)
+    """
+    required_fields = ['medication_name', 'dosage', 'frequency', 'duration']
+    
+    # Check for required fields
+    for field in required_fields:
+        if not prescription_data.get(field):
+            return {
+                'valid': False,
+                'message': f'{field.replace("_", " ").title()} is required'
+            }
+    
+    # Validate medication name
+    medication_name = prescription_data.get('medication_name', '').strip()
+    if len(medication_name) < 2 or len(medication_name) > 200:
+        return {
+            'valid': False,
+            'message': 'Medication name must be between 2 and 200 characters'
+        }
+    
+    # Validate dosage
+    dosage = prescription_data.get('dosage', '').strip()
+    if len(dosage) < 1 or len(dosage) > 100:
+        return {
+            'valid': False,
+            'message': 'Dosage must be between 1 and 100 characters'
+        }
+    
+    # Validate frequency
+    frequency = prescription_data.get('frequency', '').strip()
+    if len(frequency) < 1 or len(frequency) > 100:
+        return {
+            'valid': False,
+            'message': 'Frequency must be between 1 and 100 characters'
+        }
+    
+    # Validate duration
+    duration = prescription_data.get('duration', '').strip()
+    if len(duration) < 1 or len(duration) > 100:
+        return {
+            'valid': False,
+            'message': 'Duration must be between 1 and 100 characters'
+        }
+    
+    # Validate optional fields if provided
+    if 'quantity' in prescription_data and prescription_data['quantity']:
+        quantity = prescription_data['quantity'].strip()
+        if len(quantity) > 50:
+            return {
+                'valid': False,
+                'message': 'Quantity must be less than 50 characters'
+            }
+    
+    if 'instructions' in prescription_data and prescription_data['instructions']:
+        instructions = prescription_data['instructions'].strip()
+        if len(instructions) > 1000:
+            return {
+                'valid': False,
+                'message': 'Instructions must be less than 1000 characters'
+            }
+    
+    if 'notes' in prescription_data and prescription_data['notes']:
+        notes = prescription_data['notes'].strip()
+        if len(notes) > 1000:
+            return {
+                'valid': False,
+                'message': 'Notes must be less than 1000 characters'
+            }
+    
+    # Validate refills if provided
+    if 'refills_allowed' in prescription_data:
+        try:
+            refills = int(prescription_data['refills_allowed'])
+            if refills < 0 or refills > 10:
+                return {
+                    'valid': False,
+                    'message': 'Refills allowed must be between 0 and 10'
+                }
+        except (ValueError, TypeError):
+            return {
+                'valid': False,
+                'message': 'Refills allowed must be a valid number'
+            }
+    
+    return {
+        'valid': True,
+        'message': 'Prescription data is valid'
+    }
+
+def validate_prescription_status(status: str) -> Dict[str, Union[bool, str]]:
+    """
+    Validate prescription status
+    
+    Args:
+        status: Status to validate
+        
+    Returns:
+        dict: Contains 'valid' (bool) and 'message' (str)
+    """
+    valid_statuses = ['active', 'completed', 'cancelled', 'expired']
+    
+    if not status or not isinstance(status, str):
+        return {
+            'valid': False,
+            'message': 'Status is required'
+        }
+    
+    if status.lower() not in valid_statuses:
+        return {
+            'valid': False,
+            'message': f'Invalid status. Must be one of: {", ".join(valid_statuses)}'
+        }
+    
+    return {
+        'valid': True,
+        'message': 'Status is valid'
+    }
+
+def validate_json_data(data: dict, required_fields: list) -> Dict[str, Union[bool, str]]:
+    """
+    Validate JSON data contains required fields
+    
+    Args:
+        data: Dictionary to validate
+        required_fields: List of required field names
+        
+    Returns:
+        dict: Contains 'valid' (bool) and 'message' (str)
+    """
+    if not data or not isinstance(data, dict):
+        return {
+            'valid': False,
+            'message': 'Invalid data provided'
+        }
+    
+    missing_fields = []
+    for field in required_fields:
+        if field not in data or data[field] is None or (isinstance(data[field], str) and not data[field].strip()):
+            missing_fields.append(field)
+    
+    if missing_fields:
+        return {
+            'valid': False,
+            'message': f'Missing required fields: {", ".join(missing_fields)}'
+        }
+    
+    return {
+        'valid': True,
+        'message': 'Data is valid'
+    }
+
+def validate_medical_history_data(medical_data: dict) -> Dict[str, Union[bool, str]]:
+    """
+    Validate comprehensive medical history data
+    
+    Args:
+        medical_data: Dictionary containing medical history details
+        
+    Returns:
+        dict: Contains 'valid' (bool) and 'message' (str)
+    """
+    # Validate smoking status if provided
+    if 'smoking_status' in medical_data and medical_data['smoking_status']:
+        valid_smoking = ['never', 'former', 'current']
+        if medical_data['smoking_status'] not in valid_smoking:
+            return {
+                'valid': False,
+                'message': f'Invalid smoking status. Must be one of: {", ".join(valid_smoking)}'
+            }
+    
+    # Validate alcohol consumption if provided
+    if 'alcohol_consumption' in medical_data and medical_data['alcohol_consumption']:
+        valid_alcohol = ['none', 'occasional', 'moderate', 'heavy']
+        if medical_data['alcohol_consumption'] not in valid_alcohol:
+            return {
+                'valid': False,
+                'message': f'Invalid alcohol consumption. Must be one of: {", ".join(valid_alcohol)}'
+            }
+    
+    # Validate exercise frequency if provided
+    if 'exercise_frequency' in medical_data and medical_data['exercise_frequency']:
+        valid_exercise = ['none', 'rare', 'weekly', 'daily']
+        if medical_data['exercise_frequency'] not in valid_exercise:
+            return {
+                'valid': False,
+                'message': f'Invalid exercise frequency. Must be one of: {", ".join(valid_exercise)}'
+            }
+    
+    # Validate height if provided (in cm)
+    if 'height' in medical_data and medical_data['height']:
+        try:
+            height = float(medical_data['height'])
+            if height < 30 or height > 300:  # Reasonable range
+                return {
+                    'valid': False,
+                    'message': 'Height must be between 30 and 300 cm'
+                }
+        except (ValueError, TypeError):
+            return {
+                'valid': False,
+                'message': 'Height must be a valid number'
+            }
+    
+    # Validate weight if provided (in kg)
+    if 'weight' in medical_data and medical_data['weight']:
+        try:
+            weight = float(medical_data['weight'])
+            if weight < 1 or weight > 1000:  # Reasonable range
+                return {
+                    'valid': False,
+                    'message': 'Weight must be between 1 and 1000 kg'
+                }
+        except (ValueError, TypeError):
+            return {
+                'valid': False,
+                'message': 'Weight must be a valid number'
+            }
+    
+    # Validate text fields length
+    text_fields = {
+        'medical_history': 2000,
+        'allergies': 1000,
+        'current_medications': 1000,
+        'chronic_conditions': 1000,
+        'family_history': 2000,
+        'surgical_history': 2000
+    }
+    
+    for field, max_length in text_fields.items():
+        if field in medical_data and medical_data[field]:
+            if len(str(medical_data[field])) > max_length:
+                return {
+                    'valid': False,
+                    'message': f'{field.replace("_", " ").title()} must be less than {max_length} characters'
+                }
+    
+    return {
+        'valid': True,
+        'message': 'Medical history data is valid'
+    }
+
+def validate_blood_type(blood_type: str) -> Dict[str, Union[bool, str]]:
+    """
+    Validate blood type
+    
+    Args:
+        blood_type: Blood type to validate
+        
+    Returns:
+        dict: Contains 'valid' (bool) and 'message' (str)
+    """
+    valid_blood_types = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
+    
+    if not blood_type or not isinstance(blood_type, str):
+        return {
+            'valid': True,  # Blood type is optional
+            'message': 'Blood type is optional'
+        }
+    
+    if blood_type.upper() not in valid_blood_types:
+        return {
+            'valid': False,
+            'message': f'Invalid blood type. Must be one of: {", ".join(valid_blood_types)}'
+        }
+    
+    return {
+        'valid': True,
+        'message': 'Blood type is valid'
+    }
+
+def validate_history_update_type(update_type: str) -> Dict[str, Union[bool, str]]:
+    """
+    Validate medical history update type
+    
+    Args:
+        update_type: Update type to validate
+        
+    Returns:
+        dict: Contains 'valid' (bool) and 'message' (str)
+    """
+    valid_types = ['initial_registration', 'appointment_update', 'patient_self_update', 'doctor_update']
+    
+    if not update_type or not isinstance(update_type, str):
+        return {
+            'valid': False,
+            'message': 'Update type is required'
+        }
+    
+    if update_type not in valid_types:
+        return {
+            'valid': False,
+            'message': f'Invalid update type. Must be one of: {", ".join(valid_types)}'
+        }
+    
+    return {
+        'valid': True,
+        'message': 'Update type is valid'
+    }
+
 def sanitize_input(text: str, max_length: int = None) -> str:
     """
     Sanitize text input by trimming and optionally limiting length

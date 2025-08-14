@@ -1,0 +1,1 @@
+*0CJ1: EH9/ E9 /.{{ doctor_name }} JHE {{ appointment_date }} AJ {{ appointment_time }}. 5-*C

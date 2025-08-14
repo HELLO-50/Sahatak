@@ -1,0 +1,1 @@
+إلغاء: تم إلغاء موعد د.{{ doctor_name }} يوم {{ appointment_date }}. صحتك
