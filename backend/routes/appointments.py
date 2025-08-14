@@ -96,14 +96,15 @@ def create_appointment():
                 message='This time slot is already booked'
             )
         
-        # Create appointment
+        # Create appointment with consultation fee from doctor profile
         appointment = Appointment(
             patient_id=current_user.patient_profile.id,
             doctor_id=data['doctor_id'],
             appointment_date=appointment_date,
             appointment_type=data['appointment_type'],
             reason_for_visit=data.get('reason_for_visit'),
-            symptoms=data.get('symptoms')
+            symptoms=data.get('symptoms'),
+            consultation_fee=doctor.consultation_fee  # Auto-populate fee from doctor
         )
         
         db.session.add(appointment)

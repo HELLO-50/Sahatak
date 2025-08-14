@@ -1,7 +1,9 @@
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, current_app
 from flask_login import login_required, current_user
 from models import db, User, Patient, Doctor
 from utils.validators import validate_name, validate_phone, validate_age
+from utils.responses import success_response, error_response, not_found_response, bad_request_response
+from utils.logging_config import app_logger
 from datetime import datetime
 
 users_bp = Blueprint('users', __name__)
@@ -141,12 +143,13 @@ def update_profile():
 
 @users_bp.route('/doctors', methods=['GET'])
 def get_doctors():
-    """Get list of verified doctors"""
+    """Get list of verified doctors with participation filtering"""
     try:
         # Get pagination parameters
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 10, type=int)
         specialty = request.args.get('specialty')
+        participation_type = request.args.get('participation_type')  # New filter
         
         # Build query
         query = Doctor.query.filter_by(is_verified=True).join(User).filter_by(is_active=True)
@@ -155,8 +158,16 @@ def get_doctors():
         if specialty:
             query = query.filter(Doctor.specialty == specialty)
         
-        # Add ordering
-        query = query.order_by(Doctor.rating.desc(), Doctor.years_of_experience.desc())
+        # Filter by participation type if provided
+        if participation_type and participation_type in ['volunteer', 'paid']:
+            query = query.filter(Doctor.participation_type == participation_type)
+        
+        # Add ordering - prioritize volunteer doctors, then by rating and experience
+        query = query.order_by(
+            Doctor.participation_type.asc(),  # volunteer comes before paid
+            Doctor.rating.desc(), 
+            Doctor.years_of_experience.desc()
+        )
         
         # Paginate
         doctors = query.paginate(
@@ -165,7 +176,7 @@ def get_doctors():
             error_out=False
         )
         
-        # Format response
+        # Format response with enhanced participation info
         doctor_list = []
         for doctor in doctors.items:
             doctor_data = doctor.to_dict()
@@ -173,27 +184,33 @@ def get_doctors():
                 'full_name': doctor.user.get_full_name(),
                 'language_preference': doctor.user.language_preference
             }
+            # Highlight participation info for patient booking
+            doctor_data['participation_info'] = {
+                'type': doctor.participation_type,
+                'is_free': doctor.participation_type == 'volunteer',
+                'consultation_fee': str(doctor.consultation_fee) if doctor.consultation_fee else '0.00',
+                'display_fee': 'Free' if doctor.participation_type == 'volunteer' else f"{doctor.consultation_fee} SDG"
+            }
             doctor_list.append(doctor_data)
         
-        return jsonify({
-            'success': True,
-            'doctors': doctor_list,
-            'pagination': {
-                'page': doctors.page,
-                'pages': doctors.pages,
-                'per_page': doctors.per_page,
-                'total': doctors.total,
-                'has_next': doctors.has_next,
-                'has_prev': doctors.has_prev
+        return success_response(
+            message="Doctors retrieved successfully",
+            data={
+                'doctors': doctor_list,
+                'pagination': {
+                    'page': doctors.page,
+                    'pages': doctors.pages,
+                    'per_page': doctors.per_page,
+                    'total': doctors.total,
+                    'has_next': doctors.has_next,
+                    'has_prev': doctors.has_prev
+                }
             }
-        }), 200
+        )
         
     except Exception as e:
-        current_app.logger.error(f"Get doctors error: {str(e)}")
-        return jsonify({
-            'success': False,
-            'message': 'Failed to get doctors list'
-        }), 500
+        app_logger.error(f"Get doctors error: {str(e)}")
+        return error_response("Failed to get doctors list", 500)
 
 @users_bp.route('/doctors/<int:doctor_id>', methods=['GET'])
 def get_doctor_details(doctor_id):
@@ -202,10 +219,7 @@ def get_doctor_details(doctor_id):
         doctor = Doctor.query.filter_by(id=doctor_id, is_verified=True).join(User).filter_by(is_active=True).first()
         
         if not doctor:
-            return jsonify({
-                'success': False,
-                'message': 'Doctor not found'
-            }), 404
+            return not_found_response("Doctor")
         
         doctor_data = doctor.to_dict()
         doctor_data['user'] = {
@@ -213,18 +227,22 @@ def get_doctor_details(doctor_id):
             'language_preference': doctor.user.language_preference,
             'created_at': doctor.user.created_at.isoformat()
         }
+        # Add participation info for detailed view
+        doctor_data['participation_info'] = {
+            'type': doctor.participation_type,
+            'is_free': doctor.participation_type == 'volunteer',
+            'consultation_fee': str(doctor.consultation_fee) if doctor.consultation_fee else '0.00',
+            'display_fee': 'Free' if doctor.participation_type == 'volunteer' else f"{doctor.consultation_fee} SDG"
+        }
         
-        return jsonify({
-            'success': True,
-            'doctor': doctor_data
-        }), 200
+        return success_response(
+            message="Doctor details retrieved successfully",
+            data={'doctor': doctor_data}
+        )
         
     except Exception as e:
-        current_app.logger.error(f"Get doctor details error: {str(e)}")
-        return jsonify({
-            'success': False,
-            'message': 'Failed to get doctor details'
-        }), 500
+        app_logger.error(f"Get doctor details error: {str(e)}")
+        return error_response("Failed to get doctor details", 500)
 
 @users_bp.route('/specialties', methods=['GET'])
 def get_specialties():

@@ -22,6 +22,15 @@ class User(UserMixin, db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     last_login = db.Column(db.DateTime, nullable=True)
     
+    # Online presence tracking (FR_10)
+    is_online = db.Column(db.Boolean, default=False, nullable=False)
+    last_seen_at = db.Column(db.DateTime, nullable=True)        # Last activity timestamp
+    last_activity_at = db.Column(db.DateTime, nullable=True)    # Last meaningful interaction
+    
+    # Session management (NFR_7)
+    session_expires_at = db.Column(db.DateTime, nullable=True)  # 15-minute timeout tracking
+    auto_logout_warnings_sent = db.Column(db.Integer, default=0, nullable=False)  # Warning count
+    
     # Relationships
     patient_profile = db.relationship('Patient', backref='user', uselist=False, cascade='all, delete-orphan')
     doctor_profile = db.relationship('Doctor', backref='user', uselist=False, cascade='all, delete-orphan')
@@ -50,6 +59,27 @@ class User(UserMixin, db.Model):
             return self.doctor_profile
         return None
     
+    @staticmethod
+    def get_online_users():
+        """Get all currently online users (FR_10)"""
+        return User.query.filter_by(is_online=True).all()
+    
+    @staticmethod
+    def cleanup_expired_sessions():
+        """Mark users with expired sessions as offline (NFR_7)"""
+        expired_users = User.query.filter(
+            User.session_expires_at < datetime.utcnow(),
+            User.is_online == True
+        ).all()
+        
+        for user in expired_users:
+            user.is_online = False
+            user.session_expires_at = None
+            user.auto_logout_warnings_sent = 0
+        
+        db.session.commit()
+        return len(expired_users)
+    
     def to_dict(self, include_sensitive=False):
         """Convert user to dictionary"""
         data = {
@@ -61,13 +91,59 @@ class User(UserMixin, db.Model):
             'is_active': self.is_active,
             'is_verified': self.is_verified,
             'created_at': self.created_at.isoformat(),
-            'last_login': self.last_login.isoformat() if self.last_login else None
+            'last_login': self.last_login.isoformat() if self.last_login else None,
+            # Online presence (FR_10)
+            'is_online': self.is_online,
+            'last_seen_at': self.last_seen_at.isoformat() if self.last_seen_at else None
         }
         
         if include_sensitive:
             data['verification_token'] = self.verification_token
+            data['session_expires_at'] = self.session_expires_at.isoformat() if self.session_expires_at else None
+            data['auto_logout_warnings_sent'] = self.auto_logout_warnings_sent
             
         return data
+    
+    def update_last_activity(self):
+        """Update user's last activity timestamp (FR_10)"""
+        self.last_activity_at = datetime.utcnow()
+        self.last_seen_at = datetime.utcnow()
+        if not self.is_online:
+            self.is_online = True
+        db.session.commit()
+    
+    def set_online_status(self, is_online):
+        """Set user online/offline status (FR_10)"""
+        self.is_online = is_online
+        if is_online:
+            self.last_seen_at = datetime.utcnow()
+        db.session.commit()
+    
+    def extend_session(self, minutes=15):
+        """Extend user session timeout (NFR_7)"""
+        from datetime import timedelta
+        self.session_expires_at = datetime.utcnow() + timedelta(minutes=minutes)
+        self.auto_logout_warnings_sent = 0  # Reset warning count
+        db.session.commit()
+    
+    def is_session_expired(self):
+        """Check if user session has expired (NFR_7)"""
+        if not self.session_expires_at:
+            return True
+        return datetime.utcnow() > self.session_expires_at
+    
+    def should_send_logout_warning(self, warning_minutes=5):
+        """Check if logout warning should be sent (NFR_7)"""
+        if not self.session_expires_at:
+            return False
+        from datetime import timedelta
+        warning_time = self.session_expires_at - timedelta(minutes=warning_minutes)
+        return datetime.utcnow() >= warning_time and self.auto_logout_warnings_sent == 0
+    
+    def increment_logout_warning(self):
+        """Increment logout warning counter (NFR_7)"""
+        self.auto_logout_warnings_sent += 1
+        db.session.commit()
     
     def __repr__(self):
         return f'<User {self.email}>'
@@ -151,8 +227,14 @@ class Doctor(db.Model):
     years_of_experience = db.Column(db.Integer, nullable=False)
     qualification = db.Column(db.Text, nullable=True)
     hospital_affiliation = db.Column(db.String(200), nullable=True)
-    consultation_fee = db.Column(db.Numeric(10, 2), nullable=True)
+    # Doctor participation model
+    participation_type = db.Column(db.Enum('volunteer', 'paid', name='doctor_participation_types'), default='volunteer', nullable=False)
+    consultation_fee = db.Column(db.Numeric(10, 2), nullable=True, default=0.00)
     available_hours = db.Column(db.JSON, nullable=True)  # Store as JSON
+    
+    # Fee management
+    can_change_participation = db.Column(db.Boolean, default=True, nullable=False)  # Admin can restrict changes
+    participation_changed_at = db.Column(db.DateTime, nullable=True)  # Track when last changed
     bio = db.Column(db.Text, nullable=True)
     is_verified = db.Column(db.Boolean, default=False, nullable=False)
     rating = db.Column(db.Float, default=0.0, nullable=False)
@@ -177,7 +259,10 @@ class Doctor(db.Model):
             'years_of_experience': self.years_of_experience,
             'qualification': self.qualification,
             'hospital_affiliation': self.hospital_affiliation,
-            'consultation_fee': str(self.consultation_fee) if self.consultation_fee else None,
+            'participation_type': self.participation_type,
+            'consultation_fee': str(self.consultation_fee) if self.consultation_fee else '0.00',
+            'can_change_participation': self.can_change_participation,
+            'participation_changed_at': self.participation_changed_at.isoformat() if self.participation_changed_at else None,
             'available_hours': self.available_hours,
             'bio': self.bio,
             'is_verified': self.is_verified,
@@ -208,6 +293,26 @@ class Appointment(db.Model):
     follow_up_date = db.Column(db.DateTime, nullable=True)
     consultation_fee = db.Column(db.Numeric(10, 2), nullable=True)
     payment_status = db.Column(db.Enum('pending', 'paid', 'refunded', name='payment_statuses'), default='pending', nullable=False)
+    
+    # Virtual consultation session fields (FR_01, FR_04, NFR_11)
+    session_id = db.Column(db.String(255), nullable=True, unique=True)  # Unique session identifier
+    session_status = db.Column(db.Enum('waiting', 'connecting', 'connected', 'ended', 'failed', 'timeout', name='session_statuses'), nullable=True)
+    session_started_at = db.Column(db.DateTime, nullable=True)  # When consultation actually started
+    session_ended_at = db.Column(db.DateTime, nullable=True)    # When consultation ended
+    session_duration = db.Column(db.Integer, nullable=True)     # Duration in seconds
+    connection_quality = db.Column(db.Enum('excellent', 'good', 'fair', 'poor', 'unknown', name='connection_qualities'), nullable=True)
+    
+    # Recording and security (NFR_11)
+    recording_enabled = db.Column(db.Boolean, default=False, nullable=False)
+    recording_consent_patient = db.Column(db.Boolean, nullable=True)    # Patient consent for recording
+    recording_consent_doctor = db.Column(db.Boolean, nullable=True)     # Doctor consent for recording
+    recording_path = db.Column(db.String(500), nullable=True)           # Path to recording file if stored
+    encryption_key_id = db.Column(db.String(255), nullable=True)        # Reference to encryption key
+    
+    # Consultation participants tracking
+    participants_log = db.Column(db.JSON, nullable=True)  # Track join/leave events
+    technical_issues = db.Column(db.JSON, nullable=True)  # Log any technical problems
+    
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     
@@ -228,6 +333,14 @@ class Appointment(db.Model):
             'follow_up_date': self.follow_up_date.isoformat() if self.follow_up_date else None,
             'consultation_fee': str(self.consultation_fee) if self.consultation_fee else None,
             'payment_status': self.payment_status,
+            # Virtual consultation session info
+            'session_id': self.session_id,
+            'session_status': self.session_status,
+            'session_started_at': self.session_started_at.isoformat() if self.session_started_at else None,
+            'session_ended_at': self.session_ended_at.isoformat() if self.session_ended_at else None,
+            'session_duration': self.session_duration,
+            'connection_quality': self.connection_quality,
+            'recording_enabled': self.recording_enabled,
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat()
         }
@@ -693,3 +806,268 @@ class PlatformMetrics(db.Model):
     
     def __repr__(self):
         return f'<PlatformMetrics {self.metric_date} {self.metric_hour or "daily"}>'
+
+# =============================================================================
+# AI ASSESSMENT MODELS (FR_06, FR_17, FR_18)
+# =============================================================================
+
+class AIAssessment(db.Model):
+    """
+    AI-powered symptom assessment and triage system
+    Supports text, audio, and Sudanese Arabic dialect input
+    """
+    __tablename__ = 'ai_assessments'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    patient_id = db.Column(db.Integer, db.ForeignKey('patients.id'), nullable=False)
+    appointment_id = db.Column(db.Integer, db.ForeignKey('appointments.id'), nullable=True)  # Optional link to appointment
+    
+    # Input data (FR_06, FR_17, FR_18)
+    assessment_type = db.Column(db.Enum('text', 'audio', 'mixed', name='assessment_types'), default='text', nullable=False)
+    input_language = db.Column(db.Enum('ar', 'en', 'ar_sd', name='input_languages'), default='ar', nullable=False)  # ar_sd = Sudanese Arabic
+    
+    # Text input (FR_06, FR_17)
+    symptoms_input = db.Column(db.Text, nullable=True)      # Original user input
+    original_text = db.Column(db.Text, nullable=True)       # Raw text before processing
+    translated_text = db.Column(db.Text, nullable=True)     # Translated version if needed
+    processed_symptoms = db.Column(db.JSON, nullable=True)  # Structured symptom data
+    
+    # Audio input (FR_18)
+    audio_file_path = db.Column(db.String(500), nullable=True)        # Path to uploaded audio file
+    audio_file_name = db.Column(db.String(255), nullable=True)        # Original filename
+    audio_duration = db.Column(db.Integer, nullable=True)             # Duration in seconds
+    audio_format = db.Column(db.String(10), nullable=True)            # mp3, wav, etc.
+    audio_size = db.Column(db.Integer, nullable=True)                 # File size in bytes
+    
+    # Secure audio file handling (NFR_15)
+    audio_encrypted = db.Column(db.Boolean, default=False, nullable=False)      # Is audio file encrypted
+    audio_checksum = db.Column(db.String(64), nullable=True)                    # SHA-256 checksum for integrity
+    audio_encryption_key_id = db.Column(db.String(255), nullable=True)          # Reference to encryption key
+    audio_access_log = db.Column(db.JSON, nullable=True)                        # Access history log
+    virus_scan_status = db.Column(db.Enum('pending', 'clean', 'infected', 'failed', name='virus_scan_statuses'), default='pending', nullable=True)
+    
+    # Transcription data (FR_18)
+    transcription_text = db.Column(db.Text, nullable=True)            # Speech-to-text result
+    transcription_confidence = db.Column(db.Float, nullable=True)     # Confidence score 0-1
+    transcription_language = db.Column(db.String(10), nullable=True)  # Detected language
+    transcription_dialect = db.Column(db.String(20), nullable=True)   # Detected dialect (Sudanese, etc.)
+    
+    # AI Response and Analysis
+    ai_response = db.Column(db.Text, nullable=True)                   # AI assessment result
+    confidence_score = db.Column(db.Float, nullable=True)             # Overall confidence 0-1
+    risk_level = db.Column(db.Enum('low', 'medium', 'high', 'critical', name='risk_levels'), nullable=True)
+    recommended_action = db.Column(db.Enum('self_care', 'pharmacy', 'doctor_consultation', 'emergency', name='recommendation_types'), nullable=True)
+    
+    # Structured AI analysis
+    identified_symptoms = db.Column(db.JSON, nullable=True)           # List of identified symptoms
+    possible_conditions = db.Column(db.JSON, nullable=True)           # Potential diagnoses with confidence
+    red_flags = db.Column(db.JSON, nullable=True)                    # Warning signs detected
+    follow_up_questions = db.Column(db.JSON, nullable=True)           # Additional questions to ask
+    
+    # Processing metadata
+    processing_time_ms = db.Column(db.Integer, nullable=True)         # Time taken for AI processing
+    ai_model_version = db.Column(db.String(50), nullable=True)        # Version of AI model used
+    processing_errors = db.Column(db.JSON, nullable=True)             # Any errors during processing
+    
+    # Quality and feedback
+    user_feedback_rating = db.Column(db.Integer, nullable=True)       # 1-5 rating from user
+    user_feedback_text = db.Column(db.Text, nullable=True)            # User feedback comments
+    doctor_review_status = db.Column(db.Enum('pending', 'reviewed', 'approved', 'disputed', name='review_statuses'), default='pending')
+    doctor_review_notes = db.Column(db.Text, nullable=True)           # Doctor's review of AI assessment
+    reviewed_by_doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=True)
+    
+    # Audit and timestamps
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    completed_at = db.Column(db.DateTime, nullable=True)              # When assessment was completed
+    
+    # Relationships
+    patient = db.relationship('Patient', backref='ai_assessments', lazy=True)
+    appointment = db.relationship('Appointment', backref='ai_assessments', lazy=True)
+    reviewed_by_doctor = db.relationship('Doctor', backref='reviewed_ai_assessments', lazy=True)
+    
+    def to_dict(self):
+        """Convert AI assessment to dictionary"""
+        return {
+            'id': self.id,
+            'patient_id': self.patient_id,
+            'appointment_id': self.appointment_id,
+            'assessment_type': self.assessment_type,
+            'input_language': self.input_language,
+            
+            # Input data
+            'symptoms_input': self.symptoms_input,
+            'processed_symptoms': self.processed_symptoms,
+            
+            # Audio data
+            'audio_file_name': self.audio_file_name,
+            'audio_duration': self.audio_duration,
+            'audio_format': self.audio_format,
+            'audio_encrypted': self.audio_encrypted,
+            'virus_scan_status': self.virus_scan_status,
+            'transcription_text': self.transcription_text,
+            'transcription_confidence': self.transcription_confidence,
+            'transcription_language': self.transcription_language,
+            'transcription_dialect': self.transcription_dialect,
+            
+            # AI analysis
+            'ai_response': self.ai_response,
+            'confidence_score': self.confidence_score,
+            'risk_level': self.risk_level,
+            'recommended_action': self.recommended_action,
+            'identified_symptoms': self.identified_symptoms,
+            'possible_conditions': self.possible_conditions,
+            'red_flags': self.red_flags,
+            'follow_up_questions': self.follow_up_questions,
+            
+            # Metadata
+            'processing_time_ms': self.processing_time_ms,
+            'ai_model_version': self.ai_model_version,
+            'user_feedback_rating': self.user_feedback_rating,
+            'doctor_review_status': self.doctor_review_status,
+            
+            # Timestamps
+            'created_at': self.created_at.isoformat(),
+            'completed_at': self.completed_at.isoformat() if self.completed_at else None,
+            
+            # Related data
+            'patient_name': self.patient.user.get_full_name() if self.patient else None,
+            'reviewed_by': self.reviewed_by_doctor.user.get_full_name() if self.reviewed_by_doctor else None
+        }
+    
+    def mark_completed(self):
+        """Mark assessment as completed"""
+        self.completed_at = datetime.utcnow()
+        db.session.commit()
+    
+    def add_doctor_review(self, doctor_id, notes, status='reviewed'):
+        """Add doctor review to the assessment"""
+        self.reviewed_by_doctor_id = doctor_id
+        self.doctor_review_notes = notes
+        self.doctor_review_status = status
+        self.updated_at = datetime.utcnow()
+        db.session.commit()
+    
+    def calculate_processing_time(self, start_time):
+        """Calculate and store processing time"""
+        if start_time:
+            processing_time = datetime.utcnow() - start_time
+            self.processing_time_ms = int(processing_time.total_seconds() * 1000)
+    
+    @staticmethod
+    def get_recent_assessments(patient_id, limit=10):
+        """Get recent assessments for a patient"""
+        return AIAssessment.query.filter_by(patient_id=patient_id).order_by(
+            AIAssessment.created_at.desc()
+        ).limit(limit).all()
+    
+    @staticmethod
+    def get_pending_reviews():
+        """Get assessments pending doctor review"""
+        return AIAssessment.query.filter_by(doctor_review_status='pending').order_by(
+            AIAssessment.created_at.asc()
+        ).all()
+    
+    def log_audio_access(self, accessed_by_user_id, access_type='view'):
+        """Log audio file access for security (NFR_15)"""
+        if not self.audio_access_log:
+            self.audio_access_log = []
+        
+        access_entry = {
+            'timestamp': datetime.utcnow().isoformat(),
+            'user_id': accessed_by_user_id,
+            'access_type': access_type,  # 'view', 'download', 'delete'
+            'ip_address': None  # Can be added from request context
+        }
+        
+        # Keep only last 50 access entries
+        self.audio_access_log.append(access_entry)
+        if len(self.audio_access_log) > 50:
+            self.audio_access_log = self.audio_access_log[-50:]
+        
+        db.session.commit()
+    
+    def verify_audio_integrity(self):
+        """Verify audio file hasn't been tampered with (NFR_15)"""
+        import hashlib
+        import os
+        
+        if not self.audio_file_path or not self.audio_checksum:
+            return False
+        
+        if not os.path.exists(self.audio_file_path):
+            return False
+        
+        # Calculate current checksum
+        with open(self.audio_file_path, 'rb') as f:
+            current_checksum = hashlib.sha256(f.read()).hexdigest()
+        
+        return current_checksum == self.audio_checksum
+    
+    def __repr__(self):
+        return f'<AIAssessment {self.id} - {self.assessment_type} for patient {self.patient_id}>'
+
+
+class ConsultationSession(db.Model):
+    """
+    Extended consultation session tracking for advanced analytics
+    Separate from Appointment for detailed session management
+    """
+    __tablename__ = 'consultation_sessions'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    appointment_id = db.Column(db.Integer, db.ForeignKey('appointments.id'), nullable=False, unique=True)
+    session_token = db.Column(db.String(255), nullable=False, unique=True)  # Secure session token
+    
+    # WebRTC and connection details
+    webrtc_room_id = db.Column(db.String(255), nullable=True)         # WebRTC room identifier
+    ice_servers_config = db.Column(db.JSON, nullable=True)            # ICE servers configuration used
+    peer_connection_id = db.Column(db.String(255), nullable=True)     # Peer connection identifier
+    
+    # Participant tracking
+    doctor_joined_at = db.Column(db.DateTime, nullable=True)
+    patient_joined_at = db.Column(db.DateTime, nullable=True)
+    doctor_left_at = db.Column(db.DateTime, nullable=True)
+    patient_left_at = db.Column(db.DateTime, nullable=True)
+    
+    # Connection quality metrics
+    initial_connection_time_ms = db.Column(db.Integer, nullable=True)  # Time to establish connection
+    average_latency_ms = db.Column(db.Integer, nullable=True)          # Average latency during session
+    packet_loss_percentage = db.Column(db.Float, nullable=True)        # Packet loss percentage
+    bandwidth_usage_kb = db.Column(db.Integer, nullable=True)          # Total bandwidth used
+    
+    # Technical events log
+    connection_events = db.Column(db.JSON, nullable=True)             # Log of connection events
+    quality_reports = db.Column(db.JSON, nullable=True)               # Periodic quality reports
+    error_events = db.Column(db.JSON, nullable=True)                  # Technical errors encountered
+    
+    # Security and encryption (NFR_11)
+    encryption_protocol = db.Column(db.String(50), nullable=True)     # Encryption protocol used
+    key_exchange_method = db.Column(db.String(50), nullable=True)     # Key exchange method
+    security_events = db.Column(db.JSON, nullable=True)               # Security-related events
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    
+    # Relationships
+    appointment = db.relationship('Appointment', backref=db.backref('session_details', uselist=False), lazy=True)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'appointment_id': self.appointment_id,
+            'session_token': self.session_token,
+            'webrtc_room_id': self.webrtc_room_id,
+            'doctor_joined_at': self.doctor_joined_at.isoformat() if self.doctor_joined_at else None,
+            'patient_joined_at': self.patient_joined_at.isoformat() if self.patient_joined_at else None,
+            'doctor_left_at': self.doctor_left_at.isoformat() if self.doctor_left_at else None,
+            'patient_left_at': self.patient_left_at.isoformat() if self.patient_left_at else None,
+            'initial_connection_time_ms': self.initial_connection_time_ms,
+            'average_latency_ms': self.average_latency_ms,
+            'packet_loss_percentage': self.packet_loss_percentage,
+            'bandwidth_usage_kb': self.bandwidth_usage_kb,
+            'encryption_protocol': self.encryption_protocol,
+            'created_at': self.created_at.isoformat()
+        }
+    
+    def __repr__(self):
+        return f'<ConsultationSession {self.id} for appointment {self.appointment_id}>'

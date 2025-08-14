@@ -75,6 +75,7 @@
     "success_email": "Appointment details will be sent to your email",
     "view_appointments": "View My Appointments",
     "back_home": "Back to Home",
+    "doctor_participation_note": "Volunteer doctors provide their services for free, while paid doctors charge consultation fees",
     "loading": "Loading...",
     "no_doctors": "No doctors available in this specialty",
     "no_times": "No available times on this day",
@@ -106,7 +107,15 @@
     "reschedule_success": "Appointment rescheduled successfully",
     "cannot_cancel_past": "Cannot cancel past appointments",
     "cannot_cancel_soon": "Cannot cancel appointments less than 1 hour before",
-    "slot_unavailable": "Selected time slot is unavailable"
+    "slot_unavailable": "Selected time slot is unavailable",
+    "participation_filter": "Filter by Doctor Type",
+    "all_doctors": "All Doctors",
+    "volunteer_doctors": "Volunteer Doctors",
+    "paid_doctors": "Paid Doctors",
+    "volunteer_badge": "Volunteer",
+    "paid_badge": "Paid",
+    "consultation_cost": "Consultation Cost",
+    "total_cost": "Total Cost"
   },
 
   "prescriptions": {
@@ -378,6 +387,67 @@
         "reply": "Reply",
         "view_all": "View All Messages"
       }
+    }
+  },
+
+  "user_settings": {
+    "title": "User Settings",
+    "subtitle": "Manage your preferences and account settings",
+    "doctor_participation": {
+      "title": "Doctor Participation Type",
+      "subtitle": "Manage your participation type on the platform",
+      "participation_type": "Participation Type",
+      "volunteer": "Volunteer Doctor",
+      "paid": "Paid Doctor",
+      "consultation_fee": "Consultation Fee",
+      "current_type": "Current Type",
+      "current_fee": "Current Fee",
+      "switch_to_volunteer": "Switch to Volunteer",
+      "switch_to_paid": "Switch to Paid",
+      "volunteer_benefits": "Help patients for free and contribute to the community",
+      "paid_benefits": "Set consultation fees and earn money from your services",
+      "fee_placeholder": "Enter consultation fee in Sudanese Pounds",
+      "confirm_switch_volunteer": "Are you sure you want to switch to volunteer participation? Your consultation fee will be set to zero.",
+      "confirm_switch_paid": "Are you sure you want to switch to paid participation? You must set a consultation fee.",
+      "switch_success_volunteer": "Successfully switched to volunteer participation",
+      "switch_success_paid": "Successfully switched to paid participation",
+      "fee_required": "Consultation fee is required for paid doctors",
+      "cannot_change": "You cannot change participation type. Please contact administrator.",
+      "last_changed": "Last Changed"
+    },
+    "notification_settings": {
+      "title": "Notification Settings",
+      "subtitle": "Manage your notification preferences",
+      "contact_method": "Preferred Contact Method",
+      "email": "Email",
+      "sms": "SMS",
+      "both": "Both",
+      "appointment_reminders": "Appointment Reminders",
+      "prescription_updates": "Prescription Updates",
+      "system_notifications": "System Notifications"
+    },
+    "profile_settings": {
+      "title": "Profile Settings",
+      "language_preference": "Language Preference",
+      "arabic": "Arabic",
+      "english": "English",
+      "change_password": "Change Password",
+      "current_password": "Current Password",
+      "new_password": "New Password",
+      "confirm_password": "Confirm New Password"
+    },
+    "buttons": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "update": "Update",
+      "switch": "Switch",
+      "confirm": "Confirm"
+    },
+    "messages": {
+      "settings_updated": "Settings updated successfully",
+      "password_changed": "Password changed successfully",
+      "error_updating": "Error updating settings",
+      "invalid_current_password": "Current password is incorrect"
     }
   },
 

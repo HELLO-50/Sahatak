@@ -661,6 +661,146 @@ def validate_history_update_type(update_type: str) -> Dict[str, Union[bool, str]
         'message': 'Update type is valid'
     }
 
+def validate_doctor_participation_data(participation_data: dict) -> Dict[str, Union[bool, str]]:
+    """
+    Validate doctor participation and fee data
+    
+    Args:
+        participation_data: Dictionary containing participation details
+        
+    Returns:
+        dict: Contains 'valid' (bool) and 'message' (str)
+    """
+    # Validate participation type
+    if 'participation_type' in participation_data:
+        valid_types = ['volunteer', 'paid']
+        if participation_data['participation_type'] not in valid_types:
+            return {
+                'valid': False,
+                'message': f'Invalid participation type. Must be one of: {", ".join(valid_types)}'
+            }
+    
+    # Validate consultation fee
+    if 'consultation_fee' in participation_data:
+        try:
+            fee = float(participation_data['consultation_fee'])
+            if fee < 0:
+                return {
+                    'valid': False,
+                    'message': 'Consultation fee cannot be negative'
+                }
+            
+            if fee > 10000:  # Reasonable upper limit
+                return {
+                    'valid': False,
+                    'message': 'Consultation fee cannot exceed 10,000'
+                }
+            
+            # If participation type is volunteer, fee must be 0
+            if ('participation_type' in participation_data and 
+                participation_data['participation_type'] == 'volunteer' and fee > 0):
+                return {
+                    'valid': False,
+                    'message': 'Volunteer doctors cannot charge fees. Fee must be 0 for volunteer participation.'
+                }
+            
+            # If participation type is paid, fee should be > 0
+            if ('participation_type' in participation_data and 
+                participation_data['participation_type'] == 'paid' and fee == 0):
+                return {
+                    'valid': False,
+                    'message': 'Paid doctors must set a consultation fee greater than 0'
+                }
+                
+        except (ValueError, TypeError):
+            return {
+                'valid': False,
+                'message': 'Consultation fee must be a valid number'
+            }
+    
+    return {
+        'valid': True,
+        'message': 'Participation data is valid'
+    }
+
+def validate_participation_type(participation_type: str) -> Dict[str, Union[bool, str]]:
+    """
+    Validate doctor participation type
+    
+    Args:
+        participation_type: Participation type to validate
+        
+    Returns:
+        dict: Contains 'valid' (bool) and 'message' (str)
+    """
+    valid_types = ['volunteer', 'paid']
+    
+    if not participation_type or not isinstance(participation_type, str):
+        return {
+            'valid': False,
+            'message': 'Participation type is required'
+        }
+    
+    if participation_type.lower() not in valid_types:
+        return {
+            'valid': False,
+            'message': f'Invalid participation type. Must be one of: {", ".join(valid_types)}'
+        }
+    
+    return {
+        'valid': True,
+        'message': 'Participation type is valid'
+    }
+
+def validate_consultation_fee(fee: Union[str, float, int], participation_type: str = None) -> Dict[str, Union[bool, str]]:
+    """
+    Validate consultation fee based on participation type
+    
+    Args:
+        fee: Fee to validate
+        participation_type: Doctor's participation type for context validation
+        
+    Returns:
+        dict: Contains 'valid' (bool) and 'message' (str)
+    """
+    try:
+        fee_float = float(fee) if fee is not None else 0.0
+    except (ValueError, TypeError):
+        return {
+            'valid': False,
+            'message': 'Consultation fee must be a valid number'
+        }
+    
+    if fee_float < 0:
+        return {
+            'valid': False,
+            'message': 'Consultation fee cannot be negative'
+        }
+    
+    if fee_float > 10000:
+        return {
+            'valid': False,
+            'message': 'Consultation fee cannot exceed 10,000'
+        }
+    
+    # Context-specific validation
+    if participation_type:
+        if participation_type == 'volunteer' and fee_float > 0:
+            return {
+                'valid': False,
+                'message': 'Volunteer doctors cannot charge fees'
+            }
+        elif participation_type == 'paid' and fee_float == 0:
+            return {
+                'valid': False,
+                'message': 'Paid doctors must set a consultation fee greater than 0'
+            }
+    
+    return {
+        'valid': True,
+        'message': 'Consultation fee is valid'
+    }
+
 def sanitize_input(text: str, max_length: int = None) -> str:
     """
     Sanitize text input by trimming and optionally limiting length
