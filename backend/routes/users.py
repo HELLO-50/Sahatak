@@ -2,7 +2,7 @@ from flask import Blueprint, request, current_app
 from flask_login import login_required, current_user
 from models import db, User, Patient, Doctor
 from utils.validators import validate_name, validate_phone, validate_age
-from utils.responses import success_response, error_response, not_found_response, bad_request_response
+from utils.responses import success_response, error_response, not_found_response, validation_error_response
 from utils.logging_config import app_logger
 from datetime import datetime
 
