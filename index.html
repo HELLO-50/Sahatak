@@ -157,9 +157,9 @@
                             
                             <form id="loginForm">
                                 <div class="mb-3">
-                                    <label for="email" class="form-label" id="email-label">البريد الإلكتروني</label>
-                                    <input type="email" class="form-control" id="email" required>
-                                    <div class="invalid-feedback" id="email-error"></div>
+                                    <label for="login_identifier" class="form-label" id="login-identifier-label">البريد الإلكتروني أو رقم الهاتف</label>
+                                    <input type="text" class="form-control" id="login_identifier" required>
+                                    <div class="invalid-feedback" id="login_identifier-error"></div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="password" class="form-label" id="password-label">كلمة المرور</label>
@@ -273,18 +273,18 @@
                             <form id="patientRegisterForm">
                                 <div class="mb-3">
                                     <label for="patientFullName" class="form-label" id="patient-fullName-label">الاسم الكامل</label>
-                                    <input type="text" class="form-control" id="patientFullName" required placeholder="أدخل الاسم الأول والأخير">
+                                    <input type="text" class="form-control" id="patientFullName" required>
                                     <div class="invalid-feedback" id="patientFullName-error"></div>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="patientEmail" class="form-label" id="patient-email-label">البريد الإلكتروني</label>
-                                    <input type="email" class="form-control" id="patientEmail" required>
-                                    <div class="invalid-feedback" id="patientEmail-error"></div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="patientPhone" class="form-label" id="patient-phone-label">رقم الهاتف</label>
                                     <input type="tel" class="form-control" id="patientPhone" required>
                                     <div class="invalid-feedback" id="patientPhone-error"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="patientEmail" class="form-label" id="patient-email-label">البريد الإلكتروني (اختياري)</label>
+                                    <input type="email" class="form-control" id="patientEmail">
+                                    <div class="invalid-feedback" id="patientEmail-error"></div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
@@ -347,24 +347,29 @@
                             <form id="doctorRegisterForm">
                                 <div class="mb-3">
                                     <label for="doctorFullName" class="form-label" id="doctor-fullName-label">الاسم الكامل</label>
-                                    <input type="text" class="form-control" id="doctorFullName" required placeholder="أدخل الاسم الأول والأخير">
+                                    <input type="text" class="form-control" id="doctorFullName" required>
                                     <div class="invalid-feedback" id="doctorFullName-error"></div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="doctorEmail" class="form-label" id="doctor-email-label">البريد الإلكتروني</label>
-                                    <input type="email" class="form-control" id="doctorEmail" required>
+                                    <label for="doctorPhone" class="form-label" id="doctor-phone-label">رقم الهاتف</label>
+                                    <input type="tel" class="form-control" id="doctorPhone" required>
+                                    <div class="invalid-feedback" id="doctorPhone-error"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="doctorEmail" class="form-label" id="doctor-email-label">البريد الإلكتروني (اختياري)</label>
+                                    <input type="email" class="form-control" id="doctorEmail">
                                     <div class="invalid-feedback" id="doctorEmail-error"></div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        <label for="doctorPhone" class="form-label" id="doctor-phone-label">رقم الهاتف</label>
-                                        <input type="tel" class="form-control" id="doctorPhone" required>
-                                        <div class="invalid-feedback" id="doctorPhone-error"></div>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
                                         <label for="doctorLicense" class="form-label" id="doctor-license-label">رقم الترخيص الطبي</label>
                                         <input type="text" class="form-control" id="doctorLicense" required>
                                         <div class="invalid-feedback" id="doctorLicense-error"></div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="doctorExperience" class="form-label" id="doctor-experience-label">سنوات الخبرة</label>
+                                        <input type="number" class="form-control" id="doctorExperience" min="0" max="50" required>
+                                        <div class="invalid-feedback" id="doctorExperience-error"></div>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -505,6 +510,7 @@
     
     <!-- Custom JavaScript -->
     <script src="frontend/assets/js/main.js"></script>
+    <script src="frontend/assets/js/components/validation.js"></script>
     <script src="frontend/assets/js/components/auth.js"></script>
     <script src="frontend/assets/js/components/forms.js"></script>
     

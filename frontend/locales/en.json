@@ -19,7 +19,7 @@
   "login": {
     "title": "Login",
     "subtitle": "Enter your credentials to access your account",
-    "email": "Email Address",
+    "login_identifier": "Email Address or Phone Number",
     "password": "Password",
     "submit": "Login"
   },

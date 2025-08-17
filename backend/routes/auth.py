@@ -6,6 +6,7 @@ from models import db, User, Patient, Doctor
 from utils.validators import validate_email, validate_password, validate_phone
 from utils.responses import APIResponse, ErrorCodes
 from utils.logging_config import auth_logger, log_user_action
+from services.notification_service import NotificationService
 import re
 
 auth_bp = Blueprint('auth', __name__)
@@ -16,8 +17,8 @@ def register():
     try:
         data = request.get_json()
         
-        # Validate required fields
-        required_fields = ['email', 'password', 'full_name', 'user_type']
+        # Validate required fields - mobile and phone are required, email is optional
+        required_fields = ['password', 'full_name', 'user_type', 'phone']
         for field in required_fields:
             if not data.get(field):
                 return APIResponse.validation_error(
@@ -25,21 +26,41 @@ def register():
                     message=f'{field} is required'
                 )
         
-        # Validate email format
-        if not validate_email(data['email']):
+        # Validate phone number (required)
+        if not validate_phone(data['phone']):
+            return APIResponse.validation_error(
+                field='phone',
+                message='Invalid phone number format'
+            )
+        
+        # Validate email format if provided (optional)
+        email = data.get('email', '').strip()
+        if email and not validate_email(email):
             return APIResponse.validation_error(
                 field='email',
                 message='Invalid email format'
             )
         
-        # Check if user already exists
-        existing_user = User.query.filter_by(email=data['email'].lower()).first()
-        if existing_user:
-            auth_logger.warning(f"Registration attempt with existing email: {data['email']}")
+        # Check if phone already exists
+        existing_user_phone = User.query.join(Patient).filter(Patient.phone == data['phone']).first()
+        if not existing_user_phone:
+            existing_user_phone = User.query.join(Doctor).filter(Doctor.phone == data['phone']).first()
+        if existing_user_phone:
+            auth_logger.warning(f"Registration attempt with existing phone: {data['phone']}")
             return APIResponse.conflict(
-                message='Email already registered',
-                field='email'
+                message='Phone number already registered',
+                field='phone'
             )
+        
+        # Check if email already exists (if provided)
+        if email:
+            existing_user_email = User.query.filter_by(email=email.lower()).first()
+            if existing_user_email:
+                auth_logger.warning(f"Registration attempt with existing email: {email}")
+                return APIResponse.conflict(
+                    message='Email already registered',
+                    field='email'
+                )
         
         # Validate password
         password_validation = validate_password(data['password'])
@@ -57,7 +78,7 @@ def register():
             )
         
         # Validate full name
-        from backend.utils.validators import validate_full_name
+        from utils.validators import validate_full_name
         full_name_validation = validate_full_name(data['full_name'])
         if not full_name_validation['valid']:
             return APIResponse.validation_error(
@@ -67,10 +88,11 @@ def register():
         
         # Create user
         user = User(
-            email=data['email'].lower().strip(),
+            email=email.lower() if email else None,
             full_name=data['full_name'].strip(),
             user_type=data['user_type'],
-            language_preference=data.get('language_preference', 'ar')
+            language_preference=data.get('language_preference', 'ar'),
+            is_verified=True  # No email verification needed
         )
         user.set_password(data['password'])
         
@@ -79,43 +101,31 @@ def register():
         
         # Create specific profile based on user type
         if data['user_type'] == 'patient':
-            # Validate patient-specific fields
-            patient_required = ['phone', 'age', 'gender']
+            # Validate patient-specific fields (phone already validated above)
+            patient_required = ['age', 'gender']
             for field in patient_required:
                 if not data.get(field):
-                    return jsonify({
-                        'success': False,
-                        'message': f'{field} is required for patients',
-                        'field': field
-                    }), 400
-            
-            # Validate phone
-            if not validate_phone(data['phone']):
-                return jsonify({
-                    'success': False,
-                    'message': 'Invalid phone number format',
-                    'field': 'phone'
-                }), 400
+                    return APIResponse.validation_error(
+                        field=field,
+                        message=f'{field} is required for patients'
+                    )
             
             # Validate age
-            try:
-                age = int(data['age'])
-                if age < 1 or age > 120:
-                    raise ValueError()
-            except (ValueError, TypeError):
-                return jsonify({
-                    'success': False,
-                    'message': 'Age must be between 1 and 120',
-                    'field': 'age'
-                }), 400
+            from utils.validators import validate_age
+            age_validation = validate_age(data['age'])
+            if not age_validation['valid']:
+                return APIResponse.validation_error(
+                    field='age',
+                    message=age_validation['message']
+                )
+            age = int(data['age'])
             
             # Validate gender
             if data['gender'] not in ['male', 'female']:
-                return jsonify({
-                    'success': False,
-                    'message': 'Gender must be male or female',
-                    'field': 'gender'
-                }), 400
+                return APIResponse.validation_error(
+                    field='gender',
+                    message='Gender must be male or female'
+                )
             
             # Create patient profile
             patient = Patient(
@@ -132,23 +142,32 @@ def register():
             db.session.add(patient)
             
         elif data['user_type'] == 'doctor':
-            # Validate doctor-specific fields
-            doctor_required = ['phone', 'license_number', 'specialty', 'years_of_experience']
+            # Validate doctor-specific fields (phone already validated above)
+            doctor_required = ['license_number', 'specialty', 'years_of_experience']
             for field in doctor_required:
                 if not data.get(field):
-                    return jsonify({
-                        'success': False,
-                        'message': f'{field} is required for doctors',
-                        'field': field
-                    }), 400
+                    return APIResponse.validation_error(
+                        field=field,
+                        message=f'{field} is required for doctors'
+                    )
             
-            # Validate phone
-            if not validate_phone(data['phone']):
-                return jsonify({
-                    'success': False,
-                    'message': 'Invalid phone number format',
-                    'field': 'phone'
-                }), 400
+            # Validate license number
+            from utils.validators import validate_license_number
+            license_validation = validate_license_number(data['license_number'])
+            if not license_validation['valid']:
+                return APIResponse.validation_error(
+                    field='license_number',
+                    message=license_validation['message']
+                )
+            
+            # Validate specialty
+            from utils.validators import validate_specialty
+            specialty_validation = validate_specialty(data['specialty'])
+            if not specialty_validation['valid']:
+                return APIResponse.validation_error(
+                    field='specialty',
+                    message=specialty_validation['message']
+                )
             
             # Validate years of experience
             try:
@@ -156,20 +175,18 @@ def register():
                 if experience < 0 or experience > 50:
                     raise ValueError()
             except (ValueError, TypeError):
-                return jsonify({
-                    'success': False,
-                    'message': 'Years of experience must be between 0 and 50',
-                    'field': 'years_of_experience'
-                }), 400
+                return APIResponse.validation_error(
+                    field='years_of_experience',
+                    message='Years of experience must be between 0 and 50'
+                )
             
             # Check if license number already exists
             existing_license = Doctor.query.filter_by(license_number=data['license_number']).first()
             if existing_license:
-                return jsonify({
-                    'success': False,
-                    'message': 'License number already registered',
-                    'field': 'license_number'
-                }), 409
+                return APIResponse.conflict(
+                    message='License number already registered',
+                    field='license_number'
+                )
             
             # Create doctor profile
             doctor = Doctor(
@@ -211,32 +228,48 @@ def register():
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
-    """Login user"""
+    """Login user with email or phone"""
     try:
         data = request.get_json()
         
         # Validate required fields
-        if not data.get('email') or not data.get('password'):
-            return jsonify({
-                'success': False,
-                'message': 'Email and password are required'
-            }), 400
+        login_identifier = data.get('login_identifier', '').strip()  # Can be email or phone
+        password = data.get('password')
         
-        # Find user by email
-        user = User.query.filter_by(email=data['email'].lower().strip()).first()
+        if not login_identifier or not password:
+            return APIResponse.validation_error(
+                message='Email/phone and password are required'
+            )
         
-        if not user or not user.check_password(data['password']):
-            return jsonify({
-                'success': False,
-                'message': 'Invalid email or password'
-            }), 401
+        # Find user by email or phone
+        user = None
+        
+        # Try to find by email first
+        if validate_email(login_identifier):
+            user = User.query.filter_by(email=login_identifier.lower()).first()
+        
+        # If not found by email, try to find by phone
+        if not user and validate_phone(login_identifier):
+            # Search in patient profiles
+            patient_user = User.query.join(Patient).filter(Patient.phone == login_identifier).first()
+            if patient_user:
+                user = patient_user
+            else:
+                # Search in doctor profiles
+                doctor_user = User.query.join(Doctor).filter(Doctor.phone == login_identifier).first()
+                if doctor_user:
+                    user = doctor_user
+        
+        if not user or not user.check_password(password):
+            return APIResponse.unauthorized(
+                message='Invalid email/phone or password'
+            )
         
         # Check if user is active
         if not user.is_active:
-            return jsonify({
-                'success': False,
-                'message': 'Account is deactivated. Please contact support.'
-            }), 401
+            return APIResponse.unauthorized(
+                message='Account is deactivated. Please contact support.'
+            )
         
         # Login user and update last login
         login_user(user, remember=data.get('remember_me', False))
@@ -249,18 +282,16 @@ def login():
         if profile:
             user_data['profile'] = profile.to_dict()
         
-        return jsonify({
-            'success': True,
-            'message': 'Login successful',
-            'user': user_data
-        }), 200
+        return APIResponse.success(
+            data={'user': user_data},
+            message='Login successful'
+        )
         
     except Exception as e:
-        current_app.logger.error(f"Login error: {str(e)}")
-        return jsonify({
-            'success': False,
-            'message': 'Login failed. Please try again.'
-        }), 500
+        auth_logger.error(f"Login error: {str(e)}")
+        return APIResponse.internal_error(
+            message='Login failed. Please try again.'
+        )
 
 @auth_bp.route('/logout', methods=['POST'])
 @login_required

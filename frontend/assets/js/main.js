@@ -336,7 +336,7 @@ function updateContentByLanguage(lang) {
     // Update login form
     updateElementText('login-title', t.login?.title);
     updateElementText('login-subtitle', t.login?.subtitle);
-    updateElementText('email-label', t.login?.email);
+    updateElementText('login-identifier-label', t.login?.login_identifier);
     updateElementText('password-label', t.login?.password);
     updateElementText('login-submit', t.login?.submit);
     updateElementText('back-to-auth', t.auth?.back);
@@ -620,13 +620,13 @@ async function handleLogin(event) {
     
     try {
         const formData = {
-            email: document.getElementById('email').value.trim(),
+            login_identifier: document.getElementById('login_identifier').value.trim(),
             password: document.getElementById('password').value
         };
         
         // Validate form data
-        if (!formData.email || !formData.password) {
-            throw new Error('Email and password are required');
+        if (!formData.login_identifier || !formData.password) {
+            throw new Error('Email/phone and password are required');
         }
         
         // Make API call to login endpoint
@@ -699,9 +699,9 @@ async function handlePatientRegister(event) {
     submitBtn.disabled = true;
     
     try {
+        const email = document.getElementById('patientEmail').value.trim();
         const formData = {
             full_name: document.getElementById('patientFullName').value.trim(),
-            email: document.getElementById('patientEmail').value.trim(),
             phone: document.getElementById('patientPhone').value.trim(),
             age: parseInt(document.getElementById('patientAge').value),
             gender: document.getElementById('patientGender').value,
@@ -710,10 +710,14 @@ async function handlePatientRegister(event) {
             language_preference: LanguageManager.getLanguage() || 'ar'
         };
         
+        // Add email only if provided
+        if (email) {
+            formData.email = email;
+        }
+        
         // Basic client-side validation
-        if (!formData.full_name || !formData.email || 
-            !formData.phone || !formData.age || !formData.gender || !formData.password) {
-            throw new Error('All fields are required');
+        if (!formData.full_name || !formData.phone || !formData.age || !formData.gender || !formData.password) {
+            throw new Error('All required fields must be filled');
         }
         
         // Make API call to registration endpoint
@@ -798,9 +802,9 @@ async function handleDoctorRegister(event) {
     submitBtn.disabled = true;
     
     try {
+        const email = document.getElementById('doctorEmail').value.trim();
         const formData = {
             full_name: document.getElementById('doctorFullName').value.trim(),
-            email: document.getElementById('doctorEmail').value.trim(),
             phone: document.getElementById('doctorPhone').value.trim(),
             license_number: document.getElementById('doctorLicense').value.trim(),
             specialty: document.getElementById('doctorSpecialty').value,
@@ -810,11 +814,15 @@ async function handleDoctorRegister(event) {
             language_preference: LanguageManager.getLanguage() || 'ar'
         };
         
+        // Add email only if provided
+        if (email) {
+            formData.email = email;
+        }
+        
         // Basic client-side validation
-        if (!formData.full_name || !formData.email || 
-            !formData.phone || !formData.license_number || !formData.specialty || 
+        if (!formData.full_name || !formData.phone || !formData.license_number || !formData.specialty || 
             !formData.years_of_experience || !formData.password) {
-            throw new Error('All fields are required');
+            throw new Error('All required fields must be filled');
         }
         
         // Make API call to registration endpoint
