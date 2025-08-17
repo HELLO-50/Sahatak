@@ -4,10 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Sahatak</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="../../assets/css/main.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Bootstrap 5 CSS CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     
@@ -23,56 +19,15 @@
     <link rel="stylesheet" href="../../assets/css/main.css">
     <!-- Dashboard CSS -->
     <link rel="stylesheet" href="../../assets/css/components/dashboard.css">
-
-    <style>
-        .admin-sidebar {
-            background-color: #2c3e50;
-            min-height: 100vh;
-            color: white;
-        }
-        .admin-content {
-            padding: 20px;
-        }
-        .stats-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        .placeholder-section {
-            border: 2px dashed #ddd;
-            padding: 30px;
-            margin: 20px 0;
-            text-align: center;
-            background-color: #f8f9fa;
-            border-radius: 10px;
-        }
-        .todo-item {
-            background-color: #fff3cd;
-            border: 1px solid #ffeaa7;
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 5px;
-        }
-    </style>
-    <!-- Chart.js Library -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 </head>
 <body>
     <!-- Admin Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <i class="bi bi-shield-check"></i> Sahatak Admin
-            </a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="#"><i class="bi bi-person-circle"></i> Admin User</a>
-                <a class="nav-link" href="#"><i class="bi bi-box-arrow-right"></i> Logout</a>
-            </div>
-        </div>
-    </nav>
+    <div class="dashboard-container">
+    <div class="dashboard-header">...</div>
+    <div class="dashboard-sidebar">...</div>
+    <div class="quick-actions">...</div>
+    <div class="content-sections">...</div>
+</div>
 
     <div class="container-fluid">
         <div class="row">
@@ -81,20 +36,107 @@
                 <div class="p-3">
                     <h5><i class="bi bi-speedometer2"></i> Admin Panel</h5>
                     
-                    <div class="placeholder-section">
-                        <h6>Navigation Menu</h6>
-                        <p><strong>Awab, you need to implement:</strong></p>
-                        <ul class="list-unstyled text-start">
-                            <li><i class="bi bi-house"></i> Dashboard</li>
-                            <li><i class="bi bi-people"></i> User Management</li>
-                            <li><i class="bi bi-person-check"></i> Doctor Verification</li>
-                            <li><i class="bi bi-gear"></i> System Settings</li>
-                            <li><i class="bi bi-activity"></i> Platform Health</li>
-                            <li><i class="bi bi-bar-chart"></i> Analytics</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+                    <!-- Sidebar -->
+<div id="sidebar" class="sidebar">
+  <ul>
+    <li>Dashboard</li>
+    <li>Users</li>
+    <li>Settings</li>
+  </ul>
+</div>
+<div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" aria-label="قائمة التنقّل">
+      <div class="brand">
+        <i class="bi bi-heart-pulse"></i>
+        <div>
+          <div class="title">Sahatak Admin</div>
+          <div class="subtitle">لوحة التحكم</div>
+        </div>
+      </div>
+
+      <div class="user">
+        <div class="avatar">A</div>
+        <div>
+          <div class="name">Awab</div>
+          <div class="role">مسؤول النظام</div>
+        </div>
+      </div>
+
+      <nav class="nav" id="nav">
+        <button data-target="dashboard" class="active"><i class="bi bi-speedometer2"></i> Dashboard <span class="kbd">D</span></button>
+        <button data-target="users"><i class="bi bi-people"></i> User Management <span class="kbd">U</span></button>
+        <button data-target="verification"><i class="bi bi-patch-check"></i> Doctor Verification <span class="kbd">V</span></button>
+        <button data-target="settings"><i class="bi bi-sliders2"></i> System Settings <span class="kbd">S</span></button>
+        <button data-target="health"><i class="bi bi-activity"></i> Platform Health <span class="kbd">H</span></button>
+        <button data-target="analytics"><i class="bi bi-graph-up"></i> Analytic <span class="kbd">A</span></button>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content">
+      <div class="topbar">
+        <button class="toggle" id="toggleSidebar" aria-label="إظهار/إخفاء القائمة"><i class="bi bi-list"></i></button>
+        <div class="search">
+          <input type="search" placeholder="ابحث في لوحة التحكم…" id="searchInput" />
+          <button class="btn" id="refreshBtn"><i class="bi bi-arrow-clockwise"></i></button>
+          <button class="btn" id="themeBtn" title="تبديل المظهر"><i class="bi bi-moon"></i></button>
+        </div>
+      </div>
+
+      <!-- Sections -->
+      <section id="dashboard">
+        <div class="cards">
+          <div class="card">
+            <h3>نظرة عامة</h3>
+            <p class="muted">ضع هنا بطاقات الإحصائيات والرسوم البيانية السريعة.</p>
+          </div>
+          <div class="card"><h3>المهام السريعة</h3><p class="muted">روابط مختصرة لأهم العمليات.</p></div>
+        </div>
+      </section>
+
+      <section id="users" hidden>
+        <div class="cards">
+          <div class="card"><h3>إدارة المستخدمين</h3><p class="muted">قائمة المستخدمين، البحث، التفعيل/التعطيل، الأدوار…</p></div>
+        </div>
+      </section>
+
+      <section id="verification" hidden>
+        <div class="cards">
+          <div class="card"><h3>توثيق الأطباء</h3><p class="muted">طلبات التوثيق، المراجعة، المستندات، القبول/الرفض.</p></div>
+        </div>
+      </section>
+
+      <section id="settings" hidden>
+        <div class="cards">
+          <div class="card"><h3>إعدادات النظام</h3><p class="muted">إعدادات عامة، الصلاحيات، البريد، الإشعارات…</p></div>
+        </div>
+      </section>
+
+      <section id="health" hidden>
+        <div class="cards">
+          <div class="card"><h3>صحة المنصّة</h3><p class="muted">حالة الخوادم، قاعدة البيانات، زمن الاستجابة، الأخطاء…</p></div>
+        </div>
+      </section>
+
+      <section id="analytics" hidden>
+        <div class="cards">
+          <div class="card"><h3>التحليلات</h3><p class="muted">مخططات الاستخدام، النمو، الأنماط الزمنية…</p></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="backdrop" id="backdrop"></div>
+
+<!-- Content -->
+<div class="content">
+  <button id="menuToggle" class="menu-btn">☰</button>
+  <h1>Welcome</h1>
+  <p>Here is your content</p>
+</div>
+<link rel="stylesheet" href="../../assets/css/main.css">
+<script src="../../assets/js/components/admin.js"></script>
 
             <!-- Main Admin Content -->
             <div class="col-md-9 admin-content">
@@ -108,7 +150,6 @@
                     </div>
                 </div>
                 
-
                 <!-- Platform Statistics -->
                 <div class="row mb-4">
                     <div class="col-md-3">
@@ -144,6 +185,7 @@
                         <div class="alert alert-info">
                             <strong>Awab, these are your admin frontend tasks:</strong>
                         </div>
+                        
                         
                         <!-- User Management Section -->
                         <div class="placeholder-section">
@@ -239,33 +281,6 @@
     </div>
   </div>
 </div>
-
-<script>
-function openUserModal(user) {
-    document.getElementById("modalName").innerText = user.name;
-    document.getElementById("modalEmail").innerText = user.email;
-    document.getElementById("modalPhone").innerText = user.phone;
-    document.getElementById("modalRole").innerText = user.role;
-    document.getElementById("modalStatus").innerText = user.status;
-    
-    document.getElementById("toggleStatusBtn").innerText = user.status === "Active" ? "Deactivate" : "Activate";
-    document.getElementById("toggleStatusBtn").onclick = () => toggleStatus(user.name);
-
-    new bootstrap.Modal(document.getElementById("userModal")).show();
-}
-
-function sendNotification() {
-    alert("Notification sent!");
-}
-
-function resetPassword() {
-    alert("Password reset!");
-}
-</script>
-
-                            
-
-
 <!-- مودال تفاصيل المستخدم -->
 <div class="modal fade" id="userModal" tabindex="-1">
   <div class="modal-dialog">
@@ -281,107 +296,14 @@ function resetPassword() {
   </div>
 </div>
 
-                            <p><strong>Awab, implement the following:</strong></p>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="todo-item">
-                                        <strong>User List Table</strong>
-                                        <ul class="text-start mt-2">
-                                            <li>Show users with filters (Patient/Doctor/Admin)</li>
-                                            <li>Search by name, email, phone</li>
-                                            <li>Pagination for large user lists</li>
-                                        <li>Actions: View, Activate/Deactivate, Delete</li>                            
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="todo-item">
-                                        <strong>User Actions</strong>
-                                        <ul class="text-start mt-2">
-                                            <li>Modal for user details (NO medical data)</li>
-                                            <li>Toggle user active status</li>
-                                            <li>Send system notifications to users</li>
-                                            <li>Reset user passwords</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
+                            
                         <!-- Doctor Verification Section -->
                         <div class="placeholder-section">
                             <h5><i class="bi bi-person-check"></i> Doctor Verification</h5>
                             <div id="doctorList" class="mt-3"></div>
 <div id="doctorList" class="mt-3"></div>
  
-                            <p><strong>Awab, create these components:</strong></p>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="todo-item">
-                                        <strong>Pending Verifications</strong>
-                                        <ul class="text-start mt-2">
-                                            <li>List of unverified doctors</li>
-                                            <li>Show license documents</li>
-                                            <li>Verify/Reject buttons</li>
-                                            <li>Add verification notes</li>
-
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="todo-item">
-                                        <strong>Manual Doctor Management</strong>
-                                        <ul class="text-start mt-2">
-                                            <li>Add new doctor manually</li>
-                                            <li>Edit doctor information</li>
-                                            <li>Remove doctor access</li>
-                                            <li>Update specialties list</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- System Settings Section -->
-                        <div class="placeholder-section">
-                            <h5><i class="bi bi-gear"></i> System Settings</h5>
-                            <p><strong>Awab, build settings interface for:</strong></p>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="todo-item">
-                                        <strong>General Settings</strong>
-                                        <ul class="text-start mt-2">
-                                            <li>Site maintenance mode</li>
-                                            <li>Registration open/closed</li>
-                                            <li>Default language</li>
-                                            <li>Time zone settings</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="todo-item">
-                                        <strong>Notification Settings</strong>
-                                        <ul class="text-start mt-2">
-                                            <li>Email notification toggles</li>
-                                            <li>SMS notification settings</li>
-                                            <li>System announcement banner</li>
-                                            <li>Push notification config</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="todo-item">
-                                        <strong>Security Settings</strong>
-                                        <ul class="text-start mt-2">
-                                            <li>Password policy settings</li>
-                                            <li>Session timeout config</li>
-                                            <li>Failed login attempt limits</li>
-                                            <li>API rate limiting controls</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        
                         <form id="settingsForm" class="mt-4">
   <div class="mb-3">
     <label>وضع الصيانة</label>
@@ -398,6 +320,7 @@ function resetPassword() {
       <option value="en">إنجليزي</option>
     </select>
   </div>
+  
 
   <div class="mb-3">
     <label>المنطقة الزمنية</label>
@@ -418,7 +341,7 @@ function resetPassword() {
                 <option value="on">On</option>
             </select>
         </div>
-
+        
         <!-- Registration Status -->
         <div class="mb-3">
             <label class="form-label">Registration Status</label>
@@ -427,6 +350,7 @@ function resetPassword() {
                 <option value="closed">Closed</option>
             </select>
         </div>
+        
 
         <!-- Default Language -->
         <div class="mb-3">
@@ -437,6 +361,7 @@ function resetPassword() {
                 <option value="fr">French</option>
             </select>
         </div>
+        
 
         <!-- Time Zone -->
         <div class="mb-3">
@@ -483,7 +408,7 @@ function resetPassword() {
             <label for="smsApiKey" class="form-label">SMS API Key</label>
             <input type="password" id="smsApiKey" class="form-control" placeholder="Enter API Key">
         </div>
-
+        
         <!-- System Announcement Banner -->
         <div class="mb-3">
             <label for="systemAnnouncement" class="form-label">System Announcement Banner</label>
@@ -541,12 +466,8 @@ function resetPassword() {
     <div class="card-body">
         
         <!-- Password Policy -->
-        <div class="mb-3">
-            <label for="passwordPolicy" class="form-label">Password Policy</label>
-            <select class="form-select" id="passwordPolicy">
-                <option value="weak">Weak (Minimum 6 characters)</option>
-                <option value="medium" selected>Medium (8+ characters, at least 1 number)</option>
-                <option value="strong">Strong (10+ characters, 1 uppercase, 1 number, 1 special char)</option>
+         <div class="mb-3">
+                 <option value="weak">Weak (Minimum 6 characters)</option>
             </select>
         </div>
 
@@ -609,25 +530,6 @@ function resetPassword() {
     </div>
 </div>
 
-<!-- Chart.js Script for API Response Times -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-const ctx = document.getElementById('apiResponseChart').getContext('2d');
-new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
-        datasets: [{
-            label: 'API Response Time (ms)',
-            data: [120, 100, 150, 130, 140, 110],
-            borderColor: 'green',
-            borderWidth: 2,
-            fill: false
-        }]
-    }
-});
-</script>
-
 
 <!-- End General Settings Section -->
 
@@ -637,8 +539,8 @@ new Chart(ctx, {
                         <div class="placeholder-section">
                             <h5><i class="bi bi-activity"></i> Platform Health & Analytics</h5>
                             <div>
-  <p>استخدام المعالج: <span id="cpuUsage">0%</span></p>
-  <p>استخدام الذاكرة: <span id="memUsage">0%</span></p>
+  <p>استخدام المعالج: <span id="cpuUsage">15%</span></p>
+  <p>استخدام الذاكرة: <span id="memUsage">47%</span></p>
 </div>
 <canvas id="analyticsChart" width="400" height="200"></canvas>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -660,7 +562,7 @@ new Chart(ctx, {
             <div class="card text-center shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title">Active Users</h5>
-                    <p class="display-6 text-primary">12,450</p>
+                    <p class="display-6 text-primary">130</p>
                     <small class="text-muted">Current Month</small>
                 </div>
             </div>
@@ -686,12 +588,14 @@ new Chart(ctx, {
             </div>
         </div>
     </div>
+    
 <!-- Usage Analytics Section -->
 <section id="usage-analytics" class="card mb-4">
     <div class="card-header bg-primary text-white">
         <h5 class="mb-0">Usage Analytics</h5>
     </div>
     <div class="card-body">
+
         <!-- Daily/Monthly Registrations -->
         <h6>Daily/Monthly User Registrations</h6>
         <canvas id="registrationChart" height="100"></canvas>
@@ -722,6 +626,7 @@ new Chart(ctx, {
     </div>
 </section>
 
+
     <!-- Chart -->
     <div class="card mt-4 shadow-sm">
         <div class="card-header">
@@ -730,466 +635,17 @@ new Chart(ctx, {
         <div class="card-body">
             <canvas id="healthChart" height="100"></canvas>
         </div>
-    </div>
-</section>
+    </div>   
+</section>                            
+     <!-- JavaScript Files to Include -->
+<script src="../../assets/js/main.js"></script>
+<script src="../../assets/js/components/dashboard-translations.js"></script>
+<script src="../../assets/js/components/admin.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="assets/js/admin.js"></script>
+<!-- Bootstrap Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-
-<!-- Chart.js Script -->
-<script>
-    constctx = document.getElementById('healthChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-            datasets: [
-                {
-                    label: 'Active Users',
-                    data: [1200, 1400, 1350, 1500, 1600, 1550, 1700],
-                    borderColor: '#007bff',
-                    backgroundColor: 'rgba(0,123,255,0.2)',
-                  fill: true,
-                    tension: 0.3
-                },
-                {
-                    label: 'Error Rate (%)',
-                    data: [0.15, 0.1, 0.12, 0.09, 0.11, 0.1, 0.08],
-                    borderColor: '#dc3545',
-                    backgroundColor: 'rgba(220,53,69,0.2)',
-                    fill: true,
-                    tension: 0.3
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            plugins: { legend: { position: 'bottom' } },
-            scales: { y: { beginAtZero: true } }
-        }
-    });
-</script>
-
-
-                            <p><strong>Awab, create dashboards showing:</strong></p>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="todo-item">
-                                        <strong>Health Monitoring</strong>
-                                        <ul class="text-start mt-2">
-                                            <li>System uptime display</li>
-                                            <li>Database connection status</li>
-                                            <li>API response times chart</li>
-                                            <li>Error rate monitoring</li>
-                                            <li>Server resource usage (CPU, Memory)</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="todo-item">
-                                        <strong>Usage Analytics</strong>
-                                        <ul class="text-start mt-2">
-                                            <li>Daily/Monthly user registrations</li>
-                                            <li>Appointment booking trends</li>
-                                            <li>Most active doctors/specialties</li>
-                                            <li>Geographic user distribution</li>
-                                            <li>Platform usage by time of day</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Technical Implementation Notes -->
-                        <div class="alert alert-warning">
-                            <h6><i class="bi bi-info-circle"></i> Implementation Notes for Awab:</h6>
-                            <ul class="mb-0">
-                                <li><strong>API Integration:</strong> Use the admin endpoints that Ahmed will create in the backend</li>
-                                <li><strong>Authentication:</strong> Admin users should have elevated permissions</li>
-                                <li><strong>Data Privacy:</strong> Never display patient medical records or sensitive data</li>
-                                <li><strong>Real-time Updates:</strong> Consider using WebSocket for live health monitoring</li>
-                                <li><strong>Responsive Design:</strong> Ensure admin panel works on tablets and mobile devices</li>
-                                <li><strong>Language Support:</strong> Include Arabic/English switching for admin interface</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../../assets/js/main.js"></script>
-    <script>
-        // Placeholder JavaScript for admin functionality
-        console.log('Admin dashboard loaded');
-        
-        // Awab: Add your admin-specific JavaScript here
-        const users = [
-  { name: "أحمد", email: "ahmed@test.com", phone: "02110114532", role: "doctor", active: true },
-  { name: "منى", email: "mona@test.com", phone: "0213021435", role: "patient", active: false }
-];
-
-function renderUsersTable() {
-  const table = document.getElementById("userTable");
-  if (!table) return;
-  table.innerHTML = "";
-  users.forEach((u, i) => {
-    table.innerHTML += `
-      <tr>
-        <td>${u.name}</td>
-        <td>${u.email}</td>
-        <td>${u.phone}</td>
-        <td>${u.role}</td>
-        <td>${u.active ? 'نشط' : 'معطل'}</td>
-        <td>
-          <button class="btn btn-sm btn-info" onclick="showUserModal(${i})">عرض</button>
-          <button class="btn btn-sm btn-warning" onclick="toggleUser(${i})">${u.active ? 'تعطيل' : 'تفعيل'}</button>
-        </td>
-      </tr>
-    `;
-  });
-}
-
-function showUserModal(i) {
-  const u = users[i];
-  const modalBody = document.getElementById("userDetails");
-  if (!modalBody) return;
-  modalBody.innerHTML = `الاسم: ${u.name}<br>البريد: ${u.email}<br>الهاتف: ${u.phone}`;
-  new bootstrap.Modal(document.getElementById("userModal")).show();
-}
-
-function toggleUser(i) {
-  users[i].active = !users[i].active;
-  renderUsersTable();
-}
-
-renderUsersTable();
-const doctors = [
-  { name: "د. خالد", license: "license1.pdf", verified: false },
-  { name: "د. سامية", license: "license2.pdf", verified: false }
-];
-
-function renderDoctors() {
-  const section = document.getElementById("doctorList");
-  if (!section) return;
-  section.innerHTML = "";
-  doctors.forEach((d, i) => {
-    if (!d.verified) {
-      section.innerHTML += `
-        <div class="todo-item">
-          <strong>${d.name}</strong> - <a href="${d.license}" target="_blank">عرض الترخيص</a>
-          <br/>
-          <button onclick="verifyDoctor(${i})" class="btn btn-success btn-sm mt-1">توثيق</button>
-          <button onclick="rejectDoctor(${i})" class="btn btn-danger btn-sm mt-1">رفض</button>
-        </div>
-      `;
-    }
-  });
-}
-
-function verifyDoctor(i) {
-  doctors[i].verified = true;
-  alert("تم توثيق الطبيب");
-  renderDoctors();
-}
-
-function rejectDoctor(i) {
-  alert("تم رفض الطبيب");
-  renderDoctors();
-}
-
-renderDoctors();
-
-
-        // - User management functions
-        // - Doctor verification handlers
-        // - Settings form submissions
-        const settingsForm = document.getElementById("settingsForm");
-if (settingsForm) {
-  settingsForm.addEventListener("submit", function (e) {
-    e.preventDefault();
-    const data = {
-      maintenance: document.getElementById("maintenance").value,
-      language: document.getElementById("language").value,
-      timezone: document.getElementById("timezone").value,
-    };
-    alert("تم حفظ الإعدادات:\n" + JSON.stringify(data, null, 2));
-  });
-}
-
-        // - Real-time health monitoring
-        function simulateHealthData() {
-  const cpu = Math.floor(Math.random() * 100);
-  const mem = Math.floor(Math.random() * 100);
-  document.getElementById("cpuUsage").innerText = cpu + "%";
-  document.getElementById("memUsage").innerText = mem + "%";
-}
-setInterval(simulateHealthData, 2000);
-
-        // - Analytics chart rendering
-      document.addEventListener("DOMContentLoaded", () => {
-  const ctx = document.getElementById("analyticsChart");
-  if (ctx) {
-    new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: ["يناير", "فبراير", "مارس", "أبريل"],
-        datasets: [{
-          label: "عدد المستخدمين الجدد",
-          data: [40, 55, 65, 90],
-          backgroundColor: "#667eea"
-        }]
-      }
-    });
-  }
-});
-  
-    </script>
-</body>
-<script>
-// Toggle User Status
-function toggleUserStatus(userId) {
-    alert("Toggling status for user ID: " + userId);
-}
-
-// Verify Doctor
-function verifyDoctor(doctorId) {
-    alert("Verifying doctor ID: " + doctorId);
-}
-
-// Handle Form Submission
-function handleFormSubmit(event) {
-    event.preventDefault();
-    alert("Form submitted successfully!");
-}
-
-// Track Uptime
-document.addEventListener("DOMContentLoaded", function () {
-    let startTime = Date.now();
-    setInterval(function () {
-        let elapsed = Math.floor((Date.now() - startTime) / 1000);
-        document.getElementById("uptime").textContent = elapsed + "s";
-    }, 1000);
-});
-
-// Chart Example
-document.addEventListener("DOMContentLoaded", function () {
-    const ctx = document.getElementById("myChart");
-    if (ctx) {
-        new Chart(ctx, {
-            type: "bar",
-            data: {
-                labels: ["January", "February", "March", "April", "May", "June"],
-                datasets: [{
-                    label: "Appointments",
-                    data: [12, 19, 3, 5, 2, 3],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    y: { beginAtZero: true }
-                }
-            }
-        });
-    }
-});
-// ====== Demo data (replace with API data) ======
-const demoUsers = [];
-for (let i=1;i<=57;i++){
-  demoUsers.push({
-    id: i,
-    name: `User ${i}`,
-    email: `user${i}@example.com`,
-    phone: `010${(10000000 + i).toString().slice(-8)}`,
-    role: (i%3===0 ? 'admin' : (i%2===0 ? 'doctor' : 'patient')),
-    is_active: i % 4 !== 0,
-    last_login: new Date(Date.now() - i*3600*1000).toISOString()
-  });
-}
-
-// ====== State ======
-const UserState = {
-  all: demoUsers,      // replace with fetched users
-  filtered: [],
-  page: 1,
-  perPage: parseInt(document.getElementById('per-page').value || 10),
-  currentFilter: 'all',
-  searchQuery: ''
-};
-
-// ====== Utilities ======
-function formatDateISO(iso) {
-  const d = new Date(iso);
-  return d.toLocaleString();
-}
-
-// debounce helper
-function debounce(fn, delay=300){
-  let t;
-  return (...args)=>{ clearTimeout(t); t = setTimeout(()=>fn(...args), delay); };
-}
-
-// ====== Core: apply filters/search & paginate ======
-function applyFiltersAndRender(){
-  const { all, currentFilter, searchQuery } = UserState;
-  let list = all.slice();
-
-  // filter by role
-  if (currentFilter && currentFilter !== 'all') {
-    list = list.filter(u => u.role === currentFilter);
-  }
-
-  // search by name/email/phone (case-insensitive)
-  if (searchQuery && searchQuery.trim() !== '') {
-    const q = searchQuery.trim().toLowerCase();
-    list = list.filter(u => (
-      u.name.toLowerCase().includes(q) ||
-      u.email.toLowerCase().includes(q) ||
-      (u.phone || '').toLowerCase().includes(q)
-    ));
-  }
-
-  UserState.filtered = list;
-  renderUsersTable();
-  renderPagination();
-}
-
-// ====== Render users table for current page ======
-function renderUsersTable(){
-  const tbody = document.getElementById('users-table-body');
-  tbody.innerHTML = '';
-
-  const start = (UserState.page - 1) * UserState.perPage;
-  const end = start + UserState.perPage;
-  const pageItems = UserState.filtered.slice(start, end);
-
-  if(pageItems.length === 0){
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center">No users found</td></tr>`;
-    return;
-  }
-
-  const rows = pageItems.map((u, idx) => {
-    return `
-      <tr id="user-row-${u.id}">
-        <td>${start + idx + 1}</td>
-        <td>${u.name}</td>
-        <td>${u.email}</td>
-        <td>${u.phone}</td>
-        <td><span class="badge bg-${u.role === 'doctor' ? 'primary' : (u.role === 'admin' ? 'dark' : 'secondary')}">${u.role}</span></td>
-        <td><span id="status-${u.id}" class="badge ${u.is_active ? 'bg-success' : 'bg-danger'}">${u.is_active ? 'Active' : 'Inactive'}</span></td>
-        <td>
-          <button class="btn btn-sm btn-info" onclick="viewUser(${u.id})"><i class="bi bi-eye"></i></button>
-          <button class="btn btn-sm btn-warning" onclick="toggleUser(${u.id})"><i class="bi bi-toggle-${u.is_active ? 'on' : 'off'}"></i></button>
-          <button class="btn btn-sm btn-danger" onclick="deleteUser(${u.id})"><i class="bi bi-trash"></i></button>
-        </td>
-      </tr>
-    `;
-  }).join('');
-
-  tbody.innerHTML = rows;
-}
-
-// ====== Pagination rendering ======
-function renderPagination(){
-  const container = document.getElementById('users-pagination');
-  container.innerHTML = '';
-  const total = UserState.filtered.length;
-  const totalPages = Math.max(1, Math.ceil(total / UserState.perPage));
-  const current = UserState.page;
-
-  // helper to add page item
-  function addPageItem(label, page, disabled=false, active=false){
-    const li = document.createElement('li');
-    li.className = 'page-item' + (disabled ? ' disabled' : '') + (active ? ' active' : '');
-    const a = document.createElement('a');
-    a.className = 'page-link';
-    a.href = '#';
-    a.textContent = label;
-    a.addEventListener('click', (e) => { e.preventDefault(); if(!disabled){ UserState.page = page; applyFiltersAndRender(); } });
-    li.appendChild(a);
-    container.appendChild(li);
-  }
-
-  addPageItem('«', Math.max(1, current-1), current===1);
-  // show first, last, and neighbors (simple strategy)
-  const start = Math.max(1, current-2);
-  const end = Math.min(totalPages, current+2);
-  for(let p=start;p<=end;p++){
-    addPageItem(p, p, false, p===current);
-  }
-  addPageItem('»', Math.min(totalPages, current+1), current===totalPages);
-}
-
-// ====== Actions: view / toggle / delete ======
-function viewUser(id){
-  const u = UserState.all.find(x => x.id === id);
-  if(!u) return alert('User not found');
-  const body = document.getElementById('userViewBody');
-  body.innerHTML = `
-    <p><strong>Name:</strong> ${u.name}</p>
-    <p><strong>Email:</strong> ${u.email}</p>
-    <p><strong>Phone:</strong> ${u.phone}</p>
-    <p><strong>Role:</strong> ${u.role}</p>
-    <p><strong>Last login:</strong> ${formatDateISO(u.last_login)}</p>
-  `;
-  new bootstrap.Modal(document.getElementById('userViewModal')).show();
-}
-
-function toggleUser(id){
-  // Here you would call API to toggle. For demo we toggle local array.
-  const user = UserState.all.find(x => x.id === id);
-  if(!user) return;
-  user.is_active = !user.is_active;
-  // update status badge text/color
-  const badge = document.getElementById(`status-${id}`);
-  if(badge){
-    badge.textContent = user.is_active ? 'Active' : 'Inactive';
-    badge.className = user.is_active ? 'badge bg-success' : 'badge bg-danger';
-  }
-  // optionally show toast/alert
-  // AdminUI.showSuccess('User status updated'); // if AdminUI exists
-}
-
-function deleteUser(id){
-  if(!confirm('Delete this user?')) return;
-  // normally call API to delete then refresh. Here remove from demo array:
-  UserState.all = UserState.all.filter(u => u.id !== id);
-  applyFiltersAndRender();
-}
-
-// ====== Bind controls ======
-document.querySelectorAll('.user-filter-btn').forEach(btn => {
-  btn.addEventListener('click', (e) => {
-    document.querySelectorAll('.user-filter-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    UserState.currentFilter = btn.dataset.filter;
-    UserState.page = 1;
-    applyFiltersAndRender();
-  });
-});
-
-document.getElementById('per-page').addEventListener('change', (e) => {
-  UserState.perPage = parseInt(e.target.value, 10);
-  UserState.page = 1;
-  applyFiltersAndRender();
-});
-
-// search with debounce
-document.getElementById('user-search').addEventListener('input', debounce((e)=>{
-  UserState.searchQuery = e.target.value;
-  UserState.page = 1;
-  applyFiltersAndRender();
-}, 350));
-
-// ====== Init ======
-(function initUserManagement(){
-  UserState.filtered = UserState.all.slice();
-  renderUsersTable();
-  renderPagination();
-})();
-
-</script>
-
-</html>
+<!-- Admin Custom JS -->
+<script src="../../assets/js/components/admin.js"></script>

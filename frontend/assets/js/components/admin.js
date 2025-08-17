@@ -8,6 +8,7 @@
  * 
  * Key Features to Implement:
  * - User management
+ 
  * - Doctor verification
  * - System settings
  * - Real-time analytics
@@ -38,6 +39,67 @@ const AdminConfig = {
 // ADMIN API HELPER
 // ===========================================================================
 
+    // ====== Sidebar Navigation ======
+    const nav = document.getElementById('nav');
+    const sections = Array.from(document.querySelectorAll('main section'));
+
+    function activate(targetId) {
+      // buttons active state
+      nav.querySelectorAll('button').forEach(btn => btn.classList.toggle('active', btn.dataset.target === targetId));
+      // show selected section
+      sections.forEach(sec => { sec.hidden = sec.id !== targetId; });
+      // close sidebar on mobile
+      document.body.classList.remove('sidebar-open');
+    }
+
+    nav.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-target]');
+      if (!btn) return;
+      activate(btn.dataset.target);
+      history.replaceState(null, '', `#${btn.dataset.target}`);
+    });
+
+    // Deep link support (#dashboard, #users, ...)
+    window.addEventListener('DOMContentLoaded', () => {
+      const hash = location.hash.replace('#', '');
+      if (hash) activate(hash);
+    });
+
+    // ====== Keyboard Shortcuts ======
+    const keymap = { d: 'dashboard', u: 'users', v: 'verification', s: 'settings', h: 'health', a: 'analytics' };
+    document.addEventListener('keydown', (e) => {
+      if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+      const t = keymap[e.key?.toLowerCase()];
+      if (t) { e.preventDefault(); activate(t); }
+    });
+
+    // ====== Mobile Sidebar Toggle ======
+    const toggleSidebar = document.getElementById('toggleSidebar');
+    const backdrop = document.getElementById('backdrop');
+
+    toggleSidebar?.addEventListener('click', () => document.body.classList.toggle('sidebar-open'));
+    backdrop?.addEventListener('click', () => document.body.classList.remove('sidebar-open'));
+
+    // ====== Theme Toggle (dark only demo) ======
+    const themeBtn = document.getElementById('themeBtn');
+    let dark = true;
+    themeBtn.addEventListener('click', () => {
+      dark = !dark;
+      document.documentElement.style.filter = dark ? 'none' : 'invert(1) hue-rotate(180deg)';
+      themeBtn.innerHTML = dark ? '<i class="bi bi-moon"></i>' : '<i class="bi bi-sun"></i>';
+    });
+
+    // ====== Demo: Refresh Button ======
+    document.getElementById('refreshBtn').addEventListener('click', () => {
+      const btn = document.getElementById('refreshBtn');
+      btn.innerHTML = '<i class="bi bi-arrow-repeat"></i>';
+      btn.disabled = true;
+      setTimeout(() => {
+        btn.innerHTML = '<i class="bi bi-check2"></i>';
+        setTimeout(() => { btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i>'; btn.disabled = false; }, 900);
+      }, 900);
+    });
+  
 const AdminAPI = {
     /**
      * Awab: Make authenticated requests to admin endpoints
@@ -145,6 +207,7 @@ const AdminAPI = {
 // ===========================================================================
 // ADMIN UI HELPER FUNCTIONS
 // ===========================================================================
+// ====== Demo data (replace with API data) ======
 
 const AdminUI = {
     /**
@@ -250,6 +313,7 @@ const AdminUI = {
 // ===========================================================================
 // USER MANAGEMENT MODULE
 // ===========================================================================
+// ====== Pagination rendering ======
 
 const UserManagement = {
     currentPage: 1,
@@ -985,3 +1049,329 @@ maintain clean, well-documented code!
 
 // Initialize admin dashboard when script loads
 const adminDashboard = new AdminDashboard();
+
+// ======================= Users Management =======================
+const demoUsers = [];
+for (let i = 1; i <= 57; i++) {
+  demoUsers.push({
+    id: i,
+    name: `User ${i}`,
+    email: `user${i}@example.com`,
+    phone: `010${(10000000 + i).toString().slice(-8)}`,
+    role: (i % 3 === 0 ? 'admin' : (i % 2 === 0 ? 'doctor' : 'patient')),
+    is_active: i % 4 !== 0,
+    last_login: new Date(Date.now() - i * 3600 * 1000).toISOString()
+  });
+}
+
+const UserState = {
+  all: demoUsers,
+  filtered: [],
+  page: 1,
+  perPage: parseInt(document.getElementById('per-page').value || 10),
+  currentFilter: 'all',
+  searchQuery: ''
+};
+
+// ---- Helpers ----
+function formatDateISO(iso) {
+  return new Date(iso).toLocaleString();
+}
+function debounce(fn, delay = 300) {
+  let t;
+  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); };
+}
+function showToast(msg, type = "success") {
+  const toastBox = document.getElementById("toastBox");
+  const toast = document.createElement("div");
+  toast.className = `toast align-items-center text-bg-${type} border-0 show mb-2`;
+  toast.role = "alert";
+  toast.innerHTML = `<div class="d-flex"><div class="toast-body">${msg}</div>
+    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
+  toastBox.appendChild(toast);
+  setTimeout(() => toast.remove(), 4000);
+}
+
+// ---- Filters + Search ----
+function applyFiltersAndRender() {
+  const { all, currentFilter, searchQuery } = UserState;
+  let list = [...all];
+
+  if (currentFilter !== 'all') list = list.filter(u => u.role === currentFilter);
+
+  if (searchQuery.trim()) {
+    const q = searchQuery.toLowerCase();
+    list = list.filter(u =>
+      u.name.toLowerCase().includes(q) ||
+      u.email.toLowerCase().includes(q) ||
+      (u.phone || '').toLowerCase().includes(q)
+    );
+  }
+
+  UserState.filtered = list;
+  renderUsersTable();
+  renderPagination();
+}
+
+// ---- Render Table ----
+function renderUsersTable() {
+  const tbody = document.getElementById('users-table-body');
+  tbody.innerHTML = '';
+
+  const start = (UserState.page - 1) * UserState.perPage;
+  const end = start + UserState.perPage;
+  const pageItems = UserState.filtered.slice(start, end);
+
+  if (!pageItems.length) {
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center">🚫 لا يوجد مستخدمين</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = pageItems.map((u, idx) => `
+    <tr id="user-row-${u.id}">
+      <td>${start + idx + 1}</td>
+      <td>${u.name}</td>
+      <td>${u.email}</td>
+      <td>${u.phone}</td>
+      <td><span class="badge bg-${u.role === 'doctor' ? 'primary' : (u.role === 'admin' ? 'dark' : 'secondary')}">${u.role}</span></td>
+      <td><span id="status-${u.id}" class="badge ${u.is_active ? 'bg-success' : 'bg-danger'}">${u.is_active ? 'Active' : 'Inactive'}</span></td>
+      <td>
+        <button class="btn btn-sm btn-info" onclick="viewUser(${u.id})"><i class="bi bi-eye"></i></button>
+        <button class="btn btn-sm btn-warning" onclick="toggleUser(${u.id})"><i class="bi bi-toggle-${u.is_active ? 'on' : 'off'}"></i></button>
+        <button class="btn btn-sm btn-danger" onclick="deleteUser(${u.id})"><i class="bi bi-trash"></i></button>
+      </td>
+    </tr>`).join('');
+}
+
+// ---- Pagination ----
+function renderPagination() {
+  const container = document.getElementById('users-pagination');
+  container.innerHTML = '';
+  const total = UserState.filtered.length;
+  const totalPages = Math.max(1, Math.ceil(total / UserState.perPage));
+  const current = UserState.page;
+
+  const addPageItem = (label, page, disabled = false, active = false) => {
+    const li = document.createElement('li');
+    li.className = 'page-item' + (disabled ? ' disabled' : '') + (active ? ' active' : '');
+    const a = document.createElement('a');
+    a.className = 'page-link'; a.href = '#'; a.textContent = label;
+    a.addEventListener('click', (e) => { e.preventDefault(); if (!disabled) { UserState.page = page; applyFiltersAndRender(); } });
+    li.appendChild(a); container.appendChild(li);
+  };
+
+  addPageItem('«', Math.max(1, current - 1), current === 1);
+  for (let p = Math.max(1, current - 2); p <= Math.min(totalPages, current + 2); p++) {
+    addPageItem(p, p, false, p === current);
+  }
+  addPageItem('»', Math.min(totalPages, current + 1), current === totalPages);
+}
+
+// ---- Actions ----
+function viewUser(id) {
+  const u = UserState.all.find(x => x.id === id);
+  if (!u) return;
+  document.getElementById('userViewBody').innerHTML = `
+    <p><strong>Name:</strong> ${u.name}</p>
+    <p><strong>Email:</strong> ${u.email}</p>
+    <p><strong>Phone:</strong> ${u.phone}</p>
+    <p><strong>Role:</strong> ${u.role}</p>
+    <p><strong>Last login:</strong> ${formatDateISO(u.last_login)}</p>`;
+  new bootstrap.Modal(document.getElementById('userViewModal')).show();
+}
+
+function toggleUser(id) {
+  const user = UserState.all.find(x => x.id === id);
+  if (!user) return;
+  user.is_active = !user.is_active;
+  const badge = document.getElementById(`status-${id}`);
+  if (badge) {
+    badge.textContent = user.is_active ? 'Active' : 'Inactive';
+    badge.className = user.is_active ? 'badge bg-success' : 'badge bg-danger';
+  }
+  showToast("✅ تم تحديث حالة المستخدم");
+}
+function deleteUser(id) {
+  if (!confirm('❌ هل أنت متأكد من حذف المستخدم؟')) return;
+  UserState.all = UserState.all.filter(u => u.id !== id);
+  applyFiltersAndRender();
+  showToast("🗑️ تم حذف المستخدم", "danger");
+}
+function exportUsersCSV() {
+  const rows = [["Name", "Email", "Phone", "Role", "Status"]];
+  UserState.all.forEach(u => rows.push([u.name, u.email, u.phone, u.role, u.is_active ? "Active" : "Inactive"]));
+  const csv = rows.map(r => r.join(",")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "users.csv"; a.click();
+}
+
+// ---- Init ----
+(function initUserManagement() {
+  document.querySelectorAll('.user-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.user-filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      UserState.currentFilter = btn.dataset.filter;
+      UserState.page = 1;
+      applyFiltersAndRender();
+    });
+  });
+  document.getElementById('per-page').addEventListener('change', e => {
+    UserState.perPage = parseInt(e.target.value, 10);
+    UserState.page = 1; applyFiltersAndRender();
+  });
+  document.getElementById('user-search').addEventListener('input', debounce(e => {
+    UserState.searchQuery = e.target.value; UserState.page = 1; applyFiltersAndRender();
+  }, 350));
+  applyFiltersAndRender();
+})();
+
+// ======================= Doctors Verification =======================
+const doctors = [
+  { name: "د. خالد", license: "license1.pdf", verified: false },
+  { name: "د. سامية", license: "license2.pdf", verified: false }
+];
+
+function renderDoctors(filter = "pending") {
+  const section = document.getElementById("doctorList");
+  if (!section) return;
+  section.innerHTML = "";
+  doctors.forEach((d, i) => {
+    if (filter === "all" || (filter === "pending" && !d.verified) || (filter === "verified" && d.verified)) {
+      section.innerHTML += `
+        <div class="card p-2 mb-2">
+          <strong>${d.name}</strong> - <a href="${d.license}" target="_blank">📄 عرض الترخيص</a><br/>
+          ${d.verified ? '<span class="badge bg-success">موثق</span>' : `
+            <button onclick="verifyDoctor(${i})" class="btn btn-success btn-sm mt-1">توثيق</button>
+            <button onclick="rejectDoctor(${i})" class="btn btn-danger btn-sm mt-1">رفض</button>
+          `}
+        </div>`;
+    }
+  });
+}
+function verifyDoctor(i) { doctors[i].verified = true; showToast("✅ تم توثيق الطبيب"); renderDoctors(); }
+function rejectDoctor(i) { showToast("❌ تم رفض الطبيب", "danger"); renderDoctors(); }
+renderDoctors();
+
+// ======================= Settings =======================
+const settingsForm = document.getElementById("settingsForm");
+if (settingsForm) {
+  const saved = JSON.parse(localStorage.getItem("settings")) || {};
+  if (saved.language) document.getElementById("language").value = saved.language;
+  if (saved.timezone) document.getElementById("timezone").value = saved.timezone;
+  if (saved.maintenance) document.getElementById("maintenance").value = saved.maintenance;
+
+  settingsForm.addEventListener("submit", e => {
+    e.preventDefault();
+    const data = {
+      maintenance: document.getElementById("maintenance").value,
+      language: document.getElementById("language").value,
+      timezone: document.getElementById("timezone").value,
+    };
+    localStorage.setItem("settings", JSON.stringify(data));
+    showToast("⚙️ تم حفظ الإعدادات");
+  });
+}
+
+// ======================= Analytics =======================
+function simulateHealthData() {
+  const cpu = Math.floor(Math.random() * 100);
+  const mem = Math.floor(Math.random() * 100);
+  document.getElementById("cpuUsage").innerText = cpu + "%";
+  document.getElementById("memUsage").innerText = mem + "%";
+}
+setInterval(simulateHealthData, 5000);
+
+document.addEventListener("DOMContentLoaded", () => {
+  const ctx = document.getElementById("analyticsChart");
+  if (ctx) {
+    new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: ["يناير", "فبراير", "مارس", "أبريل"],
+        datasets: [{ label: "عدد المستخدمين الجدد", data: [40, 55, 65, 90], backgroundColor: "#667eea" }]
+      }
+    });
+  }
+});
+
+//<!-- Chart.js Script -->
+
+    constctx = document.getElementById('healthChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [
+                {
+                    label: 'Active Users',
+                    data: [1200, 1400, 1350, 1500, 1600, 1550, 1700],
+                    borderColor: '#007bff',
+                    backgroundColor: 'rgba(0,123,255,0.2)',
+                  fill: true,
+                    tension: 0.3
+                },
+                {
+                    label: 'Error Rate (%)',
+                    data: [0.15, 0.1, 0.12, 0.09, 0.11, 0.1, 0.08],
+                    borderColor: '#dc3545',
+                    backgroundColor: 'rgba(220,53,69,0.2)',
+                    fill: true,
+                    tension: 0.3
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom' } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+    const sidebar = document.getElementById("sidebar");
+const menuBtn = document.getElementById("menuToggle");
+
+menuBtn.addEventListener("click", () => {
+  sidebar.classList.toggle("closed");
+});
+//!-- Modal for user details -->
+function openUserModal(user) {
+    document.getElementById("modalName").innerText = user.name;
+    document.getElementById("modalEmail").innerText = user.email;
+    document.getElementById("modalPhone").innerText = user.phone;
+    document.getElementById("modalRole").innerText = user.role;
+    document.getElementById("modalStatus").innerText = user.status;
+    
+    document.getElementById("toggleStatusBtn").innerText = user.status === "Active" ? "Deactivate" : "Activate";
+    document.getElementById("toggleStatusBtn").onclick = () => toggleStatus(user.name);
+
+    new bootstrap.Modal(document.getElementById("userModal")).show();
+}
+function sendNotification() {
+    alert("Notification sent!");
+}
+
+function resetPassword() {
+    alert("Password reset!");
+}
+//Chart.js Script for API Response Times -->
+const ctx = document.getElementById('apiResponseChart').getContext('2d');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+        datasets: [{
+            label: 'API Response Time (ms)',
+            data: [120, 100, 150, 130, 140, 110],
+            borderColor: 'green',
+            borderWidth: 2,
+            fill: false
+        }]
+    }
+});
+
+
+    
+
+
