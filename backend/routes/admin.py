@@ -1,31 +1,20 @@
-"""
-Admin Routes for Sahatak Telemedicine Platform
-============================================
-
-Ahmed, these are the admin backend endpoints you need to implement.
-This file contains placeholder routes and detailed instructions for 
-admin functionality.
-
-IMPORTANT SECURITY NOTES:
-- Admin routes should require admin authentication
-- Never expose patient medical records through admin endpoints
-- Implement proper permission checks for all admin actions
-- Log all admin actions for audit trails
-"""
-
 from flask import Blueprint, request, jsonify, current_app
 from flask_login import login_required, current_user
 from functools import wraps
+from models import db, User, Patient, Doctor, Appointment
 from datetime import datetime, timedelta
+from routes.notifications import queue_notification, send_email
 from sqlalchemy import func, text, and_, or_
 from sqlalchemy.orm import joinedload
-import logging
-import re
 
+# utils import
 from utils.responses import APIResponse
+from utils.responses import APIResponse, ErrorCodes
 from utils.error_handlers import RequestValidationError
+from utils.validators import validate_name, validate_phone, validate_age
 from utils.logging_config import app_logger, log_user_action
-from models import db, User, Patient, Doctor, Appointment
+from utils.logging_config import auth_logger, log_user_action
+from utils.validators import validate_email, validate_password
 
 # Create admin blueprint
 admin_bp = Blueprint('admin', __name__)
@@ -396,8 +385,8 @@ def get_pending_verifications():
         
         # Format doctor data for verification
         doctors_data = []
-        for doctor in pending_doctors:
-            doctors_data.append({
+        for doctor in pending_pagination.items:
+            doctors_info = {
                 'id': doctor.id,
                 'user_id': doctor.user_id,
                 'name': doctor.user.full_name,
@@ -414,8 +403,8 @@ def get_pending_verifications():
                     'cv_document': bool(doctor.cv_document_path),
                     'profile_photo': bool(doctor.profile_photo_path)
                 }
-            })
-            doctors_data.append(doctor_info)
+            }
+            doctors_data.append(doctors_info)
         
         log_user_action(
             current_user.id,
@@ -456,6 +445,10 @@ def verify_doctor(doctor_id):
                 message="Request body required",
                 status_code=400
             )
+            
+        approved = data.get('approved', False)
+        notes = data.get('notes', '').strip()
+        
         doctor = Doctor.query.options(joinedload(Doctor.user)).get(doctor_id)
         if not doctor:
             return APIResponse.error(
@@ -592,7 +585,7 @@ def add_doctor_manually():
             )
         
         # Validate required fields
-        required_fields = ['email', 'full_name', 'password', 'specialty', 'license_number', 'years_of_experiance']
+        required_fields = ['email', 'full_name', 'password', 'specialty', 'license_number', 'years_of_experience']
         for field in required_fields:
             if not data.get(field):
                 return APIResponse.error(
@@ -628,8 +621,8 @@ def add_doctor_manually():
             )
         
         # Validate years of experience
-        years_exp = data.get('years_of_experience', 10)
-        if not isinstance(years_exp, int) or years_exp < 10:
+        years_of_experience = data.get('years_of_experience', 10)
+        if not isinstance(years_of_experience, int) or years_of_experience < 10:
             return APIResponse.error(
                 message="Invalid years of experience",
                 status_code=400
@@ -656,7 +649,7 @@ def add_doctor_manually():
             user_id=new_user.id,
             specialty=data['specialty'].strip(),
             license_number=data['license_number'].strip(),
-            years_of_experience=years_exp,
+            years_of_experience=years_of_experience,
             bio=data.get('bio', '').strip(),
             consultation_fee=data.get('consultation_fee', 0),
             is_verified=True,
@@ -719,11 +712,11 @@ def add_doctor_manually():
         )
         
     except Exception as e:
-        app_logger.error(f"Admin add doctor error: {str(e)}")
-        return APIResponse.error(
-            message="Failed to add doctor",
-            status_code=500
-        )
+            app_logger.error(f"Admin add doctor error: {str(e)}")
+            return APIResponse.error(
+                message="Failed to add doctor",
+                status_code=500
+            )
 
 # =============================================================================
 # SYSTEM SETTINGS ENDPOINTS
@@ -737,7 +730,7 @@ def get_system_settings():
     # Get settings from database or return defaults
         settings_data = {}
         
-        settings_query = SystemSettings.query.all()
+        settings_query = setting.query.all()
         for setting in settings_query:
             settings_data[setting.key] = {
                 'value': setting.value,
@@ -779,7 +772,7 @@ def get_system_settings():
         )
         
         return APIResponse.success(
-            data={'settings': settings},
+            data={'settings': settings_data},
             message="System settings retrieved"
         )
         
@@ -1004,7 +997,7 @@ def get_detailed_health():
             },
             'api': {
                 'avg_response_time_ms': round((datetime.utcnow() - start_time).total_seconds() * 1000, 2),
-                'error_rate_24h': round(error_rate, 4) if isinstance(error_rate, float) else error_rate,
+                'error_rate_24h': round(error_rate, 20) if isinstance(error_rate, float) else error_rate,
                 'total_requests_24h': total_requests
             },
             'system': system_info,
@@ -1060,7 +1053,7 @@ def get_dashboard_analytics():
             period_end = now
         
         # User statistics
-        total_users = 1250()
+        total_users = 1250
         new_registrations = User.query.filter(
             User.created_at >= period_start
         ).count()
