@@ -116,7 +116,7 @@ class EmailService:
                 app_logger.warning("Email service not configured, skipping email")
                 return False
             
-            subject = '*#CJ/ EH9/C 'D7(J' if language == 'ar' else 'Appointment Confirmation'
+            subject = 'تأكيد موعد الطبيب' if language == 'ar' else 'Appointment Confirmation'
             template_name = f'email/{language}/appointment_confirmation.html'
             
             template_data = {
@@ -163,7 +163,7 @@ class EmailService:
                 app_logger.warning("Email service not configured, skipping email")
                 return False
             
-            subject = '%D:'! EH9/C 'D7(J' if language == 'ar' else 'Appointment Cancellation'
+            subject = 'إلغاء موعد الطبيب' if language == 'ar' else 'Appointment Cancellation'
             template_name = f'email/{language}/appointment_cancellation.html'
             
             template_data = {
@@ -239,9 +239,9 @@ class EmailService:
         """Get email subject based on reminder type and language"""
         subjects = {
             'ar': {
-                '24h': '*0CJ1: EH9/C 'D7(J :/'K',
-                '1h': '*0CJ1: EH9/C 'D7(J .D'D 3'9)',
-                'now': '*0CJ1: EH9/C 'D7(J 'D"F'
+                '24h': 'تذكير: موعد الطبيب غداً',
+                '1h': 'تذكير: موعد الطبيب خلال ساعة',
+                'now': 'تذكير: موعد الطبيب الآن'
             },
             'en': {
                 '24h': 'Reminder: Your medical appointment tomorrow',
