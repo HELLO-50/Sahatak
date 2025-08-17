@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Sahatak</title>
+    
     <!-- Bootstrap 5 CSS CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     
@@ -19,633 +20,522 @@
     <link rel="stylesheet" href="../../assets/css/main.css">
     <!-- Dashboard CSS -->
     <link rel="stylesheet" href="../../assets/css/components/dashboard.css">
+    <!-- Admin CSS -->
+    <link rel="stylesheet" href="../../assets/css/components/admin.css">
 </head>
 <body>
-    <!-- Admin Navigation -->
     <div class="dashboard-container">
-    <div class="dashboard-header">...</div>
-    <div class="dashboard-sidebar">...</div>
-    <div class="quick-actions">...</div>
-    <div class="content-sections">...</div>
-</div>
-
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Admin Sidebar -->
-            <div class="col-md-3 admin-sidebar p-0">
-                <div class="p-3">
-                    <h5><i class="bi bi-speedometer2"></i> Admin Panel</h5>
-                    
-                    <!-- Sidebar -->
-<div id="sidebar" class="sidebar">
-  <ul>
-    <li>Dashboard</li>
-    <li>Users</li>
-    <li>Settings</li>
-  </ul>
-</div>
-<div class="layout">
-    <!-- Sidebar -->
-    <aside class="sidebar" aria-label="قائمة التنقّل">
-      <div class="brand">
-        <i class="bi bi-heart-pulse"></i>
-        <div>
-          <div class="title">Sahatak Admin</div>
-          <div class="subtitle">لوحة التحكم</div>
-        </div>
-      </div>
-
-      <div class="user">
-        <div class="avatar">A</div>
-        <div>
-          <div class="name">Awab</div>
-          <div class="role">مسؤول النظام</div>
-        </div>
-      </div>
-
-      <nav class="nav" id="nav">
-        <button data-target="dashboard" class="active"><i class="bi bi-speedometer2"></i> Dashboard <span class="kbd">D</span></button>
-        <button data-target="users"><i class="bi bi-people"></i> User Management <span class="kbd">U</span></button>
-        <button data-target="verification"><i class="bi bi-patch-check"></i> Doctor Verification <span class="kbd">V</span></button>
-        <button data-target="settings"><i class="bi bi-sliders2"></i> System Settings <span class="kbd">S</span></button>
-        <button data-target="health"><i class="bi bi-activity"></i> Platform Health <span class="kbd">H</span></button>
-        <button data-target="analytics"><i class="bi bi-graph-up"></i> Analytic <span class="kbd">A</span></button>
-      </nav>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="content">
-      <div class="topbar">
-        <button class="toggle" id="toggleSidebar" aria-label="إظهار/إخفاء القائمة"><i class="bi bi-list"></i></button>
-        <div class="search">
-          <input type="search" placeholder="ابحث في لوحة التحكم…" id="searchInput" />
-          <button class="btn" id="refreshBtn"><i class="bi bi-arrow-clockwise"></i></button>
-          <button class="btn" id="themeBtn" title="تبديل المظهر"><i class="bi bi-moon"></i></button>
-        </div>
-      </div>
-
-      <!-- Sections -->
-      <section id="dashboard">
-        <div class="cards">
-          <div class="card">
-            <h3>نظرة عامة</h3>
-            <p class="muted">ضع هنا بطاقات الإحصائيات والرسوم البيانية السريعة.</p>
-          </div>
-          <div class="card"><h3>المهام السريعة</h3><p class="muted">روابط مختصرة لأهم العمليات.</p></div>
-        </div>
-      </section>
-
-      <section id="users" hidden>
-        <div class="cards">
-          <div class="card"><h3>إدارة المستخدمين</h3><p class="muted">قائمة المستخدمين، البحث، التفعيل/التعطيل، الأدوار…</p></div>
-        </div>
-      </section>
-
-      <section id="verification" hidden>
-        <div class="cards">
-          <div class="card"><h3>توثيق الأطباء</h3><p class="muted">طلبات التوثيق، المراجعة، المستندات، القبول/الرفض.</p></div>
-        </div>
-      </section>
-
-      <section id="settings" hidden>
-        <div class="cards">
-          <div class="card"><h3>إعدادات النظام</h3><p class="muted">إعدادات عامة، الصلاحيات، البريد، الإشعارات…</p></div>
-        </div>
-      </section>
-
-      <section id="health" hidden>
-        <div class="cards">
-          <div class="card"><h3>صحة المنصّة</h3><p class="muted">حالة الخوادم، قاعدة البيانات، زمن الاستجابة، الأخطاء…</p></div>
-        </div>
-      </section>
-
-      <section id="analytics" hidden>
-        <div class="cards">
-          <div class="card"><h3>التحليلات</h3><p class="muted">مخططات الاستخدام، النمو، الأنماط الزمنية…</p></div>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <div class="backdrop" id="backdrop"></div>
-
-<!-- Content -->
-<div class="content">
-  <button id="menuToggle" class="menu-btn">☰</button>
-  <h1>Welcome</h1>
-  <p>Here is your content</p>
-</div>
-<link rel="stylesheet" href="../../assets/css/main.css">
-<script src="../../assets/js/components/admin.js"></script>
-
-            <!-- Main Admin Content -->
-            <div class="col-md-9 admin-content">
-                <!-- Dashboard Header -->
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2>Admin Dashboard</h2>
-                    <div>
-                        <button class="btn btn-outline-primary">
-                            <i class="bi bi-download"></i> Export Report
-                        </button>
+        <div class="container-fluid">
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <div class="row align-items-center">
+                    <div class="col-lg-6">
+                        <h1 class="dashboard-title" id="dashboard-title">Admin Dashboard</h1>
+                        <p class="dashboard-subtitle" id="dashboard-subtitle">Sahatak Medical Platform Management</p>
                     </div>
-                </div>
-                
-                <!-- Platform Statistics -->
-                <div class="row mb-4">
-                    <div class="col-md-3">
-                        <div class="stats-card">
-                            <h3>125</h3>
-                            <p>Total Users</p>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stats-card">
-                            <h3>45</h3>
-                            <p>Verified Doctors</p>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stats-card">
-                            <h3>230</h3>
-                            <p>Appointments</p>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stats-card">
-                            <h3>98%</h3>
-                            <p>System Health</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Admin Tasks for Awab -->
-                <div class="row">
-                    <div class="col-12">
-                        <h4>Frontend Development Tasks</h4>
-                        <div class="alert alert-info">
-                            <strong>Awab, these are your admin frontend tasks:</strong>
-                        </div>
-                        
-                        
-                        <!-- User Management Section -->
-                        <div class="placeholder-section">
-                            <h5><i class="bi bi-people"></i> User Management</h5>
-                            <!-- جدول المستخدمين -->
-<!-- ========== User Management Controls ========== -->
-<div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
-  <!-- Filters -->
-  <div class="btn-group" role="group" aria-label="User type filters">
-    <button type="button" class="btn btn-outline-secondary user-filter-btn active" data-filter="all">All</button>
-    <button type="button" class="btn btn-outline-secondary user-filter-btn" data-filter="patient">Patient</button>
-    <button type="button" class="btn btn-outline-secondary user-filter-btn" data-filter="doctor">Doctor</button>
-    <button type="button" class="btn btn-outline-secondary user-filter-btn" data-filter="admin">Admin</button>
-  </div>
-
-  <!-- Search -->
-  <div class="ms-3" style="min-width:280px;">
-    <input id="user-search" type="search" class="form-control" placeholder="Search name, email or phone">
-  </div>
-
-  <!-- Per-page -->
-  <div class="ms-auto">
-    <select id="per-page" class="form-select form-select-sm">
-      <option value="5">5 / page</option>
-      <option value="10" selected>10 / page</option>
-      <option value="20">20 / page</option>
-    </select>
-  </div>
-</div>
-
-<!-- ========== Users Table ========== -->
-<div class="table-responsive">
-  <table class="table table-hover table-bordered text-center">
-    <thead class="table-dark">
-      <tr>
-        <th>#</th>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Phone</th>
-        <th>Role</th>
-        <th>Status</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody id="users-table-body">
-      <!-- filled by JS -->
-    </tbody>
-  </table>
-</div>
-
-<!-- Pagination -->
-<nav>
-  <ul id="users-pagination" class="pagination justify-content-center"></ul>
-</nav>
-
-<!-- User View Modal (Bootstrap) -->
-<div class="modal fade" id="userViewModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">User Details</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body" id="userViewBody">
-        <!-- filled by JS -->
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- User Details Modal -->
-<div class="modal fade" id="userModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">User Details</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <p><strong>Name:</strong> <span id="modalName"></span></p>
-        <p><strong>Email:</strong> <span id="modalEmail"></span></p>
-        <p><strong>Phone:</strong> <span id="modalPhone"></span></p>
-        <p><strong>Role:</strong> <span id="modalRole"></span></p>
-        <p><strong>Status:</strong> <span id="modalStatus"></span></p>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-warning" id="toggleStatusBtn"></button>
-        <button class="btn btn-info" onclick="sendNotification()">Send Notification</button>
-        <button class="btn btn-secondary" onclick="resetPassword()">Reset Password</button>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- مودال تفاصيل المستخدم -->
-<div class="modal fade" id="userModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">تفاصيل المستخدم</h5>
-        <button class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <p id="userDetails"></p>
-      </div>
-    </div>
-  </div>
-</div>
-
-                            
-                        <!-- Doctor Verification Section -->
-                        <div class="placeholder-section">
-                            <h5><i class="bi bi-person-check"></i> Doctor Verification</h5>
-                            <div id="doctorList" class="mt-3"></div>
-<div id="doctorList" class="mt-3"></div>
- 
-                        
-                        <form id="settingsForm" class="mt-4">
-  <div class="mb-3">
-    <label>وضع الصيانة</label>
-    <select id="maintenance" class="form-control">
-      <option value="on">مفعل</option>
-      <option value="off">متوقف</option>
-    </select>
-  </div>
-
-  <div class="mb-3">
-    <label>اللغة</label>
-    <select id="language" class="form-control">
-      <option value="ar">عربي</option>
-      <option value="en">إنجليزي</option>
-    </select>
-  </div>
-  
-
-  <div class="mb-3">
-    <label>المنطقة الزمنية</label>
-    <input type="text" id="timezone" class="form-control" value="Africa/Cairo" />
-  </div>
-
-  <button type="submit" class="btn btn-primary">حفظ الإعدادات</button>
-</form>
-<!-- General Settings Section -->
-<section id="general-settings" class="container my-4">
-    <h2 class="mb-4">⚙️ General Settings</h2>
-    <form>
-        <!-- Site Maintenance Mode -->
-        <div class="mb-3">
-            <label class="form-label">Site Maintenance Mode</label>
-            <select class="form-select">
-                <option value="off">Off</option>
-                <option value="on">On</option>
-            </select>
-        </div>
-        
-        <!-- Registration Status -->
-        <div class="mb-3">
-            <label class="form-label">Registration Status</label>
-            <select class="form-select">
-                <option value="open">Open</option>
-                <option value="closed">Closed</option>
-            </select>
-        </div>
-        
-
-        <!-- Default Language -->
-        <div class="mb-3">
-            <label class="form-label">Default Language</label>
-            <select class="form-select">
-                <option value="en">English</option>
-                <option value="ar">Arabic</option>
-                <option value="fr">French</option>
-            </select>
-        </div>
-        
-
-        <!-- Time Zone -->
-        <div class="mb-3">
-            <label class="form-label">Time Zone</label>
-            <select class="form-select">
-                <option value="UTC">UTC</option>
-                <option value="Africa/Cairo">Africa/Cairo</option>
-                <option value="Asia/Riyadh">Asia/Riyadh</option>
-                <option value="America/New_York">America/New_York</option>
-            </select>
-        </div>
-
-        <!-- Save Button -->
-        <button type="submit" class="btn btn-primary">Save Settings</button>
-    </form>
-</section>
-<!-- Notification Settings -->
-<div class="card mt-4">
-    <div class="card-header bg-primary text-white">
-        <h5 class="mb-0">Notification Settings</h5>
-    </div>
-    <div class="card-body">
-
-        <!-- Notification Toggles -->
-        <div class="form-check form-switch mb-3">
-            <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
-            <label class="form-check-label" for="emailNotifications">Enable Email Notifications</label>
-        </div>
-        <div class="form-check form-switch mb-3">
-            <input class="form-check-input" type="checkbox" id="smsNotifications">
-            <label class="form-check-label" for="smsNotifications">Enable SMS Notifications</label>
-        </div>
-        <div class="form-check form-switch mb-3">
-            <input class="form-check-input" type="checkbox" id="pushNotifications">
-            <label class="form-check-label" for="pushNotifications">Enable Push Notifications</label>
-        </div>
-
-        <!-- SMS Notification Settings -->
-        <div class="mb-3">
-            <label for="smsProvider" class="form-label">SMS Provider</label>
-            <input type="text" id="smsProvider" class="form-control" placeholder="e.g. Twilio, Nexmo">
-        </div>
-        <div class="mb-3">
-            <label for="smsApiKey" class="form-label">SMS API Key</label>
-            <input type="password" id="smsApiKey" class="form-control" placeholder="Enter API Key">
-        </div>
-        
-        <!-- System Announcement Banner -->
-        <div class="mb-3">
-            <label for="systemAnnouncement" class="form-label">System Announcement Banner</label>
-            <textarea id="systemAnnouncement" class="form-control" rows="3" placeholder="Write your announcement here..."></textarea>
-        </div>
-
-        <!-- Save Button -->
-        <button class="btn btn-success">Save Notification Settings</button>
-    </div>
-</div>
-<!-- Security Settings Section -->
-<div class="card mb-4">
-    <div class="card-header bg-danger text-white">
-        <h5 class="mb-0">Security Settings</h5>
-    </div>
-    <div class="card-body">
-        
-        <!-- Password Policy -->
-        <div class="mb-3">
-            <label for="passwordPolicy" class="form-label">Password Policy</label>
-            <select class="form-select" id="passwordPolicy">
-                <option value="weak">Weak (Minimum 6 characters)</option>
-                <option value="medium" selected>Medium (8+ characters, at least 1 number)</option>
-                <option value="strong">Strong (10+ characters, 1 uppercase, 1 number, 1 special char)</option>
-            </select>
-        </div>
-
-        <!-- Session Timeout -->
-        <div class="mb-3">
-            <label for="sessionTimeout" class="form-label">Session Timeout (minutes)</label>
-            <input type="number" id="sessionTimeout" class="form-control" value="30" min="5">
-        </div>
-
-        <!-- Failed Login Attempts -->
-        <div class="mb-3">
-            <label for="failedAttempts" class="form-label">Failed Login Attempt Limit</label>
-            <input type="number" id="failedAttempts" class="form-control" value="5" min="1">
-        </div>
-
-        <!-- API Rate Limiting -->
-        <div class="mb-3">
-            <label for="apiRateLimit" class="form-label">API Rate Limit (requests per minute)</label>
-            <input type="number" id="apiRateLimit" class="form-control" value="60" min="10">
-        </div>
-
-        <!-- Save Button -->
-        <button class="btn btn-danger w-100">Save Security Settings</button>
-    </div>
-</div>
-<!-- Security Settings Section -->
-<div class="card mb-4">
-    <div class="card-header bg-danger text-white">
-        <h5 class="mb-0">Security Settings</h5>
-    </div>
-    <div class="card-body">
-        
-        <!-- Password Policy -->
-         <div class="mb-3">
-                 <option value="weak">Weak (Minimum 6 characters)</option>
-            </select>
-        </div>
-
-        <!-- Session Timeout -->
-        <div class="mb-3">
-            <label for="sessionTimeout" class="form-label">Session Timeout (minutes)</label>
-            <input type="number" id="sessionTimeout" class="form-control" value="30" min="5">
-        </div>
-
-        <!-- Failed Login Attempts -->
-        <div class="mb-3">
-            <label for="failedAttempts" class="form-label">Failed Login Attempt Limit</label>
-            <input type="number" id="failedAttempts" class="form-control" value="5" min="1">
-        </div>
-
-        <!-- API Rate Limiting -->
-        <div class="mb-3">
-            <label for="apiRateLimit" class="form-label">API Rate Limit (requests per minute)</label>
-            <input type="number" id="apiRateLimit" class="form-control" value="60" min="10">
-        </div>
-
-        <!-- Save Button -->
-        <button class="btn btn-danger w-100">Save Security Settings</button>
-    </div>
-</div>
-<!-- Health Monitoring Section -->
-<div class="card mt-4">
-    <div class="card-header bg-success text-white">
-        <h5 class="mb-0">Health Monitoring</h5>
-    </div>
-    <div class="card-body">
-        <!-- Database Connection Status -->
-        <div class="mb-3">
-            <label class="form-label">Database Connection Status:</label>
-            <span class="badge bg-success">Connected</span>
-        </div>
-
-        <!-- API Response Times Chart -->
-        <div class="mb-3">
-            <label class="form-label">API Response Times:</label>
-            <canvas id="apiResponseChart" height="100"></canvas>
-        </div>
-
-        <!-- Error Rate Monitoring -->
-        <div class="mb-3">
-            <label class="form-label">Error Rate Monitoring:</label>
-            <span class="badge bg-warning">Low</span>
-        </div>
-
-        <!-- Server Resource Usage -->
-        <div class="mb-3">
-            <label class="form-label">Server Resource Usage:</label>
-            <div class="progress mb-1">
-                <div class="progress-bar bg-info" style="width: 65%">CPU: 65%</div>
-            </div>
-            <div class="progress">
-                <div class="progress-bar bg-primary" style="width: 78%">Memory: 78%</div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<!-- End General Settings Section -->
-
-
-
-                        <!-- Platform Health & Analytics -->
-                        <div class="placeholder-section">
-                            <h5><i class="bi bi-activity"></i> Platform Health & Analytics</h5>
+                    <div class="col-lg-6">
+                        <div class="user-info">
+                            <div class="dropdown">
+                                <div class="user-avatar" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
+                                    <i class="bi bi-person-gear"></i>
+                                </div>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="#" onclick="showProfile()">
+                                        <i class="bi bi-person-gear me-2"></i><span>Profile</span>
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="showSettings()">
+                                        <i class="bi bi-gear me-2"></i><span>Settings</span>
+                                    </a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="#" onclick="logout()">
+                                        <i class="bi bi-box-arrow-right me-2"></i><span>Logout</span>
+                                    </a></li>
+                                </ul>
+                            </div>
                             <div>
-  <p>استخدام المعالج: <span id="cpuUsage">15%</span></p>
-  <p>استخدام الذاكرة: <span id="memUsage">47%</span></p>
-</div>
-<canvas id="analyticsChart" width="400" height="200"></canvas>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<section id="platform-health" class="mt-4">
-    <h2 class="mb-3">Platform Health & Analytics</h2>
-    <div class="row">
-        <!-- Server Uptime -->
-        <div class="col-md-3">
-            <div class="card text-center shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Server Uptime</h5>
-                    <p class="display-6 text-success">99.98%</p>
-                    <small class="text-muted">Last 30 days</small>
+                                <h5 class="mb-1" id="user-name">Awab Ahmed</h5>
+                                <span class="status-badge status-active" id="user-status">System Administrator</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Admin Sidebar -->
+                <div class="col-lg-3 mb-4">
+                    <div class="dashboard-sidebar" id="adminSidebar">
+                        <nav class="sidebar-nav" id="adminNav">
+                            <a href="#" class="sidebar-nav-link active" data-target="dashboard">
+                                <i class="bi bi-speedometer2"></i>
+                                <span>Dashboard</span>
+                            </a>
+                            <a href="#" class="sidebar-nav-link" data-target="users">
+                                <i class="bi bi-people"></i>
+                                <span>User Management</span>
+                            </a>
+                            <a href="#" class="sidebar-nav-link" data-target="verification">
+                                <i class="bi bi-patch-check"></i>
+                                <span>Doctor Verification</span>
+                            </a>
+                            <a href="#" class="sidebar-nav-link" data-target="settings">
+                                <i class="bi bi-sliders2"></i>
+                                <span>System Settings</span>
+                            </a>
+                            <a href="#" class="sidebar-nav-link" data-target="health">
+                                <i class="bi bi-activity"></i>
+                                <span>Platform Health</span>
+                            </a>
+                            <a href="#" class="sidebar-nav-link" data-target="analytics">
+                                <i class="bi bi-graph-up"></i>
+                                <span>Analytics</span>
+                            </a>
+                        </nav>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="col-lg-9">
+
+                    <!-- Admin Sections -->
+                    <div id="adminContent">
+                        <!-- Dashboard Section - Always Visible -->
+                        <section id="dashboard" class="admin-section">
+                
+                            <!-- Platform Statistics -->
+                            <div class="row mb-4">
+                                <div class="col-lg-3 col-md-6 mb-3">
+                                    <div class="dashboard-card stat-card admin-stat-card">
+                                        <div class="stat-number">125</div>
+                                        <div class="stat-label">Total Users</div>
+                                        <div class="stat-icon"><i class="bi bi-people"></i></div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-md-6 mb-3">
+                                    <div class="dashboard-card stat-card admin-stat-card">
+                                        <div class="stat-number">45</div>
+                                        <div class="stat-label">Verified Doctors</div>
+                                        <div class="stat-icon"><i class="bi bi-person-check"></i></div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-md-6 mb-3">
+                                    <div class="dashboard-card stat-card admin-stat-card">
+                                        <div class="stat-number">230</div>
+                                        <div class="stat-label">Appointments Booked</div>
+                                        <div class="stat-icon"><i class="bi bi-calendar-check"></i></div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-md-6 mb-3">
+                                    <div class="dashboard-card stat-card admin-stat-card">
+                                        <div class="stat-number">98%</div>
+                                        <div class="stat-label">System Health</div>
+                                        <div class="stat-icon"><i class="bi bi-shield-check"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Platform Health & Analytics - Always Visible -->
+                            <div class="dashboard-card admin-health-card">
+                                <h5><i class="bi bi-activity me-2"></i>Platform Health & Analytics</h5>
+                                
+                                <!-- Server Health Gauges -->
+                                <div class="row mb-4">
+                                    <div class="col-md-3 text-center">
+                                        <div class="health-gauge">
+                                            <div class="gauge-circle" data-percentage="99">
+                                                <div class="gauge-fill"></div>
+                                                <div class="gauge-cover">
+                                                    <span class="gauge-text">99.8%</span>
+                                                </div>
+                                            </div>
+                                            <p class="gauge-label">Server Uptime</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 text-center">
+                                        <div class="health-gauge">
+                                            <div class="gauge-circle cpu-gauge" data-percentage="65">
+                                                <div class="gauge-fill"></div>
+                                                <div class="gauge-cover">
+                                                    <span class="gauge-text" id="cpuUsage">65%</span>
+                                                </div>
+                                            </div>
+                                            <p class="gauge-label">CPU Usage</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 text-center">
+                                        <div class="health-gauge">
+                                            <div class="gauge-circle memory-gauge" data-percentage="78">
+                                                <div class="gauge-fill"></div>
+                                                <div class="gauge-cover">
+                                                    <span class="gauge-text" id="memUsage">78%</span>
+                                                </div>
+                                            </div>
+                                            <p class="gauge-label">Memory Usage</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 text-center">
+                                        <div class="health-gauge">
+                                            <div class="gauge-circle response-gauge" data-percentage="32">
+                                                <div class="gauge-fill"></div>
+                                                <div class="gauge-cover">
+                                                    <span class="gauge-text">320ms</span>
+                                                </div>
+                                            </div>
+                                            <p class="gauge-label">Response Time</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Health Chart -->
+                                <div class="mt-4">
+                                    <canvas id="healthChart" height="100"></canvas>
+                                </div>
+                            </div>
+
+                        </section>
+
+                        <!-- User Management Section -->
+                        <section id="users" class="admin-section">
+                            <div class="dashboard-card">
+                                <h5><i class="bi bi-people me-2"></i>User Management</h5>
+                                <!-- User Management Controls -->
+                                <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
+                                  <!-- Filters -->
+                                  <div class="btn-group" role="group" aria-label="User type filters">
+                                    <button type="button" class="btn btn-outline-medical user-filter-btn active" data-filter="all">All</button>
+                                    <button type="button" class="btn btn-outline-medical user-filter-btn" data-filter="patient">Patients</button>
+                                    <button type="button" class="btn btn-outline-medical user-filter-btn" data-filter="doctor">Doctors</button>
+                                    <button type="button" class="btn btn-outline-medical user-filter-btn" data-filter="admin">Admins</button>
+                                  </div>
+
+                                  <!-- Search -->
+                                  <div class="ms-3" style="min-width:280px;">
+                                    <input id="user-search" type="search" class="form-control" placeholder="Search by name, email or phone">
+                                  </div>
+
+                                  <!-- Per-page -->
+                                  <div class="ms-auto">
+                                    <select id="per-page" class="form-select form-select-sm">
+                                      <option value="5">5 per page</option>
+                                      <option value="10" selected>10 per page</option>
+                                      <option value="20">20 per page</option>
+                                    </select>
+                                  </div>
+                                </div>
+
+                                <!-- Users Table --> -->
+                                <div class="table-responsive">
+                                  <table class="table table-hover table-bordered text-center">
+                                    <thead class="table-dark">
+                                      <tr>
+                                        <th>#</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Phone</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody id="users-table-body">
+                                      <!-- filled by JS -->
+                                    </tbody>
+                                  </table>
+                                </div>
+
+                                <!-- Pagination -->
+                                <nav>
+                                  <ul id="users-pagination" class="pagination justify-content-center"></ul>
+                                </nav>
+                            </div>
+                        </section>
+
+
+
+                        <!-- Doctor Verification Section -->
+                        <section id="verification" class="admin-section">
+                            <div class="dashboard-card">
+                                <h5><i class="bi bi-patch-check me-2"></i>Doctor Verification</h5>
+                                <div id="doctorList" class="mt-3"></div>
+                            </div>
+                        </section>
+ 
+                        <!-- System Settings Section -->
+                        <section id="settings" class="admin-section">
+                            <div class="dashboard-card">
+                                <h5><i class="bi bi-sliders2 me-2"></i>System Settings</h5>
+                                
+                                <form id="settingsForm" class="mt-4">
+                                  <div class="mb-3">
+                                    <label class="form-label">Maintenance Mode</label>
+                                    <select id="maintenance" class="form-select">
+                                      <option value="on">Enabled</option>
+                                      <option value="off">Disabled</option>
+                                    </select>
+                                  </div>
+
+                                  <div class="mb-3">
+                                    <label class="form-label">Default Language</label>
+                                    <select id="language" class="form-select">
+                                      <option value="ar">Arabic</option>
+                                      <option value="en">English</option>
+                                    </select>
+                                  </div>
+                                  
+                                  <div class="mb-3">
+                                    <label class="form-label">Default Timezone</label>
+                                    <input type="text" id="timezone" class="form-control" value="Africa/Cairo" />
+                                  </div>
+
+                                  <button type="submit" class="btn btn-medical">Save Settings</button>
+                                </form>
+                                <!-- Additional Settings -->
+                                <div class="row mt-4">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Registration Status</label>
+                                            <select class="form-select">
+                                                <option value="open">Open</option>
+                                                <option value="closed">Closed</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Server Timezone</label>
+                                            <select class="form-select">
+                                                <option value="UTC">UTC</option>
+                                                <option value="Africa/Cairo">Africa/Cairo</option>
+                                                <option value="Asia/Riyadh">Asia/Riyadh</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        <!-- Platform Health Section -->
+                        <section id="health" class="admin-section">
+                            <div class="dashboard-card">
+                                <h5><i class="bi bi-activity me-2"></i>Platform Health</h5>
+                                
+                                <!-- Health Status Cards -->
+                                <div class="row mb-4">
+                                    <div class="col-lg-3 col-md-6 mb-3">
+                                        <div class="dashboard-card stat-card">
+                                            <div class="stat-number">99.8%</div>
+                                            <div class="stat-label">Server Uptime</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3 col-md-6 mb-3">
+                                        <div class="dashboard-card stat-card">
+                                            <div class="stat-number">65%</div>
+                                            <div class="stat-label">CPU Usage</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3 col-md-6 mb-3">
+                                        <div class="dashboard-card stat-card">
+                                            <div class="stat-number">78%</div>
+                                            <div class="stat-label">Memory Usage</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3 col-md-6 mb-3">
+                                        <div class="dashboard-card stat-card">
+                                            <div class="stat-number">320ms</div>
+                                            <div class="stat-label">Response Time</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Health Chart -->
+                                <div class="mt-4">
+                                    <canvas id="healthChart" height="100"></canvas>
+                                </div>
+                            </div>
+                        </section>
+
+
+                        <!-- Analytics Section -->
+                        <section id="analytics" class="admin-section">
+                            <div class="dashboard-card">
+                                <h5><i class="bi bi-graph-up me-2"></i>Analytics</h5>
+                                
+                                <!-- Analytics Content -->
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>CPU Usage:</strong> <span id="cpuUsage">15%</span></p>
+                                        <p><strong>Memory Usage:</strong> <span id="memUsage">47%</span></p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <canvas id="analyticsChart" height="200"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>                            
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3">
+        <div class="container">
+            <div class="row g-3">
+                <!-- Brand & Description -->
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="mb-3">
+                        <i class="bi bi-heart-pulse me-2 text-primary"></i>
+                        <span>Sahatak</span>
+                    </h5>
+                    <div class="d-flex gap-3 social-links">
+                        <a href="#"><i class="bi bi-facebook fs-5"></i></a>
+                        <a href="#"><i class="bi bi-twitter fs-5"></i></a>
+                        <a href="#"><i class="bi bi-instagram fs-5"></i></a>
+                        <a href="#"><i class="bi bi-linkedin fs-5"></i></a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="mb-3">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="#" class="text-muted text-decoration-none">About Platform</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="text-muted text-decoration-none">Services</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="mb-3">Support & Help</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="#" class="text-muted text-decoration-none">Help Center</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="text-muted text-decoration-none">Contact Us</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Emergency Contact -->
+                <div class="col-lg-3 col-md-6 emergency-section">
+                    <p class="mb-2 text-danger fw-bold">
+                        For medical emergencies
+                    </p>
+                    <p class="mb-3 text-danger fw-bold fs-6">
+                        <i class="bi bi-hospital me-2"></i>
+                        Go to nearest ER hospital
+                    </p>
+                    <p class="mb-0 text-muted small">
+                        For non-urgent consultations use the platform
+                    </p>
+                </div>
+            </div>
+
+            <!-- Bottom Bar -->
+            <hr class="my-3">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="mb-0 fw-bold">
+                        © 2025 Sahatak. All rights reserved.
+                    </p>
+                    <p class="mb-0 text-muted small mt-1">
+                        This platform does not replace visiting a doctor in emergency cases
+                    </p>
                 </div>
             </div>
         </div>
-        <!-- Active Users -->
-        <div class="col-md-3">
-            <div class="card text-center shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Active Users</h5>
-                    <p class="display-6 text-primary">130</p>
-                    <small class="text-muted">Current Month</small>
+    </footer>
+
+    <!-- Toast Container -->
+    <div id="toastBox" class="toast-container"></div>
+
+    <!-- User View Modal -->
+    <div class="modal fade" id="userViewModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">User Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-            </div>
-        </div>
-        <!-- Error Rate -->
-        <div class="col-md-3">
-            <div class="card text-center shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Error Rate</h5>
-                    <p class="display-6 text-danger">0.12%</p>
-                    <small class="text-muted">System-wide</small>
+                <div class="modal-body" id="userViewBody">
+                    <!-- filled by JS -->
                 </div>
-            </div>
-        </div>
-        <!-- API Response Time -->
-        <div class="col-md-3">
-            <div class="card text-center shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">API Response</h5>
-                    <p class="display-6 text-warning">320ms</p>
-                    <small class="text-muted">Average</small>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-medical" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Bootstrap 5 JavaScript CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     
-<!-- Usage Analytics Section -->
-<section id="usage-analytics" class="card mb-4">
-    <div class="card-header bg-primary text-white">
-        <h5 class="mb-0">Usage Analytics</h5>
-    </div>
-    <div class="card-body">
-
-        <!-- Daily/Monthly Registrations -->
-        <h6>Daily/Monthly User Registrations</h6>
-        <canvas id="registrationChart" height="100"></canvas>
-        <hr>
-
-        <!-- Appointment Booking Trends -->
-        <h6>Appointment Booking Trends</h6>
-        <canvas id="bookingChart" height="100"></canvas>
-        <hr>
-
-        <!-- Most Active Doctors/Specialties -->
-        <h6>Most Active Doctors/Specialties</h6>
-        <ul id="topDoctorsList">
-            <li>Dr. Ahmed (Cardiology)</li>
-            <li>Dr. Sara (Dermatology)</li>
-            <li>Dr. Khalid (Orthopedics)</li>
-        </ul>
-        <hr>
-
-        <!-- Geographic User Distribution -->
-        <h6>Geographic User Distribution</h6>
-        <canvas id="geoChart" height="100"></canvas>
-        <hr>
-
-        <!-- Platform Usage by Time of Day -->
-        <h6>Platform Usage by Time of Day</h6>
-        <canvas id="timeUsageChart" height="100"></canvas>
-    </div>
-</section>
-
-
-    <!-- Chart -->
-    <div class="card mt-4 shadow-sm">
-        <div class="card-header">
-            Traffic & Performance Overview
-        </div>
-        <div class="card-body">
-            <canvas id="healthChart" height="100"></canvas>
-        </div>
-    </div>   
-</section>                            
-     <!-- JavaScript Files to Include -->
-<script src="../../assets/js/main.js"></script>
-<script src="../../assets/js/components/dashboard-translations.js"></script>
-<script src="../../assets/js/components/admin.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="assets/js/admin.js"></script>
-<!-- Bootstrap Bundle with Popper -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- Admin Custom JS -->
-<script src="../../assets/js/components/admin.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Main JavaScript -->
+    <script src="../../assets/js/main.js"></script>
+    
+    <!-- Admin JavaScript -->
+    <script src="../../assets/js/components/admin.js"></script>
+    
+    <!-- Admin Dashboard Functions -->
+    <script>
+        // Profile and settings functions
+        function showProfile() {
+            console.log('Show profile clicked');
+        }
+        
+        function showSettings() {
+            console.log('Show settings clicked');
+        }
+        
+        function logout() {
+            console.log('Logout clicked');
+            window.location.href = '../../index.html';
+        }
+        
+        // Initialize admin dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Admin dashboard initializing...');
+            
+            // Navigation between sections
+            document.querySelectorAll('.sidebar-nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Sidebar link clicked:', this.getAttribute('data-target'));
+                    
+                    // Remove active class from all links
+                    document.querySelectorAll('.sidebar-nav-link').forEach(l => l.classList.remove('active'));
+                    
+                    // Add active class to current link
+                    this.classList.add('active');
+                    
+                    // Remove active class from all sections
+                    document.querySelectorAll('.admin-section').forEach(section => {
+                        section.classList.remove('active');
+                    });
+                    
+                    // Show selected section by adding active class
+                    const targetId = this.getAttribute('data-target');
+                    const targetSection = document.getElementById(targetId);
+                    if (targetSection) {
+                        targetSection.classList.add('active');
+                        console.log('Showing section:', targetId);
+                    } else {
+                        console.error('Section not found:', targetId);
+                    }
+                });
+            });
+            
+            // Ensure dashboard is active by default
+            document.getElementById('dashboard').classList.add('active');
+        });
+    </script>
+</body>
+</html>
