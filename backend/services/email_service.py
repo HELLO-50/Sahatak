@@ -74,7 +74,7 @@ class EmailService:
                 **appointment_data,
                 'reminder_type': reminder_type,
                 'language': language,
-                'app_name': '5-*C' if language == 'ar' else 'Sahatak',
+                'app_name': 'صحتك' if language == 'ar' else 'Sahatak',
                 'current_year': datetime.now().year
             }
             
@@ -122,7 +122,7 @@ class EmailService:
             template_data = {
                 **appointment_data,
                 'language': language,
-                'app_name': '5-*C' if language == 'ar' else 'Sahatak',
+                'app_name': 'صحتك' if language == 'ar' else 'Sahatak',
                 'current_year': datetime.now().year
             }
             
@@ -169,7 +169,7 @@ class EmailService:
             template_data = {
                 **appointment_data,
                 'language': language,
-                'app_name': '5-*C' if language == 'ar' else 'Sahatak',
+                'app_name': 'صحتك' if language == 'ar' else 'Sahatak',
                 'current_year': datetime.now().year
             }
             

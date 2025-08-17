@@ -296,11 +296,11 @@ class SMSService:
     def _get_default_sms_template(self, data: Dict[str, Any]) -> str:
         """Get default SMS template when file is missing"""
         language = data.get('language', 'ar')
-        doctor_name = data.get('doctor_name', ''D7(J(')
-        appointment_date = data.get('appointment_date', ':J1 E-//')
+        doctor_name = data.get('doctor_name', 'الطبيب')
+        appointment_date = data.get('appointment_date', 'غير محدد')
         
         if language == 'ar':
-            return f"*0CJ1: EH9/C E9 /.{doctor_name} AJ {appointment_date}. EF5) 5-*C"
+            return f"تذكير: موعد مع د.{doctor_name} في {appointment_date}. منصة صحتك"
         else:
             return f"Reminder: Your appointment with Dr.{doctor_name} on {appointment_date}. Sahatak Platform"
     
