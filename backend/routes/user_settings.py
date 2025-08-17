@@ -4,7 +4,7 @@ from datetime import datetime
 from decimal import Decimal
 
 from models import db, User, Doctor, Patient
-from utils.responses import success_response, error_response, not_found_response, bad_request_response
+from utils.responses import success_response, error_response, not_found_response, validation_error_response
 from utils.validators import (
     validate_doctor_participation_data, 
     validate_consultation_fee,
@@ -71,12 +71,12 @@ def update_doctor_participation_settings():
         
         data = request.get_json()
         if not data:
-            return bad_request_response("No data provided")
+            return validation_error_response("No data provided")
         
         # Validate the participation data
         validation_result = validate_doctor_participation_data(data)
         if not validation_result['valid']:
-            return bad_request_response(validation_result['message'])
+            return validation_error_response(validation_result['message'])
         
         # Update participation type if provided
         if 'participation_type' in data:
@@ -85,7 +85,7 @@ def update_doctor_participation_settings():
             # Validate participation type
             type_validation = validate_participation_type(new_type)
             if not type_validation['valid']:
-                return bad_request_response(type_validation['message'])
+                return validation_error_response(type_validation['message'])
             
             doctor.participation_type = new_type
             doctor.participation_changed_at = datetime.utcnow()
@@ -96,7 +96,7 @@ def update_doctor_participation_settings():
             elif new_type == 'paid' and doctor.consultation_fee == Decimal('0.00'):
                 # If switching to paid but fee is 0, require them to set a fee
                 if 'consultation_fee' not in data or not data['consultation_fee']:
-                    return bad_request_response("Consultation fee is required when switching to paid participation")
+                    return validation_error_response("Consultation fee is required when switching to paid participation")
         
         # Update consultation fee if provided
         if 'consultation_fee' in data:
@@ -105,7 +105,7 @@ def update_doctor_participation_settings():
             # Validate consultation fee with context
             fee_validation = validate_consultation_fee(fee, doctor.participation_type)
             if not fee_validation['valid']:
-                return bad_request_response(fee_validation['message'])
+                return validation_error_response(fee_validation['message'])
             
             doctor.consultation_fee = Decimal(str(fee))
         
@@ -153,7 +153,7 @@ def switch_to_volunteer():
             return error_response("Participation type changes are restricted for your account.", 403)
         
         if doctor.participation_type == 'volunteer':
-            return bad_request_response("You are already a volunteer doctor")
+            return validation_error_response("You are already a volunteer doctor")
         
         # Switch to volunteer and set fee to 0
         doctor.participation_type = 'volunteer'
@@ -195,18 +195,18 @@ def switch_to_paid():
             return error_response("Participation type changes are restricted for your account.", 403)
         
         if doctor.participation_type == 'paid':
-            return bad_request_response("You are already a paid doctor")
+            return validation_error_response("You are already a paid doctor")
         
         data = request.get_json()
         if not data or 'consultation_fee' not in data:
-            return bad_request_response("Consultation fee is required when switching to paid participation")
+            return validation_error_response("Consultation fee is required when switching to paid participation")
         
         fee = data['consultation_fee']
         
         # Validate consultation fee for paid doctors
         fee_validation = validate_consultation_fee(fee, 'paid')
         if not fee_validation['valid']:
-            return bad_request_response(fee_validation['message'])
+            return validation_error_response(fee_validation['message'])
         
         # Switch to paid and set the fee
         doctor.participation_type = 'paid'
@@ -246,19 +246,19 @@ def update_doctor_notification_settings():
         
         data = request.get_json()
         if not data:
-            return bad_request_response("No data provided")
+            return validation_error_response("No data provided")
         
         # Update patient notification method
         if 'patient_notification_method' in data:
             valid_methods = ['email', 'sms', 'both']
             if data['patient_notification_method'] not in valid_methods:
-                return bad_request_response(f"Invalid notification method. Must be one of: {', '.join(valid_methods)}")
+                return validation_error_response(f"Invalid notification method. Must be one of: {', '.join(valid_methods)}")
             doctor.patient_notification_method = data['patient_notification_method']
         
         # Update detailed notification settings
         if 'notification_settings' in data:
             if not isinstance(data['notification_settings'], dict):
-                return bad_request_response("Notification settings must be a valid object")
+                return validation_error_response("Notification settings must be a valid object")
             doctor.notification_settings = data['notification_settings']
         
         db.session.commit()
@@ -329,26 +329,26 @@ def update_patient_preferences():
         
         data = request.get_json()
         if not data:
-            return bad_request_response("No data provided")
+            return validation_error_response("No data provided")
         
         # Update preferred contact method
         if 'preferred_contact_method' in data:
             valid_methods = ['email', 'sms', 'both']
             if data['preferred_contact_method'] not in valid_methods:
-                return bad_request_response(f"Invalid contact method. Must be one of: {', '.join(valid_methods)}")
+                return validation_error_response(f"Invalid contact method. Must be one of: {', '.join(valid_methods)}")
             patient.preferred_contact_method = data['preferred_contact_method']
         
         # Update notification preferences
         if 'notification_preferences' in data:
             if not isinstance(data['notification_preferences'], dict):
-                return bad_request_response("Notification preferences must be a valid object")
+                return validation_error_response("Notification preferences must be a valid object")
             patient.notification_preferences = data['notification_preferences']
         
         # Update language preference
         if 'language_preference' in data:
             valid_languages = ['ar', 'en']
             if data['language_preference'] not in valid_languages:
-                return bad_request_response(f"Invalid language. Must be one of: {', '.join(valid_languages)}")
+                return validation_error_response(f"Invalid language. Must be one of: {', '.join(valid_languages)}")
             current_user.language_preference = data['language_preference']
         
         db.session.commit()
@@ -408,13 +408,13 @@ def update_language_preference():
     try:
         data = request.get_json()
         if not data or 'language' not in data:
-            return bad_request_response("Language is required")
+            return validation_error_response("Language is required")
         
         language = data['language']
         valid_languages = ['ar', 'en']
         
         if language not in valid_languages:
-            return bad_request_response(f"Invalid language. Must be one of: {', '.join(valid_languages)}")
+            return validation_error_response(f"Invalid language. Must be one of: {', '.join(valid_languages)}")
         
         current_user.language_preference = language
         db.session.commit()
@@ -442,17 +442,17 @@ def change_password():
         
         validation_result = validate_json_data(data, required_fields)
         if not validation_result['valid']:
-            return bad_request_response(validation_result['message'])
+            return validation_error_response(validation_result['message'])
         
         # Verify current password
         if not current_user.check_password(data['current_password']):
-            return bad_request_response("Current password is incorrect")
+            return validation_error_response("Current password is incorrect")
         
         # Validate new password
         from utils.validators import validate_password
         password_validation = validate_password(data['new_password'])
         if not password_validation['valid']:
-            return bad_request_response(password_validation['message'])
+            return validation_error_response(password_validation['message'])
         
         # Update password
         current_user.set_password(data['new_password'])
