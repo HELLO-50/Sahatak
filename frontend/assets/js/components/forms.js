@@ -162,10 +162,10 @@ function handleRegister(event) {
     
     // Get form data
     const formData = {
-        fullName: document.getElementById('fullName').value.trim(),
+        full_name: document.getElementById('fullName').value.trim(),
         email: document.getElementById('regEmail').value.trim(),
         password: document.getElementById('regPassword').value,
-        userType: document.getElementById('userType').value
+        user_type: document.getElementById('userType').value
     };
     
     // Validate form using ValidationManager
@@ -216,18 +216,18 @@ function handlePatientRegister(event) {
     
     // Get form data
     const formData = {
-        fullName: document.getElementById('patientFullName').value.trim(),
+        full_name: document.getElementById('patientFullName').value.trim(),
         email: document.getElementById('patientEmail').value.trim(),
         phone: document.getElementById('patientPhone').value.trim(),
         age: parseInt(document.getElementById('patientAge').value),
         gender: document.getElementById('patientGender').value,
         password: document.getElementById('patientPassword').value,
-        userType: 'patient'
+        user_type: 'patient'
     };
     
     // Validate form using ValidationManager
     const validationData = {
-        fullName: formData.fullName,
+        fullName: formData.full_name,
         email: formData.email,
         phoneNumber: formData.phone,
         nationalId: '',
@@ -291,24 +291,24 @@ function handleDoctorRegister(event) {
     
     // Get form data
     const formData = {
-        fullName: document.getElementById('doctorFullName').value.trim(),
+        full_name: document.getElementById('doctorFullName').value.trim(),
         email: document.getElementById('doctorEmail').value.trim(),
         phone: document.getElementById('doctorPhone').value.trim(),
-        licenseNumber: document.getElementById('doctorLicense').value.trim(),
+        license_number: document.getElementById('doctorLicense').value.trim(),
         specialty: document.getElementById('doctorSpecialty').value,
-        yearsOfExperience: parseInt(document.getElementById('doctorExperience').value),
+        years_of_experience: parseInt(document.getElementById('doctorExperience').value),
         password: document.getElementById('doctorPassword').value,
-        userType: 'doctor'
+        user_type: 'doctor'
     };
     
     // Validate form using ValidationManager
     const validationData = {
-        fullName: formData.fullName,
+        fullName: formData.full_name,
         email: formData.email,
         phoneNumber: formData.phone,
         nationalId: '',
         specialization: formData.specialty,
-        licenseNumber: formData.licenseNumber,
+        licenseNumber: formData.license_number,
         password: formData.password
     };
     
