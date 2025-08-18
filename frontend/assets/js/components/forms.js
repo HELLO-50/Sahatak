@@ -85,11 +85,11 @@ const FormManager = {
 
         // Create success screen HTML
         const successHTML = `
-            <div id="registration-success" class="min-vh-100 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #e8f5e8 0%, #f0f9ff 100%);">
+            <div id="registration-success" class="min-vh-100 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-teal) 100%); position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999;">
                 <div class="container">
                     <div class="row justify-content-center">
                         <div class="col-md-6">
-                            <div class="card shadow-lg border-0 text-center">
+                            <div class="card shadow-lg border-0 text-center" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);">
                                 <div class="card-body p-5">
                                     <div class="mb-4">
                                         <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>

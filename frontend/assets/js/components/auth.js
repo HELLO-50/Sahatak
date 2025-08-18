@@ -181,47 +181,7 @@ function showLogin() {
 }
 
 // Login handling function
-function handleLogin(event) {
-    event.preventDefault();
-    
-    const form = event.target;
-    const formData = new FormData(form);
-    const email = formData.get('email') || document.getElementById('email').value;
-    const password = formData.get('password') || document.getElementById('password').value;
-    
-    // Show loading state
-    const submitBtn = document.getElementById('login-submit');
-    const spinner = document.getElementById('login-spinner');
-    const icon = document.getElementById('login-icon');
-    
-    if (submitBtn) submitBtn.disabled = true;
-    if (spinner) spinner.classList.remove('d-none');
-    if (icon) icon.classList.add('d-none');
-    
-    // TODO: Replace with actual API call
-    console.log('Login attempt:', { email, password });
-    
-    // Simulate API call
-    setTimeout(() => {
-        // Reset button state
-        if (submitBtn) submitBtn.disabled = false;
-        if (spinner) spinner.classList.add('d-none');
-        if (icon) icon.classList.remove('d-none');
-        
-        // TODO: Handle actual login response
-        // For now, just log success
-        console.log('Login simulation complete');
-        
-        // Show error for demo (remove when implementing real API)
-        const errorAlert = document.getElementById('login-error-alert');
-        if (errorAlert) {
-            errorAlert.textContent = 'Demo mode - login not implemented yet';
-            errorAlert.classList.remove('d-none');
-        }
-    }, 1000);
-    
-    return false;
-}
+// handleLogin function removed - using the real implementation from main.js
 
 // Logout function
 function logout() {
