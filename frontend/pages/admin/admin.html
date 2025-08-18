@@ -29,74 +29,84 @@
             <!-- Dashboard Header -->
             <div class="dashboard-header">
                 <div class="row align-items-center">
-                    <div class="col-lg-6">
-                        <h1 class="dashboard-title" id="dashboard-title">Admin Dashboard</h1>
-                        <p class="dashboard-subtitle" id="dashboard-subtitle">Sahatak Medical Platform Management</p>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="user-info">
-                            <div class="dropdown">
-                                <div class="user-avatar" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
-                                    <i class="bi bi-person-gear"></i>
-                                </div>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" href="#" onclick="showProfile()">
-                                        <i class="bi bi-person-gear me-2"></i><span>Profile</span>
-                                    </a></li>
-                                    <li><a class="dropdown-item" href="#" onclick="showSettings()">
-                                        <i class="bi bi-gear me-2"></i><span>Settings</span>
-                                    </a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="#" onclick="logout()">
-                                        <i class="bi bi-box-arrow-right me-2"></i><span>Logout</span>
-                                    </a></li>
-                                </ul>
+                    <!-- Profile Section - Left -->
+                    <div class="col-lg-4">
+                        <div class="profile-section">
+                            <div class="user-avatar">
+                                <i class="bi bi-person-gear"></i>
                             </div>
-                            <div>
+                            <div class="user-details">
                                 <h5 class="mb-1" id="user-name">Awab Ahmed</h5>
                                 <span class="status-badge status-active" id="user-status">System Administrator</span>
                             </div>
+                            <!-- Vertical Action Buttons -->
+                            <div class="action-buttons">
+                                <button class="btn btn-action" onclick="showProfile()" title="Profile">
+                                    <i class="bi bi-person-gear"></i>
+                                    <span id="btn-profile">Profile</span>
+                                </button>
+                                <button class="btn btn-action" onclick="showSettings()" title="Settings">
+                                    <i class="bi bi-gear"></i>
+                                    <span id="btn-settings">Settings</span>
+                                </button>
+                                <button class="btn btn-action btn-logout" onclick="logout()" title="Logout">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                    <span id="btn-logout">Logout</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Dashboard Title - Center -->
+                    <div class="col-lg-4 text-center">
+                        <h1 class="dashboard-title" id="dashboard-title">Admin Dashboard</h1>
+                        <p class="dashboard-subtitle" id="dashboard-subtitle">Sahatak Medical Platform Management</p>
+                    </div>
+                    
+                    <!-- Empty right column for layout balance -->
+                    <div class="col-lg-4">
+                        <!-- Could add admin-specific controls here in the future -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Horizontal Navigation -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="admin-navigation">
+                        <div class="nav-buttons">
+                            <button class="btn btn-admin-nav active" data-target="dashboard">
+                                <i class="bi bi-speedometer2"></i>
+                                <span>Dashboard</span>
+                            </button>
+                            <button class="btn btn-admin-nav" data-target="users">
+                                <i class="bi bi-people"></i>
+                                <span>User Management</span>
+                            </button>
+                            <button class="btn btn-admin-nav" data-target="verification">
+                                <i class="bi bi-patch-check"></i>
+                                <span>Doctor Verification</span>
+                            </button>
+                            <button class="btn btn-admin-nav" data-target="settings">
+                                <i class="bi bi-sliders2"></i>
+                                <span>System Settings</span>
+                            </button>
+                            <button class="btn btn-admin-nav" data-target="health">
+                                <i class="bi bi-activity"></i>
+                                <span>Platform Health</span>
+                            </button>
+                            <button class="btn btn-admin-nav" data-target="analytics">
+                                <i class="bi bi-graph-up"></i>
+                                <span>Analytics</span>
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="row">
-                <!-- Admin Sidebar -->
-                <div class="col-lg-3 mb-4">
-                    <div class="dashboard-sidebar" id="adminSidebar">
-                        <nav class="sidebar-nav" id="adminNav">
-                            <a href="#" class="sidebar-nav-link active" data-target="dashboard">
-                                <i class="bi bi-speedometer2"></i>
-                                <span>Dashboard</span>
-                            </a>
-                            <a href="#" class="sidebar-nav-link" data-target="users">
-                                <i class="bi bi-people"></i>
-                                <span>User Management</span>
-                            </a>
-                            <a href="#" class="sidebar-nav-link" data-target="verification">
-                                <i class="bi bi-patch-check"></i>
-                                <span>Doctor Verification</span>
-                            </a>
-                            <a href="#" class="sidebar-nav-link" data-target="settings">
-                                <i class="bi bi-sliders2"></i>
-                                <span>System Settings</span>
-                            </a>
-                            <a href="#" class="sidebar-nav-link" data-target="health">
-                                <i class="bi bi-activity"></i>
-                                <span>Platform Health</span>
-                            </a>
-                            <a href="#" class="sidebar-nav-link" data-target="analytics">
-                                <i class="bi bi-graph-up"></i>
-                                <span>Analytics</span>
-                            </a>
-                        </nav>
-                    </div>
-                </div>
-
-                <!-- Main Content -->
-                <div class="col-lg-9">
-
+                <!-- Main Content - Full Width -->
+                <div class="col-12">
                     <!-- Admin Sections -->
                     <div id="adminContent">
                         <!-- Dashboard Section - Always Visible -->
@@ -495,25 +505,22 @@
             console.log('Show settings clicked');
         }
         
-        function logout() {
-            console.log('Logout clicked');
-            window.location.href = '../../index.html';
-        }
+        // logout function is now defined globally in main.js
         
         // Initialize admin dashboard
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Admin dashboard initializing...');
             
-            // Navigation between sections
-            document.querySelectorAll('.sidebar-nav-link').forEach(link => {
-                link.addEventListener('click', function(e) {
+            // Navigation between sections using horizontal buttons
+            document.querySelectorAll('.btn-admin-nav').forEach(button => {
+                button.addEventListener('click', function(e) {
                     e.preventDefault();
-                    console.log('Sidebar link clicked:', this.getAttribute('data-target'));
+                    console.log('Admin nav button clicked:', this.getAttribute('data-target'));
                     
-                    // Remove active class from all links
-                    document.querySelectorAll('.sidebar-nav-link').forEach(l => l.classList.remove('active'));
+                    // Remove active class from all buttons
+                    document.querySelectorAll('.btn-admin-nav').forEach(btn => btn.classList.remove('active'));
                     
-                    // Add active class to current link
+                    // Add active class to current button
                     this.classList.add('active');
                     
                     // Remove active class from all sections
