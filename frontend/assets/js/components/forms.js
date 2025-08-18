@@ -190,7 +190,7 @@ function handleRegister(event) {
     // Submit form
     FormManager.submitForm(
         formData,
-        '/api/auth/register',
+        '/auth/register',
         (result) => {
             FormManager.setFormLoading(formId, false);
             // Use patient as default since this is the general form
@@ -266,7 +266,7 @@ function handlePatientRegister(event) {
     // Submit form
     FormManager.submitForm(
         formData,
-        '/api/auth/register',
+        '/auth/register',
         (result) => {
             FormManager.setFormLoading(formId, false);
             FormManager.showSuccessScreen(result.message, 'patient');
@@ -340,7 +340,7 @@ function handleDoctorRegister(event) {
     // Submit form
     FormManager.submitForm(
         formData,
-        '/api/auth/register',
+        '/auth/register',
         (result) => {
             FormManager.setFormLoading(formId, false);
             FormManager.showSuccessScreen(result.message, 'doctor');

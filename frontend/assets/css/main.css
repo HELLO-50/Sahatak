@@ -287,9 +287,22 @@ body {
     color: white !important;
 }
 
+/* Ensure any text outside cards on registration forms is white */
+#patient-register-form,
+#doctor-register-form {
+    color: white;
+}
+
+#patient-register-form .card,
+#doctor-register-form .card {
+    color: var(--dark-color);
+}
+
 #auth-selection .card,
 #login-form .card,
-#register-form .card {
+#register-form .card,
+#patient-register-form .card,
+#doctor-register-form .card {
     border-radius: 15px;
     backdrop-filter: blur(10px);
     background: rgba(255, 255, 255, 0.95);
