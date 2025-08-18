@@ -637,17 +637,24 @@ async function handleLogin(event) {
         });
         
         console.log('Login successful:', response);
+        console.log('Response data:', response.data);
+        console.log('User data:', response.data?.user);
         
         // Store user session data
         if (response.data && response.data.user) {
+            console.log('Storing user session data...');
             localStorage.setItem('sahatak_user_type', response.data.user.user_type);
             localStorage.setItem('sahatak_user_email', response.data.user.email);
             localStorage.setItem('sahatak_user_id', response.data.user.id);
             localStorage.setItem('sahatak_user_name', response.data.user.full_name);
+            console.log('Session data stored successfully');
+        } else {
+            console.error('Invalid response structure:', response);
         }
         
         // Redirect to dashboard
         const userType = response.data.user.user_type;
+        console.log('User type for redirect:', userType);
         redirectToDashboard(userType);
         
     } catch (error) {
@@ -1019,12 +1026,17 @@ function validateDoctorRegistrationForm(data) {
 
 // Redirect to appropriate dashboard
 function redirectToDashboard(userType) {
+    console.log('redirectToDashboard called with userType:', userType);
+    
     const dashboardUrl = userType === 'doctor' 
         ? 'frontend/pages/dashboard/doctor.html' 
         : 'frontend/pages/dashboard/patient.html';
     
-    console.log(`Redirecting to ${userType} dashboard...`);
+    console.log(`Redirecting to ${userType} dashboard at URL: ${dashboardUrl}`);
+    console.log('Current window location:', window.location.href);
+    
     window.location.href = dashboardUrl;
+    console.log('Redirect initiated');
 }
 
 // Show field error

@@ -145,20 +145,100 @@
     font-weight: bold;
 }
 
-/* الأزرار */
-.btn-medical {
-    background: var(--medical-green);
-    color: #fff;
-    padding: 10px 20px;
+/* Consistent Button Styles - Medical Theme */
+.btn-medical,
+.btn-primary,
+.auth-btn.btn-primary {
+    background: linear-gradient(45deg, var(--medical-blue), var(--medical-teal));
+    color: white;
     border: none;
-    border-radius: 5px;
+    padding: 12px 24px;
+    border-radius: 8px;
     box-shadow: var(--card-shadow);
-    transition: 0.3s;
+    transition: all 0.3s ease;
+    font-weight: 500;
 }
 
-.btn-medical:hover {
-    background: var(--medical-teal);
+.btn-medical:hover,
+.btn-primary:hover,
+.auth-btn.btn-primary:hover {
+    background: linear-gradient(45deg, var(--medical-teal), var(--medical-blue));
+    color: white;
     box-shadow: var(--hover-shadow);
+    transform: translateY(-2px);
+}
+
+.btn-medical:focus,
+.btn-primary:focus,
+.auth-btn.btn-primary:focus {
+    background: linear-gradient(45deg, var(--medical-blue), var(--medical-teal));
+    color: white;
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+}
+
+/* Outline Button Styles */
+.btn-outline-primary,
+.auth-btn.btn-outline-primary {
+    background: transparent;
+    color: var(--medical-blue);
+    border: 2px solid var(--medical-blue);
+    padding: 10px 22px; /* Slightly less padding to account for border */
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.btn-outline-primary:hover,
+.auth-btn.btn-outline-primary:hover {
+    background: linear-gradient(45deg, var(--medical-blue), var(--medical-teal));
+    color: white;
+    border-color: var(--medical-blue);
+    box-shadow: var(--hover-shadow);
+    transform: translateY(-2px);
+}
+
+.btn-outline-primary:focus,
+.auth-btn.btn-outline-primary:focus {
+    background: linear-gradient(45deg, var(--medical-blue), var(--medical-teal));
+    color: white;
+    border-color: var(--medical-blue);
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+}
+
+/* Override Bootstrap default button styles for consistency */
+.btn.btn-primary,
+.btn.btn-outline-primary {
+    background: linear-gradient(45deg, var(--medical-blue), var(--medical-teal)) !important;
+    border-color: var(--medical-blue) !important;
+    color: white !important;
+}
+
+.btn.btn-outline-primary {
+    background: transparent !important;
+    color: var(--medical-blue) !important;
+}
+
+.btn.btn-primary:hover,
+.btn.btn-outline-primary:hover {
+    background: linear-gradient(45deg, var(--medical-teal), var(--medical-blue)) !important;
+    border-color: var(--medical-blue) !important;
+    color: white !important;
+}
+
+/* Form submit buttons */
+button[type="submit"].btn-primary,
+.form-submit-btn {
+    background: linear-gradient(45deg, var(--medical-blue), var(--medical-teal)) !important;
+    color: white !important;
+    border: none !important;
+    font-weight: 500;
+}
+
+button[type="submit"].btn-primary:hover,
+.form-submit-btn:hover {
+    background: linear-gradient(45deg, var(--medical-teal), var(--medical-blue)) !important;
+    color: white !important;
+    transform: translateY(-2px);
 }
    
 
