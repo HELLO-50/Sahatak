@@ -71,6 +71,55 @@ const FormManager = {
         }
     },
 
+    // Show centered success screen
+    showSuccessScreen(message, userType, redirectDelay = 3000) {
+        // Hide all other screens
+        const screensToHide = ['language-selection', 'auth-selection', 'login-form', 'user-type-selection', 'patient-register-form', 'doctor-register-form'];
+        screensToHide.forEach(screenId => {
+            const element = document.getElementById(screenId);
+            if (element) {
+                element.classList.add('d-none');
+                element.style.display = 'none';
+            }
+        });
+
+        // Create success screen HTML
+        const successHTML = `
+            <div id="registration-success" class="min-vh-100 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #e8f5e8 0%, #f0f9ff 100%);">
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-md-6">
+                            <div class="card shadow-lg border-0 text-center">
+                                <div class="card-body p-5">
+                                    <div class="mb-4">
+                                        <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+                                    </div>
+                                    <h2 class="text-success mb-3">Registration Successful!</h2>
+                                    <p class="lead mb-4">${message}</p>
+                                    <div class="spinner-border text-primary mb-3" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="text-muted">Redirecting to your dashboard...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add success screen to body
+        document.body.insertAdjacentHTML('beforeend', successHTML);
+
+        // Redirect after delay
+        setTimeout(() => {
+            const dashboardUrl = userType === 'doctor' ? 
+                'frontend/pages/dashboard/doctor.html' : 
+                'frontend/pages/dashboard/patient.html';
+            window.location.href = dashboardUrl;
+        }, redirectDelay);
+    },
+
     // Generic form submission handler
     async submitForm(formData, endpoint, successCallback, errorCallback) {
         try {
@@ -141,8 +190,8 @@ function handleRegister(event) {
         '/api/auth/register',
         (result) => {
             FormManager.setFormLoading(formId, false);
-            FormManager.showAlert('register-success-alert', result.message, 'success');
-            // TODO: Redirect to appropriate dashboard
+            // Use patient as default since this is the general form
+            FormManager.showSuccessScreen(result.message, 'patient');
         },
         (error) => {
             FormManager.setFormLoading(formId, false);
@@ -217,11 +266,7 @@ function handlePatientRegister(event) {
         '/api/auth/register',
         (result) => {
             FormManager.setFormLoading(formId, false);
-            FormManager.showAlert('patient-register-success-alert', result.message, 'success');
-            // TODO: Redirect to patient dashboard after successful registration
-            setTimeout(() => {
-                window.location.href = 'frontend/pages/dashboard/patient.html';
-            }, 2000);
+            FormManager.showSuccessScreen(result.message, 'patient');
         },
         (error) => {
             FormManager.setFormLoading(formId, false);
@@ -295,11 +340,7 @@ function handleDoctorRegister(event) {
         '/api/auth/register',
         (result) => {
             FormManager.setFormLoading(formId, false);
-            FormManager.showAlert('doctor-register-success-alert', result.message, 'success');
-            // TODO: Redirect to doctor dashboard after successful registration
-            setTimeout(() => {
-                window.location.href = 'frontend/pages/dashboard/doctor.html';
-            }, 2000);
+            FormManager.showSuccessScreen(result.message, 'doctor');
         },
         (error) => {
             FormManager.setFormLoading(formId, false);
