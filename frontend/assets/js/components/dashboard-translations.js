@@ -16,7 +16,10 @@ const DashboardTranslations = {
         this.updateElementText('dashboard-subtitle', patient.subtitle);
         this.updateElementText('user-status', patient.user_status);
         this.updateElementText('logout-text', patient.logout);
-        this.updateElementText('current-lang', t.auth?.current_language);
+        
+        // Show the opposite language (the one you can switch TO)
+        const oppositeLanguage = lang === 'ar' ? 'English' : 'العربية';
+        this.updateElementText('current-lang', oppositeLanguage);
         
         // Navigation
         this.updateElementText('nav-title', patient.nav.title);
@@ -40,7 +43,12 @@ const DashboardTranslations = {
         this.updateElementText('stat-prescriptions', patient.stats.prescriptions);
         this.updateElementText('stat-reports', patient.stats.reports);
         
-        // Dropdown menu
+        // Profile Action Buttons (new layout)
+        this.updateElementText('btn-profile', patient.buttons?.profile || patient.dropdown?.profile);
+        this.updateElementText('btn-settings', patient.buttons?.settings || patient.dropdown?.settings);
+        this.updateElementText('btn-logout', patient.buttons?.logout || patient.dropdown?.logout);
+        
+        // Dropdown menu (legacy)
         this.updateElementText('dropdown-profile', patient.dropdown?.profile);
         this.updateElementText('dropdown-settings', patient.dropdown?.settings);
         this.updateElementText('dropdown-logout', patient.dropdown?.logout);
@@ -79,7 +87,10 @@ const DashboardTranslations = {
         this.updateElementText('user-status', doctor.user_status);
         this.updateElementText('availability-status', doctor.available);
         this.updateElementText('logout-text', doctor.logout);
-        this.updateElementText('current-lang', t.auth?.current_language);
+        
+        // Show the opposite language (the one you can switch TO)
+        const oppositeLanguage = lang === 'ar' ? 'English' : 'العربية';
+        this.updateElementText('current-lang', oppositeLanguage);
         
         // Navigation
         this.updateElementText('nav-title', doctor.nav.title);
@@ -100,7 +111,12 @@ const DashboardTranslations = {
         this.updateElementText('action-schedule', doctor.quick_actions.schedule);
         this.updateElementText('action-schedule-desc', doctor.quick_actions.schedule_desc);
         
-        // Dropdown menu
+        // Profile Action Buttons (new layout)
+        this.updateElementText('btn-profile', doctor.buttons?.profile || doctor.dropdown?.profile);
+        this.updateElementText('btn-settings', doctor.buttons?.settings || doctor.dropdown?.settings);
+        this.updateElementText('btn-logout', doctor.buttons?.logout || doctor.dropdown?.logout);
+        
+        // Dropdown menu (legacy)
         this.updateElementText('dropdown-profile', doctor.dropdown?.profile);
         this.updateElementText('dropdown-settings', doctor.dropdown?.settings);
         this.updateElementText('dropdown-logout', doctor.dropdown?.logout);

@@ -27,43 +27,51 @@
             <!-- Dashboard Header -->
             <div class="dashboard-header">
                 <div class="row align-items-center">
-                    <div class="col-lg-6">
-                        <h1 class="dashboard-title" id="dashboard-title">Doctor Dashboard</h1>
-                        <p class="dashboard-subtitle" id="dashboard-subtitle">Manage Patients and Medical Consultations</p>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="user-info">
-                            <div class="dropdown">
-                                <div class="user-avatar" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
-                                    <i class="bi bi-person-badge"></i>
-                                </div>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" href="#" onclick="showProfile()">
-                                        <i class="bi bi-person-gear me-2"></i><span id="dropdown-profile">Profile</span>
-                                    </a></li>
-                                    <li><a class="dropdown-item" href="#" onclick="showSettings()">
-                                        <i class="bi bi-gear me-2"></i><span id="dropdown-settings">Settings</span>
-                                    </a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="#" onclick="logout()">
-                                        <i class="bi bi-box-arrow-right me-2"></i><span id="dropdown-logout">Logout</span>
-                                    </a></li>
-                                </ul>
+                    <!-- Profile Section - Left (Right in RTL) -->
+                    <div class="col-lg-4">
+                        <div class="profile-section">
+                            <div class="user-avatar">
+                                <i class="bi bi-person-badge"></i>
                             </div>
-                            <div>
+                            <div class="user-details">
                                 <h5 class="mb-1" id="user-name">Dr. Sarah Ahmed</h5>
                                 <span class="status-badge status-active" id="user-status">Available for Consultations</span>
                             </div>
-                            <div class="ms-auto">
-                                <button class="btn btn-outline-medical btn-sm" onclick="toggleAvailability()">
-                                    <i class="bi bi-circle-fill text-success me-1"></i>
-                                    <span id="availability-status">Available</span>
+                            <!-- Vertical Action Buttons -->
+                            <div class="action-buttons">
+                                <button class="btn btn-action" onclick="showProfile()" title="Profile">
+                                    <i class="bi bi-person-gear"></i>
+                                    <span id="btn-profile">Profile</span>
                                 </button>
-                                <button class="btn btn-outline-medical btn-sm ms-2" onclick="showLanguageSelector()">
-                                    <i class="bi bi-globe me-1"></i>
-                                    <span id="current-lang">English</span>
+                                <button class="btn btn-action" onclick="showSettings()" title="Settings">
+                                    <i class="bi bi-gear"></i>
+                                    <span id="btn-settings">Settings</span>
+                                </button>
+                                <button class="btn btn-action btn-logout" onclick="logout()" title="Logout">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                    <span id="btn-logout">Logout</span>
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Dashboard Title - Center -->
+                    <div class="col-lg-4 text-center">
+                        <h1 class="dashboard-title" id="dashboard-title">Doctor Dashboard</h1>
+                        <p class="dashboard-subtitle" id="dashboard-subtitle">Manage Patients and Medical Consultations</p>
+                    </div>
+                    
+                    <!-- Controls - Right (Left in RTL) -->
+                    <div class="col-lg-4 text-end">
+                        <div class="dashboard-controls">
+                            <button class="btn btn-outline-medical btn-sm" onclick="toggleAvailability()">
+                                <i class="bi bi-circle-fill text-success me-1"></i>
+                                <span id="availability-status">Available</span>
+                            </button>
+                            <button class="btn btn-outline-medical btn-sm" onclick="showLanguageSelector()">
+                                <i class="bi bi-globe me-1"></i>
+                                <span id="current-lang">English</span>
+                            </button>
                         </div>
                     </div>
                 </div>

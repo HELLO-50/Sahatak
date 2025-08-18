@@ -310,6 +310,11 @@
         "prescriptions": "Active Prescriptions",
         "reports": "Medical Reports"
       },
+      "buttons": {
+        "profile": "Profile",
+        "settings": "Settings",
+        "logout": "Logout"
+      },
       "dropdown": {
         "profile": "Profile",
         "settings": "Settings",
@@ -357,6 +362,11 @@
         "records_desc": "View patient files",
         "schedule": "Manage Schedule",
         "schedule_desc": "Edit available appointments"
+      },
+      "buttons": {
+        "profile": "Profile",
+        "settings": "Settings",
+        "logout": "Logout"
       },
       "dropdown": {
         "profile": "Profile",

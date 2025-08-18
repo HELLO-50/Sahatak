@@ -331,7 +331,9 @@ function updateContentByLanguage(lang) {
     updateElementText('login-text', t.auth?.login);
     updateElementText('register-text', t.auth?.register);
     updateElementText('language-switch-text', t.auth?.language_switch);
-    updateElementText('current-language', t.auth?.current_language);
+    // Show the opposite language (the one you can switch TO)
+    const oppositeLanguage = lang === 'ar' ? 'English' : 'العربية';
+    updateElementText('current-language', oppositeLanguage);
     
     // Update login form
     updateElementText('login-title', t.login?.title);
@@ -443,7 +445,8 @@ function updateSelectOptions(lang) {
 function initializeKeyboardNavigation() {
     document.addEventListener('keydown', function(event) {
         // Only handle keyboard navigation on language selection screen
-        if (!document.getElementById('language-selection').classList.contains('d-none')) {
+        const languageSelection = document.getElementById('language-selection');
+        if (languageSelection && !languageSelection.classList.contains('d-none')) {
             const langButtons = document.querySelectorAll('#language-selection button[data-lang]');
             const activeElement = document.activeElement;
             
@@ -509,24 +512,29 @@ document.addEventListener('DOMContentLoaded', async function() {
         const savedLanguage = LanguageManager.getLanguage();
         console.log(`Saved language found: ${savedLanguage}`);
         
-        // Skip language selection and go directly to auth selection
-        document.getElementById('language-selection').classList.add('d-none');
-        document.getElementById('auth-selection').classList.remove('d-none');
+        // Skip language selection and go directly to auth selection (only if elements exist)
+        const languageSelection = document.getElementById('language-selection');
+        const authSelection = document.getElementById('auth-selection');
+        if (languageSelection) languageSelection.classList.add('d-none');
+        if (authSelection) authSelection.classList.remove('d-none');
         
         // Apply the saved language
         LanguageManager.applyLanguage(savedLanguage);
         updateContentByLanguage(savedLanguage);
     } else {
         console.log('First visit detected - showing language selection');
-        // Ensure language selection is visible
-        document.getElementById('language-selection').classList.remove('d-none');
-        // Focus first language button for keyboard accessibility
-        setTimeout(() => {
-            const firstLangButton = document.querySelector('#language-selection button[data-lang]');
-            if (firstLangButton) {
-                firstLangButton.focus();
-            }
-        }, 100);
+        // Ensure language selection is visible (only if element exists)
+        const languageSelection = document.getElementById('language-selection');
+        if (languageSelection) {
+            languageSelection.classList.remove('d-none');
+            // Focus first language button for keyboard accessibility
+            setTimeout(() => {
+                const firstLangButton = document.querySelector('#language-selection button[data-lang]');
+                if (firstLangButton) {
+                    firstLangButton.focus();
+                }
+            }, 100);
+        }
     }
     
     // Bootstrap components initialization
@@ -1082,21 +1090,19 @@ console.log('%cLanguage management ready ✓', 'color: #059669;');
 
 // Set up form event listeners when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-    // Login form
+    // Only attach form event listeners if the forms exist (not on dashboard pages)
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
         loginForm.addEventListener('submit', handleLogin);
         console.log('Login form event listener attached');
     }
     
-    // Patient registration form
     const patientForm = document.getElementById('patientRegisterForm');
     if (patientForm) {
         patientForm.addEventListener('submit', handlePatientRegister);
         console.log('Patient registration form event listener attached');
     }
     
-    // Doctor registration form
     const doctorForm = document.getElementById('doctorRegisterForm');
     if (doctorForm) {
         doctorForm.addEventListener('submit', handleDoctorRegister);

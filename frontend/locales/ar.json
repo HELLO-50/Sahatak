@@ -310,6 +310,11 @@
         "prescriptions": "الوصفات النشطة",
         "reports": "التقارير الطبية"
       },
+      "buttons": {
+        "profile": "الملف الشخصي",
+        "settings": "الإعدادات",
+        "logout": "تسجيل خروج"
+      },
       "dropdown": {
         "profile": "الملف الشخصي",
         "settings": "الإعدادات",
@@ -357,6 +362,11 @@
         "records_desc": "عرض ملفات المرضى",
         "schedule": "إدارة الجدول",
         "schedule_desc": "تعديل المواعيد المتاحة"
+      },
+      "buttons": {
+        "profile": "الملف الشخصي",
+        "settings": "الإعدادات",
+        "logout": "تسجيل خروج"
       },
       "dropdown": {
         "profile": "الملف الشخصي",
