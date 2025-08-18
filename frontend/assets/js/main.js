@@ -1064,3 +1064,27 @@ console.log('%c🏥 Sahatak Telemedicine Platform', 'color: #2563eb; font-size: 
 console.log('%cBootstrap 5 loaded successfully ✓', 'color: #059669;');
 console.log('%cArabic font support enabled ✓', 'color: #059669;');
 console.log('%cLanguage management ready ✓', 'color: #059669;');
+
+// Set up form event listeners when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Login form
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
+        console.log('Login form event listener attached');
+    }
+    
+    // Patient registration form
+    const patientForm = document.getElementById('patientRegisterForm');
+    if (patientForm) {
+        patientForm.addEventListener('submit', handlePatientRegister);
+        console.log('Patient registration form event listener attached');
+    }
+    
+    // Doctor registration form
+    const doctorForm = document.getElementById('doctorRegisterForm');
+    if (doctorForm) {
+        doctorForm.addEventListener('submit', handleDoctorRegister);
+        console.log('Doctor registration form event listener attached');
+    }
+});

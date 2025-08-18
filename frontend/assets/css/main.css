@@ -73,10 +73,10 @@
     .topbar { display:flex; align-items:center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
     .search { flex:1; display:flex; gap:8px; }
     .search input { width:100%; background: rgba(2,6,23,.35); color: var(--text); border:1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
-    .btn {
+    .btn.custom-btn {
       border:1px solid var(--border); background: rgba(2,6,23,.35); color: var(--text); border-radius: 12px; padding: 10px 12px; cursor:pointer;
     }
-    .btn:hover { background: var(--hover); }
+    .btn.custom-btn:hover { background: var(--hover); }
 
     .cards { display:grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
     .card { grid-column: span 12; border:1px solid var(--border); border-radius: var(--radius); padding: 16px; background: rgba(2,6,23,.35); box-shadow: var(--shadow); }

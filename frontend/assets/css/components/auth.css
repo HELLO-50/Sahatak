@@ -52,9 +52,9 @@
 
 /* Welcome Section */
 .welcome-title {
-    color: var(--medical-blue);
     font-weight: 700;
     margin-bottom: 1rem;
+    /* Color is handled by main.css - keep it white */
 }
 
 .welcome-title i {
