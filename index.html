@@ -538,7 +538,21 @@
             document.getElementById('back-to-user-type-doctor').addEventListener('click', showUserTypeSelection);
             
             // Form submissions
-            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            console.log('Setting up form event listeners...');
+            
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                console.log('Login form found, adding event listener');
+                if (typeof handleLogin === 'function') {
+                    loginForm.addEventListener('submit', handleLogin);
+                    console.log('handleLogin event listener added successfully');
+                } else {
+                    console.error('handleLogin function not found!');
+                }
+            } else {
+                console.error('Login form not found!');
+            }
+            
             document.getElementById('registerForm').addEventListener('submit', handleRegister);
             document.getElementById('patientRegisterForm').addEventListener('submit', handlePatientRegister);
             document.getElementById('doctorRegisterForm').addEventListener('submit', handleDoctorRegister);

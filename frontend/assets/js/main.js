@@ -602,6 +602,7 @@ class ApiError extends Error {
 
 // Handle login form submission
 async function handleLogin(event) {
+    console.log('handleLogin function called!', event);
     event.preventDefault();
     
     const submitBtn = document.getElementById('login-submit');
