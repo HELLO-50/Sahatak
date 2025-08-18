@@ -612,12 +612,14 @@ async function handleLogin(event) {
     
     // Clear previous errors
     clearFormErrors('loginForm');
-    errorAlert.classList.add('d-none');
+    if (errorAlert) errorAlert.classList.add('d-none');
     
-    // Show loading state
-    spinner.classList.remove('d-none');
-    icon.classList.add('d-none');
-    submitBtn.disabled = true;
+    // Show loading state with null checks
+    console.log('Elements found:', { submitBtn: !!submitBtn, spinner: !!spinner, icon: !!icon, errorAlert: !!errorAlert });
+    
+    if (spinner) spinner.classList.remove('d-none');
+    if (icon) icon.classList.add('d-none');
+    if (submitBtn) submitBtn.disabled = true;
     
     try {
         const formData = {
@@ -679,10 +681,10 @@ async function handleLogin(event) {
         
         showFormError(errorAlert, errorMessage);
     } finally {
-        // Hide loading state
-        spinner.classList.add('d-none');
-        icon.classList.remove('d-none');
-        submitBtn.disabled = false;
+        // Hide loading state with null checks
+        if (spinner) spinner.classList.add('d-none');
+        if (icon) icon.classList.remove('d-none');
+        if (submitBtn) submitBtn.disabled = false;
     }
 }
 
