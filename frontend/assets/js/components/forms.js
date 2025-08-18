@@ -123,9 +123,12 @@ const FormManager = {
     // Generic form submission handler
     async submitForm(formData, endpoint, successCallback, errorCallback) {
         try {
-            console.log(`Submitting to ${endpoint}:`, formData);
+            // Use the same base URL as ApiHelper
+            const baseUrl = 'https://sahatak.pythonanywhere.com/api';
+            const fullUrl = baseUrl + endpoint;
+            console.log(`Submitting to ${fullUrl}:`, formData);
             
-            const response = await fetch(endpoint, {
+            const response = await fetch(fullUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
