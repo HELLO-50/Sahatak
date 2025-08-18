@@ -74,14 +74,8 @@ const FormManager = {
     // Generic form submission handler
     async submitForm(formData, endpoint, successCallback, errorCallback) {
         try {
-            // TODO: Replace with actual API endpoint
             console.log(`Submitting to ${endpoint}:`, formData);
             
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            // TODO: Replace with actual fetch call
-            /*
             const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: {
@@ -97,10 +91,6 @@ const FormManager = {
             } else {
                 errorCallback(result.message || 'Registration failed');
             }
-            */
-            
-            // For demo purposes, simulate success
-            successCallback({ message: 'Registration successful (demo mode)' });
             
         } catch (error) {
             console.error('Form submission error:', error);
@@ -148,7 +138,7 @@ function handleRegister(event) {
     // Submit form
     FormManager.submitForm(
         formData,
-        '/api/register',
+        '/api/auth/register',
         (result) => {
             FormManager.setFormLoading(formId, false);
             FormManager.showAlert('register-success-alert', result.message, 'success');
@@ -224,7 +214,7 @@ function handlePatientRegister(event) {
     // Submit form
     FormManager.submitForm(
         formData,
-        '/api/register/patient',
+        '/api/auth/register',
         (result) => {
             FormManager.setFormLoading(formId, false);
             FormManager.showAlert('patient-register-success-alert', result.message, 'success');
@@ -302,7 +292,7 @@ function handleDoctorRegister(event) {
     // Submit form
     FormManager.submitForm(
         formData,
-        '/api/register/doctor',
+        '/api/auth/register',
         (result) => {
             FormManager.setFormLoading(formId, false);
             FormManager.showAlert('doctor-register-success-alert', result.message, 'success');

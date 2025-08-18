@@ -265,7 +265,15 @@ body {
     background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-teal) 100%);
 }
 
-#login-form, #patient-register-form, #doctor-register-form {
+#login-form {
+    background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-teal) 100%);
+}
+
+#patient-register-form {
+    background: linear-gradient(135deg, #e8f5e8 0%, #f0f9ff 100%);
+}
+
+#doctor-register-form {
     background: linear-gradient(135deg, var(--medical-green) 0%, var(--medical-teal) 100%);
 }
 
