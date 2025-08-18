@@ -279,7 +279,9 @@
     "user_type_required": "Please select an account type",
     "login_failed": "Login failed. Please try again.",
     "registration_failed": "Registration failed. Please try again.",
-    "registration_success": "Account created successfully! You can now login."
+    "registration_success": "Account created successfully! You can now login.",
+    "logout_progress": "Logging out...",
+    "logout_success": "Logged out successfully"
   },
   
   "dashboard": {

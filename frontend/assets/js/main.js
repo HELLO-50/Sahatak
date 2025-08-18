@@ -1082,6 +1082,84 @@ function clearFormErrors(formId) {
     errorDivs.forEach(div => div.textContent = '');
 }
 
+// Logout functionality
+async function logout() {
+    console.log('Logout initiated...');
+    
+    // Get current language for messages
+    const lang = LanguageManager.getLanguage() || 'ar';
+    const t = LanguageManager.translations[lang];
+    const logoutMessage = t?.validation?.logout_progress || (lang === 'ar' ? 'جاري تسجيل الخروج...' : 'Logging out...');
+    const successMessage = t?.validation?.logout_success || (lang === 'ar' ? 'تم تسجيل الخروج بنجاح' : 'Logged out successfully');
+    
+    // Find and update logout button text to show loading
+    const logoutButton = document.querySelector('[onclick="logout()"]');
+    const logoutSpan = logoutButton?.querySelector('span');
+    const originalText = logoutSpan?.textContent;
+    
+    if (logoutSpan) {
+        logoutSpan.textContent = logoutMessage;
+        logoutButton.disabled = true;
+    }
+    
+    try {
+        // Call backend logout endpoint to invalidate session
+        const response = await ApiHelper.makeRequest('/auth/logout', {
+            method: 'POST'
+        });
+        
+        console.log('Backend logout successful:', response);
+    } catch (error) {
+        console.error('Backend logout error:', error);
+        // Continue with frontend cleanup even if backend fails
+    }
+    
+    // Clear all session data from localStorage
+    const keysToRemove = [
+        'sahatak_user_type',
+        'sahatak_user_email', 
+        'sahatak_user_id',
+        'sahatak_user_name'
+    ];
+    
+    keysToRemove.forEach(key => {
+        localStorage.removeItem(key);
+        console.log(`Cleared: ${key}`);
+    });
+    
+    // Keep language preference (don't clear sahatak_language)
+    
+    // Update button to show success
+    if (logoutSpan) {
+        logoutSpan.textContent = successMessage;
+    }
+    
+    console.log(successMessage);
+    
+    // Redirect to login page - determine correct path based on current location
+    setTimeout(() => {
+        const currentPath = window.location.pathname;
+        let redirectPath;
+        
+        if (currentPath.includes('/pages/dashboard/')) {
+            // From dashboard pages: /frontend/pages/dashboard/ -> need to go up 3 levels
+            redirectPath = '../../../index.html';
+        } else if (currentPath.includes('/pages/')) {
+            // From other pages: /frontend/pages/ -> need to go up 2 levels  
+            redirectPath = '../../index.html';
+        } else if (currentPath.includes('/frontend/')) {
+            // From frontend root: /frontend/ -> need to go up 1 level
+            redirectPath = '../index.html';
+        } else {
+            // From root or other locations
+            redirectPath = 'index.html';
+        }
+        
+        console.log(`Redirecting from ${currentPath} to ${redirectPath}`);
+        window.location.href = redirectPath;
+    }, 800);
+}
+
 // Console welcome message
 console.log('%c🏥 Sahatak Telemedicine Platform', 'color: #2563eb; font-size: 16px; font-weight: bold;');
 console.log('%cBootstrap 5 loaded successfully ✓', 'color: #059669;');

@@ -279,7 +279,9 @@
     "user_type_required": "يرجى اختيار نوع الحساب",
     "login_failed": "فشل في تسجيل الدخول. جرب  مرة أخرى.",
     "registration_failed": "ما قدرنا نسجل حسابك. يرجى المحاولة مرة أخرى.",
-    "registration_success": "تم تسجل حسابك بنجاح! ممكن تدخل الان ."
+    "registration_success": "تم تسجل حسابك بنجاح! ممكن تدخل الان .",
+    "logout_progress": "جاري تسجيل الخروج...",
+    "logout_success": "تم تسجيل الخروج بنجاح"
   },
   
   "dashboard": {
