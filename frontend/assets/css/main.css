@@ -270,11 +270,11 @@ body {
 }
 
 #patient-register-form {
-    background: linear-gradient(135deg, #e8f5e8 0%, #f0f9ff 100%);
+    background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-teal) 100%);
 }
 
 #doctor-register-form {
-    background: linear-gradient(135deg, var(--medical-green) 0%, var(--medical-teal) 100%);
+    background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-teal) 100%);
 }
 
 .welcome-title {
@@ -608,10 +608,20 @@ body {
     transform: translateY(-3px);
     box-shadow: 0 10px 30px rgba(37, 99, 235, 0.2);
     border-color: var(--medical-blue);
+    background: linear-gradient(45deg, var(--medical-blue), var(--medical-teal));
+    color: white;
 }
 
 .user-type-btn:hover i {
-    color: var(--medical-teal);
+    color: white;
+}
+
+.user-type-btn:hover .fw-bold {
+    color: white;
+}
+
+.user-type-btn:hover small {
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .user-type-btn.btn-primary {
