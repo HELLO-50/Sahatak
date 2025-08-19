@@ -22,6 +22,8 @@
     <link rel="stylesheet" href="../../assets/css/components/dashboard.css">
     <!-- Admin CSS -->
     <link rel="stylesheet" href="../../assets/css/components/admin.css">
+    <!-- Chart.js -->
+     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="dashboard-container">
@@ -386,7 +388,19 @@
             </div>
         </div>                            
     </div>
+    <!-- Navigation -->
+<div id="main-nav" class="d-flex justify-content-center gap-2 my-3">
+  <button class="btn btn-outline-primary nav-btn" data-target="dashboard">لوحة التحكم</button>
+  <button class="btn btn-outline-primary nav-btn" data-target="users">المستخدمين</button>
+  <button class="btn btn-outline-primary nav-btn" data-target="reports">التقارير</button>
+  <button class="btn btn-outline-primary nav-btn" data-target="settings">الإعدادات</button>
+</div>
 
+<!-- Sections -->
+<div id="dashboard" class="page-section">📊 محتوى لوحة التحكم</div>
+<div id="users" class="page-section d-none">👥 محتوى المستخدمين</div>
+<div id="reports" class="page-section d-none">📑 محتوى التقارير</div>
+<div id="settings" class="page-section d-none">⚙ محتوى الإعدادات</div>
     <!-- Footer -->
     <footer class="footer mt-auto py-3">
         <div class="container">
@@ -481,8 +495,43 @@
             </div>
         </div>
     </div>
+    <!-- User Details Modal -->
+<div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">تفاصيل المستخدم</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>الاسم:</strong> <span id="modalUserName"></span></p>
+        <p><strong>النوع:</strong> <span id="modalUserType"></span></p>
+        <p><strong>الإيميل:</strong> <span id="modalUserEmail"></span></p>
+        <!-- تضيف أي بيانات ثانية تحتاجها -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+      </div>
+    </div>
+  </div>
+</div>
+ <!-- Canvas -->
+    <div class="row">
+  <div class="col-md-6">
+    <canvas id="usersChart"></canvas>
+  </div>
+  <div class="col-md-6">
+    <canvas id="rolesChart"></canvas>
+  </div>
+</div>
 
     <!-- Bootstrap 5 JavaScript CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    
+    <!-- jQuery (for Bootstrap's JavaScript plugins) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Bootstrap 5 JavaScript CDN -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     
     <!-- Chart.js -->

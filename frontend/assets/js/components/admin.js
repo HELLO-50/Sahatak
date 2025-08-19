@@ -40,7 +40,7 @@ const AdminConfig = {
 // ===========================================================================
 
     // ====== Sidebar Navigation ======
-    const nav = document.getElementById('nav');
+    /**const nav = document.getElementById('nav');
     const sections = Array.from(document.querySelectorAll('main section'));
 
     function activate(targetId) {
@@ -99,6 +99,7 @@ const AdminConfig = {
         setTimeout(() => { btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i>'; btn.disabled = false; }, 900);
       }, 900);
     });
+    */
   
 const AdminAPI = {
     /**
@@ -1299,36 +1300,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
 //<!-- Chart.js Script -->
 
-    constctx = document.getElementById('healthChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-            datasets: [
-                {
-                    label: 'Active Users',
-                    data: [1200, 1400, 1350, 1500, 1600, 1550, 1700],
-                    borderColor: '#007bff',
-                    backgroundColor: 'rgba(0,123,255,0.2)',
-                  fill: true,
-                    tension: 0.3
-                },
-                {
-                    label: 'Error Rate (%)',
-                    data: [0.15, 0.1, 0.12, 0.09, 0.11, 0.1, 0.08],
-                    borderColor: '#dc3545',
-                    backgroundColor: 'rgba(220,53,69,0.2)',
-                    fill: true,
-                    tension: 0.3
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            plugins: { legend: { position: 'bottom' } },
-            scales: { y: { beginAtZero: true } }
-        }
-    });
+  // Chart.js Script
+const  healthCtx = document.getElementById('healthChart').getContext('2d');
+new Chart(healthCtx, {
+    type: 'line',
+    data: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [
+            {
+                label: 'Active Users',
+                data: [1200, 1400, 1350, 1500, 1600, 1550, 1700],
+                borderColor: '#007bff',
+                backgroundColor: 'rgba(0,123,255,0.2)',
+                fill: true,
+                tension: 0.3
+            },
+            {
+                label: 'Error Rate (%)',
+                data: [0.15, 0.1, 0.12, 0.09, 0.11, 0.1, 0.08],
+                borderColor: '#dc3545',
+                backgroundColor: 'rgba(220,53,69,0.2)',
+                fill: true,
+                tension: 0.3
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom' } },
+        scales: { y: { beginAtZero: true } }
+    }
+});
+  
     const sidebar = document.getElementById("sidebar");
 const menuBtn = document.getElementById("menuToggle");
 
@@ -1370,8 +1373,173 @@ new Chart(ctx, {
         }]
     }
 });
+// users.js  -->
+function escapeHtml(str) {
+  return String(str ?? '')
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
+function renderUsersTable(users) {
+  const tbody = document.getElementById('users_table_body'); // ✅ مطابق للـHTML
+  if (!tbody) return;
 
+  if (!Array.isArray(users)) {
+    console.warn('renderUsersTable: users is not an array', users);
+    tbody.innerHTML = '<tr><td colspan="7">لا توجد بيانات</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = '';
+
+  users.forEach((user, index) => {
+    const name =
+      user.full_name ??
+        `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim() ||
+      'غير متوفر';
+
+    const email = user.email ?? 'غير متوفر';
+    const phone = user.phone ?? 'غير متوفر';
+    const role = user.user_type ?? user.role ?? 'غير محدد';
+    const status = user.status ?? 'غير معروف';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${index + 1}</td>
+      <td>${escapeHtml(name)}</td>
+      <td>${escapeHtml(email)}</td>
+      <td>${escapeHtml(phone)}</td>
+      <td>${escapeHtml(role)}</td>
+      <td>${escapeHtml(status)}</td>
+      <td>
+        <button class="btn btn-sm btn-primary" data-user-id="${escapeHtml(user.id ?? '')}">
+          عرض
+        </button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}  
+document.addEventListener('DOMContentLoaded', loadUsers);
+
+//showUserModal(user) -->
+function showUserModal(user) {
+  // نعبي البيانات في المودال
+  document.getElementById('modalUserName').textContent =
+    user.full_name ?? {user.first_name ?? ''} {user.last_name ?? ''}.trim();
+  document.getElementById('modalUserType').textContent =
+    user.user_type ?? user.role ?? 'غير محدد';
+  document.getElementById('modalUserEmail').textContent =
+    user.email ?? 'غير متوفر';
+
+  // نظهر المودال باستخدام Bootstrap
+  const modal = new bootstrap.Modal(document.getElementById('userModal'));
+  modal.show();
+}
+// بعد بناء الجدول
+document.querySelectorAll('.show-user-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const user = JSON.parse(btn.dataset.user);
+    showUserModal(user);
+  });
+});
     
+//initialize chart  -->
+function initializeCharts() {
+  // 1️⃣ مثال: Chart لعدد المستخدمين المسجلين شهريًا
+  const ctx1 = document.getElementById('usersChart');
+  if (ctx1) {
+    new Chart(ctx1, {
+      type: 'line',
+      data: {
+        labels: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو'],
+        datasets: [{
+          label: 'عدد المستخدمين',
+          data: [10, 25, 40, 30, 50, 70], // بيانات تجريبية
+          borderColor: 'rgba(75, 192, 192, 1)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          tension: 0.3,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'top' },
+          title: { display: true, text: 'المستخدمين الجدد شهريًا' }
+        }
+      }
+    });
+  }
 
+  // 2️⃣ مثال: Chart لأنواع المستخدمين (admin, editor, viewer)
+  const ctx2 = document.getElementById('rolesChart');
+  if (ctx2) {
+    new Chart(ctx2, {
+      type: 'doughnut',
+      data: {
+        labels: ['Admin', 'Editor', 'Viewer'],
+        datasets: [{
+          label: 'نوع المستخدم',
+          data: [5, 8, 12], // بيانات تجريبية
+          backgroundColor: [
+            'rgba(255, 99, 132, 0.7)',
+            'rgba(54, 162, 235, 0.7)',
+            'rgba(255, 206, 86, 0.7)'
+          ],
+          borderColor: [
+            'rgba(255, 99, 132, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom' },
+          title: { display: true, text: 'توزيع أنواع المستخدمين' }
+        }
+      }
+    });
+  }
+}
+// Call the function to initialize charts
+document.addEventListener('DOMContentLoaded', () => {
+  initializeCharts();
+});
+
+function initializeNavigation() {
+  // نخفي كل الأقسام ما عدا أول واحد
+  const sections = document.querySelectorAll('.page-section');
+  sections.forEach((sec, i) => {
+    if (i !== 0) sec.classList.add('d-none');
+  });
+
+  // نربط الأزرار
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.dataset.target;
+
+      // نخفي الكل
+      sections.forEach(sec => sec.classList.add('d-none'));
+
+      // نظهر الهدف فقط
+      const target = document.getElementById(targetId);
+      if (target) target.classList.remove('d-none');
+
+      // تحديث الشكل النشط للأزرار
+      document.querySelectorAll('.nav-btn').forEach(b => 
+        b.classList.remove('btn-primary')
+      );
+      btn.classList.add('btn-primary');
+    });
+  });
+}
+document.addEventListener('DOMContentLoaded', () => {
+  initializeNavigation();
+});
 
