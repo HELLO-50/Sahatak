@@ -471,10 +471,17 @@ class MedicalHistoryUpdate(db.Model):
 # =============================================================================
 
 class SystemSettings(db.Model):
-    """
-    Ahmed: System-wide configuration settings
-    This model stores admin-configurable settings for the platform
-    """
+   # This model stores admin-configurable settings for the platform
+    class SystemSettings(db.Model):
+      id = db.Column(db.Integer, primary_key=True)
+      key = db.Column(db.String(100), unique=True, nullable=False)
+      value = db.Column(db.Text, nullable=False)
+      data_type = db.Column(db.String(20), nullable=False)
+      description = db.Column(db.Text)
+      created_at = db.Column(db.DateTime, default=datetime.utcnow)
+      updated_at = db.Column(db.DateTime, default=datetime.utcnow)
+      updated_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+    
     __tablename__ = 'system_settings'
     
     id = db.Column(db.Integer, primary_key=True)
@@ -553,10 +560,15 @@ class SystemSettings(db.Model):
 
 
 class AuditLog(db.Model):
-    """
-    Ahmed: Audit trail for admin actions and important system events
-    This model tracks all admin actions for security and compliance
-    """
+  # This model tracks all admin actions for security and compliance
+    class AuditLog(db.Model):
+      id = db.Column(db.Integer, primary_key=True)
+      user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+      action = db.Column(db.String(100), nullable=False)
+      details = db.Column(db.JSON)
+      ip_address = db.Column(db.String(45))
+      created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
     __tablename__ = 'audit_logs'
     
     id = db.Column(db.Integer, primary_key=True)
