@@ -16,6 +16,10 @@ from utils.logging_config import app_logger, log_user_action
 from utils.logging_config import auth_logger, log_user_action
 from utils.validators import validate_email, validate_password
 
+# Database import
+from models import SystemSettings
+from models import AuditLog
+
 # Create admin blueprint
 admin_bp = Blueprint('admin', __name__)
 
@@ -529,7 +533,7 @@ def verify_doctor(doctor_id):
     try:
         db.session.commit()
         
-        # Log admin action
+    # Log admin action
         log_user_action(
             current_user.id,
             'admin_verify_doctor',
@@ -787,7 +791,7 @@ def get_system_settings():
 @login_required
 @admin_required
 def update_system_settings():
-    #Update system settings
+# Update system settings
     try:
         data = request.get_json()
         if not data:
@@ -861,32 +865,32 @@ def update_system_settings():
                 details=validation_errors
             )
         
-        try:
+    try:
             # Update settings in database
-            for key, value, data_type in updated_settings:
-                setting = SystemSettings.query.filter_by(key=key).first()
+        for key, value, data_type in updated_settings:
+            setting = SystemSettings.query.filter_by(key=key).first()
                 
-                if setting:
-                    setting.value = str(value)
-                    setting.data_type = data_type
-                    setting.updated_at = datetime.utcnow()
-                    setting.updated_by = current_user.id
-                else:
-                    new_setting = SystemSettings(
-                        key=key,
-                        value=str(value),
-                        data_type=data_type,
-                        description=f"Updated by admin {current_user.email}",
-                        created_at=datetime.utcnow(),
-                        updated_at=datetime.utcnow(),
-                        updated_by=current_user.id
-                    )
-                    db.session.add(new_setting)
+            if setting:
+                setting.value = str(value)
+                setting.data_type = data_type
+                setting.updated_at = datetime.utcnow()
+                setting.updated_by = current_user.id
+            else:
+                new_setting = SystemSettings(
+                    key=key,
+                    value=str(value),
+                    data_type=data_type,
+                    description=f"Updated by admin {current_user.email}",
+                    created_at=datetime.utcnow(),
+                    updated_at=datetime.utcnow(),
+                    updated_by=current_user.id
+                )
+                db.session.add(new_setting)
             
-            db.session.commit()
+        db.session.commit()
             
             # Log admin action
-            log_user_action(
+        log_user_action(
                 current_user.id,
                 'admin_update_settings',
                 {
@@ -1053,7 +1057,6 @@ def get_dashboard_analytics():
             period_end = now
         
         # User statistics
-        total_users = 1250
         new_registrations = User.query.filter(
             User.created_at >= period_start
         ).count()
@@ -1071,7 +1074,7 @@ def get_dashboard_analytics():
             User.created_at <= period_start
         ).count()
         
-        user_growth_rate = ((total_users - previous_users) / previous_users * 100) if previous_users > 0 else 0
+        user_growth_rate = ((previous_users) / previous_users * 100) if previous_users > 0 else 0
         
         # Appointment statistics
         total_appointments = Appointment.query.count()
@@ -1158,7 +1161,6 @@ def get_dashboard_analytics():
         
         analytics_data = {
             'user_stats': {
-                'total_users': total_users,
                 'new_registrations_period': new_registrations,
                 'active_users_period': active_users,
                 'user_growth_rate': round(user_growth_rate, 2)
@@ -1220,51 +1222,174 @@ def get_dashboard_analytics():
 @login_required
 @admin_required
 def send_broadcast_notification():
-    """
-    Ahmed: Send notification to all users or specific groups
-    
-    Request Body:
-    {
-        "title": "System Maintenance",
-        "message": "Scheduled maintenance tonight",
-        "target": "all" | "patients" | "doctors",
-        "type": "info" | "warning" | "urgent",
-        "send_email": true,
-        "send_sms": false
-    }
-    
-    TODO Ahmed - Implement:
-    1. Validate notification data
-    2. Queue notifications for delivery
-    3. Support different notification types
-    4. Track delivery status
-    5. Log broadcast action
-    """
+# Send notification to all users or specific groups
+   
     try:
         data = request.get_json()
+        if not data:
+            return APIResponse.error(
+                message="Request body required",
+                status_code=400
+            )
         
-        # TODO: Ahmed - Implement broadcast notification
-        title = data.get('title')
-        message = data.get('message')
+    # Validate required fields
+        title = data.get('title', '').strip()
+        message = data.get('message', '').strip()
+        
+        if not title or not message:
+            return APIResponse.error(
+                message="Title and message are required",
+                status_code=400,
+                error_code="MISSING_REQUIRED_FIELDS"
+            )
+        
+        if len(title) > 100:
+            return APIResponse.error(
+                message="Title must be less than 100 characters",
+                status_code=400,
+                error_code="TITLE_TOO_LONG"
+            )
+        
+        if len(message) > 1000:
+            return APIResponse.error(
+                message="Message must be less than 1000 characters",
+                status_code=400,
+                error_code="MESSAGE_TOO_LONG"
+            )
+            
+    # Validate target audience
         target = data.get('target', 'all')
+        valid_targets = ['all', 'patients', 'doctors', 'admins']
+        if target not in valid_targets:
+            return APIResponse.error(
+                message=f"Target must be one of: {valid_targets}",
+                status_code=400,
+                error_code="INVALID_TARGET"
+            )
+            
+    # Validate notification type
         notification_type = data.get('type', 'info')
+        valid_types = ['info', 'warning', 'urgent', 'success']
+        if notification_type not in valid_types:
+            return APIResponse.error(
+                message=f"Type must be one of: {valid_types}",
+                status_code=400,
+                error_code="INVALID_TYPE"
+            )
+            
+    # Validate delivery options
+        send_email = data.get('send_email', False)
+        send_sms = data.get('send_sms', False)
         
-        # TODO: Ahmed - Queue notifications for delivery
+        if not send_email and not send_sms:
+            return APIResponse.error(
+                message="At least one delivery method (email or SMS) must be selected",
+                status_code=400,
+                error_code="NO_DELIVERY_METHOD"
+            )
+            
+    # Validate schedule time if provided
+        schedule_time = data.get('schedule_time')
+        if schedule_time:
+            try:
+                schedule_datetime = datetime.fromisoformat(schedule_time.replace('Z', '+00:00'))
+                if schedule_datetime <= datetime.utcnow():
+                    return APIResponse.error(
+                        message="Schedule time must be in the future",
+                        status_code=400,
+                        error_code="INVALID_SCHEDULE_TIME"
+                    )
+            except ValueError:
+                return APIResponse.error(
+                    message="Invalid schedule time format",
+                    status_code=400,
+                    error_code="INVALID_DATETIME_FORMAT"
+                )
+        else:
+            schedule_datetime = None
+            
+    # Build target user query
+        base_query = User.query.filter(User.is_active == True)
         
+        if target == 'patients':
+            target_users = base_query.filter(User.user_type == 'patient').all()
+        elif target == 'doctors':
+            target_users = base_query.filter(User.user_type == 'doctor').all()
+        elif target == 'admins':
+            target_users = base_query.filter(User.user_type == 'admin').all()
+        else:  # target == 'all'
+            target_users = base_query.all()
+        
+        if not target_users:
+            return APIResponse.error(
+                message=f"No active users found for target: {target}",
+                status_code=400,
+                error_code="NO_TARGET_USERS"
+            )
+            
+     # Queue notifications for each target user
+        notifications_queued = 0
+        failed_notifications = 0
+        
+        for user in target_users:
+            try:
+                queue_notification(
+                    user_id=user.id,
+                    title=title,
+                    message=message,
+                    notification_type=notification_type,
+                    send_email=send_email,
+                    send_sms=send_sms,
+                    scheduled_time=schedule_datetime,
+                    sender_id=current_user.id,
+                    metadata={
+                        'broadcast_id': f"broadcast_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
+                        'admin_sender': current_user.email,
+                        'target_group': target
+                    }
+                )
+                notifications_queued += 1
+                
+            except Exception as e:
+                app_logger.error(f"Failed to queue notification for user {user.id}: {str(e)}")
+                failed_notifications += 1
+                
+                 # Log admin action
         log_user_action(
             current_user.id,
             'admin_broadcast_notification',
             {
                 'title': title,
+                'message_length': len(message),
                 'target': target,
-                'type': notification_type
+                'type': notification_type,
+                'send_email': send_email,
+                'send_sms': send_sms,
+                'scheduled': bool(schedule_datetime),
+                'schedule_time': schedule_datetime.isoformat() if schedule_datetime else None,
+                'notifications_queued': notifications_queued,
+                'failed_notifications': failed_notifications,
+                'target_user_count': len(target_users)
             }
         )
         
-        return APIResponse.success(
-            message="Broadcast notification queued successfully"
-        )
+    # Prepare response message
+        if schedule_datetime:
+            status_message = f"Broadcast notification scheduled for {schedule_datetime.isoformat()}"
+        else:
+            status_message = "Broadcast notification sent successfully"
         
+        return APIResponse.success(
+            data={
+                'broadcast_id': f"broadcast_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
+                'notifications_queued': notifications_queued,
+                'failed_notifications': failed_notifications,
+                'target_users': len(target_users),
+                'scheduled': bool(schedule_datetime),
+                'schedule_time': schedule_datetime.isoformat() if schedule_datetime else None
+            },
+            message=status_message
+        )
     except Exception as e:
         app_logger.error(f"Admin broadcast notification error: {str(e)}")
         return APIResponse.error(
@@ -1280,31 +1405,97 @@ def send_broadcast_notification():
 @login_required
 @admin_required
 def get_audit_logs():
-    """
-    Ahmed: Get system audit logs
-    
-    Query Parameters:
-    - page: Page number
-    - per_page: Items per page
-    - action_type: Filter by action type
-    - user_id: Filter by specific user
-    - start_date: Start date filter
-    - end_date: End date filter
-    
-    TODO Ahmed - Implement:
-    1. Create AuditLog model
-    2. Query logs with filters
-    3. Return paginated results
-    4. Include user information
-    """
+# Get detailed information for a specific audit log entry
+
     try:
-        # TODO: Ahmed - Implement audit log retrieval
+        log_entry = AuditLog.query.options(
+            joinedload(AuditLog.user)
+        ).get(log_entry)
         
-        return APIResponse.success(
-            data={'audit_logs': [], 'pagination': {}},
-            message="Audit logs retrieved"
+        if not log_entry:
+            return APIResponse.error(
+                message="Audit log entry not found",
+                status_code=404,
+                error_code="AUDIT_LOG_NOT_FOUND"
+            )
+            
+            # Format detailed log information
+        log_details = {
+            'id': log_entry.id,
+            'action': log_entry.action,
+            'user_id': log_entry.user_id,
+            'user_info': {
+                'email': log_entry.user.email if log_entry.user else 'System',
+                'full_name': log_entry.user.full_name if log_entry.user else 'System',
+                'user_type': log_entry.user.user_type if log_entry.user else 'system',
+                'is_active': log_entry.user.is_active if log_entry.user else None
+            },
+            'request_info': {
+                'ip_address': log_entry.ip_address,
+                'user_agent': log_entry.user_agent,
+                'method': getattr(log_entry, 'method', None),
+                'endpoint': getattr(log_entry, 'endpoint', None)
+            },
+            'details': log_entry.details if log_entry.details else {},
+            'timestamps': {
+                'created_at': log_entry.created_at.isoformat(),
+                'created_at_readable': log_entry.created_at.strftime('%Y-%m-%d %H:%M:%S UTC'),
+                'days_ago': (datetime.utcnow() - log_entry.created_at).days
+            }
+        }
+        
+    # Determine severity and risk level
+        action_lower = log_entry.action.lower()
+        if any(keyword in action_lower for keyword in ['error', 'failed', 'denied', 'blocked']):
+            log_details['severity'] = 'error'
+        elif any(keyword in action_lower for keyword in ['warning', 'attempt', 'locked']):
+            log_details['severity'] = 'warning'
+        else:
+            log_details['severity'] = 'info'
+        
+        if any(keyword in action_lower for keyword in ['login_failed', 'account_locked', 'admin_access_denied']):
+            log_details['risk_level'] = 'high'
+        elif any(keyword in action_lower for keyword in ['password_changed', 'profile_updated', 'admin_']):
+            log_details['risk_level'] = 'medium'
+        else:
+            log_details['risk_level'] = 'low'
+        
+    # Get related logs (same user, similar timeframe)
+        if log_entry.user_id:
+            related_logs = AuditLog.query.filter(
+                and_(
+                    AuditLog.user_id == log_entry.user_id,
+                    AuditLog.id != log_entry.id,
+                    AuditLog.created_at >= log_entry.created_at - timedelta(hours=1),
+                    AuditLog.created_at <= log_entry.created_at + timedelta(hours=1)
+                )
+            ).order_by(AuditLog.created_at.desc()).limit(5).all()
+            
+            log_details['related_logs'] = [{
+                'id': related.id,
+                'action': related.action,
+                'created_at': related.created_at.isoformat(),
+                'ip_address': related.ip_address
+            } for related in related_logs]
+        else:
+            log_details['related_logs'] = []
+            
+    # Log this admin action
+        log_user_action(
+            current_user.id,
+            'admin_view_audit_log_details',
+            {
+                'audit_log_id': log_entry,
+                'target_action': log_entry.action,
+                'target_user_id': log_entry.user_id
+            }
         )
         
+        return APIResponse.success(
+            data={'audit_log': log_details},
+            message="Audit log details retrieved"
+        )
+
     except Exception as e:
         app_logger.error(f"Admin get audit logs error: {str(e)}")
         return APIResponse.error(
