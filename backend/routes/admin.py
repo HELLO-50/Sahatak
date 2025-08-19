@@ -442,14 +442,16 @@ def get_pending_verifications():
 @login_required
 @admin_required
 def verify_doctor(doctor_id):    
+    
     try:
         data = request.get_json()
         if not data:
             return APIResponse.error(
                 message="Request body required",
-                status_code=400
+                status_code=400,
+                error_code="MISSING_REQUEST_BODY"
             )
-            
+
         approved = data.get('approved', False)
         notes = data.get('notes', '').strip()
         
@@ -530,7 +532,7 @@ def verify_doctor(doctor_id):
                 body=email_body
             )
         
-    try:
+    
         db.session.commit()
         
     # Log admin action
@@ -540,7 +542,7 @@ def verify_doctor(doctor_id):
             {
                 'doctor_id': doctor_id,
                 'approved': approved,
-                'notes': notes
+                'notes': notes,
                 'verification_date': datetime.utcnow().isoformat()
             }
         )
@@ -574,18 +576,19 @@ def verify_doctor(doctor_id):
             message="Failed to verify doctor",
             status_code=500
         )
-
-#add a verified doctor
+        
+# add a verified doctor
 @admin_bp.route('/doctors', methods=['POST'])
 @login_required
 @admin_required
-def add_doctor_manually(): 
+def add_doctor_manually():
+     
     try:
         data = request.get_json()
         if not data:
             return APIResponse.error(
                 message="Request body required",
-                status_code=400
+                status_code=400,
             )
         
         # Validate required fields
@@ -631,9 +634,8 @@ def add_doctor_manually():
                 message="Invalid years of experience",
                 status_code=400
             )
-
-    try:
-            # Create User account
+            
+    # Create User account
         new_user = User(
             email=email,
             full_name=data['full_name'].strip(),
@@ -663,8 +665,6 @@ def add_doctor_manually():
             created_at=datetime.utcnow()
         )
         db.session.add(new_doctor)
-            
-        db.session.commit()
             
             # Send welcome email with login credentials
         welcome_subject = "Welcome to Sahatak Telemedicine Platform"
@@ -716,6 +716,7 @@ def add_doctor_manually():
         )
         
     except Exception as e:
+            db.session.rollback()  # Rollback on any error to maintain database integrity
             app_logger.error(f"Admin add doctor error: {str(e)}")
             return APIResponse.error(
                 message="Failed to add doctor",
@@ -865,8 +866,7 @@ def update_system_settings():
                 details=validation_errors
             )
         
-    try:
-            # Update settings in database
+    # Update settings in database
         for key, value, data_type in updated_settings:
             setting = SystemSettings.query.filter_by(key=key).first()
                 
