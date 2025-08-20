@@ -307,7 +307,7 @@ const AdminUI = {
      */
     createPagination(currentPage, totalPages, onPageChange) {
         // Awab: Implement pagination component
-        console.log('TODO: Implement pagination component');
+      
     }
 };
 
@@ -447,10 +447,7 @@ const UserManagement = {
     /**
      * Show user details modal
      */
-    showUserModal(user) {
-        // Awab: Implement user details modal
-        console.log('TODO: Implement user details modal', user);
-    },
+   
 
     /**
      * Delete user (with confirmation)
@@ -1428,8 +1425,8 @@ document.addEventListener('DOMContentLoaded', loadUsers);
 function showUserModal(user) {
   // نعبي البيانات في المودال
   document.getElementById('modalUserName').textContent =
-    user.full_name ?? {user.first_name ?? ''} {user.last_name ?? ''}.trim();
-  document.getElementById('modalUserType').textContent =
+   `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim() ||
+     document.getElementById('modalUserType').textContent =
     user.user_type ?? user.role ?? 'غير محدد';
   document.getElementById('modalUserEmail').textContent =
     user.email ?? 'غير متوفر';
