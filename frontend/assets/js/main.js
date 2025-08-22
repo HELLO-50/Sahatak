@@ -786,15 +786,19 @@ async function handlePatientRegister(event) {
         const directionLanguage = document.documentElement.dir === 'rtl' ? 'ar' : 'en';
         
         // Ensure we always have a valid language (never null/undefined)
-        let userLanguage = storedLanguage;
-        if (!userLanguage || (userLanguage !== 'ar' && userLanguage !== 'en')) {
+        let userLanguage = 'ar'; // Start with safe default
+        
+        if (storedLanguage === 'ar' || storedLanguage === 'en') {
+            userLanguage = storedLanguage;
+        } else if (documentLanguage === 'ar' || documentLanguage === 'en') {
             userLanguage = documentLanguage;
-        }
-        if (!userLanguage || (userLanguage !== 'ar' && userLanguage !== 'en')) {
+        } else if (directionLanguage === 'ar' || directionLanguage === 'en') {
             userLanguage = directionLanguage;
         }
-        if (!userLanguage || (userLanguage !== 'ar' && userLanguage !== 'en')) {
-            userLanguage = 'ar'; // Final fallback
+        
+        // Double-check we have a valid value before sending
+        if (userLanguage !== 'ar' && userLanguage !== 'en') {
+            userLanguage = 'ar';
         }
         
         console.log('=== Language Detection Debug ===');
@@ -947,15 +951,19 @@ async function handleDoctorRegister(event) {
         const directionLanguage = document.documentElement.dir === 'rtl' ? 'ar' : 'en';
         
         // Ensure we always have a valid language (never null/undefined)
-        let userLanguage = storedLanguage;
-        if (!userLanguage || (userLanguage !== 'ar' && userLanguage !== 'en')) {
+        let userLanguage = 'ar'; // Start with safe default
+        
+        if (storedLanguage === 'ar' || storedLanguage === 'en') {
+            userLanguage = storedLanguage;
+        } else if (documentLanguage === 'ar' || documentLanguage === 'en') {
             userLanguage = documentLanguage;
-        }
-        if (!userLanguage || (userLanguage !== 'ar' && userLanguage !== 'en')) {
+        } else if (directionLanguage === 'ar' || directionLanguage === 'en') {
             userLanguage = directionLanguage;
         }
-        if (!userLanguage || (userLanguage !== 'ar' && userLanguage !== 'en')) {
-            userLanguage = 'ar'; // Final fallback
+        
+        // Double-check we have a valid value before sending
+        if (userLanguage !== 'ar' && userLanguage !== 'en') {
+            userLanguage = 'ar';
         }
         
         console.log('=== Doctor Registration Language Debug ===');
