@@ -142,9 +142,14 @@
 
         async function verifyEmail(token) {
             try {
+                console.log('Starting email verification with token:', token);
+                console.log('ApiHelper available:', typeof ApiHelper);
+                
                 const response = await ApiHelper.makeRequest(`/auth/verify-email?token=${token}`, {
                     method: 'GET'
                 });
+
+                console.log('Verification response:', response);
 
                 if (response.success) {
                     showSuccess();
@@ -153,7 +158,12 @@
                 }
             } catch (error) {
                 console.error('Verification error:', error);
-                showError(LanguageManager.translate('email_verification.error_title'));
+                console.error('Error details:', {
+                    message: error.message,
+                    stack: error.stack,
+                    type: typeof error
+                });
+                showError(error.message || LanguageManager.translate('email_verification.error_title'));
             }
         }
 
