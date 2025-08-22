@@ -669,11 +669,13 @@ async function handleLogin(event) {
     if (icon) icon.classList.add('d-none');
     if (submitBtn) submitBtn.disabled = true;
     
+    // Get form data outside try block so it's accessible in catch
+    const formData = {
+        login_identifier: document.getElementById('login_identifier').value.trim(),
+        password: document.getElementById('password').value
+    };
+    
     try {
-        const formData = {
-            login_identifier: document.getElementById('login_identifier').value.trim(),
-            password: document.getElementById('password').value
-        };
         
         // Validate form data
         if (!formData.login_identifier || !formData.password) {
@@ -717,12 +719,21 @@ async function handleLogin(event) {
         // Handle specific API errors
         if (error instanceof ApiError) {
             errorMessage = error.message;
+            console.log('API Error details:', {
+                message: error.message,
+                errorCode: error.errorCode,
+                statusCode: error.statusCode
+            });
             
             // Handle email verification requirement
             if (error.errorCode === 'EMAIL_NOT_VERIFIED') {
+                console.log('Email verification required, showing special message');
                 const emailVerificationMessage = lang === 'ar' 
                     ? 'يرجى تأكيد بريدك الإلكتروني قبل تسجيل الدخول. تحقق من بريدك الإلكتروني للحصول على رابط التأكيد.'
                     : 'Please verify your email address before logging in. Check your email for verification link.';
+                
+                console.log('Error alert element:', errorAlert);
+                console.log('Calling showEmailVerificationRequired with:', emailVerificationMessage, formData.login_identifier);
                 
                 // Show verification required message with resend option
                 showEmailVerificationRequired(errorAlert, emailVerificationMessage, formData.login_identifier);
