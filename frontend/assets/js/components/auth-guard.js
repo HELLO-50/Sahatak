@@ -45,27 +45,29 @@ class AuthGuard {
      * @param {string} returnUrl - URL to return to after login (optional)
      */
     static redirectToLogin(returnUrl = null) {
-        const currentUrl = returnUrl || window.location.pathname;
-        
-        // Determine correct path to index.html based on current location
-        let loginUrl;
-        if (window.location.pathname.includes('/pages/dashboard/')) {
-            // From dashboard pages: need to go up 2 levels to root
-            loginUrl = '../../index.html';
-        } else if (window.location.pathname.includes('/pages/')) {
-            // From other pages: need to go up 1 level to root
-            loginUrl = '../index.html';
-        } else {
-            // Already at root level
-            loginUrl = 'index.html';
-        }
-        
         // Store return URL for after login
-        if (currentUrl !== 'index.html' && currentUrl !== '/' && !currentUrl.includes('index.html')) {
-            localStorage.setItem('sahatak_return_url', window.location.href);
+        const currentHref = window.location.href;
+        if (!currentHref.includes('index.html') && !currentHref.endsWith('/')) {
+            localStorage.setItem('sahatak_return_url', currentHref);
         }
         
-        window.location.href = loginUrl;
+        // For GitHub Pages, use absolute path to root
+        if (window.location.hostname.includes('github.io')) {
+            // On GitHub Pages - use absolute path from repository root
+            const repoPath = '/Sahatak/'; // Your repository name
+            window.location.href = repoPath;
+        } else {
+            // Local development or other hosting - use relative paths
+            let loginUrl;
+            if (window.location.pathname.includes('/pages/dashboard/')) {
+                loginUrl = '../../index.html';
+            } else if (window.location.pathname.includes('/pages/')) {
+                loginUrl = '../index.html';
+            } else {
+                loginUrl = 'index.html';
+            }
+            window.location.href = loginUrl;
+        }
     }
     
     /**
