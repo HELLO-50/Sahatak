@@ -519,8 +519,12 @@ def verify_email():
         return APIResponse.success(
             data={
                 'verified': True,
-                'user_type': user.user_type,
-                'full_name': user.full_name
+                'user': {
+                    'id': user.id,
+                    'user_type': user.user_type,
+                    'full_name': user.full_name,
+                    'email': user.email
+                }
             },
             message='Email verified successfully'
         )

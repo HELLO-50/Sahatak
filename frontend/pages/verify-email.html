@@ -55,9 +55,9 @@
                 <div class="success-icon mb-3">✅</div>
                 <h3 id="success-title" class="text-success">تم تأكيد البريد الإلكتروني بنجاح!</h3>
                 <p id="success-message" class="mb-4">يمكنك الآن تسجيل الدخول واستخدام جميع ميزات المنصة</p>
-                <a href="../index.html" class="btn btn-primary btn-lg">
-                    <span id="login-btn-text">تسجيل الدخول</span>
-                </a>
+                <button onclick="redirectToDashboard()" class="btn btn-primary btn-lg">
+                    <span id="login-btn-text">Go to Dashboard</span>
+                </button>
             </div>
 
             <div id="error-state" style="display: none;">
@@ -98,8 +98,13 @@
             // Load translations first
             await LanguageManager.loadTranslations();
             
+            // Wait a bit more to ensure translations are fully loaded
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
             // Initialize page with current language
             const currentLang = LanguageManager.getLanguage();
+            console.log('Current language:', currentLang);
+            console.log('Available translations:', Object.keys(LanguageManager.translations));
             updatePageContent(currentLang);
             
             // Get token from URL
@@ -155,6 +160,10 @@
                 console.log('Verification response:', response);
 
                 if (response.success) {
+                    // Store user data for dashboard redirect
+                    if (response.user) {
+                        window.verificationUserData = response.user;
+                    }
                     showSuccess();
                 } else {
                     showError(response.message || LanguageManager.getTranslation(LanguageManager.getLanguage(), 'email_verification.error_title'));
@@ -173,6 +182,32 @@
         function showSuccess() {
             document.getElementById('loading-state').style.display = 'none';
             document.getElementById('success-state').style.display = 'block';
+            
+            // Auto-redirect to dashboard after 3 seconds
+            setTimeout(() => {
+                redirectToDashboard();
+            }, 3000);
+        }
+        
+        function redirectToDashboard() {
+            // Check if user data is available in verification response
+            const userData = window.verificationUserData;
+            if (userData) {
+                // Store user session data
+                localStorage.setItem('sahatak_user_id', userData.id);
+                localStorage.setItem('sahatak_user_type', userData.user_type);
+                localStorage.setItem('sahatak_user_email', userData.email);
+                localStorage.setItem('sahatak_user_name', userData.full_name);
+                
+                // Redirect to appropriate dashboard
+                const dashboardUrl = userData.user_type === 'doctor' ? 
+                    '../pages/dashboard/doctor.html' : 
+                    '../pages/dashboard/patient.html';
+                window.location.href = dashboardUrl;
+            } else {
+                // Fallback - redirect to login
+                window.location.href = '../index.html';
+            }
         }
 
         function showError(message) {
@@ -217,6 +252,6 @@
                 alert(LanguageManager.getTranslation(LanguageManager.getLanguage(), 'email_verification.error_title'));
             }
         });
-    </script>
+    </script>1
 </body>
 </html>
