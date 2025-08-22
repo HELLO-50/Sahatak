@@ -779,6 +779,8 @@ async function handlePatientRegister(event) {
     submitBtn.disabled = true;
     
     try {
+        alert('🔥 REGISTRATION STARTING - Check console now!');
+        console.log('🔥🔥🔥 PATIENT REGISTRATION FUNCTION CALLED 🔥🔥🔥');
         const email = document.getElementById('patientEmail').value.trim();
         // Get language with multiple fallback methods - ensure never null/undefined
         const storedLanguage = localStorage.getItem('sahatak_language');
