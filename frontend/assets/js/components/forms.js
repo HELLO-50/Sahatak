@@ -101,7 +101,7 @@ const FormManager = {
                                         <p class="text-muted small">Don't see the email? Check your spam folder.</p>
                                     </div>
                                     <div class="d-grid gap-2">
-                                        <button onclick="window.location.href='index.html'" class="btn btn-outline-primary">
+                                        <button onclick="window.location.href='/Sahatak/'" class="btn btn-outline-primary">
                                             <i class="bi bi-arrow-left me-2"></i>
                                             Back to Home
                                         </button>

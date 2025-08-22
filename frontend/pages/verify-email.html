@@ -206,7 +206,7 @@
                 window.location.href = dashboardUrl;
             } else {
                 // Fallback - redirect to login
-                window.location.href = '../index.html';
+                window.location.href = '/Sahatak/';
             }
         }
 
@@ -243,7 +243,7 @@
 
                 if (response.success) {
                     alert(LanguageManager.getTranslation(LanguageManager.getLanguage(), 'email_verification.resend_sent'));
-                    window.location.href = '../index.html';
+                    window.location.href = '/Sahatak/';
                 } else {
                     alert(response.message || LanguageManager.getTranslation(LanguageManager.getLanguage(), 'email_verification.error_title'));
                 }
