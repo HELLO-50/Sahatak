@@ -15,7 +15,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-teal) 100%);
         }
         .verify-card {
             background: white;
@@ -107,7 +107,7 @@
             const token = urlParams.get('token');
 
             if (!token) {
-                showError(LanguageManager.translate('email_verification.invalid_link'));
+                showError(LanguageManager.getTranslation(currentLang, 'email_verification.invalid_link'));
                 return;
             }
 
@@ -122,17 +122,17 @@
             
             // Update text content using translations
             const elements = {
-                'loading-text': LanguageManager.translate('email_verification.loading'),
-                'wait-text': LanguageManager.translate('email_verification.wait'),
-                'success-title': LanguageManager.translate('email_verification.success_title'),
-                'success-message': LanguageManager.translate('email_verification.success_message'),
-                'error-title': LanguageManager.translate('email_verification.error_title'),
-                'resend-title': LanguageManager.translate('email_verification.resend_title'),
-                'login-btn-text': LanguageManager.translate('email_verification.login_button'),
-                'home-btn-text': LanguageManager.translate('email_verification.home_button'),
-                'resend-btn-text': LanguageManager.translate('email_verification.resend_button'),
-                'send-btn-text': LanguageManager.translate('email_verification.send_button'),
-                'cancel-btn-text': LanguageManager.translate('email_verification.cancel_button')
+                'loading-text': LanguageManager.getTranslation(lang, 'email_verification.loading'),
+                'wait-text': LanguageManager.getTranslation(lang, 'email_verification.wait'),
+                'success-title': LanguageManager.getTranslation(lang, 'email_verification.success_title'),
+                'success-message': LanguageManager.getTranslation(lang, 'email_verification.success_message'),
+                'error-title': LanguageManager.getTranslation(lang, 'email_verification.error_title'),
+                'resend-title': LanguageManager.getTranslation(lang, 'email_verification.resend_title'),
+                'login-btn-text': LanguageManager.getTranslation(lang, 'email_verification.login_button'),
+                'home-btn-text': LanguageManager.getTranslation(lang, 'email_verification.home_button'),
+                'resend-btn-text': LanguageManager.getTranslation(lang, 'email_verification.resend_button'),
+                'send-btn-text': LanguageManager.getTranslation(lang, 'email_verification.send_button'),
+                'cancel-btn-text': LanguageManager.getTranslation(lang, 'email_verification.cancel_button')
             };
 
             Object.keys(elements).forEach(id => {
@@ -157,7 +157,7 @@
                 if (response.success) {
                     showSuccess();
                 } else {
-                    showError(response.message || LanguageManager.translate('email_verification.error_title'));
+                    showError(response.message || LanguageManager.getTranslation(LanguageManager.getLanguage(), 'email_verification.error_title'));
                 }
             } catch (error) {
                 console.error('Verification error:', error);
@@ -166,7 +166,7 @@
                     stack: error.stack,
                     type: typeof error
                 });
-                showError(error.message || LanguageManager.translate('email_verification.error_title'));
+                showError(error.message || LanguageManager.getTranslation(LanguageManager.getLanguage(), 'email_verification.error_title'));
             }
         }
 
@@ -196,7 +196,7 @@
             const email = document.getElementById('resend-email').value;
             
             if (!email) {
-                alert(LanguageManager.translate('email_verification.email_required'));
+                alert(LanguageManager.getTranslation(LanguageManager.getLanguage(), 'email_verification.email_required'));
                 return;
             }
 
@@ -207,14 +207,14 @@
                 });
 
                 if (response.success) {
-                    alert(LanguageManager.translate('email_verification.resend_sent'));
+                    alert(LanguageManager.getTranslation(LanguageManager.getLanguage(), 'email_verification.resend_sent'));
                     window.location.href = '../index.html';
                 } else {
-                    alert(response.message || LanguageManager.translate('email_verification.error_title'));
+                    alert(response.message || LanguageManager.getTranslation(LanguageManager.getLanguage(), 'email_verification.error_title'));
                 }
             } catch (error) {
                 console.error('Resend error:', error);
-                alert(LanguageManager.translate('email_verification.error_title'));
+                alert(LanguageManager.getTranslation(LanguageManager.getLanguage(), 'email_verification.error_title'));
             }
         });
     </script>
