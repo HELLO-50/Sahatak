@@ -9,9 +9,20 @@ const LanguageManager = {
         try {
             // Determine correct path based on current location
             const isInSubdirectory = window.location.pathname.includes('/pages/');
-            const basePath = isInSubdirectory ? '../../locales/' : 'frontend/locales/';
+            const isGitHubPages = window.location.hostname.includes('github.io');
+            
+            let basePath;
+            if (isInSubdirectory) {
+                basePath = '../../locales/';
+            } else if (isGitHubPages) {
+                basePath = 'frontend/locales/';
+            } else {
+                basePath = 'frontend/locales/';
+            }
             
             console.log('Loading translations from:', basePath);
+            console.log('Is subdirectory:', isInSubdirectory);
+            console.log('Is GitHub Pages:', isGitHubPages);
             
             const [arResponse, enResponse] = await Promise.all([
                 fetch(`${basePath}ar.json`),
