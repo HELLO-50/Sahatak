@@ -817,8 +817,14 @@ async function handlePatientRegister(event) {
             gender: document.getElementById('patientGender').value,
             password: document.getElementById('patientPassword').value,
             user_type: 'patient',
-            language_preference: userLanguage
+            language_preference: userLanguage || 'en'  // Ensure never undefined
         };
+        
+        // Ensure language_preference is always present and valid
+        if (!formData.language_preference || (formData.language_preference !== 'ar' && formData.language_preference !== 'en')) {
+            formData.language_preference = 'en'; // Default to English for testing
+            console.log('🟡 Fixed missing/invalid language_preference, set to:', formData.language_preference);
+        }
         
         // Add email only if provided
         if (email) {
@@ -985,8 +991,14 @@ async function handleDoctorRegister(event) {
             years_of_experience: parseInt(document.getElementById('doctorExperience').value),
             password: document.getElementById('doctorPassword').value,
             user_type: 'doctor',
-            language_preference: userLanguage
+            language_preference: userLanguage || 'en'  // Ensure never undefined
         };
+        
+        // Ensure language_preference is always present and valid
+        if (!formData.language_preference || (formData.language_preference !== 'ar' && formData.language_preference !== 'en')) {
+            formData.language_preference = 'en'; // Default to English for testing
+            console.log('🟡 Doctor: Fixed missing/invalid language_preference, set to:', formData.language_preference);
+        }
         
         // Add email only if provided
         if (email) {
