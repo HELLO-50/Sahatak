@@ -729,6 +729,21 @@ async function handlePatientRegister(event) {
     
     try {
         const email = document.getElementById('patientEmail').value.trim();
+        // Get language with multiple fallback methods
+        const storedLanguage = localStorage.getItem('sahatak_language');
+        const documentLanguage = document.documentElement.lang;
+        const directionLanguage = document.documentElement.dir === 'rtl' ? 'ar' : 'en';
+        const userLanguage = storedLanguage || documentLanguage || directionLanguage || 'ar';
+        
+        console.log('=== Language Detection Debug ===');
+        console.log('Stored language (localStorage):', storedLanguage);
+        console.log('Document lang attribute:', documentLanguage);
+        console.log('Document dir attribute:', document.documentElement.dir);
+        console.log('Direction-based language:', directionLanguage);
+        console.log('Final selected language:', userLanguage);
+        console.log('LanguageManager.getLanguage():', LanguageManager.getLanguage());
+        console.log('================================');
+        
         const formData = {
             full_name: document.getElementById('patientFullName').value.trim(),
             phone: document.getElementById('patientPhone').value.trim(),
@@ -736,7 +751,7 @@ async function handlePatientRegister(event) {
             gender: document.getElementById('patientGender').value,
             password: document.getElementById('patientPassword').value,
             user_type: 'patient',
-            language_preference: LanguageManager.getLanguage() || 'ar'
+            language_preference: userLanguage
         };
         
         // Add email only if provided
@@ -748,6 +763,10 @@ async function handlePatientRegister(event) {
         if (!formData.full_name || !formData.phone || !formData.age || !formData.gender || !formData.password) {
             throw new Error('All required fields must be filled');
         }
+        
+        // Log the data being sent to backend
+        console.log('Sending registration data to backend:', formData);
+        console.log('Language preference being sent:', formData.language_preference);
         
         // Make API call to registration endpoint
         const response = await ApiHelper.makeRequest('/auth/register', {
@@ -851,6 +870,21 @@ async function handleDoctorRegister(event) {
     
     try {
         const email = document.getElementById('doctorEmail').value.trim();
+        // Get language with multiple fallback methods
+        const storedLanguage = localStorage.getItem('sahatak_language');
+        const documentLanguage = document.documentElement.lang;
+        const directionLanguage = document.documentElement.dir === 'rtl' ? 'ar' : 'en';
+        const userLanguage = storedLanguage || documentLanguage || directionLanguage || 'ar';
+        
+        console.log('=== Doctor Registration Language Debug ===');
+        console.log('Stored language (localStorage):', storedLanguage);
+        console.log('Document lang attribute:', documentLanguage);
+        console.log('Document dir attribute:', document.documentElement.dir);
+        console.log('Direction-based language:', directionLanguage);
+        console.log('Final selected language:', userLanguage);
+        console.log('LanguageManager.getLanguage():', LanguageManager.getLanguage());
+        console.log('==========================================');
+        
         const formData = {
             full_name: document.getElementById('doctorFullName').value.trim(),
             phone: document.getElementById('doctorPhone').value.trim(),
@@ -859,7 +893,7 @@ async function handleDoctorRegister(event) {
             years_of_experience: parseInt(document.getElementById('doctorExperience').value),
             password: document.getElementById('doctorPassword').value,
             user_type: 'doctor',
-            language_preference: LanguageManager.getLanguage() || 'ar'
+            language_preference: userLanguage
         };
         
         // Add email only if provided
@@ -872,6 +906,10 @@ async function handleDoctorRegister(event) {
             !formData.years_of_experience || !formData.password) {
             throw new Error('All required fields must be filled');
         }
+        
+        // Log the data being sent to backend
+        console.log('Sending doctor registration data to backend:', formData);
+        console.log('Language preference being sent:', formData.language_preference);
         
         // Make API call to registration endpoint
         const response = await ApiHelper.makeRequest('/auth/register', {

@@ -213,6 +213,12 @@ def register():
         # Send email confirmation if email was provided
         if email:
             try:
+                email_language = data.get('language_preference', 'ar')
+                auth_logger.info(f"Registration data received: {data}")
+                auth_logger.info(f"Language preference in data: {data.get('language_preference')}")
+                auth_logger.info(f"Final email language: {email_language}")
+                auth_logger.info(f"Sending email confirmation in language: {email_language} to {email}")
+                
                 from services.email_service import email_service
                 email_success = email_service.send_email_confirmation(
                     recipient_email=email,
@@ -221,7 +227,7 @@ def register():
                         'verification_token': user.verification_token,
                         'user_type': user.user_type
                     },
-                    language=data.get('language_preference', 'ar')
+                    language=email_language
                 )
                 
                 if email_success:
