@@ -221,7 +221,7 @@ def register():
                         'verification_token': user.verification_token,
                         'user_type': user.user_type
                     },
-                    language=user.language_preference
+                    language=data.get('language_preference', 'ar')
                 )
                 
                 if email_success:
