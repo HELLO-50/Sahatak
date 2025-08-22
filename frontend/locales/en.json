@@ -47,6 +47,27 @@
     "submit": "Create Account"
   },
 
+  "email_verification": {
+    "title": "Email Verification",
+    "loading": "Verifying your email address...",
+    "wait": "Please wait a moment",
+    "success_title": "Email verified successfully!",
+    "success_message": "You can now login and use all platform features",
+    "error_title": "Email verification failed",
+    "invalid_link": "Invalid verification link",
+    "expired_link": "Verification link has expired",
+    "resend_title": "Resend verification link",
+    "resend_button": "Resend verification link",
+    "resend_sent": "Verification link sent successfully. Please check your email",
+    "login_button": "Login",
+    "home_button": "Back to home",
+    "send_button": "Send",
+    "cancel_button": "Cancel",
+    "email_required": "Please enter email address",
+    "verification_required": "Please verify your email address before logging in",
+    "check_email": "Check your email for verification link"
+  },
+
   "appointments": {
     "book_title": "Book New Appointment",
     "book_subtitle": "Choose the right doctor and time for you",

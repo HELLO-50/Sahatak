@@ -678,6 +678,17 @@ async function handleLogin(event) {
         if (error instanceof ApiError) {
             errorMessage = error.message;
             
+            // Handle email verification requirement
+            if (error.errorCode === 'EMAIL_NOT_VERIFIED') {
+                const emailVerificationMessage = lang === 'ar' 
+                    ? 'يرجى تأكيد بريدك الإلكتروني قبل تسجيل الدخول. تحقق من بريدك الإلكتروني للحصول على رابط التأكيد.'
+                    : 'Please verify your email address before logging in. Check your email for verification link.';
+                
+                // Show verification required message with resend option
+                showEmailVerificationRequired(errorAlert, emailVerificationMessage, formData.login_identifier);
+                return;
+            }
+            
             // Show field-specific error if available
             if (error.field) {
                 showFieldError(error.field, error.message);
@@ -1070,6 +1081,54 @@ function showFormError(alertElement, message) {
 function showFormSuccess(alertElement, message) {
     alertElement.textContent = message;
     alertElement.classList.remove('d-none');
+}
+
+// Show email verification required message with resend option
+function showEmailVerificationRequired(alertElement, message, email) {
+    const lang = LanguageManager.getLanguage() || 'ar';
+    
+    // Create verification message with resend button
+    const resendText = lang === 'ar' ? 'إعادة إرسال' : 'Resend';
+    
+    alertElement.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center">
+            <span>${message}</span>
+            <button type="button" class="btn btn-outline-primary btn-sm ms-2" onclick="resendEmailVerification('${email}')">
+                ${resendText}
+            </button>
+        </div>
+    `;
+    alertElement.classList.remove('d-none');
+}
+
+// Resend email verification
+async function resendEmailVerification(email) {
+    const lang = LanguageManager.getLanguage() || 'ar';
+    
+    try {
+        const response = await ApiHelper.makeRequest('/auth/resend-verification', {
+            method: 'POST',
+            body: JSON.stringify({ email: email })
+        });
+
+        if (response.success) {
+            const successMessage = lang === 'ar' 
+                ? 'تم إرسال رابط التأكيد بنجاح. يرجى فحص بريدك الإلكتروني'
+                : 'Verification link sent successfully. Please check your email';
+            alert(successMessage);
+        } else {
+            const errorMessage = lang === 'ar' 
+                ? 'فشل في إرسال رابط التأكيد'
+                : 'Failed to send verification link';
+            alert(response.message || errorMessage);
+        }
+    } catch (error) {
+        console.error('Resend verification error:', error);
+        const errorMessage = lang === 'ar' 
+            ? 'حدث خطأ أثناء إرسال رابط التأكيد'
+            : 'Error occurred while sending verification link';
+        alert(errorMessage);
+    }
 }
 
 // Clear form errors

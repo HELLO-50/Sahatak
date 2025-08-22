@@ -235,6 +235,57 @@ class EmailService:
             app_logger.error(f"Failed to send registration confirmation email to {recipient_email}: {str(e)}")
             return False
     
+    def send_email_confirmation(
+        self, 
+        recipient_email: str, 
+        user_data: Dict[str, Any], 
+        language: str = 'ar'
+    ) -> bool:
+        """
+        Send email confirmation email with verification link
+        
+        Args:
+            recipient_email: Email address to send to
+            user_data: User registration details including verification_token
+            language: Language preference ('ar' or 'en')
+            
+        Returns:
+            bool: True if sent successfully, False otherwise
+        """
+        try:
+            if not self.is_configured():
+                app_logger.warning("Email service not configured, skipping email")
+                return False
+            
+            subject = 'تأكيد البريد الإلكتروني - صحتك' if language == 'ar' else 'Email Confirmation - Sahatak'
+            template_name = f'email/{language}/email_confirmation.html'
+            
+            # Create verification URL
+            verification_url = f"{current_app.config.get('FRONTEND_URL', 'http://localhost:8000')}/pages/verify-email.html?token={user_data['verification_token']}"
+            
+            template_data = {
+                **user_data,
+                'verification_url': verification_url,
+                'language': language,
+                'app_name': 'صحتك' if language == 'ar' else 'Sahatak',
+                'current_year': datetime.now().year
+            }
+            
+            msg = Message(
+                subject=subject,
+                recipients=[recipient_email],
+                html=render_template(template_name, **template_data),
+                sender=current_app.config['MAIL_DEFAULT_SENDER']
+            )
+            
+            self.mail.send(msg)
+            app_logger.info(f"Email confirmation sent to {recipient_email}")
+            return True
+            
+        except Exception as e:
+            app_logger.error(f"Failed to send email confirmation to {recipient_email}: {str(e)}")
+            return False
+    
     def _get_reminder_subject(self, reminder_type: str, language: str) -> str:
         """Get email subject based on reminder type and language"""
         subjects = {

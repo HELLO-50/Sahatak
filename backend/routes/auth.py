@@ -92,9 +92,14 @@ def register():
             full_name=data['full_name'].strip(),
             user_type=data['user_type'],
             language_preference=data.get('language_preference', 'ar'),
-            is_verified=True  # No email verification needed
+            is_verified=not bool(email)  # If email provided, needs verification; if no email, auto-verified
         )
         user.set_password(data['password'])
+        
+        # Generate verification token if email is provided
+        if email:
+            import secrets
+            user.verification_token = secrets.token_urlsafe(32)
         
         db.session.add(user)
         db.session.flush()  # Get user ID without committing
@@ -205,6 +210,28 @@ def register():
         # Commit transaction
         db.session.commit()
         
+        # Send email confirmation if email was provided
+        if email:
+            try:
+                from services.email_service import email_service
+                email_success = email_service.send_email_confirmation(
+                    recipient_email=email,
+                    user_data={
+                        'full_name': user.full_name,
+                        'verification_token': user.verification_token,
+                        'user_type': user.user_type
+                    },
+                    language=user.language_preference
+                )
+                
+                if email_success:
+                    auth_logger.info(f"Email confirmation sent to {email}")
+                else:
+                    auth_logger.warning(f"Failed to send email confirmation to {email}")
+                    
+            except Exception as e:
+                auth_logger.error(f"Error sending email confirmation: {str(e)}")
+        
         # Log successful registration
         log_user_action(user.id, 'user_registered', {
             'user_type': user.user_type,
@@ -213,9 +240,15 @@ def register():
         
         auth_logger.info(f"New user registered: {user.email} ({user.user_type})")
         
+        # Prepare response message based on email verification
+        if email:
+            message = 'User registered successfully. Please check your email to verify your account.'
+        else:
+            message = 'User registered successfully'
+        
         return APIResponse.success(
             data=user.to_dict(),
-            message='User registered successfully',
+            message=message,
             status_code=201
         )
         
@@ -269,6 +302,17 @@ def login():
         if not user.is_active:
             return APIResponse.unauthorized(
                 message='Account is deactivated. Please contact support.'
+            )
+        
+        # Check if email verification is required
+        if user.email and not user.is_verified:
+            return APIResponse.unauthorized(
+                message='Please verify your email address before logging in. Check your email for verification link.',
+                error_code='EMAIL_NOT_VERIFIED',
+                details={
+                    'email': user.email,
+                    'requires_verification': True
+                }
             )
         
         # Login user and update last login
@@ -411,3 +455,123 @@ def update_language():
             'success': False,
             'message': 'Failed to update language preference'
         }), 500
+
+@auth_bp.route('/verify-email', methods=['GET'])
+def verify_email():
+    """Verify user email with token"""
+    try:
+        token = request.args.get('token')
+        
+        if not token:
+            return APIResponse.validation_error(
+                message='Verification token is required',
+                field='token'
+            )
+        
+        # Find user by verification token
+        user = User.query.filter_by(verification_token=token).first()
+        
+        if not user:
+            return APIResponse.not_found(
+                message='Invalid or expired verification token'
+            )
+        
+        # Check if user is already verified
+        if user.is_verified:
+            return APIResponse.success(
+                message='Email is already verified'
+            )
+        
+        # Verify the user
+        user.is_verified = True
+        user.verification_token = None  # Clear the token
+        user.updated_at = datetime.utcnow()
+        db.session.commit()
+        
+        # Log successful verification
+        log_user_action(user.id, 'email_verified', {
+            'email': user.email
+        }, request)
+        
+        auth_logger.info(f"Email verified for user: {user.email}")
+        
+        return APIResponse.success(
+            data={
+                'verified': True,
+                'user_type': user.user_type,
+                'full_name': user.full_name
+            },
+            message='Email verified successfully'
+        )
+        
+    except Exception as e:
+        db.session.rollback()
+        auth_logger.error(f"Email verification error: {str(e)}")
+        return APIResponse.internal_error(
+            message='Email verification failed. Please try again.'
+        )
+
+@auth_bp.route('/resend-verification', methods=['POST'])
+def resend_verification():
+    """Resend email verification"""
+    try:
+        data = request.get_json()
+        email = data.get('email', '').strip().lower()
+        
+        if not email:
+            return APIResponse.validation_error(
+                message='Email is required',
+                field='email'
+            )
+        
+        # Find user by email
+        user = User.query.filter_by(email=email).first()
+        
+        if not user:
+            return APIResponse.not_found(
+                message='User not found'
+            )
+        
+        # Check if user is already verified
+        if user.is_verified:
+            return APIResponse.success(
+                message='Email is already verified'
+            )
+        
+        # Generate new verification token
+        import secrets
+        user.verification_token = secrets.token_urlsafe(32)
+        user.updated_at = datetime.utcnow()
+        db.session.commit()
+        
+        # Send verification email
+        try:
+            from services.email_service import email_service
+            email_success = email_service.send_email_confirmation(
+                recipient_email=email,
+                user_data={
+                    'full_name': user.full_name,
+                    'verification_token': user.verification_token,
+                    'user_type': user.user_type
+                },
+                language=user.language_preference
+            )
+            
+            if email_success:
+                auth_logger.info(f"Verification email resent to {email}")
+            else:
+                auth_logger.warning(f"Failed to resend verification email to {email}")
+                
+        except Exception as e:
+            auth_logger.error(f"Error resending verification email: {str(e)}")
+        
+        return APIResponse.success(
+            message='Verification email sent successfully'
+        )
+        
+    except Exception as e:
+        db.session.rollback()
+        auth_logger.error(f"Resend verification error: {str(e)}")
+        return APIResponse.internal_error(
+            message='Failed to resend verification email. Please try again.'
+        )

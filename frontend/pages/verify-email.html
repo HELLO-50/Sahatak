@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تأكيد البريد الإلكتروني - صحتك</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../assets/css/main.css" rel="stylesheet">
+    <style>
+        .verify-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .verify-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 100%;
+            margin: 1rem;
+        }
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+        .success-icon {
+            font-size: 4rem;
+            color: #28a745;
+        }
+        .error-icon {
+            font-size: 4rem;
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="verify-container">
+        <div class="verify-card text-center">
+            <div id="loading-state">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h4 id="loading-text">جاري تأكيد البريد الإلكتروني...</h4>
+                <p id="wait-text" class="text-muted">يرجى الانتظار لحظات</p>
+            </div>
+
+            <div id="success-state" style="display: none;">
+                <div class="success-icon mb-3">✅</div>
+                <h3 id="success-title" class="text-success">تم تأكيد البريد الإلكتروني بنجاح!</h3>
+                <p id="success-message" class="mb-4">يمكنك الآن تسجيل الدخول واستخدام جميع ميزات المنصة</p>
+                <a href="../index.html" class="btn btn-primary btn-lg">
+                    <span id="login-btn-text">تسجيل الدخول</span>
+                </a>
+            </div>
+
+            <div id="error-state" style="display: none;">
+                <div class="error-icon mb-3">❌</div>
+                <h3 id="error-title" class="text-danger">فشل في تأكيد البريد الإلكتروني</h3>
+                <p id="error-message" class="mb-4 text-muted"></p>
+                <div class="d-grid gap-2">
+                    <button id="resend-btn" class="btn btn-outline-primary">
+                        <span id="resend-btn-text">إعادة إرسال رابط التأكيد</span>
+                    </button>
+                    <a href="../index.html" class="btn btn-secondary">
+                        <span id="home-btn-text">العودة للصفحة الرئيسية</span>
+                    </a>
+                </div>
+            </div>
+
+            <div id="resend-form" style="display: none;">
+                <h4 id="resend-title">إعادة إرسال رابط التأكيد</h4>
+                <div class="mb-3">
+                    <input type="email" id="resend-email" class="form-control" placeholder="البريد الإلكتروني" required>
+                </div>
+                <div class="d-grid gap-2">
+                    <button id="send-verification" class="btn btn-primary">
+                        <span id="send-btn-text">إرسال</span>
+                    </button>
+                    <button id="cancel-resend" class="btn btn-secondary">
+                        <span id="cancel-btn-text">إلغاء</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Load translations first
+            await LanguageManager.loadTranslations();
+            
+            // Initialize page with current language
+            const currentLang = LanguageManager.getLanguage();
+            updatePageContent(currentLang);
+            
+            // Get token from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+
+            if (!token) {
+                showError(LanguageManager.translate('email_verification.invalid_link'));
+                return;
+            }
+
+            // Verify email
+            verifyEmail(token);
+        });
+
+        function updatePageContent(lang) {
+            // Update page direction and language
+            document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+            document.documentElement.setAttribute('lang', lang);
+            
+            // Update text content using translations
+            const elements = {
+                'loading-text': LanguageManager.translate('email_verification.loading'),
+                'wait-text': LanguageManager.translate('email_verification.wait'),
+                'success-title': LanguageManager.translate('email_verification.success_title'),
+                'success-message': LanguageManager.translate('email_verification.success_message'),
+                'error-title': LanguageManager.translate('email_verification.error_title'),
+                'resend-title': LanguageManager.translate('email_verification.resend_title'),
+                'login-btn-text': LanguageManager.translate('email_verification.login_button'),
+                'home-btn-text': LanguageManager.translate('email_verification.home_button'),
+                'resend-btn-text': LanguageManager.translate('email_verification.resend_button'),
+                'send-btn-text': LanguageManager.translate('email_verification.send_button'),
+                'cancel-btn-text': LanguageManager.translate('email_verification.cancel_button')
+            };
+
+            Object.keys(elements).forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = elements[id];
+                }
+            });
+        }
+
+        async function verifyEmail(token) {
+            try {
+                const response = await ApiHelper.makeRequest(`/auth/verify-email?token=${token}`, {
+                    method: 'GET'
+                });
+
+                if (response.success) {
+                    showSuccess();
+                } else {
+                    showError(response.message || LanguageManager.translate('email_verification.error_title'));
+                }
+            } catch (error) {
+                console.error('Verification error:', error);
+                showError(LanguageManager.translate('email_verification.error_title'));
+            }
+        }
+
+        function showSuccess() {
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('success-state').style.display = 'block';
+        }
+
+        function showError(message) {
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error-state').style.display = 'block';
+        }
+
+        // Resend verification email
+        document.getElementById('resend-btn').addEventListener('click', function() {
+            document.getElementById('error-state').style.display = 'none';
+            document.getElementById('resend-form').style.display = 'block';
+        });
+
+        document.getElementById('cancel-resend').addEventListener('click', function() {
+            document.getElementById('resend-form').style.display = 'none';
+            document.getElementById('error-state').style.display = 'block';
+        });
+
+        document.getElementById('send-verification').addEventListener('click', async function() {
+            const email = document.getElementById('resend-email').value;
+            
+            if (!email) {
+                alert(LanguageManager.translate('email_verification.email_required'));
+                return;
+            }
+
+            try {
+                const response = await ApiHelper.makeRequest('/auth/resend-verification', {
+                    method: 'POST',
+                    body: JSON.stringify({ email: email })
+                });
+
+                if (response.success) {
+                    alert(LanguageManager.translate('email_verification.resend_sent'));
+                    window.location.href = '../index.html';
+                } else {
+                    alert(response.message || LanguageManager.translate('email_verification.error_title'));
+                }
+            } catch (error) {
+                console.error('Resend error:', error);
+                alert(LanguageManager.translate('email_verification.error_title'));
+            }
+        });
+    </script>
+</body>
+</html>

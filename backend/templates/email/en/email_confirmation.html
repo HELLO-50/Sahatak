@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <title>Email Confirmation - {{ app_name }}</title>
+</head>
+<body style="font-family:Arial;direction:ltr;margin:0;padding:20px;background:#f9f9f9">
+    <div style="max-width:500px;margin:0 auto;background:white;padding:20px;border:1px solid #ddd">
+        
+        <h1 style="color:#2c5aa0;text-align:center;margin-bottom:20px">{{ app_name }}</h1>
+        
+        <h2>Welcome {{ full_name }}!</h2>
+        
+        <p>Thank you for joining {{ app_name }}.</p>
+        
+        <p><strong>Account Type:</strong> {% if user_type == 'patient' %}Patient{% else %}Doctor{% endif %}</p>
+
+        <p>To activate your account, click the link below:</p>
+
+        <div style="text-align:center;margin:20px 0">
+            <a href="{{ verification_url }}" style="background:#2c5aa0;color:white;padding:12px 25px;text-decoration:none;border-radius:5px;display:inline-block">
+                Verify Email Address
+            </a>
+        </div>
+
+        <p><strong>Note:</strong> This link is valid for 24 hours only.</p>
+
+        <p>If you can't click the button, copy this link:</p>
+        <p style="word-break:break-all;font-size:12px;background:#f5f5f5;padding:10px">{{ verification_url }}</p>
+
+        <hr style="margin:20px 0;border:none;border-top:1px solid #eee">
+        
+        <p style="font-size:12px;color:#666;text-align:center">
+            The {{ app_name }} Team<br>
+            &copy; {{ current_year }} All rights reserved
+        </p>
+    </div>
+</body>
+</html>
