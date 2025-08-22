@@ -1,0 +1,139 @@
+// Authentication Guard - Protects dashboard and protected routes
+class AuthGuard {
+    
+    /**
+     * Check if user is authenticated
+     * @returns {boolean} True if authenticated, false otherwise
+     */
+    static isAuthenticated() {
+        const userId = localStorage.getItem('sahatak_user_id');
+        const userType = localStorage.getItem('sahatak_user_type');
+        const userEmail = localStorage.getItem('sahatak_user_email');
+        
+        return userId && userType && (userEmail || userType); // Email optional for phone-only users
+    }
+    
+    /**
+     * Get current user data from localStorage
+     * @returns {object|null} User data or null if not authenticated
+     */
+    static getCurrentUser() {
+        if (!this.isAuthenticated()) {
+            return null;
+        }
+        
+        return {
+            id: localStorage.getItem('sahatak_user_id'),
+            userType: localStorage.getItem('sahatak_user_type'),
+            email: localStorage.getItem('sahatak_user_email'),
+            fullName: localStorage.getItem('sahatak_user_name')
+        };
+    }
+    
+    /**
+     * Check if current user has specific user type
+     * @param {string} requiredType - 'patient' or 'doctor'
+     * @returns {boolean} True if user has required type
+     */
+    static hasUserType(requiredType) {
+        const userType = localStorage.getItem('sahatak_user_type');
+        return userType === requiredType;
+    }
+    
+    /**
+     * Redirect to login page with return URL
+     * @param {string} returnUrl - URL to return to after login (optional)
+     */
+    static redirectToLogin(returnUrl = null) {
+        const currentUrl = returnUrl || window.location.pathname;
+        const loginUrl = '../../index.html';
+        
+        // Store return URL for after login
+        if (currentUrl !== '../../index.html' && currentUrl !== '/') {
+            localStorage.setItem('sahatak_return_url', currentUrl);
+        }
+        
+        window.location.href = loginUrl;
+    }
+    
+    /**
+     * Protect a page - redirect to login if not authenticated
+     * @param {string} requiredUserType - 'patient', 'doctor', or null for any authenticated user
+     */
+    static protectPage(requiredUserType = null) {
+        // Check if user is authenticated
+        if (!this.isAuthenticated()) {
+            console.warn('User not authenticated, redirecting to login');
+            this.redirectToLogin();
+            return false;
+        }
+        
+        // Check user type if specified
+        if (requiredUserType && !this.hasUserType(requiredUserType)) {
+            console.warn(`User type mismatch. Required: ${requiredUserType}, Current: ${localStorage.getItem('sahatak_user_type')}`);
+            
+            // Redirect to correct dashboard based on actual user type
+            const actualUserType = localStorage.getItem('sahatak_user_type');
+            if (actualUserType === 'patient') {
+                window.location.href = '../dashboard/patient.html';
+            } else if (actualUserType === 'doctor') {
+                window.location.href = '../dashboard/doctor.html';
+            } else {
+                this.redirectToLogin();
+            }
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Verify authentication with backend (optional - for enhanced security)
+     * @returns {Promise<boolean>} True if session is valid
+     */
+    static async verifySession() {
+        try {
+            // This would require implementing a /api/auth/verify endpoint
+            const response = await fetch('/api/auth/me', {
+                method: 'GET',
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                return data.success;
+            }
+            
+            return false;
+        } catch (error) {
+            console.error('Session verification failed:', error);
+            return false;
+        }
+    }
+    
+    /**
+     * Clear authentication data (logout)
+     */
+    static clearAuth() {
+        localStorage.removeItem('sahatak_user_id');
+        localStorage.removeItem('sahatak_user_type');
+        localStorage.removeItem('sahatak_user_email');
+        localStorage.removeItem('sahatak_user_name');
+        localStorage.removeItem('sahatak_return_url');
+    }
+}
+
+// Auto-protect pages that include this script with data-protect attribute
+document.addEventListener('DOMContentLoaded', function() {
+    const body = document.body;
+    const protectType = body.getAttribute('data-protect');
+    
+    if (protectType !== null) {
+        // Page requires protection
+        const requiredUserType = protectType === '' ? null : protectType;
+        AuthGuard.protectPage(requiredUserType);
+    }
+});
+
+// Export for use in other scripts
+window.AuthGuard = AuthGuard;
