@@ -823,9 +823,15 @@ async function handlePatientRegister(event) {
         const lang = LanguageManager.getLanguage() || 'ar';
         const requiresVerification = response.data.requires_email_verification;
         
-        console.log('Registration response data:', response.data);
-        console.log('Requires verification:', requiresVerification);
-        console.log('User is_verified:', response.data.is_verified);
+        console.log('=== REGISTRATION RESPONSE DEBUG ===');
+        console.log('Full response:', response);
+        console.log('Response.data:', response.data);
+        console.log('Email provided:', email);
+        console.log('User is_verified from backend:', response.data.is_verified);
+        console.log('requires_email_verification from backend:', response.data.requires_email_verification);
+        console.log('requiresVerification variable:', requiresVerification);
+        console.log('Type of requiresVerification:', typeof requiresVerification);
+        console.log('===================================');
         
         if (requiresVerification) {
             // Email verification required - show verification message
