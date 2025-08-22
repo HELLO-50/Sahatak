@@ -316,19 +316,13 @@ def login():
                 message='Account is deactivated. Please contact support.'
             )
         
-        # Check if email verification is required
+        # Check if email verification is required  
         if user.email and not user.is_verified:
-            from flask import jsonify
-            return jsonify({
-                "success": False,
-                "message": "Please verify your email address before logging in. Check your email for verification link.",
-                "error_code": "EMAIL_NOT_VERIFIED",
-                "status_code": 401,
-                "details": {
-                    "email": user.email,
-                    "requires_verification": True
-                }
-            }), 401
+            return APIResponse.error(
+                message="Please verify your email address before logging in. Check your email for verification link.",
+                status_code=401,
+                error_code="EMAIL_NOT_VERIFIED"
+            )
         
         # Login user and update last login
         login_user(user, remember=data.get('remember_me', False))
