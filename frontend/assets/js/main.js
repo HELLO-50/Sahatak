@@ -769,11 +769,22 @@ async function handlePatientRegister(event) {
     
     try {
         const email = document.getElementById('patientEmail').value.trim();
-        // Get language with multiple fallback methods
+        // Get language with multiple fallback methods - ensure never null/undefined
         const storedLanguage = localStorage.getItem('sahatak_language');
         const documentLanguage = document.documentElement.lang;
         const directionLanguage = document.documentElement.dir === 'rtl' ? 'ar' : 'en';
-        const userLanguage = storedLanguage || documentLanguage || directionLanguage || 'ar';
+        
+        // Ensure we always have a valid language (never null/undefined)
+        let userLanguage = storedLanguage;
+        if (!userLanguage || (userLanguage !== 'ar' && userLanguage !== 'en')) {
+            userLanguage = documentLanguage;
+        }
+        if (!userLanguage || (userLanguage !== 'ar' && userLanguage !== 'en')) {
+            userLanguage = directionLanguage;
+        }
+        if (!userLanguage || (userLanguage !== 'ar' && userLanguage !== 'en')) {
+            userLanguage = 'ar'; // Final fallback
+        }
         
         console.log('=== Language Detection Debug ===');
         console.log('Stored language (localStorage):', storedLanguage);
@@ -916,11 +927,22 @@ async function handleDoctorRegister(event) {
     
     try {
         const email = document.getElementById('doctorEmail').value.trim();
-        // Get language with multiple fallback methods
+        // Get language with multiple fallback methods - ensure never null/undefined
         const storedLanguage = localStorage.getItem('sahatak_language');
         const documentLanguage = document.documentElement.lang;
         const directionLanguage = document.documentElement.dir === 'rtl' ? 'ar' : 'en';
-        const userLanguage = storedLanguage || documentLanguage || directionLanguage || 'ar';
+        
+        // Ensure we always have a valid language (never null/undefined)
+        let userLanguage = storedLanguage;
+        if (!userLanguage || (userLanguage !== 'ar' && userLanguage !== 'en')) {
+            userLanguage = documentLanguage;
+        }
+        if (!userLanguage || (userLanguage !== 'ar' && userLanguage !== 'en')) {
+            userLanguage = directionLanguage;
+        }
+        if (!userLanguage || (userLanguage !== 'ar' && userLanguage !== 'en')) {
+            userLanguage = 'ar'; // Final fallback
+        }
         
         console.log('=== Doctor Registration Language Debug ===');
         console.log('Stored language (localStorage):', storedLanguage);
