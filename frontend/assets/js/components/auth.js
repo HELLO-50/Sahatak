@@ -101,7 +101,12 @@ const AuthManager = {
         if (loginText) loginText.textContent = LanguageManager.getTranslation(lang, 'auth.login');
         if (registerText) registerText.textContent = LanguageManager.getTranslation(lang, 'auth.register');
         if (languageSwitchText) languageSwitchText.textContent = LanguageManager.getTranslation(lang, 'auth.language_switch');
-        if (currentLanguage) currentLanguage.textContent = LanguageManager.getTranslation(lang, 'auth.current_language');
+        
+        // Show the opposite language (the one you can switch TO)
+        if (currentLanguage) {
+            const oppositeLanguage = lang === 'ar' ? 'English' : 'العربية';
+            currentLanguage.textContent = oppositeLanguage;
+        }
 
         // Update user type selection
         const userTypeTitle = document.getElementById('user-type-title');
