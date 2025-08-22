@@ -71,6 +71,53 @@ const FormManager = {
         }
     },
 
+    // Show email verification message screen
+    showEmailVerificationMessage(message) {
+        // Hide all other screens
+        const screensToHide = ['language-selection', 'auth-selection', 'login-form', 'user-type-selection', 'patient-register-form', 'doctor-register-form'];
+        screensToHide.forEach(screenId => {
+            const element = document.getElementById(screenId);
+            if (element) {
+                element.classList.add('d-none');
+                element.style.display = 'none';
+            }
+        });
+
+        // Create email verification message HTML
+        const verificationHTML = `
+            <div id="email-verification-message" class="min-vh-100 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-teal) 100%); position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999;">
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-md-6">
+                            <div class="card shadow-lg border-0 text-center" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);">
+                                <div class="card-body p-5">
+                                    <div class="mb-4">
+                                        <i class="bi bi-envelope-check text-primary" style="font-size: 4rem;"></i>
+                                    </div>
+                                    <h2 class="text-primary mb-3">Check Your Email</h2>
+                                    <p class="lead mb-4">${message}</p>
+                                    <div class="mb-4">
+                                        <p class="text-muted">Please check your inbox and click the verification link to complete your registration.</p>
+                                        <p class="text-muted small">Don't see the email? Check your spam folder.</p>
+                                    </div>
+                                    <div class="d-grid gap-2">
+                                        <button onclick="window.location.href='index.html'" class="btn btn-outline-primary">
+                                            <i class="bi bi-arrow-left me-2"></i>
+                                            Back to Home
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add email verification screen to body
+        document.body.insertAdjacentHTML('beforeend', verificationHTML);
+    },
+
     // Show centered success screen
     showSuccessScreen(message, userType, redirectDelay = 3000) {
         // Hide all other screens
@@ -286,7 +333,15 @@ function handlePatientRegister(event) {
         '/auth/register',
         (result) => {
             FormManager.setFormLoading(formId, false);
-            FormManager.showSuccessScreen(result.message, 'patient');
+            
+            // Check if email verification is required
+            if (result.requires_email_verification) {
+                // Show email verification message instead of redirecting
+                FormManager.showEmailVerificationMessage(result.message);
+            } else {
+                // No email verification needed, proceed to dashboard
+                FormManager.showSuccessScreen(result.message, 'patient');
+            }
         },
         (error) => {
             FormManager.setFormLoading(formId, false);
@@ -377,7 +432,15 @@ function handleDoctorRegister(event) {
         '/auth/register',
         (result) => {
             FormManager.setFormLoading(formId, false);
-            FormManager.showSuccessScreen(result.message, 'doctor');
+            
+            // Check if email verification is required
+            if (result.requires_email_verification) {
+                // Show email verification message instead of redirecting
+                FormManager.showEmailVerificationMessage(result.message);
+            } else {
+                // No email verification needed, proceed to dashboard
+                FormManager.showSuccessScreen(result.message, 'doctor');
+            }
         },
         (error) => {
             FormManager.setFormLoading(formId, false);
