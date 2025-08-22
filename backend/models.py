@@ -471,17 +471,9 @@ class MedicalHistoryUpdate(db.Model):
 # =============================================================================
 
 class SystemSettings(db.Model):
-   # This model stores admin-configurable settings for the platform
-    class SystemSettings(db.Model):
-      id = db.Column(db.Integer, primary_key=True)
-      key = db.Column(db.String(100), unique=True, nullable=False)
-      value = db.Column(db.Text, nullable=False)
-      data_type = db.Column(db.String(20), nullable=False)
-      description = db.Column(db.Text)
-      created_at = db.Column(db.DateTime, default=datetime.utcnow)
-      updated_at = db.Column(db.DateTime, default=datetime.utcnow)
-      updated_by = db.Column(db.Integer, db.ForeignKey('user.id'))
-    
+    """
+    This model stores admin-configurable settings for the platform
+    """
     __tablename__ = 'system_settings'
     
     id = db.Column(db.Integer, primary_key=True)
@@ -560,15 +552,9 @@ class SystemSettings(db.Model):
 
 
 class AuditLog(db.Model):
-  # This model tracks all admin actions for security and compliance
-    class AuditLog(db.Model):
-      id = db.Column(db.Integer, primary_key=True)
-      user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-      action = db.Column(db.String(100), nullable=False)
-      details = db.Column(db.JSON)
-      ip_address = db.Column(db.String(45))
-      created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
+    """
+    This model tracks all admin actions for security and compliance
+    """
     __tablename__ = 'audit_logs'
     
     id = db.Column(db.Integer, primary_key=True)
