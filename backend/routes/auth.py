@@ -315,8 +315,9 @@ def login():
         
         # Check if email verification is required
         if user.email and not user.is_verified:
-            return APIResponse.unauthorized(
+            return APIResponse.error(
                 message='Please verify your email address before logging in. Check your email for verification link.',
+                status_code=401,
                 error_code='EMAIL_NOT_VERIFIED',
                 details={
                     'email': user.email,
