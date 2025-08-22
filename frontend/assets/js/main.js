@@ -1,5 +1,9 @@
 // Sahatak main JavaScript - Language Management & Core Functions
 
+// TEST: Add immediate console log
+console.log('🟢 main.js loaded successfully');
+alert('🟢 JavaScript is working');
+
 // Language Management Object
 const LanguageManager = {
     translations: {},
