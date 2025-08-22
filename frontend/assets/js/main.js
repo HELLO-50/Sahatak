@@ -1,8 +1,10 @@
 // Sahatak main JavaScript - Language Management & Core Functions
 
-// TEST: Add immediate console log
+// TEST: Add immediate console log  
 console.log('🟢 main.js loaded successfully');
-alert('🟢 JavaScript is working');
+if (window.location.pathname.includes('index.html') || window.location.pathname === '/') {
+    console.log('🟢 On main registration page - JavaScript ready for registration');
+}
 
 // Language Management Object
 const LanguageManager = {
@@ -449,7 +451,8 @@ function updateElementText(elementId, text) {
     if (element && text) {
         element.textContent = text;
         console.log(`Updated ${elementId} with: ${text}`);
-    } else if (!element) {
+    } else if (!element && window.location.hostname === 'localhost') {
+        // Only show missing element warnings in development
         console.warn(`Element not found: ${elementId}`);
     }
 }
