@@ -247,7 +247,10 @@ def register():
             message = 'User registered successfully'
         
         return APIResponse.success(
-            data=user.to_dict(),
+            data={
+                **user.to_dict(),
+                'requires_email_verification': bool(email and not user.is_verified)
+            },
             message=message,
             status_code=201
         )

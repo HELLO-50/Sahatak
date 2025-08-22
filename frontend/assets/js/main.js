@@ -760,11 +760,11 @@ async function handlePatientRegister(event) {
         // Clear form
         document.getElementById('patientRegisterForm').reset();
         
-        // Check if email verification is required
+        // Check if email verification is required based on backend response
         const lang = LanguageManager.getLanguage() || 'ar';
-        const hasEmail = formData.email && formData.email.trim();
+        const requiresVerification = response.data.requires_email_verification;
         
-        if (hasEmail) {
+        if (requiresVerification) {
             // Email verification required - show verification message
             const emailVerificationMessage = lang === 'ar' 
                 ? 'تم إنشاء حسابك بنجاح! يرجى فحص بريدك الإلكتروني لتأكيد حسابك قبل تسجيل الدخول.'
@@ -880,11 +880,11 @@ async function handleDoctorRegister(event) {
         // Clear form
         document.getElementById('doctorRegisterForm').reset();
         
-        // Check if email verification is required
+        // Check if email verification is required based on backend response
         const lang = LanguageManager.getLanguage() || 'ar';
-        const hasEmail = formData.email && formData.email.trim();
+        const requiresVerification = response.data.requires_email_verification;
         
-        if (hasEmail) {
+        if (requiresVerification) {
             // Email verification required - show verification message
             const emailVerificationMessage = lang === 'ar' 
                 ? 'تم إنشاء حسابك بنجاح! يرجى فحص بريدك الإلكتروني لتأكيد حسابك قبل تسجيل الدخول.'
