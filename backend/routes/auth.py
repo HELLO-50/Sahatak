@@ -214,10 +214,13 @@ def register():
         if email:
             try:
                 email_language = data.get('language_preference', 'ar')
-                auth_logger.info(f"Registration data received: {data}")
-                auth_logger.info(f"Language preference in data: {data.get('language_preference')}")
-                auth_logger.info(f"Final email language: {email_language}")
-                auth_logger.info(f"Sending email confirmation in language: {email_language} to {email}")
+                auth_logger.info(f"=== EMAIL LANGUAGE DEBUG ===")
+                auth_logger.info(f"Raw registration data keys: {list(data.keys())}")
+                auth_logger.info(f"Language preference in data: '{data.get('language_preference')}'")
+                auth_logger.info(f"Language preference type: {type(data.get('language_preference'))}")
+                auth_logger.info(f"Final email language: '{email_language}'")
+                auth_logger.info(f"Will use template: templates/email/{email_language}/email_confirmation.html")
+                auth_logger.info(f"=============================")
                 
                 from services.email_service import email_service
                 email_success = email_service.send_email_confirmation(
@@ -315,15 +318,17 @@ def login():
         
         # Check if email verification is required
         if user.email and not user.is_verified:
-            return APIResponse.error(
-                message='Please verify your email address before logging in. Check your email for verification link.',
-                status_code=401,
-                error_code='EMAIL_NOT_VERIFIED',
-                details={
-                    'email': user.email,
-                    'requires_verification': True
+            from flask import jsonify
+            return jsonify({
+                "success": False,
+                "message": "Please verify your email address before logging in. Check your email for verification link.",
+                "error_code": "EMAIL_NOT_VERIFIED",
+                "status_code": 401,
+                "details": {
+                    "email": user.email,
+                    "requires_verification": True
                 }
-            )
+            }), 401
         
         # Login user and update last login
         login_user(user, remember=data.get('remember_me', False))
