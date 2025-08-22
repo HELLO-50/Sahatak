@@ -74,8 +74,13 @@ const AuthManager = {
 
     // Update translations for current language
     updateTranslations(lang) {
+        console.log('updateTranslations called with lang:', lang);
+        console.log('Available translations:', Object.keys(LanguageManager.translations));
+        console.log('LanguageManager.translations[lang]:', LanguageManager.translations[lang]);
+        
         if (!LanguageManager.translations[lang]) {
             console.error(`No translations found for language: ${lang}`);
+            console.error('Full translations object:', LanguageManager.translations);
             return;
         }
 
@@ -199,16 +204,31 @@ function logout() {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Auth system initialized');
     
-    // Check if user has language preference
-    const savedLanguage = LanguageManager.getLanguage();
+    // Wait for translations to be loaded before proceeding
+    const waitForTranslations = () => {
+        if (Object.keys(LanguageManager.translations).length > 0) {
+            initializeAuth();
+        } else {
+            console.log('Waiting for translations to load...');
+            setTimeout(waitForTranslations, 100);
+        }
+    };
     
-    if (savedLanguage) {
-        // User has visited before, apply saved language and show auth
-        LanguageManager.applyLanguage(savedLanguage);
-        AuthManager.updateTranslations(savedLanguage);
-        AuthManager.showAuthSelection();
-    } else {
-        // First visit, show language selection
-        AuthManager.showLanguageSelection();
-    }
+    const initializeAuth = () => {
+        // Check if user has language preference
+        const savedLanguage = LanguageManager.getLanguage();
+        
+        if (savedLanguage) {
+            // User has visited before, apply saved language and show auth
+            LanguageManager.applyLanguage(savedLanguage);
+            AuthManager.updateTranslations(savedLanguage);
+            AuthManager.showAuthSelection();
+        } else {
+            // First visit, show language selection
+            AuthManager.showLanguageSelection();
+        }
+    };
+    
+    // Start waiting for translations
+    waitForTranslations();
 });

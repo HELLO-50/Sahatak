@@ -37,6 +37,9 @@ const LanguageManager = {
             this.translations.en = await enResponse.json();
             
             console.log('Translations loaded successfully:', this.translations);
+            console.log('English translations available:', !!this.translations.en);
+            console.log('Arabic translations available:', !!this.translations.ar);
+            console.log('Available translation keys:', Object.keys(this.translations));
         } catch (error) {
             console.error('Failed to load translations:', error);
             // Fallback to hardcoded translations if JSON fails
