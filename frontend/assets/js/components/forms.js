@@ -214,6 +214,22 @@ function handlePatientRegister(event) {
     FormManager.hideAlert('patient-register-error-alert');
     FormManager.hideAlert('patient-register-success-alert');
     
+    // Get language with multiple fallback methods
+    const storedLanguage = localStorage.getItem('sahatak_language');
+    const documentLanguage = document.documentElement.lang;
+    const directionLanguage = document.documentElement.dir === 'rtl' ? 'ar' : 'en';
+    
+    let userLanguage = 'ar'; // Default to Arabic
+    if (storedLanguage === 'ar' || storedLanguage === 'en') {
+        userLanguage = storedLanguage;
+    } else if (documentLanguage === 'ar' || documentLanguage === 'en') {
+        userLanguage = documentLanguage;
+    } else if (directionLanguage === 'ar' || directionLanguage === 'en') {
+        userLanguage = directionLanguage;
+    }
+    
+    console.log('🔥 FORMS.JS - Language detected:', userLanguage);
+    
     // Get form data
     const formData = {
         full_name: document.getElementById('patientFullName').value.trim(),
@@ -222,7 +238,8 @@ function handlePatientRegister(event) {
         age: parseInt(document.getElementById('patientAge').value),
         gender: document.getElementById('patientGender').value,
         password: document.getElementById('patientPassword').value,
-        user_type: 'patient'
+        user_type: 'patient',
+        language_preference: userLanguage
     };
     
     // Validate form using ValidationManager
@@ -289,6 +306,22 @@ function handleDoctorRegister(event) {
     FormManager.hideAlert('doctor-register-error-alert');
     FormManager.hideAlert('doctor-register-success-alert');
     
+    // Get language with multiple fallback methods
+    const storedLanguage = localStorage.getItem('sahatak_language');
+    const documentLanguage = document.documentElement.lang;
+    const directionLanguage = document.documentElement.dir === 'rtl' ? 'ar' : 'en';
+    
+    let userLanguage = 'ar'; // Default to Arabic
+    if (storedLanguage === 'ar' || storedLanguage === 'en') {
+        userLanguage = storedLanguage;
+    } else if (documentLanguage === 'ar' || documentLanguage === 'en') {
+        userLanguage = documentLanguage;
+    } else if (directionLanguage === 'ar' || directionLanguage === 'en') {
+        userLanguage = directionLanguage;
+    }
+    
+    console.log('🔥 FORMS.JS - Doctor Language detected:', userLanguage);
+    
     // Get form data
     const formData = {
         full_name: document.getElementById('doctorFullName').value.trim(),
@@ -298,7 +331,8 @@ function handleDoctorRegister(event) {
         specialty: document.getElementById('doctorSpecialty').value,
         years_of_experience: parseInt(document.getElementById('doctorExperience').value),
         password: document.getElementById('doctorPassword').value,
-        user_type: 'doctor'
+        user_type: 'doctor',
+        language_preference: userLanguage
     };
     
     // Validate form using ValidationManager
