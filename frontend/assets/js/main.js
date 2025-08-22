@@ -1090,8 +1090,8 @@ function redirectToDashboard(userType) {
     
     // Default dashboard redirect
     const dashboardUrl = userType === 'doctor' 
-        ? 'frontend/pages/dashboard/doctor.html' 
-        : 'frontend/pages/dashboard/patient.html';
+        ? 'pages/dashboard/doctor.html' 
+        : 'pages/dashboard/patient.html';
     
     console.log(`Redirecting to ${userType} dashboard at URL: ${dashboardUrl}`);
     console.log('Current window location:', window.location.href);

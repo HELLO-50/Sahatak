@@ -46,11 +46,23 @@ class AuthGuard {
      */
     static redirectToLogin(returnUrl = null) {
         const currentUrl = returnUrl || window.location.pathname;
-        const loginUrl = '../../index.html';
+        
+        // Determine correct path to index.html based on current location
+        let loginUrl;
+        if (window.location.pathname.includes('/pages/dashboard/')) {
+            // From dashboard pages: need to go up 2 levels to root
+            loginUrl = '../../index.html';
+        } else if (window.location.pathname.includes('/pages/')) {
+            // From other pages: need to go up 1 level to root
+            loginUrl = '../index.html';
+        } else {
+            // Already at root level
+            loginUrl = 'index.html';
+        }
         
         // Store return URL for after login
-        if (currentUrl !== '../../index.html' && currentUrl !== '/') {
-            localStorage.setItem('sahatak_return_url', currentUrl);
+        if (currentUrl !== 'index.html' && currentUrl !== '/' && !currentUrl.includes('index.html')) {
+            localStorage.setItem('sahatak_return_url', window.location.href);
         }
         
         window.location.href = loginUrl;
@@ -75,9 +87,17 @@ class AuthGuard {
             // Redirect to correct dashboard based on actual user type
             const actualUserType = localStorage.getItem('sahatak_user_type');
             if (actualUserType === 'patient') {
-                window.location.href = '../dashboard/patient.html';
+                if (window.location.pathname.includes('/pages/dashboard/')) {
+                    window.location.href = 'patient.html';
+                } else {
+                    window.location.href = 'pages/dashboard/patient.html';
+                }
             } else if (actualUserType === 'doctor') {
-                window.location.href = '../dashboard/doctor.html';
+                if (window.location.pathname.includes('/pages/dashboard/')) {
+                    window.location.href = 'doctor.html';
+                } else {
+                    window.location.href = 'pages/dashboard/doctor.html';
+                }
             } else {
                 this.redirectToLogin();
             }
