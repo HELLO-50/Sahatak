@@ -37,9 +37,21 @@ class EmailService:
     
     def is_configured(self) -> bool:
         """Check if email service is properly configured"""
-        return (self.mail is not None and 
-                current_app.config.get('MAIL_USERNAME') and 
-                current_app.config.get('MAIL_PASSWORD'))
+        if self.mail is None:
+            app_logger.error("Email service not initialized - Mail object is None")
+            return False
+        
+        if not current_app.config.get('MAIL_USERNAME'):
+            app_logger.error("Email service not configured - MAIL_USERNAME is missing")
+            return False
+        
+        if not current_app.config.get('MAIL_PASSWORD'):
+            app_logger.error("Email service not configured - MAIL_PASSWORD is missing")
+            return False
+        
+        # Log successful configuration (but don't expose sensitive data)
+        app_logger.info(f"Email service configured with username: {current_app.config.get('MAIL_USERNAME')}")
+        return True
     
     def send_appointment_reminder(
         self, 
@@ -283,7 +295,16 @@ class EmailService:
             return True
             
         except Exception as e:
-            app_logger.error(f"Failed to send email confirmation to {recipient_email}: {str(e)}")
+            # Log detailed error information for debugging
+            error_type = type(e).__name__
+            if 'auth' in str(e).lower() or 'password' in str(e).lower():
+                app_logger.error(f"Email authentication failed for {recipient_email}: {error_type} - Check MAIL_USERNAME and MAIL_PASSWORD")
+            elif 'smtp' in str(e).lower():
+                app_logger.error(f"SMTP error sending email to {recipient_email}: {error_type} - {str(e)}")
+            elif 'template' in str(e).lower():
+                app_logger.error(f"Email template error for {recipient_email}: {error_type} - Check template file exists")
+            else:
+                app_logger.error(f"Failed to send email confirmation to {recipient_email}: {error_type} - {str(e)}")
             return False
     
     def _get_reminder_subject(self, reminder_type: str, language: str) -> str:
