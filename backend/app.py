@@ -47,8 +47,6 @@ login_manager.login_view = 'auth.login'
 login_manager.login_message = 'Please log in to access this page.'
 login_manager.login_message_category = 'info'
 
-mail = Mail(app)
-
 # Initialize notification services
 from services.email_service import email_service
 from services.sms_service import sms_service
