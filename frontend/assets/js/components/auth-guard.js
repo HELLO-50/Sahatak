@@ -121,6 +121,55 @@ class AuthGuard {
         localStorage.removeItem('sahatak_user_name');
         localStorage.removeItem('sahatak_return_url');
     }
+    
+    /**
+     * Complete logout - clear local data and call backend
+     * @returns {Promise<boolean>} True if logout successful
+     */
+    static async logout() {
+        try {
+            // Call backend logout endpoint to invalidate session
+            const baseUrl = 'https://sahatak.pythonanywhere.com/api';
+            const response = await fetch(`${baseUrl}/auth/logout`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            console.log('Backend logout successful:', response.ok);
+        } catch (error) {
+            console.error('Backend logout error:', error);
+            // Continue with frontend cleanup even if backend fails
+        }
+        
+        // Clear all local authentication data
+        this.clearAuth();
+        
+        // Redirect to login page
+        this.redirectToLogin();
+        
+        return true;
+    }
+    
+    /**
+     * Create logout button element
+     * @param {string} className - CSS classes for the button
+     * @param {string} text - Button text (optional)
+     * @returns {HTMLElement} Logout button element
+     */
+    static createLogoutButton(className = 'btn btn-outline-danger', text = null) {
+        const lang = localStorage.getItem('sahatak_language') || 'ar';
+        const defaultText = lang === 'ar' ? 'تسجيل خروج' : 'Logout';
+        
+        const button = document.createElement('button');
+        button.className = className;
+        button.innerHTML = `<i class="bi bi-box-arrow-right me-1"></i> ${text || defaultText}`;
+        button.onclick = () => this.logout();
+        
+        return button;
+    }
 }
 
 // Auto-protect pages that include this script with data-protect attribute

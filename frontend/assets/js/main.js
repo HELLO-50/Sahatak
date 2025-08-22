@@ -1079,6 +1079,16 @@ function validateDoctorRegistrationForm(data) {
 function redirectToDashboard(userType) {
     console.log('redirectToDashboard called with userType:', userType);
     
+    // Check for return URL first
+    const returnUrl = localStorage.getItem('sahatak_return_url');
+    if (returnUrl) {
+        console.log('Redirecting to return URL:', returnUrl);
+        localStorage.removeItem('sahatak_return_url');
+        window.location.href = returnUrl;
+        return;
+    }
+    
+    // Default dashboard redirect
     const dashboardUrl = userType === 'doctor' 
         ? 'frontend/pages/dashboard/doctor.html' 
         : 'frontend/pages/dashboard/patient.html';

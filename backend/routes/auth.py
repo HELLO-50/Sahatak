@@ -343,19 +343,31 @@ def login():
 @auth_bp.route('/logout', methods=['POST'])
 @login_required
 def logout():
-    """Logout current user"""
+    """Logout current user and clear session"""
     try:
+        user_id = current_user.id if current_user.is_authenticated else None
+        user_email = current_user.email if current_user.is_authenticated else None
+        
+        # Log the logout action
+        if user_id:
+            log_user_action(user_id, 'user_logout', {
+                'email': user_email
+            }, request)
+        
+        # Clear the user session
         logout_user()
-        return jsonify({
-            'success': True,
-            'message': 'Logout successful'
-        }), 200
+        
+        auth_logger.info(f"User logged out: {user_email}")
+        
+        return APIResponse.success(
+            message='Logout successful'
+        )
+        
     except Exception as e:
-        current_app.logger.error(f"Logout error: {str(e)}")
-        return jsonify({
-            'success': False,
-            'message': 'Logout failed'
-        }), 500
+        auth_logger.error(f"Logout error: {str(e)}")
+        return APIResponse.internal_error(
+            message='Logout failed. Please try again.'
+        )
 
 @auth_bp.route('/me', methods=['GET'])
 @login_required
