@@ -757,18 +757,33 @@ async function handlePatientRegister(event) {
         
         console.log('Patient registration successful:', response);
         
-        // Show success message
-        const lang = LanguageManager.getLanguage() || 'ar';
-        const t = LanguageManager.translations[lang];
-        showFormSuccess(successAlert, response.message || t.validation?.registration_success || 'Account created successfully! You can now login.');
-        
         // Clear form
         document.getElementById('patientRegisterForm').reset();
         
-        // Redirect to login after success
-        setTimeout(() => {
-            showLogin();
-        }, 2000);
+        // Check if email verification is required
+        const lang = LanguageManager.getLanguage() || 'ar';
+        const hasEmail = formData.email && formData.email.trim();
+        
+        if (hasEmail) {
+            // Email verification required - show verification message
+            const emailVerificationMessage = lang === 'ar' 
+                ? 'تم إنشاء حسابك بنجاح! يرجى فحص بريدك الإلكتروني لتأكيد حسابك قبل تسجيل الدخول.'
+                : 'Account created successfully! Please check your email to verify your account before logging in.';
+            showFormSuccess(successAlert, emailVerificationMessage);
+            
+            // Don't redirect - user needs to verify email first
+        } else {
+            // No email verification needed - auto-login
+            const successMessage = lang === 'ar' 
+                ? 'تم إنشاء حسابك بنجاح! يمكنك الآن تسجيل الدخول.'
+                : 'Account created successfully! You can now login.';
+            showFormSuccess(successAlert, successMessage);
+            
+            // Redirect to login after success
+            setTimeout(() => {
+                showLogin();
+            }, 2000);
+        }
         
     } catch (error) {
         console.error('Patient registration error:', error);
@@ -862,18 +877,33 @@ async function handleDoctorRegister(event) {
         
         console.log('Doctor registration successful:', response);
         
-        // Show success message
-        const lang = LanguageManager.getLanguage() || 'ar';
-        const t = LanguageManager.translations[lang];
-        showFormSuccess(successAlert, response.message || t.validation?.registration_success || 'Account created successfully! You can now login.');
-        
         // Clear form
         document.getElementById('doctorRegisterForm').reset();
         
-        // Redirect to login after success
-        setTimeout(() => {
-            showLogin();
-        }, 2000);
+        // Check if email verification is required
+        const lang = LanguageManager.getLanguage() || 'ar';
+        const hasEmail = formData.email && formData.email.trim();
+        
+        if (hasEmail) {
+            // Email verification required - show verification message
+            const emailVerificationMessage = lang === 'ar' 
+                ? 'تم إنشاء حسابك بنجاح! يرجى فحص بريدك الإلكتروني لتأكيد حسابك قبل تسجيل الدخول.'
+                : 'Account created successfully! Please check your email to verify your account before logging in.';
+            showFormSuccess(successAlert, emailVerificationMessage);
+            
+            // Don't redirect - user needs to verify email first
+        } else {
+            // No email verification needed - auto-login
+            const successMessage = lang === 'ar' 
+                ? 'تم إنشاء حسابك بنجاح! يمكنك الآن تسجيل الدخول.'
+                : 'Account created successfully! You can now login.';
+            showFormSuccess(successAlert, successMessage);
+            
+            // Redirect to login after success
+            setTimeout(() => {
+                showLogin();
+            }, 2000);
+        }
         
     } catch (error) {
         console.error('Doctor registration error:', error);
