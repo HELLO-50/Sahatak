@@ -13,7 +13,7 @@ const LanguageManager = {
             
             let basePath;
             if (isInSubdirectory) {
-                basePath = '../locales/';  // From pages/ to locales/
+                basePath = '../../locales/';  // From pages/ to locales/ (up 2 levels)
             } else if (isGitHubPages) {
                 basePath = 'frontend/locales/';
             } else {
@@ -857,6 +857,7 @@ async function handlePatientRegister(event) {
         
         if (requiresVerification) {
             // Email verification required - show verification message
+            console.log('✅ Email verification required - NOT redirecting');
             const emailVerificationMessage = lang === 'ar' 
                 ? 'تم إنشاء حسابك بنجاح! يرجى فحص بريدك الإلكتروني لتأكيد حسابك قبل تسجيل الدخول.'
                 : 'Account created successfully! Please check your email to verify your account before logging in.';
@@ -865,6 +866,7 @@ async function handlePatientRegister(event) {
             // Don't redirect - user needs to verify email first
         } else {
             // No email verification needed - auto-login
+            console.log('❌ NO email verification required - WILL redirect to login in 2 seconds');
             const successMessage = lang === 'ar' 
                 ? 'تم إنشاء حسابك بنجاح! يمكنك الآن تسجيل الدخول.'
                 : 'Account created successfully! You can now login.';
@@ -872,6 +874,7 @@ async function handlePatientRegister(event) {
             
             // Redirect to login after success
             setTimeout(() => {
+                console.log('⏰ Patient registration - Redirecting to login form now');
                 showLogin();
             }, 2000);
         }
