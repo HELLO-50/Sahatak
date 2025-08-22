@@ -13,7 +13,7 @@ const LanguageManager = {
             
             let basePath;
             if (isInSubdirectory) {
-                basePath = '../../locales/';
+                basePath = '../locales/';  // From pages/ to locales/
             } else if (isGitHubPages) {
                 basePath = 'frontend/locales/';
             } else {
@@ -136,6 +136,32 @@ const LanguageManager = {
     // Check if this is user's first visit
     isFirstVisit: () => {
         return !localStorage.getItem('sahatak_language');
+    },
+    
+    // Translate a key with dot notation (e.g., 'email_verification.invalid_link')
+    translate: function(key, lang = null) {
+        const language = lang || this.getLanguage() || 'ar';
+        const translations = this.translations[language];
+        
+        if (!translations) {
+            console.warn(`No translations found for language: ${language}`);
+            return key; // Return the key itself as fallback
+        }
+        
+        // Handle dot notation (e.g., 'email_verification.invalid_link')
+        const keys = key.split('.');
+        let value = translations;
+        
+        for (const k of keys) {
+            if (value && typeof value === 'object' && k in value) {
+                value = value[k];
+            } else {
+                console.warn(`Translation key not found: ${key}`);
+                return key; // Return the key itself as fallback
+            }
+        }
+        
+        return value;
     },
     
     // Apply language settings to the page
