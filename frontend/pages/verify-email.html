@@ -125,6 +125,37 @@
             document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
             document.documentElement.setAttribute('lang', lang);
             
+            console.log('Updating page content for language:', lang);
+            console.log('Translations available:', LanguageManager.translations);
+            
+            // Check if translations are actually loaded
+            if (!LanguageManager.translations[lang] || !LanguageManager.translations[lang].email_verification) {
+                console.error('Translations not loaded for language:', lang);
+                // Use fallback hardcoded text in English
+                const fallbackElements = {
+                    'loading-text': 'Verifying your email address...',
+                    'wait-text': 'Please wait a moment',
+                    'success-title': 'Email verified successfully!',
+                    'success-message': 'You can now login and use all platform features',
+                    'error-title': 'Email verification failed',
+                    'resend-title': 'Resend verification link',
+                    'login-btn-text': 'Go to Dashboard',
+                    'home-btn-text': 'Back to Home',
+                    'resend-btn-text': 'Resend verification link',
+                    'send-btn-text': 'Send',
+                    'cancel-btn-text': 'Cancel'
+                };
+                
+                Object.keys(fallbackElements).forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.textContent = fallbackElements[id];
+                        console.log(`Updated ${id} with fallback: ${fallbackElements[id]}`);
+                    }
+                });
+                return;
+            }
+            
             // Update text content using translations
             const elements = {
                 'loading-text': LanguageManager.getTranslation(lang, 'email_verification.loading'),
@@ -142,8 +173,11 @@
 
             Object.keys(elements).forEach(id => {
                 const element = document.getElementById(id);
-                if (element) {
+                if (element && elements[id]) {
                     element.textContent = elements[id];
+                    console.log(`Updated ${id} with: ${elements[id]}`);
+                } else if (element) {
+                    console.warn(`No translation found for ${id}, got: ${elements[id]}`);
                 }
             });
         }
