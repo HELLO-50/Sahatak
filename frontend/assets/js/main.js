@@ -831,8 +831,10 @@ async function handlePatientRegister(event) {
         }
         
         // Log the data being sent to backend
-        console.log('Sending registration data to backend:', formData);
-        console.log('Language preference being sent:', formData.language_preference);
+        console.log('🚀 SENDING TO BACKEND:', formData);
+        console.log('🔤 Language preference value:', formData.language_preference);
+        console.log('🔤 Language preference type:', typeof formData.language_preference);
+        console.log('🔤 JSON stringified data:', JSON.stringify(formData));
         
         // Make API call to registration endpoint
         const response = await ApiHelper.makeRequest('/auth/register', {
@@ -998,8 +1000,10 @@ async function handleDoctorRegister(event) {
         }
         
         // Log the data being sent to backend
-        console.log('Sending doctor registration data to backend:', formData);
-        console.log('Language preference being sent:', formData.language_preference);
+        console.log('🚀 DOCTOR SENDING TO BACKEND:', formData);
+        console.log('🔤 Doctor language preference value:', formData.language_preference);
+        console.log('🔤 Doctor language preference type:', typeof formData.language_preference);
+        console.log('🔤 Doctor JSON stringified data:', JSON.stringify(formData));
         
         // Make API call to registration endpoint
         const response = await ApiHelper.makeRequest('/auth/register', {
