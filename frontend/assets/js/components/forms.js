@@ -336,15 +336,15 @@ async function handlePatientRegister(event) {
             FormManager.setFormLoading(formId, false);
             
             // DEBUG: Show result with alerts to persist even after redirect
-            alert('🔥 REGISTRATION SUCCESS! Result: ' + JSON.stringify(result, null, 2));
-            alert('🔥 requires_email_verification: ' + result.requires_email_verification + ' (type: ' + typeof result.requires_email_verification + ')');
+            alert('🔥 FOUND THE BUG! requires_email_verification is in result.data, not result root');
+            alert('🔥 result.data.requires_email_verification: ' + result.data.requires_email_verification);
             
             console.log('🔥 REGISTRATION SUCCESS RESULT:', result);
-            console.log('🔥 requires_email_verification:', result.requires_email_verification);
-            console.log('🔥 typeof requires_email_verification:', typeof result.requires_email_verification);
+            console.log('🔥 requires_email_verification (root):', result.requires_email_verification);
+            console.log('🔥 requires_email_verification (data):', result.data.requires_email_verification);
             
-            // Check if email verification is required
-            if (result.requires_email_verification) {
+            // Check if email verification is required (FIXED: check data object)
+            if (result.data && result.data.requires_email_verification) {
                 alert('🔥 EMAIL VERIFICATION REQUIRED - Showing verification message');
                 console.log('🔥 EMAIL VERIFICATION REQUIRED - Showing verification message');
                 // Show email verification message instead of redirecting
@@ -447,11 +447,11 @@ function handleDoctorRegister(event) {
             FormManager.setFormLoading(formId, false);
             
             console.log('🔥 DOCTOR REGISTRATION SUCCESS RESULT:', result);
-            console.log('🔥 requires_email_verification:', result.requires_email_verification);
-            console.log('🔥 typeof requires_email_verification:', typeof result.requires_email_verification);
+            console.log('🔥 requires_email_verification (root):', result.requires_email_verification);
+            console.log('🔥 requires_email_verification (data):', result.data.requires_email_verification);
             
-            // Check if email verification is required
-            if (result.requires_email_verification) {
+            // Check if email verification is required (FIXED: check data object)
+            if (result.data && result.data.requires_email_verification) {
                 console.log('🔥 EMAIL VERIFICATION REQUIRED - Showing verification message');
                 // Show email verification message instead of redirecting
                 FormManager.showEmailVerificationMessage(result.message);
