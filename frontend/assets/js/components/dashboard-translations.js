@@ -187,9 +187,34 @@ const DashboardTranslations = {
             this.updateDoctorDashboard(lang);
         }
         
+        // Update user name with correct language prefix
+        this.updateUserName();
+        
         console.log(`Dashboard language switched to: ${lang}`);
     },
     
+    // Update user name in dashboard header
+    updateUserName() {
+        const userName = localStorage.getItem('sahatak_user_name');
+        const userType = localStorage.getItem('sahatak_user_type');
+        
+        if (userName) {
+            let displayName = userName;
+            
+            // Add Dr. prefix for doctors if not already present
+            if (userType === 'doctor' && !userName.toLowerCase().startsWith('dr.') && !userName.toLowerCase().startsWith('د.')) {
+                const currentLang = LanguageManager.getLanguage() || 'ar';
+                const prefix = currentLang === 'ar' ? 'د. ' : 'Dr. ';
+                displayName = prefix + userName;
+            }
+            
+            this.updateElementText('user-name', displayName);
+            console.log('User name updated to:', displayName);
+        } else {
+            console.warn('User name not found in localStorage');
+        }
+    },
+
     // Initialize dashboard translations on page load
     async initializeDashboard(dashboardType) {
         console.log(`Initializing ${dashboardType} dashboard translations...`);
@@ -209,6 +234,9 @@ const DashboardTranslations = {
         } else if (dashboardType === 'doctor') {
             this.updateDoctorDashboard(savedLanguage);
         }
+        
+        // Update user name from localStorage
+        this.updateUserName();
         
         console.log(`${dashboardType} dashboard initialized with language: ${savedLanguage}`);
     }
