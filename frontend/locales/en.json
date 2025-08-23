@@ -484,6 +484,36 @@
     }
   },
 
+  "admin": {
+    "dashboard": {
+      "title": "Admin Dashboard",
+      "subtitle": "Sahatak Medical Platform Management"
+    },
+    "navigation": {
+      "dashboard": "Dashboard",
+      "users": "User Management", 
+      "verification": "Doctor Verification",
+      "settings": "System Settings",
+      "health": "Platform Health",
+      "analytics": "Analytics"
+    },
+    "stats": {
+      "total_users": "Total Users",
+      "verified_doctors": "Verified Doctors",
+      "appointments": "Appointments Booked",
+      "system_health": "System Health"
+    },
+    "language": {
+      "current": "English",
+      "switch_to": "العربية"
+    },
+    "actions": {
+      "profile": "Profile",
+      "settings": "Settings", 
+      "logout": "Logout"
+    }
+  },
+
   "footer": {
     "brand": "صحتك | Sahatak",
     "description": "A secure and trusted medical platform to connect with doctors remotely",

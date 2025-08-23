@@ -172,6 +172,52 @@ const DashboardTranslations = {
             element.textContent = text;
         }
     },
+
+    // Update admin dashboard translations
+    updateAdminDashboard(lang) {
+        const t = LanguageManager.translations[lang];
+        if (!t || !t.admin) {
+            console.warn('Admin translations not available for language:', lang);
+            return;
+        }
+
+        const admin = t.admin;
+
+        // Header translations
+        this.updateElementText('admin-dashboard-title', admin.dashboard.title);
+        this.updateElementText('admin-dashboard-subtitle', admin.dashboard.subtitle);
+
+        // Navigation translations
+        this.updateElementText('admin-nav-dashboard', admin.navigation.dashboard);
+        this.updateElementText('admin-nav-users', admin.navigation.users);
+        this.updateElementText('admin-nav-verification', admin.navigation.verification);
+        this.updateElementText('admin-nav-settings', admin.navigation.settings);
+        this.updateElementText('admin-nav-health', admin.navigation.health);
+        this.updateElementText('admin-nav-analytics', admin.navigation.analytics);
+
+        // Statistics translations
+        this.updateElementText('admin-stat-total-users', admin.stats.total_users);
+        this.updateElementText('admin-stat-verified-doctors', admin.stats.verified_doctors);
+        this.updateElementText('admin-stat-appointments', admin.stats.appointments);
+        this.updateElementText('admin-stat-system-health', admin.stats.system_health);
+
+        // Language selector
+        this.updateElementText('current-admin-language', admin.language.current);
+
+        // Action buttons (using title attribute for tooltips)
+        const profileBtn = document.getElementById('admin-btn-profile');
+        const settingsBtn = document.getElementById('admin-btn-settings');
+        const logoutBtn = document.getElementById('admin-btn-logout');
+        
+        if (profileBtn) profileBtn.title = admin.actions.profile;
+        if (settingsBtn) settingsBtn.title = admin.actions.settings;
+        if (logoutBtn) logoutBtn.title = admin.actions.logout;
+
+        // Update footer
+        this.updateFooter(t);
+
+        console.log(`Admin dashboard translations updated to: ${lang}`);
+    },
     
     // Language switching for dashboards
     switchDashboardLanguage(lang, dashboardType) {
@@ -184,10 +230,14 @@ const DashboardTranslations = {
             this.updatePatientDashboard(lang);
         } else if (dashboardType === 'doctor') {
             this.updateDoctorDashboard(lang);
+        } else if (dashboardType === 'admin') {
+            this.updateAdminDashboard(lang);
         }
         
-        // Update user name with correct language prefix
-        this.updateUserName();
+        // Update user name with correct language prefix (admin doesn't need this)
+        if (dashboardType !== 'admin') {
+            this.updateUserName();
+        }
         
         console.log(`Dashboard language switched to: ${lang}`);
     },
@@ -232,10 +282,14 @@ const DashboardTranslations = {
             this.updatePatientDashboard(savedLanguage);
         } else if (dashboardType === 'doctor') {
             this.updateDoctorDashboard(savedLanguage);
+        } else if (dashboardType === 'admin') {
+            this.updateAdminDashboard(savedLanguage);
         }
         
-        // Update user name from localStorage
-        this.updateUserName();
+        // Update user name from localStorage (admin doesn't need this)
+        if (dashboardType !== 'admin') {
+            this.updateUserName();
+        }
         
         console.log(`${dashboardType} dashboard initialized with language: ${savedLanguage}`);
     }

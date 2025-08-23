@@ -484,6 +484,36 @@
     }
   },
 
+  "admin": {
+    "dashboard": {
+      "title": "لوحة التحكم الإدارية",
+      "subtitle": "إدارة منصة صحتك الطبية"
+    },
+    "navigation": {
+      "dashboard": "لوحة التحكم",
+      "users": "إدارة المستخدمين", 
+      "verification": "توثيق الأطباء",
+      "settings": "إعدادات النظام",
+      "health": "صحة المنصة",
+      "analytics": "التحليلات"
+    },
+    "stats": {
+      "total_users": "إجمالي المستخدمين",
+      "verified_doctors": "الأطباء المعتمدين",
+      "appointments": "المواعيد المحجوزة",
+      "system_health": "صحة النظام"
+    },
+    "language": {
+      "current": "العربية",
+      "switch_to": "English"
+    },
+    "actions": {
+      "profile": "الملف الشخصي",
+      "settings": "الإعدادات", 
+      "logout": "تسجيل الخروج"
+    }
+  },
+
   "footer": {
     "brand": "صحتك | Sahatak",
     "description": "منصة طبية آمنة وموثوقة للتواصل مع الأطباء عن بُعد",

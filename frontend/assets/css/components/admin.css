@@ -1,33 +1,144 @@
 /*
 ==============================================================================
-SAHATAK ADMIN DASHBOARD CSS - DARK PROFESSIONAL THEME
+SAHATAK ADMIN DASHBOARD CSS - DEEP BLUE PROFESSIONAL THEME
 ==============================================================================
 
-Admin Theme - Darker colors for professional admin interface
+Admin Theme - Deep blue professional colors for admin interface
 Colors:
-- Primary: #1e293b (Dark slate)
+- Primary: #2563eb (Deep Blue)
 - Secondary: #334155 (Slate)
-- Accent: #dc2626 (Red)
-- Dark: #0f172a (Very dark slate)
+- Accent: #2563eb (Deep Blue)
+- Dark: #1d4ed8 (Darker Blue)
 - Light: #f1f5f9 (Light gray)
 */
 
-/* Admin Theme - Darker colors for professional admin interface */
+/* Admin Theme - Deep blue professional colors */
 :root {
-    /* Admin Dark Theme Colors */
-    --admin-primary: #1e293b;     /* Dark slate */
+    /* Admin Deep Blue Theme Colors */
+    --admin-primary: #2563eb;     /* Deep Blue */
     --admin-secondary: #334155;   /* Slate */
-    --admin-accent: #dc2626;      /* Red */
-    --admin-dark: #0f172a;        /* Very dark slate */
+    --admin-accent: #2563eb;      /* Deep Blue */
+    --admin-dark: #1d4ed8;        /* Darker Blue */
     --admin-light: #f1f5f9;       /* Light gray */
     
-    /* Medical Theme Colors - Darker variants for admin */
-    --medical-blue: #1e40af;      /* Darker blue */
+    /* Medical Theme Colors - Blue variants for admin */
+    --medical-blue: #2563eb;      /* Deep blue */
     --medical-green: #047857;     /* Darker green */
     --medical-teal: #0e7490;      /* Darker teal */
-    --medical-red: #dc2626;       /* Admin red */
+    --medical-red: #dc2626;       /* Keep red only for alerts */
     
     /* Admin specific colors */
+}
+
+/* RTL Layout Fixes - Swap the first and third columns */
+[dir="rtl"] .dashboard-header .row {
+    direction: rtl;
+}
+
+[dir="rtl"] .dashboard-header .col-lg-4:nth-child(1) { order: 3; }
+[dir="rtl"] .dashboard-header .col-lg-4:nth-child(2) { order: 2; }
+[dir="rtl"] .dashboard-header .col-lg-4:nth-child(3) { order: 1; }
+
+/* Fix flex direction and alignment for RTL */
+[dir="rtl"] .user-profile {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .justify-content-end { 
+    justify-content: flex-start !important; 
+}
+
+[dir="rtl"] .me-3 { 
+    margin-left: 1rem !important; 
+    margin-right: 0 !important; 
+}
+
+/* Admin Navigation Deep Blue Theme */
+.btn-admin-nav {
+    background-color: transparent;
+    border: 2px solid var(--admin-primary);
+    color: var(--admin-primary);
+    border-radius: 10px;
+    padding: 12px 20px;
+    margin: 0 5px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.btn-admin-nav:hover {
+    background-color: var(--admin-accent);
+    border-color: var(--admin-accent);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-admin-nav.active {
+    background-color: var(--admin-primary);
+    border-color: var(--admin-primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+/* Button styling for deep blue theme */
+.btn-outline-primary {
+    border-color: var(--admin-primary);
+    color: var(--admin-primary);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--admin-primary);
+    border-color: var(--admin-primary);
+    color: white;
+}
+
+.btn-primary {
+    background-color: var(--admin-primary);
+    border-color: var(--admin-primary);
+}
+
+.btn-primary:hover {
+    background-color: var(--admin-dark);
+    border-color: var(--admin-dark);
+}
+
+/* Admin Dashboard Title and Elements */
+.dashboard-title {
+    color: var(--admin-primary) !important;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.dashboard-subtitle {
+    color: var(--admin-secondary);
+    font-size: 0.9rem;
+}
+
+.status-badge {
+    background-color: var(--admin-primary) !important;
+    color: white !important;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.text-primary { 
+    color: var(--admin-primary) !important; 
+}
+
+/* Admin Section Styling */
+.admin-section {
+    display: none;
+    animation: fadeIn 0.5s ease-in;
+}
+
+.admin-section.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* Admin Layout - Always LTR (English only) */
@@ -38,10 +149,13 @@ Colors:
     min-height: 100vh;
 }
 
-/* Admin Header Layout - Dark Theme */
+/* Admin Header Layout - Deep Blue Theme */
 .dashboard-header {
-    background: var(--admin-card-bg) !important;
-    border: 1px solid rgba(220, 38, 38, 0.3);
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+    border: 1px solid rgba(37, 99, 235, 0.1);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 30px;
 }
 
 .profile-section {
@@ -278,14 +392,22 @@ Colors:
 .dashboard-card {
     background: var(--admin-card-bg);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(220, 38, 38, 0.1);
+    border: 1px solid rgba(37, 99, 235, 0.2);
     box-shadow: var(--admin-shadow);
     color: var(--admin-text);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.dashboard-card:hover {
+    border-color: var(--admin-primary);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.15);
+    transform: translateY(-5px);
 }
 
 .dashboard-card h5 {
     color: var(--admin-text);
-    border-bottom: 2px solid var(--medical-red);
+    border-bottom: 2px solid var(--admin-primary);
     padding-bottom: 0.5rem;
 }
 
@@ -293,8 +415,32 @@ Colors:
 .admin-stat-card {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(135deg, var(--admin-primary) 0%, var(--admin-secondary) 100%);
-    border: 2px solid var(--medical-red);
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(59, 130, 246, 0.02) 100%);
+    border: 1px solid rgba(37, 99, 235, 0.2);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.admin-stat-card:hover {
+    border-color: var(--admin-primary);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.15);
+    transform: translateY(-5px);
+}
+
+.stat-number {
+    color: var(--admin-primary);
+    font-weight: 700;
+    font-size: 2rem;
+}
+
+.stat-label {
+    color: var(--admin-secondary);
+    font-weight: 500;
+}
+
+.stat-icon i {
+    color: var(--admin-accent);
+    font-size: 1.5rem;
 }
 
 .admin-stat-card::before {

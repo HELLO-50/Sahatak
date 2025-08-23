@@ -1227,7 +1227,7 @@ function renderUsersTable() {
   const pageItems = UserState.filtered.slice(start, end);
 
   if (!pageItems.length) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center">🚫 لا يوجد مستخدمين</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center">No users found</td></tr>`;
     return;
   }
 
@@ -1293,13 +1293,13 @@ function toggleUser(id) {
     badge.textContent = user.is_active ? 'Active' : 'Inactive';
     badge.className = user.is_active ? 'badge bg-success' : 'badge bg-danger';
   }
-  showToast("✅ تم تحديث حالة المستخدم");
+  showToast("✅ User status updated successfully");
 }
 function deleteUser(id) {
-  if (!confirm('❌ هل أنت متأكد من حذف المستخدم؟')) return;
+  if (!confirm('❌ Are you sure you want to delete this user?')) return;
   UserState.all = UserState.all.filter(u => u.id !== id);
   applyFiltersAndRender();
-  showToast("🗑️ تم حذف المستخدم", "danger");
+  showToast("🗑️ User deleted successfully", "danger");
 }
 function exportUsersCSV() {
   const rows = [["Name", "Email", "Phone", "Role", "Status"]];
@@ -1334,8 +1334,8 @@ function exportUsersCSV() {
 
 // ======================= Doctors Verification =======================
 const doctors = [
-  { name: "د. خالد", license: "license1.pdf", verified: false },
-  { name: "د. سامية", license: "license2.pdf", verified: false }
+  { name: "Dr. Khalid", license: "license1.pdf", verified: false },
+  { name: "Dr. Samia", license: "license2.pdf", verified: false }
 ];
 
 function renderDoctors(filter = "pending") {
@@ -1346,17 +1346,17 @@ function renderDoctors(filter = "pending") {
     if (filter === "all" || (filter === "pending" && !d.verified) || (filter === "verified" && d.verified)) {
       section.innerHTML += `
         <div class="card p-2 mb-2">
-          <strong>${d.name}</strong> - <a href="${d.license}" target="_blank">📄 عرض الترخيص</a><br/>
-          ${d.verified ? '<span class="badge bg-success">موثق</span>' : `
-            <button onclick="verifyDoctor(${i})" class="btn btn-success btn-sm mt-1">توثيق</button>
-            <button onclick="rejectDoctor(${i})" class="btn btn-danger btn-sm mt-1">رفض</button>
+          <strong>${d.name}</strong> - <a href="${d.license}" target="_blank">📄 View License</a><br/>
+          ${d.verified ? '<span class="badge bg-success">Verified</span>' : `
+            <button onclick="verifyDoctor(${i})" class="btn btn-success btn-sm mt-1">Verify</button>
+            <button onclick="rejectDoctor(${i})" class="btn btn-danger btn-sm mt-1">Reject</button>
           `}
         </div>`;
     }
   });
 }
-function verifyDoctor(i) { doctors[i].verified = true; showToast("✅ تم توثيق الطبيب"); renderDoctors(); }
-function rejectDoctor(i) { showToast("❌ تم رفض الطبيب", "danger"); renderDoctors(); }
+function verifyDoctor(i) { doctors[i].verified = true; showToast("✅ Doctor verified successfully"); renderDoctors(); }
+function rejectDoctor(i) { showToast("❌ Doctor verification rejected", "danger"); renderDoctors(); }
 renderDoctors();
 
 // ======================= Settings =======================
@@ -1375,7 +1375,7 @@ if (settingsForm) {
       timezone: document.getElementById("timezone").value,
     };
     localStorage.setItem("settings", JSON.stringify(data));
-    showToast("⚙️ تم حفظ الإعدادات");
+    showToast("⚙️ Settings saved successfully");
   });
 }
 
