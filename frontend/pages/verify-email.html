@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تأكيد البريد الإلكتروني - صحتك</title>
+    <title>Email Verification - Sahatak</title>
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%230d6efd' d='m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053.918 3.995.78 5.323 1.508 7H.43c-.299-.249-.127-.336 0-.8.064-.227.203-.348.43-.4.315-.077.632-.095.948-.055.328.04.656.097.969.184.311.087.614.195.911.325L6 7.5h2l1.5-2 .5 3h2.5l.5-1H15v1z'/></svg>">
@@ -124,6 +124,9 @@
             // Update page direction and language
             document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
             document.documentElement.setAttribute('lang', lang);
+            
+            // Update page title
+            document.title = lang === 'ar' ? 'تأكيد البريد الإلكتروني - صحتك' : 'Email Verification - Sahatak';
             
             console.log('Updating page content for language:', lang);
             console.log('Translations available:', LanguageManager.translations);
