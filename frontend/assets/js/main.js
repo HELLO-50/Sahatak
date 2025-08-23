@@ -733,7 +733,7 @@ async function handleLogin(event) {
             });
             
             // Handle email verification requirement
-            if (error.errorCode === 'EMAIL_NOT_VERIFIED') {
+            if (error.errorCode === 'USER_NOT_VERIFIED') {
                 console.log('Email verification required, showing special message');
                 const emailVerificationMessage = lang === 'ar' 
                     ? 'يرجى تأكيد بريدك الإلكتروني قبل تسجيل الدخول. تحقق من بريدك الإلكتروني للحصول على رابط التأكيد.'

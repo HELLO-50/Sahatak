@@ -321,7 +321,7 @@ def login():
             return APIResponse.error(
                 message="Please verify your email address before logging in. Check your email for verification link.",
                 status_code=401,
-                error_code="EMAIL_NOT_VERIFIED"
+                error_code=ErrorCodes.USER_NOT_VERIFIED
             )
         
         # Login user and update last login
