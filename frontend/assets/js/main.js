@@ -1437,15 +1437,16 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Login form event listener attached');
     }
     
-    const patientForm = document.getElementById('patientRegisterForm');
-    if (patientForm) {
-        patientForm.addEventListener('submit', handlePatientRegister);
-        console.log('Patient registration form event listener attached');
-    }
+    // Event listeners disabled - using forms.js versions instead
+    // const patientForm = document.getElementById('patientRegisterForm');
+    // if (patientForm) {
+    //     patientForm.addEventListener('submit', handlePatientRegister);
+    //     console.log('Patient registration form event listener attached');
+    // }
     
-    const doctorForm = document.getElementById('doctorRegisterForm');
-    if (doctorForm) {
-        doctorForm.addEventListener('submit', handleDoctorRegister);
-        console.log('Doctor registration form event listener attached');
-    }
+    // const doctorForm = document.getElementById('doctorRegisterForm');
+    // if (doctorForm) {
+    //     doctorForm.addEventListener('submit', handleDoctorRegister);
+    //     console.log('Doctor registration form event listener attached');
+    // }
 });
