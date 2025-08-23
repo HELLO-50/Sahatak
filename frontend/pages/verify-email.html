@@ -197,11 +197,21 @@
                 console.log('Verification response:', response);
 
                 if (response.success) {
-                    // Store user data for dashboard redirect
-                    if (response.user) {
-                        window.verificationUserData = response.user;
+                    // Check if this is an "already verified" case
+                    if (response.data && response.data.already_verified) {
+                        console.log('User already verified, redirecting to login');
+                        // Redirect to login page for already verified users  
+                        setTimeout(() => {
+                            window.location.href = '/Sahatak/';
+                        }, 2000);
+                        showAlreadyVerified();
+                    } else {
+                        // Store user data for dashboard redirect
+                        if (response.data && response.data.user) {
+                            window.verificationUserData = response.data.user;
+                        }
+                        showSuccess();
                     }
-                    showSuccess();
                 } else {
                     showError(response.message || LanguageManager.getTranslation(LanguageManager.getLanguage(), 'email_verification.error_title'));
                 }
@@ -224,6 +234,18 @@
             setTimeout(() => {
                 redirectToDashboard();
             }, 3000);
+        }
+        
+        function showAlreadyVerified() {
+            document.getElementById('loading-state').style.display = 'none';
+            
+            // Update success state for already verified user
+            document.getElementById('success-title').textContent = 'Email Already Verified';
+            document.getElementById('success-message').textContent = 'Your email is already verified. You can now login to your account.';
+            document.getElementById('login-btn-text').textContent = 'Go to Login';
+            
+            // Show modified success state
+            document.getElementById('success-state').style.display = 'block';
         }
         
         function redirectToDashboard() {

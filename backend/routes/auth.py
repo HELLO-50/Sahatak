@@ -500,6 +500,16 @@ def verify_email():
         # Check if user is already verified
         if user.is_verified:
             return APIResponse.success(
+                data={
+                    'verified': True,
+                    'already_verified': True,
+                    'user': {
+                        'id': user.id,
+                        'user_type': user.user_type,
+                        'full_name': user.full_name,
+                        'email': user.email
+                    }
+                },
                 message='Email is already verified'
             )
         
