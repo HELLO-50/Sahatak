@@ -14,7 +14,6 @@ const DashboardTranslations = {
         // Header section
         this.updateElementText('dashboard-title', patient.title);
         this.updateElementText('dashboard-subtitle', patient.subtitle);
-        this.updateElementText('user-status', patient.user_status);
         this.updateElementText('logout-text', patient.logout);
         
         // Show the opposite language (the one you can switch TO)
