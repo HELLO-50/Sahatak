@@ -167,33 +167,41 @@ const FormManager = {
         }, redirectDelay);
     },
 
-    // Generic form submission handler
+    // Get current user language using LanguageManager pattern
+    getCurrentLanguage() {
+        const storedLanguage = LanguageManager.getLanguage();
+        const documentLanguage = document.documentElement.lang;
+        const directionLanguage = document.documentElement.dir === 'rtl' ? 'ar' : 'en';
+        
+        // Use stored language first, then document attributes, default to Arabic
+        let userLanguage = 'ar'; // Default to Arabic
+        if (storedLanguage === 'ar' || storedLanguage === 'en') {
+            userLanguage = storedLanguage;
+        } else if (documentLanguage === 'ar' || documentLanguage === 'en') {
+            userLanguage = documentLanguage;
+        } else if (directionLanguage === 'ar' || directionLanguage === 'en') {
+            userLanguage = directionLanguage;
+        }
+        
+        return userLanguage;
+    },
+
+    // Generic form submission handler using ApiHelper pattern
     async submitForm(formData, endpoint, successCallback, errorCallback) {
         try {
-            // Use the same base URL as ApiHelper
-            const baseUrl = 'https://sahatak.pythonanywhere.com/api';
-            const fullUrl = baseUrl + endpoint;
-            console.log(`Submitting to ${fullUrl}:`, formData);
+            console.log(`Submitting form data to ${endpoint}:`, formData);
             
-            const response = await fetch(fullUrl, {
+            // Use ApiHelper for consistent API calls
+            const result = await ApiHelper.makeRequest(endpoint, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify(formData)
             });
             
-            const result = await response.json();
-            
-            if (response.ok) {
-                successCallback(result);
-            } else {
-                errorCallback(result.message || 'Registration failed');
-            }
-            
+            successCallback(result);
         } catch (error) {
             console.error('Form submission error:', error);
-            errorCallback('Network error. Please try again.');
+            const errorMessage = error.message || 'Registration failed. Please try again.';
+            errorCallback(errorMessage);
         }
     }
 };
@@ -262,20 +270,8 @@ async function handlePatientRegister(event) {
     FormManager.hideAlert('patient-register-error-alert');
     FormManager.hideAlert('patient-register-success-alert');
     
-    // Get language with multiple fallback methods
-    const storedLanguage = localStorage.getItem('sahatak_language');
-    const documentLanguage = document.documentElement.lang;
-    const directionLanguage = document.documentElement.dir === 'rtl' ? 'ar' : 'en';
-    
-    let userLanguage = 'ar'; // Default to Arabic
-    if (storedLanguage === 'ar' || storedLanguage === 'en') {
-        userLanguage = storedLanguage;
-    } else if (documentLanguage === 'ar' || documentLanguage === 'en') {
-        userLanguage = documentLanguage;
-    } else if (directionLanguage === 'ar' || directionLanguage === 'en') {
-        userLanguage = directionLanguage;
-    }
-    
+    // Get language using FormManager pattern
+    const userLanguage = FormManager.getCurrentLanguage();
     console.log('🔥 FORMS.JS - Language detected:', userLanguage);
     
     // Get form data
@@ -367,20 +363,8 @@ function handleDoctorRegister(event) {
     FormManager.hideAlert('doctor-register-error-alert');
     FormManager.hideAlert('doctor-register-success-alert');
     
-    // Get language with multiple fallback methods
-    const storedLanguage = localStorage.getItem('sahatak_language');
-    const documentLanguage = document.documentElement.lang;
-    const directionLanguage = document.documentElement.dir === 'rtl' ? 'ar' : 'en';
-    
-    let userLanguage = 'ar'; // Default to Arabic
-    if (storedLanguage === 'ar' || storedLanguage === 'en') {
-        userLanguage = storedLanguage;
-    } else if (documentLanguage === 'ar' || documentLanguage === 'en') {
-        userLanguage = documentLanguage;
-    } else if (directionLanguage === 'ar' || directionLanguage === 'en') {
-        userLanguage = directionLanguage;
-    }
-    
+    // Get language using FormManager pattern
+    const userLanguage = FormManager.getCurrentLanguage();
     console.log('🔥 FORMS.JS - Doctor Language detected:', userLanguage);
     
     // Get form data
