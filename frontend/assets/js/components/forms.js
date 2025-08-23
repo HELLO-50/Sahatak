@@ -335,22 +335,15 @@ async function handlePatientRegister(event) {
         (result) => {
             FormManager.setFormLoading(formId, false);
             
-            // DEBUG: Show result with alerts to persist even after redirect
-            alert('🔥 FOUND THE BUG! requires_email_verification is in result.data, not result root');
-            alert('🔥 result.data.requires_email_verification: ' + result.data.requires_email_verification);
-            
             console.log('🔥 REGISTRATION SUCCESS RESULT:', result);
-            console.log('🔥 requires_email_verification (root):', result.requires_email_verification);
             console.log('🔥 requires_email_verification (data):', result.data.requires_email_verification);
             
-            // Check if email verification is required (FIXED: check data object)
+            // Check if email verification is required
             if (result.data && result.data.requires_email_verification) {
-                alert('🔥 EMAIL VERIFICATION REQUIRED - Showing verification message');
                 console.log('🔥 EMAIL VERIFICATION REQUIRED - Showing verification message');
                 // Show email verification message instead of redirecting
                 FormManager.showEmailVerificationMessage(result.message);
             } else {
-                alert('🔥 NO EMAIL VERIFICATION - Redirecting to dashboard');
                 console.log('🔥 NO EMAIL VERIFICATION - Redirecting to dashboard');
                 // No email verification needed, proceed to dashboard
                 FormManager.showSuccessScreen(result.message, 'patient');
