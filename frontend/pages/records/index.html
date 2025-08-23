@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>السجلات الطبية | صحتك</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Arabic Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../../assets/css/components/medical-records.css">
+</head>
+<body>
+    <!-- Header -->
+    <nav class="navbar navbar-expand-lg bg-primary navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-heart-pulse me-2"></i>
+                صحتك | Sahatak
+            </a>
+            <div>
+                <button class="btn btn-outline-light me-2" onclick="goToDashboard()">
+                    <i class="bi bi-house me-1"></i>
+                    لوحة التحكم
+                </button>
+                <button class="btn btn-outline-light" onclick="goBack()">
+                    <i class="bi bi-arrow-right me-1"></i>
+                    العودة
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <!-- Page Header -->
+        <div class="text-center mb-5">
+            <h1 class="display-6 mb-3">
+                <i class="bi bi-folder-fill text-primary me-3"></i>
+                السجلات الطبية
+            </h1>
+            <p class="lead text-muted">إدارة شاملة للتاريخ الطبي والوصفات الطبية</p>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="row mb-5">
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <i class="bi bi-file-medical stat-icon text-primary"></i>
+                    <div class="stat-value" id="history-completion">--</div>
+                    <div class="stat-label">اكتمال التاريخ الطبي</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <i class="bi bi-prescription2 stat-icon text-success"></i>
+                    <div class="stat-value" id="active-prescriptions-count">--</div>
+                    <div class="stat-label">الوصفات النشطة</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <i class="bi bi-clock-history stat-icon text-info"></i>
+                    <div class="stat-value" id="recent-updates-count">--</div>
+                    <div class="stat-label">التحديثات الأخيرة</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card">
+                    <i class="bi bi-calendar-check stat-icon text-warning"></i>
+                    <div class="stat-value" id="last-update-days">--</div>
+                    <div class="stat-label">أيام منذ آخر تحديث</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Navigation Cards -->
+        <div class="row">
+            <!-- Medical History Card -->
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100 shadow-lg border-0 medical-nav-card" onclick="goToMedicalHistory()">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-clipboard-medical me-2"></i>
+                            التاريخ الطبي
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-8">
+                                <p class="card-text mb-3">عرض وإدارة التاريخ الطبي الكامل والخط الزمني للتحديثات</p>
+                                
+                                <div class="medical-summary mb-3" id="medical-summary-preview">
+                                    <small class="text-muted">جاري التحميل...</small>
+                                </div>
+                                
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button class="btn btn-outline-primary btn-sm">عرض التاريخ الكامل</button>
+                                    <button class="btn btn-outline-success btn-sm" id="update-history-btn">تحديث البيانات</button>
+                                </div>
+                            </div>
+                            <div class="col-4 text-center">
+                                <i class="bi bi-file-medical display-4 text-primary opacity-25"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prescriptions Card -->
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100 shadow-lg border-0 medical-nav-card" onclick="goToPrescriptions()">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-prescription2 me-2"></i>
+                            الوصفات الطبية
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-8">
+                                <p class="card-text mb-3">إدارة الوصفات الطبية والأدوية الحالية والمكتملة</p>
+                                
+                                <div class="prescription-summary mb-3" id="prescription-summary-preview">
+                                    <small class="text-muted">جاري التحميل...</small>
+                                </div>
+                                
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button class="btn btn-outline-success btn-sm">عرض جميع الوصفات</button>
+                                    <button class="btn btn-outline-info btn-sm" id="active-prescriptions-btn">الوصفات النشطة</button>
+                                </div>
+                            </div>
+                            <div class="col-4 text-center">
+                                <i class="bi bi-prescription2 display-4 text-success opacity-25"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-lg border-0">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-activity me-2"></i>
+                            النشاط الأخير
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="recent-activity">
+                            <div class="loading-state">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">جاري التحميل...</span>
+                                </div>
+                                <p class="mt-3">جاري تحميل النشاط الأخير...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="../../assets/js/main.js"></script>
+    <script src="../../assets/js/components/medical-records-api.js"></script>
+    
+    <script>
+        let userType = null;
+        let medicalData = null;
+        let prescriptionData = null;
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Ensure translations are loaded
+            if (!LanguageManager.translations || !LanguageManager.translations.ar) {
+                await LanguageManager.loadTranslations();
+            }
+            
+            // Get user type
+            const userInfo = await getCurrentUser();
+            userType = userInfo?.user_type || 'patient';
+            
+            await loadOverviewData();
+            setupEventListeners();
+        });
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Update history button
+            document.getElementById('update-history-btn').addEventListener('click', function(e) {
+                e.stopPropagation();
+                goToMedicalHistory();
+            });
+
+            // Active prescriptions button
+            document.getElementById('active-prescriptions-btn').addEventListener('click', function(e) {
+                e.stopPropagation();
+                goToPrescriptions('?status=active');
+            });
+        }
+
+        // Load overview data
+        async function loadOverviewData() {
+            try {
+                // Load medical history data
+                const medicalResult = await MedicalRecordsAPI.getPatientMedicalHistory();
+                if (medicalResult.success) {
+                    medicalData = medicalResult.data;
+                    updateMedicalSummary();
+                }
+
+                // Load prescription data
+                const prescriptionResult = await PrescriptionsAPI.getPrescriptions({ perPage: 50 });
+                if (prescriptionResult.success) {
+                    prescriptionData = prescriptionResult.data;
+                    updatePrescriptionSummary();
+                }
+
+                // Load prescription stats
+                const statsResult = await PrescriptionsAPI.getPrescriptionStats();
+                if (statsResult.success) {
+                    updateStats(statsResult.data);
+                }
+
+                // Load recent activity
+                await loadRecentActivity();
+            } catch (error) {
+                console.error('Error loading overview data:', error);
+                showError('خطأ في تحميل بيانات النظرة العامة');
+            }
+        }
+
+        // Update medical summary
+        function updateMedicalSummary() {
+            const container = document.getElementById('medical-summary-preview');
+            
+            if (!medicalData || !medicalData.medicalHistory) {
+                container.innerHTML = '<small class="text-warning">التاريخ الطبي غير مكتمل</small>';
+                return;
+            }
+
+            const history = medicalData.medicalHistory;
+            const bmi = MedicalRecordsUtils.calculateBMI(history.height, history.weight);
+            const bmiStatus = MedicalRecordsUtils.getBMIStatus(bmi);
+
+            const summaryHtml = `
+                <div class="row text-center">
+                    <div class="col-4">
+                        <div class="bg-light rounded p-2 mb-1">
+                            <small class="text-muted d-block">فصيلة الدم</small>
+                            <strong>${history.blood_type || '--'}</strong>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="bg-light rounded p-2 mb-1">
+                            <small class="text-muted d-block">الوزن</small>
+                            <strong>${history.weight ? history.weight + ' كجم' : '--'}</strong>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="bg-light rounded p-2 mb-1" style="background-color: ${bmiStatus.color}15 !important">
+                            <small class="text-muted d-block">مؤشر كتلة الجسم</small>
+                            <strong style="color: ${bmiStatus.color}">${bmi || '--'}</strong>
+                        </div>
+                    </div>
+                </div>
+                <small class="text-muted">
+                    آخر تحديث: ${history.medical_history_last_updated ? 
+                        new Date(history.medical_history_last_updated).toLocaleDateString('ar-SA') : 
+                        'لم يتم التحديث'}
+                </small>
+            `;
+
+            container.innerHTML = summaryHtml;
+        }
+
+        // Update prescription summary
+        function updatePrescriptionSummary() {
+            const container = document.getElementById('prescription-summary-preview');
+            
+            if (!prescriptionData || !prescriptionData.prescriptions) {
+                container.innerHTML = '<small class="text-muted">لا توجد وصفات طبية</small>';
+                return;
+            }
+
+            const prescriptions = prescriptionData.prescriptions;
+            const activePrescriptions = prescriptions.filter(p => p.status === 'active');
+            const expiringSoon = activePrescriptions.filter(p => {
+                if (!p.end_date) return false;
+                const endDate = new Date(p.end_date);
+                return endDate <= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+            });
+
+            const summaryHtml = `
+                <div class="row text-center">
+                    <div class="col-4">
+                        <div class="bg-light rounded p-2 mb-1">
+                            <small class="text-muted d-block">الإجمالي</small>
+                            <strong>${prescriptions.length}</strong>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="bg-light rounded p-2 mb-1">
+                            <small class="text-muted d-block">النشطة</small>
+                            <strong class="text-success">${activePrescriptions.length}</strong>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="bg-light rounded p-2 mb-1">
+                            <small class="text-muted d-block">تنتهي قريباً</small>
+                            <strong class="text-warning">${expiringSoon.length}</strong>
+                        </div>
+                    </div>
+                </div>
+                ${expiringSoon.length > 0 ? 
+                    '<small class="text-warning"><i class="bi bi-exclamation-triangle me-1"></i>لديك وصفات تنتهي خلال أسبوع</small>' : 
+                    '<small class="text-muted">جميع الوصفات محدثة</small>'}
+            `;
+
+            container.innerHTML = summaryHtml;
+        }
+
+        // Update stats
+        function updateStats(stats) {
+            // Calculate completion percentage
+            let completionPercentage = 0;
+            if (medicalData && medicalData.medicalHistory) {
+                const requiredFields = ['medical_history', 'allergies', 'current_medications'];
+                const completedRequired = requiredFields.filter(field => 
+                    medicalData.medicalHistory[field] && medicalData.medicalHistory[field].trim()
+                ).length;
+                completionPercentage = Math.round((completedRequired / requiredFields.length) * 100);
+            }
+
+            // Calculate days since last update
+            let daysSinceUpdate = '--';
+            if (medicalData && medicalData.medicalHistory && medicalData.medicalHistory.medical_history_last_updated) {
+                const lastUpdate = new Date(medicalData.medicalHistory.medical_history_last_updated);
+                const today = new Date();
+                daysSinceUpdate = Math.floor((today - lastUpdate) / (1000 * 60 * 60 * 24));
+            }
+
+            // Update display
+            document.getElementById('history-completion').textContent = completionPercentage + '%';
+            document.getElementById('active-prescriptions-count').textContent = stats.active_prescriptions || 0;
+            document.getElementById('recent-updates-count').textContent = (medicalData?.historyUpdates?.length || 0) + (prescriptionData?.prescriptions?.length || 0);
+            document.getElementById('last-update-days').textContent = daysSinceUpdate === '--' ? daysSinceUpdate : daysSinceUpdate + ' يوم';
+        }
+
+        // Load recent activity
+        async function loadRecentActivity() {
+            const container = document.getElementById('recent-activity');
+            
+            try {
+                const activities = [];
+
+                // Add medical history updates
+                if (medicalData && medicalData.historyUpdates) {
+                    medicalData.historyUpdates.forEach(update => {
+                        activities.push({
+                            type: 'medical_update',
+                            date: new Date(update.created_at),
+                            title: MedicalRecordsUtils.getUpdateTypeInfo(update.update_type).title,
+                            description: update.notes || 'تحديث التاريخ الطبي',
+                            icon: MedicalRecordsUtils.getUpdateTypeInfo(update.update_type).icon,
+                            color: MedicalRecordsUtils.getUpdateTypeInfo(update.update_type).class
+                        });
+                    });
+                }
+
+                // Add recent prescriptions
+                if (prescriptionData && prescriptionData.prescriptions) {
+                    prescriptionData.prescriptions.slice(0, 5).forEach(prescription => {
+                        activities.push({
+                            type: 'prescription',
+                            date: new Date(prescription.created_at),
+                            title: 'وصفة طبية جديدة',
+                            description: `${prescription.medication_name} - ${prescription.dosage}`,
+                            icon: 'bi-prescription2',
+                            color: 'bg-success'
+                        });
+                    });
+                }
+
+                // Sort by date (newest first)
+                activities.sort((a, b) => b.date - a.date);
+
+                // Render activities
+                if (activities.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="bi bi-activity"></i>
+                            <h6>لا يوجد نشاط حديث</h6>
+                            <p>سيظهر هنا النشاط الطبي الأخير</p>
+                        </div>
+                    `;
+                } else {
+                    const activitiesHtml = activities.slice(0, 8).map(activity => `
+                        <div class="activity-item d-flex align-items-center py-3 border-bottom">
+                            <div class="activity-icon me-3">
+                                <div class="rounded-circle ${activity.color} d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="bi ${activity.icon} text-white"></i>
+                                </div>
+                            </div>
+                            <div class="activity-content flex-grow-1">
+                                <h6 class="mb-1">${activity.title}</h6>
+                                <p class="text-muted small mb-1">${activity.description}</p>
+                                <small class="text-muted">
+                                    <i class="bi bi-clock me-1"></i>
+                                    ${activity.date.toLocaleDateString('ar-SA')} - ${activity.date.toLocaleTimeString('ar-SA', {hour: '2-digit', minute: '2-digit'})}
+                                </small>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    container.innerHTML = activitiesHtml;
+                }
+            } catch (error) {
+                console.error('Error loading recent activity:', error);
+                container.innerHTML = `
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-exclamation-circle me-2"></i>
+                        خطأ في تحميل النشاط الأخير
+                    </div>
+                `;
+            }
+        }
+
+        // Navigation functions
+        function goToMedicalHistory() {
+            window.location.href = 'medical-history.html';
+        }
+
+        function goToPrescriptions(params = '') {
+            window.location.href = 'prescriptions.html' + params;
+        }
+
+        // Helper functions
+        async function getCurrentUser() {
+            try {
+                const response = await ApiHelper.makeRequest('/users/profile');
+                return response.success ? response.data : null;
+            } catch (error) {
+                console.error('Error getting current user:', error);
+                return null;
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'alert alert-danger alert-dismissible fade show position-fixed';
+            errorDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+            errorDiv.innerHTML = `
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(errorDiv);
+            
+            setTimeout(() => {
+                if (errorDiv.parentNode) {
+                    errorDiv.remove();
+                }
+            }, 5000);
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        function goToDashboard() {
+            const dashboardUrl = userType === 'doctor' ? '../dashboard/doctor.html' : '../dashboard/patient.html';
+            window.location.href = dashboardUrl;
+        }
+    </script>
+
+    <style>
+        .medical-nav-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .medical-nav-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none !important;
+        }
+
+        .activity-icon {
+            flex-shrink: 0;
+        }
+    </style>
+</body>
+</html>

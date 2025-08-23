@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الوصفات الطبية | صحتك</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Arabic Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../../assets/css/components/medical-records.css">
+</head>
+<body>
+    <!-- Header -->
+    <nav class="navbar navbar-expand-lg bg-primary navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-heart-pulse me-2"></i>
+                صحتك | Sahatak
+            </a>
+            <div>
+                <button class="btn btn-success me-2" id="create-prescription-btn" style="display: none;">
+                    <i class="bi bi-plus me-1"></i>
+                    وصفة طبية جديدة
+                </button>
+                <button class="btn btn-outline-light me-2" onclick="goToDashboard()">
+                    <i class="bi bi-house me-1"></i>
+                    لوحة التحكم
+                </button>
+                <button class="btn btn-outline-light" onclick="goBack()">
+                    <i class="bi bi-arrow-right me-1"></i>
+                    العودة
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <!-- Page Header -->
+        <div class="text-center mb-5">
+            <h1 class="display-6 mb-3">
+                <i class="bi bi-prescription2 text-primary me-3"></i>
+                الوصفات الطبية
+            </h1>
+            <p class="lead text-muted">إدارة الوصفات الطبية والأدوية</p>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="stats-grid mb-4">
+            <div class="stat-card">
+                <i class="bi bi-prescription2 stat-icon text-primary"></i>
+                <div class="stat-value" id="total-prescriptions">--</div>
+                <div class="stat-label">إجمالي الوصفات</div>
+            </div>
+            <div class="stat-card">
+                <i class="bi bi-check-circle stat-icon text-success"></i>
+                <div class="stat-value" id="active-prescriptions">--</div>
+                <div class="stat-label">الوصفات النشطة</div>
+            </div>
+            <div class="stat-card">
+                <i class="bi bi-clipboard-check stat-icon text-info"></i>
+                <div class="stat-value" id="completed-prescriptions">--</div>
+                <div class="stat-label">الوصفات المكتملة</div>
+            </div>
+            <div class="stat-card" id="doctor-stats" style="display: none;">
+                <i class="bi bi-people stat-icon text-warning"></i>
+                <div class="stat-value" id="patients-with-prescriptions">--</div>
+                <div class="stat-label">المرضى</div>
+            </div>
+        </div>
+
+        <!-- Search and Filter Controls -->
+        <div class="search-controls">
+            <div class="row align-items-center">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <div class="position-relative">
+                        <input type="text" class="form-control" id="search-prescriptions" placeholder="بحث في الوصفات الطبية...">
+                        <i class="bi bi-search search-icon"></i>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-6">
+                            <select class="form-select" id="status-filter">
+                                <option value="">جميع الحالات</option>
+                                <option value="active">النشطة</option>
+                                <option value="completed">المكتملة</option>
+                                <option value="cancelled">المُلغاة</option>
+                                <option value="expired">المنتهية الصلاحية</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <select class="form-select" id="sort-prescriptions">
+                                <option value="newest">الأحدث أولاً</option>
+                                <option value="oldest">الأقدم أولاً</option>
+                                <option value="medication">ترتيب بالدواء</option>
+                                <option value="status">ترتيب بالحالة</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prescriptions List -->
+        <div id="prescriptions-container">
+            <div class="loading-state">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">جاري التحميل...</span>
+                </div>
+                <p class="mt-3">جاري تحميل الوصفات الطبية...</p>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <nav aria-label="Prescription pagination" id="pagination-container" style="display: none;">
+            <ul class="pagination justify-content-center mt-4" id="pagination">
+                <!-- Pagination will be populated by JavaScript -->
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Create/Edit Prescription Modal (For Doctors) -->
+    <div class="modal fade" id="prescription-modal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="prescription-modal-title">
+                        <i class="bi bi-prescription2 text-primary me-2"></i>
+                        وصفة طبية جديدة
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="prescription-form" class="prescription-form">
+                        <!-- Patient Selection (for doctors) -->
+                        <div class="row mb-4" id="patient-selection-section">
+                            <div class="col-md-6">
+                                <label for="patient-select" class="form-label">المريض</label>
+                                <select class="form-select" id="patient-select" required>
+                                    <option value="">اختر المريض</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="appointment-select" class="form-label">الموعد</label>
+                                <select class="form-select" id="appointment-select" required>
+                                    <option value="">اختر الموعد</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Medication Information -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="medication-name" class="form-label">اسم الدواء *</label>
+                                <input type="text" class="form-control" id="medication-name" required placeholder="مثل: باراسيتامول">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="dosage" class="form-label">الجرعة *</label>
+                                <input type="text" class="form-control" id="dosage" required placeholder="مثل: 500 مجم">
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="frequency" class="form-label">التكرار *</label>
+                                <input type="text" class="form-control" id="frequency" required placeholder="مثل: 3 مرات يومياً">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="duration" class="form-label">المدة *</label>
+                                <input type="text" class="form-control" id="duration" required placeholder="مثل: 7 أيام">
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="quantity" class="form-label">الكمية</label>
+                                <input type="text" class="form-control" id="quantity" placeholder="مثل: 21 قرص">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="refills-allowed" class="form-label">عدد مرات التجديد المسموح</label>
+                                <input type="number" class="form-control" id="refills-allowed" min="0" max="10" value="0">
+                            </div>
+                        </div>
+
+                        <!-- Dates -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="start-date" class="form-label">تاريخ البدء</label>
+                                <input type="date" class="form-control" id="start-date">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="end-date" class="form-label">تاريخ الانتهاء</label>
+                                <input type="date" class="form-control" id="end-date">
+                            </div>
+                        </div>
+
+                        <!-- Instructions and Notes -->
+                        <div class="mb-4">
+                            <label for="instructions" class="form-label">تعليمات الاستخدام</label>
+                            <textarea class="form-control" id="instructions" rows="3" placeholder="مثل: تناول مع الطعام، تجنب القيادة..."></textarea>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="notes" class="form-label">ملاحظات الطبيب</label>
+                            <textarea class="form-control" id="notes" rows="2" placeholder="ملاحظات إضافية للصيدلي أو المريض..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x me-1"></i>
+                        إلغاء
+                    </button>
+                    <button type="button" class="btn btn-primary" id="save-prescription-btn">
+                        <i class="bi bi-check-lg me-1"></i>
+                        حفظ الوصفة
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prescription Details Modal -->
+    <div class="modal fade" id="prescription-details-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="prescription-details-title">
+                        تفاصيل الوصفة الطبية
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="prescription-details-body">
+                    <!-- Details will be populated by JavaScript -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning d-none" id="edit-prescription-btn">
+                        <i class="bi bi-pencil me-1"></i>
+                        تعديل
+                    </button>
+                    <button type="button" class="btn btn-success d-none" id="mark-completed-btn">
+                        <i class="bi bi-check-circle me-1"></i>
+                        تمييز كمكتمل
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Change Modal -->
+    <div class="modal fade" id="status-change-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-arrow-repeat text-primary me-2"></i>
+                        تغيير حالة الوصفة
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>هل تريد تمييز هذه الوصفة كمكتملة؟</p>
+                    <div class="mb-3">
+                        <label for="completion-notes" class="form-label">ملاحظات (اختياري)</label>
+                        <textarea class="form-control" id="completion-notes" rows="3" placeholder="أي ملاحظات حول إكمال الوصفة..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" onclick="confirmStatusChange()">
+                        <i class="bi bi-check me-1"></i>
+                        نعم، تمييز كمكتمل
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="../../assets/js/main.js"></script>
+    <script src="../../assets/js/components/medical-records-api.js"></script>
+    
+    <script>
+        let prescriptions = [];
+        let currentPrescription = null;
+        let currentPage = 1;
+        let totalPages = 1;
+        let currentFilter = '';
+        let currentSort = 'newest';
+        let currentSearch = '';
+        let userType = null;
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Ensure translations are loaded
+            if (!LanguageManager.translations || !LanguageManager.translations.ar) {
+                await LanguageManager.loadTranslations();
+            }
+            
+            // Get user type
+            const userInfo = await getCurrentUser();
+            userType = userInfo?.user_type || 'patient';
+            
+            // Show create button for doctors
+            if (userType === 'doctor') {
+                document.getElementById('create-prescription-btn').style.display = 'block';
+                document.getElementById('doctor-stats').style.display = 'block';
+            }
+            
+            await loadPrescriptionStats();
+            await loadPrescriptions();
+            setupEventListeners();
+            
+            // Set today as default start date
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('start-date').value = today;
+        });
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Create prescription button
+            const createBtn = document.getElementById('create-prescription-btn');
+            if (createBtn) {
+                createBtn.addEventListener('click', openCreatePrescriptionModal);
+            }
+            
+            // Save prescription button
+            document.getElementById('save-prescription-btn').addEventListener('click', savePrescription);
+            
+            // Search input
+            document.getElementById('search-prescriptions').addEventListener('input', debounce(handleSearch, 300));
+            
+            // Filter and sort
+            document.getElementById('status-filter').addEventListener('change', handleFilterChange);
+            document.getElementById('sort-prescriptions').addEventListener('change', handleSortChange);
+            
+            // Patient selection change (for doctors)
+            const patientSelect = document.getElementById('patient-select');
+            if (patientSelect) {
+                patientSelect.addEventListener('change', loadPatientAppointments);
+            }
+        }
+
+        // Load prescription statistics
+        async function loadPrescriptionStats() {
+            try {
+                const response = await ApiHelper.makeRequest('/prescriptions/stats');
+                
+                if (response.success) {
+                    const stats = response.data.stats;
+                    
+                    if (userType === 'patient') {
+                        document.getElementById('total-prescriptions').textContent = stats.total_prescriptions || 0;
+                        document.getElementById('active-prescriptions').textContent = stats.active_prescriptions || 0;
+                        document.getElementById('completed-prescriptions').textContent = stats.completed_prescriptions || 0;
+                    } else if (userType === 'doctor') {
+                        document.getElementById('total-prescriptions').textContent = stats.total_prescribed || 0;
+                        document.getElementById('active-prescriptions').textContent = stats.active_prescriptions || 0;
+                        document.getElementById('completed-prescriptions').textContent = stats.prescribed_this_month || 0;
+                        document.getElementById('patients-with-prescriptions').textContent = stats.patients_with_prescriptions || 0;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading prescription stats:', error);
+            }
+        }
+
+        // Load prescriptions
+        async function loadPrescriptions(page = 1) {
+            try {
+                currentPage = page;
+                const params = new URLSearchParams({
+                    page: page,
+                    per_page: 12
+                });
+                
+                if (currentFilter) {
+                    params.append('status', currentFilter);
+                }
+                
+                const response = await ApiHelper.makeRequest(`/prescriptions/?${params}`);
+                
+                if (response.success) {
+                    prescriptions = response.data.prescriptions || [];
+                    totalPages = response.meta?.pagination?.pages || 1;
+                    
+                    // Apply client-side filtering and sorting
+                    let filteredPrescriptions = [...prescriptions];
+                    
+                    // Search filter
+                    if (currentSearch) {
+                        filteredPrescriptions = filteredPrescriptions.filter(prescription => 
+                            prescription.medication_name.toLowerCase().includes(currentSearch.toLowerCase()) ||
+                            (prescription.doctor_name && prescription.doctor_name.toLowerCase().includes(currentSearch.toLowerCase())) ||
+                            (prescription.patient_name && prescription.patient_name.toLowerCase().includes(currentSearch.toLowerCase()))
+                        );
+                    }
+                    
+                    // Sort
+                    sortPrescriptions(filteredPrescriptions);
+                    
+                    renderPrescriptions(filteredPrescriptions);
+                    renderPagination();
+                } else {
+                    showError('فشل في تحميل الوصفات الطبية');
+                }
+            } catch (error) {
+                console.error('Error loading prescriptions:', error);
+                showError('خطأ في تحميل الوصفات الطبية');
+            }
+        }
+
+        // Render prescriptions
+        function renderPrescriptions(prescriptionsToRender) {
+            const container = document.getElementById('prescriptions-container');
+            
+            if (prescriptionsToRender.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="bi bi-prescription2"></i>
+                        <h5>لا توجد وصفات طبية</h5>
+                        <p>لم يتم العثور على وصفات طبية بناءً على المعايير المحددة</p>
+                        ${userType === 'doctor' ? `
+                            <button class="btn btn-primary" onclick="openCreatePrescriptionModal()">
+                                <i class="bi bi-plus me-1"></i>
+                                إنشاء وصفة طبية
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+                return;
+            }
+            
+            const prescriptionsHtml = prescriptionsToRender.map(prescription => {
+                const date = new Date(prescription.created_at);
+                const statusInfo = getPrescriptionStatusInfo(prescription.status);
+                const endDate = prescription.end_date ? new Date(prescription.end_date) : null;
+                const isExpiringSoon = endDate && endDate <= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+                
+                return `
+                    <div class="prescription-card" onclick="showPrescriptionDetails(${prescription.id})">
+                        <div class="prescription-header">
+                            <div>
+                                <h5 class="prescription-medication">${prescription.medication_name}</h5>
+                                <p class="prescription-dosage">${prescription.dosage} - ${prescription.frequency}</p>
+                                <small class="text-muted">المدة: ${prescription.duration}</small>
+                            </div>
+                            <div>
+                                <span class="prescription-status ${prescription.status}">${statusInfo.text}</span>
+                                ${isExpiringSoon ? '<div class="badge bg-warning text-dark mt-1">ينتهي قريباً</div>' : ''}
+                            </div>
+                        </div>
+                        
+                        <div class="prescription-details">
+                            ${prescription.instructions ? `<p><strong>التعليمات:</strong> ${prescription.instructions}</p>` : ''}
+                            ${prescription.quantity ? `<p><strong>الكمية:</strong> ${prescription.quantity}</p>` : ''}
+                        </div>
+                        
+                        <div class="prescription-meta">
+                            <div>
+                                <i class="bi bi-calendar me-1"></i>
+                                ${date.toLocaleDateString('ar-SA')}
+                            </div>
+                            <div>
+                                ${userType === 'patient' && prescription.doctor_name ? `
+                                    <i class="bi bi-person-badge me-1"></i>
+                                    د. ${prescription.doctor_name}
+                                ` : ''}
+                                ${userType === 'doctor' && prescription.patient_name ? `
+                                    <i class="bi bi-person me-1"></i>
+                                    ${prescription.patient_name}
+                                ` : ''}
+                            </div>
+                        </div>
+                        
+                        <div class="prescription-actions">
+                            <button class="btn btn-outline-primary btn-sm" onclick="event.stopPropagation(); showPrescriptionDetails(${prescription.id})">
+                                <i class="bi bi-eye me-1"></i>
+                                التفاصيل
+                            </button>
+                            ${prescription.status === 'active' && userType === 'patient' ? `
+                                <button class="btn btn-outline-success btn-sm" onclick="event.stopPropagation(); markAsCompleted(${prescription.id})">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    مكتمل
+                                </button>
+                            ` : ''}
+                            ${userType === 'doctor' && prescription.status === 'active' ? `
+                                <button class="btn btn-outline-warning btn-sm" onclick="event.stopPropagation(); editPrescription(${prescription.id})">
+                                    <i class="bi bi-pencil me-1"></i>
+                                    تعديل
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = prescriptionsHtml;
+        }
+
+        // Show prescription details
+        async function showPrescriptionDetails(prescriptionId) {
+            try {
+                const response = await ApiHelper.makeRequest(`/prescriptions/${prescriptionId}`);
+                
+                if (response.success) {
+                    currentPrescription = response.data.prescription;
+                    const prescription = currentPrescription;
+                    
+                    const modal = document.getElementById('prescription-details-modal');
+                    const title = document.getElementById('prescription-details-title');
+                    const body = document.getElementById('prescription-details-body');
+                    
+                    title.innerHTML = `
+                        <i class="bi bi-prescription2 text-primary me-2"></i>
+                        ${prescription.medication_name}
+                    `;
+                    
+                    const createdDate = new Date(prescription.created_at);
+                    const startDate = prescription.start_date ? new Date(prescription.start_date) : null;
+                    const endDate = prescription.end_date ? new Date(prescription.end_date) : null;
+                    
+                    body.innerHTML = `
+                        <div class="prescription-details-content">
+                            <!-- Basic Information -->
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <h6 class="text-primary">معلومات الدواء</h6>
+                                    <table class="table table-borderless table-sm">
+                                        <tr>
+                                            <td><strong>اسم الدواء:</strong></td>
+                                            <td>${prescription.medication_name}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>الجرعة:</strong></td>
+                                            <td>${prescription.dosage}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>التكرار:</strong></td>
+                                            <td>${prescription.frequency}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>المدة:</strong></td>
+                                            <td>${prescription.duration}</td>
+                                        </tr>
+                                        ${prescription.quantity ? `
+                                            <tr>
+                                                <td><strong>الكمية:</strong></td>
+                                                <td>${prescription.quantity}</td>
+                                            </tr>
+                                        ` : ''}
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-primary">معلومات الوصفة</h6>
+                                    <table class="table table-borderless table-sm">
+                                        <tr>
+                                            <td><strong>الحالة:</strong></td>
+                                            <td><span class="prescription-status ${prescription.status}">${getPrescriptionStatusInfo(prescription.status).text}</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>تاريخ الوصف:</strong></td>
+                                            <td>${createdDate.toLocaleDateString('ar-SA')}</td>
+                                        </tr>
+                                        ${startDate ? `
+                                            <tr>
+                                                <td><strong>تاريخ البدء:</strong></td>
+                                                <td>${startDate.toLocaleDateString('ar-SA')}</td>
+                                            </tr>
+                                        ` : ''}
+                                        ${endDate ? `
+                                            <tr>
+                                                <td><strong>تاريخ الانتهاء:</strong></td>
+                                                <td>${endDate.toLocaleDateString('ar-SA')}</td>
+                                            </tr>
+                                        ` : ''}
+                                        <tr>
+                                            <td><strong>التجديدات المسموحة:</strong></td>
+                                            <td>${prescription.refills_allowed || 0}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <!-- Instructions and Notes -->
+                            ${prescription.instructions ? `
+                                <div class="mb-4">
+                                    <h6 class="text-primary">تعليمات الاستخدام</h6>
+                                    <div class="bg-light rounded p-3">
+                                        ${prescription.instructions}
+                                    </div>
+                                </div>
+                            ` : ''}
+                            
+                            ${prescription.notes ? `
+                                <div class="mb-4">
+                                    <h6 class="text-primary">ملاحظات الطبيب</h6>
+                                    <div class="bg-light rounded p-3">
+                                        ${prescription.notes}
+                                    </div>
+                                </div>
+                            ` : ''}
+                            
+                            <!-- Doctor/Patient Information -->
+                            <div class="row">
+                                ${prescription.doctor_name && userType === 'patient' ? `
+                                    <div class="col-md-6">
+                                        <h6 class="text-primary">الطبيب المعالج</h6>
+                                        <p><i class="bi bi-person-badge me-2"></i>د. ${prescription.doctor_name}</p>
+                                    </div>
+                                ` : ''}
+                                ${prescription.patient_name && userType === 'doctor' ? `
+                                    <div class="col-md-6">
+                                        <h6 class="text-primary">المريض</h6>
+                                        <p><i class="bi bi-person me-2"></i>${prescription.patient_name}</p>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Show/hide action buttons
+                    const editBtn = document.getElementById('edit-prescription-btn');
+                    const completeBtn = document.getElementById('mark-completed-btn');
+                    
+                    if (userType === 'doctor' && prescription.status === 'active') {
+                        editBtn.classList.remove('d-none');
+                        editBtn.onclick = () => editPrescription(prescription.id);
+                    } else {
+                        editBtn.classList.add('d-none');
+                    }
+                    
+                    if (userType === 'patient' && prescription.status === 'active') {
+                        completeBtn.classList.remove('d-none');
+                        completeBtn.onclick = () => markAsCompleted(prescription.id);
+                    } else {
+                        completeBtn.classList.add('d-none');
+                    }
+                    
+                    new bootstrap.Modal(modal).show();
+                } else {
+                    showError('فشل في تحميل تفاصيل الوصفة');
+                }
+            } catch (error) {
+                console.error('Error loading prescription details:', error);
+                showError('خطأ في تحميل تفاصيل الوصفة');
+            }
+        }
+
+        // Open create prescription modal
+        function openCreatePrescriptionModal() {
+            if (userType !== 'doctor') return;
+            
+            // Reset form
+            document.getElementById('prescription-form').reset();
+            document.getElementById('prescription-modal-title').innerHTML = `
+                <i class="bi bi-prescription2 text-primary me-2"></i>
+                وصفة طبية جديدة
+            `;
+            
+            // Set today as default start date
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('start-date').value = today;
+            
+            // Load patients for selection
+            loadPatients();
+            
+            const modal = new bootstrap.Modal(document.getElementById('prescription-modal'));
+            modal.show();
+        }
+
+        // Load patients for prescription creation
+        async function loadPatients() {
+            try {
+                const response = await ApiHelper.makeRequest('/users/patients');
+                
+                if (response.success) {
+                    const patients = response.data.patients || [];
+                    const select = document.getElementById('patient-select');
+                    
+                    select.innerHTML = '<option value="">اختر المريض</option>';
+                    patients.forEach(patient => {
+                        const option = document.createElement('option');
+                        option.value = patient.id;
+                        option.textContent = patient.user.full_name;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading patients:', error);
+            }
+        }
+
+        // Load patient appointments
+        async function loadPatientAppointments() {
+            const patientId = document.getElementById('patient-select').value;
+            const appointmentSelect = document.getElementById('appointment-select');
+            
+            appointmentSelect.innerHTML = '<option value="">اختر الموعد</option>';
+            
+            if (!patientId) return;
+            
+            try {
+                const response = await ApiHelper.makeRequest(`/appointments/?patient_id=${patientId}`);
+                
+                if (response.success) {
+                    const appointments = response.data.appointments || [];
+                    const completedAppointments = appointments.filter(apt => apt.status === 'completed');
+                    
+                    completedAppointments.forEach(appointment => {
+                        const option = document.createElement('option');
+                        option.value = appointment.id;
+                        const date = new Date(appointment.appointment_date);
+                        option.textContent = `موعد ${date.toLocaleDateString('ar-SA')} - ${appointment.reason_for_visit || 'استشارة'}`;
+                        appointmentSelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading appointments:', error);
+            }
+        }
+
+        // Save prescription
+        async function savePrescription() {
+            const formData = {
+                patient_id: document.getElementById('patient-select').value,
+                appointment_id: document.getElementById('appointment-select').value,
+                medication_name: document.getElementById('medication-name').value,
+                dosage: document.getElementById('dosage').value,
+                frequency: document.getElementById('frequency').value,
+                duration: document.getElementById('duration').value,
+                quantity: document.getElementById('quantity').value,
+                instructions: document.getElementById('instructions').value,
+                notes: document.getElementById('notes').value,
+                refills_allowed: document.getElementById('refills-allowed').value,
+                start_date: document.getElementById('start-date').value,
+                end_date: document.getElementById('end-date').value
+            };
+            
+            // Validate required fields
+            if (!formData.patient_id || !formData.appointment_id || !formData.medication_name || 
+                !formData.dosage || !formData.frequency || !formData.duration) {
+                showError('يرجى ملء جميع الحقول المطلوبة');
+                return;
+            }
+            
+            try {
+                const response = await ApiHelper.makeRequest('/prescriptions/', {
+                    method: 'POST',
+                    body: JSON.stringify(formData)
+                });
+                
+                if (response.success) {
+                    showSuccess('تم إنشاء الوصفة الطبية بنجاح');
+                    bootstrap.Modal.getInstance(document.getElementById('prescription-modal')).hide();
+                    await loadPrescriptions();
+                    await loadPrescriptionStats();
+                } else {
+                    showError(response.message || 'فشل في إنشاء الوصفة الطبية');
+                }
+            } catch (error) {
+                console.error('Error saving prescription:', error);
+                showError('خطأ في حفظ الوصفة الطبية');
+            }
+        }
+
+        // Mark prescription as completed
+        function markAsCompleted(prescriptionId) {
+            currentPrescription = prescriptions.find(p => p.id === prescriptionId);
+            const modal = new bootstrap.Modal(document.getElementById('status-change-modal'));
+            modal.show();
+        }
+
+        // Confirm status change
+        async function confirmStatusChange() {
+            if (!currentPrescription) return;
+            
+            try {
+                const response = await ApiHelper.makeRequest(`/prescriptions/${currentPrescription.id}/status`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        status: 'completed',
+                        notes: document.getElementById('completion-notes').value
+                    })
+                });
+                
+                if (response.success) {
+                    showSuccess('تم تحديث حالة الوصفة بنجاح');
+                    bootstrap.Modal.getInstance(document.getElementById('status-change-modal')).hide();
+                    await loadPrescriptions();
+                    await loadPrescriptionStats();
+                } else {
+                    showError(response.message || 'فشل في تحديث حالة الوصفة');
+                }
+            } catch (error) {
+                console.error('Error updating prescription status:', error);
+                showError('خطأ في تحديث حالة الوصفة');
+            }
+        }
+
+        // Handle search
+        function handleSearch(event) {
+            currentSearch = event.target.value;
+            loadPrescriptions(1);
+        }
+
+        // Handle filter change
+        function handleFilterChange(event) {
+            currentFilter = event.target.value;
+            loadPrescriptions(1);
+        }
+
+        // Handle sort change
+        function handleSortChange(event) {
+            currentSort = event.target.value;
+            loadPrescriptions(1);
+        }
+
+        // Sort prescriptions
+        function sortPrescriptions(prescriptions) {
+            prescriptions.sort((a, b) => {
+                switch (currentSort) {
+                    case 'newest':
+                        return new Date(b.created_at) - new Date(a.created_at);
+                    case 'oldest':
+                        return new Date(a.created_at) - new Date(b.created_at);
+                    case 'medication':
+                        return a.medication_name.localeCompare(b.medication_name);
+                    case 'status':
+                        return a.status.localeCompare(b.status);
+                    default:
+                        return 0;
+                }
+            });
+        }
+
+        // Render pagination
+        function renderPagination() {
+            const container = document.getElementById('pagination-container');
+            const pagination = document.getElementById('pagination');
+            
+            if (totalPages <= 1) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'block';
+            
+            let paginationHtml = '';
+            
+            // Previous button
+            paginationHtml += `
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="loadPrescriptions(${currentPage - 1}); return false;">السابق</a>
+                </li>
+            `;
+            
+            // Page numbers
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, currentPage + 2);
+            
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHtml += `
+                    <li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="loadPrescriptions(${i}); return false;">${i}</a>
+                    </li>
+                `;
+            }
+            
+            // Next button
+            paginationHtml += `
+                <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="loadPrescriptions(${currentPage + 1}); return false;">التالي</a>
+                </li>
+            `;
+            
+            pagination.innerHTML = paginationHtml;
+        }
+
+        // Helper functions
+        function getPrescriptionStatusInfo(status) {
+            const statuses = {
+                'active': { text: 'نشط', class: 'active' },
+                'completed': { text: 'مكتمل', class: 'completed' },
+                'cancelled': { text: 'مُلغى', class: 'cancelled' },
+                'expired': { text: 'منتهي الصلاحية', class: 'expired' }
+            };
+            return statuses[status] || { text: status, class: 'secondary' };
+        }
+
+        async function getCurrentUser() {
+            try {
+                const response = await ApiHelper.makeRequest('/users/profile');
+                return response.success ? response.data : null;
+            } catch (error) {
+                console.error('Error getting current user:', error);
+                return null;
+            }
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'alert alert-danger alert-dismissible fade show position-fixed';
+            errorDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+            errorDiv.innerHTML = `
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(errorDiv);
+            
+            setTimeout(() => {
+                if (errorDiv.parentNode) {
+                    errorDiv.remove();
+                }
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'alert alert-success alert-dismissible fade show position-fixed';
+            successDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+            successDiv.innerHTML = `
+                <i class="bi bi-check-circle-fill me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(successDiv);
+            
+            setTimeout(() => {
+                if (successDiv.parentNode) {
+                    successDiv.remove();
+                }
+            }, 3000);
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        function goToDashboard() {
+            const dashboardUrl = userType === 'doctor' ? '../dashboard/doctor.html' : '../dashboard/patient.html';
+            window.location.href = dashboardUrl;
+        }
+    </script>
+</body>
+</html>
