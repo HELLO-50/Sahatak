@@ -235,8 +235,8 @@
                 
                 // Redirect to appropriate dashboard
                 const dashboardUrl = userData.user_type === 'doctor' ? 
-                    '../pages/dashboard/doctor.html' : 
-                    '../pages/dashboard/patient.html';
+                    'dashboard/doctor.html' : 
+                    'dashboard/patient.html';
                 window.location.href = dashboardUrl;
             } else {
                 // Fallback - redirect to login

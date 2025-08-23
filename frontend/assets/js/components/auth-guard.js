@@ -92,13 +92,13 @@ class AuthGuard {
                 if (window.location.pathname.includes('/pages/dashboard/')) {
                     window.location.href = 'patient.html';
                 } else {
-                    window.location.href = 'pages/dashboard/patient.html';
+                    window.location.href = 'frontend/pages/dashboard/patient.html';
                 }
             } else if (actualUserType === 'doctor') {
                 if (window.location.pathname.includes('/pages/dashboard/')) {
                     window.location.href = 'doctor.html';
                 } else {
-                    window.location.href = 'pages/dashboard/doctor.html';
+                    window.location.href = 'frontend/pages/dashboard/doctor.html';
                 }
             } else {
                 this.redirectToLogin();
