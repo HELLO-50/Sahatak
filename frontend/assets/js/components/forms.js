@@ -334,11 +334,17 @@ function handlePatientRegister(event) {
         (result) => {
             FormManager.setFormLoading(formId, false);
             
+            console.log('🔥 REGISTRATION SUCCESS RESULT:', result);
+            console.log('🔥 requires_email_verification:', result.requires_email_verification);
+            console.log('🔥 typeof requires_email_verification:', typeof result.requires_email_verification);
+            
             // Check if email verification is required
             if (result.requires_email_verification) {
+                console.log('🔥 EMAIL VERIFICATION REQUIRED - Showing verification message');
                 // Show email verification message instead of redirecting
                 FormManager.showEmailVerificationMessage(result.message);
             } else {
+                console.log('🔥 NO EMAIL VERIFICATION - Redirecting to dashboard');
                 // No email verification needed, proceed to dashboard
                 FormManager.showSuccessScreen(result.message, 'patient');
             }
@@ -433,11 +439,17 @@ function handleDoctorRegister(event) {
         (result) => {
             FormManager.setFormLoading(formId, false);
             
+            console.log('🔥 DOCTOR REGISTRATION SUCCESS RESULT:', result);
+            console.log('🔥 requires_email_verification:', result.requires_email_verification);
+            console.log('🔥 typeof requires_email_verification:', typeof result.requires_email_verification);
+            
             // Check if email verification is required
             if (result.requires_email_verification) {
+                console.log('🔥 EMAIL VERIFICATION REQUIRED - Showing verification message');
                 // Show email verification message instead of redirecting
                 FormManager.showEmailVerificationMessage(result.message);
             } else {
+                console.log('🔥 NO EMAIL VERIFICATION - Redirecting to dashboard');
                 // No email verification needed, proceed to dashboard
                 FormManager.showSuccessScreen(result.message, 'doctor');
             }
