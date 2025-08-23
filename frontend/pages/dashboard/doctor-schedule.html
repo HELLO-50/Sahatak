@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الجدول | صحتك</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Arabic Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../../assets/css/components/appointments.css">
+</head>
+<body>
+    <!-- Header -->
+    <nav class="navbar navbar-expand-lg bg-primary navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-heart-pulse me-2"></i>
+                صحتك | Sahatak
+            </a>
+            <div>
+                <button class="btn btn-outline-light me-2" onclick="goToDashboard()">
+                    <i class="bi bi-house me-1"></i>
+                    لوحة التحكم
+                </button>
+                <button class="btn btn-outline-light" onclick="goBack()">
+                    <i class="bi bi-arrow-right me-1"></i>
+                    العودة
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <!-- Page Header -->
+        <div class="text-center mb-5">
+            <h1 class="display-6 mb-3">
+                <i class="bi bi-calendar-week text-primary me-3"></i>
+                إدارة الجدول الطبي
+            </h1>
+            <p class="lead text-muted">قم بتحديد أوقات عملك وإدارة توفرك للمرضى</p>
+        </div>
+
+        <div class="row">
+            <!-- Schedule Settings -->
+            <div class="col-lg-8">
+                <div class="card shadow-lg border-0 mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-clock me-2"></i>
+                            أوقات العمل الأسبوعية
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form id="schedule-form">
+                            <div class="row">
+                                <!-- Saturday -->
+                                <div class="col-md-6 mb-4">
+                                    <div class="card border">
+                                        <div class="card-header">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="saturday-enabled" data-day="saturday" checked>
+                                                <label class="form-check-label fw-bold" for="saturday-enabled">
+                                                    السبت
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="card-body" id="saturday-times">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <label class="form-label">من</label>
+                                                    <input type="time" class="form-control" id="saturday-start" value="09:00">
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="form-label">إلى</label>
+                                                    <input type="time" class="form-control" id="saturday-end" value="17:00">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Sunday -->
+                                <div class="col-md-6 mb-4">
+                                    <div class="card border">
+                                        <div class="card-header">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="sunday-enabled" data-day="sunday" checked>
+                                                <label class="form-check-label fw-bold" for="sunday-enabled">
+                                                    الأحد
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="card-body" id="sunday-times">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <label class="form-label">من</label>
+                                                    <input type="time" class="form-control" id="sunday-start" value="09:00">
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="form-label">إلى</label>
+                                                    <input type="time" class="form-control" id="sunday-end" value="17:00">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Monday -->
+                                <div class="col-md-6 mb-4">
+                                    <div class="card border">
+                                        <div class="card-header">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="monday-enabled" data-day="monday" checked>
+                                                <label class="form-check-label fw-bold" for="monday-enabled">
+                                                    الاثنين
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="card-body" id="monday-times">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <label class="form-label">من</label>
+                                                    <input type="time" class="form-control" id="monday-start" value="09:00">
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="form-label">إلى</label>
+                                                    <input type="time" class="form-control" id="monday-end" value="17:00">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Tuesday -->
+                                <div class="col-md-6 mb-4">
+                                    <div class="card border">
+                                        <div class="card-header">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="tuesday-enabled" data-day="tuesday" checked>
+                                                <label class="form-check-label fw-bold" for="tuesday-enabled">
+                                                    الثلاثاء
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="card-body" id="tuesday-times">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <label class="form-label">من</label>
+                                                    <input type="time" class="form-control" id="tuesday-start" value="09:00">
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="form-label">إلى</label>
+                                                    <input type="time" class="form-control" id="tuesday-end" value="17:00">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Wednesday -->
+                                <div class="col-md-6 mb-4">
+                                    <div class="card border">
+                                        <div class="card-header">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="wednesday-enabled" data-day="wednesday" checked>
+                                                <label class="form-check-label fw-bold" for="wednesday-enabled">
+                                                    الأربعاء
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="card-body" id="wednesday-times">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <label class="form-label">من</label>
+                                                    <input type="time" class="form-control" id="wednesday-start" value="09:00">
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="form-label">إلى</label>
+                                                    <input type="time" class="form-control" id="wednesday-end" value="17:00">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Thursday -->
+                                <div class="col-md-6 mb-4">
+                                    <div class="card border">
+                                        <div class="card-header">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="thursday-enabled" data-day="thursday" checked>
+                                                <label class="form-check-label fw-bold" for="thursday-enabled">
+                                                    الخميس
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="card-body" id="thursday-times">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <label class="form-label">من</label>
+                                                    <input type="time" class="form-control" id="thursday-start" value="09:00">
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="form-label">إلى</label>
+                                                    <input type="time" class="form-control" id="thursday-end" value="17:00">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-grid mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-check-circle me-2"></i>
+                                    حفظ أوقات العمل
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schedule Preview -->
+            <div class="col-lg-4">
+                <div class="card shadow-lg border-0 mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-eye me-2"></i>
+                            معاينة الجدول
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="schedule-preview">
+                            <!-- Schedule preview will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="card shadow-lg border-0">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-graph-up me-2"></i>
+                            إحصائيات سريعة
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6 mb-3">
+                                <div class="bg-light rounded p-3">
+                                    <h3 class="text-primary mb-1" id="total-hours">0</h3>
+                                    <small class="text-muted">ساعات الأسبوع</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <div class="bg-light rounded p-3">
+                                    <h3 class="text-success mb-1" id="working-days">0</h3>
+                                    <small class="text-muted">أيام العمل</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="bg-light rounded p-3">
+                                    <h3 class="text-info mb-1" id="max-slots">0</h3>
+                                    <small class="text-muted">أقصى مواعيد</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="bg-light rounded p-3">
+                                    <h3 class="text-warning mb-1" id="avg-day">0</h3>
+                                    <small class="text-muted">متوسط ساعات اليوم</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="../../assets/js/main.js"></script>
+    
+    <script>
+        let currentSchedule = {};
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Ensure translations are loaded
+            if (!LanguageManager.translations || !LanguageManager.translations.ar) {
+                await LanguageManager.loadTranslations();
+            }
+            
+            loadCurrentSchedule();
+            setupEventListeners();
+            updatePreview();
+        });
+
+        // Setup event listeners
+        function setupEventListeners() {
+            const form = document.getElementById('schedule-form');
+            
+            // Form submission
+            form.addEventListener('submit', saveSchedule);
+            
+            // Day checkboxes
+            document.querySelectorAll('[data-day]').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const day = this.dataset.day;
+                    const timesDiv = document.getElementById(`${day}-times`);
+                    timesDiv.style.display = this.checked ? 'block' : 'none';
+                    updatePreview();
+                });
+            });
+            
+            // Time inputs
+            document.querySelectorAll('input[type="time"]').forEach(input => {
+                input.addEventListener('change', updatePreview);
+            });
+        }
+
+        // Load current schedule from API
+        async function loadCurrentSchedule() {
+            try {
+                const response = await ApiHelper.makeRequest('/users/profile');
+                
+                if (response.success && response.data.doctor_profile) {
+                    const availableHours = response.data.doctor_profile.available_hours || {};
+                    populateScheduleForm(availableHours);
+                    updatePreview();
+                }
+            } catch (error) {
+                console.error('Error loading schedule:', error);
+                showError('خطأ في تحميل الجدول الحالي');
+            }
+        }
+
+        // Populate schedule form with existing data
+        function populateScheduleForm(availableHours) {
+            const days = ['saturday', 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday'];
+            
+            days.forEach(day => {
+                const checkbox = document.getElementById(`${day}-enabled`);
+                const startInput = document.getElementById(`${day}-start`);
+                const endInput = document.getElementById(`${day}-end`);
+                const timesDiv = document.getElementById(`${day}-times`);
+                
+                if (availableHours[day]) {
+                    checkbox.checked = true;
+                    startInput.value = availableHours[day].start || '09:00';
+                    endInput.value = availableHours[day].end || '17:00';
+                    timesDiv.style.display = 'block';
+                } else {
+                    checkbox.checked = false;
+                    timesDiv.style.display = 'none';
+                }
+            });
+        }
+
+        // Save schedule
+        async function saveSchedule(event) {
+            event.preventDefault();
+            
+            try {
+                const schedule = {};
+                const days = ['saturday', 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday'];
+                
+                days.forEach(day => {
+                    const checkbox = document.getElementById(`${day}-enabled`);
+                    if (checkbox.checked) {
+                        const start = document.getElementById(`${day}-start`).value;
+                        const end = document.getElementById(`${day}-end`).value;
+                        
+                        // Validate time range
+                        if (start >= end) {
+                            throw new Error(`وقت البداية يجب أن يكون أقل من وقت النهاية في يوم ${getDayNameArabic(day)}`);
+                        }
+                        
+                        schedule[day] = { start, end };
+                    }
+                });
+                
+                if (Object.keys(schedule).length === 0) {
+                    throw new Error('يجب تحديد يوم واحد على الأقل للعمل');
+                }
+                
+                const response = await ApiHelper.makeRequest('/users/profile', {
+                    method: 'PUT',
+                    body: JSON.stringify({ available_hours: schedule })
+                });
+                
+                if (response.success) {
+                    currentSchedule = schedule;
+                    showSuccess('تم حفظ الجدول بنجاح');
+                    updatePreview();
+                } else {
+                    throw new Error(response.message || 'فشل في حفظ الجدول');
+                }
+            } catch (error) {
+                console.error('Error saving schedule:', error);
+                showError(error.message || 'خطأ في حفظ الجدول');
+            }
+        }
+
+        // Update schedule preview
+        function updatePreview() {
+            const days = ['saturday', 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday'];
+            const previewContainer = document.getElementById('schedule-preview');
+            let totalHours = 0;
+            let workingDays = 0;
+            
+            let previewHtml = '<div class="schedule-preview">';
+            
+            days.forEach(day => {
+                const checkbox = document.getElementById(`${day}-enabled`);
+                const dayNameAr = getDayNameArabic(day);
+                
+                if (checkbox && checkbox.checked) {
+                    const start = document.getElementById(`${day}-start`).value;
+                    const end = document.getElementById(`${day}-end`).value;
+                    
+                    const startTime = new Date(`2000-01-01T${start}`);
+                    const endTime = new Date(`2000-01-01T${end}`);
+                    const hours = (endTime - startTime) / (1000 * 60 * 60);
+                    
+                    if (hours > 0) {
+                        totalHours += hours;
+                        workingDays++;
+                        
+                        previewHtml += `
+                            <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                <span class="fw-bold">${dayNameAr}</span>
+                                <span class="badge bg-primary">${start} - ${end}</span>
+                            </div>
+                        `;
+                    }
+                } else {
+                    previewHtml += `
+                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom text-muted">
+                            <span>${dayNameAr}</span>
+                            <span class="badge bg-secondary">إجازة</span>
+                        </div>
+                    `;
+                }
+            });
+            
+            previewHtml += '</div>';
+            previewContainer.innerHTML = previewHtml;
+            
+            // Update stats
+            const maxSlots = Math.floor(totalHours * 2); // 30-minute slots
+            const avgDay = workingDays > 0 ? (totalHours / workingDays).toFixed(1) : 0;
+            
+            document.getElementById('total-hours').textContent = totalHours.toFixed(1);
+            document.getElementById('working-days').textContent = workingDays;
+            document.getElementById('max-slots').textContent = maxSlots;
+            document.getElementById('avg-day').textContent = avgDay;
+        }
+
+        // Helper functions
+        function getDayNameArabic(day) {
+            const dayNames = {
+                'saturday': 'السبت',
+                'sunday': 'الأحد',
+                'monday': 'الاثنين',
+                'tuesday': 'الثلاثاء',
+                'wednesday': 'الأربعاء',
+                'thursday': 'الخميس'
+            };
+            return dayNames[day] || day;
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'alert alert-danger alert-dismissible fade show position-fixed';
+            errorDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+            errorDiv.innerHTML = `
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(errorDiv);
+            
+            setTimeout(() => {
+                if (errorDiv.parentNode) {
+                    errorDiv.remove();
+                }
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'alert alert-success alert-dismissible fade show position-fixed';
+            successDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+            successDiv.innerHTML = `
+                <i class="bi bi-check-circle-fill me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(successDiv);
+            
+            setTimeout(() => {
+                if (successDiv.parentNode) {
+                    successDiv.remove();
+                }
+            }, 3000);
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        function goToDashboard() {
+            window.location.href = 'doctor.html';
+        }
+    </script>
+</body>
+</html>

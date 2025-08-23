@@ -5,6 +5,8 @@ const AppointmentBooking = {
     selectedDoctor: null,
     selectedDateTime: null,
     selectedType: 'video',
+    doctors: [],
+    calendar: null,
     
     // Initialize the booking system
     async init() {
@@ -15,6 +17,7 @@ const AppointmentBooking = {
         
         // Update UI with translations
         this.updateUITranslations();
+        this.initCalendarWidget();
         this.loadDoctors();
         this.setupEventListeners();
         this.setMinDate();
@@ -105,7 +108,13 @@ const AppointmentBooking = {
         document.getElementById('specialty-filter').addEventListener('change', () => this.loadDoctors());
         
         // Date change
-        document.getElementById('appointment-date').addEventListener('change', () => this.loadTimeSlots());
+        document.getElementById('appointment-date').addEventListener('change', (e) => {
+            this.loadTimeSlots();
+            // Update calendar widget if available
+            if (this.calendar && e.target.value) {
+                this.calendar.selectDate(new Date(e.target.value));
+            }
+        });
         
         // Appointment type change
         document.getElementById('appointment-type').addEventListener('change', (e) => {
@@ -113,11 +122,28 @@ const AppointmentBooking = {
         });
     },
 
+    // Initialize calendar widget
+    initCalendarWidget() {
+        if (typeof CalendarWidget !== 'undefined') {
+            this.calendar = Object.create(CalendarWidget);
+            this.calendar.init('calendar-widget-container', {
+                minDate: new Date(),
+                maxDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 90 days from now
+                onDateSelect: (date) => {
+                    const dateString = date.toISOString().split('T')[0];
+                    document.getElementById('appointment-date').value = dateString;
+                    this.loadTimeSlots();
+                }
+            });
+        }
+    },
+
     // Set minimum date to today
     setMinDate() {
         const today = new Date().toISOString().split('T')[0];
-        document.getElementById('appointment-date').min = today;
-        document.getElementById('appointment-date').value = today;
+        const dateInput = document.getElementById('appointment-date');
+        dateInput.min = today;
+        dateInput.value = today;
     },
 
     // Load doctors list
@@ -129,13 +155,18 @@ const AppointmentBooking = {
             const response = await ApiHelper.makeRequest(`/users/doctors${params}`);
             
             if (response.success) {
-                this.renderDoctors(response.doctors);
+                this.doctors = response.data.doctors || response.doctors || [];
+                this.renderDoctors(this.doctors);
+                // Load doctor availability for calendar if doctor is selected
+                if (this.selectedDoctor) {
+                    this.updateDoctorAvailability();
+                }
             } else {
-                this.showError('A4D AJ *-EJD B'&E) 'D#7('!');
+                this.showError('فشل في تحميل قائمة الأطباء');
             }
         } catch (error) {
             console.error('Error loading doctors:', error);
-            this.showError('.7# AJ 'D'*5'D ('D.'/E');
+            this.showError('خطأ في الاتصال بالخادم');
         }
     },
 
@@ -147,7 +178,7 @@ const AppointmentBooking = {
             container.innerHTML = `
                 <div class="col-12 text-center py-5">
                     <i class="bi bi-person-x display-4 text-muted mb-3"></i>
-                    <p class="text-muted">D' JH,/ #7('! E*'-HF AJ G0' 'D*.55</p>
+                    <p class="text-muted">لا يوجد أطباء متاحون في هذا التخصص</p>
                 </div>
             `;
             return;
@@ -163,27 +194,27 @@ const AppointmentBooking = {
                                 <i class="bi bi-person-circle display-6 text-primary"></i>
                             </div>
                             <div>
-                                <h5 class="card-title mb-1">/. ${doctor.user.full_name}</h5>
+                                <h5 class="card-title mb-1">د. ${doctor.user ? doctor.user.full_name : doctor.full_name}</h5>
                                 <p class="text-muted small mb-0">${this.getSpecialtyArabic(doctor.specialty)}</p>
                                 <div class="rating mt-1">
-                                    ${this.renderStars(doctor.rating)}
-                                    <small class="text-muted">(${doctor.total_reviews} *BJJE)</small>
+                                    ${this.renderStars(doctor.rating || 4.5)}
+                                    <small class="text-muted">(${doctor.total_reviews || 0} تقييم)</small>
                                 </div>
                             </div>
                         </div>
                         
                         <div class="row text-center">
                             <div class="col-4">
-                                <small class="text-muted d-block">'D.(1)</small>
-                                <strong>${doctor.years_of_experience} 3F)</strong>
+                                <small class="text-muted d-block">الخبرة</small>
+                                <strong>${doctor.years_of_experience} سنة</strong>
                             </div>
                             <div class="col-4">
-                                <small class="text-muted d-block">'D#,1</small>
-                                <strong>${doctor.consultation_fee ? doctor.consultation_fee + ' /.3' : 'E,'FJ'}</strong>
+                                <small class="text-muted d-block">الأجر</small>
+                                <strong>${doctor.consultation_fee ? doctor.consultation_fee + ' ج.س' : 'مجاني'}</strong>
                             </div>
                             <div class="col-4">
-                                <small class="text-muted d-block">'D-'D)</small>
-                                <span class="badge bg-success">E*'-</span>
+                                <small class="text-muted d-block">الحالة</small>
+                                <span class="badge bg-success">متاح</span>
                             </div>
                         </div>
                         
@@ -207,7 +238,10 @@ const AppointmentBooking = {
         event.currentTarget.classList.add('selected');
         
         // Store selected doctor
-        this.selectedDoctor = { id: doctorId };
+        this.selectedDoctor = this.doctors.find(d => d.id === doctorId) || { id: doctorId };
+        
+        // Update doctor availability in calendar
+        this.updateDoctorAvailability();
         
         // Enable next button
         document.getElementById('next-btn').disabled = false;
@@ -226,13 +260,13 @@ const AppointmentBooking = {
             );
             
             if (response.success) {
-                this.renderTimeSlots(response.data.available_slots);
+                this.renderTimeSlots(response.data.available_slots || []);
             } else {
-                this.showError('A4D AJ *-EJD 'D#HB'* 'DE*'-)');
+                this.showError('فشل في تحميل الأوقات المتاحة');
             }
         } catch (error) {
             console.error('Error loading time slots:', error);
-            this.showError('.7# AJ *-EJD 'D#HB'* 'DE*'-)');
+            this.showError('خطأ في تحميل الأوقات المتاحة');
         }
     },
 
@@ -241,7 +275,7 @@ const AppointmentBooking = {
         const container = document.getElementById('time-slots');
         
         if (slots.length === 0) {
-            container.innerHTML = '<p class="text-muted">D' *H,/ #HB'* E*'-) AJ G0' 'DJHE</p>';
+            container.innerHTML = '<p class="text-muted">لا توجد أوقات متاحة في هذا اليوم</p>';
             return;
         }
 
@@ -278,12 +312,12 @@ const AppointmentBooking = {
     // Move to next step
     nextStep() {
         if (this.currentStep === 1 && !this.selectedDoctor) {
-            this.showError('J1,I '.*J'1 7(J(');
+            this.showError('يرجى اختيار طبيب');
             return;
         }
         
         if (this.currentStep === 2 && !this.selectedDateTime) {
-            this.showError('J1,I '.*J'1 HB* DDEH9/');
+            this.showError('يرجى اختيار وقت للموعد');
             return;
         }
 
@@ -371,28 +405,28 @@ const AppointmentBooking = {
                 const summaryHtml = `
                     <div class="row">
                         <div class="col-sm-6 mb-3">
-                            <strong>'D7(J(:</strong><br>
-                            /. ${doctor.user.full_name}
+                            <strong>الطبيب:</strong><br>
+                            د. ${doctor.user ? doctor.user.full_name : doctor.full_name}
                         </div>
                         <div class="col-sm-6 mb-3">
-                            <strong>'D*.55:</strong><br>
+                            <strong>التخصص:</strong><br>
                             ${this.getSpecialtyArabic(doctor.specialty)}
                         </div>
                         <div class="col-sm-6 mb-3">
-                            <strong>'D*'1J.:</strong><br>
+                            <strong>التاريخ:</strong><br>
                             ${date.toLocaleDateString('ar-SA')}
                         </div>
                         <div class="col-sm-6 mb-3">
-                            <strong>'DHB*:</strong><br>
+                            <strong>الوقت:</strong><br>
                             ${this.selectedDateTime.displayTime}
                         </div>
                         <div class="col-sm-6 mb-3">
-                            <strong>FH9 'D'3*4'1):</strong><br>
+                            <strong>نوع الاستشارة:</strong><br>
                             ${this.getAppointmentTypeArabic(this.selectedType)}
                         </div>
                         <div class="col-sm-6 mb-3">
-                            <strong>'D#,1:</strong><br>
-                            ${doctor.consultation_fee ? doctor.consultation_fee + ' /.3' : 'E,'FJ'}
+                            <strong>الأجر:</strong><br>
+                            ${doctor.consultation_fee ? doctor.consultation_fee + ' ج.س' : 'مجاني'}
                         </div>
                     </div>
                 `;
@@ -408,7 +442,7 @@ const AppointmentBooking = {
     async confirmBooking() {
         const termsAgreed = document.getElementById('terms-agreement').checked;
         if (!termsAgreed) {
-            this.showError('J1,I 'DEH'AB) 9DI 'D41H7 H'D#-C'E');
+            this.showError('يرجى الموافقة على الشروط والأحكام');
             return;
         }
 
@@ -426,37 +460,38 @@ const AppointmentBooking = {
             });
 
             if (response.success) {
-                // Show success modal
+                // Show success message and modal
+                this.showSuccess('تم حجز الموعد بنجاح!');
                 const modal = new bootstrap.Modal(document.getElementById('success-modal'));
                 modal.show();
             } else {
-                this.showError(response.message || 'A4D AJ -,2 'DEH9/');
+                this.showError(response.message || 'فشل في حجز الموعد');
             }
         } catch (error) {
             console.error('Error confirming booking:', error);
-            this.showError('.7# AJ *#CJ/ 'D-,2');
+            this.showError('خطأ في تأكيد الحجز');
         }
     },
 
     // Helper functions
     getSpecialtyArabic(specialty) {
         const specialties = {
-            cardiology: '#E1'6 'DBD(',
-            pediatrics: '7( 'D#7A'D',
-            dermatology: ''D#E1'6 'D,D/J)',
-            internal: ''D7( 'D('7FJ',
-            psychiatry: ''D7( 'DFA3J',
-            orthopedics: ''D98'E',
-            general: '7( 9'E'
+            cardiology: 'أمراض القلب',
+            pediatrics: 'طب الأطفال',
+            dermatology: 'الأمراض الجلدية',
+            internal: 'الطب الباطني',
+            psychiatry: 'الطب النفسي',
+            orthopedics: 'العظام',
+            general: 'طب عام'
         };
         return specialties[specialty] || specialty;
     },
 
     getAppointmentTypeArabic(type) {
         const types = {
-            video: 'EC'DE) AJ/JH',
-            audio: 'EC'DE) 5H*J)',
-            chat: 'E-'/+) F5J)'
+            video: 'مكالمة فيديو',
+            audio: 'مكالمة صوتية',
+            chat: 'محادثة نصية'
         };
         return types[type] || type;
     },
@@ -482,9 +517,75 @@ const AppointmentBooking = {
         return stars.join('');
     },
 
+    // Update doctor availability in calendar
+    async updateDoctorAvailability() {
+        if (!this.selectedDoctor || !this.calendar) return;
+
+        try {
+            // Get next 30 days of availability
+            const availableDates = [];
+            const today = new Date();
+            
+            for (let i = 0; i < 30; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                const dateString = date.toISOString().split('T')[0];
+                
+                const response = await ApiHelper.makeRequest(
+                    `/appointments/doctors/${this.selectedDoctor.id}/availability?date=${dateString}`
+                );
+                
+                if (response.success && response.data.available_slots.some(slot => slot.available)) {
+                    availableDates.push(dateString);
+                }
+            }
+            
+            this.calendar.setAvailableDates(availableDates);
+        } catch (error) {
+            console.error('Error loading doctor availability:', error);
+        }
+    },
+
     showError(message) {
-        // Simple error display - you can enhance this with better UI
-        alert(message);
+        // Enhanced error display with toast-like notification
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'alert alert-danger alert-dismissible fade show position-fixed';
+        errorDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+        errorDiv.innerHTML = `
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(errorDiv);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (errorDiv.parentNode) {
+                errorDiv.remove();
+            }
+        }, 5000);
+    },
+
+    showSuccess(message) {
+        // Enhanced success display with toast-like notification
+        const successDiv = document.createElement('div');
+        successDiv.className = 'alert alert-success alert-dismissible fade show position-fixed';
+        successDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+        successDiv.innerHTML = `
+            <i class="bi bi-check-circle-fill me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(successDiv);
+        
+        // Auto-remove after 3 seconds
+        setTimeout(() => {
+            if (successDiv.parentNode) {
+                successDiv.remove();
+            }
+        }, 3000);
     }
 };
 

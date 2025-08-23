@@ -474,6 +474,174 @@
     transform: scaleX(-1);
 }
 
+/* Enhanced Calendar Widget Styles */
+.calendar-widget {
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    padding: 1.5rem;
+    background: white;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+    margin-bottom: 1.5rem;
+}
+
+.calendar-widget .calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #f8f9fa;
+}
+
+.calendar-widget .calendar-month-year {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+}
+
+.calendar-widget .calendar-nav {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background: var(--light-color);
+    color: var(--primary-color);
+    transition: all 0.3s ease;
+}
+
+.calendar-widget .calendar-nav:hover {
+    border-color: var(--primary-color);
+    background: rgba(37, 99, 235, 0.1);
+    transform: scale(1.05);
+}
+
+.calendar-widget .calendar-grid {
+    width: 100%;
+}
+
+.calendar-widget .calendar-days-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    margin-bottom: 0.75rem;
+}
+
+.calendar-widget .calendar-day-header {
+    text-align: center;
+    padding: 0.75rem 0.25rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #6c757d;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.calendar-widget .calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.calendar-widget .calendar-day {
+    position: relative;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 45px;
+    background: white;
+    border: 2px solid transparent;
+}
+
+.calendar-widget .calendar-day:hover:not(.disabled) {
+    background-color: rgba(37, 99, 235, 0.1);
+    border-color: var(--primary-color);
+    transform: scale(1.05);
+}
+
+.calendar-widget .calendar-day:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.calendar-widget .calendar-day.today {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: bold;
+    border-color: var(--primary-color);
+}
+
+.calendar-widget .calendar-day.selected {
+    background-color: var(--success-color);
+    color: white;
+    font-weight: bold;
+    border-color: var(--success-color);
+}
+
+.calendar-widget .calendar-day.disabled {
+    color: #ced4da;
+    cursor: not-allowed;
+    background-color: #f8f9fa;
+    opacity: 0.6;
+}
+
+.calendar-widget .calendar-day.available {
+    border: 2px solid var(--success-color);
+    background-color: rgba(25, 135, 84, 0.05);
+}
+
+.calendar-widget .calendar-day.available .availability-indicator {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 8px;
+    height: 8px;
+    background-color: var(--success-color);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.calendar-widget .calendar-day.prev-month,
+.calendar-widget .calendar-day.next-month {
+    color: #adb5bd;
+    cursor: default;
+    background-color: transparent;
+}
+
+.calendar-widget .calendar-day.prev-month:hover,
+.calendar-widget .calendar-day.next-month:hover {
+    background-color: transparent;
+    border-color: transparent;
+    transform: none;
+}
+
+.calendar-widget.rtl {
+    direction: rtl;
+}
+
+.calendar-widget.rtl .calendar-day-header {
+    text-align: center;
+}
+
+.calendar-widget.rtl .availability-indicator {
+    right: auto;
+    left: 4px;
+}
+
 /* Print Styles */
 @media print {
     .video-consultation-container,
@@ -483,6 +651,12 @@
     }
     
     .appointment-card {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+    
+    .calendar-widget {
         break-inside: avoid;
         box-shadow: none;
         border: 1px solid #ddd;
