@@ -252,9 +252,10 @@ function handleRegister(event) {
     return false;
 }
 
-// Patient registration form handler
-function handlePatientRegister(event) {
+// Patient registration form handler - Override main.js version
+async function handlePatientRegister(event) {
     event.preventDefault();
+    console.log('🔥🔥🔥 FORMS.JS handlePatientRegister called 🔥🔥🔥');
     
     const formId = 'patientRegisterForm';
     FormManager.clearFormErrors(formId);

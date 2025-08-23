@@ -766,7 +766,8 @@ async function handleLogin(event) {
 }
 
 // Handle patient registration form submission
-async function handlePatientRegister(event) {
+// DISABLED - Using forms.js version instead
+async function handlePatientRegister_OLD(event) {
     event.preventDefault();
     
     const submitBtn = document.getElementById('patient-register-submit');
@@ -941,7 +942,8 @@ async function handlePatientRegister(event) {
 }
 
 // Handle doctor registration form submission
-async function handleDoctorRegister(event) {
+// DISABLED - Using forms.js version instead  
+async function handleDoctorRegister_OLD(event) {
     event.preventDefault();
     
     const submitBtn = document.getElementById('doctor-register-submit');
