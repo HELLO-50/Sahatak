@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from routes.notifications import queue_notification, send_email
 from sqlalchemy import func, text, and_, or_
 from sqlalchemy.orm import joinedload
+import os
 
 # utils import
 from utils.responses import APIResponse
@@ -735,7 +736,7 @@ def get_system_settings():
     # Get settings from database or return defaults
         settings_data = {}
         
-        settings_query = setting.query.all()
+        settings_query = SystemSettings.query.all()
         for setting in settings_query:
             settings_data[setting.key] = {
                 'value': setting.value,
@@ -1405,12 +1406,117 @@ def send_broadcast_notification():
 @login_required
 @admin_required
 def get_audit_logs():
-# Get detailed information for a specific audit log entry
+    """Get paginated list of audit logs with filtering"""
+    try:
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 20, type=int)
+        user_id = request.args.get('user_id', type=int)
+        action = request.args.get('action')
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+        
+        page, per_page = validate_pagination_params(page, per_page)
+        start_date, end_date = validate_date_range(start_date, end_date)
+        
+        # Build base query
+        query = AuditLog.query.options(joinedload(AuditLog.user))
+        
+        # Apply filters
+        if user_id:
+            query = query.filter(AuditLog.user_id == user_id)
+        if action:
+            query = query.filter(AuditLog.action.ilike(f'%{action}%'))
+        if start_date:
+            query = query.filter(AuditLog.created_at >= start_date)
+        if end_date:
+            query = query.filter(AuditLog.created_at <= end_date)
+        
+        # Apply pagination
+        logs_pagination = query.order_by(AuditLog.created_at.desc()).paginate(
+            page=page, 
+            per_page=per_page, 
+            error_out=False
+        )
+        
+        # Format audit log data
+        logs_data = []
+        for log_entry in logs_pagination.items:
+            log_details = {
+                'id': log_entry.id,
+                'action': log_entry.action,
+                'user_id': log_entry.user_id,
+                'user_info': {
+                    'email': log_entry.user.email if log_entry.user else 'System',
+                    'full_name': log_entry.user.full_name if log_entry.user else 'System',
+                    'user_type': log_entry.user.user_type if log_entry.user else 'system'
+                },
+                'ip_address': log_entry.ip_address,
+                'user_agent': log_entry.user_agent,
+                'details': log_entry.details if log_entry.details else {},
+                'created_at': log_entry.created_at.isoformat(),
+                'created_at_readable': log_entry.created_at.strftime('%Y-%m-%d %H:%M:%S UTC')
+            }
+            
+            # Determine severity level
+            action_lower = log_entry.action.lower()
+            if any(keyword in action_lower for keyword in ['error', 'failed', 'denied', 'blocked']):
+                log_details['severity'] = 'error'
+            elif any(keyword in action_lower for keyword in ['warning', 'attempt', 'locked']):
+                log_details['severity'] = 'warning'
+            else:
+                log_details['severity'] = 'info'
+            
+            logs_data.append(log_details)
+        
+        # Log admin action
+        log_user_action(
+            current_user.id,
+            'admin_view_audit_logs',
+            {
+                'page': page,
+                'per_page': per_page,
+                'total_results': logs_pagination.total,
+                'filters': {
+                    'user_id': user_id,
+                    'action': action,
+                    'date_range': bool(start_date or end_date)
+                }
+            }
+        )
+        
+        return APIResponse.success(
+            data={
+                'logs': logs_data,
+                'pagination': {
+                    'page': logs_pagination.page,
+                    'pages': logs_pagination.pages,
+                    'per_page': logs_pagination.per_page,
+                    'total': logs_pagination.total,
+                    'has_next': logs_pagination.has_next,
+                    'has_prev': logs_pagination.has_prev
+                }
+            },
+            message="Audit logs retrieved successfully"
+        )
 
+    except RequestValidationError as e:
+        return APIResponse.error(message=str(e), status_code=400)
+    except Exception as e:
+        app_logger.error(f"Admin get audit logs error: {str(e)}")
+        return APIResponse.error(
+            message="Failed to retrieve audit logs",
+            status_code=500
+        )
+
+@admin_bp.route('/audit-logs/<int:log_id>', methods=['GET'])
+@login_required
+@admin_required
+def get_audit_log_details(log_id):
+    """Get detailed information for a specific audit log entry"""
     try:
         log_entry = AuditLog.query.options(
             joinedload(AuditLog.user)
-        ).get(log_entry)
+        ).get(log_id)
         
         if not log_entry:
             return APIResponse.error(
@@ -1419,7 +1525,7 @@ def get_audit_logs():
                 error_code="AUDIT_LOG_NOT_FOUND"
             )
             
-            # Format detailed log information
+        # Format detailed log information
         log_details = {
             'id': log_entry.id,
             'action': log_entry.action,
@@ -1444,7 +1550,7 @@ def get_audit_logs():
             }
         }
         
-    # Determine severity and risk level
+        # Determine severity and risk level
         action_lower = log_entry.action.lower()
         if any(keyword in action_lower for keyword in ['error', 'failed', 'denied', 'blocked']):
             log_details['severity'] = 'error'
@@ -1460,7 +1566,7 @@ def get_audit_logs():
         else:
             log_details['risk_level'] = 'low'
         
-    # Get related logs (same user, similar timeframe)
+        # Get related logs (same user, similar timeframe)
         if log_entry.user_id:
             related_logs = AuditLog.query.filter(
                 and_(
@@ -1480,12 +1586,12 @@ def get_audit_logs():
         else:
             log_details['related_logs'] = []
             
-    # Log this admin action
+        # Log this admin action
         log_user_action(
             current_user.id,
             'admin_view_audit_log_details',
             {
-                'audit_log_id': log_entry,
+                'audit_log_id': log_id,
                 'target_action': log_entry.action,
                 'target_user_id': log_entry.user_id
             }
@@ -1495,11 +1601,245 @@ def get_audit_logs():
             data={'audit_log': log_details},
             message="Audit log details retrieved"
         )
-
+        
     except Exception as e:
-        app_logger.error(f"Admin get audit logs error: {str(e)}")
+        app_logger.error(f"Admin get audit log details error: {str(e)}")
         return APIResponse.error(
-            message="Failed to retrieve audit logs",
+            message="Failed to retrieve audit log details",
+            status_code=500
+        )
+
+# =============================================================================
+# ADMIN USER MANAGEMENT ENDPOINTS
+# =============================================================================
+
+@admin_bp.route('/create-admin', methods=['POST'])
+@login_required
+@admin_required
+def create_admin_user():
+    """Create a new admin user - only existing admins can create new admins"""
+    try:
+        data = request.get_json()
+        if not data:
+            return APIResponse.error(
+                message="Request body required",
+                status_code=400,
+                error_code="MISSING_REQUEST_BODY"
+            )
+        
+        # Validate required fields
+        required_fields = ['email', 'full_name', 'password']
+        for field in required_fields:
+            if not data.get(field):
+                return APIResponse.error(
+                    message=f"Field '{field}' is required",
+                    status_code=400,
+                    error_code="MISSING_REQUIRED_FIELD"
+                )
+        
+        # Validate email format
+        email = data['email'].lower().strip()
+        email_validation = validate_email(email)
+        if not email_validation:
+            return APIResponse.error(
+                message="Invalid email format",
+                status_code=400,
+                error_code="INVALID_EMAIL"
+            )
+        
+        # Check if email already exists
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            return APIResponse.error(
+                message="Email already exists",
+                status_code=400,
+                error_code="EMAIL_EXISTS"
+            )
+        
+        # Validate password
+        password_validation = validate_password(data['password'])
+        if not password_validation:
+            return APIResponse.error(
+                message="Password does not meet requirements",
+                status_code=400,
+                error_code="WEAK_PASSWORD"
+            )
+        
+        # Create admin user
+        new_admin = User(
+            email=email,
+            full_name=data['full_name'].strip(),
+            phone=data.get('phone', '').strip(),
+            user_type='admin',
+            is_active=True,
+            is_verified=True,
+            profile_completed=True,
+            created_at=datetime.utcnow()
+        )
+        new_admin.set_password(data['password'])
+        db.session.add(new_admin)
+        db.session.commit()
+        
+        # Log admin creation action
+        log_user_action(
+            current_user.id,
+            'admin_create_admin_user',
+            {
+                'new_admin_id': new_admin.id,
+                'new_admin_email': email,
+                'created_by': current_user.email
+            }
+        )
+        
+        # Send welcome email
+        try:
+            from services.email_service import send_email
+            welcome_subject = "Admin Account Created - Sahatak Platform"
+            welcome_body = f"""
+            Dear {new_admin.full_name},
+
+            Your administrator account has been created for the Sahatak Telemedicine Platform.
+
+            Login Details:
+            Email: {email}
+            Password: {data['password']}
+
+            Please login and change your password immediately for security.
+
+            Admin Dashboard: {current_app.config.get('FRONTEND_URL', '')}/pages/admin/admin.html
+
+            Best regards,
+            The Sahatak Team
+            """
+            
+            send_email(
+                to_email=email,
+                subject=welcome_subject,
+                body=welcome_body
+            )
+        except Exception as e:
+            app_logger.warning(f"Failed to send welcome email to new admin: {str(e)}")
+        
+        return APIResponse.success(
+            data={
+                'admin_id': new_admin.id,
+                'email': email,
+                'full_name': new_admin.full_name,
+                'created_at': new_admin.created_at.isoformat()
+            },
+            message="Admin user created successfully"
+        )
+        
+    except Exception as e:
+        db.session.rollback()
+        app_logger.error(f"Create admin user error: {str(e)}")
+        return APIResponse.error(
+            message="Failed to create admin user",
+            status_code=500
+        )
+
+@admin_bp.route('/init-first-admin', methods=['POST'])
+def create_first_admin():
+    """Create the first admin user - only works if no admins exist"""
+    try:
+        # Check if any admin users already exist
+        existing_admin = User.query.filter_by(user_type='admin').first()
+        if existing_admin:
+            return APIResponse.error(
+                message="Admin users already exist. Use /create-admin endpoint instead.",
+                status_code=403,
+                error_code="ADMIN_EXISTS"
+            )
+        
+        data = request.get_json()
+        if not data:
+            return APIResponse.error(
+                message="Request body required",
+                status_code=400,
+                error_code="MISSING_REQUEST_BODY"
+            )
+        
+        # Validate required fields
+        required_fields = ['email', 'full_name', 'password', 'secret_key']
+        for field in required_fields:
+            if not data.get(field):
+                return APIResponse.error(
+                    message=f"Field '{field}' is required",
+                    status_code=400,
+                    error_code="MISSING_REQUIRED_FIELD"
+                )
+        
+        # Validate secret key (you should set this in environment variables)
+        expected_secret = os.getenv('ADMIN_INIT_SECRET', 'CHANGE_THIS_SECRET_KEY')
+        if data.get('secret_key') != expected_secret:
+            return APIResponse.error(
+                message="Invalid initialization secret key",
+                status_code=403,
+                error_code="INVALID_SECRET_KEY"
+            )
+        
+        # Validate email format
+        email = data['email'].lower().strip()
+        email_validation = validate_email(email)
+        if not email_validation:
+            return APIResponse.error(
+                message="Invalid email format",
+                status_code=400,
+                error_code="INVALID_EMAIL"
+            )
+        
+        # Validate password
+        password_validation = validate_password(data['password'])
+        if not password_validation:
+            return APIResponse.error(
+                message="Password does not meet requirements",
+                status_code=400,
+                error_code="WEAK_PASSWORD"
+            )
+        
+        # Create first admin user
+        first_admin = User(
+            email=email,
+            full_name=data['full_name'].strip(),
+            phone=data.get('phone', '').strip(),
+            user_type='admin',
+            is_active=True,
+            is_verified=True,
+            profile_completed=True,
+            created_at=datetime.utcnow()
+        )
+        first_admin.set_password(data['password'])
+        db.session.add(first_admin)
+        db.session.commit()
+        
+        # Log the initial admin creation
+        log_user_action(
+            first_admin.id,
+            'admin_initial_creation',
+            {
+                'admin_id': first_admin.id,
+                'admin_email': email,
+                'initialization': True
+            }
+        )
+        
+        app_logger.info(f"First admin user created: {email}")
+        
+        return APIResponse.success(
+            data={
+                'admin_id': first_admin.id,
+                'email': email,
+                'full_name': first_admin.full_name,
+                'message': 'First admin user created successfully'
+            },
+            message="System initialized with first admin user"
+        )
+        
+    except Exception as e:
+        db.session.rollback()
+        app_logger.error(f"Create first admin error: {str(e)}")
+        return APIResponse.error(
+            message="Failed to create first admin user",
             status_code=500
         )
 

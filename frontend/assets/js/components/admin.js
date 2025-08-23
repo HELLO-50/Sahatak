@@ -38,68 +38,174 @@ const AdminConfig = {
 // ===========================================================================
 // ADMIN API HELPER
 // ===========================================================================
+// ADMIN NAVIGATION & UI INITIALIZATION
+// ===========================================================================
 
-    // ====== Sidebar Navigation ======
-    /**const nav = document.getElementById('nav');
-    const sections = Array.from(document.querySelectorAll('main section'));
+const AdminNavigation = {
+    /**
+     * Initialize admin navigation and UI components
+     */
+    init() {
+        this.setupNavigation();
+        this.setupKeyboardShortcuts();
+        this.setupMobileToggle();
+        this.initializeDashboard();
+    },
 
-    function activate(targetId) {
-      // buttons active state
-      nav.querySelectorAll('button').forEach(btn => btn.classList.toggle('active', btn.dataset.target === targetId));
-      // show selected section
-      sections.forEach(sec => { sec.hidden = sec.id !== targetId; });
-      // close sidebar on mobile
-      document.body.classList.remove('sidebar-open');
+    /**
+     * Setup section navigation
+     */
+    setupNavigation() {
+        const navButtons = document.querySelectorAll('.btn-admin-nav');
+        const sections = document.querySelectorAll('.admin-section');
+
+        navButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const targetId = button.getAttribute('data-target');
+                if (targetId) {
+                    this.activateSection(targetId);
+                    history.replaceState(null, '', `#${targetId}`);
+                }
+            });
+        });
+
+        // Deep link support
+        window.addEventListener('DOMContentLoaded', () => {
+            const hash = location.hash.replace('#', '');
+            if (hash && document.getElementById(hash)) {
+                this.activateSection(hash);
+            } else {
+                this.activateSection('dashboard');
+            }
+        });
+    },
+
+    /**
+     * Activate specific admin section
+     */
+    activateSection(targetId) {
+        // Update navigation buttons
+        const navButtons = document.querySelectorAll('.btn-admin-nav');
+        navButtons.forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-target') === targetId);
+        });
+
+        // Show/hide sections
+        const sections = document.querySelectorAll('.admin-section');
+        sections.forEach(section => {
+            if (section.id === targetId) {
+                section.style.display = 'block';
+                section.classList.add('active');
+            } else {
+                section.style.display = 'none';
+                section.classList.remove('active');
+            }
+        });
+
+        console.log(`Admin section activated: ${targetId}`);
+    },
+
+    /**
+     * Setup keyboard shortcuts
+     */
+    setupKeyboardShortcuts() {
+        const keymap = { 
+            'd': 'dashboard', 
+            'u': 'users', 
+            'v': 'verification', 
+            's': 'settings', 
+            'h': 'health', 
+            'a': 'analytics' 
+        };
+
+        document.addEventListener('keydown', (e) => {
+            // Don't trigger shortcuts when typing in inputs
+            if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) {
+                return;
+            }
+
+            const targetSection = keymap[e.key?.toLowerCase()];
+            if (targetSection) {
+                e.preventDefault();
+                this.activateSection(targetSection);
+                history.replaceState(null, '', `#${targetSection}`);
+            }
+        });
+    },
+
+    /**
+     * Setup mobile sidebar toggle (if needed)
+     */
+    setupMobileToggle() {
+        const toggleSidebar = document.getElementById('toggleSidebar');
+        const backdrop = document.getElementById('backdrop');
+
+        if (toggleSidebar) {
+            toggleSidebar.addEventListener('click', () => {
+                document.body.classList.toggle('sidebar-open');
+            });
+        }
+
+        if (backdrop) {
+            backdrop.addEventListener('click', () => {
+                document.body.classList.remove('sidebar-open');
+            });
+        }
+    },
+
+    /**
+     * Initialize dashboard with real data
+     */
+    initializeDashboard() {
+        // Load dashboard data when admin page loads
+        this.loadDashboardStats();
+        this.setupRefreshButton();
+    },
+
+    /**
+     * Load dashboard statistics
+     */
+    async loadDashboardStats() {
+        try {
+            // Students can implement API calls here
+            console.log('Dashboard stats loading - integrate with AdminAPI.getDashboardAnalytics()');
+            
+            // Example: const analytics = await AdminAPI.getDashboardAnalytics();
+            // Then update the stat cards with real data
+            
+        } catch (error) {
+            console.error('Failed to load dashboard stats:', error);
+            AdminUI.showError('Failed to load dashboard statistics');
+        }
+    },
+
+    /**
+     * Setup refresh button functionality
+     */
+    setupRefreshButton() {
+        const refreshBtn = document.getElementById('refreshBtn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', async () => {
+                refreshBtn.innerHTML = '<i class="bi bi-arrow-repeat"></i>';
+                refreshBtn.disabled = true;
+                
+                try {
+                    await this.loadDashboardStats();
+                    refreshBtn.innerHTML = '<i class="bi bi-check2"></i>';
+                    AdminUI.showSuccess('Dashboard data refreshed');
+                } catch (error) {
+                    refreshBtn.innerHTML = '<i class="bi bi-exclamation-triangle"></i>';
+                    AdminUI.showError('Failed to refresh data');
+                }
+                
+                setTimeout(() => {
+                    refreshBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i>';
+                    refreshBtn.disabled = false;
+                }, 1500);
+            });
+        }
     }
-
-    nav.addEventListener('click', (e) => {
-      const btn = e.target.closest('button[data-target]');
-      if (!btn) return;
-      activate(btn.dataset.target);
-      history.replaceState(null, '', `#${btn.dataset.target}`);
-    });
-
-    // Deep link support (#dashboard, #users, ...)
-    window.addEventListener('DOMContentLoaded', () => {
-      const hash = location.hash.replace('#', '');
-      if (hash) activate(hash);
-    });
-
-    // ====== Keyboard Shortcuts ======
-    const keymap = { d: 'dashboard', u: 'users', v: 'verification', s: 'settings', h: 'health', a: 'analytics' };
-    document.addEventListener('keydown', (e) => {
-      if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
-      const t = keymap[e.key?.toLowerCase()];
-      if (t) { e.preventDefault(); activate(t); }
-    });
-
-    // ====== Mobile Sidebar Toggle ======
-    const toggleSidebar = document.getElementById('toggleSidebar');
-    const backdrop = document.getElementById('backdrop');
-
-    toggleSidebar?.addEventListener('click', () => document.body.classList.toggle('sidebar-open'));
-    backdrop?.addEventListener('click', () => document.body.classList.remove('sidebar-open'));
-
-    // ====== Theme Toggle (dark only demo) ======
-    const themeBtn = document.getElementById('themeBtn');
-    let dark = true;
-    themeBtn.addEventListener('click', () => {
-      dark = !dark;
-      document.documentElement.style.filter = dark ? 'none' : 'invert(1) hue-rotate(180deg)';
-      themeBtn.innerHTML = dark ? '<i class="bi bi-moon"></i>' : '<i class="bi bi-sun"></i>';
-    });
-
-    // ====== Demo: Refresh Button ======
-    document.getElementById('refreshBtn').addEventListener('click', () => {
-      const btn = document.getElementById('refreshBtn');
-      btn.innerHTML = '<i class="bi bi-arrow-repeat"></i>';
-      btn.disabled = true;
-      setTimeout(() => {
-        btn.innerHTML = '<i class="bi bi-check2"></i>';
-        setTimeout(() => { btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i>'; btn.disabled = false; }, 900);
-      }, 900);
-    });
-    */
+};
   
 const AdminAPI = {
     /**
@@ -1536,7 +1642,24 @@ function initializeNavigation() {
     });
   });
 }
+// ===========================================================================
+// ADMIN INITIALIZATION
+// ===========================================================================
+
+/**
+ * Initialize admin dashboard when page loads
+ */
 document.addEventListener('DOMContentLoaded', () => {
-  initializeNavigation();
+    console.log('Admin dashboard initializing...');
+    
+    // Initialize navigation system
+    AdminNavigation.init();
+    
+    // Keep existing navigation for compatibility
+    if (typeof initializeNavigation === 'function') {
+        initializeNavigation();
+    }
+    
+    console.log('Admin dashboard initialized successfully');
 });
 
