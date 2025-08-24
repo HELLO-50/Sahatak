@@ -39,22 +39,22 @@
                                 <i class="bi bi-person-badge"></i>
                             </div>
                             <div class="user-details">
-                                <h5 class="mb-1" id="user-name">Awab Ahmed</h5>
-                                <span class="status-badge status-active" id="user-status">System Administrator</span>
+                                <h5 class="mb-1" id="admin-user-name">Awab Ahmed</h5>
+                                <span class="status-badge status-active" id="admin-user-status">System Administrator</span>
                             </div>
                             <!-- Vertical Action Buttons -->
                             <div class="action-buttons">
-                                <button class="btn btn-action" onclick="showProfile()" title="Profile">
+                                <button class="btn btn-action" id="admin-btn-profile" onclick="showProfile()" title="Profile">
                                     <i class="bi bi-person-gear"></i>
-                                    <span id="btn-profile">Profile</span>
+                                    <span>Profile</span>
                                 </button>
-                                <button class="btn btn-action" onclick="showSettings()" title="Settings">
+                                <button class="btn btn-action" id="admin-btn-settings" onclick="showSettings()" title="Settings">
                                     <i class="bi bi-gear"></i>
-                                    <span id="btn-settings">Settings</span>
+                                    <span>Settings</span>
                                 </button>
-                                <button class="btn btn-action btn-logout" onclick="AuthGuard.logout()" title="Logout">
+                                <button class="btn btn-action btn-logout" id="admin-btn-logout" onclick="AuthGuard.logout()" title="Logout">
                                     <i class="bi bi-box-arrow-right"></i>
-                                    <span id="btn-logout">Logout</span>
+                                    <span>Logout</span>
                                 </button>
                             </div>
                         </div>
@@ -62,15 +62,15 @@
                     
                     <!-- Dashboard Title - Center -->
                     <div class="col-lg-4 text-center">
-                        <h1 class="dashboard-title" id="dashboard-title">Admin Dashboard</h1>
-                        <p class="dashboard-subtitle" id="dashboard-subtitle">Sahatak Medical Platform Management</p>
+                        <h1 class="dashboard-title" id="admin-dashboard-title">Admin Dashboard</h1>
+                        <p class="dashboard-subtitle" id="admin-dashboard-subtitle">Sahatak Medical Platform Management</p>
                     </div>
                     
                     <!-- Language Selector - Right (Left in RTL) -->
                     <div class="col-lg-4 text-end">
                         <button class="btn btn-outline-medical btn-sm" onclick="showLanguageSelector()">
                             <i class="bi bi-globe me-1"></i>
-                            <span id="current-lang">English</span>
+                            <span id="current-admin-language">English</span>
                         </button>
                     </div>
                 </div>
@@ -83,31 +83,31 @@
                         <div class="nav-buttons">
                             <button class="btn btn-admin-nav active" data-target="dashboard">
                                 <i class="bi bi-speedometer2"></i>
-                                <span id="nav-dashboard">Dashboard</span>
+                                <span id="admin-nav-dashboard">Dashboard</span>
                             </button>
                             <button class="btn btn-admin-nav" data-target="users">
                                 <i class="bi bi-people"></i>
-                                <span id="nav-users">User Management</span>
+                                <span id="admin-nav-users">User Management</span>
                             </button>
                             <button class="btn btn-admin-nav" data-target="verification">
                                 <i class="bi bi-patch-check"></i>
-                                <span id="nav-verification">Doctor Verification</span>
+                                <span id="admin-nav-verification">Doctor Verification</span>
                             </button>
                             <button class="btn btn-admin-nav" data-target="appointments">
                                 <i class="bi bi-calendar-check"></i>
-                                <span id="nav-appointments">Appointments</span>
+                                <span id="admin-nav-appointments">Appointments</span>
                             </button>
                             <button class="btn btn-admin-nav" data-target="settings">
                                 <i class="bi bi-sliders2"></i>
-                                <span id="nav-settings">System Settings</span>
+                                <span id="admin-nav-settings">System Settings</span>
                             </button>
                             <button class="btn btn-admin-nav" data-target="health">
                                 <i class="bi bi-activity"></i>
-                                <span id="nav-health">Platform Health</span>
+                                <span id="admin-nav-health">Platform Health</span>
                             </button>
                             <button class="btn btn-admin-nav" data-target="analytics">
                                 <i class="bi bi-graph-up"></i>
-                                <span id="nav-analytics">Analytics</span>
+                                <span id="admin-nav-analytics">Analytics</span>
                             </button>
                         </div>
                     </div>
@@ -753,6 +753,8 @@
             
             // Initialize admin dashboard translations
             await DashboardTranslations.initializeDashboard('admin');
+            
+            // Note: Language display will be handled by the translation system
             
             // Navigation between sections using horizontal buttons
             document.querySelectorAll('.btn-admin-nav').forEach(button => {
