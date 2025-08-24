@@ -25,7 +25,7 @@ Colors:
     --medical-blue: #2563eb;      /* Deep blue */
     --medical-green: #047857;     /* Darker green */
     --medical-teal: #0e7490;      /* Darker teal */
-    --medical-red: #dc2626;       /* Keep red only for alerts */
+    --medical-accent: #3b82f6;    /* Blue accent instead of red */
     
     /* Admin specific colors */
 }
@@ -179,7 +179,7 @@ Colors:
 }
 
 .user-details .status-badge {
-    background: rgba(220, 38, 38, 0.2) !important;
+    background: rgba(37, 99, 235, 0.2) !important;
     color: var(--admin-accent) !important;
     border: 1px solid var(--admin-accent);
 }
@@ -202,15 +202,15 @@ Colors:
 }
 
 .btn-action.btn-logout {
-    border-color: #ef4444;
-    color: #ef4444;
-    background: rgba(239, 68, 68, 0.1);
+    border-color: #6366f1;
+    color: #6366f1;
+    background: rgba(99, 102, 241, 0.1);
 }
 
 .btn-action.btn-logout:hover {
-    background-color: #ef4444;
+    background-color: #6366f1;
     color: white;
-    border-color: #ef4444;
+    border-color: #6366f1;
 }
 
 /* Horizontal Admin Navigation - Dark Theme */
@@ -220,7 +220,7 @@ Colors:
     border-radius: 15px;
     padding: 1.5rem;
     box-shadow: var(--admin-shadow);
-    border: 1px solid rgba(220, 38, 38, 0.3);
+    border: 1px solid rgba(37, 99, 235, 0.3);
 }
 
 .nav-buttons {
@@ -236,7 +236,7 @@ Colors:
     gap: 0.5rem;
     padding: 0.75rem 1.25rem;
     border: 2px solid var(--admin-accent);
-    background: rgba(220, 38, 38, 0.1);
+    background: rgba(37, 99, 235, 0.1);
     color: var(--admin-accent);
     border-radius: 10px;
     font-weight: 500;
@@ -323,7 +323,7 @@ Colors:
 /* Admin Cards and Content - Dark Theme */
 .dashboard-card {
     background: var(--admin-card-bg) !important;
-    border: 1px solid rgba(220, 38, 38, 0.3) !important;
+    border: 1px solid rgba(37, 99, 235, 0.3) !important;
     color: var(--admin-text) !important;
 }
 
@@ -365,7 +365,7 @@ Colors:
 .dashboard-header {
     background: var(--admin-card-bg);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(220, 38, 38, 0.2);
+    border: 1px solid rgba(37, 99, 235, 0.2);
     box-shadow: var(--admin-shadow);
 }
 
@@ -450,7 +450,7 @@ Colors:
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, var(--medical-red) 0%, #ef4444 100%);
+    background: linear-gradient(90deg, var(--admin-primary) 0%, #3b82f6 100%);
 }
 
 .admin-stat-card .stat-number {
@@ -468,7 +468,7 @@ Colors:
     top: 50%;
     transform: translateY(-50%);
     font-size: 3rem;
-    color: rgba(220, 38, 38, 0.2);
+    color: rgba(37, 99, 235, 0.2);
 }
 
 /* LTR layout adjustments */
@@ -480,12 +480,12 @@ Colors:
 /* Admin Health Card */
 .admin-health-card {
     background: linear-gradient(135deg, var(--admin-dark) 0%, var(--admin-primary) 100%);
-    border: 2px solid var(--medical-red);
+    border: 2px solid var(--admin-primary);
 }
 
 .admin-health-card h5 {
-    color: var(--medical-red);
-    border-bottom-color: var(--medical-red);
+    color: var(--admin-primary);
+    border-bottom-color: var(--admin-primary);
 }
 
 /* Admin sections - hidden by default except dashboard */
@@ -515,19 +515,19 @@ Colors:
 }
 
 .sidebar-nav-link:hover {
-    background: linear-gradient(45deg, var(--medical-red), #ef4444);
+    background: linear-gradient(45deg, var(--admin-primary), #3b82f6);
     color: white;
     transform: translateX(5px);
     text-decoration: none;
-    border-color: var(--medical-red);
-    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.4);
+    border-color: var(--admin-primary);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
 }
 
 .sidebar-nav-link.active {
-    background: linear-gradient(45deg, var(--medical-red), #dc2626);
+    background: linear-gradient(45deg, var(--admin-primary), var(--admin-dark));
     color: white;
-    border-color: #ef4444;
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
     text-decoration: none;
     transform: translateX(3px);
 }

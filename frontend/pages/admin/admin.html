@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,31 +26,35 @@
     <!-- Chart.js -->
      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
+<body data-protect="admin">
     <div class="dashboard-container">
         <div class="container-fluid">
             <!-- Dashboard Header -->
             <div class="dashboard-header">
                 <div class="row align-items-center">
-                    <!-- Profile Section - Left in English, Right in Arabic -->
+                    <!-- Profile Section - Left (Right in RTL) -->
                     <div class="col-lg-4">
-                        <div class="user-profile d-flex align-items-center">
-                            <div class="user-avatar me-3">
-                                <i class="bi bi-person-circle fs-2 text-primary"></i>
+                        <div class="profile-section">
+                            <div class="user-avatar">
+                                <i class="bi bi-person-badge"></i>
                             </div>
-                            <div class="user-details me-3">
+                            <div class="user-details">
                                 <h5 class="mb-1" id="user-name">Awab Ahmed</h5>
                                 <span class="status-badge status-active" id="user-status">System Administrator</span>
                             </div>
-                            <div class="action-buttons d-flex gap-2">
-                                <button class="btn btn-outline-primary btn-sm" onclick="showProfile()" id="admin-btn-profile">
+                            <!-- Vertical Action Buttons -->
+                            <div class="action-buttons">
+                                <button class="btn btn-action" onclick="showProfile()" title="Profile">
                                     <i class="bi bi-person-gear"></i>
+                                    <span id="btn-profile">Profile</span>
                                 </button>
-                                <button class="btn btn-outline-primary btn-sm" onclick="showSettings()" id="admin-btn-settings">
+                                <button class="btn btn-action" onclick="showSettings()" title="Settings">
                                     <i class="bi bi-gear"></i>
+                                    <span id="btn-settings">Settings</span>
                                 </button>
-                                <button class="btn btn-outline-danger btn-sm" onclick="logout()" id="admin-btn-logout">
+                                <button class="btn btn-action btn-logout" onclick="AuthGuard.logout()" title="Logout">
                                     <i class="bi bi-box-arrow-right"></i>
+                                    <span id="btn-logout">Logout</span>
                                 </button>
                             </div>
                         </div>
@@ -58,18 +62,16 @@
                     
                     <!-- Dashboard Title - Center -->
                     <div class="col-lg-4 text-center">
-                        <h1 class="dashboard-title" id="admin-dashboard-title">Admin Dashboard</h1>
-                        <p class="dashboard-subtitle" id="admin-dashboard-subtitle">Sahatak Medical Platform Management</p>
+                        <h1 class="dashboard-title" id="dashboard-title">Admin Dashboard</h1>
+                        <p class="dashboard-subtitle" id="dashboard-subtitle">Sahatak Medical Platform Management</p>
                     </div>
                     
-                    <!-- Language Selector - Right in English, Left in Arabic -->
-                    <div class="col-lg-4 d-flex align-items-center justify-content-end">
-                        <div class="language-selector">
-                            <button class="btn btn-primary btn-sm" id="admin-language-toggle">
-                                <i class="bi bi-globe2 me-1"></i>
-                                <span id="current-admin-language">العربية</span>
-                            </button>
-                        </div>
+                    <!-- Language Selector - Right (Left in RTL) -->
+                    <div class="col-lg-4 text-end">
+                        <button class="btn btn-outline-medical btn-sm" onclick="showLanguageSelector()">
+                            <i class="bi bi-globe me-1"></i>
+                            <span id="current-lang">English</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -81,31 +83,31 @@
                         <div class="nav-buttons">
                             <button class="btn btn-admin-nav active" data-target="dashboard">
                                 <i class="bi bi-speedometer2"></i>
-                                <span id="admin-nav-dashboard">لوحة التحكم</span>
+                                <span id="nav-dashboard">Dashboard</span>
                             </button>
                             <button class="btn btn-admin-nav" data-target="users">
                                 <i class="bi bi-people"></i>
-                                <span id="admin-nav-users">إدارة المستخدمين</span>
+                                <span id="nav-users">User Management</span>
                             </button>
                             <button class="btn btn-admin-nav" data-target="verification">
                                 <i class="bi bi-patch-check"></i>
-                                <span id="admin-nav-verification">تحقق من الأطباء</span>
+                                <span id="nav-verification">Doctor Verification</span>
                             </button>
                             <button class="btn btn-admin-nav" data-target="appointments">
                                 <i class="bi bi-calendar-check"></i>
-                                <span id="admin-nav-appointments">إدارة المواعيد</span>
+                                <span id="nav-appointments">Appointments</span>
                             </button>
                             <button class="btn btn-admin-nav" data-target="settings">
                                 <i class="bi bi-sliders2"></i>
-                                <span id="admin-nav-settings">إعدادات النظام</span>
+                                <span id="nav-settings">System Settings</span>
                             </button>
                             <button class="btn btn-admin-nav" data-target="health">
                                 <i class="bi bi-activity"></i>
-                                <span id="admin-nav-health">صحة النظام</span>
+                                <span id="nav-health">Platform Health</span>
                             </button>
                             <button class="btn btn-admin-nav" data-target="analytics">
                                 <i class="bi bi-graph-up"></i>
-                                <span id="admin-nav-analytics">التحليلات</span>
+                                <span id="nav-analytics">Analytics</span>
                             </button>
                         </div>
                     </div>
@@ -124,28 +126,28 @@
                             <div class="row mb-4">
                                 <div class="col-lg-3 col-md-6 mb-3">
                                     <div class="dashboard-card stat-card admin-stat-card">
-                                        <div class="stat-number">125</div>
+                                        <div class="stat-number" id="total-users-count">125</div>
                                         <div class="stat-label" id="admin-stat-total-users">Total Users</div>
                                         <div class="stat-icon"><i class="bi bi-people"></i></div>
                                     </div>
                                 </div>
                                 <div class="col-lg-3 col-md-6 mb-3">
                                     <div class="dashboard-card stat-card admin-stat-card">
-                                        <div class="stat-number">45</div>
+                                        <div class="stat-number" id="verified-doctors-count">45</div>
                                         <div class="stat-label" id="admin-stat-verified-doctors">Verified Doctors</div>
                                         <div class="stat-icon"><i class="bi bi-person-check"></i></div>
                                     </div>
                                 </div>
                                 <div class="col-lg-3 col-md-6 mb-3">
                                     <div class="dashboard-card stat-card admin-stat-card">
-                                        <div class="stat-number">230</div>
+                                        <div class="stat-number" id="appointments-count">230</div>
                                         <div class="stat-label" id="admin-stat-appointments">Appointments Booked</div>
                                         <div class="stat-icon"><i class="bi bi-calendar-check"></i></div>
                                     </div>
                                 </div>
                                 <div class="col-lg-3 col-md-6 mb-3">
                                     <div class="dashboard-card stat-card admin-stat-card">
-                                        <div class="stat-number">98%</div>
+                                        <div class="stat-number" id="system-health-percentage">98%</div>
                                         <div class="stat-label" id="admin-stat-system-health">System Health</div>
                                         <div class="stat-icon"><i class="bi bi-shield-check"></i></div>
                                     </div>
@@ -154,7 +156,7 @@
                             
                             <!-- Platform Health & Analytics - Always Visible -->
                             <div class="dashboard-card admin-health-card">
-                                <h5><i class="bi bi-activity me-2"></i>Platform Health & Analytics</h5>
+                                <h5><i class="bi bi-activity ms-2"></i>صحة النظام والتحليلات</h5>
                                 
                                 <!-- Server Health Gauges -->
                                 <div class="row mb-4">
@@ -166,7 +168,7 @@
                                                     <span class="gauge-text">99.8%</span>
                                                 </div>
                                             </div>
-                                            <p class="gauge-label">Server Uptime</p>
+                                            <p class="gauge-label" id="admin-gauge-uptime">Server Uptime</p>
                                         </div>
                                     </div>
                                     <div class="col-md-3 text-center">
@@ -177,7 +179,7 @@
                                                     <span class="gauge-text" id="cpuUsage">65%</span>
                                                 </div>
                                             </div>
-                                            <p class="gauge-label">CPU Usage</p>
+                                            <p class="gauge-label" id="admin-gauge-cpu">CPU Usage</p>
                                         </div>
                                     </div>
                                     <div class="col-md-3 text-center">
@@ -188,7 +190,7 @@
                                                     <span class="gauge-text" id="memUsage">78%</span>
                                                 </div>
                                             </div>
-                                            <p class="gauge-label">Memory Usage</p>
+                                            <p class="gauge-label" id="admin-gauge-memory">Memory Usage</p>
                                         </div>
                                     </div>
                                     <div class="col-md-3 text-center">
@@ -199,7 +201,7 @@
                                                     <span class="gauge-text">320ms</span>
                                                 </div>
                                             </div>
-                                            <p class="gauge-label">Response Time</p>
+                                            <p class="gauge-label" id="admin-gauge-response">Response Time</p>
                                         </div>
                                     </div>
                                 </div>
@@ -736,24 +738,21 @@
             console.log('Show settings clicked');
         }
         
+        // Language selector function
+        function showLanguageSelector() {
+            const currentLang = LanguageManager.getLanguage() || 'en';
+            const newLang = currentLang === 'en' ? 'ar' : 'en';
+            DashboardTranslations.switchDashboardLanguage(newLang, 'admin');
+        }
+        
         // logout function is now defined globally in main.js
         
         // Initialize admin dashboard with translations
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             console.log('Admin dashboard initializing...');
             
             // Initialize admin dashboard translations
-            DashboardTranslations.initializeDashboard('admin');
-            
-            // Setup language toggle
-            const languageToggle = document.getElementById('admin-language-toggle');
-            if (languageToggle) {
-                languageToggle.addEventListener('click', () => {
-                    const currentLang = LanguageManager.getLanguage() || 'ar';
-                    const newLang = currentLang === 'ar' ? 'en' : 'ar';
-                    DashboardTranslations.switchDashboardLanguage(newLang, 'admin');
-                });
-            }
+            await DashboardTranslations.initializeDashboard('admin');
             
             // Navigation between sections using horizontal buttons
             document.querySelectorAll('.btn-admin-nav').forEach(button => {
