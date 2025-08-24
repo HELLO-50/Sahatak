@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -81,27 +81,31 @@
                         <div class="nav-buttons">
                             <button class="btn btn-admin-nav active" data-target="dashboard">
                                 <i class="bi bi-speedometer2"></i>
-                                <span id="admin-nav-dashboard">Dashboard</span>
+                                <span id="admin-nav-dashboard">لوحة التحكم</span>
                             </button>
                             <button class="btn btn-admin-nav" data-target="users">
                                 <i class="bi bi-people"></i>
-                                <span id="admin-nav-users">User Management</span>
+                                <span id="admin-nav-users">إدارة المستخدمين</span>
                             </button>
                             <button class="btn btn-admin-nav" data-target="verification">
                                 <i class="bi bi-patch-check"></i>
-                                <span id="admin-nav-verification">Doctor Verification</span>
+                                <span id="admin-nav-verification">تحقق من الأطباء</span>
+                            </button>
+                            <button class="btn btn-admin-nav" data-target="appointments">
+                                <i class="bi bi-calendar-check"></i>
+                                <span id="admin-nav-appointments">إدارة المواعيد</span>
                             </button>
                             <button class="btn btn-admin-nav" data-target="settings">
                                 <i class="bi bi-sliders2"></i>
-                                <span id="admin-nav-settings">System Settings</span>
+                                <span id="admin-nav-settings">إعدادات النظام</span>
                             </button>
                             <button class="btn btn-admin-nav" data-target="health">
                                 <i class="bi bi-activity"></i>
-                                <span id="admin-nav-health">Platform Health</span>
+                                <span id="admin-nav-health">صحة النظام</span>
                             </button>
                             <button class="btn btn-admin-nav" data-target="analytics">
                                 <i class="bi bi-graph-up"></i>
-                                <span id="admin-nav-analytics">Analytics</span>
+                                <span id="admin-nav-analytics">التحليلات</span>
                             </button>
                         </div>
                     </div>
@@ -211,55 +215,83 @@
                         <!-- User Management Section -->
                         <section id="users" class="admin-section">
                             <div class="dashboard-card">
-                                <h5><i class="bi bi-people me-2"></i>User Management</h5>
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <h5><i class="bi bi-people me-2"></i>إدارة المستخدمين</h5>
+                                    <div>
+                                        <button class="btn btn-success me-2" onclick="AdminActions.exportUsers()">
+                                            <i class="bi bi-download me-1"></i>
+                                            تصدير البيانات
+                                        </button>
+                                        <button class="btn btn-primary" onclick="AdminActions.createAdminUser()">
+                                            <i class="bi bi-person-plus me-1"></i>
+                                            إضافة مشرف
+                                        </button>
+                                    </div>
+                                </div>
+                                
                                 <!-- User Management Controls -->
                                 <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
-                                  <!-- Filters -->
-                                  <div class="btn-group" role="group" aria-label="User type filters">
-                                    <button type="button" class="btn btn-outline-medical user-filter-btn active" data-filter="all">All</button>
-                                    <button type="button" class="btn btn-outline-medical user-filter-btn" data-filter="patient">Patients</button>
-                                    <button type="button" class="btn btn-outline-medical user-filter-btn" data-filter="doctor">Doctors</button>
-                                    <button type="button" class="btn btn-outline-medical user-filter-btn" data-filter="admin">Admins</button>
-                                  </div>
+                                    <!-- Filters -->
+                                    <div class="btn-group" role="group" aria-label="User type filters">
+                                        <button type="button" class="btn btn-outline-primary user-filter-btn active" data-filter="all">الكل</button>
+                                        <button type="button" class="btn btn-outline-primary user-filter-btn" data-filter="patient">المرضى</button>
+                                        <button type="button" class="btn btn-outline-primary user-filter-btn" data-filter="doctor">الأطباء</button>
+                                        <button type="button" class="btn btn-outline-primary user-filter-btn" data-filter="admin">المشرفين</button>
+                                    </div>
 
-                                  <!-- Search -->
-                                  <div class="ms-3" style="min-width:280px;">
-                                    <input id="user-search" type="search" class="form-control" placeholder="Search by name, email or phone">
-                                  </div>
+                                    <!-- Status Filter -->
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-outline-success status-filter-btn active" data-status="">جميع الحالات</button>
+                                        <button type="button" class="btn btn-outline-success status-filter-btn" data-status="true">نشط</button>
+                                        <button type="button" class="btn btn-outline-danger status-filter-btn" data-status="false">غير نشط</button>
+                                    </div>
 
-                                  <!-- Per-page -->
-                                  <div class="ms-auto">
-                                    <select id="per-page" class="form-select form-select-sm">
-                                      <option value="5">5 per page</option>
-                                      <option value="10" selected>10 per page</option>
-                                      <option value="20">20 per page</option>
-                                    </select>
-                                  </div>
+                                    <!-- Search -->
+                                    <div class="ms-3" style="min-width:280px;">
+                                        <input id="user-search" type="search" class="form-control" placeholder="البحث باسم، إيميل أو رقم الهاتف...">
+                                    </div>
+
+                                    <!-- Per-page -->
+                                    <div class="ms-auto">
+                                        <select id="users-per-page" class="form-select form-select-sm">
+                                            <option value="10">10 في الصفحة</option>
+                                            <option value="20" selected>20 في الصفحة</option>
+                                            <option value="50">50 في الصفحة</option>
+                                        </select>
+                                    </div>
                                 </div>
 
-                                <!-- Users Table --> -->
+                                <!-- Users Table -->
                                 <div class="table-responsive">
-                                  <table class="table table-hover table-bordered text-center">
-                                    <thead class="table-dark">
-                                      <tr>
-                                        <th>#</th>
-                                        <th>Name</th>
-                                        <th>Email</th>
-                                        <th>Phone</th>
-                                        <th>Role</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody id="users-table-body">
-                                      <!-- filled by JS -->
-                                    </tbody>
-                                  </table>
+                                    <table class="table table-hover table-bordered text-center">
+                                        <thead class="table-primary">
+                                            <tr>
+                                                <th width="5%">#</th>
+                                                <th width="20%">الاسم الكامل</th>
+                                                <th width="20%">البريد الإلكتروني</th>
+                                                <th width="12%">الهاتف</th>
+                                                <th width="12%">النوع</th>
+                                                <th width="10%">الحالة</th>
+                                                <th width="12%">تاريخ التسجيل</th>
+                                                <th width="15%">الإجراءات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="users-table-body">
+                                            <tr>
+                                                <td colspan="8" class="text-center py-4">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="visually-hidden">جاري التحميل...</span>
+                                                    </div>
+                                                    <p class="mt-2 text-muted">جاري تحميل بيانات المستخدمين...</p>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
 
                                 <!-- Pagination -->
-                                <nav>
-                                  <ul id="users-pagination" class="pagination justify-content-center"></ul>
+                                <nav aria-label="Users pagination">
+                                    <ul id="users-pagination" class="pagination justify-content-center"></ul>
                                 </nav>
                             </div>
                         </section>
@@ -269,60 +301,229 @@
                         <!-- Doctor Verification Section -->
                         <section id="verification" class="admin-section">
                             <div class="dashboard-card">
-                                <h5><i class="bi bi-patch-check me-2"></i>Doctor Verification</h5>
-                                <div id="doctorList" class="mt-3"></div>
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <h5><i class="bi bi-patch-check me-2"></i>تحقق من الأطباء</h5>
+                                    <div>
+                                        <button class="btn btn-info me-2" onclick="DoctorVerification.refreshPending()">
+                                            <i class="bi bi-arrow-clockwise me-1"></i>
+                                            تحديث
+                                        </button>
+                                        <button class="btn btn-success" onclick="AdminActions.addDoctorManually()">
+                                            <i class="bi bi-person-plus me-1"></i>
+                                            إضافة طبيب يدوياً
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Verification Tabs -->
+                                <div class="mb-3">
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-outline-warning verification-tab-btn active" data-tab="pending">
+                                            <i class="bi bi-clock me-1"></i>
+                                            في الانتظار (<span id="pending-count">0</span>)
+                                        </button>
+                                        <button type="button" class="btn btn-outline-success verification-tab-btn" data-tab="approved">
+                                            <i class="bi bi-check-circle me-1"></i>
+                                            معتمد
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger verification-tab-btn" data-tab="rejected">
+                                            <i class="bi bi-x-circle me-1"></i>
+                                            مرفوض
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Doctors List -->
+                                <div id="pending-verifications">
+                                    <div class="text-center py-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">جاري التحميل...</span>
+                                        </div>
+                                        <p class="mt-2 text-muted">جاري تحميل طلبات التحقق...</p>
+                                    </div>
+                                </div>
                             </div>
                         </section>
  
+                        <!-- Appointments Management Section -->
+                        <section id="appointments" class="admin-section">
+                            <div class="dashboard-card">
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <h5><i class="bi bi-calendar-check me-2"></i>إدارة المواعيد</h5>
+                                    <div>
+                                        <button class="btn btn-info me-2" onclick="AppointmentManagement.refreshAppointments()">
+                                            <i class="bi bi-arrow-clockwise me-1"></i>
+                                            تحديث
+                                        </button>
+                                        <button class="btn btn-success" onclick="AdminActions.exportAppointments()">
+                                            <i class="bi bi-download me-1"></i>
+                                            تصدير البيانات
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Appointment Filters -->
+                                <div class="mb-3">
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-outline-primary appointment-filter-btn active" data-filter="all">جميع المواعيد</button>
+                                        <button type="button" class="btn btn-outline-success appointment-filter-btn" data-filter="upcoming">قادمة</button>
+                                        <button type="button" class="btn btn-outline-info appointment-filter-btn" data-filter="today">اليوم</button>
+                                        <button type="button" class="btn btn-outline-warning appointment-filter-btn" data-filter="completed">مكتملة</button>
+                                        <button type="button" class="btn btn-outline-danger appointment-filter-btn" data-filter="cancelled">ملغاة</button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Appointments Table -->
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-bordered">
+                                        <thead class="table-primary">
+                                            <tr>
+                                                <th>المريض</th>
+                                                <th>الطبيب</th>
+                                                <th>التاريخ والوقت</th>
+                                                <th>الحالة</th>
+                                                <th>الإجراءات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="appointments-table-body">
+                                            <tr>
+                                                <td colspan="5" class="text-center py-4">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="visually-hidden">جاري التحميل...</span>
+                                                    </div>
+                                                    <p class="mt-2 text-muted">جاري تحميل بيانات المواعيد...</p>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </section>
+                        
                         <!-- System Settings Section -->
                         <section id="settings" class="admin-section">
                             <div class="dashboard-card">
-                                <h5><i class="bi bi-sliders2 me-2"></i>System Settings</h5>
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <h5><i class="bi bi-sliders2 me-2"></i>إعدادات النظام</h5>
+                                    <button class="btn btn-success" onclick="SystemSettings.saveAllSettings()">
+                                        <i class="bi bi-check2 me-1"></i>
+                                        حفظ جميع الإعدادات
+                                    </button>
+                                </div>
                                 
-                                <form id="settingsForm" class="mt-4">
-                                  <div class="mb-3">
-                                    <label class="form-label">Maintenance Mode</label>
-                                    <select id="maintenance" class="form-select">
-                                      <option value="on">Enabled</option>
-                                      <option value="off">Disabled</option>
-                                    </select>
-                                  </div>
-
-                                  <div class="mb-3">
-                                    <label class="form-label">Default Language</label>
-                                    <select id="language" class="form-select">
-                                      <option value="ar">Arabic</option>
-                                      <option value="en">English</option>
-                                    </select>
-                                  </div>
-                                  
-                                  <div class="mb-3">
-                                    <label class="form-label">Default Timezone</label>
-                                    <input type="text" id="timezone" class="form-control" value="Africa/Cairo" />
-                                  </div>
-
-                                  <button type="submit" class="btn btn-medical">Save Settings</button>
-                                </form>
-                                <!-- Additional Settings -->
-                                <div class="row mt-4">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">Registration Status</label>
-                                            <select class="form-select">
-                                                <option value="open">Open</option>
-                                                <option value="closed">Closed</option>
-                                            </select>
-                                        </div>
+                                <!-- Settings Tabs -->
+                                <ul class="nav nav-tabs mb-3" id="settingsTabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab">
+                                            <i class="bi bi-gear me-1"></i>عام
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="notifications-tab" data-bs-toggle="tab" data-bs-target="#notifications" type="button" role="tab">
+                                            <i class="bi bi-bell me-1"></i>الإشعارات
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="maintenance-tab" data-bs-toggle="tab" data-bs-target="#maintenance" type="button" role="tab">
+                                            <i class="bi bi-tools me-1"></i>الصيانة
+                                        </button>
+                                    </li>
+                                </ul>
+                                
+                                <!-- Settings Content -->
+                                <div class="tab-content" id="settingsTabContent">
+                                    <!-- General Settings -->
+                                    <div class="tab-pane fade show active" id="general" role="tabpanel">
+                                        <form id="general-settings-form">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">اللغة الافتراضية</label>
+                                                    <select id="default_language" class="form-select">
+                                                        <option value="ar">العربية</option>
+                                                        <option value="en">الإنجليزية</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">المنطقة الزمنية</label>
+                                                    <select id="default_timezone" class="form-select">
+                                                        <option value="Africa/Cairo">القاهرة</option>
+                                                        <option value="Asia/Riyadh">الرياض</option>
+                                                        <option value="UTC">UTC</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">حالة التسجيل</label>
+                                                    <select id="registration_status" class="form-select">
+                                                        <option value="open">مفتوح</option>
+                                                        <option value="closed">مغلق</option>
+                                                        <option value="doctors_only">للأطباء فقط</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">الحد الأقصى للمواعيد في اليوم</label>
+                                                    <input type="number" id="max_appointments_per_day" class="form-control" value="20" min="1" max="100">
+                                                </div>
+                                            </div>
+                                        </form>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">Server Timezone</label>
-                                            <select class="form-select">
-                                                <option value="UTC">UTC</option>
-                                                <option value="Africa/Cairo">Africa/Cairo</option>
-                                                <option value="Asia/Riyadh">Asia/Riyadh</option>
-                                            </select>
-                                        </div>
+                                    
+                                    <!-- Notifications Settings -->
+                                    <div class="tab-pane fade" id="notifications" role="tabpanel">
+                                        <form id="notifications-settings-form">
+                                            <div class="row g-3">
+                                                <div class="col-12">
+                                                    <h6>إعدادات الإشعارات</h6>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" id="email_notifications" checked>
+                                                        <label class="form-check-label">إشعارات البريد الإلكتروني</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" id="sms_notifications">
+                                                        <label class="form-check-label">إشعارات SMS</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" id="appointment_reminders" checked>
+                                                        <label class="form-check-label">تذكير بالمواعيد</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" id="system_alerts" checked>
+                                                        <label class="form-check-label">تنبيهات النظام</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    
+                                    <!-- Maintenance Settings -->
+                                    <div class="tab-pane fade" id="maintenance" role="tabpanel">
+                                        <form id="maintenance-settings-form">
+                                            <div class="row g-3">
+                                                <div class="col-12">
+                                                    <div class="alert alert-warning">
+                                                        <i class="bi bi-exclamation-triangle me-2"></i>
+                                                        تفعيل وضع الصيانة سيمنع المستخدمين من الوصول إلى النظام
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" id="maintenance_mode">
+                                                        <label class="form-check-label">تفعيل وضع الصيانة</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <label class="form-label">رسالة الصيانة</label>
+                                                    <textarea id="maintenance_message" class="form-control" rows="3" placeholder="نحن نعمل على تحسين الخدمة. الرجاء المحاولة لاحقاً.">نحن نعمل على تحسين الخدمة. الرجاء المحاولة لاحقاً.</textarea>
+                                                </div>
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
