@@ -333,8 +333,9 @@ const DashboardTranslations = {
         this.updateElementText('gauge-memory', admin.gauges?.memory || 'Memory Usage');
         this.updateElementText('gauge-response', admin.gauges?.response || 'Response Time');
 
-        // Language selector
-        this.updateElementText('current-admin-language', admin.language.current);
+        // Show the opposite language (the one you can switch TO)
+        const oppositeLanguage = lang === 'ar' ? 'English' : 'العربية';
+        this.updateElementText('current-admin-language', oppositeLanguage);
 
         // Action buttons (using title attribute for tooltips)
         const profileBtn = document.getElementById('admin-btn-profile');

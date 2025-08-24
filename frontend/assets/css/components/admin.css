@@ -35,13 +35,48 @@ Colors:
     direction: rtl;
 }
 
-[dir="rtl"] .dashboard-header .col-lg-4:nth-child(1) { order: 3; }
-[dir="rtl"] .dashboard-header .col-lg-4:nth-child(2) { order: 2; }
-[dir="rtl"] .dashboard-header .col-lg-4:nth-child(3) { order: 1; }
+/* RTL positioning for language selector (same as other dashboards) */
+[dir="rtl"] .dashboard-header .col-lg-4.text-end {
+    position: absolute !important;
+    left: 15px !important; /* Position at far left with small margin */
+    right: auto !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: auto !important;
+    z-index: 10 !important;
+}
 
-/* Fix flex direction and alignment for RTL */
-[dir="rtl"] .user-profile {
-    flex-direction: row-reverse;
+/* RTL Support for Profile Section (same as other dashboards) */
+[dir="rtl"] .profile-section {
+    justify-content: flex-end; /* Align profile content to the right in RTL */
+    flex-direction: row-reverse; /* Reverse order: buttons, name, avatar */
+}
+
+/* RTL: Move action buttons to the left side of profile */
+[dir="rtl"] .action-buttons {
+    margin-left: 0;
+    margin-right: 1rem;
+}
+
+/* RTL Mobile Support */
+@media (max-width: 768px) {
+    [dir="rtl"] .dashboard-header .col-lg-4.text-end {
+        position: relative !important; /* Reset absolute positioning on mobile */
+        left: auto !important;
+        top: auto !important;
+        transform: none !important;
+        width: 100% !important;
+    }
+    
+    [dir="rtl"] .profile-section {
+        flex-direction: column; /* Same as LTR on mobile */
+        justify-content: center; /* Center align on mobile */
+    }
+    
+    [dir="rtl"] .action-buttons {
+        margin-right: 0;
+        margin-top: 0.5rem;
+    }
 }
 
 [dir="rtl"] .justify-content-end { 
@@ -59,6 +94,86 @@ Colors:
 
 [dir="rtl"] .dashboard-header .col-lg-4.text-end {
     text-align: start !important;
+}
+
+/* RTL Stats and Content Layout */
+
+/* RTL Margin fixes for icons */
+[dir="rtl"] .me-1 {
+    margin-left: 0.25rem !important;
+    margin-right: 0 !important;
+}
+
+[dir="rtl"] .me-2 {
+    margin-left: 0.5rem !important;
+    margin-right: 0 !important;
+}
+
+[dir="rtl"] .ms-2 {
+    margin-right: 0.5rem !important;
+    margin-left: 0 !important;
+}
+
+/* RTL Flex alignment fixes */
+[dir="rtl"] .d-flex.justify-content-between {
+    direction: rtl;
+}
+
+/* RTL Stats cards */
+[dir="rtl"] .admin-stat-card {
+    text-align: center !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+[dir="rtl"] .stat-number {
+    text-align: center;
+}
+
+[dir="rtl"] .stat-label {
+    text-align: center;
+}
+
+/* RTL Navigation and menu items */
+[dir="rtl"] .admin-nav {
+    direction: rtl;
+}
+
+[dir="rtl"] .nav-link {
+    text-align: right;
+}
+
+/* RTL Content sections */
+[dir="rtl"] .admin-section h5 {
+    direction: rtl;
+    text-align: right;
+}
+
+[dir="rtl"] .dashboard-card h5 {
+    direction: rtl;
+    text-align: right;
+}
+
+/* Specific RTL fixes for admin navigation */
+[dir="rtl"] .nav-buttons {
+    direction: rtl;
+    text-align: right;
+}
+
+[dir="rtl"] .nav-buttons .btn {
+    text-align: center;
+}
+
+/* RTL fixes for stats cards row - target the parent of stat cards */
+[dir="rtl"] .admin-section .row {
+    direction: rtl;
+}
+
+/* RTL fixes for action button groups in cards */
+[dir="rtl"] .dashboard-card .d-flex.justify-content-between {
+    direction: rtl;
 }
 
 /* Admin Navigation Deep Blue Theme */
@@ -422,17 +537,23 @@ Colors:
 /* Admin Stat Cards */
 .admin-stat-card {
     position: relative;
-    overflow: hidden;
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(59, 130, 246, 0.02) 100%);
+    background: #ffffff;
     border: 1px solid rgba(37, 99, 235, 0.2);
     border-radius: 12px;
     transition: all 0.3s ease;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 1.5rem;
+    box-shadow: none !important;
 }
 
 .admin-stat-card:hover {
     border-color: var(--admin-primary);
-    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.15);
-    transform: translateY(-5px);
+    box-shadow: none !important;
+    transform: none;
 }
 
 .stat-number {
@@ -471,18 +592,10 @@ Colors:
 }
 
 .admin-stat-card .stat-icon {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 3rem;
-    color: rgba(37, 99, 235, 0.2);
-}
-
-/* LTR layout adjustments */
-[dir="ltr"] .admin-stat-card .stat-icon {
-    right: 20px;
-    left: auto;
+    font-size: 2rem;
+    color: var(--admin-primary);
+    margin-bottom: 0.5rem;
+    text-align: center;
 }
 
 /* Admin Health Card */
