@@ -191,6 +191,7 @@ const DashboardTranslations = {
         this.updateElementText('admin-nav-dashboard', admin.navigation.dashboard);
         this.updateElementText('admin-nav-users', admin.navigation.users);
         this.updateElementText('admin-nav-verification', admin.navigation.verification);
+        this.updateElementText('admin-nav-appointments', admin.navigation.appointments);
         this.updateElementText('admin-nav-settings', admin.navigation.settings);
         this.updateElementText('admin-nav-health', admin.navigation.health);
         this.updateElementText('admin-nav-analytics', admin.navigation.analytics);

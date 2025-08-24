@@ -493,6 +493,7 @@
       "dashboard": "Dashboard",
       "users": "User Management", 
       "verification": "Doctor Verification",
+      "appointments": "Appointments",
       "settings": "System Settings",
       "health": "Platform Health",
       "analytics": "Analytics"

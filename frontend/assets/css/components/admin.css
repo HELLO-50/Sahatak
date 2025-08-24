@@ -53,6 +53,14 @@ Colors:
     margin-right: 0 !important; 
 }
 
+[dir="rtl"] .text-end {
+    text-align: start !important;
+}
+
+[dir="rtl"] .dashboard-header .col-lg-4.text-end {
+    text-align: start !important;
+}
+
 /* Admin Navigation Deep Blue Theme */
 .btn-admin-nav {
     background-color: transparent;
