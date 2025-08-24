@@ -5,6 +5,7 @@ from utils.responses import success_response, error_response
 from utils.validators import validate_json_data
 from utils.logging_config import app_logger
 from services.notification_service import send_registration_confirmation_notification, send_appointment_notification, send_doctor_notification
+from services.email_service import EmailService
 
 notifications_bp = Blueprint('notifications', __name__, url_prefix='/notifications')
 
@@ -249,3 +250,22 @@ def get_default_settings():
     except Exception as e:
         app_logger.error(f"Error getting default settings: {str(e)}")
         return error_response('Failed to get default settings', 500)
+
+def queue_notification(user_id, title, message, notification_type='info', send_email=False):
+    """Queue a notification for a user (stub for compatibility)"""
+    try:
+        app_logger.info(f"Notification queued for user {user_id}: {title}")
+        # TODO: Implement proper notification queuing system
+        return True
+    except Exception as e:
+        app_logger.error(f"Error queuing notification: {str(e)}")
+        return False
+
+def send_email(to_email, subject, body):
+    """Send email using EmailService (compatibility wrapper)"""
+    try:
+        email_service = EmailService()
+        return email_service.send_custom_email(to_email, subject, body)
+    except Exception as e:
+        app_logger.error(f"Error sending email: {str(e)}")
+        return False

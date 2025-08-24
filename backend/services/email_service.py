@@ -307,6 +307,27 @@ class EmailService:
                 app_logger.error(f"Failed to send email confirmation to {recipient_email}: {error_type} - {str(e)}")
             return False
     
+    def send_custom_email(self, recipient_email: str, subject: str, body: str) -> bool:
+        """Send a custom email with provided subject and body"""
+        try:
+            if not self.is_configured():
+                return False
+            
+            msg = Message(
+                subject=subject,
+                recipients=[recipient_email],
+                body=body,
+                sender=current_app.config['MAIL_DEFAULT_SENDER']
+            )
+            
+            self.mail.send(msg)
+            app_logger.info(f"Custom email sent to {recipient_email}")
+            return True
+            
+        except Exception as e:
+            app_logger.error(f"Failed to send custom email to {recipient_email}: {str(e)}")
+            return False
+    
     def _get_reminder_subject(self, reminder_type: str, language: str) -> str:
         """Get email subject based on reminder type and language"""
         subjects = {
