@@ -511,6 +511,124 @@
       "profile": "Profile",
       "settings": "Settings", 
       "logout": "Logout"
+    },
+    "sections": {
+      "user_management": "User Management",
+      "doctor_verification": "Doctor Verification",
+      "appointment_management": "Appointment Management",
+      "system_settings": "System Settings",
+      "platform_health": "Platform Health",
+      "analytics": "Analytics"
+    },
+    "settings": {
+      "save_all": "Save All Settings",
+      "general": "General",
+      "notifications": "Notifications",
+      "maintenance": "Maintenance"
+    },
+    "forms": {
+      "default_language": "Default Language",
+      "timezone": "Timezone",
+      "registration_status": "Registration Status",
+      "max_appointments": "Max Appointments Per Day"
+    },
+    "monitoring": {
+      "server_uptime": "Server Uptime",
+      "cpu_usage": "CPU Usage",
+      "memory_usage": "Memory Usage",
+      "response_time": "Response Time"
+    },
+    "buttons": {
+      "refresh": "Refresh",
+      "add_doctor_manually": "Add Doctor Manually",
+      "export_users": "Export Users",
+      "export_appointments": "Export Data",
+      "refresh_appointments": "Refresh"
+    },
+    "tabs": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "filters": {
+      "all_appointments": "All Appointments",
+      "upcoming": "Upcoming",
+      "today": "Today",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "table": {
+      "full_name": "Full Name",
+      "email": "Email",
+      "phone": "Phone",
+      "type": "Type",
+      "status": "Status",
+      "registration_date": "Registration Date",
+      "actions": "Actions",
+      "patient": "Patient",
+      "doctor": "Doctor",
+      "datetime": "Date & Time"
+    },
+    "pagination": {
+      "per_page_10": "10 per page",
+      "per_page_20": "20 per page",
+      "per_page_50": "50 per page"
+    },
+    "loading": {
+      "text": "Loading...",
+      "users": "Loading user data...",
+      "appointments": "Loading appointment data...",
+      "verification": "Loading verification requests..."
+    },
+    "languages": {
+      "arabic": "Arabic",
+      "english": "English"
+    },
+    "timezones": {
+      "cairo": "Cairo",
+      "riyadh": "Riyadh"
+    },
+    "registration": {
+      "open": "Open",
+      "closed": "Closed",
+      "doctors_only": "Doctors Only"
+    },
+    "notifications": {
+      "settings_title": "Notification Settings",
+      "email_notifications": "Email Notifications",
+      "sms_notifications": "SMS Notifications",
+      "appointment_reminders": "Appointment Reminders",
+      "system_alerts": "System Alerts"
+    },
+    "maintenance": {
+      "warning": "Enabling maintenance mode will prevent users from accessing the system",
+      "mode_label": "Enable Maintenance Mode",
+      "message_label": "Maintenance Message",
+      "message_placeholder": "We are working to improve the service. Please try again later."
+    },
+    "user_filters": {
+      "all": "All",
+      "patients": "Patients",
+      "doctors": "Doctors",
+      "admins": "Admins"
+    },
+    "status_filters": {
+      "all": "All Status",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "search": {
+      "placeholder": "Search users..."
+    },
+    "more_buttons": {
+      "export_data": "Export Data",
+      "add_admin": "Add Admin"
+    },
+    "gauges": {
+      "uptime": "Server Uptime",
+      "cpu": "CPU Usage",
+      "memory": "Memory Usage",
+      "response": "Response Time"
     }
   },
 

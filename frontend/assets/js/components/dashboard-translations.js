@@ -201,6 +201,137 @@ const DashboardTranslations = {
         this.updateElementText('admin-stat-appointments', admin.stats.appointments);
         this.updateElementText('admin-stat-system-health', admin.stats.system_health);
 
+        // Section titles
+        this.updateElementText('user-management-title', admin.sections?.user_management || 'User Management');
+        this.updateElementText('doctor-verification-title', admin.sections?.doctor_verification || 'Doctor Verification');
+        this.updateElementText('appointment-management-title', admin.sections?.appointment_management || 'Appointment Management');
+        this.updateElementText('system-settings-title', admin.sections?.system_settings || 'System Settings');
+        this.updateElementText('platform-health-title', admin.sections?.platform_health || 'Platform Health');
+        this.updateElementText('analytics-title', admin.sections?.analytics || 'Analytics');
+
+        // Settings translations
+        this.updateElementText('save-all-settings', admin.settings?.save_all || 'Save All Settings');
+        this.updateElementText('settings-general-tab', admin.settings?.general || 'General');
+        this.updateElementText('settings-notifications-tab', admin.settings?.notifications || 'Notifications');
+        this.updateElementText('settings-maintenance-tab', admin.settings?.maintenance || 'Maintenance');
+        
+        // Form labels
+        this.updateElementText('default-language-label', admin.forms?.default_language || 'Default Language');
+        this.updateElementText('timezone-label', admin.forms?.timezone || 'Timezone');
+        this.updateElementText('registration-status-label', admin.forms?.registration_status || 'Registration Status');
+        this.updateElementText('max-appointments-label', admin.forms?.max_appointments || 'Max Appointments Per Day');
+        
+        // Health monitoring
+        this.updateElementText('server-uptime-label', admin.monitoring?.server_uptime || 'Server Uptime');
+        this.updateElementText('cpu-usage-label', admin.monitoring?.cpu_usage || 'CPU Usage');
+        this.updateElementText('memory-usage-label', admin.monitoring?.memory_usage || 'Memory Usage');
+        this.updateElementText('response-time-label', admin.monitoring?.response_time || 'Response Time');
+        this.updateElementText('analytics-cpu-label', admin.monitoring?.cpu_usage || 'CPU Usage');
+        this.updateElementText('analytics-memory-label', admin.monitoring?.memory_usage || 'Memory Usage');
+
+        // Buttons
+        this.updateElementText('refresh-button', admin.buttons?.refresh || 'Refresh');
+        this.updateElementText('add-doctor-manually', admin.buttons?.add_doctor_manually || 'Add Doctor Manually');
+        this.updateElementText('refresh-appointments', admin.buttons?.refresh_appointments || 'Refresh');
+        this.updateElementText('export-appointments', admin.buttons?.export_appointments || 'Export Data');
+
+        // Tabs
+        this.updateElementText('pending-tab', admin.tabs?.pending || 'Pending');
+        this.updateElementText('approved-tab', admin.tabs?.approved || 'Approved');
+        this.updateElementText('rejected-tab', admin.tabs?.rejected || 'Rejected');
+
+        // Filters
+        this.updateElementText('filter-all-appointments', admin.filters?.all_appointments || 'All Appointments');
+        this.updateElementText('filter-upcoming', admin.filters?.upcoming || 'Upcoming');
+        this.updateElementText('filter-today', admin.filters?.today || 'Today');
+        this.updateElementText('filter-completed', admin.filters?.completed || 'Completed');
+        this.updateElementText('filter-cancelled', admin.filters?.cancelled || 'Cancelled');
+
+        // Table headers
+        this.updateElementText('table-full-name', admin.table?.full_name || 'Full Name');
+        this.updateElementText('table-email', admin.table?.email || 'Email');
+        this.updateElementText('table-phone', admin.table?.phone || 'Phone');
+        this.updateElementText('table-type', admin.table?.type || 'Type');
+        this.updateElementText('table-status', admin.table?.status || 'Status');
+        this.updateElementText('table-registration-date', admin.table?.registration_date || 'Registration Date');
+        this.updateElementText('table-actions', admin.table?.actions || 'Actions');
+        this.updateElementText('appointment-patient', admin.table?.patient || 'Patient');
+        this.updateElementText('appointment-doctor', admin.table?.doctor || 'Doctor');
+        this.updateElementText('appointment-datetime', admin.table?.datetime || 'Date & Time');
+        this.updateElementText('appointment-status', admin.table?.status || 'Status');
+        this.updateElementText('appointment-actions', admin.table?.actions || 'Actions');
+
+        // Pagination
+        this.updateElementText('per-page-10', admin.pagination?.per_page_10 || '10 per page');
+        this.updateElementText('per-page-20', admin.pagination?.per_page_20 || '20 per page');
+        this.updateElementText('per-page-50', admin.pagination?.per_page_50 || '50 per page');
+
+        // Loading states
+        this.updateElementText('loading-users', admin.loading?.text || 'Loading...');
+        this.updateElementText('loading-appointments', admin.loading?.text || 'Loading...');
+        this.updateElementText('loading-verification', admin.loading?.text || 'Loading...');
+        this.updateElementText('loading-users-text', admin.loading?.users || 'Loading user data...');
+        this.updateElementText('loading-appointments-text', admin.loading?.appointments || 'Loading appointment data...');
+        this.updateElementText('loading-verification-text', admin.loading?.verification || 'Loading verification requests...');
+
+        // Language options
+        this.updateElementText('language-arabic', admin.languages?.arabic || 'Arabic');
+        this.updateElementText('language-english', admin.languages?.english || 'English');
+
+        // Timezone options
+        this.updateElementText('timezone-cairo', admin.timezones?.cairo || 'Cairo');
+        this.updateElementText('timezone-riyadh', admin.timezones?.riyadh || 'Riyadh');
+
+        // Registration options
+        this.updateElementText('registration-open', admin.registration?.open || 'Open');
+        this.updateElementText('registration-closed', admin.registration?.closed || 'Closed');
+        this.updateElementText('registration-doctors-only', admin.registration?.doctors_only || 'Doctors Only');
+
+        // Notification settings
+        this.updateElementText('notification-settings-title', admin.notifications?.settings_title || 'Notification Settings');
+        this.updateElementText('email-notifications-label', admin.notifications?.email_notifications || 'Email Notifications');
+        this.updateElementText('sms-notifications-label', admin.notifications?.sms_notifications || 'SMS Notifications');
+        this.updateElementText('appointment-reminders-label', admin.notifications?.appointment_reminders || 'Appointment Reminders');
+        this.updateElementText('system-alerts-label', admin.notifications?.system_alerts || 'System Alerts');
+
+        // Maintenance settings
+        this.updateElementText('maintenance-warning', admin.maintenance?.warning || 'Enabling maintenance mode will prevent users from accessing the system');
+        this.updateElementText('maintenance-mode-label', admin.maintenance?.mode_label || 'Enable Maintenance Mode');
+        this.updateElementText('maintenance-message-label', admin.maintenance?.message_label || 'Maintenance Message');
+        
+        // Set placeholder for maintenance message
+        const maintenanceTextarea = document.getElementById('maintenance_message');
+        if (maintenanceTextarea && admin.maintenance?.message_placeholder) {
+            maintenanceTextarea.setAttribute('placeholder', admin.maintenance.message_placeholder);
+        }
+
+        // User filters
+        this.updateElementText('filter-all', admin.user_filters?.all || 'All');
+        this.updateElementText('filter-patients', admin.user_filters?.patients || 'Patients');
+        this.updateElementText('filter-doctors', admin.user_filters?.doctors || 'Doctors');
+        this.updateElementText('filter-admins', admin.user_filters?.admins || 'Admins');
+
+        // Status filters
+        this.updateElementText('status-all', admin.status_filters?.all || 'All Status');
+        this.updateElementText('status-active', admin.status_filters?.active || 'Active');
+        this.updateElementText('status-inactive', admin.status_filters?.inactive || 'Inactive');
+
+        // Additional buttons
+        this.updateElementText('export-data', admin.more_buttons?.export_data || 'Export Data');
+        this.updateElementText('add-admin', admin.more_buttons?.add_admin || 'Add Admin');
+
+        // Search placeholder
+        const searchInput = document.getElementById('user-search');
+        if (searchInput && admin.search?.placeholder) {
+            searchInput.setAttribute('placeholder', admin.search.placeholder);
+        }
+
+        // Gauge labels
+        this.updateElementText('gauge-uptime', admin.gauges?.uptime || 'Server Uptime');
+        this.updateElementText('gauge-cpu', admin.gauges?.cpu || 'CPU Usage');
+        this.updateElementText('gauge-memory', admin.gauges?.memory || 'Memory Usage');
+        this.updateElementText('gauge-response', admin.gauges?.response || 'Response Time');
+
         // Language selector
         this.updateElementText('current-admin-language', admin.language.current);
 

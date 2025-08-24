@@ -511,6 +511,124 @@
       "profile": "الملف الشخصي",
       "settings": "الإعدادات", 
       "logout": "تسجيل الخروج"
+    },
+    "sections": {
+      "user_management": "إدارة المستخدمين",
+      "doctor_verification": "تحقق من الأطباء",
+      "appointment_management": "إدارة المواعيد",
+      "system_settings": "إعدادات النظام",
+      "platform_health": "صحة المنصة",
+      "analytics": "التحليلات"
+    },
+    "settings": {
+      "save_all": "حفظ جميع الإعدادات",
+      "general": "عام",
+      "notifications": "الإشعارات",
+      "maintenance": "الصيانة"
+    },
+    "forms": {
+      "default_language": "اللغة الافتراضية",
+      "timezone": "المنطقة الزمنية",
+      "registration_status": "حالة التسجيل",
+      "max_appointments": "الحد الأقصى للمواعيد في اليوم"
+    },
+    "monitoring": {
+      "server_uptime": "وقت تشغيل الخادم",
+      "cpu_usage": "استخدام المعالج",
+      "memory_usage": "استخدام الذاكرة",
+      "response_time": "وقت الاستجابة"
+    },
+    "buttons": {
+      "refresh": "تحديث",
+      "add_doctor_manually": "إضافة طبيب يدوياً",
+      "export_users": "تصدير المستخدمين",
+      "export_appointments": "تصدير البيانات",
+      "refresh_appointments": "تحديث"
+    },
+    "tabs": {
+      "pending": "في الانتظار",
+      "approved": "معتمد",
+      "rejected": "مرفوض"
+    },
+    "filters": {
+      "all_appointments": "جميع المواعيد",
+      "upcoming": "قادمة",
+      "today": "اليوم",
+      "completed": "مكتملة",
+      "cancelled": "ملغاة"
+    },
+    "table": {
+      "full_name": "الاسم الكامل",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "type": "النوع",
+      "status": "الحالة",
+      "registration_date": "تاريخ التسجيل",
+      "actions": "الإجراءات",
+      "patient": "المريض",
+      "doctor": "الطبيب",
+      "datetime": "التاريخ والوقت"
+    },
+    "pagination": {
+      "per_page_10": "10 في الصفحة",
+      "per_page_20": "20 في الصفحة",
+      "per_page_50": "50 في الصفحة"
+    },
+    "loading": {
+      "text": "جاري التحميل...",
+      "users": "جاري تحميل بيانات المستخدمين...",
+      "appointments": "جاري تحميل بيانات المواعيد...",
+      "verification": "جاري تحميل طلبات التحقق..."
+    },
+    "languages": {
+      "arabic": "العربية",
+      "english": "الإنجليزية"
+    },
+    "timezones": {
+      "cairo": "القاهرة",
+      "riyadh": "الرياض"
+    },
+    "registration": {
+      "open": "مفتوح",
+      "closed": "مغلق",
+      "doctors_only": "للأطباء فقط"
+    },
+    "notifications": {
+      "settings_title": "إعدادات الإشعارات",
+      "email_notifications": "إشعارات البريد الإلكتروني",
+      "sms_notifications": "إشعارات SMS",
+      "appointment_reminders": "تذكير بالمواعيد",
+      "system_alerts": "تنبيهات النظام"
+    },
+    "maintenance": {
+      "warning": "تفعيل وضع الصيانة سيمنع المستخدمين من الوصول إلى النظام",
+      "mode_label": "تفعيل وضع الصيانة",
+      "message_label": "رسالة الصيانة",
+      "message_placeholder": "نحن نعمل على تحسين الخدمة. الرجاء المحاولة لاحقاً."
+    },
+    "user_filters": {
+      "all": "الكل",
+      "patients": "المرضى",
+      "doctors": "الأطباء",
+      "admins": "المديرون"
+    },
+    "status_filters": {
+      "all": "جميع الحالات",
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "search": {
+      "placeholder": "البحث في المستخدمين..."
+    },
+    "more_buttons": {
+      "export_data": "تصدير البيانات",
+      "add_admin": "إضافة مدير"
+    },
+    "gauges": {
+      "uptime": "وقت تشغيل الخادم",
+      "cpu": "استخدام المعالج",
+      "memory": "استخدام الذاكرة",
+      "response": "وقت الاستجابة"
     }
   },
 

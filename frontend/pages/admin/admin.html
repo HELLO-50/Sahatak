@@ -256,9 +256,9 @@
                                     <!-- Per-page -->
                                     <div class="ms-auto">
                                         <select id="users-per-page" class="form-select form-select-sm">
-                                            <option value="10">10 في الصفحة</option>
-                                            <option value="20" selected>20 في الصفحة</option>
-                                            <option value="50">50 في الصفحة</option>
+                                            <option value="10" id="per-page-10">10 per page</option>
+                                            <option value="20" selected id="per-page-20">20 per page</option>
+                                            <option value="50" id="per-page-50">50 per page</option>
                                         </select>
                                     </div>
                                 </div>
@@ -269,22 +269,22 @@
                                         <thead class="table-primary">
                                             <tr>
                                                 <th width="5%">#</th>
-                                                <th width="20%">الاسم الكامل</th>
-                                                <th width="20%">البريد الإلكتروني</th>
-                                                <th width="12%">الهاتف</th>
-                                                <th width="12%">النوع</th>
-                                                <th width="10%">الحالة</th>
-                                                <th width="12%">تاريخ التسجيل</th>
-                                                <th width="15%">الإجراءات</th>
+                                                <th width="20%" id="table-full-name">Full Name</th>
+                                                <th width="20%" id="table-email">Email</th>
+                                                <th width="12%" id="table-phone">Phone</th>
+                                                <th width="12%" id="table-type">Type</th>
+                                                <th width="10%" id="table-status">Status</th>
+                                                <th width="12%" id="table-registration-date">Registration Date</th>
+                                                <th width="15%" id="table-actions">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody id="users-table-body">
                                             <tr>
                                                 <td colspan="8" class="text-center py-4">
                                                     <div class="spinner-border text-primary" role="status">
-                                                        <span class="visually-hidden">جاري التحميل...</span>
+                                                        <span class="visually-hidden" id="loading-users">Loading...</span>
                                                     </div>
-                                                    <p class="mt-2 text-muted">جاري تحميل بيانات المستخدمين...</p>
+                                                    <p class="mt-2 text-muted" id="loading-users-text">Loading user data...</p>
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -304,15 +304,15 @@
                         <section id="verification" class="admin-section">
                             <div class="dashboard-card">
                                 <div class="d-flex justify-content-between align-items-center mb-4">
-                                    <h5><i class="bi bi-patch-check me-2"></i>تحقق من الأطباء</h5>
+                                    <h5><i class="bi bi-patch-check me-2"></i><span id="doctor-verification-title">Doctor Verification</span></h5>
                                     <div>
                                         <button class="btn btn-info me-2" onclick="DoctorVerification.refreshPending()">
                                             <i class="bi bi-arrow-clockwise me-1"></i>
-                                            تحديث
+                                            <span id="refresh-button">Refresh</span>
                                         </button>
                                         <button class="btn btn-success" onclick="AdminActions.addDoctorManually()">
                                             <i class="bi bi-person-plus me-1"></i>
-                                            إضافة طبيب يدوياً
+                                            <span id="add-doctor-manually">Add Doctor Manually</span>
                                         </button>
                                     </div>
                                 </div>
@@ -322,15 +322,15 @@
                                     <div class="btn-group" role="group">
                                         <button type="button" class="btn btn-outline-warning verification-tab-btn active" data-tab="pending">
                                             <i class="bi bi-clock me-1"></i>
-                                            في الانتظار (<span id="pending-count">0</span>)
+                                            <span id="pending-tab">Pending</span> (<span id="pending-count">0</span>)
                                         </button>
                                         <button type="button" class="btn btn-outline-success verification-tab-btn" data-tab="approved">
                                             <i class="bi bi-check-circle me-1"></i>
-                                            معتمد
+                                            <span id="approved-tab">Approved</span>
                                         </button>
                                         <button type="button" class="btn btn-outline-danger verification-tab-btn" data-tab="rejected">
                                             <i class="bi bi-x-circle me-1"></i>
-                                            مرفوض
+                                            <span id="rejected-tab">Rejected</span>
                                         </button>
                                     </div>
                                 </div>
@@ -339,9 +339,9 @@
                                 <div id="pending-verifications">
                                     <div class="text-center py-4">
                                         <div class="spinner-border text-primary" role="status">
-                                            <span class="visually-hidden">جاري التحميل...</span>
+                                            <span class="visually-hidden" id="loading-verification">Loading...</span>
                                         </div>
-                                        <p class="mt-2 text-muted">جاري تحميل طلبات التحقق...</p>
+                                        <p class="mt-2 text-muted" id="loading-verification-text">Loading verification requests...</p>
                                     </div>
                                 </div>
                             </div>
@@ -351,15 +351,15 @@
                         <section id="appointments" class="admin-section">
                             <div class="dashboard-card">
                                 <div class="d-flex justify-content-between align-items-center mb-4">
-                                    <h5><i class="bi bi-calendar-check me-2"></i>إدارة المواعيد</h5>
+                                    <h5><i class="bi bi-calendar-check me-2"></i><span id="appointment-management-title">Appointment Management</span></h5>
                                     <div>
                                         <button class="btn btn-info me-2" onclick="AppointmentManagement.refreshAppointments()">
                                             <i class="bi bi-arrow-clockwise me-1"></i>
-                                            تحديث
+                                            <span id="refresh-appointments">Refresh</span>
                                         </button>
                                         <button class="btn btn-success" onclick="AdminActions.exportAppointments()">
                                             <i class="bi bi-download me-1"></i>
-                                            تصدير البيانات
+                                            <span id="export-appointments">Export Data</span>
                                         </button>
                                     </div>
                                 </div>
@@ -367,11 +367,11 @@
                                 <!-- Appointment Filters -->
                                 <div class="mb-3">
                                     <div class="btn-group" role="group">
-                                        <button type="button" class="btn btn-outline-primary appointment-filter-btn active" data-filter="all">جميع المواعيد</button>
-                                        <button type="button" class="btn btn-outline-success appointment-filter-btn" data-filter="upcoming">قادمة</button>
-                                        <button type="button" class="btn btn-outline-info appointment-filter-btn" data-filter="today">اليوم</button>
-                                        <button type="button" class="btn btn-outline-warning appointment-filter-btn" data-filter="completed">مكتملة</button>
-                                        <button type="button" class="btn btn-outline-danger appointment-filter-btn" data-filter="cancelled">ملغاة</button>
+                                        <button type="button" class="btn btn-outline-primary appointment-filter-btn active" data-filter="all"><span id="filter-all-appointments">All Appointments</span></button>
+                                        <button type="button" class="btn btn-outline-success appointment-filter-btn" data-filter="upcoming"><span id="filter-upcoming">Upcoming</span></button>
+                                        <button type="button" class="btn btn-outline-info appointment-filter-btn" data-filter="today"><span id="filter-today">Today</span></button>
+                                        <button type="button" class="btn btn-outline-warning appointment-filter-btn" data-filter="completed"><span id="filter-completed">Completed</span></button>
+                                        <button type="button" class="btn btn-outline-danger appointment-filter-btn" data-filter="cancelled"><span id="filter-cancelled">Cancelled</span></button>
                                     </div>
                                 </div>
                                 
@@ -380,20 +380,20 @@
                                     <table class="table table-hover table-bordered">
                                         <thead class="table-primary">
                                             <tr>
-                                                <th>المريض</th>
-                                                <th>الطبيب</th>
-                                                <th>التاريخ والوقت</th>
-                                                <th>الحالة</th>
-                                                <th>الإجراءات</th>
+                                                <th id="appointment-patient">Patient</th>
+                                                <th id="appointment-doctor">Doctor</th>
+                                                <th id="appointment-datetime">Date & Time</th>
+                                                <th id="appointment-status">Status</th>
+                                                <th id="appointment-actions">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody id="appointments-table-body">
                                             <tr>
                                                 <td colspan="5" class="text-center py-4">
                                                     <div class="spinner-border text-primary" role="status">
-                                                        <span class="visually-hidden">جاري التحميل...</span>
+                                                        <span class="visually-hidden" id="loading-appointments">Loading...</span>
                                                     </div>
-                                                    <p class="mt-2 text-muted">جاري تحميل بيانات المواعيد...</p>
+                                                    <p class="mt-2 text-muted" id="loading-appointments-text">Loading appointment data...</p>
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -406,10 +406,10 @@
                         <section id="settings" class="admin-section">
                             <div class="dashboard-card">
                                 <div class="d-flex justify-content-between align-items-center mb-4">
-                                    <h5><i class="bi bi-sliders2 me-2"></i>إعدادات النظام</h5>
+                                    <h5><i class="bi bi-sliders2 me-2"></i><span id="system-settings-title">System Settings</span></h5>
                                     <button class="btn btn-success" onclick="SystemSettings.saveAllSettings()">
                                         <i class="bi bi-check2 me-1"></i>
-                                        حفظ جميع الإعدادات
+                                        <span id="save-all-settings">Save All Settings</span>
                                     </button>
                                 </div>
                                 
@@ -417,17 +417,17 @@
                                 <ul class="nav nav-tabs mb-3" id="settingsTabs" role="tablist">
                                     <li class="nav-item" role="presentation">
                                         <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab">
-                                            <i class="bi bi-gear me-1"></i>عام
+                                            <i class="bi bi-gear me-1"></i><span id="settings-general-tab">General</span>
                                         </button>
                                     </li>
                                     <li class="nav-item" role="presentation">
                                         <button class="nav-link" id="notifications-tab" data-bs-toggle="tab" data-bs-target="#notifications" type="button" role="tab">
-                                            <i class="bi bi-bell me-1"></i>الإشعارات
+                                            <i class="bi bi-bell me-1"></i><span id="settings-notifications-tab">Notifications</span>
                                         </button>
                                     </li>
                                     <li class="nav-item" role="presentation">
                                         <button class="nav-link" id="maintenance-tab" data-bs-toggle="tab" data-bs-target="#maintenance" type="button" role="tab">
-                                            <i class="bi bi-tools me-1"></i>الصيانة
+                                            <i class="bi bi-tools me-1"></i><span id="settings-maintenance-tab">Maintenance</span>
                                         </button>
                                     </li>
                                 </ul>
@@ -439,30 +439,30 @@
                                         <form id="general-settings-form">
                                             <div class="row g-3">
                                                 <div class="col-md-6">
-                                                    <label class="form-label">اللغة الافتراضية</label>
+                                                    <label class="form-label" id="default-language-label">Default Language</label>
                                                     <select id="default_language" class="form-select">
-                                                        <option value="ar">العربية</option>
-                                                        <option value="en">الإنجليزية</option>
+                                                        <option value="ar" id="language-arabic">Arabic</option>
+                                                        <option value="en" id="language-english">English</option>
                                                     </select>
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <label class="form-label">المنطقة الزمنية</label>
+                                                    <label class="form-label" id="timezone-label">Timezone</label>
                                                     <select id="default_timezone" class="form-select">
-                                                        <option value="Africa/Cairo">القاهرة</option>
-                                                        <option value="Asia/Riyadh">الرياض</option>
+                                                        <option value="Africa/Cairo" id="timezone-cairo">Cairo</option>
+                                                        <option value="Asia/Riyadh" id="timezone-riyadh">Riyadh</option>
                                                         <option value="UTC">UTC</option>
                                                     </select>
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <label class="form-label">حالة التسجيل</label>
+                                                    <label class="form-label" id="registration-status-label">Registration Status</label>
                                                     <select id="registration_status" class="form-select">
-                                                        <option value="open">مفتوح</option>
-                                                        <option value="closed">مغلق</option>
-                                                        <option value="doctors_only">للأطباء فقط</option>
+                                                        <option value="open" id="registration-open">Open</option>
+                                                        <option value="closed" id="registration-closed">Closed</option>
+                                                        <option value="doctors_only" id="registration-doctors-only">Doctors Only</option>
                                                     </select>
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <label class="form-label">الحد الأقصى للمواعيد في اليوم</label>
+                                                    <label class="form-label" id="max-appointments-label">Max Appointments Per Day</label>
                                                     <input type="number" id="max_appointments_per_day" class="form-control" value="20" min="1" max="100">
                                                 </div>
                                             </div>
@@ -474,30 +474,30 @@
                                         <form id="notifications-settings-form">
                                             <div class="row g-3">
                                                 <div class="col-12">
-                                                    <h6>إعدادات الإشعارات</h6>
+                                                    <h6 id="notification-settings-title">Notification Settings</h6>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-check form-switch">
                                                         <input class="form-check-input" type="checkbox" id="email_notifications" checked>
-                                                        <label class="form-check-label">إشعارات البريد الإلكتروني</label>
+                                                        <label class="form-check-label" id="email-notifications-label">Email Notifications</label>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-check form-switch">
                                                         <input class="form-check-input" type="checkbox" id="sms_notifications">
-                                                        <label class="form-check-label">إشعارات SMS</label>
+                                                        <label class="form-check-label" id="sms-notifications-label">SMS Notifications</label>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-check form-switch">
                                                         <input class="form-check-input" type="checkbox" id="appointment_reminders" checked>
-                                                        <label class="form-check-label">تذكير بالمواعيد</label>
+                                                        <label class="form-check-label" id="appointment-reminders-label">Appointment Reminders</label>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-check form-switch">
                                                         <input class="form-check-input" type="checkbox" id="system_alerts" checked>
-                                                        <label class="form-check-label">تنبيهات النظام</label>
+                                                        <label class="form-check-label" id="system-alerts-label">System Alerts</label>
                                                     </div>
                                                 </div>
                                             </div>
@@ -511,18 +511,18 @@
                                                 <div class="col-12">
                                                     <div class="alert alert-warning">
                                                         <i class="bi bi-exclamation-triangle me-2"></i>
-                                                        تفعيل وضع الصيانة سيمنع المستخدمين من الوصول إلى النظام
+                                                        <span id="maintenance-warning">Enabling maintenance mode will prevent users from accessing the system</span>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-12">
                                                     <div class="form-check form-switch">
                                                         <input class="form-check-input" type="checkbox" id="maintenance_mode">
-                                                        <label class="form-check-label">تفعيل وضع الصيانة</label>
+                                                        <label class="form-check-label" id="maintenance-mode-label">Enable Maintenance Mode</label>
                                                     </div>
                                                 </div>
                                                 <div class="col-12">
-                                                    <label class="form-label">رسالة الصيانة</label>
-                                                    <textarea id="maintenance_message" class="form-control" rows="3" placeholder="نحن نعمل على تحسين الخدمة. الرجاء المحاولة لاحقاً.">نحن نعمل على تحسين الخدمة. الرجاء المحاولة لاحقاً.</textarea>
+                                                    <label class="form-label" id="maintenance-message-label">Maintenance Message</label>
+                                                    <textarea id="maintenance_message" class="form-control" rows="3" data-placeholder-id="maintenance-message-placeholder">We are working to improve the service. Please try again later.</textarea>
                                                 </div>
                                             </div>
                                         </form>
@@ -533,32 +533,32 @@
                         <!-- Platform Health Section -->
                         <section id="health" class="admin-section">
                             <div class="dashboard-card">
-                                <h5><i class="bi bi-activity me-2"></i>Platform Health</h5>
+                                <h5><i class="bi bi-activity me-2"></i><span id="platform-health-title">Platform Health</span></h5>
                                 
                                 <!-- Health Status Cards -->
                                 <div class="row mb-4">
                                     <div class="col-lg-3 col-md-6 mb-3">
                                         <div class="dashboard-card stat-card">
                                             <div class="stat-number">99.8%</div>
-                                            <div class="stat-label">Server Uptime</div>
+                                            <div class="stat-label" id="server-uptime-label">Server Uptime</div>
                                         </div>
                                     </div>
                                     <div class="col-lg-3 col-md-6 mb-3">
                                         <div class="dashboard-card stat-card">
                                             <div class="stat-number">65%</div>
-                                            <div class="stat-label">CPU Usage</div>
+                                            <div class="stat-label" id="cpu-usage-label">CPU Usage</div>
                                         </div>
                                     </div>
                                     <div class="col-lg-3 col-md-6 mb-3">
                                         <div class="dashboard-card stat-card">
                                             <div class="stat-number">78%</div>
-                                            <div class="stat-label">Memory Usage</div>
+                                            <div class="stat-label" id="memory-usage-label">Memory Usage</div>
                                         </div>
                                     </div>
                                     <div class="col-lg-3 col-md-6 mb-3">
                                         <div class="dashboard-card stat-card">
                                             <div class="stat-number">320ms</div>
-                                            <div class="stat-label">Response Time</div>
+                                            <div class="stat-label" id="response-time-label">Response Time</div>
                                         </div>
                                     </div>
                                 </div>
@@ -574,13 +574,13 @@
                         <!-- Analytics Section -->
                         <section id="analytics" class="admin-section">
                             <div class="dashboard-card">
-                                <h5><i class="bi bi-graph-up me-2"></i>Analytics</h5>
+                                <h5><i class="bi bi-graph-up me-2"></i><span id="analytics-title">Analytics</span></h5>
                                 
                                 <!-- Analytics Content -->
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <p><strong>CPU Usage:</strong> <span id="cpuUsage">15%</span></p>
-                                        <p><strong>Memory Usage:</strong> <span id="memUsage">47%</span></p>
+                                        <p><strong id="analytics-cpu-label">CPU Usage:</strong> <span id="cpuUsage">15%</span></p>
+                                        <p><strong id="analytics-memory-label">Memory Usage:</strong> <span id="memUsage">47%</span></p>
                                     </div>
                                     <div class="col-md-6">
                                         <canvas id="analyticsChart" height="200"></canvas>
