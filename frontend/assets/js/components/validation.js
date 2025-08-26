@@ -22,7 +22,7 @@ const ValidationManager = {
     countries: {
         US: {
             name: 'United States',
-            flag: '🇺🇸',
+            flag: '[US]',
             code: '+1',
             phonePattern: /^\d{10}$/,
             licensePattern: /^[A-Z]{2}\d{6,8}$/,
@@ -30,7 +30,7 @@ const ValidationManager = {
         },
         SD: {
             name: 'Sudan',
-            flag: '🇸🇩',
+            flag: '[SD]',
             code: '+249',
             phonePattern: /^\d{9}$/,
             licensePattern: /^[A-Z0-9]{6,12}$/,
@@ -38,7 +38,7 @@ const ValidationManager = {
         },
         EG: {
             name: 'Egypt',
-            flag: '🇪🇬',
+            flag: '[EG]',
             code: '+20',
             phonePattern: /^1\d{9}$/,
             licensePattern: /^\d{7,10}$/,
@@ -46,7 +46,7 @@ const ValidationManager = {
         },
         SA: {
             name: 'Saudi Arabia',
-            flag: '🇸🇦',
+            flag: '[SA]',
             code: '+966',
             phonePattern: /^5\d{8}$/,
             licensePattern: /^\d{10}$/,
@@ -54,7 +54,7 @@ const ValidationManager = {
         },
         AE: {
             name: 'UAE',
-            flag: '🇦🇪',
+            flag: '[AE]',
             code: '+971',
             phonePattern: /^5\d{8}$/,
             licensePattern: /^[A-Z0-9]{6,10}$/,
@@ -62,7 +62,7 @@ const ValidationManager = {
         },
         IE: {
             name: 'Ireland',
-            flag: '🇮🇪',
+            flag: '[IE]',
             code: '+353',
             phonePattern: /^[8-9]\d{8}$/,
             licensePattern: /^[A-Z0-9]{6,10}$/,
@@ -70,7 +70,7 @@ const ValidationManager = {
         },
         GB: {
             name: 'United Kingdom',
-            flag: '🇬🇧',
+            flag: '[GB]',
             code: '+44',
             phonePattern: /^7\d{9}$/,
             licensePattern: /^[A-Z0-9]{7,10}$/,
