@@ -319,8 +319,9 @@
     "EG": "Egypt",
     "SA": "Saudi Arabia", 
     "AE": "UAE",
-    "JO": "Jordan",
-    "US": "United States"
+    "IE": "Ireland",
+    "US": "United States",
+    "GB": "United Kingdom"
   },
 
   "validation": {
