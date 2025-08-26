@@ -387,7 +387,6 @@ function handleDoctorRegister(event) {
         fullName: formData.full_name,
         email: formData.email,
         phoneNumber: formData.phone,
-        nationalId: '',
         specialization: formData.specialty,
         licenseNumber: formData.license_number,
         password: formData.password

@@ -275,8 +275,8 @@ const ValidationManager = {
             isValid = false;
         }
 
-        // Validate national ID (required for doctors)
-        if (!this.validateNationalId(data.nationalId)) {
+        // Validate national ID (optional for doctors)
+        if (data.nationalId && !this.validateNationalId(data.nationalId)) {
             errors.nationalId = 'Please enter a valid 10-digit national ID';
             isValid = false;
         }
