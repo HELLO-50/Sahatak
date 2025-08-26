@@ -311,6 +311,11 @@
                                     <div class="invalid-feedback" id="patientPassword-error"></div>
                                     <div class="form-text" id="patient-password-help">كلمة المرور يجب أن تكون 6 أحرف على الأقل</div>
                                 </div>
+                                <div class="mb-3">
+                                    <label for="patientConfirmPassword" class="form-label" id="patient-confirm-password-label">تأكيد كلمة المرور <span class="text-danger">*</span></label>
+                                    <input type="password" class="form-control" id="patientConfirmPassword" required minlength="6">
+                                    <div class="invalid-feedback" id="patientConfirmPassword-error"></div>
+                                </div>
                                 <div class="d-grid">
                                     <button type="submit" class="btn btn-primary btn-lg" id="patient-register-submit">
                                         <span class="spinner-border spinner-border-sm me-2 d-none" id="patient-register-spinner"></span>
@@ -355,25 +360,55 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="doctorPhone" class="form-label" id="doctor-phone-label">رقم الهاتف <span class="text-danger">*</span></label>
-                                    <input type="tel" class="form-control" id="doctorPhone" required>
-                                    <div class="invalid-feedback" id="doctorPhone-error"></div>
+                                    <div class="row">
+                                        <div class="col-4">
+                                            <select class="form-select" id="doctorPhoneCountry" required>
+                                                <option value="">اختر الدولة</option>
+                                                <option value="SD">🇸🇩 السودان (+249)</option>
+                                                <option value="EG">🇪🇬 مصر (+20)</option>
+                                                <option value="SA">🇸🇦 السعودية (+966)</option>
+                                                <option value="AE">🇦🇪 الإمارات (+971)</option>
+                                                <option value="JO">🇯🇴 الأردن (+962)</option>
+                                                <option value="US">🇺🇸 أمريكا (+1)</option>
+                                            </select>
+                                            <div class="invalid-feedback" id="doctorPhoneCountry-error"></div>
+                                        </div>
+                                        <div class="col-8">
+                                            <input type="tel" class="form-control" id="doctorPhone" required>
+                                            <div class="invalid-feedback" id="doctorPhone-error"></div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="doctorEmail" class="form-label" id="doctor-email-label">البريد الإلكتروني (اختياري)</label>
-                                    <input type="email" class="form-control" id="doctorEmail">
+                                    <label for="doctorEmail" class="form-label" id="doctor-email-label">البريد الإلكتروني <span class="text-danger">*</span></label>
+                                    <input type="email" class="form-control" id="doctorEmail" required>
                                     <div class="invalid-feedback" id="doctorEmail-error"></div>
                                 </div>
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="doctorLicense" class="form-label" id="doctor-license-label">رقم الترخيص الطبي <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" id="doctorLicense" required>
-                                        <div class="invalid-feedback" id="doctorLicense-error"></div>
+                                <div class="mb-3">
+                                    <label for="doctorLicense" class="form-label" id="doctor-license-label">رقم الترخيص الطبي <span class="text-danger">*</span></label>
+                                    <div class="row">
+                                        <div class="col-4">
+                                            <select class="form-select" id="doctorLicenseCountry" required>
+                                                <option value="">اختر دولة الترخيص</option>
+                                                <option value="SD">🇸🇩 السودان</option>
+                                                <option value="EG">🇪🇬 مصر</option>
+                                                <option value="SA">🇸🇦 السعودية</option>
+                                                <option value="AE">🇦🇪 الإمارات</option>
+                                                <option value="JO">🇯🇴 الأردن</option>
+                                                <option value="US">🇺🇸 أمريكا</option>
+                                            </select>
+                                            <div class="invalid-feedback" id="doctorLicenseCountry-error"></div>
+                                        </div>
+                                        <div class="col-8">
+                                            <input type="text" class="form-control" id="doctorLicense" required>
+                                            <div class="invalid-feedback" id="doctorLicense-error"></div>
+                                        </div>
                                     </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="doctorExperience" class="form-label" id="doctor-experience-label">سنوات الخبرة <span class="text-danger">*</span></label>
-                                        <input type="number" class="form-control" id="doctorExperience" min="0" max="50" required>
-                                        <div class="invalid-feedback" id="doctorExperience-error"></div>
-                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="doctorExperience" class="form-label" id="doctor-experience-label">سنوات الخبرة <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" id="doctorExperience" min="0" max="50" required>
+                                    <div class="invalid-feedback" id="doctorExperience-error"></div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
@@ -396,6 +431,11 @@
                                     <input type="password" class="form-control" id="doctorPassword" required minlength="6">
                                     <div class="invalid-feedback" id="doctorPassword-error"></div>
                                     <div class="form-text" id="doctor-password-help">كلمة المرور يجب أن تكون 6 أحرف على الأقل</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="doctorConfirmPassword" class="form-label" id="doctor-confirm-password-label">تأكيد كلمة المرور <span class="text-danger">*</span></label>
+                                    <input type="password" class="form-control" id="doctorConfirmPassword" required minlength="6">
+                                    <div class="invalid-feedback" id="doctorConfirmPassword-error"></div>
                                 </div>
                                 <div class="d-grid">
                                     <button type="submit" class="btn btn-primary btn-lg" id="doctor-register-submit">
@@ -554,6 +594,19 @@
             document.getElementById('registerForm').addEventListener('submit', handleRegister);
             document.getElementById('patientRegisterForm').addEventListener('submit', handlePatientRegister);
             document.getElementById('doctorRegisterForm').addEventListener('submit', handleDoctorRegister);
+            
+            // License country change handler for dynamic placeholders
+            const licenseCountrySelect = document.getElementById('doctorLicenseCountry');
+            if (licenseCountrySelect) {
+                licenseCountrySelect.addEventListener('change', function() {
+                    const licenseInput = document.getElementById('doctorLicense');
+                    const countryCode = this.value;
+                    
+                    if (licenseInput && countryCode && ValidationManager.countries[countryCode]) {
+                        licenseInput.placeholder = ValidationManager.countries[countryCode].licensePlaceholder;
+                    }
+                });
+            }
         });
     </script>
 </body>
