@@ -152,7 +152,7 @@ const AppointmentBooking = {
             const specialty = document.getElementById('specialty-filter').value;
             const params = specialty ? `?specialty=${specialty}` : '';
             
-            const response = await ApiHelper.makeRequest(`/users/doctors${params}`);
+            const response = await ApiHelper.makeRequest(`/appointments/doctors${params}`);
             
             if (response.success) {
                 this.doctors = response.data.doctors || response.doctors || [];
@@ -393,16 +393,13 @@ const AppointmentBooking = {
     },
 
     // Show appointment summary
-    async showSummary() {
+    showSummary() {
         try {
-            // Get doctor details
-            const response = await ApiHelper.makeRequest(`/users/doctors/${this.selectedDoctor.id}`);
+            // Use the already loaded doctor data
+            const doctor = this.selectedDoctor;
+            const date = new Date(this.selectedDateTime.datetime);
             
-            if (response.success) {
-                const doctor = response.doctor;
-                const date = new Date(this.selectedDateTime.datetime);
-                
-                const summaryHtml = `
+            const summaryHtml = `
                     <div class="row">
                         <div class="col-sm-6 mb-3">
                             <strong>الطبيب:</strong><br>
@@ -431,10 +428,9 @@ const AppointmentBooking = {
                     </div>
                 `;
                 
-                document.getElementById('appointment-summary').innerHTML = summaryHtml;
-            }
+            document.getElementById('appointment-summary').innerHTML = summaryHtml;
         } catch (error) {
-            console.error('Error loading doctor details:', error);
+            console.error('Error showing summary:', error);
         }
     },
 
@@ -471,6 +467,182 @@ const AppointmentBooking = {
             console.error('Error confirming booking:', error);
             this.showError('خطأ في تأكيد الحجز');
         }
+    },
+
+    // Confirm and submit appointment booking
+    async confirmBooking() {
+        try {
+            // Validate all required data
+            if (!this.selectedDoctor || !this.selectedDateTime) {
+                this.showError('يرجى اختيار الطبيب والوقت المناسب');
+                return;
+            }
+
+            // Check terms agreement
+            const termsCheckbox = document.getElementById('terms-agreement');
+            if (!termsCheckbox || !termsCheckbox.checked) {
+                this.showError('يرجى الموافقة على شروط الاستخدام');
+                return;
+            }
+
+            // Prepare booking data
+            const bookingData = {
+                doctor_id: this.selectedDoctor.id,
+                appointment_date: this.selectedDateTime.datetime,
+                appointment_type: this.selectedType,
+                reason_for_visit: document.getElementById('reason-visit')?.value || '',
+                symptoms: '' // Can be expanded
+            };
+
+            // Validate future date
+            const appointmentDate = new Date(bookingData.appointment_date);
+            if (appointmentDate <= new Date()) {
+                this.showError('يجب أن يكون الموعد في المستقبل');
+                return;
+            }
+
+            // Show loading state
+            const confirmBtn = document.getElementById('confirm-btn');
+            const originalText = confirmBtn.innerHTML;
+            confirmBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>جاري الحجز...';
+            confirmBtn.disabled = true;
+
+            // Submit booking
+            const response = await ApiHelper.makeRequest('/appointments/', {
+                method: 'POST',
+                body: JSON.stringify(bookingData)
+            });
+
+            if (response.success) {
+                this.showSuccess('تم حجز الموعد بنجاح!');
+                
+                // Show success modal
+                const modal = new bootstrap.Modal(document.getElementById('success-modal'));
+                modal.show();
+                
+                // Reset form state
+                this.currentStep = 1;
+                this.selectedDoctor = null;
+                this.selectedDateTime = null;
+                this.renderStep();
+            } else {
+                throw new Error(response.message || 'فشل في حجز الموعد');
+            }
+
+        } catch (error) {
+            console.error('Error confirming booking:', error);
+            
+            // Handle specific API errors
+            if (error.message.includes('blocked')) {
+                this.showError('هذا الوقت محجوب من قبل الطبيب');
+            } else if (error.message.includes('booked')) {
+                this.showError('هذا الوقت محجوز مسبقاً');
+            } else {
+                this.showError(error.message || 'خطأ في تأكيد الحجز');
+            }
+            
+            // Go back to time selection to choose different slot
+            this.currentStep = 2;
+            this.renderStep();
+        } finally {
+            // Reset button state
+            const confirmBtn = document.getElementById('confirm-btn');
+            if (confirmBtn) {
+                confirmBtn.innerHTML = '<i class="bi bi-calendar-check me-1"></i>تأكيد الحجز';
+                confirmBtn.disabled = false;
+            }
+        }
+    },
+
+    // Setup event listeners
+    setupEventListeners() {
+        // Navigation buttons
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const confirmBtn = document.getElementById('confirm-btn');
+
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                if (this.currentStep < this.maxSteps) {
+                    if (this.validateCurrentStep()) {
+                        this.nextStep();
+                    }
+                }
+            });
+        }
+
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                if (this.currentStep > 1) {
+                    this.previousStep();
+                }
+            });
+        }
+
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', () => {
+                this.confirmBooking();
+            });
+        }
+
+        // Specialty filter
+        const specialtyFilter = document.getElementById('specialty-filter');
+        if (specialtyFilter) {
+            specialtyFilter.addEventListener('change', (e) => {
+                this.filterDoctorsBySpecialty(e.target.value);
+            });
+        }
+
+        // Appointment type change
+        const appointmentType = document.getElementById('appointment-type');
+        if (appointmentType) {
+            appointmentType.addEventListener('change', (e) => {
+                this.selectedType = e.target.value;
+            });
+        }
+
+        // Date input change
+        const appointmentDate = document.getElementById('appointment-date');
+        if (appointmentDate) {
+            appointmentDate.addEventListener('change', (e) => {
+                this.loadTimeSlots(e.target.value);
+            });
+        }
+    },
+
+    // Validate current step
+    validateCurrentStep() {
+        switch (this.currentStep) {
+            case 1:
+                if (!this.selectedDoctor) {
+                    this.showError('يرجى اختيار الطبيب');
+                    return false;
+                }
+                return true;
+            case 2:
+                if (!this.selectedDateTime) {
+                    this.showError('يرجى اختيار التاريخ والوقت');
+                    return false;
+                }
+                return true;
+            case 3:
+                const termsCheckbox = document.getElementById('terms-agreement');
+                if (!termsCheckbox || !termsCheckbox.checked) {
+                    this.showError('يرجى الموافقة على شروط الاستخدام');
+                    return false;
+                }
+                return true;
+            default:
+                return true;
+        }
+    },
+
+    // Filter doctors by specialty
+    filterDoctorsBySpecialty(specialty) {
+        // Re-render doctors with filter
+        this.renderDoctorsList(this.doctors.filter(doctor => 
+            !specialty || doctor.specialty.toLowerCase().includes(specialty.toLowerCase())
+        ));
     },
 
     // Helper functions

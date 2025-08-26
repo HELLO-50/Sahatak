@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>السجل الطبي الإلكتروني | صحتك</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Arabic Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js for vital signs graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../../assets/css/components/dashboard.css">
+    <link rel="stylesheet" href="../../assets/css/components/ehr.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="doctor.html">
+                <i class="bi bi-heart-pulse me-2"></i>
+                صحتك | Sahatak
+            </a>
+            
+            <div class="d-flex align-items-center">
+                <div class="dropdown me-3">
+                    <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle me-1"></i>
+                        <span id="doctor-name">الطبيب</span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="doctor.html">
+                            <i class="bi bi-speedometer2 me-2"></i>لوحة التحكم
+                        </a></li>
+                        <li><a class="dropdown-item" href="../profile/profile.html">
+                            <i class="bi bi-person me-2"></i>الملف الشخصي
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" onclick="logout()">
+                            <i class="bi bi-box-arrow-right me-2"></i>تسجيل الخروج
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Main content -->
+            <main class="col-12">
+                <!-- Header -->
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <div>
+                        <h1 class="h2">
+                            <i class="bi bi-file-medical text-primary me-2"></i>
+                            السجل الطبي الإلكتروني
+                        </h1>
+                        <p class="text-muted" id="patient-info">جاري تحميل معلومات المريض...</p>
+                    </div>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <button class="btn btn-outline-primary me-2" onclick="printEHR()">
+                            <i class="bi bi-printer me-1"></i>طباعة السجل
+                        </button>
+                        <button class="btn btn-primary" onclick="addNewDiagnosis()">
+                            <i class="bi bi-plus-circle me-1"></i>تشخيص جديد
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Alert container -->
+                <div id="alert-container"></div>
+
+                <!-- Loading State -->
+                <div id="loading-container" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">جاري التحميل...</span>
+                    </div>
+                    <p class="mt-3 text-muted">جاري تحميل السجل الطبي...</p>
+                </div>
+
+                <!-- EHR Content -->
+                <div id="ehr-content" class="d-none">
+                    <!-- Patient Overview Card -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card patient-overview-card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">
+                                        <i class="bi bi-person-badge me-2"></i>معلومات المريض الأساسية
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="patient-overview">
+                                        <!-- Patient info will be populated here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EHR Tabs -->
+                    <ul class="nav nav-tabs ehr-tabs" id="ehrTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="diagnoses-tab" data-bs-toggle="tab" data-bs-target="#diagnoses" type="button" role="tab">
+                                <i class="bi bi-clipboard-pulse me-1"></i>التشخيصات
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="vitals-tab" data-bs-toggle="tab" data-bs-target="#vitals" type="button" role="tab">
+                                <i class="bi bi-activity me-1"></i>العلامات الحيوية
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab">
+                                <i class="bi bi-journal-medical me-1"></i>التاريخ الطبي
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="appointments-tab" data-bs-toggle="tab" data-bs-target="#appointments" type="button" role="tab">
+                                <i class="bi bi-calendar-event me-1"></i>المواعيد
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content ehr-tab-content" id="ehrTabContent">
+                        <!-- Diagnoses Tab -->
+                        <div class="tab-pane fade show active" id="diagnoses" role="tabpanel">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h6 class="card-title mb-0">
+                                        <i class="bi bi-clipboard-pulse me-2"></i>سجل التشخيصات
+                                    </h6>
+                                    <button class="btn btn-success btn-sm" onclick="addNewDiagnosis()">
+                                        <i class="bi bi-plus me-1"></i>تشخيص جديد
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <div id="diagnoses-list">
+                                        <div class="text-center py-3">
+                                            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                            <p class="mt-2 text-muted small">جاري تحميل التشخيصات...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Vital Signs Tab -->
+                        <div class="tab-pane fade" id="vitals" role="tabpanel">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h6 class="card-title mb-0">
+                                        <i class="bi bi-activity me-2"></i>العلامات الحيوية
+                                    </h6>
+                                    <button class="btn btn-success btn-sm" onclick="recordVitalSigns()">
+                                        <i class="bi bi-plus me-1"></i>تسجيل قراءات جديدة
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <!-- Vital Signs Charts -->
+                                    <div class="row mb-4">
+                                        <div class="col-md-6 mb-3">
+                                            <div class="vitals-chart-container">
+                                                <h6 class="text-center">ضغط الدم</h6>
+                                                <canvas id="bloodPressureChart"></canvas>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="vitals-chart-container">
+                                                <h6 class="text-center">معدل ضربات القلب</h6>
+                                                <canvas id="heartRateChart"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Vital Signs List -->
+                                    <div id="vital-signs-list">
+                                        <div class="text-center py-3">
+                                            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                            <p class="mt-2 text-muted small">جاري تحميل العلامات الحيوية...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Medical History Tab -->
+                        <div class="tab-pane fade" id="history" role="tabpanel">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="card-title mb-0">
+                                        <i class="bi bi-journal-medical me-2"></i>التاريخ الطبي
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div id="medical-history-content">
+                                        <div class="text-center py-3">
+                                            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                            <p class="mt-2 text-muted small">جاري تحميل التاريخ الطبي...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Appointments Tab -->
+                        <div class="tab-pane fade" id="appointments" role="tabpanel">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="card-title mb-0">
+                                        <i class="bi bi-calendar-event me-2"></i>سجل المواعيد
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div id="appointments-list">
+                                        <div class="text-center py-3">
+                                            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                            <p class="mt-2 text-muted small">جاري تحميل المواعيد...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Add Diagnosis Modal -->
+    <div class="modal fade" id="diagnosisModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-clipboard-pulse me-2"></i>تشخيص جديد
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="diagnosis-form">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label for="primary_diagnosis" class="form-label">التشخيص الأساسي *</label>
+                                <textarea class="form-control" id="primary_diagnosis" rows="2" required></textarea>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="severity" class="form-label">شدة الحالة</label>
+                                <select class="form-select" id="severity">
+                                    <option value="">اختر الشدة</option>
+                                    <option value="mild">خفيفة</option>
+                                    <option value="moderate">متوسطة</option>
+                                    <option value="severe">شديدة</option>
+                                    <option value="critical">حرجة</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="icd_10_code" class="form-label">رمز ICD-10</label>
+                                <input type="text" class="form-control" id="icd_10_code" placeholder="مثل: K30">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="status" class="form-label">حالة التشخيص</label>
+                                <select class="form-select" id="status">
+                                    <option value="provisional">مبدئي</option>
+                                    <option value="confirmed">مؤكد</option>
+                                    <option value="differential">تشخيص تفريقي</option>
+                                    <option value="rule_out">استبعاد</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="clinical_findings" class="form-label">الفحوصات السريرية</label>
+                            <textarea class="form-control" id="clinical_findings" rows="3"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="treatment_plan" class="form-label">خطة العلاج</label>
+                            <textarea class="form-control" id="treatment_plan" rows="3"></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="follow_up_required">
+                                    <label class="form-check-label" for="follow_up_required">
+                                        يتطلب متابعة
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="follow_up_date" class="form-label">تاريخ المتابعة</label>
+                                <input type="date" class="form-control" id="follow_up_date">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="follow_up_notes" class="form-label">ملاحظات المتابعة</label>
+                            <textarea class="form-control" id="follow_up_notes" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                        <button type="submit" class="btn btn-primary" id="save-diagnosis-btn">
+                            <i class="bi bi-check-circle me-1"></i>حفظ التشخيص
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Record Vital Signs Modal -->
+    <div class="modal fade" id="vitalsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-activity me-2"></i>تسجيل العلامات الحيوية
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="vitals-form">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="systolic_bp" class="form-label">ضغط الدم الانقباضي</label>
+                                <input type="number" class="form-control" id="systolic_bp" min="60" max="250">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="diastolic_bp" class="form-label">ضغط الدم الانبساطي</label>
+                                <input type="number" class="form-control" id="diastolic_bp" min="40" max="150">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="heart_rate" class="form-label">معدل ضربات القلب</label>
+                                <input type="number" class="form-control" id="heart_rate" min="30" max="200">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="temperature" class="form-label">درجة الحرارة (°م)</label>
+                                <input type="number" class="form-control" id="temperature" min="35" max="45" step="0.1">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="respiratory_rate" class="form-label">معدل التنفس</label>
+                                <input type="number" class="form-control" id="respiratory_rate" min="8" max="40">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="oxygen_saturation" class="form-label">نسبة الأكسجين (%)</label>
+                                <input type="number" class="form-control" id="oxygen_saturation" min="70" max="100" step="0.1">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="pain_scale" class="form-label">مقياس الألم (0-10)</label>
+                                <input type="number" class="form-control" id="pain_scale" min="0" max="10">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="height" class="form-label">الطول (سم)</label>
+                                <input type="number" class="form-control" id="height" min="100" max="250" step="0.1">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="weight" class="form-label">الوزن (كغ)</label>
+                                <input type="number" class="form-control" id="weight" min="30" max="300" step="0.1">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="pain_location" class="form-label">موقع الألم</label>
+                            <input type="text" class="form-control" id="pain_location" placeholder="مثل: الرأس، الصدر، البطن">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="vitals_notes" class="form-label">ملاحظات</label>
+                            <textarea class="form-control" id="vitals_notes" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                        <button type="submit" class="btn btn-primary" id="save-vitals-btn">
+                            <i class="bi bi-check-circle me-1"></i>حفظ القراءات
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="../../assets/js/main.js"></script>
+    <script src="../../assets/js/components/ehr-manager.js"></script>
+    
+    <script>
+        // Initialize EHR when page loads
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Get patient ID from URL params
+            const urlParams = new URLSearchParams(window.location.search);
+            const patientId = urlParams.get('patient_id');
+            
+            if (!patientId) {
+                alert('معرف المريض مفقود');
+                window.location.href = 'doctor.html';
+                return;
+            }
+            
+            await EHRManager.init(patientId);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,540 @@
+/* Electronic Health Record (EHR) System Styles */
+
+/* Patient Overview Card */
+.patient-overview-card {
+    border-left: 4px solid var(--primary-color);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.patient-overview-card .card-header {
+    background: linear-gradient(135deg, var(--primary-color), #1e7e34);
+    color: white;
+}
+
+.patient-basic-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.info-group {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.info-group h6 {
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 500;
+    color: #495057;
+}
+
+.info-value {
+    color: #212529;
+    font-weight: 600;
+}
+
+/* EHR Tabs */
+.ehr-tabs {
+    background: white;
+    border-bottom: 2px solid #e9ecef;
+    margin-bottom: 0;
+}
+
+.ehr-tabs .nav-link {
+    color: #6c757d;
+    font-weight: 500;
+    padding: 1rem 1.5rem;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.ehr-tabs .nav-link:hover {
+    color: var(--primary-color);
+    background: rgba(0, 123, 255, 0.1);
+    border-color: transparent;
+}
+
+.ehr-tabs .nav-link.active {
+    color: var(--primary-color);
+    background: white;
+    border-color: transparent transparent var(--primary-color) transparent;
+    border-width: 0 0 3px 0;
+    border-style: solid;
+}
+
+.ehr-tab-content {
+    background: white;
+    padding: 0;
+    border: 1px solid #e9ecef;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+}
+
+/* Diagnosis Cards */
+.diagnosis-card {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.diagnosis-card:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary-color);
+}
+
+.diagnosis-card.active-diagnosis {
+    border-left: 4px solid var(--success-color);
+}
+
+.diagnosis-card.resolved-diagnosis {
+    border-left: 4px solid #6c757d;
+    opacity: 0.8;
+}
+
+.diagnosis-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.diagnosis-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 0.25rem;
+}
+
+.diagnosis-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.diagnosis-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.severity-mild { background: #d1ecf1; color: #0c5460; }
+.severity-moderate { background: #fff3cd; color: #856404; }
+.severity-severe { background: #f8d7da; color: #721c24; }
+.severity-critical { background: #f5c6cb; color: #721c24; }
+
+.status-provisional { background: #e2e3e5; color: #383d41; }
+.status-confirmed { background: #d4edda; color: #155724; }
+.status-differential { background: #cce5ff; color: #004085; }
+.status-rule-out { background: #f8d7da; color: #721c24; }
+
+.diagnosis-content {
+    padding: 0.75rem 0;
+}
+
+.diagnosis-section {
+    margin-bottom: 0.75rem;
+}
+
+.diagnosis-section h6 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.diagnosis-section p {
+    font-size: 0.9rem;
+    color: #495057;
+    margin-bottom: 0;
+    line-height: 1.4;
+}
+
+/* Vital Signs */
+.vitals-chart-container {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.vitals-chart-container h6 {
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.vital-signs-card {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.vital-signs-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-color: var(--info-color);
+}
+
+.vitals-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.vitals-date {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.vitals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.75rem;
+}
+
+.vital-item {
+    text-align: center;
+    padding: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+}
+
+.vital-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 0.25rem;
+}
+
+.vital-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+/* Vital ranges colors */
+.vital-normal { border-color: var(--success-color); }
+.vital-warning { border-color: var(--warning-color); }
+.vital-danger { border-color: var(--danger-color); }
+
+/* Medical History */
+.history-section {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    background: white;
+}
+
+.history-section-header {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    border-radius: 8px 8px 0 0;
+}
+
+.history-section-title {
+    font-weight: 600;
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.history-section-content {
+    padding: 1rem;
+}
+
+.history-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.history-item {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.history-item:last-child {
+    border-bottom: none;
+}
+
+.history-content {
+    flex: 1;
+}
+
+.history-label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.25rem;
+}
+
+.history-value {
+    color: #212529;
+    line-height: 1.4;
+}
+
+.history-date {
+    color: #6c757d;
+    font-size: 0.85rem;
+    font-style: italic;
+    white-space: nowrap;
+    margin-left: 1rem;
+}
+
+/* Appointments List */
+.appointment-card {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.appointment-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary-color);
+}
+
+.appointment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.appointment-date {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 1rem;
+}
+
+.appointment-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.status-completed { background: #d4edda; color: #155724; }
+.status-scheduled { background: #cce5ff; color: #004085; }
+.status-cancelled { background: #f8d7da; color: #721c24; }
+
+.appointment-details {
+    color: #495057;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* Loading States */
+.ehr-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    color: #6c757d;
+}
+
+.ehr-loading .spinner-border {
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: 1rem;
+}
+
+/* Empty States */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #adb5bd;
+}
+
+.empty-state h6 {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.empty-state p {
+    font-size: 0.9rem;
+    margin-bottom: 0;
+}
+
+/* Print Styles */
+@media print {
+    .navbar,
+    .btn-toolbar,
+    .ehr-tabs,
+    .modal,
+    .btn {
+        display: none !important;
+    }
+    
+    .ehr-tab-content {
+        border: none !important;
+    }
+    
+    .tab-pane {
+        display: block !important;
+        opacity: 1 !important;
+    }
+    
+    .card {
+        break-inside: avoid;
+        margin-bottom: 1rem;
+    }
+    
+    body {
+        font-size: 12pt;
+        line-height: 1.3;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        color: black !important;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .patient-basic-info {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .ehr-tabs .nav-link {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .diagnosis-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .vitals-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .appointment-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .vitals-chart-container {
+        padding: 0.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .ehr-tabs .nav-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+    
+    .vitals-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .diagnosis-meta {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .info-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+}
+
+/* Animation Classes */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.3s ease-out;
+}
+
+/* Form Enhancements */
+.modal-lg .form-label {
+    font-weight: 500;
+    color: #495057;
+}
+
+.modal-lg .form-control:focus,
+.modal-lg .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.required-field::after {
+    content: ' *';
+    color: var(--danger-color);
+}
+
+/* Success/Error States */
+.field-success {
+    border-color: var(--success-color) !important;
+    background-color: rgba(40, 167, 69, 0.05);
+}
+
+.field-error {
+    border-color: var(--danger-color) !important;
+    background-color: rgba(220, 53, 69, 0.05);
+}
+
+.error-message {
+    color: var(--danger-color);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}

@@ -2,12 +2,67 @@ from flask import Blueprint, request, current_app
 from flask_login import login_required, current_user
 from models import db, Appointment, Doctor, Patient, User
 from datetime import datetime, timedelta
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
 from utils.responses import APIResponse, ErrorCodes
 from utils.validators import validate_date, validate_appointment_type
 from utils.logging_config import app_logger, log_user_action
 
 appointments_bp = Blueprint('appointments', __name__)
+
+@appointments_bp.route('/doctors', methods=['GET'])
+@login_required
+def get_available_doctors():
+    """Get list of available doctors for appointment booking"""
+    try:
+        # Get query parameters
+        specialty = request.args.get('specialty')
+        page = int(request.args.get('page', 1))
+        per_page = min(int(request.args.get('per_page', 20)), 100)  # Max 100 per page
+        
+        # Base query: verified and active doctors
+        query = Doctor.query.filter_by(is_verified=True).join(User).filter_by(is_active=True)
+        
+        # Filter by specialty if provided
+        if specialty:
+            query = query.filter(Doctor.specialty.ilike(f'%{specialty}%'))
+        
+        # Pagination
+        paginated_doctors = query.order_by(Doctor.rating.desc(), Doctor.total_reviews.desc()).paginate(
+            page=page,
+            per_page=per_page,
+            error_out=False
+        )
+        
+        # Format doctor data
+        doctors_data = []
+        for doctor in paginated_doctors.items:
+            doctor_data = doctor.to_dict()
+            # Add user information
+            doctor_data['user'] = {
+                'full_name': doctor.user.full_name,
+                'email': doctor.user.email if doctor.user.email else None,
+                'language_preference': doctor.user.language_preference
+            }
+            doctors_data.append(doctor_data)
+        
+        return APIResponse.success(
+            data={
+                'doctors': doctors_data,
+                'pagination': {
+                    'page': page,
+                    'per_page': per_page,
+                    'total': paginated_doctors.total,
+                    'pages': paginated_doctors.pages,
+                    'has_next': paginated_doctors.has_next,
+                    'has_prev': paginated_doctors.has_prev
+                }
+            },
+            message='Available doctors retrieved successfully'
+        )
+        
+    except Exception as e:
+        app_logger.error(f"Get available doctors error: {str(e)}")
+        return APIResponse.internal_error(message='Failed to get available doctors')
 
 @appointments_bp.route('/', methods=['GET'])
 @login_required
@@ -82,19 +137,24 @@ def create_appointment():
                 message='Appointment must be scheduled in the future'
             )
         
-        # Check if time slot is available
+        # Check if time slot is available (including blocked slots)
         existing_appointment = Appointment.query.filter(
             and_(
                 Appointment.doctor_id == data['doctor_id'],
                 Appointment.appointment_date == appointment_date,
-                Appointment.status.in_(['scheduled', 'confirmed', 'in_progress'])
+                Appointment.status.in_(['scheduled', 'confirmed', 'in_progress', 'blocked'])
             )
         ).first()
         
         if existing_appointment:
-            return APIResponse.conflict(
-                message='This time slot is already booked'
-            )
+            if existing_appointment.status == 'blocked':
+                return APIResponse.conflict(
+                    message='This time slot is blocked by the doctor'
+                )
+            else:
+                return APIResponse.conflict(
+                    message='This time slot is already booked'
+                )
         
         # Create appointment with consultation fee from doctor profile
         appointment = Appointment(
@@ -225,13 +285,13 @@ def get_doctor_availability(doctor_id):
                 })
             current_time = slot_end
         
-        # Check for existing appointments
+        # Check for existing appointments and blocked slots
         existing_appointments = Appointment.query.filter(
             and_(
                 Appointment.doctor_id == doctor_id,
                 Appointment.appointment_date >= datetime.combine(target_date, start_time),
                 Appointment.appointment_date < datetime.combine(target_date + timedelta(days=1), datetime.min.time()),
-                Appointment.status.in_(['scheduled', 'confirmed', 'in_progress'])
+                Appointment.status.in_(['scheduled', 'confirmed', 'in_progress', 'blocked'])
             )
         ).all()
         
@@ -368,20 +428,25 @@ def reschedule_appointment(appointment_id):
                 message='New appointment must be scheduled in the future'
             )
         
-        # Check if new time slot is available
+        # Check if new time slot is available (including blocked slots)
         existing_appointment = Appointment.query.filter(
             and_(
                 Appointment.doctor_id == appointment.doctor_id,
                 Appointment.appointment_date == new_appointment_date,
-                Appointment.status.in_(['scheduled', 'confirmed', 'in_progress']),
+                Appointment.status.in_(['scheduled', 'confirmed', 'in_progress', 'blocked']),
                 Appointment.id != appointment_id  # Exclude current appointment
             )
         ).first()
         
         if existing_appointment:
-            return APIResponse.conflict(
-                message='The new time slot is already booked'
-            )
+            if existing_appointment.status == 'blocked':
+                return APIResponse.conflict(
+                    message='The new time slot is blocked by the doctor'
+                )
+            else:
+                return APIResponse.conflict(
+                    message='The new time slot is already booked'
+                )
         
         # Update appointment
         old_date = appointment.appointment_date
