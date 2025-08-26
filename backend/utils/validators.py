@@ -324,7 +324,34 @@ def validate_date(date_str: str) -> Dict[str, Union[bool, str]]:
             'valid': False,
             'message': 'Invalid date format. Use YYYY-MM-DD'
         }
-
+def validate_time(time_str: str) -> Dict[str, Union[bool, str]]:
+    """
+    Validate time string in HH:MM format (24-hour clock)
+    
+    Args:
+        time_str: Time string to validate
+    
+    Returns:
+        dict: Contains 'valid' (bool) and 'message' (str)
+    """
+    if not time_str or not isinstance(time_str, str):
+        return {
+            'valid': False,
+            'message': 'Time is required'
+        }
+    
+    try:
+        datetime.strptime(time_str, '%H:%M')
+        return {
+            'valid': True,
+            'message': 'Time is valid'
+        }
+    except ValueError:
+        return {
+            'valid': False,
+            'message': 'Invalid time format. Use HH:MM (24-hour clock)'
+        }
+    
 def validate_appointment_type(appointment_type: str) -> Dict[str, Union[bool, str]]:
     """
     Validate appointment type
