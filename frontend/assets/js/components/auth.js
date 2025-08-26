@@ -28,6 +28,9 @@ const AuthManager = {
         this.hideAllSections();
         document.getElementById('login-form').classList.remove('d-none');
         document.getElementById('login-form').style.display = 'flex';
+        // Update placeholders for current language
+        const currentLang = LanguageManager.getLanguage() || 'ar';
+        this.updateFormPlaceholders(currentLang);
     },
 
     // Show general register form (not used in current flow, but keeping for compatibility)
@@ -42,6 +45,9 @@ const AuthManager = {
         this.hideAllSections();
         document.getElementById('patient-register-form').classList.remove('d-none');
         document.getElementById('patient-register-form').style.display = 'flex';
+        // Update placeholders for current language
+        const currentLang = LanguageManager.getLanguage() || 'ar';
+        this.updateFormPlaceholders(currentLang);
     },
 
     // Show doctor registration form
@@ -49,6 +55,9 @@ const AuthManager = {
         this.hideAllSections();
         document.getElementById('doctor-register-form').classList.remove('d-none');
         document.getElementById('doctor-register-form').style.display = 'flex';
+        // Update placeholders for current language
+        const currentLang = LanguageManager.getLanguage() || 'ar';
+        this.updateFormPlaceholders(currentLang);
     },
 
     // Hide all sections
@@ -137,6 +146,46 @@ const AuthManager = {
         const footerCopyright = document.getElementById('footer-copyright');
         if (footerBrand) footerBrand.textContent = LanguageManager.getTranslation(lang, 'footer.brand');
         if (footerCopyright) footerCopyright.textContent = LanguageManager.getTranslation(lang, 'footer.copyright');
+
+        // Update form placeholders
+        this.updateFormPlaceholders(lang);
+    },
+
+    // Update form placeholders based on current language
+    updateFormPlaceholders(lang) {
+        // Login form placeholders
+        const loginIdentifier = document.getElementById('login_identifier');
+        const loginPassword = document.getElementById('password');
+        if (loginIdentifier) loginIdentifier.placeholder = LanguageManager.getTranslation(lang, 'login.login_identifier_placeholder');
+        if (loginPassword) loginPassword.placeholder = LanguageManager.getTranslation(lang, 'login.password_placeholder');
+
+        // Patient registration form placeholders
+        const patientFullName = document.getElementById('patientFullName');
+        const patientPhone = document.getElementById('patientPhone');
+        const patientEmail = document.getElementById('patientEmail');
+        const patientAge = document.getElementById('patientAge');
+        const patientPassword = document.getElementById('patientPassword');
+        
+        if (patientFullName) patientFullName.placeholder = LanguageManager.getTranslation(lang, 'patient_register.full_name_placeholder');
+        if (patientPhone) patientPhone.placeholder = LanguageManager.getTranslation(lang, 'patient_register.phone_placeholder');
+        if (patientEmail) patientEmail.placeholder = LanguageManager.getTranslation(lang, 'patient_register.email_placeholder');
+        if (patientAge) patientAge.placeholder = LanguageManager.getTranslation(lang, 'patient_register.age_placeholder');
+        if (patientPassword) patientPassword.placeholder = LanguageManager.getTranslation(lang, 'patient_register.password_placeholder');
+
+        // Doctor registration form placeholders
+        const doctorFullName = document.getElementById('doctorFullName');
+        const doctorPhone = document.getElementById('doctorPhone');
+        const doctorEmail = document.getElementById('doctorEmail');
+        const doctorLicense = document.getElementById('doctorLicense');
+        const doctorExperience = document.getElementById('doctorExperience');
+        const doctorPassword = document.getElementById('doctorPassword');
+        
+        if (doctorFullName) doctorFullName.placeholder = LanguageManager.getTranslation(lang, 'doctor_register.full_name_placeholder');
+        if (doctorPhone) doctorPhone.placeholder = LanguageManager.getTranslation(lang, 'doctor_register.phone_placeholder');
+        if (doctorEmail) doctorEmail.placeholder = LanguageManager.getTranslation(lang, 'doctor_register.email_placeholder');
+        if (doctorLicense) doctorLicense.placeholder = LanguageManager.getTranslation(lang, 'doctor_register.license_placeholder');
+        if (doctorExperience) doctorExperience.placeholder = LanguageManager.getTranslation(lang, 'doctor_register.experience_placeholder');
+        if (doctorPassword) doctorPassword.placeholder = LanguageManager.getTranslation(lang, 'doctor_register.password_placeholder');
     }
 };
 
