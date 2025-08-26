@@ -282,6 +282,7 @@ async function handlePatientRegister(event) {
         age: parseInt(document.getElementById('patientAge').value),
         gender: document.getElementById('patientGender').value,
         password: document.getElementById('patientPassword').value,
+        confirm_password: document.getElementById('patientConfirmPassword').value,
         user_type: 'patient',
         language_preference: userLanguage
     };
@@ -314,6 +315,13 @@ async function handlePatientRegister(event) {
     
     if (!formData.gender) {
         ValidationManager.showFieldError('patientGender', 'Please select gender');
+        isValid = false;
+    }
+
+    
+    // Validate password confirmation
+    if (!ValidationManager.validatePasswordConfirmation(formData.password, formData.confirm_password)) {
+        ValidationManager.showFieldError('patientConfirmPassword', 'Passwords do not match');
         isValid = false;
     }
     
@@ -370,10 +378,13 @@ function handleDoctorRegister(event) {
         full_name: document.getElementById('doctorFullName').value.trim(),
         email: document.getElementById('doctorEmail').value.trim(),
         phone: document.getElementById('doctorPhone').value.trim(),
+        phone_country: document.getElementById('doctorPhoneCountry').value,
         license_number: document.getElementById('doctorLicense').value.trim(),
+        license_country: document.getElementById('doctorLicenseCountry').value,
         specialty: document.getElementById('doctorSpecialty').value,
         years_of_experience: parseInt(document.getElementById('doctorExperience').value),
         password: document.getElementById('doctorPassword').value,
+        confirm_password: document.getElementById('doctorConfirmPassword').value,
         user_type: 'doctor',
         language_preference: userLanguage
     };
@@ -413,6 +424,30 @@ function handleDoctorRegister(event) {
     if (isNaN(formData.years_of_experience) || formData.years_of_experience < 0 || formData.years_of_experience > 50) {
         console.log('🔥 FORMS.JS - Doctor experience validation failed:', formData.years_of_experience);
         ValidationManager.showFieldError('doctorExperience', 'Please enter valid years of experience (0-50)');
+        isValid = false;
+    }
+
+    // Validate phone country selection
+    if (!formData.phone_country) {
+        ValidationManager.showFieldError('doctorPhoneCountry', 'Please select your country');
+        isValid = false;
+    } else if (!ValidationManager.validatePhoneWithCountry(formData.phone, formData.phone_country)) {
+        ValidationManager.showFieldError('doctorPhone', 'Please enter a valid phone number for the selected country');
+        isValid = false;
+    }
+
+    // Validate license country selection
+    if (!formData.license_country) {
+        ValidationManager.showFieldError('doctorLicenseCountry', 'Please select licensing country');
+        isValid = false;
+    } else if (!ValidationManager.validateLicenseWithCountry(formData.license_number, formData.license_country)) {
+        ValidationManager.showFieldError('doctorLicense', 'Please enter a valid license number for the selected country');
+        isValid = false;
+    }
+    
+    // Validate password confirmation
+    if (!ValidationManager.validatePasswordConfirmation(formData.password, formData.confirm_password)) {
+        ValidationManager.showFieldError('doctorConfirmPassword', 'Passwords do not match');
         isValid = false;
     }
     

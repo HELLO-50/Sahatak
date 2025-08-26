@@ -165,12 +165,14 @@ const AuthManager = {
         const patientEmail = document.getElementById('patientEmail');
         const patientAge = document.getElementById('patientAge');
         const patientPassword = document.getElementById('patientPassword');
+        const patientConfirmPassword = document.getElementById('patientConfirmPassword');
         
         if (patientFullName) patientFullName.placeholder = LanguageManager.getTranslation(lang, 'patient_register.full_name_placeholder');
         if (patientPhone) patientPhone.placeholder = LanguageManager.getTranslation(lang, 'patient_register.phone_placeholder');
         if (patientEmail) patientEmail.placeholder = LanguageManager.getTranslation(lang, 'patient_register.email_placeholder');
         if (patientAge) patientAge.placeholder = LanguageManager.getTranslation(lang, 'patient_register.age_placeholder');
         if (patientPassword) patientPassword.placeholder = LanguageManager.getTranslation(lang, 'patient_register.password_placeholder');
+        if (patientConfirmPassword) patientConfirmPassword.placeholder = LanguageManager.getTranslation(lang, 'patient_register.confirm_password_placeholder');
 
         // Doctor registration form placeholders
         const doctorFullName = document.getElementById('doctorFullName');
@@ -179,6 +181,7 @@ const AuthManager = {
         const doctorLicense = document.getElementById('doctorLicense');
         const doctorExperience = document.getElementById('doctorExperience');
         const doctorPassword = document.getElementById('doctorPassword');
+        const doctorConfirmPassword = document.getElementById('doctorConfirmPassword');
         
         if (doctorFullName) doctorFullName.placeholder = LanguageManager.getTranslation(lang, 'doctor_register.full_name_placeholder');
         if (doctorPhone) doctorPhone.placeholder = LanguageManager.getTranslation(lang, 'doctor_register.phone_placeholder');
@@ -186,6 +189,7 @@ const AuthManager = {
         if (doctorLicense) doctorLicense.placeholder = LanguageManager.getTranslation(lang, 'doctor_register.license_placeholder');
         if (doctorExperience) doctorExperience.placeholder = LanguageManager.getTranslation(lang, 'doctor_register.experience_placeholder');
         if (doctorPassword) doctorPassword.placeholder = LanguageManager.getTranslation(lang, 'doctor_register.password_placeholder');
+        if (doctorConfirmPassword) doctorConfirmPassword.placeholder = LanguageManager.getTranslation(lang, 'doctor_register.confirm_password_placeholder');
     }
 };
 
