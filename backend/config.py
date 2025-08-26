@@ -70,7 +70,7 @@ class ProductionConfig(Config):
     SESSION_COOKIE_SAMESITE = 'Lax'
     
     # CORS settings
-    CORS_ORIGINS = os.getenv('CORS_ORIGINS', 'https://hello-50.github.io,https://hmb104.github.io').split(',')
+    CORS_ORIGINS = os.getenv('CORS_ORIGINS', 'https://hello-50.github.io,https://hmb104.github.io,https://hmb104.github.io/Sahatak').split(',')
 
 # Configuration dictionary
 config = {
