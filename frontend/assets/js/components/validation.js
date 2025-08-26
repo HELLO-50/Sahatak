@@ -6,7 +6,6 @@ const ValidationManager = {
         email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
         phone: /^\+?[1-9]\d{7,14}$/,
         phoneJordan: /^(\+962|00962|0)?(7[789]\d{7})$/,
-        nationalId: /^\d{10}$/,
         name: /^[a-zA-Z\u0600-\u06FF\s\-'\.]+$/,
         licenseNumber: /^[a-zA-Z0-9\-\/]+$/
     },
@@ -82,10 +81,6 @@ const ValidationManager = {
         return this.patterns.phone.test(cleanPhone);
     },
 
-    validateNationalId(id) {
-        if (!id || typeof id !== 'string') return false;
-        return this.patterns.nationalId.test(id.trim());
-    },
 
     validateAge(age) {
         const ageNum = parseInt(age);
@@ -216,11 +211,6 @@ const ValidationManager = {
             isValid = false;
         }
 
-        // Validate national ID (optional for patients)
-        if (data.nationalId && !this.validateNationalId(data.nationalId)) {
-            errors.nationalId = 'Please enter a valid 10-digit national ID';
-            isValid = false;
-        }
 
         // Validate date of birth (optional)
         if (data.dateOfBirth && !this.validateDateOfBirth(data.dateOfBirth)) {
@@ -275,11 +265,6 @@ const ValidationManager = {
             isValid = false;
         }
 
-        // Validate national ID (optional for doctors)
-        if (data.nationalId && !this.validateNationalId(data.nationalId)) {
-            errors.nationalId = 'Please enter a valid 10-digit national ID';
-            isValid = false;
-        }
 
         // Validate medical specialization
         if (!this.validateSpecialization(data.specialization)) {
