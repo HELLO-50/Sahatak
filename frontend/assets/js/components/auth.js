@@ -227,9 +227,9 @@ const AuthManager = {
             doctorLicenseCountryPlaceholder.textContent = LanguageManager.getTranslation(lang, 'doctor_register.license_country_placeholder');
         }
 
-        // Update country option text (keeping flags)
+        // Update country option text (using country codes for cross-browser compatibility)
         const countries = ['SD', 'EG', 'SA', 'AE', 'IE', 'US', 'GB'];
-        const flags = {'SD': '🇸🇩', 'EG': '🇪🇬', 'SA': '🇸🇦', 'AE': '🇦🇪', 'IE': '🇮🇪', 'US': '🇺🇸', 'GB': '🇬🇧'};
+        const flags = {'SD': '[SD]', 'EG': '[EG]', 'SA': '[SA]', 'AE': '[AE]', 'IE': '[IE]', 'US': '[US]', 'GB': '[GB]'};
         const codes = {'SD': '+249', 'EG': '+20', 'SA': '+966', 'AE': '+971', 'IE': '+353', 'US': '+1', 'GB': '+44'};
 
         // Update doctor phone country options
