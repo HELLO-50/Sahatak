@@ -291,8 +291,6 @@ async function handlePatientRegister(event) {
         fullName: formData.full_name,
         email: formData.email,
         phoneNumber: formData.phone,
-        nationalId: '',
-        dateOfBirth: '',
         password: formData.password
     };
     
@@ -390,6 +388,7 @@ function handleDoctorRegister(event) {
         specialization: formData.specialty,
         licenseNumber: formData.license_number,
         password: formData.password
+        // nationalId is not included since doctor form doesn't have this field
     };
     
     const validation = ValidationManager.validateDoctorRegistrationForm(validationData);

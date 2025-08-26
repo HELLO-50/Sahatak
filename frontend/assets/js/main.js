@@ -1142,8 +1142,6 @@ function validatePatientRegistrationForm(data) {
         fullName: data.fullName,
         email: data.email,
         phoneNumber: data.phone,
-        nationalId: data.nationalId || '',
-        dateOfBirth: data.dateOfBirth || '',
         password: data.password
     };
     
@@ -1170,7 +1168,6 @@ function validatePatientRegistrationForm(data) {
         Object.keys(validation.errors).forEach(field => {
             let fieldId = 'patient' + field.charAt(0).toUpperCase() + field.slice(1);
             if (field === 'phoneNumber') fieldId = 'patientPhone';
-            if (field === 'nationalId') fieldId = 'patientNationalId';
             if (field === 'dateOfBirth') fieldId = 'patientDateOfBirth';
             
             const translatedMessage = t.validation?.[field + '_error'] || validation.errors[field];
@@ -1197,7 +1194,6 @@ function validateDoctorRegistrationForm(data) {
         fullName: data.fullName,
         email: data.email,
         phoneNumber: data.phone,
-        nationalId: data.nationalId || '',
         specialization: data.specialty,
         licenseNumber: data.license,
         password: data.password
@@ -1220,7 +1216,6 @@ function validateDoctorRegistrationForm(data) {
         Object.keys(validation.errors).forEach(field => {
             let fieldId = 'doctor' + field.charAt(0).toUpperCase() + field.slice(1);
             if (field === 'phoneNumber') fieldId = 'doctorPhone';
-            if (field === 'nationalId') fieldId = 'doctorNationalId';
             if (field === 'specialization') fieldId = 'doctorSpecialty';
             if (field === 'licenseNumber') fieldId = 'doctorLicense';
             
