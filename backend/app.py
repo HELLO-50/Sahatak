@@ -147,7 +147,7 @@ def index():
     return APIResponse.success(
         data={
             'service': 'Sahatak Telemedicine Platform API',
-            'version': '1.0.0',
+            'version': '1.0.2',
             'environment': app.config.get('FLASK_ENV', 'production'),
             'documentation': '/api/docs',
             'health_check': '/health',
@@ -161,7 +161,7 @@ def api_info():
     """API information endpoint"""
     return APIResponse.success(
         data={
-            'version': '1.0.0',
+            'version': '1.0.2',
             'endpoints': {
                 'authentication': '/api/auth',
                 'users': '/api/users',
@@ -175,7 +175,7 @@ def api_info():
                 'database': '/health/database'
             }
         },
-        message='Sahatak API v1.0.0'
+        message='Sahatak API v1.0.2'
     )
 
 if __name__ == '__main__':
