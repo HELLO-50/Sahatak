@@ -29,7 +29,7 @@ else:
 # Override with environment variables if they exist
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', app.config['SECRET_KEY'])
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', app.config['SQLALCHEMY_DATABASE_URI'])
-app.config['FRONTEND_URL'] = os.getenv('FRONTEND_URL', 'https://hmb104.github.io/Sahatak')
+app.config['FRONTEND_URL'] = os.getenv('FRONTEND_URL', 'https://hello-50.github.io/Sahatak')
 
 # Setup logging first (before other imports)
 from utils.logging_config import SahatakLogger
