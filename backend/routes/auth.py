@@ -197,7 +197,9 @@ def register():
             doctor = Doctor(
                 user_id=user.id,
                 phone=data['phone'].strip(),
+                phone_country=data.get('phone_country'),
                 license_number=data['license_number'].strip(),
+                license_country=data.get('license_country'),
                 specialty=data['specialty'].strip(),
                 years_of_experience=experience,
                 qualification=data.get('qualification'),
