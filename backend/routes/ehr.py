@@ -1,0 +1,399 @@
+from flask import Blueprint, request
+from flask_login import login_required, current_user
+from datetime import datetime, timedelta
+from sqlalchemy import and_, or_, desc
+
+from models import db, Patient, Doctor, Appointment, Diagnosis, VitalSigns
+from utils.responses import APIResponse, ErrorCodes
+from utils.validators import validate_date
+from utils.logging_config import app_logger, log_user_action
+
+ehr_bp = Blueprint('ehr', __name__)
+
+@ehr_bp.route('/patient/<int:patient_id>', methods=['GET'])
+@login_required
+def get_patient_ehr(patient_id):
+    """Get comprehensive EHR for a patient"""
+    try:
+        # Verify access permissions
+        if not has_patient_access(patient_id):
+            return APIResponse.forbidden(message='Access denied to this patient\'s records')
+        
+        patient = Patient.query.get_or_404(patient_id)
+        
+        # Get comprehensive medical data
+        ehr_data = {
+            'patient_info': patient.to_dict(),
+            'diagnoses': [d.to_dict() for d in patient.diagnoses],
+            'vital_signs': [v.to_dict() for v in patient.vital_signs[-10:]],  # Last 10 records
+            'appointments': [a.to_dict() for a in patient.appointments.order_by(desc(Appointment.appointment_date)).limit(10).all()],
+            'medical_history_updates': [u.to_dict() for u in patient.medical_history_updates[-5:]]  # Last 5 updates
+        }
+        
+        app_logger.info(f"EHR accessed for patient {patient_id} by user {current_user.id}")
+        
+        return APIResponse.success(
+            data={'ehr': ehr_data},
+            message='Patient EHR retrieved successfully'
+        )
+        
+    except Exception as e:
+        app_logger.error(f"Get patient EHR error: {str(e)}")
+        return APIResponse.internal_error(message='Failed to retrieve patient EHR')
+
+@ehr_bp.route('/diagnoses', methods=['POST'])
+@login_required
+def create_diagnosis():
+    """Create a new diagnosis (doctors only)"""
+    try:
+        if current_user.user_type != 'doctor':
+            return APIResponse.forbidden(message='Only doctors can create diagnoses')
+        
+        doctor = current_user.doctor_profile
+        if not doctor:
+            return APIResponse.not_found(message='Doctor profile not found')
+        
+        data = request.get_json()
+        
+        # Validate required fields
+        required_fields = ['patient_id', 'primary_diagnosis']
+        for field in required_fields:
+            if not data.get(field):
+                return APIResponse.validation_error(
+                    field=field,
+                    message=f'{field} is required'
+                )
+        
+        # Verify patient access
+        if not has_patient_access(data['patient_id']):
+            return APIResponse.forbidden(message='Access denied to this patient')
+        
+        # Validate appointment if provided
+        appointment_id = data.get('appointment_id')
+        if appointment_id:
+            appointment = Appointment.query.filter_by(
+                id=appointment_id,
+                patient_id=data['patient_id'],
+                doctor_id=doctor.id
+            ).first()
+            if not appointment:
+                return APIResponse.validation_error(
+                    field='appointment_id',
+                    message='Invalid appointment or access denied'
+                )
+        
+        # Parse dates
+        diagnosis_date = datetime.utcnow()
+        if data.get('diagnosis_date'):
+            try:
+                diagnosis_date = datetime.fromisoformat(data['diagnosis_date'])
+            except ValueError:
+                return APIResponse.validation_error(
+                    field='diagnosis_date',
+                    message='Invalid date format'
+                )
+        
+        follow_up_date = None
+        if data.get('follow_up_date'):
+            try:
+                follow_up_date = datetime.fromisoformat(data['follow_up_date'])
+            except ValueError:
+                return APIResponse.validation_error(
+                    field='follow_up_date',
+                    message='Invalid follow-up date format'
+                )
+        
+        # Create diagnosis
+        diagnosis = Diagnosis(
+            patient_id=data['patient_id'],
+            doctor_id=doctor.id,
+            appointment_id=appointment_id,
+            primary_diagnosis=data['primary_diagnosis'],
+            secondary_diagnoses=data.get('secondary_diagnoses', []),
+            icd_10_code=data.get('icd_10_code'),
+            severity=data.get('severity'),
+            status=data.get('status', 'provisional'),
+            symptoms_reported=data.get('symptoms_reported', []),
+            clinical_findings=data.get('clinical_findings'),
+            diagnostic_tests=data.get('diagnostic_tests', []),
+            treatment_plan=data.get('treatment_plan'),
+            follow_up_required=data.get('follow_up_required', False),
+            follow_up_date=follow_up_date,
+            follow_up_notes=data.get('follow_up_notes'),
+            diagnosis_date=diagnosis_date
+        )
+        
+        db.session.add(diagnosis)
+        db.session.commit()
+        
+        # Log the action
+        log_user_action(
+            current_user.id,
+            'diagnosis_created',
+            {
+                'diagnosis_id': diagnosis.id,
+                'patient_id': data['patient_id'],
+                'primary_diagnosis': data['primary_diagnosis']
+            },
+            request
+        )
+        
+        app_logger.info(f"Diagnosis created: ID {diagnosis.id} by doctor {doctor.id}")
+        
+        return APIResponse.success(
+            data={'diagnosis': diagnosis.to_dict()},
+            message='Diagnosis created successfully',
+            status_code=201
+        )
+        
+    except Exception as e:
+        db.session.rollback()
+        app_logger.error(f"Create diagnosis error: {str(e)}")
+        return APIResponse.internal_error(message='Failed to create diagnosis')
+
+@ehr_bp.route('/diagnoses/<int:diagnosis_id>', methods=['PUT'])
+@login_required
+def update_diagnosis(diagnosis_id):
+    """Update a diagnosis (doctors only)"""
+    try:
+        if current_user.user_type != 'doctor':
+            return APIResponse.forbidden(message='Only doctors can update diagnoses')
+        
+        doctor = current_user.doctor_profile
+        diagnosis = Diagnosis.query.get_or_404(diagnosis_id)
+        
+        # Check if doctor owns this diagnosis
+        if diagnosis.doctor_id != doctor.id:
+            return APIResponse.forbidden(message='Access denied')
+        
+        data = request.get_json()
+        
+        # Update fields
+        updatable_fields = [
+            'primary_diagnosis', 'secondary_diagnoses', 'icd_10_code', 'severity',
+            'status', 'symptoms_reported', 'clinical_findings', 'diagnostic_tests',
+            'treatment_plan', 'follow_up_required', 'follow_up_notes', 'resolved',
+            'resolution_notes'
+        ]
+        
+        for field in updatable_fields:
+            if field in data:
+                setattr(diagnosis, field, data[field])
+        
+        # Handle date fields
+        if 'follow_up_date' in data and data['follow_up_date']:
+            try:
+                diagnosis.follow_up_date = datetime.fromisoformat(data['follow_up_date'])
+            except ValueError:
+                return APIResponse.validation_error(
+                    field='follow_up_date',
+                    message='Invalid follow-up date format'
+                )
+        
+        if 'resolved' in data and data['resolved'] and not diagnosis.resolved:
+            diagnosis.resolution_date = datetime.utcnow()
+        
+        diagnosis.updated_at = datetime.utcnow()
+        db.session.commit()
+        
+        log_user_action(
+            current_user.id,
+            'diagnosis_updated',
+            {
+                'diagnosis_id': diagnosis_id,
+                'patient_id': diagnosis.patient_id
+            },
+            request
+        )
+        
+        app_logger.info(f"Diagnosis {diagnosis_id} updated by doctor {doctor.id}")
+        
+        return APIResponse.success(
+            data={'diagnosis': diagnosis.to_dict()},
+            message='Diagnosis updated successfully'
+        )
+        
+    except Exception as e:
+        db.session.rollback()
+        app_logger.error(f"Update diagnosis error: {str(e)}")
+        return APIResponse.internal_error(message='Failed to update diagnosis')
+
+@ehr_bp.route('/vital-signs', methods=['POST'])
+@login_required
+def record_vital_signs():
+    """Record vital signs (doctors or patients)"""
+    try:
+        data = request.get_json()
+        
+        if current_user.user_type == 'doctor':
+            doctor = current_user.doctor_profile
+            if not doctor:
+                return APIResponse.not_found(message='Doctor profile not found')
+            
+            # Patient ID required for doctors
+            if not data.get('patient_id'):
+                return APIResponse.validation_error(
+                    field='patient_id',
+                    message='Patient ID is required'
+                )
+            
+            # Verify patient access
+            if not has_patient_access(data['patient_id']):
+                return APIResponse.forbidden(message='Access denied to this patient')
+            
+            patient_id = data['patient_id']
+            recorded_by_doctor_id = doctor.id
+            
+        elif current_user.user_type == 'patient':
+            patient = current_user.patient_profile
+            if not patient:
+                return APIResponse.not_found(message='Patient profile not found')
+            
+            patient_id = patient.id
+            recorded_by_doctor_id = None
+        else:
+            return APIResponse.forbidden(message='Invalid user type')
+        
+        # Create vital signs record
+        vital_signs = VitalSigns(
+            patient_id=patient_id,
+            appointment_id=data.get('appointment_id'),
+            recorded_by_doctor_id=recorded_by_doctor_id,
+            systolic_bp=data.get('systolic_bp'),
+            diastolic_bp=data.get('diastolic_bp'),
+            heart_rate=data.get('heart_rate'),
+            temperature=data.get('temperature'),
+            respiratory_rate=data.get('respiratory_rate'),
+            oxygen_saturation=data.get('oxygen_saturation'),
+            height=data.get('height'),
+            weight=data.get('weight'),
+            pain_scale=data.get('pain_scale'),
+            pain_location=data.get('pain_location'),
+            notes=data.get('notes')
+        )
+        
+        # Calculate BMI if possible
+        vital_signs.calculate_bmi()
+        
+        # Set measurement time
+        if data.get('measured_at'):
+            try:
+                vital_signs.measured_at = datetime.fromisoformat(data['measured_at'])
+            except ValueError:
+                return APIResponse.validation_error(
+                    field='measured_at',
+                    message='Invalid measurement date format'
+                )
+        
+        db.session.add(vital_signs)
+        db.session.commit()
+        
+        log_user_action(
+            current_user.id,
+            'vital_signs_recorded',
+            {
+                'vital_signs_id': vital_signs.id,
+                'patient_id': patient_id
+            },
+            request
+        )
+        
+        app_logger.info(f"Vital signs recorded: ID {vital_signs.id} for patient {patient_id}")
+        
+        return APIResponse.success(
+            data={'vital_signs': vital_signs.to_dict()},
+            message='Vital signs recorded successfully',
+            status_code=201
+        )
+        
+    except Exception as e:
+        db.session.rollback()
+        app_logger.error(f"Record vital signs error: {str(e)}")
+        return APIResponse.internal_error(message='Failed to record vital signs')
+
+@ehr_bp.route('/vital-signs/patient/<int:patient_id>', methods=['GET'])
+@login_required
+def get_patient_vital_signs(patient_id):
+    """Get patient's vital signs history"""
+    try:
+        if not has_patient_access(patient_id):
+            return APIResponse.forbidden(message='Access denied')
+        
+        # Get date range
+        days = min(int(request.args.get('days', 30)), 365)  # Max 1 year
+        limit = min(int(request.args.get('limit', 50)), 200)  # Max 200 records
+        
+        end_date = datetime.utcnow()
+        start_date = end_date - timedelta(days=days)
+        
+        vital_signs = VitalSigns.query.filter(
+            and_(
+                VitalSigns.patient_id == patient_id,
+                VitalSigns.measured_at >= start_date,
+                VitalSigns.measured_at <= end_date
+            )
+        ).order_by(desc(VitalSigns.measured_at)).limit(limit).all()
+        
+        return APIResponse.success(
+            data={
+                'vital_signs': [vs.to_dict() for vs in vital_signs],
+                'period': {
+                    'start_date': start_date.isoformat(),
+                    'end_date': end_date.isoformat(),
+                    'days': days
+                }
+            },
+            message='Vital signs retrieved successfully'
+        )
+        
+    except Exception as e:
+        app_logger.error(f"Get patient vital signs error: {str(e)}")
+        return APIResponse.internal_error(message='Failed to retrieve vital signs')
+
+@ehr_bp.route('/diagnoses/patient/<int:patient_id>', methods=['GET'])
+@login_required
+def get_patient_diagnoses(patient_id):
+    """Get patient's diagnosis history"""
+    try:
+        if not has_patient_access(patient_id):
+            return APIResponse.forbidden(message='Access denied')
+        
+        # Get query parameters
+        status = request.args.get('status')  # active, resolved, all
+        limit = min(int(request.args.get('limit', 50)), 200)
+        
+        query = Diagnosis.query.filter_by(patient_id=patient_id)
+        
+        if status == 'active':
+            query = query.filter_by(resolved=False)
+        elif status == 'resolved':
+            query = query.filter_by(resolved=True)
+        
+        diagnoses = query.order_by(desc(Diagnosis.diagnosis_date)).limit(limit).all()
+        
+        return APIResponse.success(
+            data={'diagnoses': [d.to_dict() for d in diagnoses]},
+            message='Patient diagnoses retrieved successfully'
+        )
+        
+    except Exception as e:
+        app_logger.error(f"Get patient diagnoses error: {str(e)}")
+        return APIResponse.internal_error(message='Failed to retrieve diagnoses')
+
+def has_patient_access(patient_id):
+    """Check if current user has access to patient records"""
+    user_profile = current_user.get_profile()
+    if not user_profile:
+        return False
+    
+    if current_user.user_type == 'patient':
+        return patient_id == user_profile.id
+    elif current_user.user_type == 'doctor':
+        # Doctor can access if they have treated this patient
+        has_appointment = Appointment.query.filter_by(
+            patient_id=patient_id,
+            doctor_id=user_profile.id
+        ).first()
+        return bool(has_appointment)
+    
+    return False

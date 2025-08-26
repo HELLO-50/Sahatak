@@ -233,6 +233,7 @@ class Doctor(db.Model):
     participation_type = db.Column(db.Enum('volunteer', 'paid', name='doctor_participation_types'), default='volunteer', nullable=False)
     consultation_fee = db.Column(db.Numeric(10, 2), nullable=True, default=0.00)
     available_hours = db.Column(db.JSON, nullable=True)  # Store as JSON
+    timezone = db.Column(db.String(50), nullable=True, default='UTC')  # Doctor's timezone
     
     # Fee management
     can_change_participation = db.Column(db.Boolean, default=True, nullable=False)  # Admin can restrict changes
@@ -268,6 +269,7 @@ class Doctor(db.Model):
             'can_change_participation': self.can_change_participation,
             'participation_changed_at': self.participation_changed_at.isoformat() if self.participation_changed_at else None,
             'available_hours': self.available_hours,
+            'timezone': self.timezone,
             'bio': self.bio,
             'is_verified': self.is_verified,
             'rating': self.rating,
@@ -284,11 +286,11 @@ class Appointment(db.Model):
     __tablename__ = 'appointments'
     
     id = db.Column(db.Integer, primary_key=True)
-    patient_id = db.Column(db.Integer, db.ForeignKey('patients.id'), nullable=False)
+    patient_id = db.Column(db.Integer, db.ForeignKey('patients.id'), nullable=True)  # Nullable for blocked slots
     doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=False)
     appointment_date = db.Column(db.DateTime, nullable=False)
-    appointment_type = db.Column(db.Enum('video', 'audio', 'chat', name='appointment_types'), default='video', nullable=False)
-    status = db.Column(db.Enum('scheduled', 'confirmed', 'in_progress', 'completed', 'cancelled', 'no_show', name='appointment_statuses'), default='scheduled', nullable=False)
+    appointment_type = db.Column(db.Enum('video', 'audio', 'chat', 'blocked', name='appointment_types'), default='video', nullable=False)
+    status = db.Column(db.Enum('scheduled', 'confirmed', 'in_progress', 'completed', 'cancelled', 'no_show', 'blocked', name='appointment_statuses'), default='scheduled', nullable=False)
     reason_for_visit = db.Column(db.Text, nullable=True)
     symptoms = db.Column(db.Text, nullable=True)
     notes = db.Column(db.Text, nullable=True)
@@ -469,6 +471,163 @@ class MedicalHistoryUpdate(db.Model):
     def __repr__(self):
         return f'<MedicalHistoryUpdate {self.id} - {self.update_type} for {self.patient.user.get_full_name()}>'
 
+# =============================================================================
+# EXTENDED EHR MODELS
+# =============================================================================
+
+class Diagnosis(db.Model):
+    """
+    Structured diagnosis tracking system for comprehensive EHR
+    """
+    __tablename__ = 'diagnoses'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    patient_id = db.Column(db.Integer, db.ForeignKey('patients.id'), nullable=False)
+    doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=False)
+    appointment_id = db.Column(db.Integer, db.ForeignKey('appointments.id'), nullable=True)
+    
+    # Diagnosis information
+    primary_diagnosis = db.Column(db.Text, nullable=False)  # Main diagnosis
+    secondary_diagnoses = db.Column(db.JSON, nullable=True)  # Additional diagnoses as array
+    icd_10_code = db.Column(db.String(10), nullable=True)  # ICD-10 diagnostic code
+    
+    # Diagnosis details
+    severity = db.Column(db.Enum('mild', 'moderate', 'severe', 'critical', name='severity_levels'), nullable=True)
+    status = db.Column(db.Enum('provisional', 'confirmed', 'differential', 'rule_out', name='diagnosis_status'), 
+                      default='provisional', nullable=False)
+    
+    # Clinical information
+    symptoms_reported = db.Column(db.JSON, nullable=True)  # Array of symptoms
+    clinical_findings = db.Column(db.Text, nullable=True)  # Physical examination findings
+    diagnostic_tests = db.Column(db.JSON, nullable=True)  # Tests ordered/performed
+    
+    # Treatment and follow-up
+    treatment_plan = db.Column(db.Text, nullable=True)
+    follow_up_required = db.Column(db.Boolean, default=False, nullable=False)
+    follow_up_date = db.Column(db.DateTime, nullable=True)
+    follow_up_notes = db.Column(db.Text, nullable=True)
+    
+    # Resolution
+    resolved = db.Column(db.Boolean, default=False, nullable=False)
+    resolution_date = db.Column(db.DateTime, nullable=True)
+    resolution_notes = db.Column(db.Text, nullable=True)
+    
+    # Timestamps
+    diagnosis_date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    
+    # Relationships
+    patient = db.relationship('Patient', backref='diagnoses', lazy=True)
+    doctor = db.relationship('Doctor', backref='diagnoses', lazy=True)
+    appointment = db.relationship('Appointment', backref='diagnoses', lazy=True)
+    
+    def to_dict(self):
+        """Convert diagnosis to dictionary"""
+        return {
+            'id': self.id,
+            'patient_id': self.patient_id,
+            'doctor_id': self.doctor_id,
+            'appointment_id': self.appointment_id,
+            'primary_diagnosis': self.primary_diagnosis,
+            'secondary_diagnoses': self.secondary_diagnoses,
+            'icd_10_code': self.icd_10_code,
+            'severity': self.severity,
+            'status': self.status,
+            'symptoms_reported': self.symptoms_reported,
+            'clinical_findings': self.clinical_findings,
+            'diagnostic_tests': self.diagnostic_tests,
+            'treatment_plan': self.treatment_plan,
+            'follow_up_required': self.follow_up_required,
+            'follow_up_date': self.follow_up_date.isoformat() if self.follow_up_date else None,
+            'follow_up_notes': self.follow_up_notes,
+            'resolved': self.resolved,
+            'resolution_date': self.resolution_date.isoformat() if self.resolution_date else None,
+            'resolution_notes': self.resolution_notes,
+            'diagnosis_date': self.diagnosis_date.isoformat(),
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat(),
+            'patient_name': self.patient.user.get_full_name() if self.patient else None,
+            'doctor_name': self.doctor.user.get_full_name() if self.doctor else None
+        }
+    
+    def __repr__(self):
+        return f'<Diagnosis {self.id} - {self.primary_diagnosis} for {self.patient.user.get_full_name()}>'
+
+class VitalSigns(db.Model):
+    """
+    Vital signs tracking over time for comprehensive patient monitoring
+    """
+    __tablename__ = 'vital_signs'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    patient_id = db.Column(db.Integer, db.ForeignKey('patients.id'), nullable=False)
+    appointment_id = db.Column(db.Integer, db.ForeignKey('appointments.id'), nullable=True)
+    recorded_by_doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=True)
+    
+    # Vital signs
+    systolic_bp = db.Column(db.Integer, nullable=True)  # mmHg
+    diastolic_bp = db.Column(db.Integer, nullable=True)  # mmHg
+    heart_rate = db.Column(db.Integer, nullable=True)  # bpm
+    temperature = db.Column(db.Float, nullable=True)  # Celsius
+    respiratory_rate = db.Column(db.Integer, nullable=True)  # breaths per minute
+    oxygen_saturation = db.Column(db.Float, nullable=True)  # percentage
+    
+    # Additional measurements
+    height = db.Column(db.Float, nullable=True)  # cm
+    weight = db.Column(db.Float, nullable=True)  # kg
+    bmi = db.Column(db.Float, nullable=True)  # calculated BMI
+    
+    # Pain assessment
+    pain_scale = db.Column(db.Integer, nullable=True)  # 0-10 pain scale
+    pain_location = db.Column(db.String(100), nullable=True)
+    
+    # Notes
+    notes = db.Column(db.Text, nullable=True)
+    
+    # Timestamps
+    measured_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    
+    # Relationships
+    patient = db.relationship('Patient', backref='vital_signs', lazy=True)
+    appointment = db.relationship('Appointment', backref='vital_signs', lazy=True)
+    recorded_by_doctor = db.relationship('Doctor', backref='recorded_vitals', lazy=True)
+    
+    def calculate_bmi(self):
+        """Calculate BMI if height and weight are provided"""
+        if self.height and self.weight and self.height > 0:
+            height_m = self.height / 100  # convert cm to meters
+            self.bmi = round(self.weight / (height_m ** 2), 1)
+    
+    def to_dict(self):
+        """Convert vital signs to dictionary"""
+        return {
+            'id': self.id,
+            'patient_id': self.patient_id,
+            'appointment_id': self.appointment_id,
+            'recorded_by_doctor_id': self.recorded_by_doctor_id,
+            'systolic_bp': self.systolic_bp,
+            'diastolic_bp': self.diastolic_bp,
+            'blood_pressure': f"{self.systolic_bp}/{self.diastolic_bp}" if self.systolic_bp and self.diastolic_bp else None,
+            'heart_rate': self.heart_rate,
+            'temperature': self.temperature,
+            'respiratory_rate': self.respiratory_rate,
+            'oxygen_saturation': self.oxygen_saturation,
+            'height': self.height,
+            'weight': self.weight,
+            'bmi': self.bmi,
+            'pain_scale': self.pain_scale,
+            'pain_location': self.pain_location,
+            'notes': self.notes,
+            'measured_at': self.measured_at.isoformat(),
+            'created_at': self.created_at.isoformat(),
+            'patient_name': self.patient.user.get_full_name() if self.patient else None,
+            'recorded_by': self.recorded_by_doctor.user.get_full_name() if self.recorded_by_doctor else 'Patient'
+        }
+    
+    def __repr__(self):
+        return f'<VitalSigns {self.id} for {self.patient.user.get_full_name()} at {self.measured_at}>'
 
 # =============================================================================
 # ADMIN MODELS

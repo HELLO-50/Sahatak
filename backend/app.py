@@ -87,6 +87,8 @@ create_health_routes(app)
 from routes.auth import auth_bp
 from routes.users import users_bp
 from routes.appointments import appointments_bp
+from routes.availability import availability_bp
+from routes.ehr import ehr_bp
 from routes.medical import medical_bp
 from routes.ai_assessment import ai_bp
 from routes.notifications import notifications_bp
@@ -100,6 +102,8 @@ app_logger.info("Registering API blueprints")
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(users_bp, url_prefix='/api/users')
 app.register_blueprint(appointments_bp, url_prefix='/api/appointments')
+app.register_blueprint(availability_bp, url_prefix='/api/availability')
+app.register_blueprint(ehr_bp, url_prefix='/api/ehr')
 app.register_blueprint(medical_bp, url_prefix='/api/medical')
 app.register_blueprint(ai_bp, url_prefix='/api/ai')
 app.register_blueprint(notifications_bp, url_prefix='/api/notifications')

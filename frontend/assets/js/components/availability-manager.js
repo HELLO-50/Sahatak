@@ -1,0 +1,724 @@
+// Doctor Availability Management - Following main.js patterns
+const AvailabilityManager = {
+    currentMonth: new Date(),
+    currentSchedule: null,
+    blockedTimes: [],
+    calendarData: null,
+    
+    // Initialize the availability manager
+    async init() {
+        console.log('🟢 AvailabilityManager initializing...');
+        
+        // Ensure translations are loaded
+        if (!LanguageManager.translations || !LanguageManager.translations.ar) {
+            await LanguageManager.loadTranslations();
+        }
+        
+        // Update UI with translations
+        this.updateUITranslations();
+        
+        // Load initial data
+        await this.loadWeeklySchedule();
+        await this.loadCalendarData();
+        await this.loadBlockedTimes();
+        
+        // Setup event listeners
+        this.setupEventListeners();
+        
+        console.log('✅ AvailabilityManager initialized successfully');
+    },
+    
+    // Update UI with translations
+    updateUITranslations() {
+        const lang = LanguageManager.getLanguage() || 'ar';
+        const t = LanguageManager.translations[lang];
+        if (!t || !t.availability) return;
+        
+        // Update page elements with translations
+        // This would be expanded with actual translation keys
+        console.log('UI translations updated for availability management');
+    },
+    
+    // Load doctor's weekly schedule
+    async loadWeeklySchedule() {
+        try {
+            const response = await ApiHelper.makeRequest('/availability/schedule');
+            
+            if (response.success) {
+                this.currentSchedule = response.data.schedule;
+                this.renderWeeklySchedule();
+            } else {
+                throw new Error(response.message);
+            }
+        } catch (error) {
+            console.error('Error loading weekly schedule:', error);
+            this.showAlert('error', 'فشل في تحميل الجدول الأسبوعي');
+            this.renderDefaultSchedule();
+        }
+    },
+    
+    // Render weekly schedule form
+    renderWeeklySchedule() {
+        const container = document.getElementById('weekly-schedule-container');
+        if (!container) return;
+        
+        const daysArabic = {
+            'saturday': 'السبت',
+            'sunday': 'الأحد',
+            'monday': 'الاثنين',
+            'tuesday': 'الثلاثاء',
+            'wednesday': 'الأربعاء',
+            'thursday': 'الخميس',
+            'friday': 'الجمعة'
+        };
+        
+        const daysOrder = ['saturday', 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+        
+        let html = '';
+        
+        daysOrder.forEach(dayKey => {
+            const daySchedule = this.currentSchedule[dayKey] || { enabled: false, start: '09:00', end: '17:00' };
+            const isEnabled = daySchedule.enabled;
+            
+            html += `
+                <div class="schedule-day ${isEnabled ? 'enabled' : 'disabled'}" data-day="${dayKey}">
+                    <div class="day-header">
+                        <div class="day-name">${daysArabic[dayKey]}</div>
+                        <label class="day-toggle">
+                            <input type="checkbox" class="day-enabled-toggle" data-day="${dayKey}" ${isEnabled ? 'checked' : ''}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="time-inputs">
+                        <div class="time-input-group">
+                            <label>من الساعة</label>
+                            <input type="time" class="form-control start-time-input" 
+                                   data-day="${dayKey}" value="${daySchedule.start}" 
+                                   ${!isEnabled ? 'disabled' : ''}>
+                        </div>
+                        <div class="time-input-group">
+                            <label>إلى الساعة</label>
+                            <input type="time" class="form-control end-time-input" 
+                                   data-day="${dayKey}" value="${daySchedule.end}"
+                                   ${!isEnabled ? 'disabled' : ''}>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+        
+        // Add event listeners for toggles
+        container.querySelectorAll('.day-enabled-toggle').forEach(toggle => {
+            toggle.addEventListener('change', (e) => {
+                this.toggleDay(e.target.dataset.day, e.target.checked);
+            });
+        });
+        
+        // Add event listeners for time inputs
+        container.querySelectorAll('.start-time-input, .end-time-input').forEach(input => {
+            input.addEventListener('change', (e) => {
+                this.updateTimeSlot(e.target.dataset.day, e.target);
+            });
+        });
+    },
+    
+    // Render default schedule if loading fails
+    renderDefaultSchedule() {
+        this.currentSchedule = {
+            'saturday': { enabled: false, start: '09:00', end: '17:00' },
+            'sunday': { enabled: true, start: '09:00', end: '17:00' },
+            'monday': { enabled: true, start: '09:00', end: '17:00' },
+            'tuesday': { enabled: true, start: '09:00', end: '17:00' },
+            'wednesday': { enabled: true, start: '09:00', end: '17:00' },
+            'thursday': { enabled: true, start: '09:00', end: '17:00' },
+            'friday': { enabled: false, start: '09:00', end: '17:00' }
+        };
+        this.renderWeeklySchedule();
+    },
+    
+    // Toggle day availability
+    toggleDay(dayKey, enabled) {
+        const dayElement = document.querySelector(`.schedule-day[data-day="${dayKey}"]`);
+        const timeInputs = dayElement.querySelectorAll('.start-time-input, .end-time-input');
+        
+        if (enabled) {
+            dayElement.classList.add('enabled');
+            dayElement.classList.remove('disabled');
+            timeInputs.forEach(input => input.disabled = false);
+        } else {
+            dayElement.classList.add('disabled');
+            dayElement.classList.remove('enabled');
+            timeInputs.forEach(input => input.disabled = true);
+        }
+        
+        // Update schedule object
+        if (!this.currentSchedule[dayKey]) {
+            this.currentSchedule[dayKey] = { start: '09:00', end: '17:00' };
+        }
+        this.currentSchedule[dayKey].enabled = enabled;
+    },
+    
+    // Update time slot
+    updateTimeSlot(dayKey, input) {
+        if (!this.currentSchedule[dayKey]) {
+            this.currentSchedule[dayKey] = { enabled: true };
+        }
+        
+        if (input.classList.contains('start-time-input')) {
+            this.currentSchedule[dayKey].start = input.value;
+        } else {
+            this.currentSchedule[dayKey].end = input.value;
+        }
+        
+        // Validate time range
+        this.validateTimeRange(dayKey);
+    },
+    
+    // Validate time range
+    validateTimeRange(dayKey) {
+        const schedule = this.currentSchedule[dayKey];
+        if (!schedule || !schedule.start || !schedule.end) return;
+        
+        const startTime = new Date(`1970-01-01T${schedule.start}:00`);
+        const endTime = new Date(`1970-01-01T${schedule.end}:00`);
+        
+        if (endTime <= startTime) {
+            const endInput = document.querySelector(`.end-time-input[data-day="${dayKey}"]`);
+            endInput.classList.add('is-invalid');
+            
+            // Show error message
+            let errorDiv = endInput.nextElementSibling;
+            if (!errorDiv || !errorDiv.classList.contains('invalid-feedback')) {
+                errorDiv = document.createElement('div');
+                errorDiv.className = 'invalid-feedback';
+                endInput.insertAdjacentElement('afterend', errorDiv);
+            }
+            errorDiv.textContent = 'وقت النهاية يجب أن يكون بعد وقت البداية';
+        } else {
+            const endInput = document.querySelector(`.end-time-input[data-day="${dayKey}"]`);
+            endInput.classList.remove('is-invalid');
+            const errorDiv = endInput.nextElementSibling;
+            if (errorDiv && errorDiv.classList.contains('invalid-feedback')) {
+                errorDiv.remove();
+            }
+        }
+    },
+    
+    // Save weekly schedule
+    async saveWeeklySchedule() {
+        try {
+            // Validate all time ranges
+            let hasErrors = false;
+            Object.keys(this.currentSchedule).forEach(dayKey => {
+                const schedule = this.currentSchedule[dayKey];
+                if (schedule.enabled) {
+                    const startTime = new Date(`1970-01-01T${schedule.start}:00`);
+                    const endTime = new Date(`1970-01-01T${schedule.end}:00`);
+                    
+                    if (endTime <= startTime) {
+                        hasErrors = true;
+                        this.validateTimeRange(dayKey);
+                    }
+                }
+            });
+            
+            if (hasErrors) {
+                this.showAlert('error', 'يرجى تصحيح الأخطاء في الأوقات المحددة');
+                return;
+            }
+            
+            // Show loading state
+            const saveBtn = document.getElementById('save-schedule-btn');
+            const originalText = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>جاري الحفظ...';
+            saveBtn.disabled = true;
+            
+            const response = await ApiHelper.makeRequest('/availability/schedule', {
+                method: 'PUT',
+                body: JSON.stringify({
+                    schedule: this.currentSchedule
+                })
+            });
+            
+            if (response.success) {
+                this.showAlert('success', 'تم حفظ الجدول الأسبوعي بنجاح');
+                // Reload calendar data to reflect changes
+                await this.loadCalendarData();
+            } else {
+                throw new Error(response.message);
+            }
+        } catch (error) {
+            console.error('Error saving schedule:', error);
+            this.showAlert('error', 'فشل في حفظ الجدول الأسبوعي');
+        } finally {
+            // Reset button state
+            const saveBtn = document.getElementById('save-schedule-btn');
+            saveBtn.innerHTML = '<i class="bi bi-check-circle me-1"></i>حفظ الجدول';
+            saveBtn.disabled = false;
+        }
+    },
+    
+    // Load calendar data
+    async loadCalendarData() {
+        try {
+            const startDate = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth(), 1);
+            const endDate = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 0);
+            
+            const response = await ApiHelper.makeRequest(`/availability/calendar?start_date=${startDate.toISOString().split('T')[0]}&end_date=${endDate.toISOString().split('T')[0]}`);
+            
+            if (response.success) {
+                this.calendarData = response.data.calendar;
+                this.renderCalendarView();
+            } else {
+                throw new Error(response.message);
+            }
+        } catch (error) {
+            console.error('Error loading calendar data:', error);
+            this.showAlert('error', 'فشل في تحميل بيانات التقويم');
+        }
+    },
+    
+    // Render calendar view
+    renderCalendarView() {
+        const container = document.getElementById('availability-calendar');
+        if (!container || !this.calendarData) return;
+        
+        // Update month display
+        const monthNames = [
+            'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+            'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+        ];
+        
+        const currentMonthSpan = document.getElementById('current-month');
+        if (currentMonthSpan) {
+            currentMonthSpan.textContent = `${monthNames[this.currentMonth.getMonth()]} ${this.currentMonth.getFullYear()}`;
+        }
+        
+        // Build calendar HTML
+        let html = '<table class="availability-calendar table table-bordered">';
+        
+        // Header
+        html += '<thead class="calendar-header"><tr>';
+        const dayHeaders = ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
+        dayHeaders.forEach(day => {
+            html += `<th>${day}</th>`;
+        });
+        html += '</tr></thead><tbody>';
+        
+        // Get first day of month and create calendar grid
+        const firstDay = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth(), 1);
+        const lastDay = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 0);
+        
+        // Adjust for Saturday start (Saturday = 6, Sunday = 0)
+        let startDay = firstDay.getDay() === 6 ? 0 : firstDay.getDay() + 1;
+        
+        let date = 1;
+        let calendarIndex = 0;
+        
+        for (let week = 0; week < 6 && date <= lastDay.getDate(); week++) {
+            html += '<tr>';
+            
+            for (let day = 0; day < 7; day++) {
+                if ((week === 0 && day < startDay) || date > lastDay.getDate()) {
+                    html += '<td class="calendar-day other-month"></td>';
+                } else {
+                    const dayData = this.calendarData[calendarIndex] || {};
+                    const today = new Date();
+                    const isToday = date === today.getDate() && 
+                                   this.currentMonth.getMonth() === today.getMonth() && 
+                                   this.currentMonth.getFullYear() === today.getFullYear();
+                    
+                    let dayClass = 'calendar-day';
+                    if (isToday) dayClass += ' today';
+                    if (dayData.enabled) dayClass += ' available';
+                    else dayClass += ' unavailable';
+                    
+                    html += `<td class="${dayClass}" data-date="${dayData.date}">`;
+                    html += `<div class="day-number">${date}</div>`;
+                    
+                    if (dayData.appointments && dayData.appointments.length > 0) {
+                        html += `<div class="day-appointments">`;
+                        html += `<span class="appointment-count">${dayData.appointments.length} مواعيد</span>`;
+                        html += `</div>`;
+                    }
+                    
+                    // Count blocked slots
+                    const blockedSlots = dayData.available_slots ? 
+                        dayData.available_slots.filter(slot => !slot.available).length : 0;
+                    
+                    if (blockedSlots > 0) {
+                        html += `<span class="blocked-count">${blockedSlots} محجوب</span>`;
+                    }
+                    
+                    html += '</td>';
+                    date++;
+                    calendarIndex++;
+                }
+            }
+            html += '</tr>';
+        }
+        
+        html += '</tbody></table>';
+        container.innerHTML = html;
+        
+        // Add click events for calendar days
+        container.querySelectorAll('.calendar-day[data-date]').forEach(day => {
+            day.addEventListener('click', (e) => {
+                this.showDayDetails(e.target.dataset.date);
+            });
+        });
+    },
+    
+    // Show day details
+    showDayDetails(date) {
+        const dayData = this.calendarData.find(day => day.date === date);
+        if (!dayData) return;
+        
+        // This could open a modal with detailed day information
+        console.log('Day details for:', date, dayData);
+    },
+    
+    // Load blocked times
+    async loadBlockedTimes() {
+        try {
+            // For now, extract blocked times from calendar data
+            this.blockedTimes = [];
+            
+            if (this.calendarData) {
+                this.calendarData.forEach(day => {
+                    if (day.appointments) {
+                        day.appointments.forEach(apt => {
+                            if (apt.status === 'blocked') {
+                                this.blockedTimes.push({
+                                    id: apt.id,
+                                    date: day.date,
+                                    time: apt.time,
+                                    reason: 'Doctor unavailable'
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+            
+            this.renderBlockedTimes();
+        } catch (error) {
+            console.error('Error loading blocked times:', error);
+            this.showAlert('error', 'فشل في تحميل الأوقات المحجوبة');
+        }
+    },
+    
+    // Render blocked times list
+    renderBlockedTimes() {
+        const container = document.getElementById('blocked-times-list');
+        if (!container) return;
+        
+        if (this.blockedTimes.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-4">
+                    <i class="bi bi-calendar-check text-success" style="font-size: 3rem;"></i>
+                    <h6 class="mt-3">لا توجد أوقات محجوبة</h6>
+                    <p class="text-muted">جميع أوقاتك متاحة للحجز حسب الجدول الأسبوعي</p>
+                </div>
+            `;
+            return;
+        }
+        
+        let html = '';
+        this.blockedTimes.forEach(blocked => {
+            const date = new Date(blocked.date);
+            const formattedDate = date.toLocaleDateString('ar-SA', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            html += `
+                <div class="blocked-time-item" data-block-id="${blocked.id}">
+                    <div class="blocked-time-header">
+                        <div>
+                            <div class="blocked-date">${formattedDate}</div>
+                            <div class="blocked-time-range">${blocked.time}</div>
+                        </div>
+                        <button class="btn btn-outline-success btn-sm unblock-btn" 
+                                onclick="AvailabilityManager.unblockTime(${blocked.id})">
+                            <i class="bi bi-check-circle me-1"></i>إلغاء الحجب
+                        </button>
+                    </div>
+                    ${blocked.reason ? `<div class="blocked-reason">${blocked.reason}</div>` : ''}
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+    },
+    
+    // Block time slot
+    async blockTimeSlot(formData) {
+        try {
+            const response = await ApiHelper.makeRequest('/availability/block-time', {
+                method: 'POST',
+                body: JSON.stringify(formData)
+            });
+            
+            if (response.success) {
+                this.showAlert('success', 'تم حجب الوقت بنجاح');
+                
+                // Refresh data
+                await this.loadCalendarData();
+                await this.loadBlockedTimes();
+                
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('blockTimeModal'));
+                if (modal) modal.hide();
+                
+                // Reset form
+                document.getElementById('block-time-form').reset();
+            } else {
+                throw new Error(response.message);
+            }
+        } catch (error) {
+            console.error('Error blocking time:', error);
+            this.showAlert('error', error.message || 'فشل في حجب الوقت');
+        }
+    },
+    
+    // Unblock time slot
+    async unblockTime(blockId) {
+        if (!confirm('هل أنت متأكد من إلغاء حجب هذا الوقت؟')) {
+            return;
+        }
+        
+        try {
+            const response = await ApiHelper.makeRequest(`/availability/unblock-time/${blockId}`, {
+                method: 'DELETE'
+            });
+            
+            if (response.success) {
+                this.showAlert('success', 'تم إلغاء حجب الوقت بنجاح');
+                
+                // Refresh data
+                await this.loadCalendarData();
+                await this.loadBlockedTimes();
+            } else {
+                throw new Error(response.message);
+            }
+        } catch (error) {
+            console.error('Error unblocking time:', error);
+            this.showAlert('error', error.message || 'فشل في إلغاء حجب الوقت');
+        }
+    },
+    
+    // Setup event listeners
+    setupEventListeners() {
+        // Weekly schedule form submission
+        const scheduleForm = document.getElementById('weekly-schedule-form');
+        if (scheduleForm) {
+            scheduleForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await this.saveWeeklySchedule();
+            });
+        }
+        
+        // Block time form submission
+        const blockForm = document.getElementById('block-time-form');
+        if (blockForm) {
+            blockForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = {
+                    date: document.getElementById('block-date').value,
+                    start_time: document.getElementById('block-start-time').value,
+                    end_time: document.getElementById('block-end-time').value,
+                    reason: document.getElementById('block-reason').value
+                };
+                
+                // Validate form
+                if (!formData.date || !formData.start_time || !formData.end_time) {
+                    this.showAlert('error', 'يرجى ملء جميع الحقول المطلوبة');
+                    return;
+                }
+                
+                // Validate time range
+                const startTime = new Date(`1970-01-01T${formData.start_time}:00`);
+                const endTime = new Date(`1970-01-01T${formData.end_time}:00`);
+                
+                if (endTime <= startTime) {
+                    this.showAlert('error', 'وقت النهاية يجب أن يكون بعد وقت البداية');
+                    return;
+                }
+                
+                await this.blockTimeSlot(formData);
+            });
+        }
+        
+        // Set minimum date for blocking (today)
+        const blockDateInput = document.getElementById('block-date');
+        if (blockDateInput) {
+            const today = new Date().toISOString().split('T')[0];
+            blockDateInput.setAttribute('min', today);
+        }
+    },
+    
+    // Navigation functions
+    async previousMonth() {
+        this.currentMonth.setMonth(this.currentMonth.getMonth() - 1);
+        await this.loadCalendarData();
+    },
+    
+    async nextMonth() {
+        this.currentMonth.setMonth(this.currentMonth.getMonth() + 1);
+        await this.loadCalendarData();
+    },
+    
+    // Reset schedule to default
+    resetSchedule() {
+        if (confirm('هل أنت متأكد من إعادة تعيين الجدول الأسبوعي؟')) {
+            this.renderDefaultSchedule();
+        }
+    },
+    
+    // Show alert message
+    showAlert(type, message) {
+        const container = document.getElementById('alert-container');
+        if (!container) return;
+        
+        const alertClass = type === 'error' ? 'alert-danger' : 'alert-success';
+        const icon = type === 'error' ? 'exclamation-triangle' : 'check-circle';
+        
+        const alert = document.createElement('div');
+        alert.className = `alert ${alertClass} alert-dismissible fade show`;
+        alert.innerHTML = `
+            <i class="bi bi-${icon} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        container.appendChild(alert);
+        
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.remove();
+            }
+        }, 5000);
+    },
+    
+    // Quick schedule presets
+    applyQuickSchedule(type) {
+        switch(type) {
+            case 'full-time':
+                this.currentSchedule = {
+                    'saturday': { enabled: true, start: '08:00', end: '18:00' },
+                    'sunday': { enabled: true, start: '08:00', end: '18:00' },
+                    'monday': { enabled: true, start: '08:00', end: '18:00' },
+                    'tuesday': { enabled: true, start: '08:00', end: '18:00' },
+                    'wednesday': { enabled: true, start: '08:00', end: '18:00' },
+                    'thursday': { enabled: true, start: '08:00', end: '18:00' },
+                    'friday': { enabled: true, start: '08:00', end: '18:00' }
+                };
+                break;
+            case 'weekdays-only':
+                this.currentSchedule = {
+                    'saturday': { enabled: false, start: '09:00', end: '17:00' },
+                    'sunday': { enabled: true, start: '09:00', end: '17:00' },
+                    'monday': { enabled: true, start: '09:00', end: '17:00' },
+                    'tuesday': { enabled: true, start: '09:00', end: '17:00' },
+                    'wednesday': { enabled: true, start: '09:00', end: '17:00' },
+                    'thursday': { enabled: true, start: '09:00', end: '17:00' },
+                    'friday': { enabled: false, start: '09:00', end: '17:00' }
+                };
+                break;
+            case 'part-time':
+                this.currentSchedule = {
+                    'saturday': { enabled: false, start: '10:00', end: '14:00' },
+                    'sunday': { enabled: true, start: '10:00', end: '14:00' },
+                    'monday': { enabled: true, start: '10:00', end: '14:00' },
+                    'tuesday': { enabled: true, start: '10:00', end: '14:00' },
+                    'wednesday': { enabled: true, start: '10:00', end: '14:00' },
+                    'thursday': { enabled: false, start: '10:00', end: '14:00' },
+                    'friday': { enabled: false, start: '10:00', end: '14:00' }
+                };
+                break;
+            default:
+                this.renderDefaultSchedule();
+                return;
+        }
+        
+        this.renderWeeklySchedule();
+        this.showAlert('success', 'تم تطبيق الجدول المحدد بنجاح');
+    },
+    
+    // Export schedule as JSON
+    exportSchedule() {
+        const scheduleData = {
+            doctor_schedule: this.currentSchedule,
+            blocked_times: this.blockedTimes,
+            exported_at: new Date().toISOString()
+        };
+        
+        const dataStr = JSON.stringify(scheduleData, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(dataBlob);
+        link.download = `doctor_schedule_${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+        
+        this.showAlert('success', 'تم تصدير الجدول بنجاح');
+    },
+    
+    // Get availability statistics
+    getAvailabilityStats() {
+        if (!this.currentSchedule) return null;
+        
+        let totalEnabledDays = 0;
+        let totalHours = 0;
+        
+        Object.values(this.currentSchedule).forEach(day => {
+            if (day.enabled) {
+                totalEnabledDays++;
+                const start = new Date(`1970-01-01T${day.start}:00`);
+                const end = new Date(`1970-01-01T${day.end}:00`);
+                const hours = (end - start) / (1000 * 60 * 60);
+                totalHours += hours;
+            }
+        });
+        
+        const avgHoursPerDay = totalEnabledDays > 0 ? (totalHours / totalEnabledDays).toFixed(1) : 0;
+        const weeklyHours = totalHours.toFixed(1);
+        
+        return {
+            enabledDays: totalEnabledDays,
+            weeklyHours,
+            avgHoursPerDay,
+            blockedSlotsCount: this.blockedTimes.length
+        };
+    }
+}
+};
+
+// Global functions for HTML onclick events
+function resetSchedule() {
+    AvailabilityManager.resetSchedule();
+}
+
+function previousMonth() {
+    AvailabilityManager.previousMonth();
+}
+
+function nextMonth() {
+    AvailabilityManager.nextMonth();
+}
+
+function showWeeklySchedule() {
+    const tab = new bootstrap.Tab(document.getElementById('weekly-tab'));
+    tab.show();
+}
+
+function showCalendarView() {
+    const tab = new bootstrap.Tab(document.getElementById('calendar-tab'));
+    tab.show();
+}

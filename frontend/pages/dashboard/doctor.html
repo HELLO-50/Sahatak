@@ -104,12 +104,12 @@
                             </div>
                         </div>
                         <div class="col-lg-4 col-md-6 mb-3">
-                            <div class="dashboard-card quick-action-card" onclick="manageSchedule()">
+                            <div class="dashboard-card quick-action-card" onclick="manageAvailability()">
                                 <div class="quick-action-icon">
-                                    <i class="bi bi-calendar-plus"></i>
+                                    <i class="bi bi-calendar-week"></i>
                                 </div>
-                                <h6 id="action-schedule">Manage Schedule</h6>
-                                <p class="text-muted small" id="action-schedule-desc">Edit available appointments</p>
+                                <h6 id="action-schedule">Manage Availability</h6>
+                                <p class="text-muted small" id="action-schedule-desc">Set available hours and block time slots</p>
                             </div>
                         </div>
                     </div>
@@ -411,9 +411,9 @@
             // Implement medical records review
         }
         
-        function manageSchedule() {
-            console.log('Manage schedule clicked');
-            // Implement schedule management
+        function manageAvailability() {
+            console.log('Manage availability clicked');
+            window.location.href = 'manage-availability.html';
         }
         
         function showProfile() {
