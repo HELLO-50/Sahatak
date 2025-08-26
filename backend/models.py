@@ -222,7 +222,9 @@ class Doctor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
     phone = db.Column(db.String(20), nullable=False)
+    phone_country = db.Column(db.String(2), nullable=True)  # Country code like 'SD', 'US'
     license_number = db.Column(db.String(50), nullable=False, unique=True)
+    license_country = db.Column(db.String(2), nullable=True)  # Country code for license validation
     specialty = db.Column(db.String(100), nullable=False)
     years_of_experience = db.Column(db.Integer, nullable=False)
     qualification = db.Column(db.Text, nullable=True)
@@ -254,7 +256,9 @@ class Doctor(db.Model):
             'id': self.id,
             'user_id': self.user_id,
             'phone': self.phone,
+            'phone_country': self.phone_country,
             'license_number': self.license_number,
+            'license_country': self.license_country,
             'specialty': self.specialty,
             'years_of_experience': self.years_of_experience,
             'qualification': self.qualification,
