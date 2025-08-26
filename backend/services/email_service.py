@@ -273,7 +273,7 @@ class EmailService:
             template_name = f'email/{language}/email_confirmation.html'
             
             # Create verification URL
-            verification_url = f"{current_app.config.get('FRONTEND_URL', 'https://hmb104.github.io/Sahatak')}/frontend/pages/verify-email.html?token={user_data['verification_token']}"
+            verification_url = f"{current_app.config.get('FRONTEND_URL', 'https://hello-50.github.io/Sahatak')}/frontend/pages/verify-email.html?token={user_data['verification_token']}"
             
             template_data = {
                 **user_data,
