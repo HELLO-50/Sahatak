@@ -314,6 +314,15 @@
     "back": "Back"
   },
 
+  "countries": {
+    "SD": "Sudan",
+    "EG": "Egypt",
+    "SA": "Saudi Arabia", 
+    "AE": "UAE",
+    "JO": "Jordan",
+    "US": "United States"
+  },
+
   "validation": {
     "required": "This field is required",
     "email_invalid": "Please enter a valid email address",

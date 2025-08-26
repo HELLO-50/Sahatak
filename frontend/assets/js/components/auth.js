@@ -147,8 +147,29 @@ const AuthManager = {
         if (footerBrand) footerBrand.textContent = LanguageManager.getTranslation(lang, 'footer.brand');
         if (footerCopyright) footerCopyright.textContent = LanguageManager.getTranslation(lang, 'footer.copyright');
 
+        // Update form labels
+        this.updateFormLabels(lang);
+        
         // Update form placeholders
         this.updateFormPlaceholders(lang);
+        
+        // Update country dropdown options
+        this.updateCountryDropdowns(lang);
+    },
+
+    // Update form labels based on current language
+    updateFormLabels(lang) {
+        // Patient confirm password label
+        const patientConfirmPasswordLabel = document.getElementById('patient-confirm-password-label');
+        if (patientConfirmPasswordLabel) {
+            patientConfirmPasswordLabel.innerHTML = LanguageManager.getTranslation(lang, 'patient_register.confirm_password') + ' <span class="text-danger">*</span>';
+        }
+
+        // Doctor confirm password label
+        const doctorConfirmPasswordLabel = document.getElementById('doctor-confirm-password-label');
+        if (doctorConfirmPasswordLabel) {
+            doctorConfirmPasswordLabel.innerHTML = LanguageManager.getTranslation(lang, 'doctor_register.confirm_password') + ' <span class="text-danger">*</span>';
+        }
     },
 
     // Update form placeholders based on current language
@@ -190,6 +211,50 @@ const AuthManager = {
         if (doctorExperience) doctorExperience.placeholder = LanguageManager.getTranslation(lang, 'doctor_register.experience_placeholder');
         if (doctorPassword) doctorPassword.placeholder = LanguageManager.getTranslation(lang, 'doctor_register.password_placeholder');
         if (doctorConfirmPassword) doctorConfirmPassword.placeholder = LanguageManager.getTranslation(lang, 'doctor_register.confirm_password_placeholder');
+    },
+
+    // Update country dropdown options and placeholders
+    updateCountryDropdowns(lang) {
+        // Update doctor phone country placeholder
+        const doctorPhoneCountryPlaceholder = document.getElementById('doctor-phone-country-placeholder');
+        if (doctorPhoneCountryPlaceholder) {
+            doctorPhoneCountryPlaceholder.textContent = LanguageManager.getTranslation(lang, 'doctor_register.phone_country_placeholder');
+        }
+
+        // Update doctor license country placeholder
+        const doctorLicenseCountryPlaceholder = document.getElementById('doctor-license-country-placeholder');
+        if (doctorLicenseCountryPlaceholder) {
+            doctorLicenseCountryPlaceholder.textContent = LanguageManager.getTranslation(lang, 'doctor_register.license_country_placeholder');
+        }
+
+        // Update country option text (keeping flags)
+        const countries = ['SD', 'EG', 'SA', 'AE', 'JO', 'US'];
+        const flags = {'SD': '🇸🇩', 'EG': '🇪🇬', 'SA': '🇸🇦', 'AE': '🇦🇪', 'JO': '🇯🇴', 'US': '🇺🇸'};
+        const codes = {'SD': '+249', 'EG': '+20', 'SA': '+966', 'AE': '+971', 'JO': '+962', 'US': '+1'};
+
+        // Update doctor phone country options
+        const doctorPhoneCountrySelect = document.getElementById('doctorPhoneCountry');
+        if (doctorPhoneCountrySelect) {
+            countries.forEach(countryCode => {
+                const option = doctorPhoneCountrySelect.querySelector(`option[value="${countryCode}"]`);
+                if (option) {
+                    const countryName = LanguageManager.getTranslation(lang, `countries.${countryCode}`);
+                    option.textContent = `${flags[countryCode]} ${countryName} (${codes[countryCode]})`;
+                }
+            });
+        }
+
+        // Update doctor license country options
+        const doctorLicenseCountrySelect = document.getElementById('doctorLicenseCountry');
+        if (doctorLicenseCountrySelect) {
+            countries.forEach(countryCode => {
+                const option = doctorLicenseCountrySelect.querySelector(`option[value="${countryCode}"]`);
+                if (option) {
+                    const countryName = LanguageManager.getTranslation(lang, `countries.${countryCode}`);
+                    option.textContent = `${flags[countryCode]} ${countryName}`;
+                }
+            });
+        }
     }
 };
 
