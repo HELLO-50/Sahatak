@@ -406,7 +406,7 @@ function handleDoctorRegister(event) {
     }
     
     // Additional custom validation for years of experience
-    if (isNaN(formData.yearsOfExperience) || formData.yearsOfExperience < 0 || formData.yearsOfExperience > 50) {
+    if (isNaN(formData.years_of_experience) || formData.years_of_experience < 0 || formData.years_of_experience > 50) {
         ValidationManager.showFieldError('doctorExperience', 'Please enter valid years of experience (0-50)');
         isValid = false;
     }
