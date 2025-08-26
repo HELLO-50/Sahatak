@@ -380,6 +380,8 @@ function handleDoctorRegister(event) {
         language_preference: userLanguage
     };
     
+    console.log('🔥 FORMS.JS - Doctor form data:', formData);
+    
     // Validate form using ValidationManager
     const validationData = {
         fullName: formData.full_name,
@@ -394,8 +396,12 @@ function handleDoctorRegister(event) {
     const validation = ValidationManager.validateDoctorRegistrationForm(validationData);
     let isValid = validation.isValid;
     
+    console.log('🔥 FORMS.JS - Doctor validation result:', validation);
+    console.log('🔥 FORMS.JS - Is form valid:', isValid);
+    
     // Show ValidationManager errors
     if (!validation.isValid) {
+        console.log('🔥 FORMS.JS - Doctor validation errors:', validation.errors);
         Object.keys(validation.errors).forEach(field => {
             let fieldId = 'doctor' + field.charAt(0).toUpperCase() + field.slice(1);
             if (field === 'phoneNumber') fieldId = 'doctorPhone';
@@ -407,14 +413,20 @@ function handleDoctorRegister(event) {
     
     // Additional custom validation for years of experience
     if (isNaN(formData.years_of_experience) || formData.years_of_experience < 0 || formData.years_of_experience > 50) {
+        console.log('🔥 FORMS.JS - Doctor experience validation failed:', formData.years_of_experience);
         ValidationManager.showFieldError('doctorExperience', 'Please enter valid years of experience (0-50)');
         isValid = false;
     }
     
-    if (!isValid) return false;
+    console.log('🔥 FORMS.JS - Final validation state:', isValid);
+    if (!isValid) {
+        console.log('🔥 FORMS.JS - Form validation failed, stopping submission');
+        return false;
+    }
     
     // Set loading state
     FormManager.setFormLoading(formId, true);
+    console.log('🔥 FORMS.JS - Starting doctor form submission...');
     
     // Submit form
     FormManager.submitForm(
