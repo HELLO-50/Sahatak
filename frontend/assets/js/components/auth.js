@@ -228,9 +228,9 @@ const AuthManager = {
         }
 
         // Update country option text (keeping flags)
-        const countries = ['SD', 'EG', 'SA', 'AE', 'JO', 'US'];
-        const flags = {'SD': '🇸🇩', 'EG': '🇪🇬', 'SA': '🇸🇦', 'AE': '🇦🇪', 'JO': '🇯🇴', 'US': '🇺🇸'};
-        const codes = {'SD': '+249', 'EG': '+20', 'SA': '+966', 'AE': '+971', 'JO': '+962', 'US': '+1'};
+        const countries = ['SD', 'EG', 'SA', 'AE', 'IE', 'US', 'GB'];
+        const flags = {'SD': '🇸🇩', 'EG': '🇪🇬', 'SA': '🇸🇦', 'AE': '🇦🇪', 'IE': '🇮🇪', 'US': '🇺🇸', 'GB': '🇬🇧'};
+        const codes = {'SD': '+249', 'EG': '+20', 'SA': '+966', 'AE': '+971', 'IE': '+353', 'US': '+1', 'GB': '+44'};
 
         // Update doctor phone country options
         const doctorPhoneCountrySelect = document.getElementById('doctorPhoneCountry');

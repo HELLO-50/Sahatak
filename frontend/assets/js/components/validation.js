@@ -60,13 +60,21 @@ const ValidationManager = {
             licensePattern: /^[A-Z0-9]{6,10}$/,
             licensePlaceholder: 'e.g., DOH123456'
         },
-        JO: {
-            name: 'Jordan',
-            flag: '🇯🇴',
-            code: '+962',
-            phonePattern: /^7[789]\d{7}$/,
-            licensePattern: /^\d{6,8}$/,
-            licensePlaceholder: 'e.g., 123456'
+        IE: {
+            name: 'Ireland',
+            flag: '🇮🇪',
+            code: '+353',
+            phonePattern: /^[8-9]\d{8}$/,
+            licensePattern: /^[A-Z0-9]{6,10}$/,
+            licensePlaceholder: 'e.g., IMC123456'
+        },
+        GB: {
+            name: 'United Kingdom',
+            flag: '🇬🇧',
+            code: '+44',
+            phonePattern: /^7\d{9}$/,
+            licensePattern: /^[A-Z0-9]{7,10}$/,
+            licensePlaceholder: 'e.g., GMC1234567'
         }
     },
 
