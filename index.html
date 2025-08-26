@@ -160,13 +160,13 @@
                             
                             <form id="loginForm">
                                 <div class="mb-3">
-                                    <label for="login_identifier" class="form-label" id="login-identifier-label">البريد الإلكتروني أو رقم الهاتف</label>
-                                    <input type="text" class="form-control" id="login_identifier" required>
+                                    <label for="login_identifier" class="form-label" id="login-identifier-label">البريد الإلكتروني أو رقم الهاتف <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="login_identifier" placeholder="أدخل بريدك الإلكتروني أو رقم هاتفك" required>
                                     <div class="invalid-feedback" id="login_identifier-error"></div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="password" class="form-label" id="password-label">كلمة المرور</label>
-                                    <input type="password" class="form-control" id="password" required>
+                                    <label for="password" class="form-label" id="password-label">كلمة المرور <span class="text-danger">*</span></label>
+                                    <input type="password" class="form-control" id="password" placeholder="أدخل كلمة المرور الخاصة بك" required>
                                     <div class="invalid-feedback" id="password-error"></div>
                                 </div>
                                 <div class="d-grid">
@@ -275,28 +275,28 @@
                             
                             <form id="patientRegisterForm">
                                 <div class="mb-3">
-                                    <label for="patientFullName" class="form-label" id="patient-fullName-label">الاسم الكامل</label>
-                                    <input type="text" class="form-control" id="patientFullName" required>
+                                    <label for="patientFullName" class="form-label" id="patient-fullName-label">الاسم الكامل <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="patientFullName" placeholder="أدخل اسمك الأول والأخير بالكامل" required>
                                     <div class="invalid-feedback" id="patientFullName-error"></div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="patientPhone" class="form-label" id="patient-phone-label">رقم الهاتف</label>
-                                    <input type="tel" class="form-control" id="patientPhone" required>
+                                    <label for="patientPhone" class="form-label" id="patient-phone-label">رقم الهاتف <span class="text-danger">*</span></label>
+                                    <input type="tel" class="form-control" id="patientPhone" placeholder="أدخل رقم هاتفك مع رمز البلد مثل +249123456789" required>
                                     <div class="invalid-feedback" id="patientPhone-error"></div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="patientEmail" class="form-label" id="patient-email-label">البريد الإلكتروني (اختياري)</label>
-                                    <input type="email" class="form-control" id="patientEmail">
+                                    <input type="email" class="form-control" id="patientEmail" placeholder="مثال: ahmed@example.com (اختياري)">
                                     <div class="invalid-feedback" id="patientEmail-error"></div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        <label for="patientAge" class="form-label" id="patient-age-label">العمر</label>
-                                        <input type="number" class="form-control" id="patientAge" min="1" max="120" required>
+                                        <label for="patientAge" class="form-label" id="patient-age-label">العمر <span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" id="patientAge" min="1" max="120" placeholder="أدخل عمرك بالسنوات" required>
                                         <div class="invalid-feedback" id="patientAge-error"></div>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label for="patientGender" class="form-label" id="patient-gender-label">الجنس</label>
+                                        <label for="patientGender" class="form-label" id="patient-gender-label">الجنس <span class="text-danger">*</span></label>
                                         <select class="form-select" id="patientGender" required>
                                             <option value="">اختر الجنس</option>
                                             <option value="male">ذكر</option>
@@ -306,8 +306,8 @@
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="patientPassword" class="form-label" id="patient-password-label">كلمة المرور</label>
-                                    <input type="password" class="form-control" id="patientPassword" required minlength="6">
+                                    <label for="patientPassword" class="form-label" id="patient-password-label">كلمة المرور <span class="text-danger">*</span></label>
+                                    <input type="password" class="form-control" id="patientPassword" placeholder="أدخل كلمة مرور قوية (6 أحرف على الأقل)" required minlength="6">
                                     <div class="invalid-feedback" id="patientPassword-error"></div>
                                     <div class="form-text" id="patient-password-help">كلمة المرور يجب أن تكون 6 أحرف على الأقل</div>
                                 </div>
@@ -349,35 +349,35 @@
                             
                             <form id="doctorRegisterForm">
                                 <div class="mb-3">
-                                    <label for="doctorFullName" class="form-label" id="doctor-fullName-label">الاسم الكامل</label>
-                                    <input type="text" class="form-control" id="doctorFullName" required>
+                                    <label for="doctorFullName" class="form-label" id="doctor-fullName-label">الاسم الكامل <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="doctorFullName" placeholder="أدخل اسمك الثلاثي بالكامل كما في الهوية" required>
                                     <div class="invalid-feedback" id="doctorFullName-error"></div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="doctorPhone" class="form-label" id="doctor-phone-label">رقم الهاتف</label>
-                                    <input type="tel" class="form-control" id="doctorPhone" required>
+                                    <label for="doctorPhone" class="form-label" id="doctor-phone-label">رقم الهاتف <span class="text-danger">*</span></label>
+                                    <input type="tel" class="form-control" id="doctorPhone" placeholder="رقم هاتفك مع رمز البلد مثل +249123456789" required>
                                     <div class="invalid-feedback" id="doctorPhone-error"></div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="doctorEmail" class="form-label" id="doctor-email-label">البريد الإلكتروني (اختياري)</label>
-                                    <input type="email" class="form-control" id="doctorEmail">
+                                    <input type="email" class="form-control" id="doctorEmail" placeholder="مثال: dr.ahmed@hospital.com (اختياري)">
                                     <div class="invalid-feedback" id="doctorEmail-error"></div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        <label for="doctorLicense" class="form-label" id="doctor-license-label">رقم الترخيص الطبي</label>
-                                        <input type="text" class="form-control" id="doctorLicense" required>
+                                        <label for="doctorLicense" class="form-label" id="doctor-license-label">رقم الترخيص الطبي <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="doctorLicense" placeholder="أدخل رقم ترخيص مزاولة المهنة من وزارة الصحة" required>
                                         <div class="invalid-feedback" id="doctorLicense-error"></div>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label for="doctorExperience" class="form-label" id="doctor-experience-label">سنوات الخبرة</label>
-                                        <input type="number" class="form-control" id="doctorExperience" min="0" max="50" required>
+                                        <label for="doctorExperience" class="form-label" id="doctor-experience-label">سنوات الخبرة <span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" id="doctorExperience" min="0" max="50" placeholder="أدخل عدد سنوات الممارسة الطبية (0-50)" required>
                                         <div class="invalid-feedback" id="doctorExperience-error"></div>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        <label for="doctorSpecialty" class="form-label" id="doctor-specialty-label">التخصص</label>
+                                        <label for="doctorSpecialty" class="form-label" id="doctor-specialty-label">التخصص <span class="text-danger">*</span></label>
                                         <select class="form-select" id="doctorSpecialty" required>
                                             <option value="">اختر التخصص</option>
                                             <option value="cardiology">أمراض القلب</option>
@@ -392,8 +392,8 @@
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="doctorPassword" class="form-label" id="doctor-password-label">كلمة المرور</label>
-                                    <input type="password" class="form-control" id="doctorPassword" required minlength="6">
+                                    <label for="doctorPassword" class="form-label" id="doctor-password-label">كلمة المرور <span class="text-danger">*</span></label>
+                                    <input type="password" class="form-control" id="doctorPassword" placeholder="أدخل كلمة مرور قوية (6 أحرف على الأقل)" required minlength="6">
                                     <div class="invalid-feedback" id="doctorPassword-error"></div>
                                     <div class="form-text" id="doctor-password-help">كلمة المرور يجب أن تكون 6 أحرف على الأقل</div>
                                 </div>
