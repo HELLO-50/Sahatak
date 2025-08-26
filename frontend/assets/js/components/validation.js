@@ -18,6 +18,58 @@ const ValidationManager = {
         'radiology', 'pathology', 'anesthesiology', 'emergency'
     ],
 
+    // Country data with phone patterns and license formats
+    countries: {
+        US: {
+            name: 'United States',
+            flag: '🇺🇸',
+            code: '+1',
+            phonePattern: /^\d{10}$/,
+            licensePattern: /^[A-Z]{2}\d{6,8}$/,
+            licensePlaceholder: 'e.g., CA123456'
+        },
+        SD: {
+            name: 'Sudan',
+            flag: '🇸🇩',
+            code: '+249',
+            phonePattern: /^\d{9}$/,
+            licensePattern: /^[A-Z0-9]{6,12}$/,
+            licensePlaceholder: 'e.g., MED123456'
+        },
+        EG: {
+            name: 'Egypt',
+            flag: '🇪🇬',
+            code: '+20',
+            phonePattern: /^1\d{9}$/,
+            licensePattern: /^\d{7,10}$/,
+            licensePlaceholder: 'e.g., 1234567'
+        },
+        SA: {
+            name: 'Saudi Arabia',
+            flag: '🇸🇦',
+            code: '+966',
+            phonePattern: /^5\d{8}$/,
+            licensePattern: /^\d{10}$/,
+            licensePlaceholder: 'e.g., 1234567890'
+        },
+        AE: {
+            name: 'UAE',
+            flag: '🇦🇪',
+            code: '+971',
+            phonePattern: /^5\d{8}$/,
+            licensePattern: /^[A-Z0-9]{6,10}$/,
+            licensePlaceholder: 'e.g., DOH123456'
+        },
+        JO: {
+            name: 'Jordan',
+            flag: '🇯🇴',
+            code: '+962',
+            phonePattern: /^7[789]\d{7}$/,
+            licensePattern: /^\d{6,8}$/,
+            licensePlaceholder: 'e.g., 123456'
+        }
+    },
+
     // Core validation methods - matching backend logic
     validateEmail(email) {
         if (!email || typeof email !== 'string') return false;
@@ -86,6 +138,25 @@ const ValidationManager = {
         const ageNum = parseInt(age);
         if (isNaN(ageNum)) return false;
         return ageNum >= 1 && ageNum <= 120;
+    },
+
+    // Country-specific phone validation
+    validatePhoneWithCountry(phone, countryCode) {
+        if (!phone || !countryCode || !this.countries[countryCode]) return false;
+        const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
+        return this.countries[countryCode].phonePattern.test(cleanPhone);
+    },
+
+    // Country-specific license validation
+    validateLicenseWithCountry(license, countryCode) {
+        if (!license || !countryCode || !this.countries[countryCode]) return false;
+        const cleanLicense = license.trim().replace(/[\s\-]/g, '');
+        return this.countries[countryCode].licensePattern.test(cleanLicense);
+    },
+
+    // Password confirmation validation
+    validatePasswordConfirmation(password, confirmPassword) {
+        return password === confirmPassword;
     },
 
     validateDateOfBirth(dateString) {
@@ -199,14 +270,14 @@ const ValidationManager = {
             isValid = false;
         }
 
-        // Validate email
-        if (!this.validateEmail(data.email)) {
+        // Validate email (optional for patients)
+        if (data.email && !this.validateEmail(data.email)) {
             errors.email = 'Please enter a valid email address';
             isValid = false;
         }
 
-        // Validate phone number
-        if (data.phoneNumber && !this.validatePhoneNumber(data.phoneNumber)) {
+        // Validate phone number (always required)
+        if (!this.validatePhoneNumber(data.phoneNumber)) {
             errors.phoneNumber = 'Please enter a valid phone number';
             isValid = false;
         }
@@ -253,13 +324,13 @@ const ValidationManager = {
             isValid = false;
         }
 
-        // Validate email
+        // Validate email (required for doctors)
         if (!this.validateEmail(data.email)) {
             errors.email = 'Please enter a valid email address';
             isValid = false;
         }
 
-        // Validate phone number
+        // Validate phone number (always required)
         if (!this.validatePhoneNumber(data.phoneNumber)) {
             errors.phoneNumber = 'Please enter a valid phone number';
             isValid = false;
