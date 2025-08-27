@@ -1,8 +1,8 @@
-from flask import Blueprint, request, current_app
+from flask import Blueprint, request, current_app, jsonify
 from flask_login import login_required, current_user
 from models import db, User, Patient, Doctor
 from utils.validators import validate_name, validate_phone, validate_age
-from utils.responses import success_response, error_response, not_found_response, validation_error_response
+from utils.responses import APIResponse
 from utils.logging_config import app_logger
 from datetime import datetime
 
@@ -26,10 +26,7 @@ def get_profile():
         
     except Exception as e:
         current_app.logger.error(f"Get profile error: {str(e)}")
-        return jsonify({
-            'success': False,
-            'message': 'Failed to get profile'
-        }), 500
+        return APIResponse.internal_error(message='Failed to get profile')
 
 @users_bp.route('/profile', methods=['PUT'])
 @login_required
@@ -40,23 +37,27 @@ def update_profile():
         
         # Update basic user information
         if 'full_name' in data:
-            from backend.utils.validators import validate_full_name
+            from utils.validators import validate_full_name
             name_validation = validate_full_name(data['full_name'])
             if not name_validation['valid']:
-                return jsonify({
-                    'success': False,
-                    'message': name_validation['message'],
-                    'field': 'full_name'
-                }), 400
+                return APIResponse.validation_error(
+                    message=name_validation['message'],
+                    field='full_name'
+                )
             current_user.full_name = data['full_name'].strip()
         
         if 'language_preference' in data:
-            if data['language_preference'] not in ['ar', 'en']:
-                return jsonify({
-                    'success': False,
-                    'message': 'Invalid language preference',
-                    'field': 'language_preference'
-                }), 400
+            from utils.validators import validate_enum_field
+            lang_validation = validate_enum_field(
+                data['language_preference'], 
+                current_app.config.get('LANGUAGES', ['ar', 'en']), 
+                'language_preference'
+            )
+            if not lang_validation['valid']:
+                return APIResponse.validation_error(
+                    message=lang_validation['message'],
+                    field='language_preference'
+                )
             current_user.language_preference = data['language_preference']
         
         # Update profile-specific information
@@ -65,22 +66,21 @@ def update_profile():
             if current_user.user_type == 'patient':
                 # Update patient profile
                 if 'phone' in data:
-                    if not validate_phone(data['phone']):
-                        return jsonify({
-                            'success': False,
-                            'message': 'Invalid phone number format',
-                            'field': 'phone'
-                        }), 400
+                    phone_validation = validate_phone(data['phone'])
+                    if not phone_validation['valid']:
+                        return APIResponse.validation_error(
+                            message=phone_validation['message'],
+                            field='phone'
+                        )
                     profile.phone = data['phone'].strip()
                 
                 if 'age' in data:
                     age_validation = validate_age(data['age'])
                     if not age_validation['valid']:
-                        return jsonify({
-                            'success': False,
-                            'message': age_validation['message'],
-                            'field': 'age'
-                        }), 400
+                        return APIResponse.validation_error(
+                            message=age_validation['message'],
+                            field='age'
+                        )
                     profile.age = int(data['age'])
                 
                 if 'gender' in data:

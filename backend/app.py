@@ -147,7 +147,7 @@ def index():
     return APIResponse.success(
         data={
             'service': 'Sahatak Telemedicine Platform API',
-            'version': '1.0.2',
+            'version': '1.3.0',
             'environment': app.config.get('FLASK_ENV', 'production'),
             'documentation': '/api/docs',
             'health_check': '/health',
@@ -161,21 +161,178 @@ def api_info():
     """API information endpoint"""
     return APIResponse.success(
         data={
-            'version': '1.0.2',
+            'version': '1.3.0',
             'endpoints': {
-                'authentication': '/api/auth',
-                'users': '/api/users',
-                'appointments': '/api/appointments',
-                'medical': '/api/medical',
-                'ai_assessment': '/api/ai'
+                'authentication': {
+                    'base': '/api/auth',
+                    'routes': [
+                        'POST /api/auth/register - User registration',
+                        'POST /api/auth/login - User login',
+                        'POST /api/auth/logout - User logout',
+                        'GET /api/auth/me - Get current user info',
+                        'POST /api/auth/change-password - Change password',
+                        'POST /api/auth/update-language - Update language preference',
+                        'GET /api/auth/verify-email - Verify email address',
+                        'POST /api/auth/resend-verification - Resend verification email'
+                    ]
+                },
+                'users': {
+                    'base': '/api/users',
+                    'routes': [
+                        'GET /api/users/profile - Get user profile',
+                        'PUT /api/users/profile - Update user profile',
+                        'GET /api/users/doctors - List all doctors',
+                        'GET /api/users/doctors/{id} - Get doctor details',
+                        'GET /api/users/specialties - Get medical specialties',
+                        'POST /api/users/deactivate - Deactivate user account'
+                    ]
+                },
+                'appointments': {
+                    'base': '/api/appointments',
+                    'routes': [
+                        'GET /api/appointments/doctors - List available doctors',
+                        'GET /api/appointments/ - Get user appointments',
+                        'POST /api/appointments/ - Create new appointment',
+                        'GET /api/appointments/{id} - Get appointment details',
+                        'GET /api/appointments/doctors/{id}/availability - Get doctor availability',
+                        'PUT /api/appointments/{id}/cancel - Cancel appointment',
+                        'PUT /api/appointments/{id}/reschedule - Reschedule appointment'
+                    ]
+                },
+                'availability': {
+                    'base': '/api/availability',
+                    'routes': [
+                        'GET /api/availability/schedule - Get doctor schedule',
+                        'PUT /api/availability/schedule - Update doctor schedule',
+                        'GET /api/availability/calendar - Get calendar view',
+                        'POST /api/availability/block-time - Block time slots',
+                        'DELETE /api/availability/unblock-time/{id} - Unblock time slot'
+                    ]
+                },
+                'ehr': {
+                    'base': '/api/ehr',
+                    'routes': [
+                        'GET /api/ehr/patient/{id} - Get patient EHR',
+                        'POST /api/ehr/diagnoses - Add diagnosis',
+                        'PUT /api/ehr/diagnoses/{id} - Update diagnosis',
+                        'POST /api/ehr/vital-signs - Add vital signs',
+                        'GET /api/ehr/vital-signs/patient/{id} - Get patient vital signs',
+                        'GET /api/ehr/diagnoses/patient/{id} - Get patient diagnoses'
+                    ]
+                },
+                'medical': {
+                    'base': '/api/medical',
+                    'routes': [
+                        'GET /api/medical/records - Get medical records',
+                        'GET /api/medical/prescriptions - Get prescriptions'
+                    ]
+                },
+                'medical_history': {
+                    'base': '/api/medical-history',
+                    'routes': [
+                        'GET /api/medical-history/patient/{id} - Get patient medical history',
+                        'POST /api/medical-history/complete - Complete medical history',
+                        'PUT /api/medical-history/update - Update medical history',
+                        'GET /api/medical-history/check-completion - Check completion status',
+                        'GET /api/medical-history/updates/{id} - Get history updates',
+                        'GET /api/medical-history/appointment-prompt/{id} - Get appointment prompts'
+                    ]
+                },
+                'prescriptions': {
+                    'base': '/api/prescriptions',
+                    'routes': [
+                        'GET /api/prescriptions/ - Get prescriptions',
+                        'GET /api/prescriptions/{id} - Get prescription details',
+                        'POST /api/prescriptions/ - Create new prescription',
+                        'PUT /api/prescriptions/{id} - Update prescription',
+                        'PUT /api/prescriptions/{id}/status - Update prescription status',
+                        'GET /api/prescriptions/patient/{id} - Get patient prescriptions',
+                        'GET /api/prescriptions/stats - Get prescription statistics'
+                    ]
+                },
+                'notifications': {
+                    'base': '/api/notifications',
+                    'routes': [
+                        'GET /api/notifications/preferences - Get notification preferences',
+                        'PUT /api/notifications/preferences - Update notification preferences',
+                        'POST /api/notifications/test/registration - Test registration notification',
+                        'POST /api/notifications/test/appointment - Test appointment notification',
+                        'GET /api/notifications/settings/defaults - Get default settings'
+                    ]
+                },
+                'user_settings': {
+                    'base': '/api/user-settings',
+                    'routes': [
+                        'GET /api/user-settings/doctor/participation - Get doctor participation settings',
+                        'PUT /api/user-settings/doctor/participation - Update doctor participation',
+                        'POST /api/user-settings/doctor/switch-to-volunteer - Switch to volunteer mode',
+                        'POST /api/user-settings/doctor/switch-to-paid - Switch to paid mode',
+                        'PUT /api/user-settings/doctor/notification-settings - Update notification settings',
+                        'GET /api/user-settings/patient/preferences - Get patient preferences',
+                        'PUT /api/user-settings/patient/preferences - Update patient preferences',
+                        'GET /api/user-settings/profile - Get user profile settings',
+                        'PUT /api/user-settings/language - Update language preference',
+                        'PUT /api/user-settings/password - Change password',
+                        'GET /api/user-settings/summary - Get settings summary'
+                    ]
+                },
+                'ai_assessment': {
+                    'base': '/api/ai',
+                    'routes': [
+                        'POST /api/ai/assessment - Perform AI health assessment'
+                    ]
+                },
+                'admin': {
+                    'base': '/api/admin',
+                    'routes': [
+                        'GET /api/admin/users - List all users',
+                        'GET /api/admin/users/{id} - Get user details',
+                        'POST /api/admin/users/{id}/toggle-status - Toggle user status',
+                        'GET /api/admin/doctors/pending-verification - Get pending doctor verifications',
+                        'POST /api/admin/doctors/{id}/verify - Verify doctor',
+                        'POST /api/admin/doctors - Create doctor account',
+                        'GET /api/admin/settings - Get platform settings',
+                        'PUT /api/admin/settings - Update platform settings',
+                        'GET /api/admin/health/detailed - Get detailed health status',
+                        'GET /api/admin/analytics/dashboard - Get analytics dashboard',
+                        'POST /api/admin/notifications/broadcast - Broadcast notification',
+                        'GET /api/admin/audit-logs - Get audit logs',
+                        'GET /api/admin/audit-logs/{id} - Get specific audit log',
+                        'POST /api/admin/create-admin - Create admin user',
+                        'POST /api/admin/init-first-admin - Initialize first admin'
+                    ]
+                }
             },
             'health_checks': {
                 'basic': '/health',
                 'detailed': '/health/detailed',
                 'database': '/health/database'
+            },
+            'features': [
+                'User authentication and authorization',
+                'Patient and doctor registration',
+                'Appointment booking and management',
+                'Electronic Health Records (EHR)',
+                'Medical history tracking',
+                'Prescription management',
+                'AI-powered health assessments',
+                'Real-time notifications (Email/SMS)',
+                'Multi-language support (Arabic/English)',
+                'Admin dashboard and analytics',
+                'Doctor availability management',
+                'Comprehensive audit logging'
+            ],
+            'technologies': {
+                'framework': 'Flask 2.3.3',
+                'database': 'SQLAlchemy with SQLite/MySQL',
+                'authentication': 'Flask-Login with bcrypt',
+                'notifications': 'Email (SMTP) and SMS integration',
+                'cors': 'Flask-CORS for cross-origin requests',
+                'logging': 'Structured JSON logging',
+                'validation': 'Custom validation system'
             }
         },
-        message='Sahatak API v1.0.2'
+        message='Sahatak API v1.3.0'
     )
 
 if __name__ == '__main__':

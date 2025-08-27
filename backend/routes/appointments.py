@@ -90,20 +90,41 @@ def get_appointments():
 @login_required
 def create_appointment():
     """Create new appointment (patients only)"""
+    from utils.validators import validate_json_payload, validate_id_parameter, validate_enum_field, handle_api_errors
+    
     try:
         if current_user.user_type != 'patient':
             return APIResponse.forbidden(message='Only patients can book appointments')
         
         data = request.get_json()
         
-        # Validate required fields
+        # Validate JSON payload structure
         required_fields = ['doctor_id', 'appointment_date', 'appointment_type']
-        for field in required_fields:
-            if not data.get(field):
-                return APIResponse.validation_error(
-                    field=field,
-                    message=f'{field} is required'
-                )
+        optional_fields = ['notes']
+        validation = validate_json_payload(data, required_fields, optional_fields)
+        
+        if not validation['valid']:
+            return APIResponse.validation_error(
+                message=validation['message'],
+                field=validation.get('missing_fields', validation.get('unexpected_fields'))
+            )
+        
+        # Validate doctor_id
+        doctor_validation = validate_id_parameter(data['doctor_id'], 'doctor_id')
+        if not doctor_validation['valid']:
+            return APIResponse.validation_error(
+                field='doctor_id',
+                message=doctor_validation['message']
+            )
+        
+        # Validate appointment_type
+        allowed_types = ['video', 'audio', 'chat']
+        type_validation = validate_enum_field(data['appointment_type'], allowed_types, 'appointment_type')
+        if not type_validation['valid']:
+            return APIResponse.validation_error(
+                field='appointment_type',
+                message=type_validation['message']
+            )
         
         # Validate doctor exists and is verified
         doctor = Doctor.query.filter_by(id=data['doctor_id'], is_verified=True).join(User).filter_by(is_active=True).first()

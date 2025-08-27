@@ -83,13 +83,8 @@ const AuthManager = {
 
     // Update translations for current language
     updateTranslations(lang) {
-        console.log('updateTranslations called with lang:', lang);
-        console.log('Available translations:', Object.keys(LanguageManager.translations));
-        console.log('LanguageManager.translations[lang]:', LanguageManager.translations[lang]);
         
         if (!LanguageManager.translations[lang]) {
-            console.error(`No translations found for language: ${lang}`);
-            console.error('Full translations object:', LanguageManager.translations);
             return;
         }
 
@@ -260,7 +255,6 @@ const AuthManager = {
 
 // Language selection function
 function selectLanguage(lang) {
-    console.log(`User selected language: ${lang}`);
     
     // Show loading state
     const buttons = document.querySelectorAll('#language-selection .btn');
@@ -282,7 +276,6 @@ function selectLanguage(lang) {
 
 // User type selection function
 function selectUserType(type) {
-    console.log(`User selected type: ${type}`);
     
     if (type === 'patient') {
         AuthManager.showPatientRegister();

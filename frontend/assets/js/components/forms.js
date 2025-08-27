@@ -189,7 +189,6 @@ const FormManager = {
     // Generic form submission handler using ApiHelper pattern
     async submitForm(formData, endpoint, successCallback, errorCallback) {
         try {
-            console.log(`Submitting form data to ${endpoint}:`, formData);
             
             // Use ApiHelper for consistent API calls
             const result = await ApiHelper.makeRequest(endpoint, {
@@ -263,7 +262,6 @@ function handleRegister(event) {
 // Patient registration form handler - Override main.js version
 async function handlePatientRegister(event) {
     event.preventDefault();
-    console.log('🔥🔥🔥 FORMS.JS handlePatientRegister called 🔥🔥🔥');
     
     const formId = 'patientRegisterForm';
     FormManager.clearFormErrors(formId);
@@ -272,7 +270,6 @@ async function handlePatientRegister(event) {
     
     // Get language using FormManager pattern
     const userLanguage = FormManager.getCurrentLanguage();
-    console.log('🔥 FORMS.JS - Language detected:', userLanguage);
     
     // Get form data
     const formData = {

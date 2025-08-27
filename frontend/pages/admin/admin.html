@@ -11,10 +11,10 @@
     <!-- Bootstrap Icons CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
-    <!-- Arabic Font - Noto Sans Arabic -->
+    <!-- Modern Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Main CSS -->
     <link rel="stylesheet" href="../../assets/css/main.css">
@@ -25,6 +25,7 @@
     
     <!-- Chart.js -->
      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+     
 </head>
 <body data-protect="admin">
     <div class="dashboard-container">
@@ -101,10 +102,6 @@
                                 <i class="bi bi-sliders2"></i>
                                 <span id="admin-nav-settings">System Settings</span>
                             </button>
-                            <button class="btn btn-admin-nav" data-target="health">
-                                <i class="bi bi-activity"></i>
-                                <span id="admin-nav-health">Platform Health</span>
-                            </button>
                             <button class="btn btn-admin-nav" data-target="analytics">
                                 <i class="bi bi-graph-up"></i>
                                 <span id="admin-nav-analytics">Analytics</span>
@@ -156,7 +153,7 @@
                             
                             <!-- Platform Health & Analytics - Always Visible -->
                             <div class="dashboard-card admin-health-card">
-                                <h5><i class="bi bi-activity ms-2"></i><span id="platform-health-title">Platform Health & Analytics</span></h5>
+                                <h5><i class="bi bi-activity me-2"></i><span id="platform-health-title">Platform Health & Analytics</span></h5>
                                 
                                 <!-- Server Health Gauges -->
                                 <div class="row mb-4">
@@ -421,8 +418,28 @@
                                         </button>
                                     </li>
                                     <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab">
+                                            <i class="bi bi-shield-lock me-1"></i><span id="settings-security-tab">Security</span>
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="business-tab" data-bs-toggle="tab" data-bs-target="#business" type="button" role="tab">
+                                            <i class="bi bi-briefcase me-1"></i><span id="settings-business-tab">Business</span>
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
                                         <button class="nav-link" id="notifications-tab" data-bs-toggle="tab" data-bs-target="#notifications" type="button" role="tab">
                                             <i class="bi bi-bell me-1"></i><span id="settings-notifications-tab">Notifications</span>
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="video-tab" data-bs-toggle="tab" data-bs-target="#video" type="button" role="tab">
+                                            <i class="bi bi-camera-video me-1"></i><span id="settings-video-tab">Video Calls</span>
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="features-tab" data-bs-toggle="tab" data-bs-target="#features" type="button" role="tab">
+                                            <i class="bi bi-toggles me-1"></i><span id="settings-features-tab">Features</span>
                                         </button>
                                     </li>
                                     <li class="nav-item" role="presentation">
@@ -434,138 +451,432 @@
                                 
                                 <!-- Settings Content -->
                                 <div class="tab-content" id="settingsTabContent">
+                                    
                                     <!-- General Settings -->
                                     <div class="tab-pane fade show active" id="general" role="tabpanel">
-                                        <form id="general-settings-form">
-                                            <div class="row g-3">
-                                                <div class="col-md-6">
-                                                    <label class="form-label" id="default-language-label">Default Language</label>
-                                                    <select id="default_language" class="form-select">
-                                                        <option value="ar" id="language-arabic">Arabic</option>
-                                                        <option value="en" id="language-english">English</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label" id="timezone-label">Timezone</label>
-                                                    <select id="default_timezone" class="form-select">
-                                                        <option value="Africa/Cairo" id="timezone-cairo">Cairo</option>
-                                                        <option value="Asia/Riyadh" id="timezone-riyadh">Riyadh</option>
-                                                        <option value="UTC">UTC</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label" id="registration-status-label">Registration Status</label>
-                                                    <select id="registration_status" class="form-select">
-                                                        <option value="open" id="registration-open">Open</option>
-                                                        <option value="closed" id="registration-closed">Closed</option>
-                                                        <option value="doctors_only" id="registration-doctors-only">Doctors Only</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label" id="max-appointments-label">Max Appointments Per Day</label>
-                                                    <input type="number" id="max_appointments_per_day" class="form-control" value="20" min="1" max="100">
+                                        <div class="row g-4">
+                                            <!-- Platform Settings -->
+                                            <div class="col-12">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <h6><i class="bi bi-globe me-2"></i><span id="platform-settings-title">Platform Settings</span></h6>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row g-3">
+                                                            <div class="col-md-6">
+                                                                <label class="form-label" id="default-language-label">Default Language</label>
+                                                                <select id="default_language" class="form-select" data-setting="default_language">
+                                                                    <option value="ar" id="language-arabic">العربية (Arabic)</option>
+                                                                    <option value="en" id="language-english">English</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label" id="supported-languages-label">Supported Languages</label>
+                                                                <input type="text" id="languages" class="form-control" data-setting="languages" placeholder="ar,en">
+                                                                <small class="form-text text-muted" id="languages-help">Comma-separated language codes</small>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-check form-switch">
+                                                                    <input class="form-check-input" type="checkbox" id="registration_enabled" data-setting="registration_enabled">
+                                                                    <label class="form-check-label" id="registration-enabled-label">Enable User Registration</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </form>
+                                            
+                                            <!-- API Limits -->
+                                            <div class="col-12">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <h6><i class="bi bi-speedometer2 me-2"></i><span id="api-limits-title">API & Performance Limits</span></h6>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row g-3">
+                                                            <div class="col-md-4">
+                                                                <label class="form-label" id="posts-per-page-label">Items Per Page</label>
+                                                                <input type="number" id="posts_per_page" class="form-control" data-setting="posts_per_page" min="5" max="100">
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label class="form-label" id="max-page-size-label">Max Page Size</label>
+                                                                <input type="number" id="max_page_size" class="form-control" data-setting="max_page_size" min="10" max="500">
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label class="form-label" id="max-vital-signs-label">Max Vital Signs per Request</label>
+                                                                <input type="number" id="max_vital_signs_per_request" class="form-control" data-setting="max_vital_signs_per_request" min="1" max="50">
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label class="form-label" id="max-prescriptions-label">Max Prescriptions per Request</label>
+                                                                <input type="number" id="max_prescriptions_per_request" class="form-control" data-setting="max_prescriptions_per_request" min="1" max="100">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Security Settings -->
+                                    <div class="tab-pane fade" id="security" role="tabpanel">
+                                        <div class="row g-4">
+                                            <!-- Password Requirements -->
+                                            <div class="col-12">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <h6><i class="bi bi-key me-2"></i><span id="password-requirements-title">Password Requirements</span></h6>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row g-3">
+                                                            <div class="col-md-6">
+                                                                <label class="form-label" id="password-min-length-label">Minimum Password Length</label>
+                                                                <input type="number" id="password_min_length" class="form-control" data-setting="password_min_length" min="4" max="20">
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label" id="password-max-length-label">Maximum Password Length</label>
+                                                                <input type="number" id="password_max_length" class="form-control" data-setting="password_max_length" min="20" max="256">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Validation Settings -->
+                                            <div class="col-12">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <h6><i class="bi bi-check-circle me-2"></i><span id="validation-settings-title">Input Validation</span></h6>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row g-3">
+                                                            <div class="col-md-4">
+                                                                <label class="form-label" id="phone-min-length-label">Min Phone Length</label>
+                                                                <input type="number" id="phone_min_length" class="form-control" data-setting="phone_min_length" min="8" max="15">
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label class="form-label" id="phone-max-length-label">Max Phone Length</label>
+                                                                <input type="number" id="phone_max_length" class="form-control" data-setting="phone_max_length" min="10" max="20">
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label class="form-label" id="name-min-length-label">Min Name Length</label>
+                                                                <input type="number" id="name_min_length" class="form-control" data-setting="name_min_length" min="1" max="10">
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label class="form-label" id="name-max-length-label">Max Name Length</label>
+                                                                <input type="number" id="name_max_length" class="form-control" data-setting="name_max_length" min="50" max="200">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Authentication Security -->
+                                            <div class="col-12">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <h6><i class="bi bi-shield-check me-2"></i><span id="auth-security-title">Authentication Security</span></h6>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row g-3">
+                                                            <div class="col-md-4">
+                                                                <label class="form-label" id="max-login-attempts-label">Max Login Attempts</label>
+                                                                <input type="number" id="max_login_attempts" class="form-control" data-setting="max_login_attempts" min="3" max="10">
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label class="form-label" id="lockout-duration-label">Lockout Duration (minutes)</label>
+                                                                <input type="number" id="lockout_duration_minutes" class="form-control" data-setting="lockout_duration_minutes" min="5" max="120">
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label class="form-label" id="session-timeout-label">Session Timeout (minutes)</label>
+                                                                <input type="number" id="session_timeout_minutes" class="form-control" data-setting="session_timeout_minutes" min="5" max="480">
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label class="form-label" id="auto-logout-warning-label">Auto Logout Warning (minutes)</label>
+                                                                <input type="number" id="auto_logout_warning_minutes" class="form-control" data-setting="auto_logout_warning_minutes" min="1" max="10">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Business Settings -->
+                                    <div class="tab-pane fade" id="business" role="tabpanel">
+                                        <div class="row g-4">
+                                            <!-- Medical Settings -->
+                                            <div class="col-12">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <h6><i class="bi bi-heart-pulse me-2"></i><span id="medical-settings-title">Medical Practice Settings</span></h6>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row g-3">
+                                                            <div class="col-md-6">
+                                                                <label class="form-label" id="consultation-duration-label">Default Consultation Duration (minutes)</label>
+                                                                <input type="number" id="consultation_duration_minutes" class="form-control" data-setting="consultation_duration_minutes" min="15" max="120">
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label" id="max-appointment-days-label">Max Appointment Days Ahead</label>
+                                                                <input type="number" id="max_appointment_days_ahead" class="form-control" data-setting="max_appointment_days_ahead" min="7" max="365">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Financial Settings -->
+                                            <div class="col-12">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <h6><i class="bi bi-currency-dollar me-2"></i><span id="financial-settings-title">Financial Settings</span></h6>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row g-3">
+                                                            <div class="col-md-6">
+                                                                <label class="form-label" id="platform-commission-label">Platform Commission (%)</label>
+                                                                <input type="number" id="platform_commission_percent" class="form-control" data-setting="platform_commission_percent" step="0.1" min="0" max="50">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                     
                                     <!-- Notifications Settings -->
                                     <div class="tab-pane fade" id="notifications" role="tabpanel">
-                                        <form id="notifications-settings-form">
-                                            <div class="row g-3">
-                                                <div class="col-12">
-                                                    <h6 id="notification-settings-title">Notification Settings</h6>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-check form-switch">
-                                                        <input class="form-check-input" type="checkbox" id="email_notifications" checked>
-                                                        <label class="form-check-label" id="email-notifications-label">Email Notifications</label>
+                                        <div class="row g-4">
+                                            <!-- Notification Controls -->
+                                            <div class="col-12">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <h6><i class="bi bi-bell-fill me-2"></i><span id="notification-controls-title">Notification Controls</span></h6>
                                                     </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-check form-switch">
-                                                        <input class="form-check-input" type="checkbox" id="sms_notifications">
-                                                        <label class="form-check-label" id="sms-notifications-label">SMS Notifications</label>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-check form-switch">
-                                                        <input class="form-check-input" type="checkbox" id="appointment_reminders" checked>
-                                                        <label class="form-check-label" id="appointment-reminders-label">Appointment Reminders</label>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-check form-switch">
-                                                        <input class="form-check-input" type="checkbox" id="system_alerts" checked>
-                                                        <label class="form-check-label" id="system-alerts-label">System Alerts</label>
+                                                    <div class="card-body">
+                                                        <div class="row g-3">
+                                                            <div class="col-md-6">
+                                                                <div class="form-check form-switch">
+                                                                    <input class="form-check-input" type="checkbox" id="email_notifications_enabled" data-setting="email_notifications_enabled">
+                                                                    <label class="form-check-label" id="email-notifications-enabled-label">Enable Email Notifications</label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-check form-switch">
+                                                                    <input class="form-check-input" type="checkbox" id="sms_notifications_enabled" data-setting="sms_notifications_enabled">
+                                                                    <label class="form-check-label" id="sms-notifications-enabled-label">Enable SMS Notifications</label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-check form-switch">
+                                                                    <input class="form-check-input" type="checkbox" id="enable_sms_reminders" data-setting="enable_sms_reminders">
+                                                                    <label class="form-check-label" id="sms-reminders-label">Enable SMS Reminders</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </form>
+                                            
+                                            <!-- Notification Settings -->
+                                            <div class="col-12">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <h6><i class="bi bi-gear-fill me-2"></i><span id="notification-config-title">Notification Configuration</span></h6>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row g-3">
+                                                            <div class="col-md-6">
+                                                                <label class="form-label" id="max-notification-attempts-label">Max Notification Attempts</label>
+                                                                <input type="number" id="max_notification_attempts" class="form-control" data-setting="max_notification_attempts" min="1" max="10">
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label" id="notification-retry-delay-label">Retry Delay (seconds)</label>
+                                                                <input type="number" id="notification_retry_delay_seconds" class="form-control" data-setting="notification_retry_delay_seconds" min="30" max="3600">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Video Conferencing Settings -->
+                                    <div class="tab-pane fade" id="video" role="tabpanel">
+                                        <div class="row g-4">
+                                            <!-- Jitsi Configuration -->
+                                            <div class="col-12">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <h6><i class="bi bi-camera-video-fill me-2"></i><span id="jitsi-config-title">Jitsi Video Configuration</span></h6>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row g-3">
+                                                            <div class="col-md-6">
+                                                                <label class="form-label" id="jitsi-domain-label">Jitsi Domain</label>
+                                                                <input type="text" id="jitsi_domain" class="form-control" data-setting="jitsi_domain" placeholder="meet.jit.si">
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label" id="jitsi-app-id-label">Application ID</label>
+                                                                <input type="text" id="jitsi_app_id" class="form-control" data-setting="jitsi_app_id" placeholder="sahatak_telemedicine">
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label" id="jitsi-room-prefix-label">Room Prefix</label>
+                                                                <input type="text" id="jitsi_room_prefix" class="form-control" data-setting="jitsi_room_prefix" placeholder="sahatak_consultation_">
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label" id="video-call-max-duration-label">Max Call Duration (minutes)</label>
+                                                                <input type="number" id="video_call_max_duration_minutes" class="form-control" data-setting="video_call_max_duration_minutes" min="15" max="180">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Video Call Features -->
+                                            <div class="col-12">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <h6><i class="bi bi-toggles2 me-2"></i><span id="video-features-title">Video Call Features</span></h6>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row g-3">
+                                                            <div class="col-md-4">
+                                                                <div class="form-check form-switch">
+                                                                    <input class="form-check-input" type="checkbox" id="video_call_recording_enabled" data-setting="video_call_recording_enabled">
+                                                                    <label class="form-check-label" id="video-recording-label">Enable Recording</label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <div class="form-check form-switch">
+                                                                    <input class="form-check-input" type="checkbox" id="video_call_lobby_enabled" data-setting="video_call_lobby_enabled">
+                                                                    <label class="form-check-label" id="video-lobby-label">Enable Waiting Room</label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <div class="form-check form-switch">
+                                                                    <input class="form-check-input" type="checkbox" id="video_call_password_protected" data-setting="video_call_password_protected">
+                                                                    <label class="form-check-label" id="video-password-label">Password Protected</label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <div class="form-check form-switch">
+                                                                    <input class="form-check-input" type="checkbox" id="jitsi_enable_chat" data-setting="jitsi_enable_chat">
+                                                                    <label class="form-check-label" id="jitsi-chat-label">Enable Chat</label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <div class="form-check form-switch">
+                                                                    <input class="form-check-input" type="checkbox" id="jitsi_enable_screen_sharing" data-setting="jitsi_enable_screen_sharing">
+                                                                    <label class="form-check-label" id="jitsi-screen-sharing-label">Enable Screen Sharing</label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <div class="form-check form-switch">
+                                                                    <input class="form-check-input" type="checkbox" id="jitsi_enable_e2ee" data-setting="jitsi_enable_e2ee">
+                                                                    <label class="form-check-label" id="jitsi-e2ee-label">End-to-End Encryption</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Video Quality Settings -->
+                                            <div class="col-12">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <h6><i class="bi bi-display me-2"></i><span id="video-quality-title">Video Quality Settings</span></h6>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row g-3">
+                                                            <div class="col-md-6">
+                                                                <label class="form-label" id="jitsi-default-quality-label">Default Video Quality (p)</label>
+                                                                <select id="jitsi_default_video_quality" class="form-select" data-setting="jitsi_default_video_quality">
+                                                                    <option value="180">180p (Low)</option>
+                                                                    <option value="360">360p (Standard)</option>
+                                                                    <option value="720">720p (HD)</option>
+                                                                    <option value="1080">1080p (Full HD)</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label" id="jitsi-max-quality-label">Maximum Video Quality (p)</label>
+                                                                <select id="jitsi_max_video_quality" class="form-select" data-setting="jitsi_max_video_quality">
+                                                                    <option value="360">360p (Standard)</option>
+                                                                    <option value="720">720p (HD)</option>
+                                                                    <option value="1080">1080p (Full HD)</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Feature Flags -->
+                                    <div class="tab-pane fade" id="features" role="tabpanel">
+                                        <div class="row g-4">
+                                            <!-- Core Features -->
+                                            <div class="col-12">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <h6><i class="bi bi-toggles me-2"></i><span id="core-features-title">Core Features</span></h6>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row g-3">
+                                                            <div class="col-md-6">
+                                                                <div class="form-check form-switch">
+                                                                    <input class="form-check-input" type="checkbox" id="enable_video_calls" data-setting="enable_video_calls">
+                                                                    <label class="form-check-label" id="enable-video-calls-label">Enable Video Consultations</label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-check form-switch">
+                                                                    <input class="form-check-input" type="checkbox" id="enable_prescription_module" data-setting="enable_prescription_module">
+                                                                    <label class="form-check-label" id="enable-prescriptions-label">Enable Prescription Module</label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-check form-switch">
+                                                                    <input class="form-check-input" type="checkbox" id="enable_ai_assessment" data-setting="enable_ai_assessment">
+                                                                    <label class="form-check-label" id="enable-ai-assessment-label">Enable AI Health Assessment</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                     
                                     <!-- Maintenance Settings -->
                                     <div class="tab-pane fade" id="maintenance" role="tabpanel">
-                                        <form id="maintenance-settings-form">
-                                            <div class="row g-3">
-                                                <div class="col-12">
-                                                    <div class="alert alert-warning">
-                                                        <i class="bi bi-exclamation-triangle me-2"></i>
-                                                        <span id="maintenance-warning">Enabling maintenance mode will prevent users from accessing the system</span>
+                                        <div class="row g-4">
+                                            <div class="col-12">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <h6><i class="bi bi-tools me-2"></i><span id="maintenance-controls-title">Maintenance Controls</span></h6>
                                                     </div>
-                                                </div>
-                                                <div class="col-md-12">
-                                                    <div class="form-check form-switch">
-                                                        <input class="form-check-input" type="checkbox" id="maintenance_mode">
-                                                        <label class="form-check-label" id="maintenance-mode-label">Enable Maintenance Mode</label>
+                                                    <div class="card-body">
+                                                        <div class="alert alert-warning">
+                                                            <i class="bi bi-exclamation-triangle me-2"></i>
+                                                            <span id="maintenance-warning">Enabling maintenance mode will prevent users from accessing the system</span>
+                                                        </div>
+                                                        <div class="row g-3">
+                                                            <div class="col-12">
+                                                                <div class="form-check form-switch">
+                                                                    <input class="form-check-input" type="checkbox" id="maintenance_mode" data-setting="maintenance_mode">
+                                                                    <label class="form-check-label" id="maintenance-mode-label">Enable Maintenance Mode</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="col-12">
-                                                    <label class="form-label" id="maintenance-message-label">Maintenance Message</label>
-                                                    <textarea id="maintenance_message" class="form-control" rows="3" data-placeholder-id="maintenance-message-placeholder">We are working to improve the service. Please try again later.</textarea>
                                                 </div>
                                             </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
-                        <!-- Platform Health Section -->
-                        <section id="health" class="admin-section">
-                            <div class="dashboard-card">
-                                <h5><i class="bi bi-activity me-2"></i><span id="platform-health-title">Platform Health</span></h5>
-                                
-                                <!-- Health Status Cards -->
-                                <div class="row mb-4">
-                                    <div class="col-lg-3 col-md-6 mb-3">
-                                        <div class="dashboard-card stat-card">
-                                            <div class="stat-number">99.8%</div>
-                                            <div class="stat-label" id="server-uptime-label">Server Uptime</div>
                                         </div>
                                     </div>
-                                    <div class="col-lg-3 col-md-6 mb-3">
-                                        <div class="dashboard-card stat-card">
-                                            <div class="stat-number">65%</div>
-                                            <div class="stat-label" id="cpu-usage-label">CPU Usage</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-3 col-md-6 mb-3">
-                                        <div class="dashboard-card stat-card">
-                                            <div class="stat-number">78%</div>
-                                            <div class="stat-label" id="memory-usage-label">Memory Usage</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-3 col-md-6 mb-3">
-                                        <div class="dashboard-card stat-card">
-                                            <div class="stat-number">320ms</div>
-                                            <div class="stat-label" id="response-time-label">Response Time</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Health Chart -->
-                                <div class="mt-4">
-                                    <canvas id="healthChart" height="100"></canvas>
+                                    
                                 </div>
                             </div>
                         </section>
@@ -731,11 +1042,11 @@
     <script>
         // Profile and settings functions
         function showProfile() {
-            console.log('Show profile clicked');
+            // Show profile functionality
         }
         
         function showSettings() {
-            console.log('Show settings clicked');
+            // Show settings functionality
         }
         
         // Language selector function
@@ -749,7 +1060,6 @@
         
         // Initialize admin dashboard with translations
         document.addEventListener('DOMContentLoaded', async function() {
-            console.log('Admin dashboard initializing...');
             
             // Initialize admin dashboard translations
             await DashboardTranslations.initializeDashboard('admin');
@@ -760,7 +1070,6 @@
             document.querySelectorAll('.btn-admin-nav').forEach(button => {
                 button.addEventListener('click', function(e) {
                     e.preventDefault();
-                    console.log('Admin nav button clicked:', this.getAttribute('data-target'));
                     
                     // Remove active class from all buttons
                     document.querySelectorAll('.btn-admin-nav').forEach(btn => btn.classList.remove('active'));
@@ -778,9 +1087,6 @@
                     const targetSection = document.getElementById(targetId);
                     if (targetSection) {
                         targetSection.classList.add('active');
-                        console.log('Showing section:', targetId);
-                    } else {
-                        console.error('Section not found:', targetId);
                     }
                 });
             });

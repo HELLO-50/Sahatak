@@ -20,25 +20,50 @@ class Config:
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
     
     # File upload configuration
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB
-    UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
-    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf', 'doc', 'docx'}
+    MAX_CONTENT_LENGTH = int(os.getenv('MAX_CONTENT_LENGTH', 16 * 1024 * 1024))  # 16MB default
+    UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads'))
+    ALLOWED_EXTENSIONS = set(os.getenv('ALLOWED_EXTENSIONS', 'png,jpg,jpeg,gif,pdf,doc,docx').split(','))
     
     # Pagination
-    POSTS_PER_PAGE = 20
+    POSTS_PER_PAGE = int(os.getenv('POSTS_PER_PAGE', 20))
+    MAX_PAGE_SIZE = int(os.getenv('MAX_PAGE_SIZE', 100))
     
     # Language settings
-    LANGUAGES = ['ar', 'en']
-    DEFAULT_LANGUAGE = 'ar'
+    LANGUAGES = os.getenv('LANGUAGES', 'ar,en').split(',')
+    DEFAULT_LANGUAGE = os.getenv('DEFAULT_LANGUAGE', 'ar')
     
     # SMS Configuration (for AfricasTalking)
     SMS_USERNAME = os.getenv('SMS_USERNAME', 'sandbox')
     SMS_API_KEY = os.getenv('SMS_API_KEY')
     SMS_SENDER_ID = os.getenv('SMS_SENDER_ID', 'SAHATAK')
+    
+    # Validation settings
+    PASSWORD_MIN_LENGTH = int(os.getenv('PASSWORD_MIN_LENGTH', 6))
+    PASSWORD_MAX_LENGTH = int(os.getenv('PASSWORD_MAX_LENGTH', 128))
+    PHONE_MIN_LENGTH = int(os.getenv('PHONE_MIN_LENGTH', 10))
+    PHONE_MAX_LENGTH = int(os.getenv('PHONE_MAX_LENGTH', 15))
+    NAME_MIN_LENGTH = int(os.getenv('NAME_MIN_LENGTH', 2))
+    NAME_MAX_LENGTH = int(os.getenv('NAME_MAX_LENGTH', 100))
+    
+    # Session settings
+    SESSION_TIMEOUT_MINUTES = int(os.getenv('SESSION_TIMEOUT_MINUTES', 15))
+    AUTO_LOGOUT_WARNING_MINUTES = int(os.getenv('AUTO_LOGOUT_WARNING_MINUTES', 2))
+    
+    # Rate limiting settings
+    MAX_LOGIN_ATTEMPTS = int(os.getenv('MAX_LOGIN_ATTEMPTS', 5))
+    LOCKOUT_DURATION_MINUTES = int(os.getenv('LOCKOUT_DURATION_MINUTES', 30))
+    
+    # Notification settings
+    MAX_NOTIFICATION_ATTEMPTS = int(os.getenv('MAX_NOTIFICATION_ATTEMPTS', 3))
+    NOTIFICATION_RETRY_DELAY_SECONDS = int(os.getenv('NOTIFICATION_RETRY_DELAY_SECONDS', 60))
+    
+    # Medical settings
+    MAX_VITAL_SIGNS_PER_REQUEST = int(os.getenv('MAX_VITAL_SIGNS_PER_REQUEST', 10))
+    MAX_PRESCRIPTIONS_PER_REQUEST = int(os.getenv('MAX_PRESCRIPTIONS_PER_REQUEST', 20))
 
 class DevelopmentConfig(Config):
     """Development configuration"""
-    DEBUG = True
+    DEBUG = False
     # For development, use SQLite as fallback (no sensitive credentials)
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///sahatak_dev.db')
     
