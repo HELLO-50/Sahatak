@@ -34,18 +34,24 @@ def validate_password(password: str) -> Dict[str, Union[bool, str]]:
             'message': 'Password is required'
         }
     
+    from utils.settings_manager import get_validation_setting
+    
+    # Get configurable limits (Database > Environment > Default)
+    min_length = get_validation_setting('password_min_length', 6, 'integer')
+    max_length = get_validation_setting('password_max_length', 128, 'integer')
+    
     # Check minimum length
-    if len(password) < 6:
+    if len(password) < min_length:
         return {
             'valid': False,
-            'message': 'Password must be at least 6 characters long'
+            'message': f'Password must be at least {min_length} characters long'
         }
     
     # Check maximum length
-    if len(password) > 128:
+    if len(password) > max_length:
         return {
             'valid': False,
-            'message': 'Password must be less than 128 characters long'
+            'message': f'Password must be less than {max_length} characters long'
         }
     
     # Basic strength check - at least one letter and one number
@@ -63,7 +69,7 @@ def validate_password(password: str) -> Dict[str, Union[bool, str]]:
         'message': 'Password is valid'
     }
 
-def validate_phone(phone: str) -> bool:
+def validate_phone(phone: str) -> Dict[str, Union[bool, str]]:
     """
     Validate phone number format
     Accepts international format with + or local format
@@ -72,27 +78,55 @@ def validate_phone(phone: str) -> bool:
         phone: Phone number string to validate
         
     Returns:
-        bool: True if valid, False otherwise
+        dict: Contains 'valid' (bool) and 'message' (str)
     """
     if not phone or not isinstance(phone, str):
-        return False
+        return {
+            'valid': False,
+            'message': 'Phone number is required'
+        }
+    
+    from flask import current_app
+    
+    # Get configurable limits
+    min_length = getattr(current_app.config, 'PHONE_MIN_LENGTH', 10)
+    max_length = getattr(current_app.config, 'PHONE_MAX_LENGTH', 15)
     
     # Remove all spaces and dashes
     clean_phone = re.sub(r'[\s\-\(\)]', '', phone.strip())
     
+    # Check length
+    if len(clean_phone) < min_length:
+        return {
+            'valid': False,
+            'message': f'Phone number must be at least {min_length} digits'
+        }
+    
+    if len(clean_phone) > max_length:
+        return {
+            'valid': False,
+            'message': f'Phone number must be less than {max_length} digits'
+        }
+    
     # Check for international format (+XXX) or local format
-    # Allow 8-15 digits, optionally starting with +
     pattern = r'^\+?[1-9]\d{7,14}$'
-    return bool(re.match(pattern, clean_phone))
+    if not re.match(pattern, clean_phone):
+        return {
+            'valid': False,
+            'message': 'Invalid phone number format'
+        }
+    
+    return {
+        'valid': True,
+        'message': 'Phone number is valid'
+    }
 
-def validate_full_name(full_name: str, min_length: int = 3, max_length: int = 200) -> Dict[str, Union[bool, str]]:
+def validate_full_name(full_name: str) -> Dict[str, Union[bool, str]]:
     """
     Validate full name field (replaces separate first_name/last_name validation)
     
     Args:
         full_name: Full name string to validate
-        min_length: Minimum length (default: 3)
-        max_length: Maximum length (default: 200)
         
     Returns:
         dict: Contains 'valid' (bool) and 'message' (str)
@@ -102,6 +136,12 @@ def validate_full_name(full_name: str, min_length: int = 3, max_length: int = 20
             'valid': False,
             'message': 'Full name is required'
         }
+    
+    from flask import current_app
+    
+    # Get configurable limits
+    min_length = getattr(current_app.config, 'NAME_MIN_LENGTH', 2)
+    max_length = getattr(current_app.config, 'NAME_MAX_LENGTH', 100)
     
     full_name = full_name.strip()
     
@@ -986,3 +1026,261 @@ def sanitize_input(text: str, max_length: int = None) -> str:
         sanitized = sanitized[:max_length].strip()
     
     return sanitized
+
+
+# ============================================================================
+# STANDARDIZED VALIDATION FUNCTIONS
+# ============================================================================
+
+def validate_pagination_params(page: int = 1, per_page: int = None) -> Dict[str, Union[bool, str, int]]:
+    """
+    Validate pagination parameters with configurable limits
+    
+    Args:
+        page: Page number (1-based)
+        per_page: Items per page
+        
+    Returns:
+        dict: Contains validation result and validated values
+    """
+    from flask import current_app
+    
+    # Get configurable limits
+    default_per_page = getattr(current_app.config, 'POSTS_PER_PAGE', 20)
+    max_per_page = getattr(current_app.config, 'MAX_PAGE_SIZE', 100)
+    
+    # Validate page number
+    if not isinstance(page, int) or page < 1:
+        return {
+            'valid': False,
+            'message': 'Page number must be a positive integer'
+        }
+    
+    # Set default per_page if not provided
+    if per_page is None:
+        per_page = default_per_page
+    
+    # Validate per_page
+    if not isinstance(per_page, int) or per_page < 1:
+        return {
+            'valid': False,
+            'message': 'Items per page must be a positive integer'
+        }
+    
+    if per_page > max_per_page:
+        return {
+            'valid': False,
+            'message': f'Items per page cannot exceed {max_per_page}'
+        }
+    
+    return {
+        'valid': True,
+        'message': 'Pagination parameters are valid',
+        'page': page,
+        'per_page': per_page
+    }
+
+
+def validate_json_payload(data: dict, required_fields: list = None, optional_fields: list = None) -> Dict[str, Union[bool, str]]:
+    """
+    Validate JSON payload structure and required fields
+    
+    Args:
+        data: JSON data to validate
+        required_fields: List of required field names
+        optional_fields: List of optional field names
+        
+    Returns:
+        dict: Contains validation result
+    """
+    if not isinstance(data, dict):
+        return {
+            'valid': False,
+            'message': 'Invalid JSON payload'
+        }
+    
+    if not data:
+        return {
+            'valid': False,
+            'message': 'Empty payload'
+        }
+    
+    # Check required fields
+    if required_fields:
+        missing_fields = []
+        for field in required_fields:
+            if field not in data or data.get(field) is None or (isinstance(data.get(field), str) and not data.get(field).strip()):
+                missing_fields.append(field)
+        
+        if missing_fields:
+            return {
+                'valid': False,
+                'message': f'Missing required fields: {", ".join(missing_fields)}',
+                'missing_fields': missing_fields
+            }
+    
+    # Check for unexpected fields if optional_fields is specified
+    if optional_fields is not None:
+        allowed_fields = set((required_fields or []) + optional_fields)
+        unexpected_fields = set(data.keys()) - allowed_fields
+        if unexpected_fields:
+            return {
+                'valid': False,
+                'message': f'Unexpected fields: {", ".join(unexpected_fields)}',
+                'unexpected_fields': list(unexpected_fields)
+            }
+    
+    return {
+        'valid': True,
+        'message': 'Payload is valid'
+    }
+
+
+def validate_id_parameter(id_value: Union[str, int], param_name: str = 'id') -> Dict[str, Union[bool, str, int]]:
+    """
+    Validate ID parameter (must be positive integer)
+    
+    Args:
+        id_value: ID value to validate
+        param_name: Name of the parameter for error messages
+        
+    Returns:
+        dict: Contains validation result and validated ID
+    """
+    try:
+        id_int = int(id_value)
+        if id_int <= 0:
+            return {
+                'valid': False,
+                'message': f'{param_name} must be a positive integer'
+            }
+        
+        return {
+            'valid': True,
+            'message': f'{param_name} is valid',
+            'id': id_int
+        }
+    except (ValueError, TypeError):
+        return {
+            'valid': False,
+            'message': f'{param_name} must be a valid integer'
+        }
+
+
+def validate_enum_field(value: str, allowed_values: list, field_name: str) -> Dict[str, Union[bool, str]]:
+    """
+    Validate enum/choice field against allowed values
+    
+    Args:
+        value: Value to validate
+        allowed_values: List of allowed values
+        field_name: Name of the field for error messages
+        
+    Returns:
+        dict: Contains validation result
+    """
+    if not value:
+        return {
+            'valid': False,
+            'message': f'{field_name} is required'
+        }
+    
+    if value not in allowed_values:
+        return {
+            'valid': False,
+            'message': f'{field_name} must be one of: {", ".join(allowed_values)}'
+        }
+    
+    return {
+        'valid': True,
+        'message': f'{field_name} is valid'
+    }
+
+
+def validate_date_range(start_date: str, end_date: str) -> Dict[str, Union[bool, str]]:
+    """
+    Validate date range (start_date must be before end_date)
+    
+    Args:
+        start_date: Start date in ISO format
+        end_date: End date in ISO format
+        
+    Returns:
+        dict: Contains validation result
+    """
+    from datetime import datetime
+    
+    try:
+        start = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
+        end = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
+        
+        if start >= end:
+            return {
+                'valid': False,
+                'message': 'Start date must be before end date'
+            }
+        
+        return {
+            'valid': True,
+            'message': 'Date range is valid'
+        }
+    except ValueError as e:
+        return {
+            'valid': False,
+            'message': f'Invalid date format: {str(e)}'
+        }
+
+
+# ============================================================================
+# STANDARDIZED ERROR HANDLING DECORATOR
+# ============================================================================
+
+from functools import wraps
+from flask import request
+from utils.responses import APIResponse
+from utils.logging_config import app_logger
+
+def handle_api_errors(f):
+    """
+    Decorator to provide standardized error handling for API endpoints
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except ValueError as e:
+            app_logger.warning(f"Validation error in {f.__name__}: {str(e)}")
+            return APIResponse.validation_error(message=str(e))
+        except KeyError as e:
+            app_logger.warning(f"Missing required field in {f.__name__}: {str(e)}")
+            return APIResponse.validation_error(message=f'Missing required field: {str(e)}')
+        except Exception as e:
+            app_logger.error(f"Unexpected error in {f.__name__}: {str(e)}")
+            return APIResponse.internal_error(message='An unexpected error occurred')
+    
+    return decorated_function
+
+
+def validate_request_data(required_fields: list = None, optional_fields: list = None):
+    """
+    Decorator to validate request JSON data
+    """
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            data = request.get_json()
+            
+            # Validate payload structure
+            validation = validate_json_payload(data, required_fields, optional_fields)
+            if not validation['valid']:
+                return APIResponse.validation_error(
+                    message=validation['message'],
+                    field=validation.get('missing_fields', validation.get('unexpected_fields'))
+                )
+            
+            # Add validated data to kwargs
+            kwargs['validated_data'] = data
+            return f(*args, **kwargs)
+        
+        return decorated_function
+    return decorator

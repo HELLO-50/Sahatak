@@ -37,15 +37,8 @@ if os.path.exists(env_path):
 try:
     from app import app as application
     
-    # Log successful import
-    print(f"Successfully imported Flask app from {project_home}")
-    
 except ImportError as import_error:
     error_message = str(import_error)
-    print(f"Error importing Flask app: {error_message}")
-    print(f"Python path: {sys.path}")
-    print(f"Current working directory: {os.getcwd()}")
-    print(f"Project home contents: {os.listdir(project_home) if os.path.exists(project_home) else 'Directory not found'}")
     
     # Create a simple error application
     def application(environ, start_response):
@@ -53,10 +46,3 @@ except ImportError as import_error:
         headers = [('Content-type', 'text/plain')]
         start_response(status, headers)
         return [f"Import Error: {error_message}".encode('utf-8')]
-
-# For debugging - remove in production
-if __name__ == '__main__':
-    print("WSGI configuration loaded successfully")
-    print(f"Project home: {project_home}")
-    print(f"Python version: {sys.version}")
-    print(f"Flask app: {application}")

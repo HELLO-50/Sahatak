@@ -12,22 +12,99 @@ Colors:
 - Light: #f1f5f9 (Light gray)
 */
 
-/* Admin Theme - Deep blue professional colors */
+/* ============================================================================
+   PROFESSIONAL ADMIN DASHBOARD - Premium Dark Theme
+   ============================================================================ */
 :root {
-    /* Admin Deep Blue Theme Colors */
-    --admin-primary: #2563eb;     /* Deep Blue */
-    --admin-secondary: #334155;   /* Slate */
-    --admin-accent: #2563eb;      /* Deep Blue */
-    --admin-dark: #1d4ed8;        /* Darker Blue */
-    --admin-light: #f1f5f9;       /* Light gray */
+    /* Professional Dark Theme - Inspired by Premium Admin Templates */
+    --admin-primary: #2563eb;         /* Medical Blue */
+    --admin-primary-rgb: 37, 99, 235;
+    --admin-primary-light: #3b82f6;   /* Light Medical Blue */
+    --admin-primary-dark: #1d4ed8;    /* Dark Medical Blue */
     
-    /* Medical Theme Colors - Blue variants for admin */
-    --medical-blue: #2563eb;      /* Deep blue */
-    --medical-green: #047857;     /* Darker green */
-    --medical-teal: #0e7490;      /* Darker teal */
-    --medical-accent: #3b82f6;    /* Blue accent instead of red */
+    /* Secondary Colors */
+    --admin-secondary: #06b6d4;       /* Cyan */
+    --admin-secondary-rgb: 6, 182, 212;
+    --admin-accent: #f59e0b;          /* Amber */
+    --admin-accent-rgb: 245, 158, 11;
     
-    /* Admin specific colors */
+    /* Status Colors */
+    --admin-success: #10b981;         /* Emerald */
+    --admin-success-rgb: 16, 185, 129;
+    --admin-warning: #f59e0b;         /* Amber */
+    --admin-warning-rgb: 245, 158, 11;
+    --admin-error: #ef4444;           /* Red */
+    --admin-error-rgb: 239, 68, 68;
+    --admin-info: #3b82f6;            /* Blue */
+    --admin-info-rgb: 59, 130, 246;
+    
+    /* Dark Theme Background System */
+    --admin-bg-primary: #0f172a;      /* Deep Navy */
+    --admin-bg-secondary: #1e293b;    /* Slate 800 */
+    --admin-bg-tertiary: #334155;     /* Slate 700 */
+    --admin-bg-card: #1e293b;         /* Card Background */
+    --admin-bg-elevated: #334155;     /* Elevated Elements */
+    --admin-bg-overlay: rgba(15, 23, 42, 0.9);
+    
+    /* Text Colors - High Contrast */
+    --admin-text-primary: #f1f5f9;    /* Slate 100 */
+    --admin-text-secondary: #cbd5e1;  /* Slate 300 */
+    --admin-text-muted: #94a3b8;      /* Slate 400 */
+    --admin-text-disabled: #64748b;   /* Slate 500 */
+    --admin-text-inverse: #1e293b;    /* Dark text on light */
+    
+    /* Border Colors */
+    --admin-border-primary: #334155;  /* Slate 700 */
+    --admin-border-secondary: #475569; /* Slate 600 */
+    --admin-border-accent: rgba(37, 99, 235, 0.3);
+    
+    /* Professional Gradients */
+    --admin-gradient-primary: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+    --admin-gradient-secondary: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+    --admin-gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    --admin-gradient-card: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+    --admin-gradient-overlay: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+    
+    /* Advanced Shadows */
+    --admin-shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+    --admin-shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.5), 0 1px 2px -1px rgba(0, 0, 0, 0.5);
+    --admin-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.5);
+    --admin-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.5);
+    --admin-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+    --admin-shadow-glow: 0 0 0 1px rgba(37, 99, 235, 0.3), 0 0 20px rgba(37, 99, 235, 0.2);
+    
+    /* Professional Spacing */
+    --admin-space-xs: 0.25rem;   /* 4px */
+    --admin-space-sm: 0.5rem;    /* 8px */
+    --admin-space-md: 1rem;      /* 16px */
+    --admin-space-lg: 1.5rem;    /* 24px */
+    --admin-space-xl: 2rem;      /* 32px */
+    --admin-space-2xl: 3rem;     /* 48px */
+    --admin-space-3xl: 4rem;     /* 64px */
+    
+    /* Border Radius - Modern Rounded */
+    --admin-radius-sm: 0.375rem;    /* 6px */
+    --admin-radius-md: 0.5rem;      /* 8px */
+    --admin-radius-lg: 0.75rem;     /* 12px */
+    --admin-radius-xl: 1rem;        /* 16px */
+    --admin-radius-2xl: 1.5rem;     /* 24px */
+    --admin-radius-full: 9999px;
+    
+    /* Typography - Modern Scale */
+    --admin-text-xs: 0.75rem;      /* 12px */
+    --admin-text-sm: 0.875rem;     /* 14px */
+    --admin-text-base: 1rem;       /* 16px */
+    --admin-text-lg: 1.125rem;     /* 18px */
+    --admin-text-xl: 1.25rem;      /* 20px */
+    --admin-text-2xl: 1.5rem;      /* 24px */
+    --admin-text-3xl: 1.875rem;    /* 30px */
+    --admin-text-4xl: 2.25rem;     /* 36px */
+    
+    /* Professional Animations */
+    --admin-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --admin-transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --admin-transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+    --admin-transition-bounce: 350ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 /* RTL Layout Fixes - Swap the first and third columns */
@@ -176,30 +253,105 @@ Colors:
     direction: rtl;
 }
 
-/* Admin Navigation Deep Blue Theme */
-.btn-admin-nav {
-    background-color: transparent;
-    border: 2px solid var(--admin-primary);
-    color: var(--admin-primary);
-    border-radius: 10px;
-    padding: 12px 20px;
-    margin: 0 5px;
-    transition: all 0.3s ease;
-    font-weight: 500;
+/* ============================================================================
+   PREMIUM ADMIN NAVIGATION - Professional Dark Design
+   ============================================================================ */
+
+/* Premium Navigation Container */
+.admin-navigation {
+    background: var(--admin-gradient-card);
+    border: 1px solid var(--admin-border-primary);
+    border-radius: var(--admin-radius-2xl);
+    padding: var(--admin-space-lg);
+    box-shadow: var(--admin-shadow-lg);
+    margin-bottom: var(--admin-space-2xl);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--admin-space-sm);
+    position: relative;
+    overflow: hidden;
+    justify-content: center;
 }
 
-.btn-admin-nav:hover {
-    background-color: var(--admin-accent);
-    border-color: var(--admin-accent);
-    color: white;
+/* Navigation backdrop */
+.admin-navigation::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--admin-gradient-overlay);
+    opacity: 0.5;
+    z-index: 0;
+}
+
+/* Professional Navigation Buttons */
+.btn-admin-nav {
+    background: rgba(51, 65, 85, 0.8);
+    border: 1px solid var(--admin-border-primary);
+    color: var(--admin-text-secondary);
+    border-radius: var(--admin-radius-xl);
+    padding: var(--admin-space-sm) var(--admin-space-lg);
+    font-weight: 600;
+    font-size: var(--admin-text-sm);
+    line-height: 1.4;
+    transition: all var(--admin-transition-base);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--admin-space-sm);
+    text-decoration: none;
+    position: relative;
+    white-space: nowrap;
+    z-index: 1;
+    backdrop-filter: blur(10px);
+}
+
+/* Premium hover effect with glow */
+.btn-admin-nav:hover:not(.active) {
+    background: rgba(37, 99, 235, 0.2);
+    border-color: var(--admin-primary);
+    color: var(--admin-primary);
+    box-shadow: 
+        var(--admin-shadow-md),
+        0 0 20px rgba(37, 99, 235, 0.3);
+    text-decoration: none;
     transform: translateY(-2px);
 }
 
+/* Professional active state */
 .btn-admin-nav.active {
-    background-color: var(--admin-primary);
-    border-color: var(--admin-primary);
-    color: white;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    background: var(--admin-gradient-primary);
+    border-color: var(--admin-primary-light);
+    color: var(--admin-text-primary);
+    box-shadow: 
+        var(--admin-shadow-lg),
+        var(--admin-shadow-glow);
+    font-weight: 700;
+    transform: translateY(-1px);
+}
+
+/* Icon styling */
+.btn-admin-nav i {
+    font-size: var(--admin-text-base);
+    opacity: 0.9;
+    transition: var(--admin-transition-fast);
+}
+
+.btn-admin-nav:hover i,
+.btn-admin-nav.active i {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* Icons in navigation */
+.btn-admin-nav i {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+.btn-admin-nav.active i {
+    opacity: 1;
 }
 
 /* Button styling for deep blue theme */
@@ -264,21 +416,108 @@ Colors:
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Admin Layout - Always LTR (English only) */
+/* ============================================================================
+   PROFESSIONAL DARK ADMIN LAYOUT - Premium Design
+   ============================================================================ */
+
+/* Main Dark Container */
 .dashboard-container {
     direction: ltr !important;
     text-align: left !important;
-    background: var(--admin-bg) !important;
+    background: var(--admin-bg-primary) !important;
     min-height: 100vh;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    line-height: 1.6;
+    color: var(--admin-text-primary);
+    padding: var(--admin-space-lg);
+    position: relative;
 }
 
-/* Admin Header Layout - Deep Blue Theme */
+/* Subtle background pattern */
+.dashboard-container::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(37, 99, 235, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Premium Admin Header */
 .dashboard-header {
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
-    border: 1px solid rgba(37, 99, 235, 0.1);
-    border-radius: 15px;
-    padding: 20px;
-    margin-bottom: 30px;
+    background: var(--admin-gradient-card);
+    border: 1px solid var(--admin-border-primary);
+    border-radius: var(--admin-radius-2xl);
+    padding: var(--admin-space-xl);
+    margin-bottom: var(--admin-space-2xl);
+    box-shadow: var(--admin-shadow-lg);
+    position: relative;
+    overflow: hidden;
+    transition: var(--admin-transition-base);
+}
+
+/* Premium gradient border */
+.dashboard-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--admin-gradient-primary);
+    border-radius: var(--admin-radius-2xl) var(--admin-radius-2xl) 0 0;
+}
+
+/* Subtle glow on hover */
+.dashboard-header::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: var(--admin-gradient-primary);
+    border-radius: var(--admin-radius-2xl);
+    opacity: 0;
+    z-index: -1;
+    transition: var(--admin-transition-base);
+}
+
+.dashboard-header:hover::after {
+    opacity: 0.1;
+}
+
+.dashboard-header:hover {
+    box-shadow: var(--admin-shadow-xl);
+    transform: translateY(-2px);
+}
+
+/* Professional Typography */
+.dashboard-title {
+    color: var(--admin-text-primary) !important;
+    font-weight: 800;
+    font-size: var(--admin-text-3xl);
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+    margin-bottom: var(--admin-space-xs);
+    background: var(--admin-gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.dashboard-subtitle {
+    color: var(--admin-text-secondary);
+    font-size: var(--admin-text-base);
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: 0.01em;
 }
 
 .profile-section {
@@ -325,15 +564,15 @@ Colors:
 }
 
 .btn-action.btn-logout {
-    border-color: #6366f1;
-    color: #6366f1;
-    background: rgba(99, 102, 241, 0.1);
+    border-color: #2563eb;
+    color: #2563eb;
+    background: rgba(37, 99, 235, 0.1);
 }
 
 .btn-action.btn-logout:hover {
-    background-color: #6366f1;
+    background-color: #2563eb;
     color: white;
-    border-color: #6366f1;
+    border-color: #2563eb;
 }
 
 /* Horizontal Admin Navigation - Dark Theme */
@@ -443,23 +682,144 @@ Colors:
     }
 }
 
-/* Admin Cards and Content - Dark Theme */
+/* ============================================================================
+   PROFESSIONAL DASHBOARD CARDS SYSTEM
+   ============================================================================ */
+
+/* Base Dashboard Card - Dark Theme */
 .dashboard-card {
-    background: var(--admin-card-bg) !important;
-    border: 1px solid rgba(37, 99, 235, 0.3) !important;
-    color: var(--admin-text) !important;
+    background: var(--admin-gradient-card) !important;
+    border: 1px solid var(--admin-border-primary) !important;
+    border-radius: var(--admin-radius-xl) !important;
+    padding: var(--admin-space-xl) !important;
+    box-shadow: var(--admin-shadow-lg) !important;
+    color: var(--admin-text-primary) !important;
+    transition: all var(--admin-transition-base) !important;
+    position: relative !important;
 }
 
+.dashboard-card:hover {
+    box-shadow: var(--admin-shadow-xl) !important;
+    transform: translateY(-2px) !important;
+    border-color: var(--admin-border-secondary) !important;
+}
+
+/* Card Headers - Light Text */
+.dashboard-card h5 {
+    color: var(--admin-text-primary) !important;
+    font-weight: 700 !important;
+    font-size: var(--admin-text-xl) !important;
+    line-height: 1.3 !important;
+    margin-bottom: var(--admin-space-lg) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--admin-space-sm) !important;
+}
+
+/* All card text should be light */
+.dashboard-card p,
+.dashboard-card span,
+.dashboard-card div,
+.dashboard-card label {
+    color: var(--admin-text-primary) !important;
+}
+
+.dashboard-card .text-muted {
+    color: var(--admin-text-secondary) !important;
+}
+
+/* Enhanced Stat Cards - Dark Theme */
+.admin-stat-card {
+    background: var(--admin-gradient-card);
+    border: 1px solid var(--admin-border-primary);
+    border-radius: var(--admin-radius-xl);
+    padding: var(--admin-space-xl);
+    text-align: center;
+    transition: all var(--admin-transition-base);
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--admin-shadow-lg);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 140px;
+}
+
+/* Gradient top border accent */
+.admin-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--admin-gradient-primary);
+}
+
+/* Different colored accents for variety */
+.admin-stat-card:nth-child(2)::before {
+    background: var(--admin-gradient-secondary);
+}
+
+.admin-stat-card:nth-child(3)::before {
+    background: var(--admin-gradient-success);
+}
+
+.admin-stat-card:nth-child(4)::before {
+    background: linear-gradient(135deg, var(--admin-info) 0%, var(--admin-accent) 100%);
+}
+
+.admin-stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--admin-shadow-xl);
+    border-color: var(--admin-border-secondary);
+}
+
+/* Stat Numbers - Medical Blue Bold */
 .stat-number {
-    color: var(--admin-accent) !important;
+    color: var(--admin-primary) !important;
+    font-size: var(--admin-text-4xl) !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    margin-bottom: var(--admin-space-sm) !important;
+    letter-spacing: -0.025em !important;
 }
 
+/* All stat numbers use medical blue */
+.admin-stat-card .stat-number {
+    color: var(--admin-primary) !important;
+}
+
+/* Stat Labels - Light Text */
 .stat-label {
-    color: var(--admin-text-muted) !important;
+    color: var(--admin-text-secondary) !important;
+    font-weight: 600 !important;
+    font-size: var(--admin-text-sm) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.1em !important;
+    line-height: 1.4 !important;
 }
 
+/* Stat Icons - Colored */
 .stat-icon {
-    color: var(--admin-accent) !important;
+    color: var(--admin-primary) !important;
+    font-size: var(--admin-text-2xl) !important;
+    margin-bottom: var(--admin-space-md) !important;
+    opacity: 0.9 !important;
+}
+
+/* Icon color variations */
+.admin-stat-card:nth-child(2) .stat-icon {
+    color: var(--admin-secondary) !important;
+}
+
+.admin-stat-card:nth-child(3) .stat-icon {
+    color: var(--admin-success) !important;
+}
+
+.admin-stat-card:nth-child(4) .stat-icon {
+    color: var(--admin-info) !important;
 }
 
 /* Admin specific colors continued */
@@ -583,8 +943,7 @@ Colors:
 }
 
 .admin-stat-card .stat-number {
-    color: var(--admin-text);
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    color: var(--admin-primary) !important;
 }
 
 .admin-stat-card .stat-label {
@@ -1411,4 +1770,953 @@ Colors:
     .btn {
         display: none !important;
     }
+}
+
+/* ============================================================================
+   MODERN ADMIN SYSTEM SETTINGS - Complete Overhaul
+   ============================================================================ */
+
+/* Admin Section Container */
+.admin-section {
+    background: var(--admin-bg-primary);
+    padding: 24px;
+    border-radius: 0;
+    margin-bottom: 32px;
+    min-height: calc(100vh - 200px);
+}
+
+.admin-section.active {
+    display: block;
+    animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+   
+/* ============================================================================
+   MODERN SYSTEM SETTINGS - Complete Redesign
+   ============================================================================ */
+
+/* Settings Navigation */
+#settingsTabs {
+    border-bottom: 1px solid var(--admin-border-subtle);
+    margin-bottom: var(--admin-space-xl);
+    background: var(--admin-bg-card);
+    border-radius: var(--admin-radius-xl) var(--admin-radius-xl) 0 0;
+    overflow: hidden;
+    box-shadow: var(--admin-elevation-1);
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#settingsTabs .nav-link {
+    color: var(--admin-text-secondary) !important;
+    border: none !important;
+    background: transparent !important;
+    padding: var(--admin-space-lg) var(--admin-space-xl) !important;
+    margin: 0 !important;
+    font-weight: 500 !important;
+    font-size: var(--admin-text-sm) !important;
+    transition: all var(--admin-transition-fast) !important;
+    border-radius: 0 !important;
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--admin-space-xs) !important;
+    border-bottom: 3px solid transparent !important;
+    flex: 1 !important;
+    text-align: center !important;
+    justify-content: center !important;
+    min-width: 120px !important;
+}
+
+/* Underline indicator */
+#settingsTabs .nav-link::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 3px;
+    background: var(--admin-primary);
+    transition: all var(--admin-transition-base);
+    transform: translateX(-50%);
+}
+
+/* Hover State - Fixed */
+#settingsTabs .nav-link:hover:not(.active) {
+    color: var(--admin-primary) !important;
+    background: rgba(37, 99, 235, 0.05) !important;
+}
+
+#settingsTabs .nav-link:hover:not(.active)::before {
+    width: 40%;
+}
+
+/* Active State */
+#settingsTabs .nav-link.active {
+    color: var(--admin-primary) !important;
+    background: var(--admin-bg-section) !important;
+    font-weight: 600 !important;
+}
+
+#settingsTabs .nav-link.active::before {
+    width: 100%;
+}
+
+/* Tab Icons */
+#settingsTabs .nav-link i {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+#settingsTabs .nav-link.active i {
+    opacity: 1;
+}
+
+/* Settings Content Area - Dark Theme */
+.tab-content {
+    background: var(--admin-gradient-card);
+    border-radius: 0 0 var(--admin-radius-2xl) var(--admin-radius-2xl);
+    box-shadow: var(--admin-shadow-lg);
+    padding: var(--admin-space-xl);
+    min-height: 400px;
+    color: var(--admin-text-primary);
+}
+
+/* Settings Cards - Dark Theme */
+.tab-content .card {
+    border: 1px solid var(--admin-border-primary) !important;
+    border-radius: var(--admin-radius-xl) !important;
+    box-shadow: var(--admin-shadow-lg) !important;
+    transition: all var(--admin-transition-base) !important;
+    background: var(--admin-gradient-card) !important;
+    margin-bottom: var(--admin-space-xl) !important;
+    overflow: hidden !important;
+    color: var(--admin-text-primary) !important;
+}
+
+.tab-content .card:hover {
+    box-shadow: var(--admin-shadow-xl) !important;
+    border-color: var(--admin-border-secondary) !important;
+}
+
+/* Card Headers - Dark Theme */
+.tab-content .card-header {
+    background: var(--admin-bg-tertiary) !important;
+    border-bottom: 1px solid var(--admin-border-primary) !important;
+    padding: var(--admin-space-lg) var(--admin-space-xl) !important;
+    border-radius: var(--admin-radius-xl) var(--admin-radius-xl) 0 0 !important;
+    position: relative !important;
+}
+
+/* Gradient accent line */
+.tab-content .card-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--admin-gradient-primary);
+}
+
+.tab-content .card-header h6 {
+    color: var(--admin-text-primary) !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+    font-size: var(--admin-text-lg) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--admin-space-sm) !important;
+    line-height: 1.3 !important;
+}
+
+.tab-content .card-header i {
+    color: var(--admin-primary) !important;
+    font-size: var(--admin-text-lg) !important;
+    opacity: 0.9 !important;
+}
+
+/* Card Bodies - Dark Theme */
+.tab-content .card-body {
+    padding: var(--admin-space-xl) !important;
+    background: var(--admin-gradient-card) !important;
+    border-radius: 0 0 var(--admin-radius-xl) var(--admin-radius-xl) !important;
+    color: var(--admin-text-primary) !important;
+}
+
+/* ============================================================================
+   MODERN FORM SYSTEM - Professional Controls
+   ============================================================================ */
+
+/* Form Labels */
+.tab-content .form-label {
+    color: var(--admin-text-primary) !important;
+    font-weight: 500 !important;
+    margin-bottom: var(--admin-space-xs) !important;
+    font-size: var(--admin-text-sm) !important;
+    display: block !important;
+    line-height: 1.4 !important;
+}
+
+/* Text Inputs */
+.tab-content .form-control {
+    border: 1px solid var(--admin-border-default) !important;
+    border-radius: var(--admin-radius-md) !important;
+    padding: var(--admin-space-sm) var(--admin-space-md) !important;
+    font-size: var(--admin-text-base) !important;
+    font-weight: 400 !important;
+    line-height: 1.5 !important;
+    transition: all var(--admin-transition-fast) !important;
+    background: var(--admin-bg-card) !important;
+    color: var(--admin-text-primary) !important;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05) !important;
+    width: 100% !important;
+}
+
+.tab-content .form-control::placeholder {
+    color: var(--admin-text-placeholder) !important;
+    opacity: 1 !important;
+}
+
+.tab-content .form-control:focus {
+    border-color: var(--admin-primary) !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1), inset 0 1px 2px rgba(0,0,0,0.05) !important;
+    background: var(--admin-bg-card) !important;
+    color: var(--admin-text-primary) !important;
+    outline: none !important;
+}
+
+.tab-content .form-control:hover:not(:focus) {
+    border-color: var(--admin-primary) !important;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05) !important;
+}
+
+/* Select Dropdowns */
+.tab-content .form-select {
+    border: 1px solid var(--admin-border-default) !important;
+    border-radius: var(--admin-radius-md) !important;
+    padding: var(--admin-space-sm) var(--admin-space-md) !important;
+    font-size: var(--admin-text-base) !important;
+    font-weight: 400 !important;
+    background: var(--admin-bg-card) !important;
+    color: var(--admin-text-primary) !important;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05) !important;
+    transition: all var(--admin-transition-fast) !important;
+    cursor: pointer !important;
+}
+
+.tab-content .form-select:focus {
+    border-color: var(--admin-primary) !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1), inset 0 1px 2px rgba(0,0,0,0.05) !important;
+    color: var(--admin-text-primary) !important;
+    outline: none !important;
+}
+
+.tab-content .form-select:hover:not(:focus) {
+    border-color: var(--admin-primary) !important;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05) !important;
+}
+
+/* Toggle Switches */
+.tab-content .form-check-input[type="checkbox"] {
+    width: 2.5rem !important;
+    height: 1.25rem !important;
+    border: 1px solid var(--admin-border-default) !important;
+    background: var(--admin-bg-section) !important;
+    transition: all var(--admin-transition-fast) !important;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05) !important;
+    cursor: pointer !important;
+    border-radius: var(--admin-radius-full) !important;
+}
+
+.tab-content .form-check-input[type="checkbox"]:checked {
+    background: var(--admin-secondary) !important;
+    border-color: var(--admin-secondary) !important;
+    box-shadow: 0 2px 4px rgba(0, 105, 92, 0.25) !important;
+}
+
+.tab-content .form-check-input[type="checkbox"]:focus {
+    border-color: var(--admin-primary) !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+}
+
+.tab-content .form-check-input[type="checkbox"]:hover:not(:checked):not(:focus) {
+    background: var(--admin-gray-200) !important;
+    border-color: var(--admin-primary) !important;
+}
+
+/* Switch Labels */
+.tab-content .form-check-label {
+    color: var(--admin-text-primary) !important;
+    font-weight: 500 !important;
+    margin-left: var(--admin-space-sm) !important;
+    cursor: pointer !important;
+    font-size: var(--admin-text-base) !important;
+    line-height: 1.4 !important;
+}
+
+/* Form Text/Help */
+.tab-content .form-text {
+    color: var(--admin-text-muted) !important;
+    font-size: var(--admin-text-xs) !important;
+    margin-top: var(--admin-space-xs) !important;
+    font-weight: 400 !important;
+    line-height: 1.4 !important;
+}
+
+/* Modern Helper Text */
+.tab-content .form-text {
+    color: var(--admin-text-secondary) !important;
+    font-size: 0.8rem !important;
+    margin-top: 6px !important;
+    font-weight: 400 !important;
+    font-style: italic !important;
+}
+
+/* Modern Alert Styling */
+.tab-content .alert {
+    border-radius: 8px !important;
+    border: 1px solid !important;
+    box-shadow: var(--admin-shadow-sm) !important;
+    padding: 16px 20px !important;
+    margin: 20px 0 !important;
+}
+
+.tab-content .alert-warning {
+    background: rgba(245, 158, 11, 0.1) !important;
+    color: var(--admin-warning) !important;
+    border-color: var(--admin-warning) !important;
+    font-weight: 500 !important;
+}
+
+.tab-content .alert-info {
+    background: rgba(14, 165, 233, 0.1) !important;
+    color: var(--admin-info) !important;
+    border-color: var(--admin-info) !important;
+}
+
+/* ============================================================================
+   PROFESSIONAL BUTTON SYSTEM
+   ============================================================================ */
+
+/* Primary Success Button */
+.dashboard-card .btn-success,
+.tab-content .btn-success {
+    background: var(--admin-secondary) !important;
+    border: 1px solid var(--admin-secondary) !important;
+    border-radius: var(--admin-radius-md) !important;
+    padding: var(--admin-space-sm) var(--admin-space-xl) !important;
+    font-weight: 600 !important;
+    font-size: var(--admin-text-sm) !important;
+    box-shadow: var(--admin-elevation-1) !important;
+    transition: all var(--admin-transition-fast) !important;
+    color: var(--admin-text-white) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: var(--admin-space-xs) !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+}
+
+.dashboard-card .btn-success:hover,
+.tab-content .btn-success:hover {
+    background: #004d40 !important;
+    border-color: #004d40 !important;
+    box-shadow: var(--admin-elevation-2) !important;
+    color: var(--admin-text-white) !important;
+}
+
+/* Primary Button */
+.btn-primary,
+.dashboard-card .btn-primary,
+.tab-content .btn-primary {
+    background: var(--admin-primary) !important;
+    border: 1px solid var(--admin-primary) !important;
+    border-radius: var(--admin-radius-md) !important;
+    padding: var(--admin-space-sm) var(--admin-space-xl) !important;
+    font-weight: 600 !important;
+    font-size: var(--admin-text-sm) !important;
+    color: var(--admin-text-white) !important;
+    box-shadow: var(--admin-elevation-1) !important;
+    transition: all var(--admin-transition-fast) !important;
+}
+
+.btn-primary:hover,
+.dashboard-card .btn-primary:hover,
+.tab-content .btn-primary:hover {
+    background: var(--admin-primary-dark) !important;
+    border-color: var(--admin-primary-dark) !important;
+    box-shadow: var(--admin-elevation-2) !important;
+    color: var(--admin-text-white) !important;
+}
+
+/* Secondary/Outline Button */
+.btn-outline-primary {
+    background: transparent !important;
+    border: 1px solid var(--admin-primary) !important;
+    color: var(--admin-primary) !important;
+    border-radius: var(--admin-radius-md) !important;
+    padding: var(--admin-space-sm) var(--admin-space-xl) !important;
+    font-weight: 500 !important;
+    transition: all var(--admin-transition-fast) !important;
+}
+
+.btn-outline-primary:hover {
+    background: var(--admin-primary) !important;
+    color: var(--admin-text-white) !important;
+    box-shadow: var(--admin-elevation-1) !important;
+}
+
+/* Danger Button */
+.btn-danger,
+.dashboard-card .btn-danger,
+.tab-content .btn-danger {
+    background: var(--admin-error) !important;
+    border: 1px solid var(--admin-error) !important;
+    color: var(--admin-text-white) !important;
+    border-radius: var(--admin-radius-md) !important;
+    padding: var(--admin-space-sm) var(--admin-space-xl) !important;
+    font-weight: 600 !important;
+    font-size: var(--admin-text-sm) !important;
+    transition: all var(--admin-transition-fast) !important;
+}
+
+.btn-danger:hover {
+    background: #B71C1C !important;
+    border-color: #B71C1C !important;
+    box-shadow: var(--admin-elevation-2) !important;
+    color: var(--admin-text-white) !important;
+}
+
+/* Section Title Enhancement */
+.dashboard-card h5 {
+    color: #0f172a !important;
+    font-weight: 800;
+    font-size: 1.5rem;
+    text-shadow: none;
+}
+
+/* Icon Colors - Medical Professional */
+.tab-content .card-header i,
+.dashboard-card h5 i,
+#settingsTabs .nav-link i {
+    color: #1e40af !important;
+}
+
+#settingsTabs .nav-link.active i {
+    color: #ffffff !important;
+}
+
+/* Input Focus States */
+.tab-content input[type="number"]:focus,
+.tab-content input[type="text"]:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+    color: #1e293b !important;
+}
+
+/* Responsive Improvements */
+@media (max-width: 768px) {
+    .admin-section {
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+    
+    #settingsTabs .nav-link {
+        font-size: 0.9rem;
+        padding: 10px 14px;
+        margin-right: 4px;
+    }
+    
+    .tab-content .card-body {
+        padding: 20px;
+    }
+    
+    .tab-content .form-control,
+    .tab-content .form-select {
+        padding: 12px 16px;
+        font-size: 0.95rem;
+    }
+    
+    .dashboard-card .btn-success {
+        padding: 12px 20px;
+        font-size: 1rem;
+    }
+}
+
+/* Loading States */
+.settings-loading {
+    opacity: 0.6;
+    pointer-events: none;
+    position: relative;
+}
+
+.settings-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 24px;
+    height: 24px;
+    margin: -12px 0 0 -12px;
+    border: 3px solid #e2e8f0;
+    border-top: 3px solid #1e40af;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Success/Error States */
+.settings-success {
+    border-color: #059669 !important;
+    box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.15) !important;
+    background: #f0fdf4 !important;
+}
+
+.settings-error {
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.15) !important;
+    background: #fef2f2 !important;
+}
+
+/* Accessibility Enhancements */
+.tab-content .form-control:focus,
+.tab-content .form-select:focus,
+.tab-content .form-check-input:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+}
+
+/* High Contrast for Better Readability */
+.tab-content .card-header h6,
+.tab-content .form-label,
+.tab-content .form-check-label,
+.dashboard-card h5 {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ensure text is always readable */
+.tab-content input::placeholder,
+.tab-content select::placeholder {
+    color: #6b7280 !important;
+    opacity: 0.8;
+}
+
+/* Override any inherited dark backgrounds */
+.admin-section *,
+.dashboard-card *,
+.tab-content * {
+    background-color: inherit;
+}
+
+/* Specific overrides for form elements */
+.tab-content .form-control,
+.tab-content .form-select {
+    background: #ffffff !important;
+    color: #1e293b !important;
+}
+
+.tab-content .form-control:focus,
+.tab-content .form-select:focus {
+    background: #ffffff !important;
+    color: #1e293b !important;
+}
+
+/* Card body text color override */
+.tab-content .card-body {
+    color: #1e293b !important;
+}
+
+/* Medical Professional Color Scheme */
+:root {
+    --medical-primary: #1e40af;      /* Medical Blue */
+    --medical-secondary: #059669;    /* Medical Green */
+    --medical-accent: #0f172a;       /* Dark Text */
+    --medical-bg-light: #f0f9ff;     /* Light Blue Background */
+    --medical-bg-white: #ffffff;     /* Pure White */
+    --medical-border: #cbd5e1;       /* Light Border */
+    --medical-text: #0f172a;         /* Dark Text */
+    --medical-text-secondary: #475569; /* Secondary Text */
+}
+
+/* ============================================================================
+   PROFESSIONAL GAUGE SYSTEM - Completely Redesigned
+   ============================================================================ */
+
+/* Gauge Container - Dark Theme Card */
+.health-gauge {
+    background: var(--admin-gradient-card);
+    border: 1px solid var(--admin-border-primary);
+    border-radius: var(--admin-radius-xl);
+    padding: var(--admin-space-xl);
+    box-shadow: var(--admin-shadow-lg);
+    transition: all var(--admin-transition-base);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.health-gauge::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--admin-gradient-overlay);
+    opacity: 0.3;
+    z-index: 0;
+}
+
+.health-gauge:hover {
+    box-shadow: var(--admin-shadow-xl);
+    transform: translateY(-4px);
+}
+
+.health-gauge > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* Professional Gauge Circle */
+.gauge-circle {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto var(--admin-space-lg);
+}
+
+/* Gauge Background Track */
+.gauge-circle::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: conic-gradient(from 270deg, var(--admin-border-primary) 0deg, var(--admin-border-primary) 360deg);
+    opacity: 0.3;
+}
+
+/* Gauge Progress Ring */
+.gauge-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: conic-gradient(from 270deg, #10b981 0deg, #10b981 270deg, transparent 270deg);
+    transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    mask: radial-gradient(closest-side, transparent 80%, black 80%);
+    -webkit-mask: radial-gradient(closest-side, transparent 80%, black 80%);
+}
+
+/* Default Gauge - Server Uptime (99.7% = 358.9deg) */
+.gauge-fill {
+    background: conic-gradient(from 270deg, #10b981 0deg, #10b981 359deg, transparent 359deg);
+}
+
+/* CPU Gauge - 65% usage (234deg) */
+.gauge-circle.cpu-gauge .gauge-fill {
+    background: conic-gradient(from 270deg, #f59e0b 0deg, #f59e0b 234deg, transparent 234deg);
+}
+
+/* Memory Gauge - 78% usage (281deg) */
+.gauge-circle.memory-gauge .gauge-fill {
+    background: conic-gradient(from 270deg, #2563eb 0deg, #2563eb 281deg, transparent 281deg);
+}
+
+/* Response Time Gauge - 32% (115deg) */
+.gauge-circle.response-gauge .gauge-fill {
+    background: conic-gradient(from 270deg, #06b6d4 0deg, #06b6d4 115deg, transparent 115deg);
+}
+
+/* Inner Circle for Value Display */
+.gauge-cover {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: var(--admin-gradient-card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--admin-border-primary);
+    box-shadow: 
+        var(--admin-shadow-md),
+        inset 0 2px 10px rgba(0,0,0,0.2);
+    backdrop-filter: blur(10px);
+}
+
+/* Gauge Value - Large and Bold */
+.gauge-text {
+    font-size: var(--admin-text-xl) !important;
+    font-weight: 800 !important;
+    color: var(--admin-text-primary) !important;
+    text-align: center;
+    line-height: 1;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* Gauge Label - Professional Typography */
+.gauge-label {
+    margin-top: var(--admin-space-md);
+    font-size: var(--admin-text-sm);
+    color: var(--admin-text-secondary) !important;
+    text-align: center;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    line-height: 1.3;
+}
+
+/* Gauge Status Indicators */
+.gauge-status {
+    margin-top: var(--admin-space-xs);
+    font-size: var(--admin-text-xs);
+    padding: var(--admin-space-xs) var(--admin-space-sm);
+    border-radius: var(--admin-radius-full);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Status Colors */
+.gauge-status.healthy {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.gauge-status.warning {
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.gauge-status.critical {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Gauge Animation on Load */
+@keyframes gaugeLoad {
+    from {
+        background: conic-gradient(from 270deg, transparent 0deg, transparent 360deg);
+    }
+    to {
+        background: conic-gradient(from 270deg, var(--gauge-color, #10b981) 0deg, var(--gauge-color, #10b981) var(--gauge-end, 359deg), transparent var(--gauge-end, 359deg));
+    }
+}
+
+.gauge-fill {
+    animation: gaugeLoad 2s cubic-bezier(0.4, 0, 0.2, 1) 0.5s both;
+}
+
+/* Fix stat card labels for better contrast */
+.stat-label {
+    color: #0f172a !important;
+    font-weight: 600;
+}
+
+/* Fix any remaining gray text on white backgrounds */
+.admin-section .text-muted,
+.dashboard-card .text-muted {
+    color: #475569 !important;
+}
+
+/* Ensure proper contrast for all text elements */
+.admin-section p,
+.admin-section span,
+.dashboard-card p,
+.dashboard-card span {
+    color: #1e293b;
+}
+
+.admin-section .small,
+.dashboard-card .small {
+    color: var(--admin-text-muted) !important;
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN ENHANCEMENTS
+   ============================================================================ */
+
+/* Tablet and Small Desktop */
+@media (max-width: 1024px) {
+    .dashboard-container {
+        padding: var(--admin-space-md);
+    }
+    
+    .dashboard-header {
+        padding: var(--admin-space-lg);
+    }
+    
+    .admin-navigation {
+        padding: var(--admin-space-sm);
+    }
+    
+    .btn-admin-nav {
+        padding: var(--admin-space-xs) var(--admin-space-md);
+        font-size: var(--admin-text-xs);
+    }
+    
+    .admin-stat-card {
+        min-height: 120px;
+        padding: var(--admin-space-lg);
+    }
+    
+    .stat-number {
+        font-size: var(--admin-text-2xl) !important;
+    }
+}
+
+/* Mobile Devices */
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: var(--admin-space-sm);
+    }
+    
+    .dashboard-header {
+        padding: var(--admin-space-md);
+    }
+    
+    .dashboard-title {
+        font-size: var(--admin-text-xl);
+    }
+    
+    /* Mobile Navigation - Stack vertically */
+    .admin-navigation {
+        flex-direction: column;
+        gap: var(--admin-space-xs);
+    }
+    
+    .btn-admin-nav {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* Settings Tabs - Stack on mobile */
+    #settingsTabs {
+        flex-direction: column;
+    }
+    
+    #settingsTabs .nav-link {
+        min-width: auto;
+        flex: none;
+        padding: var(--admin-space-md);
+    }
+    
+    .tab-content {
+        padding: var(--admin-space-md);
+    }
+    
+    .tab-content .card-body {
+        padding: var(--admin-space-md) !important;
+    }
+    
+    /* Form controls - Better mobile UX */
+    .tab-content .form-control,
+    .tab-content .form-select {
+        font-size: var(--admin-text-base);
+        padding: var(--admin-space-md);
+    }
+    
+    /* Responsive Gauges - Mobile */
+    .gauge-circle {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .gauge-cover {
+        top: 12px;
+        left: 12px;
+        width: 76px;
+        height: 76px;
+    }
+    
+    .gauge-text {
+        font-size: var(--admin-text-lg) !important;
+    }
+    
+    .gauge-label {
+        font-size: var(--admin-text-xs);
+    }
+    
+    .health-gauge {
+        padding: var(--admin-space-lg);
+    }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+    .dashboard-header .row {
+        flex-direction: column;
+        text-align: center;
+        gap: var(--admin-space-md);
+    }
+    
+    .admin-stat-card {
+        min-height: 100px;
+        padding: var(--admin-space-md);
+    }
+    
+    .stat-number {
+        font-size: var(--admin-text-xl) !important;
+    }
+    
+    /* Hide some button text on very small screens */
+    .btn-admin-nav span {
+        display: none;
+    }
+    
+    .btn-admin-nav {
+        width: auto;
+        min-width: 44px;
+        padding: var(--admin-space-sm);
+    }
+}
+
+/* High DPI Displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .admin-stat-card,
+    .dashboard-card,
+    .health-gauge {
+        box-shadow: var(--admin-elevation-1);
+    }
+}
+
+/* Dark Mode Support (Future Enhancement) */
+@media (prefers-color-scheme: dark) {
+    /* Uncomment when dark mode is implemented */
+    /*
+    :root {
+        --admin-bg-page: #121212;
+        --admin-bg-card: #1e1e1e;
+        --admin-text-primary: #ffffff;
+        --admin-text-secondary: #b3b3b3;
+    }
+    */
 }

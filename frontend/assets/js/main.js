@@ -1,10 +1,6 @@
 // Sahatak main JavaScript - Language Management & Core Functions
 
-// TEST: Add immediate console log  
-console.log('🟢 main.js loaded successfully');
-if (window.location.pathname.includes('index.html') || window.location.pathname === '/') {
-    console.log('🟢 On main registration page - JavaScript ready for registration');
-}
+// Main.js loaded
 
 // Language Management Object
 const LanguageManager = {
@@ -38,10 +34,6 @@ const LanguageManager = {
                 basePath = 'frontend/locales/';
             }
             
-            console.log('Loading translations from:', basePath);
-            console.log('Current pathname:', pathname);
-            console.log('Is subdirectory:', isInSubdirectory);
-            console.log('Is GitHub Pages:', isGitHubPages);
             
             const [arResponse, enResponse] = await Promise.all([
                 fetch(`${basePath}ar.json`),
@@ -55,15 +47,6 @@ const LanguageManager = {
             this.translations.ar = await arResponse.json();
             this.translations.en = await enResponse.json();
             
-            console.log('Translations loaded successfully:', this.translations);
-            console.log('English translations available:', !!this.translations.en);
-            console.log('Arabic translations available:', !!this.translations.ar);
-            console.log('Arabic records section:', this.translations.ar?.records ? 'EXISTS' : 'MISSING');
-            console.log('English records section:', this.translations.en?.records ? 'EXISTS' : 'MISSING');
-            if (this.translations.ar?.records) {
-                console.log('Arabic records title:', this.translations.ar.records.title);
-            }
-            console.log('Available translation keys:', Object.keys(this.translations));
         } catch (error) {
             console.error('Failed to load translations:', error);
             // Fallback to hardcoded translations if JSON fails
@@ -73,7 +56,6 @@ const LanguageManager = {
     
     // Fallback translations in case JSON loading fails
     loadFallbackTranslations() {
-        console.log('Using fallback translations');
         this.translations = {
             ar: {
                 welcome: { 
@@ -149,7 +131,6 @@ const LanguageManager = {
         localStorage.setItem('sahatak_language', lang);
         document.documentElement.setAttribute('lang', lang);
         document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
-        console.log(`Language set to: ${lang}`);
     },
     
     // Get current language preference
@@ -168,7 +149,6 @@ const LanguageManager = {
         const translations = this.translations[language];
         
         if (!translations) {
-            console.warn(`No translations found for language: ${language}`);
             return key; // Return the key itself as fallback
         }
         
@@ -180,7 +160,6 @@ const LanguageManager = {
             if (value && typeof value === 'object' && k in value) {
                 value = value[k];
             } else {
-                console.warn(`Translation key not found: ${key}`);
                 return key; // Return the key itself as fallback
             }
         }
@@ -206,8 +185,6 @@ const LanguageManager = {
 
 // Language Selection Function
 function selectLanguage(lang) {
-    console.log(`User selected language: ${lang}`);
-    console.log('Available translations:', LanguageManager.translations);
     
     // Show loading state
     const buttons = document.querySelectorAll('#language-selection .btn');
@@ -248,7 +225,6 @@ function selectLanguage(lang) {
         // Update content based on language
         updateContentByLanguage(lang);
         
-        console.log(`Language selection completed for: ${lang}`);
     }, 500);
 }
 
@@ -278,7 +254,6 @@ function showLanguageSelection() {
 
 // Show auth selection screen
 function showAuthSelection() {
-    console.log('Showing auth selection screen');
     
     // Hide all other screens
     const screensToHide = ['language-selection', 'login-form', 'user-type-selection', 'patient-register-form', 'doctor-register-form'];
@@ -300,7 +275,6 @@ function showAuthSelection() {
 
 // Show login form
 function showLogin() {
-    console.log('Showing login form');
     
     // Hide all other screens
     const screensToHide = ['auth-selection', 'user-type-selection', 'patient-register-form', 'doctor-register-form'];
@@ -322,7 +296,6 @@ function showLogin() {
 
 // Show user type selection
 function showUserTypeSelection() {
-    console.log('Showing user type selection');
     
     // Hide all other screens
     const screensToHide = ['auth-selection', 'login-form', 'patient-register-form', 'doctor-register-form'];
@@ -344,7 +317,6 @@ function showUserTypeSelection() {
 
 // Select user type and show appropriate registration form
 function selectUserType(userType) {
-    console.log(`User selected type: ${userType}`);
     
     // Hide all other screens
     const screensToHide = ['user-type-selection', 'auth-selection', 'login-form', 'patient-register-form', 'doctor-register-form'];
@@ -374,17 +346,11 @@ function selectUserType(userType) {
 
 // Update page content based on selected language using JSON translations
 function updateContentByLanguage(lang) {
-    console.log(`Updating content for language: ${lang}`);
-    
     // Use the new LanguageManager to get translations
     const t = LanguageManager.translations[lang];
     if (!t) {
-        console.error(`Translations not found for language: ${lang}`);
-        console.log('Available translations:', LanguageManager.translations);
         return;
     }
-    
-    console.log(`Using translations for ${lang}:`, t);
     
     // Update welcome section
     updateElementText('welcome-text', t.welcome?.title);
@@ -468,10 +434,6 @@ function updateElementText(elementId, text) {
     const element = document.getElementById(elementId);
     if (element && text) {
         element.textContent = text;
-        console.log(`Updated ${elementId} with: ${text}`);
-    } else if (!element && window.location.hostname === 'localhost') {
-        // Only show missing element warnings in development
-        console.warn(`Element not found: ${elementId}`);
     }
 }
 
@@ -541,7 +503,6 @@ function initializeKeyboardNavigation() {
 
 // Initialize application on page load
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('Sahatak application initializing...');
     
     // FIRST: Hide all screens except language selection to ensure clean state
     const screensToHide = ['auth-selection', 'user-type-selection', 'login-form', 'patient-register-form', 'doctor-register-form'];
@@ -561,12 +522,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         LanguageManager.loadFallbackTranslations();
     }
     
-    // Check translation loading status
-    console.log('Translation loading status:');
-    console.log('Arabic loaded:', !!LanguageManager.translations.ar);
-    console.log('English loaded:', !!LanguageManager.translations.en);
-    
-    console.log('Final translations state:', LanguageManager.translations);
     
     // Initialize keyboard navigation
     initializeKeyboardNavigation();
@@ -574,7 +529,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Check if user has already selected a language
     if (!LanguageManager.isFirstVisit()) {
         const savedLanguage = LanguageManager.getLanguage();
-        console.log(`Saved language found: ${savedLanguage}`);
         
         // Skip language selection and go directly to auth selection (only if elements exist)
         const languageSelection = document.getElementById('language-selection');
@@ -586,7 +540,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         LanguageManager.applyLanguage(savedLanguage);
         updateContentByLanguage(savedLanguage);
     } else {
-        console.log('First visit detected - showing language selection');
         // Ensure language selection is visible (only if element exists)
         const languageSelection = document.getElementById('language-selection');
         if (languageSelection) {
@@ -619,7 +572,6 @@ function initializeBootstrapComponents() {
         return new bootstrap.Popover(popoverTriggerEl);
     });
     
-    console.log('Bootstrap components initialized');
 }
 
 // API Helper for backend communication
@@ -674,7 +626,6 @@ class ApiError extends Error {
 
 // Handle login form submission
 async function handleLogin(event) {
-    console.log('handleLogin function called!', event);
     event.preventDefault();
     
     const submitBtn = document.getElementById('login-submit');
@@ -687,7 +638,6 @@ async function handleLogin(event) {
     if (errorAlert) errorAlert.classList.add('d-none');
     
     // Show loading state with null checks
-    console.log('Elements found:', { submitBtn: !!submitBtn, spinner: !!spinner, icon: !!icon, errorAlert: !!errorAlert });
     
     if (spinner) spinner.classList.remove('d-none');
     if (icon) icon.classList.add('d-none');
@@ -712,25 +662,19 @@ async function handleLogin(event) {
             body: JSON.stringify(formData)
         });
         
-        console.log('Login successful:', response);
-        console.log('Response data:', response.data);
-        console.log('User data:', response.data?.user);
         
         // Store user session data
         if (response.data && response.data.user) {
-            console.log('Storing user session data...');
             localStorage.setItem('sahatak_user_type', response.data.user.user_type);
             localStorage.setItem('sahatak_user_email', response.data.user.email);
             localStorage.setItem('sahatak_user_id', response.data.user.id);
             localStorage.setItem('sahatak_user_name', response.data.user.full_name);
-            console.log('Session data stored successfully');
         } else {
             console.error('Invalid response structure:', response);
         }
         
         // Redirect to dashboard
         const userType = response.data.user.user_type;
-        console.log('User type for redirect:', userType);
         redirectToDashboard(userType);
         
     } catch (error) {
@@ -743,21 +687,12 @@ async function handleLogin(event) {
         // Handle specific API errors
         if (error instanceof ApiError) {
             errorMessage = error.message;
-            console.log('API Error details:', {
-                message: error.message,
-                errorCode: error.errorCode,
-                statusCode: error.statusCode
-            });
             
             // Handle email verification requirement
             if (error.errorCode === 'USER_NOT_VERIFIED') {
-                console.log('Email verification required, showing special message');
                 const emailVerificationMessage = lang === 'ar' 
                     ? 'يرجى تأكيد بريدك الإلكتروني قبل تسجيل الدخول. تحقق من بريدك الإلكتروني للحصول على رابط التأكيد.'
                     : 'Please verify your email address before logging in. Check your email for verification link.';
-                
-                console.log('Error alert element:', errorAlert);
-                console.log('Calling showEmailVerificationRequired with:', emailVerificationMessage, formData.login_identifier);
                 
                 // Show verification required message with resend option
                 showEmailVerificationRequired(errorAlert, emailVerificationMessage, formData.login_identifier);
@@ -804,8 +739,6 @@ async function handlePatientRegister_OLD(event) {
     submitBtn.disabled = true;
     
     try {
-        alert('🔥 REGISTRATION STARTING - Check console now!');
-        console.log('🔥🔥🔥 PATIENT REGISTRATION FUNCTION CALLED 🔥🔥🔥');
         const email = document.getElementById('patientEmail').value.trim();
         // Get language with multiple fallback methods - ensure never null/undefined
         const storedLanguage = localStorage.getItem('sahatak_language');
@@ -828,14 +761,6 @@ async function handlePatientRegister_OLD(event) {
             userLanguage = 'ar';
         }
         
-        console.log('=== Language Detection Debug ===');
-        console.log('Stored language (localStorage):', storedLanguage);
-        console.log('Document lang attribute:', documentLanguage);
-        console.log('Document dir attribute:', document.documentElement.dir);
-        console.log('Direction-based language:', directionLanguage);
-        console.log('Final selected language:', userLanguage);
-        console.log('LanguageManager.getLanguage():', LanguageManager.getLanguage());
-        console.log('================================');
         
         const formData = {
             full_name: document.getElementById('patientFullName').value.trim(),
@@ -850,7 +775,6 @@ async function handlePatientRegister_OLD(event) {
         // Ensure language_preference is always present and valid
         if (!formData.language_preference || (formData.language_preference !== 'ar' && formData.language_preference !== 'en')) {
             formData.language_preference = 'en'; // Default to English for testing
-            console.log('🟡 Fixed missing/invalid language_preference, set to:', formData.language_preference);
         }
         
         // Add email only if provided
@@ -863,11 +787,6 @@ async function handlePatientRegister_OLD(event) {
             throw new Error('All required fields must be filled');
         }
         
-        // Log the data being sent to backend
-        console.log('🚀 SENDING TO BACKEND:', formData);
-        console.log('🔤 Language preference value:', formData.language_preference);
-        console.log('🔤 Language preference type:', typeof formData.language_preference);
-        console.log('🔤 JSON stringified data:', JSON.stringify(formData));
         
         // Make API call to registration endpoint
         const response = await ApiHelper.makeRequest('/auth/register', {
@@ -875,7 +794,6 @@ async function handlePatientRegister_OLD(event) {
             body: JSON.stringify(formData)
         });
         
-        console.log('Patient registration successful:', response);
         
         // Clear form
         document.getElementById('patientRegisterForm').reset();
@@ -884,19 +802,9 @@ async function handlePatientRegister_OLD(event) {
         const lang = LanguageManager.getLanguage() || 'ar';
         const requiresVerification = response.data.requires_email_verification;
         
-        console.log('=== REGISTRATION RESPONSE DEBUG ===');
-        console.log('Full response:', response);
-        console.log('Response.data:', response.data);
-        console.log('Email provided:', email);
-        console.log('User is_verified from backend:', response.data.is_verified);
-        console.log('requires_email_verification from backend:', response.data.requires_email_verification);
-        console.log('requiresVerification variable:', requiresVerification);
-        console.log('Type of requiresVerification:', typeof requiresVerification);
-        console.log('===================================');
         
         if (requiresVerification) {
             // Email verification required - show verification message
-            console.log('✅ Email verification required - NOT redirecting');
             const emailVerificationMessage = lang === 'ar' 
                 ? 'تم إنشاء حسابك بنجاح! يرجى فحص بريدك الإلكتروني لتأكيد حسابك قبل تسجيل الدخول.'
                 : 'Account created successfully! Please check your email to verify your account before logging in.';
@@ -905,7 +813,6 @@ async function handlePatientRegister_OLD(event) {
             // Don't redirect - user needs to verify email first
         } else {
             // No email verification needed - auto-login
-            console.log('❌ NO email verification required - WILL redirect to login in 2 seconds');
             const successMessage = lang === 'ar' 
                 ? 'تم إنشاء حسابك بنجاح! يمكنك الآن تسجيل الدخول.'
                 : 'Account created successfully! You can now login.';
@@ -913,7 +820,6 @@ async function handlePatientRegister_OLD(event) {
             
             // Redirect to login after success
             setTimeout(() => {
-                console.log('⏰ Patient registration - Redirecting to login form now');
                 showLogin();
             }, 2000);
         }
@@ -1002,14 +908,6 @@ async function handleDoctorRegister_OLD(event) {
             userLanguage = 'ar';
         }
         
-        console.log('=== Doctor Registration Language Debug ===');
-        console.log('Stored language (localStorage):', storedLanguage);
-        console.log('Document lang attribute:', documentLanguage);
-        console.log('Document dir attribute:', document.documentElement.dir);
-        console.log('Direction-based language:', directionLanguage);
-        console.log('Final selected language:', userLanguage);
-        console.log('LanguageManager.getLanguage():', LanguageManager.getLanguage());
-        console.log('==========================================');
         
         const formData = {
             full_name: document.getElementById('doctorFullName').value.trim(),
@@ -1025,7 +923,6 @@ async function handleDoctorRegister_OLD(event) {
         // Ensure language_preference is always present and valid
         if (!formData.language_preference || (formData.language_preference !== 'ar' && formData.language_preference !== 'en')) {
             formData.language_preference = 'en'; // Default to English for testing
-            console.log('🟡 Doctor: Fixed missing/invalid language_preference, set to:', formData.language_preference);
         }
         
         // Add email only if provided
@@ -1039,11 +936,6 @@ async function handleDoctorRegister_OLD(event) {
             throw new Error('All required fields must be filled');
         }
         
-        // Log the data being sent to backend
-        console.log('🚀 DOCTOR SENDING TO BACKEND:', formData);
-        console.log('🔤 Doctor language preference value:', formData.language_preference);
-        console.log('🔤 Doctor language preference type:', typeof formData.language_preference);
-        console.log('🔤 Doctor JSON stringified data:', JSON.stringify(formData));
         
         // Make API call to registration endpoint
         const response = await ApiHelper.makeRequest('/auth/register', {
@@ -1051,7 +943,6 @@ async function handleDoctorRegister_OLD(event) {
             body: JSON.stringify(formData)
         });
         
-        console.log('Doctor registration successful:', response);
         
         // Clear form
         document.getElementById('doctorRegisterForm').reset();
@@ -1060,9 +951,6 @@ async function handleDoctorRegister_OLD(event) {
         const lang = LanguageManager.getLanguage() || 'ar';
         const requiresVerification = response.data.requires_email_verification;
         
-        console.log('Doctor registration response data:', response.data);
-        console.log('Requires verification:', requiresVerification);
-        console.log('User is_verified:', response.data.is_verified);
         
         if (requiresVerification) {
             // Email verification required - show verification message
@@ -1252,12 +1140,10 @@ function validateDoctorRegistrationForm(data) {
 
 // Redirect to appropriate dashboard
 function redirectToDashboard(userType) {
-    console.log('redirectToDashboard called with userType:', userType);
     
     // Check for return URL first
     const returnUrl = localStorage.getItem('sahatak_return_url');
     if (returnUrl) {
-        console.log('Redirecting to return URL:', returnUrl);
         localStorage.removeItem('sahatak_return_url');
         window.location.href = returnUrl;
         return;
@@ -1268,11 +1154,7 @@ function redirectToDashboard(userType) {
         ? 'frontend/pages/dashboard/doctor.html' 
         : 'frontend/pages/dashboard/patient.html';
     
-    console.log(`Redirecting to ${userType} dashboard at URL: ${dashboardUrl}`);
-    console.log('Current window location:', window.location.href);
-    
     window.location.href = dashboardUrl;
-    console.log('Redirect initiated');
 }
 
 // Show field error
@@ -1330,19 +1212,16 @@ async function resendEmailVerification(email) {
             const successMessage = lang === 'ar' 
                 ? 'تم إرسال رابط التأكيد بنجاح. يرجى فحص بريدك الإلكتروني'
                 : 'Verification link sent successfully. Please check your email';
-            alert(successMessage);
         } else {
             const errorMessage = lang === 'ar' 
                 ? 'فشل في إرسال رابط التأكيد'
                 : 'Failed to send verification link';
-            alert(response.message || errorMessage);
         }
     } catch (error) {
         console.error('Resend verification error:', error);
         const errorMessage = lang === 'ar' 
             ? 'حدث خطأ أثناء إرسال رابط التأكيد'
             : 'Error occurred while sending verification link';
-        alert(errorMessage);
     }
 }
 
@@ -1358,7 +1237,6 @@ function clearFormErrors(formId) {
 
 // Logout functionality
 async function logout() {
-    console.log('Logout initiated...');
     
     // Get current language for messages
     const lang = LanguageManager.getLanguage() || 'ar';
@@ -1382,7 +1260,6 @@ async function logout() {
             method: 'POST'
         });
         
-        console.log('Backend logout successful:', response);
     } catch (error) {
         console.error('Backend logout error:', error);
         // Continue with frontend cleanup even if backend fails
@@ -1398,7 +1275,6 @@ async function logout() {
     
     keysToRemove.forEach(key => {
         localStorage.removeItem(key);
-        console.log(`Cleared: ${key}`);
     });
     
     // Keep language preference (don't clear sahatak_language)
@@ -1408,7 +1284,6 @@ async function logout() {
         logoutSpan.textContent = successMessage;
     }
     
-    console.log(successMessage);
     
     // Redirect to login page - determine correct path based on current location
     setTimeout(() => {
@@ -1429,16 +1304,10 @@ async function logout() {
             redirectPath = 'index.html';
         }
         
-        console.log(`Redirecting from ${currentPath} to ${redirectPath}`);
         window.location.href = redirectPath;
     }, 800);
 }
 
-// Console welcome message
-console.log('%c🏥 Sahatak Telemedicine Platform', 'color: #2563eb; font-size: 16px; font-weight: bold;');
-console.log('%cBootstrap 5 loaded successfully ✓', 'color: #059669;');
-console.log('%cArabic font support enabled ✓', 'color: #059669;');
-console.log('%cLanguage management ready ✓', 'color: #059669;');
 
 // Set up form event listeners when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
@@ -1446,7 +1315,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
         loginForm.addEventListener('submit', handleLogin);
-        console.log('Login form event listener attached');
     }
     
     // Event listeners disabled - using forms.js versions instead
