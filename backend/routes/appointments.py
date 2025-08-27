@@ -4,7 +4,7 @@ from models import db, Appointment, Doctor, Patient, User
 from datetime import datetime, timedelta
 from sqlalchemy import and_, or_
 from utils.responses import APIResponse, ErrorCodes
-from utils.validators import validate_date, validate_appointment_type
+from utils.validators import validate_date, validate_appointment_type, validate_text_field_length
 from utils.logging_config import app_logger, log_user_action
 
 appointments_bp = Blueprint('appointments', __name__)
@@ -121,6 +121,21 @@ def create_appointment():
                 message=appointment_type_validation['message']
             )
         
+        # Validate text fields for length and content
+        text_validations = [
+            ('reason_for_visit', data.get('reason_for_visit', ''), 500, 0),
+            ('symptoms', data.get('symptoms', ''), 1000, 0)
+        ]
+        
+        for field_name, value, max_len, min_len in text_validations:
+            if value:  # Only validate if field has content
+                validation = validate_text_field_length(value, field_name, max_len, min_len)
+                if not validation['valid']:
+                    return APIResponse.validation_error(
+                        field=field_name,
+                        message=validation['message']
+                    )
+        
         # Parse and validate appointment date
         try:
             appointment_date = datetime.fromisoformat(data['appointment_date'])
@@ -137,38 +152,61 @@ def create_appointment():
                 message='Appointment must be scheduled in the future'
             )
         
-        # Check if time slot is available (including blocked slots)
-        existing_appointment = Appointment.query.filter(
-            and_(
-                Appointment.doctor_id == data['doctor_id'],
-                Appointment.appointment_date == appointment_date,
-                Appointment.status.in_(['scheduled', 'confirmed', 'in_progress', 'blocked'])
+        # Use database transaction with SELECT FOR UPDATE to prevent race conditions
+        try:
+            # Begin transaction with row-level locking
+            db.session.begin()
+            
+            # Lock and check availability atomically
+            existing_appointment = Appointment.query.filter(
+                and_(
+                    Appointment.doctor_id == data['doctor_id'],
+                    Appointment.appointment_date == appointment_date,
+                    Appointment.status.in_(['scheduled', 'confirmed', 'in_progress', 'blocked'])
+                )
+            ).with_for_update().first()
+            
+            if existing_appointment:
+                db.session.rollback()
+                # Log double booking attempt for security monitoring
+                log_user_action(
+                    current_user.id,
+                    'double_booking_attempt',
+                    {
+                        'doctor_id': data['doctor_id'],
+                        'appointment_date': appointment_date.isoformat(),
+                        'existing_appointment_id': existing_appointment.id,
+                        'existing_status': existing_appointment.status
+                    },
+                    request
+                )
+                if existing_appointment.status == 'blocked':
+                    return APIResponse.conflict(
+                        message='This time slot is blocked by the doctor'
+                    )
+                else:
+                    return APIResponse.conflict(
+                        message='This time slot is already booked'
+                    )
+            
+            # Create appointment with consultation fee from doctor profile
+            appointment = Appointment(
+                patient_id=current_user.patient_profile.id,
+                doctor_id=data['doctor_id'],
+                appointment_date=appointment_date,
+                appointment_type=data['appointment_type'],
+                reason_for_visit=data.get('reason_for_visit'),
+                symptoms=data.get('symptoms'),
+                consultation_fee=doctor.consultation_fee  # Auto-populate fee from doctor
             )
-        ).first()
-        
-        if existing_appointment:
-            if existing_appointment.status == 'blocked':
-                return APIResponse.conflict(
-                    message='This time slot is blocked by the doctor'
-                )
-            else:
-                return APIResponse.conflict(
-                    message='This time slot is already booked'
-                )
-        
-        # Create appointment with consultation fee from doctor profile
-        appointment = Appointment(
-            patient_id=current_user.patient_profile.id,
-            doctor_id=data['doctor_id'],
-            appointment_date=appointment_date,
-            appointment_type=data['appointment_type'],
-            reason_for_visit=data.get('reason_for_visit'),
-            symptoms=data.get('symptoms'),
-            consultation_fee=doctor.consultation_fee  # Auto-populate fee from doctor
-        )
-        
-        db.session.add(appointment)
-        db.session.commit()
+            
+            db.session.add(appointment)
+            db.session.commit()  # Commit the transaction
+            
+        except Exception as e:
+            db.session.rollback()
+            app_logger.error(f"Error creating appointment: {str(e)}")
+            return APIResponse.server_error(message='Failed to create appointment')
         
         # Log successful appointment creation
         log_user_action(
@@ -341,7 +379,6 @@ def cancel_appointment(appointment_id):
             )
         
         # Check if appointment is in the near future (allow cancellation up to 1 hour before)
-        from datetime import timedelta
         if appointment.appointment_date <= datetime.now() + timedelta(hours=1):
             return APIResponse.validation_error(
                 field='appointment_date',

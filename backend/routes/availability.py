@@ -49,17 +49,23 @@ def get_doctor_schedule():
 @availability_bp.route('/schedule', methods=['PUT'])
 @login_required
 def update_doctor_schedule():
-    """Update doctor's weekly availability schedule"""
+    """Update doctor's weekly availability schedule with locking to prevent concurrent updates"""
     try:
         if current_user.user_type != 'doctor':
             return APIResponse.forbidden(message='Only doctors can access this endpoint')
         
-        doctor = current_user.doctor_profile
+        # Use database transaction with row-level locking to prevent concurrent updates
+        db.session.begin()
+        
+        # Lock the doctor record to prevent concurrent schedule updates
+        doctor = Doctor.query.filter_by(id=current_user.doctor_profile.id).with_for_update().first()
         if not doctor:
+            db.session.rollback()
             return APIResponse.not_found(message='Doctor profile not found')
         
         data = request.get_json()
         if not data or 'schedule' not in data:
+            db.session.rollback()
             return APIResponse.validation_error(
                 field='schedule',
                 message='Schedule data is required'
@@ -71,55 +77,79 @@ def update_doctor_schedule():
         valid_days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
         validated_schedule = {}
         
-        for day in valid_days:
-            if day in schedule:
-                day_schedule = schedule[day]
-                
-                # Validate required fields
-                if not isinstance(day_schedule, dict):
-                    return APIResponse.validation_error(
-                        field=f'schedule.{day}',
-                        message=f'Invalid format for {day} schedule'
-                    )
-                
-                # Validate time format
-                start_time = day_schedule.get('start', '09:00')
-                end_time = day_schedule.get('end', '17:00')
-                enabled = day_schedule.get('enabled', True)
-                
-                if not validate_time(start_time) or not validate_time(end_time):
-                    return APIResponse.validation_error(
-                        field=f'schedule.{day}',
-                        message=f'Invalid time format for {day}. Use HH:MM format'
-                    )
-                
-                # Validate that end time is after start time
-                start_datetime = datetime.strptime(start_time, '%H:%M')
-                end_datetime = datetime.strptime(end_time, '%H:%M')
-                
-                if end_datetime <= start_datetime:
-                    return APIResponse.validation_error(
-                        field=f'schedule.{day}',
-                        message=f'End time must be after start time for {day}'
-                    )
-                
-                validated_schedule[day] = {
-                    'start': start_time,
-                    'end': end_time,
-                    'enabled': bool(enabled)
-                }
-            else:
-                # Default for missing days
-                validated_schedule[day] = {
-                    'start': '09:00',
-                    'end': '17:00',
-                    'enabled': False
-                }
+        try:
+            for day in valid_days:
+                if day in schedule:
+                    day_schedule = schedule[day]
+                    
+                    # Validate required fields
+                    if not isinstance(day_schedule, dict):
+                        db.session.rollback()
+                        return APIResponse.validation_error(
+                            field=f'schedule.{day}',
+                            message=f'Invalid format for {day} schedule'
+                        )
+                    
+                    # Validate time format
+                    start_time = day_schedule.get('start', '09:00')
+                    end_time = day_schedule.get('end', '17:00')
+                    enabled = day_schedule.get('enabled', True)
+                    
+                    if not validate_time(start_time)['valid'] or not validate_time(end_time)['valid']:
+                        db.session.rollback()
+                        return APIResponse.validation_error(
+                            field=f'schedule.{day}',
+                            message=f'Invalid time format for {day}. Use HH:MM format'
+                        )
+                    
+                    # Validate that end time is after start time
+                    start_datetime = datetime.strptime(start_time, '%H:%M')
+                    end_datetime = datetime.strptime(end_time, '%H:%M')
+                    
+                    if end_datetime <= start_datetime:
+                        db.session.rollback()
+                        return APIResponse.validation_error(
+                            field=f'schedule.{day}',
+                            message=f'End time must be after start time for {day}'
+                        )
+                    
+                    validated_schedule[day] = {
+                        'start': start_time,
+                        'end': end_time,
+                        'enabled': bool(enabled)
+                    }
+                else:
+                    # Default for missing days
+                    validated_schedule[day] = {
+                        'start': '09:00',
+                        'end': '17:00',
+                        'enabled': False
+                    }
         
-        # Update doctor's schedule
-        doctor.available_hours = validated_schedule
-        doctor.updated_at = datetime.utcnow()
-        db.session.commit()
+            # Update doctor's schedule
+            old_schedule = doctor.available_hours
+            doctor.available_hours = validated_schedule
+            doctor.updated_at = datetime.utcnow()
+            db.session.commit()
+            
+            # Log schedule changes for audit trail
+            log_user_action(
+                current_user.id,
+                'schedule_updated',
+                {
+                    'doctor_id': doctor.id,
+                    'old_schedule': old_schedule,
+                    'new_schedule': validated_schedule,
+                    'schedule_changes': len([day for day in validated_schedule 
+                                           if validated_schedule[day] != old_schedule.get(day, {})])
+                },
+                request
+            )
+            
+        except Exception as schedule_error:
+            db.session.rollback()
+            app_logger.error(f"Error updating doctor schedule: {str(schedule_error)}")
+            return APIResponse.server_error(message='Failed to update schedule')
         
         # Log the action
         log_user_action(
@@ -466,10 +496,3 @@ def generate_time_slots(start_time, end_time, booked_times, slot_duration=30):
     
     return slots
 
-def validate_time(time_str):
-    """Validate time format HH:MM"""
-    try:
-        datetime.strptime(time_str, '%H:%M')
-        return True
-    except ValueError:
-        return False

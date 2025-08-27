@@ -564,12 +564,30 @@ const AvailabilityManager = {
     
     // Navigation functions
     async previousMonth() {
-        this.currentMonth.setMonth(this.currentMonth.getMonth() - 1);
+        // Properly handle year boundary crossing
+        const newDate = new Date(this.currentMonth);
+        if (newDate.getMonth() === 0) {
+            // January -> December of previous year
+            newDate.setFullYear(newDate.getFullYear() - 1);
+            newDate.setMonth(11);
+        } else {
+            newDate.setMonth(newDate.getMonth() - 1);
+        }
+        this.currentMonth = newDate;
         await this.loadCalendarData();
     },
     
     async nextMonth() {
-        this.currentMonth.setMonth(this.currentMonth.getMonth() + 1);
+        // Properly handle year boundary crossing
+        const newDate = new Date(this.currentMonth);
+        if (newDate.getMonth() === 11) {
+            // December -> January of next year
+            newDate.setFullYear(newDate.getFullYear() + 1);
+            newDate.setMonth(0);
+        } else {
+            newDate.setMonth(newDate.getMonth() + 1);
+        }
+        this.currentMonth = newDate;
         await this.loadCalendarData();
     },
     
@@ -697,7 +715,6 @@ const AvailabilityManager = {
             blockedSlotsCount: this.blockedTimes.length
         };
     }
-}
 };
 
 // Global functions for HTML onclick events

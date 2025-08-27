@@ -5,7 +5,7 @@ from sqlalchemy import and_, or_, desc
 
 from models import db, Patient, Doctor, Appointment, Diagnosis, VitalSigns
 from utils.responses import APIResponse, ErrorCodes
-from utils.validators import validate_date
+from utils.validators import validate_date, validate_vital_signs_ranges, validate_text_field_length
 from utils.logging_config import app_logger, log_user_action
 
 ehr_bp = Blueprint('ehr', __name__)
@@ -17,7 +17,30 @@ def get_patient_ehr(patient_id):
     try:
         # Verify access permissions
         if not has_patient_access(patient_id):
+            # Log unauthorized access attempt
+            log_user_action(
+                current_user.id,
+                'unauthorized_ehr_access_attempt',
+                {
+                    'patient_id': patient_id,
+                    'endpoint': 'get_patient_ehr',
+                    'user_type': current_user.user_type
+                },
+                request
+            )
             return APIResponse.forbidden(message='Access denied to this patient\'s records')
+        
+        # Log successful EHR access
+        log_user_action(
+            current_user.id,
+            'ehr_access_granted',
+            {
+                'patient_id': patient_id,
+                'endpoint': 'get_patient_ehr',
+                'user_type': current_user.user_type
+            },
+            request
+        )
         
         patient = Patient.query.get_or_404(patient_id)
         
@@ -81,6 +104,23 @@ def create_diagnosis():
                     field='appointment_id',
                     message='Invalid appointment or access denied'
                 )
+        
+        # Validate text fields for length and content
+        text_validations = [
+            ('primary_diagnosis', data.get('primary_diagnosis', ''), 1500, 10),
+            ('clinical_findings', data.get('clinical_findings', ''), 2000, 0),
+            ('treatment_plan', data.get('treatment_plan', ''), 2000, 0),
+            ('follow_up_notes', data.get('follow_up_notes', ''), 1000, 0)
+        ]
+        
+        for field_name, value, max_len, min_len in text_validations:
+            if value:  # Only validate if field has content
+                validation = validate_text_field_length(value, field_name, max_len, min_len)
+                if not validation['valid']:
+                    return APIResponse.validation_error(
+                        field=field_name,
+                        message=validation['message']
+                    )
         
         # Parse dates
         diagnosis_date = datetime.utcnow()
@@ -254,6 +294,13 @@ def record_vital_signs():
         else:
             return APIResponse.forbidden(message='Invalid user type')
         
+        # Validate vital signs ranges
+        validation_result = validate_vital_signs_ranges(data)
+        if not validation_result['valid']:
+            return APIResponse.validation_error(
+                message=validation_result['message']
+            )
+        
         # Create vital signs record
         vital_signs = VitalSigns(
             patient_id=patient_id,
@@ -287,6 +334,19 @@ def record_vital_signs():
         
         db.session.add(vital_signs)
         db.session.commit()
+        
+        # Log vital signs recording
+        log_user_action(
+            current_user.id,
+            'vital_signs_recorded',
+            {
+                'patient_id': patient_id,
+                'vital_signs_id': vital_signs.id,
+                'recorded_by_type': current_user.user_type,
+                'appointment_id': data.get('appointment_id')
+            },
+            request
+        )
         
         log_user_action(
             current_user.id,
@@ -380,20 +440,96 @@ def get_patient_diagnoses(patient_id):
         app_logger.error(f"Get patient diagnoses error: {str(e)}")
         return APIResponse.internal_error(message='Failed to retrieve diagnoses')
 
-def has_patient_access(patient_id):
-    """Check if current user has access to patient records"""
+def has_patient_access(patient_id, emergency_access=False):
+    """
+    Check if current user has access to patient records
+    
+    Args:
+        patient_id: ID of the patient whose records are being accessed
+        emergency_access: Whether this is an emergency access request
+    
+    Returns:
+        bool: True if access is allowed, False otherwise
+    """
     user_profile = current_user.get_profile()
     if not user_profile:
         return False
     
+    # Admin users have full access (with logging)
+    if current_user.user_type == 'admin':
+        app_logger.warning(
+            f"Admin {current_user.id} accessed patient {patient_id} records"
+        )
+        return True
+    
     if current_user.user_type == 'patient':
         return patient_id == user_profile.id
     elif current_user.user_type == 'doctor':
-        # Doctor can access if they have treated this patient
-        has_appointment = Appointment.query.filter_by(
-            patient_id=patient_id,
-            doctor_id=user_profile.id
+        from datetime import datetime, timedelta
+        
+        # Define access timeframe: doctors can access patient records:
+        # - 7 days before scheduled appointment
+        # - During active appointments
+        # - Up to 90 days after completed appointments
+        now = datetime.utcnow()
+        access_start = now - timedelta(days=7)  # 7 days before future appointments
+        access_end_past = now - timedelta(days=90)  # 90 days after past appointments
+        
+        # Check for appointments within valid timeframes
+        valid_appointment = Appointment.query.filter(
+            and_(
+                Appointment.patient_id == patient_id,
+                Appointment.doctor_id == user_profile.id,
+                or_(
+                    # Future appointments (within 7 days)
+                    and_(
+                        Appointment.appointment_date > now,
+                        Appointment.appointment_date <= now + timedelta(days=7),
+                        Appointment.status.in_(['scheduled', 'confirmed'])
+                    ),
+                    # Active appointments
+                    and_(
+                        Appointment.status.in_(['in_progress', 'confirmed']),
+                        Appointment.appointment_date <= now + timedelta(hours=2)  # 2-hour window
+                    ),
+                    # Recent past appointments (within 90 days)
+                    and_(
+                        Appointment.appointment_date >= access_end_past,
+                        Appointment.appointment_date <= now,
+                        Appointment.status.in_(['completed', 'cancelled', 'no_show'])
+                    )
+                )
+            )
         ).first()
-        return bool(has_appointment)
+        
+        # Emergency access override (must be logged and reviewed)
+        if emergency_access and not valid_appointment:
+            app_logger.critical(
+                f"EMERGENCY ACCESS: Doctor {user_profile.id} accessed patient {patient_id} "
+                f"without valid appointment - requires review"
+            )
+            # In a real system, this would trigger alerts to administrators
+            return True
+        
+        # Log access attempt for audit
+        if not valid_appointment:
+            app_logger.warning(
+                f"Doctor {user_profile.id} attempted to access patient {patient_id} "
+                f"without valid timeframe appointment"
+            )
+            # Also use structured logging for security monitoring
+            from flask import request
+            log_user_action(
+                user_profile.id,
+                'patient_access_denied_timeframe',
+                {
+                    'patient_id': patient_id,
+                    'reason': 'no_valid_appointment_in_timeframe',
+                    'doctor_id': user_profile.id
+                },
+                request if 'request' in locals() else None
+            )
+        
+        return bool(valid_appointment)
     
     return False

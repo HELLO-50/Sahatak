@@ -215,9 +215,24 @@ const EHRManager = {
                             </div>
                         ` : ''}
                         
-                        <div class="text-muted small mt-2">
-                            <i class="bi bi-person-badge me-1"></i>
-                            الطبيب: ${diagnosis.doctor_name}
+                        <div class="diagnosis-actions mt-3 d-flex justify-content-between align-items-center">
+                            <div class="text-muted small">
+                                <i class="bi bi-person-badge me-1"></i>
+                                الطبيب: ${diagnosis.doctor_name}
+                            </div>
+                            <div class="btn-group btn-group-sm">
+                                ${!diagnosis.resolved ? `
+                                    <button class="btn btn-outline-primary" onclick="editDiagnosis(${diagnosis.id})" title="تعديل">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-outline-success" onclick="EHRManager.resolveDiagnosis(${diagnosis.id})" title="وضع علامة كمحلول">
+                                        <i class="bi bi-check-circle"></i>
+                                    </button>
+                                ` : ''}
+                                <button class="btn btn-outline-info" onclick="viewDiagnosisDetails(${diagnosis.id})" title="عرض التفاصيل">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -337,6 +352,13 @@ const EHRManager = {
         const ctx = document.getElementById('bloodPressureChart');
         if (!ctx) return;
         
+        // Check if Chart.js is available
+        if (typeof Chart === 'undefined') {
+            console.error('Chart.js library is not loaded');
+            ctx.parentElement.innerHTML = '<p class="text-center text-muted">خطأ: مكتبة الرسوم البيانية غير متاحة</p>';
+            return;
+        }
+        
         const data = vitals.filter(v => v.systolic_bp && v.diastolic_bp);
         
         if (data.length === 0) {
@@ -387,6 +409,13 @@ const EHRManager = {
     createHeartRateChart(vitals) {
         const ctx = document.getElementById('heartRateChart');
         if (!ctx) return;
+        
+        // Check if Chart.js is available
+        if (typeof Chart === 'undefined') {
+            console.error('Chart.js library is not loaded');
+            ctx.parentElement.innerHTML = '<p class="text-center text-muted">خطأ: مكتبة الرسوم البيانية غير متاحة</p>';
+            return;
+        }
         
         const data = vitals.filter(v => v.heart_rate);
         
@@ -605,9 +634,13 @@ const EHRManager = {
         }
     },
     
-    // Save diagnosis
+    // Save diagnosis (create new or update existing)
     async saveDiagnosis() {
         try {
+            const form = document.getElementById('diagnosis-form');
+            const editingId = form.dataset.editingId;
+            const isEditing = !!editingId;
+            
             const formData = {
                 patient_id: this.patientId,
                 primary_diagnosis: document.getElementById('primary_diagnosis').value,
@@ -627,20 +660,33 @@ const EHRManager = {
             saveBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>جاري الحفظ...';
             saveBtn.disabled = true;
             
-            const response = await ApiHelper.makeRequest('/ehr/diagnoses', {
-                method: 'POST',
-                body: JSON.stringify(formData)
-            });
+            let response;
+            if (isEditing) {
+                response = await ApiHelper.makeRequest(`/ehr/diagnoses/${editingId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(formData)
+                });
+            } else {
+                response = await ApiHelper.makeRequest('/ehr/diagnoses', {
+                    method: 'POST',
+                    body: JSON.stringify(formData)
+                });
+            }
             
             if (response.success) {
-                this.showAlert('success', 'تم حفظ التشخيص بنجاح');
+                this.showAlert('success', isEditing ? 'تم تحديث التشخيص بنجاح' : 'تم حفظ التشخيص بنجاح');
                 
                 // Close modal and refresh data
                 const modal = bootstrap.Modal.getInstance(document.getElementById('diagnosisModal'));
                 if (modal) modal.hide();
                 
-                // Reset form
+                // Reset form and editing state
                 document.getElementById('diagnosis-form').reset();
+                delete form.dataset.editingId;
+                
+                // Reset modal title and button text
+                document.querySelector('#diagnosisModal .modal-title').textContent = 'إضافة تشخيص جديد';
+                document.getElementById('save-diagnosis-btn').innerHTML = '<i class="bi bi-check-circle me-1"></i>حفظ التشخيص';
                 
                 // Reload EHR data
                 await this.loadEHRData();
@@ -655,7 +701,9 @@ const EHRManager = {
             // Reset button
             const saveBtn = document.getElementById('save-diagnosis-btn');
             if (saveBtn) {
-                saveBtn.innerHTML = '<i class="bi bi-check-circle me-1"></i>حفظ التشخيص';
+                saveBtn.innerHTML = saveBtn.innerHTML.includes('تحديث') ? 
+                    '<i class="bi bi-check-circle me-1"></i>تحديث التشخيص' : 
+                    '<i class="bi bi-check-circle me-1"></i>حفظ التشخيص';
                 saveBtn.disabled = false;
             }
         }
@@ -719,12 +767,305 @@ const EHRManager = {
         }
     },
     
+    // Update diagnosis (edit existing diagnosis)
+    async updateDiagnosis(diagnosisId, formData) {
+        try {
+            const response = await ApiHelper.makeRequest(`/ehr/diagnoses/${diagnosisId}`, {
+                method: 'PUT',
+                body: JSON.stringify(formData)
+            });
+            
+            if (response.success) {
+                this.showAlert('success', 'تم تحديث التشخيص بنجاح');
+                await this.loadEHRData();
+                return true;
+            } else {
+                throw new Error(response.message);
+            }
+        } catch (error) {
+            console.error('Error updating diagnosis:', error);
+            this.showAlert('error', error.message || 'فشل في تحديث التشخيص');
+            return false;
+        }
+    },
+
+    // Mark diagnosis as resolved
+    async resolveDiagnosis(diagnosisId, resolutionNotes = '') {
+        if (!confirm('هل أنت متأكد من أن هذا التشخيص قد تم حله؟')) {
+            return;
+        }
+
+        try {
+            const response = await ApiHelper.makeRequest(`/ehr/diagnoses/${diagnosisId}`, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    resolved: true,
+                    resolution_notes: resolutionNotes
+                })
+            });
+
+            if (response.success) {
+                this.showAlert('success', 'تم وضع علامة على التشخيص كمحلول');
+                await this.loadEHRData();
+            } else {
+                throw new Error(response.message);
+            }
+        } catch (error) {
+            console.error('Error resolving diagnosis:', error);
+            this.showAlert('error', error.message || 'فشل في تحديث حالة التشخيص');
+        }
+    },
+
+    // Generate EHR summary report
+    generateEHRSummary() {
+        if (!this.ehrData) return null;
+
+        const summary = {
+            patient_info: this.ehrData.patient_info,
+            active_diagnoses: this.ehrData.diagnoses?.filter(d => !d.resolved) || [],
+            resolved_diagnoses: this.ehrData.diagnoses?.filter(d => d.resolved) || [],
+            latest_vitals: this.ehrData.vital_signs?.[0] || null,
+            recent_appointments: this.ehrData.appointments?.slice(0, 3) || [],
+            health_metrics: this.calculateHealthMetrics(),
+            risk_factors: this.identifyRiskFactors()
+        };
+
+        return summary;
+    },
+
+    // Calculate health metrics from vital signs
+    calculateHealthMetrics() {
+        if (!this.ehrData.vital_signs || this.ehrData.vital_signs.length === 0) {
+            return null;
+        }
+
+        const vitals = this.ehrData.vital_signs;
+        const latest = vitals[0];
+        
+        // Calculate averages for recent vitals (last 5 readings)
+        const recentVitals = vitals.slice(0, 5);
+        
+        const metrics = {
+            bmi: latest?.bmi || this.calculateBMI(latest?.height, latest?.weight),
+            bmi_category: this.getBMICategory(latest?.bmi),
+            blood_pressure_status: this.getBloodPressureStatus(latest?.systolic_bp, latest?.diastolic_bp),
+            heart_rate_status: this.getHeartRateStatus(latest?.heart_rate),
+            temperature_status: this.getTemperatureStatus(latest?.temperature)
+        };
+
+        // Calculate trends if we have enough data
+        if (recentVitals.length >= 3) {
+            metrics.bp_trend = this.calculateBPTrend(recentVitals);
+            metrics.weight_trend = this.calculateWeightTrend(recentVitals);
+        }
+
+        return metrics;
+    },
+
+    // Identify health risk factors
+    identifyRiskFactors() {
+        const patient = this.ehrData.patient_info;
+        const risks = [];
+
+        // Age-related risks
+        if (patient.age > 65) {
+            risks.push({ type: 'age', level: 'medium', description: 'كبار السن - مراقبة صحية إضافية مطلوبة' });
+        }
+
+        // Lifestyle risks
+        if (patient.smoking_status === 'current') {
+            risks.push({ type: 'lifestyle', level: 'high', description: 'التدخين - خطر عالي على القلب والرئتين' });
+        }
+
+        if (patient.alcohol_consumption === 'heavy') {
+            risks.push({ type: 'lifestyle', level: 'high', description: 'الإفراط في شرب الكحول' });
+        }
+
+        if (patient.exercise_frequency === 'none') {
+            risks.push({ type: 'lifestyle', level: 'medium', description: 'قلة النشاط البدني' });
+        }
+
+        // Medical history risks
+        if (patient.chronic_conditions) {
+            risks.push({ type: 'medical', level: 'high', description: 'وجود حالات مزمنة تتطلب متابعة' });
+        }
+
+        if (patient.family_history && (patient.family_history.includes('diabetes') || patient.family_history.includes('سكري'))) {
+            risks.push({ type: 'genetic', level: 'medium', description: 'تاريخ عائلي لمرض السكري' });
+        }
+
+        // Vital signs risks
+        const latestVitals = this.ehrData.vital_signs?.[0];
+        if (latestVitals) {
+            if (latestVitals.systolic_bp > 140 || latestVitals.diastolic_bp > 90) {
+                risks.push({ type: 'vitals', level: 'high', description: 'ارتفاع ضغط الدم' });
+            }
+            
+            if (latestVitals.bmi > 30) {
+                risks.push({ type: 'vitals', level: 'medium', description: 'السمنة - مؤشر كتلة الجسم مرتفع' });
+            }
+        }
+
+        return risks;
+    },
+
+    // Export EHR data as PDF (placeholder for future implementation)
+    async exportEHRToPDF() {
+        const summary = this.generateEHRSummary();
+        
+        // For now, we'll create a simple text export
+        // In a full implementation, you would use a PDF library like jsPDF
+        let exportText = `سجل طبي إلكتروني - ${summary.patient_info.user?.full_name}\n`;
+        exportText += `التاريخ: ${new Date().toLocaleDateString('ar-SA')}\n\n`;
+        
+        exportText += `المعلومات الأساسية:\n`;
+        exportText += `العمر: ${summary.patient_info.age}\n`;
+        exportText += `الجنس: ${summary.patient_info.gender === 'male' ? 'ذكر' : 'أنثى'}\n`;
+        exportText += `فصيلة الدم: ${summary.patient_info.blood_type || 'غير محددة'}\n\n`;
+        
+        if (summary.active_diagnoses.length > 0) {
+            exportText += `التشخيصات النشطة:\n`;
+            summary.active_diagnoses.forEach(diagnosis => {
+                exportText += `- ${diagnosis.primary_diagnosis}\n`;
+            });
+            exportText += '\n';
+        }
+        
+        if (summary.latest_vitals) {
+            exportText += `آخر العلامات الحيوية:\n`;
+            if (summary.latest_vitals.blood_pressure) {
+                exportText += `ضغط الدم: ${summary.latest_vitals.blood_pressure}\n`;
+            }
+            if (summary.latest_vitals.heart_rate) {
+                exportText += `نبضات القلب: ${summary.latest_vitals.heart_rate}\n`;
+            }
+            exportText += '\n';
+        }
+
+        // Create and download the file
+        const blob = new Blob([exportText], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `ehr_${this.patientId}_${new Date().toISOString().split('T')[0]}.txt`;
+        link.click();
+        URL.revokeObjectURL(url);
+
+        this.showAlert('success', 'تم تصدير السجل الطبي بنجاح');
+    },
+
+    // Search within EHR data
+    searchEHR(query) {
+        if (!query || !this.ehrData) return null;
+        
+        const results = {
+            diagnoses: [],
+            appointments: [],
+            medical_history: []
+        };
+        
+        const searchTerm = query.toLowerCase();
+        
+        // Search diagnoses
+        this.ehrData.diagnoses?.forEach(diagnosis => {
+            if (diagnosis.primary_diagnosis.toLowerCase().includes(searchTerm) ||
+                (diagnosis.clinical_findings && diagnosis.clinical_findings.toLowerCase().includes(searchTerm)) ||
+                (diagnosis.treatment_plan && diagnosis.treatment_plan.toLowerCase().includes(searchTerm))) {
+                results.diagnoses.push(diagnosis);
+            }
+        });
+        
+        // Search appointments
+        this.ehrData.appointments?.forEach(appointment => {
+            if ((appointment.reason_for_visit && appointment.reason_for_visit.toLowerCase().includes(searchTerm)) ||
+                (appointment.diagnosis && appointment.diagnosis.toLowerCase().includes(searchTerm)) ||
+                (appointment.notes && appointment.notes.toLowerCase().includes(searchTerm))) {
+                results.appointments.push(appointment);
+            }
+        });
+        
+        // Search medical history
+        const patient = this.ehrData.patient_info;
+        if (patient.medical_history && patient.medical_history.toLowerCase().includes(searchTerm)) {
+            results.medical_history.push({ field: 'medical_history', value: patient.medical_history });
+        }
+        if (patient.allergies && patient.allergies.toLowerCase().includes(searchTerm)) {
+            results.medical_history.push({ field: 'allergies', value: patient.allergies });
+        }
+        if (patient.current_medications && patient.current_medications.toLowerCase().includes(searchTerm)) {
+            results.medical_history.push({ field: 'current_medications', value: patient.current_medications });
+        }
+        
+        return results;
+    },
+
     // Helper functions
     calculateBMI(height, weight) {
         if (!height || !weight) return null;
         const heightM = height / 100;
         const bmi = (weight / (heightM * heightM)).toFixed(1);
         return bmi;
+    },
+
+    getBMICategory(bmi) {
+        if (!bmi) return null;
+        if (bmi < 18.5) return 'نقص الوزن';
+        if (bmi < 25) return 'وزن طبيعي';
+        if (bmi < 30) return 'زيادة وزن';
+        return 'سمنة';
+    },
+
+    getBloodPressureStatus(systolic, diastolic) {
+        if (!systolic || !diastolic) return null;
+        if (systolic < 120 && diastolic < 80) return 'طبيعي';
+        if (systolic < 130 && diastolic < 80) return 'مرتفع قليلاً';
+        if (systolic < 140 || diastolic < 90) return 'ارتفاع المرحلة الأولى';
+        return 'ارتفاع المرحلة الثانية';
+    },
+
+    getHeartRateStatus(heartRate) {
+        if (!heartRate) return null;
+        if (heartRate < 60) return 'بطء القلب';
+        if (heartRate <= 100) return 'طبيعي';
+        return 'سرعة القلب';
+    },
+
+    getTemperatureStatus(temperature) {
+        if (!temperature) return null;
+        if (temperature < 36) return 'منخفضة';
+        if (temperature <= 37.5) return 'طبيعية';
+        if (temperature <= 38.5) return 'حمى خفيفة';
+        return 'حمى شديدة';
+    },
+
+    calculateBPTrend(vitals) {
+        const systolicValues = vitals.map(v => v.systolic_bp).filter(v => v);
+        if (systolicValues.length < 2) return null;
+        
+        const recent = systolicValues.slice(0, Math.floor(systolicValues.length / 2));
+        const older = systolicValues.slice(Math.floor(systolicValues.length / 2));
+        
+        const recentAvg = recent.reduce((a, b) => a + b, 0) / recent.length;
+        const olderAvg = older.reduce((a, b) => a + b, 0) / older.length;
+        
+        if (recentAvg > olderAvg + 5) return 'ارتفاع';
+        if (recentAvg < olderAvg - 5) return 'انخفاض';
+        return 'مستقر';
+    },
+
+    calculateWeightTrend(vitals) {
+        const weightValues = vitals.map(v => v.weight).filter(v => v);
+        if (weightValues.length < 2) return null;
+        
+        const recent = weightValues.slice(0, Math.floor(weightValues.length / 2));
+        const older = weightValues.slice(Math.floor(weightValues.length / 2));
+        
+        const recentAvg = recent.reduce((a, b) => a + b, 0) / recent.length;
+        const olderAvg = older.reduce((a, b) => a + b, 0) / older.length;
+        
+        if (recentAvg > olderAvg + 2) return 'زيادة';
+        if (recentAvg < olderAvg - 2) return 'نقصان';
+        return 'مستقر';
     },
     
     getSeverityArabic(severity) {
@@ -821,17 +1162,165 @@ const EHRManager = {
     
     showContent(show) {
         const contentContainer = document.getElementById('ehr-content');
+        const searchContainer = document.getElementById('search-container');
         if (show && contentContainer) {
             contentContainer.classList.remove('d-none');
+            if (searchContainer) {
+                searchContainer.classList.remove('d-none');
+            }
         }
+    },
+    
+    // Generate medical timeline from all EHR data
+    generateMedicalTimeline() {
+        if (!this.ehrData) return [];
+        
+        const timeline = [];
+        
+        // Add diagnoses to timeline
+        this.ehrData.diagnoses?.forEach(diagnosis => {
+            timeline.push({
+                date: diagnosis.diagnosis_date,
+                type: 'diagnosis',
+                title: 'تشخيص جديد',
+                description: diagnosis.primary_diagnosis,
+                data: diagnosis
+            });
+            
+            if (diagnosis.resolution_date) {
+                timeline.push({
+                    date: diagnosis.resolution_date,
+                    type: 'diagnosis',
+                    title: 'حل التشخيص',
+                    description: `تم حل: ${diagnosis.primary_diagnosis}`,
+                    data: diagnosis
+                });
+            }
+        });
+        
+        // Add vital signs to timeline
+        this.ehrData.vital_signs?.forEach(vital => {
+            const measurements = [];
+            if (vital.blood_pressure) measurements.push(`ضغط الدم: ${vital.blood_pressure}`);
+            if (vital.heart_rate) measurements.push(`نبضات القلب: ${vital.heart_rate}`);
+            if (vital.temperature) measurements.push(`الحرارة: ${vital.temperature}°`);
+            
+            timeline.push({
+                date: vital.measured_at,
+                type: 'vital',
+                title: 'قياس العلامات الحيوية',
+                description: measurements.join(', '),
+                data: vital
+            });
+        });
+        
+        // Add appointments to timeline
+        this.ehrData.appointments?.forEach(appointment => {
+            timeline.push({
+                date: appointment.appointment_date,
+                type: 'appointment',
+                title: `موعد طبي - ${this.getAppointmentTypeArabic(appointment.appointment_type)}`,
+                description: appointment.reason_for_visit || 'زيارة طبية',
+                data: appointment
+            });
+        });
+        
+        // Sort timeline by date (newest first)
+        timeline.sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+        return timeline;
+    },
+    
+    // Enhanced prescription integration
+    async getPrescriptionsForPatient() {
+        try {
+            const response = await ApiHelper.makeRequest(`/prescriptions/patient/${this.patientId}`);
+            if (response.success) {
+                return response.data.prescriptions || [];
+            }
+        } catch (error) {
+            console.error('Error loading prescriptions:', error);
+        }
+        return [];
+    },
+    
+    // Enhanced appointment integration
+    async getAppointmentsForPatient() {
+        try {
+            const response = await ApiHelper.makeRequest(`/appointments/patient/${this.patientId}`);
+            if (response.success) {
+                return response.data.appointments || [];
+            }
+        } catch (error) {
+            console.error('Error loading appointments:', error);
+        }
+        return [];
+    },
+    
+    // Calculate comprehensive health score
+    calculateHealthScore() {
+        let score = 100; // Start with perfect score
+        const patient = this.ehrData.patient_info;
+        const latestVitals = this.ehrData.vital_signs?.[0];
+        const activeDiagnoses = this.ehrData.diagnoses?.filter(d => !d.resolved) || [];
+        
+        // Deduct points for active diagnoses
+        score -= activeDiagnoses.length * 10;
+        
+        // Deduct points for vital signs outside normal range
+        if (latestVitals) {
+            if (latestVitals.systolic_bp > 140 || latestVitals.diastolic_bp > 90) score -= 15;
+            if (latestVitals.bmi > 30) score -= 10;
+            if (latestVitals.heart_rate > 100 || latestVitals.heart_rate < 60) score -= 5;
+        }
+        
+        // Deduct points for lifestyle factors
+        if (patient.smoking_status === 'current') score -= 20;
+        if (patient.exercise_frequency === 'none') score -= 10;
+        if (patient.chronic_conditions) score -= 15;
+        
+        return Math.max(0, Math.min(100, score));
+    },
+    
+    // Enhanced search with filters
+    searchEHRWithFilters(query, filters = {}) {
+        if (!query || !this.ehrData) return null;
+        
+        const results = this.searchEHR(query);
+        
+        // Apply date filters
+        if (filters.dateFrom) {
+            const fromDate = new Date(filters.dateFrom);
+            results.diagnoses = results.diagnoses.filter(d => new Date(d.diagnosis_date) >= fromDate);
+            results.appointments = results.appointments.filter(a => new Date(a.appointment_date) >= fromDate);
+        }
+        
+        if (filters.dateTo) {
+            const toDate = new Date(filters.dateTo);
+            results.diagnoses = results.diagnoses.filter(d => new Date(d.diagnosis_date) <= toDate);
+            results.appointments = results.appointments.filter(a => new Date(a.appointment_date) <= toDate);
+        }
+        
+        // Apply status filters
+        if (filters.diagnosisStatus) {
+            results.diagnoses = results.diagnoses.filter(d => 
+                filters.diagnosisStatus === 'active' ? !d.resolved : d.resolved
+            );
+        }
+        
+        return results;
     },
     
     showAlert(type, message) {
         const container = document.getElementById('alert-container');
         if (!container) return;
         
-        const alertClass = type === 'error' ? 'alert-danger' : 'alert-success';
-        const icon = type === 'error' ? 'exclamation-triangle' : 'check-circle';
+        const alertClass = type === 'error' ? 'alert-danger' : 
+                          type === 'warning' ? 'alert-warning' :
+                          type === 'info' ? 'alert-info' : 'alert-success';
+        const icon = type === 'error' ? 'exclamation-triangle' : 
+                     type === 'warning' ? 'exclamation-triangle-fill' :
+                     type === 'info' ? 'info-circle' : 'check-circle';
         
         const alert = document.createElement('div');
         alert.className = `alert ${alertClass} alert-dismissible fade show`;
@@ -865,6 +1354,262 @@ function recordVitalSigns() {
 
 function printEHR() {
     window.print();
+}
+
+function editDiagnosis(diagnosisId) {
+    // Find the diagnosis data
+    const diagnosis = EHRManager.ehrData.diagnoses.find(d => d.id === diagnosisId);
+    if (!diagnosis) return;
+    
+    // Populate the form with existing data
+    document.getElementById('primary_diagnosis').value = diagnosis.primary_diagnosis || '';
+    document.getElementById('severity').value = diagnosis.severity || '';
+    document.getElementById('icd_10_code').value = diagnosis.icd_10_code || '';
+    document.getElementById('status').value = diagnosis.status || '';
+    document.getElementById('clinical_findings').value = diagnosis.clinical_findings || '';
+    document.getElementById('treatment_plan').value = diagnosis.treatment_plan || '';
+    document.getElementById('follow_up_required').checked = diagnosis.follow_up_required || false;
+    document.getElementById('follow_up_date').value = diagnosis.follow_up_date ? diagnosis.follow_up_date.split('T')[0] : '';
+    document.getElementById('follow_up_notes').value = diagnosis.follow_up_notes || '';
+    
+    // Store diagnosis ID for update
+    document.getElementById('diagnosis-form').dataset.editingId = diagnosisId;
+    
+    // Update modal title and button text
+    document.querySelector('#diagnosisModal .modal-title').textContent = 'تعديل التشخيص';
+    document.getElementById('save-diagnosis-btn').innerHTML = '<i class="bi bi-check-circle me-1"></i>تحديث التشخيص';
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('diagnosisModal'));
+    modal.show();
+}
+
+function viewDiagnosisDetails(diagnosisId) {
+    const diagnosis = EHRManager.ehrData.diagnoses.find(d => d.id === diagnosisId);
+    if (!diagnosis) return;
+    
+    // Create detailed view modal content
+    const modalContent = `
+        <div class="modal-header">
+            <h5 class="modal-title">تفاصيل التشخيص</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label"><strong>التشخيص الأساسي:</strong></label>
+                        <p class="form-control-plaintext">${diagnosis.primary_diagnosis}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>الشدة:</strong></label>
+                        <p class="form-control-plaintext">${diagnosis.severity ? EHRManager.getSeverityArabic(diagnosis.severity) : 'غير محددة'}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>الحالة:</strong></label>
+                        <p class="form-control-plaintext">${EHRManager.getStatusArabic(diagnosis.status)}</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label"><strong>تاريخ التشخيص:</strong></label>
+                        <p class="form-control-plaintext">${new Date(diagnosis.diagnosis_date).toLocaleDateString('ar-SA')}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>رمز ICD-10:</strong></label>
+                        <p class="form-control-plaintext">${diagnosis.icd_10_code || 'غير محدد'}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>الطبيب:</strong></label>
+                        <p class="form-control-plaintext">${diagnosis.doctor_name}</p>
+                    </div>
+                </div>
+            </div>
+            
+            ${diagnosis.clinical_findings ? `
+                <div class="mb-3">
+                    <label class="form-label"><strong>الفحوصات السريرية:</strong></label>
+                    <p class="form-control-plaintext">${diagnosis.clinical_findings}</p>
+                </div>
+            ` : ''}
+            
+            ${diagnosis.treatment_plan ? `
+                <div class="mb-3">
+                    <label class="form-label"><strong>خطة العلاج:</strong></label>
+                    <p class="form-control-plaintext">${diagnosis.treatment_plan}</p>
+                </div>
+            ` : ''}
+            
+            ${diagnosis.follow_up_required ? `
+                <div class="mb-3">
+                    <label class="form-label"><strong>المتابعة المطلوبة:</strong></label>
+                    <p class="form-control-plaintext">نعم ${diagnosis.follow_up_date ? `- ${new Date(diagnosis.follow_up_date).toLocaleDateString('ar-SA')}` : ''}</p>
+                    ${diagnosis.follow_up_notes ? `<p class="form-control-plaintext"><strong>ملاحظات المتابعة:</strong> ${diagnosis.follow_up_notes}</p>` : ''}
+                </div>
+            ` : ''}
+            
+            ${diagnosis.resolved ? `
+                <div class="mb-3">
+                    <label class="form-label"><strong>تاريخ الحل:</strong></label>
+                    <p class="form-control-plaintext">${new Date(diagnosis.resolution_date).toLocaleDateString('ar-SA')}</p>
+                    ${diagnosis.resolution_notes ? `<p class="form-control-plaintext"><strong>ملاحظات الحل:</strong> ${diagnosis.resolution_notes}</p>` : ''}
+                </div>
+            ` : ''}
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+        </div>
+    `;
+    
+    // Create or update details modal
+    let detailsModal = document.getElementById('diagnosisDetailsModal');
+    if (!detailsModal) {
+        detailsModal = document.createElement('div');
+        detailsModal.id = 'diagnosisDetailsModal';
+        detailsModal.className = 'modal fade';
+        detailsModal.innerHTML = '<div class="modal-dialog modal-lg"><div class="modal-content"></div></div>';
+        document.body.appendChild(detailsModal);
+    }
+    
+    detailsModal.querySelector('.modal-content').innerHTML = modalContent;
+    const modal = new bootstrap.Modal(detailsModal);
+    modal.show();
+}
+
+function searchEHRData() {
+    const searchQuery = document.getElementById('ehr-search').value.trim();
+    if (!searchQuery) {
+        // Reset to show all data
+        EHRManager.renderAllTabs();
+        return;
+    }
+    
+    const results = EHRManager.searchEHR(searchQuery);
+    if (!results) return;
+    
+    // Update diagnoses tab with search results
+    const diagnosesContainer = document.getElementById('diagnoses-list');
+    if (results.diagnoses.length > 0) {
+        let html = `<div class="alert alert-info"><i class="bi bi-search me-2"></i>نتائج البحث: تم العثور على ${results.diagnoses.length} تشخيص</div>`;
+        
+        results.diagnoses.forEach(diagnosis => {
+            const isActive = !diagnosis.resolved;
+            const cardClass = isActive ? 'active-diagnosis' : 'resolved-diagnosis';
+            
+            html += `
+                <div class="diagnosis-card ${cardClass} fade-in-up">
+                    <div class="diagnosis-header">
+                        <div>
+                            <div class="diagnosis-title">${diagnosis.primary_diagnosis}</div>
+                            <div class="diagnosis-meta">
+                                ${diagnosis.severity ? `<span class="diagnosis-badge severity-${diagnosis.severity}">شدة: ${EHRManager.getSeverityArabic(diagnosis.severity)}</span>` : ''}
+                                <span class="diagnosis-badge status-${diagnosis.status}">الحالة: ${EHRManager.getStatusArabic(diagnosis.status)}</span>
+                            </div>
+                        </div>
+                        <div class="text-muted small">
+                            ${new Date(diagnosis.diagnosis_date).toLocaleDateString('ar-SA')}
+                        </div>
+                    </div>
+                    <div class="diagnosis-content">
+                        ${diagnosis.clinical_findings ? `<div class="diagnosis-section"><h6>الفحوصات السريرية</h6><p>${diagnosis.clinical_findings}</p></div>` : ''}
+                        ${diagnosis.treatment_plan ? `<div class="diagnosis-section"><h6>خطة العلاج</h6><p>${diagnosis.treatment_plan}</p></div>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+        
+        diagnosesContainer.innerHTML = html;
+    }
+    
+    // Show search results summary
+    const totalResults = results.diagnoses.length + results.appointments.length + results.medical_history.length;
+    EHRManager.showAlert('info', `تم العثور على ${totalResults} نتيجة للبحث: "${searchQuery}"`);
+}
+
+function exportEHR() {
+    EHRManager.exportEHRToPDF();
+}
+
+function scheduleFollowUp() {
+    // Redirect to appointment scheduling with patient info
+    window.location.href = `appointments.html?patient_id=${EHRManager.patientId}&action=schedule`;
+}
+
+function managePrescriptions() {
+    // Redirect to prescription management for this patient
+    window.location.href = `prescriptions.html?patient_id=${EHRManager.patientId}`;
+}
+
+function generateMedicalTimeline() {
+    const timeline = EHRManager.generateMedicalTimeline();
+    if (!timeline || timeline.length === 0) {
+        EHRManager.showAlert('info', 'لا توجد بيانات كافية لإنشاء الجدول الزمني');
+        return;
+    }
+    
+    // Create timeline modal
+    const modalContent = `
+        <div class="modal-header">
+            <h5 class="modal-title">الجدول الزمني الطبي</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            <div class="timeline">
+                ${timeline.map(event => `
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-${event.type === 'diagnosis' ? 'primary' : event.type === 'vital' ? 'success' : 'info'}"></div>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">${event.title}</h6>
+                            <p class="mb-1">${event.description}</p>
+                            <small class="text-muted">${new Date(event.date).toLocaleDateString('ar-SA')}</small>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+            <button type="button" class="btn btn-primary" onclick="printTimeline()">طباعة</button>
+        </div>
+    `;
+    
+    // Create or update timeline modal
+    let timelineModal = document.getElementById('timelineModal');
+    if (!timelineModal) {
+        timelineModal = document.createElement('div');
+        timelineModal.id = 'timelineModal';
+        timelineModal.className = 'modal fade';
+        timelineModal.innerHTML = '<div class="modal-dialog modal-lg"><div class="modal-content"></div></div>';
+        document.body.appendChild(timelineModal);
+    }
+    
+    timelineModal.querySelector('.modal-content').innerHTML = modalContent;
+    const modal = new bootstrap.Modal(timelineModal);
+    modal.show();
+}
+
+function printTimeline() {
+    const timelineContent = document.querySelector('#timelineModal .timeline').innerHTML;
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>الجدول الزمني الطبي</title>
+                <style>
+                    body { font-family: Arial, sans-serif; direction: rtl; }
+                    .timeline-item { margin-bottom: 1rem; padding: 1rem; border: 1px solid #ddd; }
+                    h6 { color: #0066cc; }
+                </style>
+            </head>
+            <body>
+                <h2>الجدول الزمني الطبي - ${EHRManager.ehrData.patient_info.user?.full_name}</h2>
+                <div class="timeline">${timelineContent}</div>
+            </body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+    printWindow.close();
 }
 
 function logout() {
