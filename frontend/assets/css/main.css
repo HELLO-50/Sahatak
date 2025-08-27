@@ -735,6 +735,53 @@ body {
     color: rgba(255, 255, 255, 0.9);
 }
 
+/* Button Highlighting Fix - Remove pre-highlight when hovering over other buttons */
+/* Auth Section - Login/Register buttons */
+#auth-selection .d-grid:hover #login-btn:not(:hover) {
+    background: transparent !important;
+    color: var(--medical-blue) !important;
+    border: 2px solid var(--medical-blue) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+#auth-selection .d-grid:hover #register-btn:not(:hover) {
+    background: transparent !important;
+    color: var(--medical-blue) !important;
+    border: 2px solid var(--medical-blue) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* User Type Selection - Patient/Doctor buttons */
+#user-type-selection .d-grid:hover #patient-type-btn:not(:hover) {
+    background: transparent !important;
+    color: var(--medical-blue) !important;
+    border: 2px solid var(--medical-blue) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+#user-type-selection .d-grid:hover #patient-type-btn:not(:hover) .fw-bold,
+#user-type-selection .d-grid:hover #patient-type-btn:not(:hover) small,
+#user-type-selection .d-grid:hover #patient-type-btn:not(:hover) i {
+    color: var(--medical-blue) !important;
+}
+
+#user-type-selection .d-grid:hover #doctor-type-btn:not(:hover) {
+    background: transparent !important;
+    color: var(--medical-blue) !important;
+    border: 2px solid var(--medical-blue) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+#user-type-selection .d-grid:hover #doctor-type-btn:not(:hover) .fw-bold,
+#user-type-selection .d-grid:hover #doctor-type-btn:not(:hover) small,
+#user-type-selection .d-grid:hover #doctor-type-btn:not(:hover) i {
+    color: var(--medical-blue) !important;
+}
+
 /* Mobile optimization for user type buttons */
 @media (max-width: 768px) {
     .user-type-btn {
@@ -1079,6 +1126,7 @@ body {
   border-radius: 8px;
   margin-bottom: 10px;
 }
+
 
 /* Responsive */
 @media (max-width: 768px) {

@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="page-title">Medical History | Sahatak</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%230d47a1' d='m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523.942-.661 2.27.067 3.71L8 15.5l6.533-8.737c.728-1.44.59-2.768.067-3.71C13.486.878 10.4.28 8.717 2.01L8 2.748z'/></svg>">
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -13,110 +16,120 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="../../assets/css/main.css">
-    <link rel="stylesheet" href="../../assets/css/components/medical-records.css">
+    <link rel="stylesheet" href="../../../assets/css/main.css">
+    <!-- Dashboard CSS -->
+    <link rel="stylesheet" href="../../../assets/css/components/dashboard.css">
+    <link rel="stylesheet" href="../../../assets/css/components/medical-records.css">
 </head>
 <body>
-    <!-- Header -->
-    <nav class="navbar navbar-expand-lg bg-primary navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="bi bi-heart-pulse me-2"></i>
-                صحتك | Sahatak
-            </a>
-            <div>
-                <button class="btn btn-success me-2" id="edit-history-btn">
-                    <i class="bi bi-pencil me-1"></i>
-                    تحديث التاريخ الطبي
-                </button>
-                <button class="btn btn-outline-light me-2" onclick="goToDashboard()">
-                    <i class="bi bi-house me-1"></i>
-                    لوحة التحكم
-                </button>
-                <button class="btn btn-outline-light" onclick="goBack()">
-                    <i class="bi bi-arrow-right me-1"></i>
-                    العودة
-                </button>
+    <div class="dashboard-container">
+        <div class="container-fluid">
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <div class="row align-items-center">
+                    <!-- Profile Section - Left (Right in RTL) -->
+                    <div class="col-lg-4">
+                        <div class="profile-section">
+                            <div class="user-avatar">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <div class="user-details">
+                                <h5 class="mb-1" id="user-name">User Name</h5>
+                            </div>
+                            <!-- Vertical Action Buttons -->
+                            <div class="action-buttons">
+                                <button class="btn btn-action" onclick="openEditModal()" title="Edit History" id="edit-history-btn">
+                                    <i class="bi bi-pencil"></i>
+                                    <span id="edit-history"></span>
+                                </button>
+                                <button class="btn btn-action" onclick="goToDashboard()" title="Dashboard">
+                                    <i class="bi bi-house"></i>
+                                    <span id="nav-dashboard"></span>
+                                </button>
+                                <button class="btn btn-action" onclick="goBack()" title="Back">
+                                    <i class="bi bi-arrow-right"></i>
+                                    <span id="nav-back"></span>
+                                </button>
+                                <button class="btn btn-action btn-logout" onclick="AuthGuard.logout()" title="Logout">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                    <span id="btn-logout">Logout</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Dashboard Title - Center -->
+                    <div class="col-lg-4 text-center">
+                        <h1 class="dashboard-title" id="medical-history-title">Medical History</h1>
+                        <p class="dashboard-subtitle" id="medical-history-subtitle">Comprehensive Electronic Health Record</p>
+                    </div>
+                    
+                    <!-- Language Selector - Right (Left in RTL) -->
+                    <div class="col-lg-4 text-end">
+                        <button class="btn btn-outline-medical btn-sm" onclick="showLanguageSelector()" id="language-toggle">
+                            <i class="bi bi-globe me-1"></i>
+                            <span id="current-lang">English</span>
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
-    </nav>
 
-    <div class="container my-5">
-        <!-- Page Header -->
-        <div class="text-center mb-5">
-            <h1 class="display-6 mb-3">
-                <i class="bi bi-file-medical text-primary me-3"></i>
-                التاريخ الطبي
-            </h1>
-            <p class="lead text-muted">السجل الطبي الشامل والتاريخ الصحي</p>
-        </div>
+            <div class="row">
+                <div class="col-12">
 
-        <div class="row">
+        <div class="row medical-history-cards">
             <!-- Medical History Summary -->
-            <div class="col-lg-4">
-                <div class="card shadow-lg border-0 mb-4">
-                    <div class="card-header bg-primary text-white">
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100 border-0" style="background: white; border: 1px solid #e9ecef !important;">
+                    <div class="card-header text-white" style="background: #0d47a1 !important;">
                         <h5 class="card-title mb-0">
                             <i class="bi bi-clipboard-data me-2"></i>
-                            ملخص التاريخ الطبي
+                            <span id="summary-title">Medical Summary</span>
                         </h5>
                     </div>
                     <div class="card-body">
                         <div id="history-summary">
                             <div class="text-center py-4">
                                 <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">جاري التحميل...</span>
+                                    <span class="visually-hidden">Loading...</span>
                                 </div>
-                                <p class="mt-3 text-muted">جاري تحميل التاريخ الطبي...</p>
+                                <p class="mt-3 text-muted" id="summary-loading">Loading summary...</p>
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Health Metrics -->
-                <div class="card shadow-lg border-0 mb-4">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="card-title mb-0">
-                            <i class="bi bi-activity me-2"></i>
-                            القياسات الحيوية
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="health-metrics">
-                            <!-- Will be populated by JavaScript -->
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Medical History Timeline -->
-            <div class="col-lg-8">
-                <div class="card shadow-lg border-0">
-                    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+            <div class="col-lg-8 mb-4">
+                <div class="card h-100 border-0" style="background: white; border: 1px solid #e9ecef !important;">
+                    <div class="card-header text-white d-flex justify-content-between align-items-center" style="background: #0d47a1 !important;">
                         <h5 class="card-title mb-0">
                             <i class="bi bi-clock-history me-2"></i>
-                            الخط الزمني للتاريخ الطبي
+                            <span id="timeline-title">Update Timeline</span>
                         </h5>
                         <div class="btn-group btn-group-sm" id="timeline-filter">
                             <input type="radio" class="btn-check" name="timelineFilter" id="all-updates" value="all" checked>
-                            <label class="btn btn-outline-light" for="all-updates">الكل</label>
+                            <label class="btn btn-outline-light" for="all-updates" id="filter-all">All</label>
 
                             <input type="radio" class="btn-check" name="timelineFilter" id="appointments-updates" value="appointments">
-                            <label class="btn btn-outline-light" for="appointments-updates">المواعيد</label>
+                            <label class="btn btn-outline-light" for="appointments-updates" id="filter-appointments">Appointments</label>
 
                             <input type="radio" class="btn-check" name="timelineFilter" id="self-updates" value="self">
-                            <label class="btn btn-outline-light" for="self-updates">التحديثات الشخصية</label>
+                            <label class="btn btn-outline-light" for="self-updates" id="filter-self-updates">Self Updates</label>
                         </div>
                     </div>
                     <div class="card-body p-0">
                         <div id="medical-timeline" class="timeline-container">
                             <div class="text-center py-5">
                                 <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">جاري التحميل...</span>
+                                    <span class="visually-hidden">Loading...</span>
                                 </div>
-                                <p class="mt-3 text-muted">جاري تحميل الخط الزمني...</p>
+                                <p class="mt-3 text-muted" id="timeline-loading"></p>
                             </div>
                         </div>
+                    </div>
+                </div>
                     </div>
                 </div>
             </div>
@@ -130,7 +143,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title">
                         <i class="bi bi-pencil-square text-primary me-2"></i>
-                        تحديث التاريخ الطبي
+                        <span id="modal-title"></span>
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
@@ -141,13 +154,13 @@
                             <div class="col-md-6 mb-4">
                                 <h6 class="text-primary mb-3">
                                     <i class="bi bi-person me-2"></i>
-                                    المعلومات الأساسية
+                                    <span id="basic-info-title"></span>
                                 </h6>
                                 
                                 <div class="mb-3">
-                                    <label for="blood-type" class="form-label">فصيلة الدم</label>
+                                    <label for="blood-type" class="form-label" id="blood-type-label"></label>
                                     <select class="form-select" id="blood-type">
-                                        <option value="">اختر فصيلة الدم</option>
+                                        <option value="" id="select-blood-type"></option>
                                         <option value="A+">A+</option>
                                         <option value="A-">A-</option>
                                         <option value="B+">B+</option>
@@ -161,11 +174,11 @@
 
                                 <div class="row">
                                     <div class="col-6">
-                                        <label for="height" class="form-label">الطول (سم)</label>
+                                        <label for="height" class="form-label" id="height-label"></label>
                                         <input type="number" class="form-control" id="height" min="50" max="250">
                                     </div>
                                     <div class="col-6">
-                                        <label for="weight" class="form-label">الوزن (كجم)</label>
+                                        <label for="weight" class="form-label" id="weight-label"></label>
                                         <input type="number" class="form-control" id="weight" min="20" max="300">
                                     </div>
                                 </div>
@@ -175,37 +188,37 @@
                             <div class="col-md-6 mb-4">
                                 <h6 class="text-primary mb-3">
                                     <i class="bi bi-heart me-2"></i>
-                                    نمط الحياة
+                                    <span id="lifestyle-title"></span>
                                 </h6>
 
                                 <div class="mb-3">
-                                    <label for="smoking-status" class="form-label">حالة التدخين</label>
+                                    <label for="smoking-status" class="form-label" id="smoking-label"></label>
                                     <select class="form-select" id="smoking-status">
-                                        <option value="">اختر حالة التدخين</option>
-                                        <option value="never">لم أدخن مطلقاً</option>
-                                        <option value="former">مدخن سابق</option>
-                                        <option value="current">مدخن حالياً</option>
+                                        <option value="" id="select-smoking"></option>
+                                        <option value="never" id="never-smoked"></option>
+                                        <option value="former" id="former-smoker"></option>
+                                        <option value="current" id="current-smoker"></option>
                                     </select>
                                 </div>
 
                                 <div class="mb-3">
-                                    <label for="exercise-frequency" class="form-label">تكرار التمارين</label>
+                                    <label for="exercise-frequency" class="form-label" id="exercise-label"></label>
                                     <select class="form-select" id="exercise-frequency">
-                                        <option value="">اختر تكرار التمارين</option>
-                                        <option value="rare">نادراً</option>
-                                        <option value="weekly">أسبوعياً</option>
-                                        <option value="daily">يومياً</option>
+                                        <option value="" id="select-exercise"></option>
+                                        <option value="rare" id="rare-exercise"></option>
+                                        <option value="weekly" id="weekly-exercise"></option>
+                                        <option value="daily" id="daily-exercise"></option>
                                     </select>
                                 </div>
 
                                 <div class="mb-3">
-                                    <label for="alcohol-consumption" class="form-label">استهلاك الكحول</label>
+                                    <label for="alcohol-consumption" class="form-label" id="alcohol-label"></label>
                                     <select class="form-select" id="alcohol-consumption">
-                                        <option value="">اختر حالة الكحول</option>
-                                        <option value="none">لا أشرب</option>
-                                        <option value="occasional">أحياناً</option>
-                                        <option value="moderate">معتدل</option>
-                                        <option value="heavy">كثير</option>
+                                        <option value="" id="select-alcohol"></option>
+                                        <option value="none" id="no-drink"></option>
+                                        <option value="occasional" id="sometimes"></option>
+                                        <option value="moderate" id="moderate"></option>
+                                        <option value="heavy" id="heavy"></option>
                                     </select>
                                 </div>
                             </div>
@@ -214,50 +227,50 @@
                             <div class="col-12 mb-4">
                                 <h6 class="text-primary mb-3">
                                     <i class="bi bi-clipboard-medical me-2"></i>
-                                    التاريخ المرضي
+                                    <span id="medical-conditions-title"></span>
                                 </h6>
 
                                 <div class="mb-3">
-                                    <label for="allergies" class="form-label">الحساسية</label>
-                                    <textarea class="form-control" id="allergies" rows="2" placeholder="اكتب أي حساسية لديك من أدوية أو طعام..."></textarea>
+                                    <label for="allergies" class="form-label" id="allergies-label"></label>
+                                    <textarea class="form-control" id="allergies" rows="2"></textarea>
                                 </div>
 
                                 <div class="mb-3">
-                                    <label for="current-medications" class="form-label">الأدوية الحالية</label>
-                                    <textarea class="form-control" id="current-medications" rows="2" placeholder="اكتب الأدوية التي تتناولها حالياً..."></textarea>
+                                    <label for="current-medications" class="form-label" id="current-medications-label">Current Medications</label>
+                                    <textarea class="form-control" id="current-medications" rows="2"></textarea>
                                 </div>
 
                                 <div class="mb-3">
-                                    <label for="chronic-conditions" class="form-label">الأمراض المزمنة</label>
-                                    <textarea class="form-control" id="chronic-conditions" rows="2" placeholder="اكتب أي أمراض مزمنة لديك..."></textarea>
+                                    <label for="chronic-conditions" class="form-label" id="chronic-conditions-label">Chronic Conditions</label>
+                                    <textarea class="form-control" id="chronic-conditions" rows="2"></textarea>
                                 </div>
                             </div>
 
                             <!-- Family and Surgical History -->
                             <div class="col-md-6 mb-4">
                                 <div class="mb-3">
-                                    <label for="family-history" class="form-label">التاريخ العائلي</label>
-                                    <textarea class="form-control" id="family-history" rows="3" placeholder="اكتب التاريخ المرضي للعائلة..."></textarea>
+                                    <label for="family-history" class="form-label" id="family-history-label">Family History</label>
+                                    <textarea class="form-control" id="family-history" rows="3"></textarea>
                                 </div>
                             </div>
 
                             <div class="col-md-6 mb-4">
                                 <div class="mb-3">
-                                    <label for="surgical-history" class="form-label">التاريخ الجراحي</label>
-                                    <textarea class="form-control" id="surgical-history" rows="3" placeholder="اكتب العمليات الجراحية السابقة..."></textarea>
+                                    <label for="surgical-history" class="form-label" id="surgical-history-label">Surgical History</label>
+                                    <textarea class="form-control" id="surgical-history" rows="3"></textarea>
                                 </div>
                             </div>
 
                             <!-- General Medical History -->
                             <div class="col-12 mb-4">
                                 <div class="mb-3">
-                                    <label for="medical-history" class="form-label">التاريخ الطبي العام</label>
-                                    <textarea class="form-control" id="medical-history" rows="4" placeholder="اكتب أي معلومات طبية أخرى مهمة..."></textarea>
+                                    <label for="medical-history" class="form-label" id="medical-history-label">General Medical History</label>
+                                    <textarea class="form-control" id="medical-history" rows="4"></textarea>
                                 </div>
 
                                 <div class="mb-3">
-                                    <label for="update-notes" class="form-label">ملاحظات التحديث</label>
-                                    <textarea class="form-control" id="update-notes" rows="2" placeholder="اكتب سبب تحديث التاريخ الطبي (اختياري)..."></textarea>
+                                    <label for="update-notes" class="form-label" id="update-notes-label">Update Notes</label>
+                                    <textarea class="form-control" id="update-notes" rows="2"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -266,11 +279,11 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         <i class="bi bi-x me-1"></i>
-                        إلغاء
+                        <span id="cancel-btn-text">Cancel</span>
                     </button>
                     <button type="button" class="btn btn-primary" id="save-history-btn">
                         <i class="bi bi-check-lg me-1"></i>
-                        حفظ التحديثات
+                        <span id="save-btn-text">Save Changes</span>
                     </button>
                 </div>
             </div>
@@ -282,8 +295,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="timeline-details-title">
-                        تفاصيل التحديث
+                    <h5 class="modal-title" id="timeline-details-title"></h5>
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
@@ -291,34 +303,107 @@
                     <!-- Details will be populated by JavaScript -->
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close-details-btn"></button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3">
+        <div class="container">
+            <div class="row g-3">
+                <!-- Brand & Description -->
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="mb-3">
+                        <i class="bi bi-heart-pulse me-2 text-primary"></i>
+                        <span id="footer-brand">Sahatak</span>
+                    </h5>
+                    <div class="d-flex gap-3 social-links">
+                        <a href="#"><i class="bi bi-facebook fs-5"></i></a>
+                        <a href="#"><i class="bi bi-twitter fs-5"></i></a>
+                        <a href="#"><i class="bi bi-instagram fs-5"></i></a>
+                        <a href="#"><i class="bi bi-linkedin fs-5"></i></a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="mb-3" id="footer-links-title">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="#" class="text-muted text-decoration-none" id="footer-about">About Platform</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="text-muted text-decoration-none" id="footer-services">Services</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="mb-3" id="footer-support-title">Support & Help</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="#" class="text-muted text-decoration-none" id="footer-help">Help Center</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="text-muted text-decoration-none" id="footer-contact">Contact Us</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Emergency Contact -->
+                <div class="col-lg-3 col-md-6 emergency-section">
+                    <p class="mb-2 text-danger fw-bold" id="footer-emergency-text">
+                        For medical emergencies
+                    </p>
+                    <p class="mb-3 text-danger fw-bold fs-6" id="footer-emergency-action">
+                        <i class="bi bi-hospital me-2"></i>
+                        Go to nearest ER hospital
+                    </p>
+                    <p class="mb-0 text-muted small" id="footer-emergency-note">
+                        For non-urgent consultations use the platform
+                    </p>
+                </div>
+            </div>
+
+            <!-- Bottom Bar -->
+            <hr class="my-3">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="mb-0 fw-bold" id="footer-copyright">
+                        © 2025 Sahatak. All rights reserved.
+                    </p>
+                    <p class="mb-0 text-muted small mt-1" id="footer-medical-disclaimer">
+                        This platform does not replace visiting a doctor in emergency cases
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
     <!-- Custom JS -->
-    <script src="../../assets/js/main.js"></script>
-    <script src="../../assets/js/components/medical-records-api.js"></script>
+    <script src="../../../assets/js/main.js"></script>
+    <script src="../../../assets/js/components/auth-guard.js"></script>
+    <script src="../../../assets/js/components/dashboard-translations.js"></script>
+    <script src="../../../assets/js/components/medical-records-api.js"></script>
     
     <script>
+        // All translations are handled by dashboard-translations.js
+
         let currentPatientId = null;
         let medicalHistory = null;
         let historyUpdates = [];
         let currentFilter = 'all';
 
-        // Initialize when page loads
+        // Initialize medical history page on page load
         document.addEventListener('DOMContentLoaded', async function() {
-            // Ensure translations are loaded
-            if (!LanguageManager.translations || !LanguageManager.translations.ar) {
-                await LanguageManager.loadTranslations();
-            }
-            
-            await loadMedicalHistory();
-            setupEventListeners();
+            console.log('Medical history page initializing...');
+            await DashboardTranslations.initializeDashboard('records');
         });
 
         // Setup event listeners
@@ -360,18 +445,17 @@
                         historyUpdates = historyResponse.data.recent_updates || [];
                         
                         renderMedicalSummary();
-                        renderHealthMetrics();
                         await loadHistoryUpdates();
                         renderTimeline();
                     } else {
-                        showError('فشل في تحميل التاريخ الطبي');
+                        showError(getTranslation('errors.loading_history_failed') || 'Failed to load medical history');
                     }
                 } else {
-                    showError('فشل في الوصول للتاريخ الطبي');
+                    showError(getTranslation('errors.access_history_failed') || 'Failed to access medical history');
                 }
             } catch (error) {
                 console.error('Error loading medical history:', error);
-                showError('خطأ في تحميل التاريخ الطبي');
+                showError(getTranslation('errors.loading_history_error') || 'Error loading medical history');
             }
         }
 
@@ -397,26 +481,26 @@
             const container = document.getElementById('history-summary');
             
             if (!medicalHistory) {
-                container.innerHTML = '<p class="text-muted text-center">لا توجد معلومات متاحة</p>';
+                container.innerHTML = `<p class="text-muted text-center">${getTranslation('status.no_information') || 'No information available'}</p>`;
                 return;
             }
             
             const completionStatus = medicalHistory.medical_history_completed ? 
-                '<span class="badge bg-success">مكتمل</span>' : 
-                '<span class="badge bg-warning">غير مكتمل</span>';
+                `<span class="badge bg-success">${getTranslation('status.completed') || 'Complete'}</span>` : 
+                `<span class="badge bg-warning">${getTranslation('status.incomplete') || 'Incomplete'}</span>`;
             
             const lastUpdated = medicalHistory.medical_history_last_updated ? 
                 new Date(medicalHistory.medical_history_last_updated).toLocaleDateString('ar-SA') : 
-                'لم يتم التحديث';
+                getTranslation('status.not_updated') || 'Not updated';
             
             const summaryHtml = `
                 <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="fw-bold">حالة الإكمال:</span>
+                        <span class="fw-bold">${getTranslation('labels.completion_status') || 'Completion Status'}:</span>
                         ${completionStatus}
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="fw-bold">آخر تحديث:</span>
+                        <span class="fw-bold">${getTranslation('labels.last_update') || 'Last Update'}:</span>
                         <span class="text-muted">${lastUpdated}</span>
                     </div>
                 </div>
@@ -427,15 +511,15 @@
                     <div class="col-6 mb-2">
                         <div class="bg-light rounded p-2">
                             <i class="bi bi-droplet text-danger fs-4"></i>
-                            <div class="small text-muted">فصيلة الدم</div>
-                            <div class="fw-bold">${medicalHistory.blood_type || 'غير محدد'}</div>
+                            <div class="small text-muted">${getTranslation('labels.blood_type') || 'Blood Type'}</div>
+                            <div class="fw-bold">${medicalHistory.blood_type || getTranslation('status.not_specified') || '--'}</div>
                         </div>
                     </div>
                     <div class="col-6 mb-2">
                         <div class="bg-light rounded p-2">
                             <i class="bi bi-activity text-success fs-4"></i>
-                            <div class="small text-muted">الحالة العامة</div>
-                            <div class="fw-bold text-success">جيد</div>
+                            <div class="small text-muted">${getTranslation('labels.general_status') || 'General Status'}</div>
+                            <div class="fw-bold text-success">${getTranslation('status.good') || 'Good'}</div>
                         </div>
                     </div>
                 </div>
@@ -443,7 +527,7 @@
                 <div class="mt-3">
                     <small class="text-muted">
                         <i class="bi bi-info-circle me-1"></i>
-                        للحصول على رعاية طبية شاملة، تأكد من اكتمال جميع المعلومات
+                        ${getTranslation('info.complete_all_info') || 'For comprehensive medical care, ensure all information is complete'}
                     </small>
                 </div>
             `;
@@ -451,59 +535,6 @@
             container.innerHTML = summaryHtml;
         }
 
-        // Render health metrics
-        function renderHealthMetrics() {
-            const container = document.getElementById('health-metrics');
-            
-            if (!medicalHistory) {
-                container.innerHTML = '<p class="text-muted text-center">لا توجد قياسات متاحة</p>';
-                return;
-            }
-            
-            const bmi = calculateBMI(medicalHistory.height, medicalHistory.weight);
-            const bmiStatus = getBMIStatus(bmi);
-            
-            const metricsHtml = `
-                <div class="row text-center">
-                    <div class="col-6 mb-3">
-                        <div class="metric-card bg-primary text-white rounded p-3">
-                            <i class="bi bi-rulers fs-3 mb-2"></i>
-                            <div class="metric-value">${medicalHistory.height || '--'}</div>
-                            <div class="metric-label">الطول (سم)</div>
-                        </div>
-                    </div>
-                    <div class="col-6 mb-3">
-                        <div class="metric-card bg-info text-white rounded p-3">
-                            <i class="bi bi-speedometer2 fs-3 mb-2"></i>
-                            <div class="metric-value">${medicalHistory.weight || '--'}</div>
-                            <div class="metric-label">الوزن (كجم)</div>
-                        </div>
-                    </div>
-                    <div class="col-12 mb-3">
-                        <div class="metric-card ${bmiStatus.class} text-white rounded p-3">
-                            <i class="bi bi-calculator fs-3 mb-2"></i>
-                            <div class="metric-value">${bmi || '--'}</div>
-                            <div class="metric-label">مؤشر كتلة الجسم</div>
-                            <small>${bmiStatus.text}</small>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="lifestyle-summary">
-                    <h6 class="mb-3">نمط الحياة</h6>
-                    <div class="lifestyle-item">
-                        <i class="bi bi-lungs me-2"></i>
-                        <span>التدخين: ${getSmokingStatusArabic(medicalHistory.smoking_status)}</span>
-                    </div>
-                    <div class="lifestyle-item">
-                        <i class="bi bi-heart-pulse me-2"></i>
-                        <span>التمارين: ${getExerciseFrequencyArabic(medicalHistory.exercise_frequency)}</span>
-                    </div>
-                </div>
-            `;
-            
-            container.innerHTML = metricsHtml;
-        }
 
         // Render timeline
         function renderTimeline() {
@@ -513,8 +544,8 @@
                 container.innerHTML = `
                     <div class="text-center py-5">
                         <i class="bi bi-clock-history display-4 text-muted mb-3"></i>
-                        <h6 class="text-muted mb-3">لا يوجد تاريخ للتحديثات</h6>
-                        <p class="text-muted">ستظهر هنا جميع التحديثات على التاريخ الطبي</p>
+                        <h6 class="text-muted mb-3">${getTranslation('timeline.no_updates') || 'No update history'}</h6>
+                        <p class="text-muted">${getTranslation('timeline.updates_will_appear') || 'All medical history updates will appear here'}</p>
                     </div>
                 `;
                 return;
@@ -539,7 +570,7 @@
                 container.innerHTML = `
                     <div class="text-center py-5">
                         <i class="bi bi-filter display-4 text-muted mb-3"></i>
-                        <h6 class="text-muted">لا توجد تحديثات في هذه الفئة</h6>
+                        <h6 class="text-muted">${getTranslation('timeline.no_updates_category') || 'No updates in this category'}</h6>
                     </div>
                 `;
                 return;
@@ -564,11 +595,11 @@
                                 </small>
                             </div>
                             <div class="timeline-body">
-                                <p class="mb-2">${update.notes || 'تحديث التاريخ الطبي'}</p>
+                                <p class="mb-2">${update.notes || getTranslation('updates.medical_history') || 'Medical history update'}</p>
                                 <div class="timeline-fields">
                                     <small class="text-muted">
                                         <i class="bi bi-pencil me-1"></i>
-                                        تم تحديث ${update.updated_fields?.length || 0} حقل
+                                        ${getTranslation('timeline.fields_updated') || 'Updated'} ${update.updated_fields?.length || 0} ${getTranslation('timeline.fields') || 'fields'}
                                     </small>
                                 </div>
                                 ${update.doctor_name ? `
@@ -639,15 +670,15 @@
                 });
                 
                 if (response.success) {
-                    showSuccess('تم تحديث التاريخ الطبي بنجاح');
+                    showSuccess(getTranslation('success.history_updated') || 'Medical history updated successfully');
                     bootstrap.Modal.getInstance(document.getElementById('edit-history-modal')).hide();
                     await loadMedicalHistory(); // Reload data
                 } else {
-                    showError(response.message || 'فشل في تحديث التاريخ الطبي');
+                    showError(response.message || getTranslation('errors.update_failed') || 'Failed to update medical history');
                 }
             } catch (error) {
                 console.error('Error saving medical history:', error);
-                showError('خطأ في حفظ التاريخ الطبي');
+                showError(getTranslation('errors.save_error') || 'Error saving medical history');
             }
         }
 
@@ -668,50 +699,51 @@
                 <div class="update-details">
                     <div class="row mb-3">
                         <div class="col-6">
-                            <strong>التاريخ:</strong><br>
+                            <strong>${getTranslation('labels.date') || 'Date'}:</strong><br>
                             ${date.toLocaleDateString('ar-SA')}
                         </div>
                         <div class="col-6">
-                            <strong>الوقت:</strong><br>
+                            <strong>${getTranslation('labels.time') || 'Time'}:</strong><br>
                             ${date.toLocaleTimeString('ar-SA')}
                         </div>
                     </div>
                     
                     ${update.doctor_name ? `
                         <div class="mb-3">
-                            <strong>الطبيب:</strong><br>
+                            <strong>${getTranslation('labels.doctor') || 'Doctor'}:</strong><br>
                             د. ${update.doctor_name}
                         </div>
                     ` : ''}
                     
                     ${update.notes ? `
                         <div class="mb-3">
-                            <strong>الملاحظات:</strong><br>
+                            <strong>${getTranslation('labels.notes') || 'Notes'}:</strong><br>
                             ${update.notes}
                         </div>
                     ` : ''}
                     
                     <div class="mb-3">
-                        <strong>الحقول المحدثة:</strong><br>
+                        <strong>${getTranslation('labels.updated_fields') || 'Updated Fields'}:</strong><br>
                         <div class="mt-2">
             `;
             
             if (update.updated_fields && update.updated_fields.length > 0) {
                 update.updated_fields.forEach(field => {
                     const fieldNameAr = getFieldNameArabic(field);
-                    const oldValue = update.previous_values?.[field] || 'غير محدد';
-                    const newValue = update.new_values?.[field] || 'غير محدد';
+                    const notSpecified = getTranslation('status.not_specified') || 'Not specified';
+                    const oldValue = update.previous_values?.[field] || notSpecified;
+                    const newValue = update.new_values?.[field] || notSpecified;
                     
                     detailsHtml += `
                         <div class="field-change mb-2 p-2 border rounded">
                             <strong>${fieldNameAr}:</strong><br>
-                            <small class="text-muted">من: ${oldValue}</small><br>
-                            <small class="text-success">إلى: ${newValue}</small>
+                            <small class="text-muted">${getTranslation('labels.from') || 'From'}: ${oldValue}</small><br>
+                            <small class="text-success">${getTranslation('labels.to') || 'To'}: ${newValue}</small>
                         </div>
                     `;
                 });
             } else {
-                detailsHtml += '<p class="text-muted">لا توجد تفاصيل متاحة</p>';
+                detailsHtml += `<p class="text-muted">${getTranslation('status.no_details') || 'No details available'}</p>`;
             }
             
             detailsHtml += '</div></div></div>';
@@ -728,80 +760,81 @@
         }
 
         function getBMIStatus(bmi) {
-            if (!bmi) return { class: 'bg-secondary', text: 'غير محدد' };
+            if (!bmi) return { class: 'bg-secondary', text: getTranslation('status.not_specified') || 'Not specified' };
             
-            if (bmi < 18.5) return { class: 'bg-warning', text: 'نقص في الوزن' };
-            if (bmi < 25) return { class: 'bg-success', text: 'وزن طبيعي' };
-            if (bmi < 30) return { class: 'bg-warning', text: 'زيادة في الوزن' };
-            return { class: 'bg-danger', text: 'سمنة' };
+            if (bmi < 18.5) return { class: 'bg-warning', text: getTranslation('bmi.underweight') || 'Underweight' };
+            if (bmi < 25) return { class: 'bg-success', text: getTranslation('bmi.normal') || 'Normal weight' };
+            if (bmi < 30) return { class: 'bg-warning', text: getTranslation('bmi.overweight') || 'Overweight' };
+            return { class: 'bg-danger', text: getTranslation('bmi.obese') || 'Obese' };
         }
 
         function getUpdateTypeInfo(updateType) {
             const types = {
                 'initial_registration': {
-                    title: 'التسجيل الأولي',
+                    title: getTranslation('timeline.initial_registration') || 'Initial Registration',
                     icon: 'bi-plus-circle',
                     class: 'bg-success'
                 },
                 'patient_self_update': {
-                    title: 'تحديث شخصي',
+                    title: getTranslation('timeline.self_update') || 'Self Update',
                     icon: 'bi-person',
                     class: 'bg-primary'
                 },
                 'appointment_update': {
-                    title: 'تحديث خلال الموعد',
+                    title: getTranslation('timeline.appointment_update') || 'Appointment Update',
                     icon: 'bi-calendar-check',
                     class: 'bg-info'
                 },
                 'doctor_update': {
-                    title: 'تحديث من الطبيب',
+                    title: getTranslation('timeline.doctor_update') || 'Doctor Update',
                     icon: 'bi-person-badge',
                     class: 'bg-warning'
                 }
             };
             
             return types[updateType] || {
-                title: 'تحديث',
+                title: getTranslation('timeline.update') || 'Update',
                 icon: 'bi-pencil',
                 class: 'bg-secondary'
             };
         }
 
         function getFieldNameArabic(field) {
-            const fieldNames = {
-                'medical_history': 'التاريخ الطبي',
-                'allergies': 'الحساسية',
-                'current_medications': 'الأدوية الحالية',
-                'chronic_conditions': 'الأمراض المزمنة',
-                'family_history': 'التاريخ العائلي',
-                'surgical_history': 'التاريخ الجراحي',
-                'smoking_status': 'حالة التدخين',
-                'alcohol_consumption': 'استهلاك الكحول',
-                'exercise_frequency': 'تكرار التمارين',
-                'height': 'الطول',
-                'weight': 'الوزن',
-                'blood_type': 'فصيلة الدم'
+            const currentLang = LanguageManager.getLanguage() || 'ar';
+            const fieldTranslations = {
+                'medical_history': getTranslation('fields.medical_history') || 'Medical History',
+                'allergies': getTranslation('fields.allergies') || 'Allergies',
+                'current_medications': getTranslation('fields.current_medications') || 'Current Medications',
+                'chronic_conditions': getTranslation('fields.chronic_conditions') || 'Chronic Conditions',
+                'family_history': getTranslation('fields.family_history') || 'Family History',
+                'surgical_history': getTranslation('fields.surgical_history') || 'Surgical History',
+                'smoking_status': getTranslation('fields.smoking_status') || 'Smoking Status',
+                'alcohol_consumption': getTranslation('fields.alcohol_consumption') || 'Alcohol Consumption',
+                'exercise_frequency': getTranslation('fields.exercise_frequency') || 'Exercise Frequency',
+                'height': getTranslation('fields.height') || 'Height',
+                'weight': getTranslation('fields.weight') || 'Weight',
+                'blood_type': getTranslation('fields.blood_type') || 'Blood Type'
             };
             
-            return fieldNames[field] || field;
+            return fieldTranslations[field] || field;
         }
 
         function getSmokingStatusArabic(status) {
             const statuses = {
-                'never': 'لم أدخن مطلقاً',
-                'former': 'مدخن سابق',
-                'current': 'مدخن حالياً'
+                'never': getTranslation('smoking.never') || 'Never smoked',
+                'former': getTranslation('smoking.former') || 'Former smoker',
+                'current': getTranslation('smoking.current') || 'Current smoker'
             };
-            return statuses[status] || 'غير محدد';
+            return statuses[status] || getTranslation('status.not_specified') || 'Not specified';
         }
 
         function getExerciseFrequencyArabic(frequency) {
             const frequencies = {
-                'rare': 'نادراً',
-                'weekly': 'أسبوعياً',
-                'daily': 'يومياً'
+                'rare': getTranslation('exercise.rare') || 'Rarely',
+                'weekly': getTranslation('exercise.weekly') || 'Weekly',
+                'daily': getTranslation('exercise.daily') || 'Daily'
             };
-            return frequencies[frequency] || 'غير محدد';
+            return frequencies[frequency] || getTranslation('status.not_specified') || 'Not specified';
         }
 
         function getCurrentUserId() {
@@ -853,8 +886,10 @@
         }
 
         function goToDashboard() {
-            window.location.href = '../dashboard/patient.html';
+            window.location.href = '../../dashboard/patient.html';
         }
+        
+        // Use the global language switching function
     </script>
 </body>
 </html>

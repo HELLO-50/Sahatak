@@ -257,6 +257,93 @@
       "update": "Update",
       "save": "Save",
       "cancel": "Cancel"
+    },
+    
+    "timeline": {
+      "title": "Medical History Timeline",
+      "all": "All",
+      "appointments": "Appointments", 
+      "self_updates": "Self Updates",
+      "loading": "Loading timeline...",
+      "no_updates": "No update history",
+      "no_updates_desc": "All updates to your medical history will appear here",
+      "no_updates_category": "No updates in this category",
+      "default_note": "Medical history update",
+      "updated_fields": "updated field(s)",
+      "by_doctor": "By: Dr."
+    },
+    
+    "summary": {
+      "title": "Medical History Summary",
+      "loading": "Loading medical history...",
+      "no_info": "No information available",
+      "completion_status": "Completion Status:",
+      "last_update": "Last Update:",
+      "never_updated": "Never updated",
+      "blood_type_label": "Blood Type",
+      "not_specified": "Not specified",
+      "general_status": "General Status", 
+      "good": "Good",
+      "care_note": "For comprehensive medical care, ensure all information is complete"
+    },
+    
+    "form": {
+      "basic_info": "Basic Information",
+      "select_blood_type": "Select blood type",
+      "height_label": "Height (cm)",
+      "weight_label": "Weight (kg)",
+      "lifestyle_section": "Lifestyle",
+      "select_smoking": "Select smoking status",
+      "never_smoked": "Never smoked",
+      "former_smoker": "Former smoker", 
+      "current_smoker": "Currently smoking",
+      "select_exercise": "Select exercise frequency",
+      "select_alcohol": "Select alcohol status",
+      "no_drink": "Don't drink",
+      "sometimes": "Occasionally",
+      "medical_conditions_section": "Medical Conditions",
+      "allergies_placeholder": "Write any allergies you have to medications or food...",
+      "medications_placeholder": "Write the medications you are currently taking...",
+      "chronic_placeholder": "Write any chronic diseases you have...",
+      "family_history_placeholder": "Write family medical history...",
+      "surgical_history_placeholder": "Write previous surgical operations...", 
+      "general_history_placeholder": "Write any other important medical information...",
+      "update_notes_label": "Update Notes",
+      "update_notes_placeholder": "Write reason for updating medical history (optional)...",
+      "save_updates": "Save Updates"
+    },
+    
+    "modal": {
+      "update_details": "Update Details",
+      "close": "Close",
+      "date": "Date:",
+      "time": "Time:",
+      "doctor": "Doctor:",
+      "notes": "Notes:",
+      "updated_fields": "Updated Fields:",
+      "no_details": "No details available",
+      "from": "From:",
+      "to": "To:"
+    },
+    
+    "bmi": {
+      "not_specified": "Not specified",
+      "underweight": "Underweight",
+      "normal": "Normal weight", 
+      "overweight": "Overweight",
+      "obese": "Obese"
+    },
+    
+    "errors": {
+      "loading_failed": "Failed to load medical history",
+      "access_failed": "Failed to access medical history", 
+      "loading_error": "Error loading medical history",
+      "update_failed": "Failed to update medical history",
+      "save_error": "Error saving medical history"
+    },
+    
+    "success": {
+      "updated_successfully": "Medical history updated successfully"
     }
   },
 
@@ -666,22 +753,187 @@
     }
   },
 
+  "records": {
+    "title": "Medical Records",
+    "subtitle": "Comprehensive management of medical history and prescriptions",
+    "dashboard_title": "Medical Records Dashboard",
+    "stats": {
+      "total_records": "Total Medical Records",
+      "active_prescriptions": "Active Prescriptions", 
+      "recent_updates": "Recent Updates",
+      "days_since_update": "Days Since Last Update"
+    },
+    "navigation": {
+      "medical_history": "Medical History",
+      "medical_history_desc": "View and manage complete medical history and timeline of updates",
+      "prescriptions": "Prescriptions", 
+      "prescriptions_desc": "Manage medical prescriptions and current and completed medications",
+      "view_complete_history": "View Complete History",
+      "update_data": "Update Data",
+      "view_all_prescriptions": "View All Prescriptions",
+      "active_prescriptions": "Active Prescriptions"
+    },
+    "buttons": {
+      "view_complete_history": "View Complete History",
+      "update_data": "Update Data", 
+      "view_all_prescriptions": "View All Prescriptions",
+      "active_prescriptions": "Active Prescriptions"
+    },
+    "recent_activity": {
+      "title": "Recent Activity",
+      "view_all": "View All Activity",
+      "loading_activity": "Loading recent activity...",
+      "no_activity": "No recent activity",
+      "no_activity_desc": "Recent medical activity will appear here"
+    },
+    "loading": {
+      "default": "Loading...",
+      "medical": "Loading...",
+      "prescription": "Loading...",
+      "activity": "Loading recent activity..."
+    },
+    "errors": {
+      "loading_overview": "Error loading overview data",
+      "loading_activity": "Error loading recent activity"
+    },
+    "status": {
+      "medical_incomplete": "Medical history incomplete",
+      "no_prescriptions": "No prescriptions",
+      "prescriptions_expiring": "You have prescriptions expiring within a week",
+      "all_prescriptions_current": "All prescriptions are current"
+    },
+    "labels": {
+      "blood_type": "Blood Type",
+      "weight": "Weight", 
+      "weight_unit": "kg",
+      "bmi": "BMI",
+      "total": "Total",
+      "active": "Active",
+      "expiring_soon": "Expiring Soon",
+      "last_updated": "Last updated",
+      "not_updated": "Not updated",
+      "days": "days"
+    },
+    "updates": {
+      "medical_history": "Medical history update",
+      "new_prescription": "New prescription"
+    },
+    "no_data": "No data available"
+  },
+
+  "availability": {
+    "dashboard_title": "Manage Availability",
+    "dashboard_subtitle": "Set your working hours and availability",
+    "page_breadcrumb": "Dashboard / Availability",
+    "page_title": "Manage Availability",
+    "page_subtitle": "Set your working hours and availability",
+    
+    "tabs": {
+      "weekly": "Weekly Schedule",
+      "calendar": "Monthly Calendar", 
+      "blocked": "Blocked Times"
+    },
+    
+    "weekly": {
+      "title": "Setup Weekly Schedule",
+      "loading": "Loading weekly schedule...",
+      "quick_templates": "Quick Templates",
+      "template_fulltime": "Full Time",
+      "template_weekdays": "Weekdays Only",
+      "template_parttime": "Part Time",
+      "from_time": "From",
+      "to_time": "To"
+    },
+    
+    "days": {
+      "saturday": "Saturday",
+      "sunday": "Sunday",
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday"
+    },
+    
+    "days_short": {
+      "sat": "Sat",
+      "sun": "Sun",
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri"
+    },
+    
+    "calendar": {
+      "title": "Monthly Calendar",
+      "loading": "Loading calendar..."
+    },
+    
+    "blocked": {
+      "title": "Blocked Times",
+      "loading": "Loading blocked times...",
+      "block_new": "Block New Time"
+    },
+    
+    "modal": {
+      "block_title": "Block Specific Time",
+      "edit_title": "Edit Blocked Time",
+      "date": "Date",
+      "start_time": "Start Time", 
+      "end_time": "End Time",
+      "reason": "Reason (Optional)",
+      "placeholder_reason": "Enter reason for blocking this time...",
+      "cancel": "Cancel",
+      "block_time": "Block Time",
+      "unblock": "Remove Block",
+      "close": "Close"
+    },
+    
+    "buttons": {
+      "back": "Back",
+      "profile": "Profile",
+      "logout": "Logout",
+      "weekly": "Weekly View",
+      "save_schedule": "Save Schedule",
+      "reset": "Reset",
+      "export": "Export",
+      "block_new": "Block New Time"
+    },
+    
+    "loading": "Loading...",
+    "user_name": "Dr. Sarah Ahmed",
+    
+    "messages": {
+      "load_schedule_error": "Failed to load weekly schedule",
+      "save_schedule_error": "Failed to save schedule",
+      "save_schedule_success": "Schedule saved successfully",
+      "load_calendar_error": "Failed to load calendar",
+      "load_blocked_error": "Failed to load blocked times",
+      "block_time_error": "Failed to block time",
+      "block_time_success": "Time blocked successfully",
+      "unblock_time_error": "Failed to unblock time",
+      "unblock_time_success": "Time unblocked successfully",
+      "reset_confirm": "Are you sure you want to reset the weekly schedule?",
+      "template_applied": "Template applied successfully",
+      "invalid_time": "Invalid time range",
+      "overlap_error": "Time overlaps with existing schedule"
+    }
+  },
+
   "footer": {
-    "brand": "صحتك | Sahatak",
+    "brand": "Sahatak",
     "description": "A secure and trusted medical platform to connect with doctors remotely",
-    "quick_links": "Quick Links",
+    "links_title": "Quick Links",
     "about": "About Platform",
     "services": "Services",
-    "support": "Support & Help",
+    "support_title": "Support & Help",
     "help": "Help Center",
     "contact": "Contact Us",
-    "emergency": {
-      "title": "Emergency",
-      "text": "For medical emergencies",
-      "action": "Go to nearest ER hospital",
-      "note": "For non-urgent consultations use the platform"
-    },
-    "copyright": "© 2025 Sahatak | صحتك. All rights reserved.",
-    "disclaimer": "This platform does not replace visiting a doctor in emergency cases"
+    "emergency_text": "For medical emergencies",
+    "emergency_action": "Go to nearest ER hospital",
+    "emergency_note": "For non-urgent consultations use the platform",
+    "copyright": "© 2025 Sahatak. All rights reserved.",
+    "medical_disclaimer": "This platform does not replace visiting a doctor in emergency cases"
   }
 }

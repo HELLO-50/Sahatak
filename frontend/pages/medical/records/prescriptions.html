@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الوصفات الطبية | صحتك</title>
+    <title id="page-title">Prescriptions | Sahatak</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%230d47a1' d='m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523.942-.661 2.27.067 3.71L8 15.5l6.533-8.737c.728-1.44.59-2.768.067-3.71C13.486.878 10.4.28 8.717 2.01L8 2.748z'/></svg>">
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -13,65 +16,88 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="../../assets/css/main.css">
-    <link rel="stylesheet" href="../../assets/css/components/medical-records.css">
+    <link rel="stylesheet" href="../../../assets/css/main.css">
+    <!-- Dashboard CSS -->
+    <link rel="stylesheet" href="../../../assets/css/components/dashboard.css">
+    <link rel="stylesheet" href="../../../assets/css/components/medical-records.css">
 </head>
 <body>
-    <!-- Header -->
-    <nav class="navbar navbar-expand-lg bg-primary navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="bi bi-heart-pulse me-2"></i>
-                صحتك | Sahatak
-            </a>
-            <div>
-                <button class="btn btn-success me-2" id="create-prescription-btn" style="display: none;">
-                    <i class="bi bi-plus me-1"></i>
-                    وصفة طبية جديدة
-                </button>
-                <button class="btn btn-outline-light me-2" onclick="goToDashboard()">
-                    <i class="bi bi-house me-1"></i>
-                    لوحة التحكم
-                </button>
-                <button class="btn btn-outline-light" onclick="goBack()">
-                    <i class="bi bi-arrow-right me-1"></i>
-                    العودة
-                </button>
+    <div class="dashboard-container">
+        <div class="container-fluid">
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <div class="row align-items-center">
+                    <!-- Profile Section - Left (Right in RTL) -->
+                    <div class="col-lg-4">
+                        <div class="profile-section">
+                            <div class="user-avatar">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <div class="user-details">
+                                <h5 class="mb-1" id="user-name">User Name</h5>
+                            </div>
+                            <!-- Vertical Action Buttons -->
+                            <div class="action-buttons">
+                                <button class="btn btn-action" onclick="openCreatePrescriptionModal()" title="Create Prescription" id="create-prescription-btn" style="display: none;">
+                                    <i class="bi bi-plus"></i>
+                                    <span id="create-prescription">Create Prescription</span>
+                                </button>
+                                <button class="btn btn-action" onclick="goToDashboard()" title="Dashboard">
+                                    <i class="bi bi-house"></i>
+                                    <span id="nav-dashboard">Dashboard</span>
+                                </button>
+                                <button class="btn btn-action" onclick="goBack()" title="Back">
+                                    <i class="bi bi-arrow-right"></i>
+                                    <span id="nav-back">Back</span>
+                                </button>
+                                <button class="btn btn-action btn-logout" onclick="AuthGuard.logout()" title="Logout">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                    <span id="btn-logout">Logout</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Dashboard Title - Center -->
+                    <div class="col-lg-4 text-center">
+                        <h1 class="dashboard-title" id="prescriptions-title">Prescriptions</h1>
+                        <p class="dashboard-subtitle" id="prescriptions-subtitle">Manage medical prescriptions and medications</p>
+                    </div>
+                    
+                    <!-- Language Selector - Right (Left in RTL) -->
+                    <div class="col-lg-4 text-end">
+                        <button class="btn btn-outline-medical btn-sm" onclick="showLanguageSelector()" id="language-toggle">
+                            <i class="bi bi-globe me-1"></i>
+                            <span id="current-lang">English</span>
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
-    </nav>
 
-    <div class="container my-5">
-        <!-- Page Header -->
-        <div class="text-center mb-5">
-            <h1 class="display-6 mb-3">
-                <i class="bi bi-prescription2 text-primary me-3"></i>
-                الوصفات الطبية
-            </h1>
-            <p class="lead text-muted">إدارة الوصفات الطبية والأدوية</p>
-        </div>
+            <div class="row">
+                <div class="col-12">
 
         <!-- Statistics Cards -->
         <div class="stats-grid mb-4">
             <div class="stat-card">
                 <i class="bi bi-prescription2 stat-icon text-primary"></i>
                 <div class="stat-value" id="total-prescriptions">--</div>
-                <div class="stat-label">إجمالي الوصفات</div>
+                <div class="stat-label" id="stat-total-prescriptions">Total Prescriptions</div>
             </div>
             <div class="stat-card">
                 <i class="bi bi-check-circle stat-icon text-success"></i>
                 <div class="stat-value" id="active-prescriptions">--</div>
-                <div class="stat-label">الوصفات النشطة</div>
+                <div class="stat-label" id="stat-active-prescriptions">Active Prescriptions</div>
             </div>
             <div class="stat-card">
                 <i class="bi bi-clipboard-check stat-icon text-info"></i>
                 <div class="stat-value" id="completed-prescriptions">--</div>
-                <div class="stat-label">الوصفات المكتملة</div>
+                <div class="stat-label" id="stat-completed-prescriptions">Completed Prescriptions</div>
             </div>
             <div class="stat-card" id="doctor-stats" style="display: none;">
                 <i class="bi bi-people stat-icon text-warning"></i>
                 <div class="stat-value" id="patients-with-prescriptions">--</div>
-                <div class="stat-label">المرضى</div>
+                <div class="stat-label" id="stat-patients">Patients</div>
             </div>
         </div>
 
@@ -80,7 +106,7 @@
             <div class="row align-items-center">
                 <div class="col-md-6 mb-3 mb-md-0">
                     <div class="position-relative">
-                        <input type="text" class="form-control" id="search-prescriptions" placeholder="بحث في الوصفات الطبية...">
+                        <input type="text" class="form-control" id="search-prescriptions" placeholder="">
                         <i class="bi bi-search search-icon"></i>
                     </div>
                 </div>
@@ -88,19 +114,19 @@
                     <div class="row">
                         <div class="col-6">
                             <select class="form-select" id="status-filter">
-                                <option value="">جميع الحالات</option>
-                                <option value="active">النشطة</option>
-                                <option value="completed">المكتملة</option>
-                                <option value="cancelled">المُلغاة</option>
-                                <option value="expired">المنتهية الصلاحية</option>
+                                <option value="" id="filter-all-status">All Status</option>
+                                <option value="active" id="filter-active">Active</option>
+                                <option value="completed" id="filter-completed">Completed</option>
+                                <option value="cancelled" id="filter-cancelled">Cancelled</option>
+                                <option value="expired" id="filter-expired">Expired</option>
                             </select>
                         </div>
                         <div class="col-6">
                             <select class="form-select" id="sort-prescriptions">
-                                <option value="newest">الأحدث أولاً</option>
-                                <option value="oldest">الأقدم أولاً</option>
-                                <option value="medication">ترتيب بالدواء</option>
-                                <option value="status">ترتيب بالحالة</option>
+                                <option value="newest" id="sort-newest">Newest First</option>
+                                <option value="oldest" id="sort-oldest">Oldest First</option>
+                                <option value="medication" id="sort-medication">By Medication</option>
+                                <option value="status" id="sort-status">By Status</option>
                             </select>
                         </div>
                     </div>
@@ -112,9 +138,9 @@
         <div id="prescriptions-container">
             <div class="loading-state">
                 <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">جاري التحميل...</span>
+                    <span class="visually-hidden" id="loading-text"></span>
                 </div>
-                <p class="mt-3">جاري تحميل الوصفات الطبية...</p>
+                <p class="mt-3" id="loading-prescriptions-text"></p>
             </div>
         </div>
 
@@ -123,7 +149,9 @@
             <ul class="pagination justify-content-center mt-4" id="pagination">
                 <!-- Pagination will be populated by JavaScript -->
             </ul>
-        </nav>
+                </nav>
+            </div>
+        </div>
     </div>
 
     <!-- Create/Edit Prescription Modal (For Doctors) -->
@@ -133,7 +161,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="prescription-modal-title">
                         <i class="bi bi-prescription2 text-primary me-2"></i>
-                        وصفة طبية جديدة
+                        <span id="modal-new-prescription"></span>
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
@@ -142,15 +170,15 @@
                         <!-- Patient Selection (for doctors) -->
                         <div class="row mb-4" id="patient-selection-section">
                             <div class="col-md-6">
-                                <label for="patient-select" class="form-label">المريض</label>
+                                <label for="patient-select" class="form-label" id="patient-label"></label>
                                 <select class="form-select" id="patient-select" required>
-                                    <option value="">اختر المريض</option>
+                                    <option value="" id="select-patient"></option>
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <label for="appointment-select" class="form-label">الموعد</label>
+                                <label for="appointment-select" class="form-label" id="appointment-label"></label>
                                 <select class="form-select" id="appointment-select" required>
-                                    <option value="">اختر الموعد</option>
+                                    <option value="" id="select-appointment"></option>
                                 </select>
                             </div>
                         </div>
@@ -158,33 +186,33 @@
                         <!-- Medication Information -->
                         <div class="row mb-4">
                             <div class="col-md-6">
-                                <label for="medication-name" class="form-label">اسم الدواء *</label>
-                                <input type="text" class="form-control" id="medication-name" required placeholder="مثل: باراسيتامول">
+                                <label for="medication-name" class="form-label" id="medication-name-label"></label>
+                                <input type="text" class="form-control" id="medication-name" required placeholder="">
                             </div>
                             <div class="col-md-6">
-                                <label for="dosage" class="form-label">الجرعة *</label>
-                                <input type="text" class="form-control" id="dosage" required placeholder="مثل: 500 مجم">
-                            </div>
-                        </div>
-
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <label for="frequency" class="form-label">التكرار *</label>
-                                <input type="text" class="form-control" id="frequency" required placeholder="مثل: 3 مرات يومياً">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="duration" class="form-label">المدة *</label>
-                                <input type="text" class="form-control" id="duration" required placeholder="مثل: 7 أيام">
+                                <label for="dosage" class="form-label" id="dosage-label"></label>
+                                <input type="text" class="form-control" id="dosage" required placeholder="">
                             </div>
                         </div>
 
                         <div class="row mb-4">
                             <div class="col-md-6">
-                                <label for="quantity" class="form-label">الكمية</label>
-                                <input type="text" class="form-control" id="quantity" placeholder="مثل: 21 قرص">
+                                <label for="frequency" class="form-label" id="frequency-label"></label>
+                                <input type="text" class="form-control" id="frequency" required placeholder="">
                             </div>
                             <div class="col-md-6">
-                                <label for="refills-allowed" class="form-label">عدد مرات التجديد المسموح</label>
+                                <label for="duration" class="form-label" id="duration-label"></label>
+                                <input type="text" class="form-control" id="duration" required placeholder="">
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="quantity" class="form-label" id="quantity-label"></label>
+                                <input type="text" class="form-control" id="quantity" placeholder="">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="refills-allowed" class="form-label" id="refills-label"></label>
                                 <input type="number" class="form-control" id="refills-allowed" min="0" max="10" value="0">
                             </div>
                         </div>
@@ -192,35 +220,35 @@
                         <!-- Dates -->
                         <div class="row mb-4">
                             <div class="col-md-6">
-                                <label for="start-date" class="form-label">تاريخ البدء</label>
+                                <label for="start-date" class="form-label" id="start-date-label"></label>
                                 <input type="date" class="form-control" id="start-date">
                             </div>
                             <div class="col-md-6">
-                                <label for="end-date" class="form-label">تاريخ الانتهاء</label>
+                                <label for="end-date" class="form-label" id="end-date-label"></label>
                                 <input type="date" class="form-control" id="end-date">
                             </div>
                         </div>
 
                         <!-- Instructions and Notes -->
                         <div class="mb-4">
-                            <label for="instructions" class="form-label">تعليمات الاستخدام</label>
-                            <textarea class="form-control" id="instructions" rows="3" placeholder="مثل: تناول مع الطعام، تجنب القيادة..."></textarea>
+                            <label for="instructions" class="form-label" id="instructions-label"></label>
+                            <textarea class="form-control" id="instructions" rows="3" placeholder=""></textarea>
                         </div>
 
                         <div class="mb-4">
-                            <label for="notes" class="form-label">ملاحظات الطبيب</label>
-                            <textarea class="form-control" id="notes" rows="2" placeholder="ملاحظات إضافية للصيدلي أو المريض..."></textarea>
+                            <label for="notes" class="form-label" id="notes-label"></label>
+                            <textarea class="form-control" id="notes" rows="2" placeholder=""></textarea>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         <i class="bi bi-x me-1"></i>
-                        إلغاء
+                        <span id="modal-cancel"></span>
                     </button>
                     <button type="button" class="btn btn-primary" id="save-prescription-btn">
                         <i class="bi bi-check-lg me-1"></i>
-                        حفظ الوصفة
+                        <span id="modal-save"></span>
                     </button>
                 </div>
             </div>
@@ -233,7 +261,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="prescription-details-title">
-                        تفاصيل الوصفة الطبية
+                        <span id="details-modal-title"></span>
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
@@ -243,13 +271,13 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-warning d-none" id="edit-prescription-btn">
                         <i class="bi bi-pencil me-1"></i>
-                        تعديل
+                        <span id="edit-btn-text"></span>
                     </button>
                     <button type="button" class="btn btn-success d-none" id="mark-completed-btn">
                         <i class="bi bi-check-circle me-1"></i>
-                        تمييز كمكتمل
+                        <span id="mark-complete-btn"></span>
                     </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close-details-btn"></button>
                 </div>
             </div>
         </div>
@@ -262,34 +290,110 @@
                 <div class="modal-header">
                     <h5 class="modal-title">
                         <i class="bi bi-arrow-repeat text-primary me-2"></i>
-                        تغيير حالة الوصفة
+                        <span id="status-modal-title"></span>
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p>هل تريد تمييز هذه الوصفة كمكتملة؟</p>
+                    <p id="confirm-complete-text"></p>
                     <div class="mb-3">
-                        <label for="completion-notes" class="form-label">ملاحظات (اختياري)</label>
-                        <textarea class="form-control" id="completion-notes" rows="3" placeholder="أي ملاحظات حول إكمال الوصفة..."></textarea>
+                        <label for="completion-notes" class="form-label" id="completion-notes-label"></label>
+                        <textarea class="form-control" id="completion-notes" rows="3" placeholder=""></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" onclick="confirmStatusChange()">
                         <i class="bi bi-check me-1"></i>
-                        نعم، تمييز كمكتمل
+                        <span id="confirm-complete-btn-text"></span>
                     </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="status-cancel-btn"></button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3">
+        <div class="container">
+            <div class="row g-3">
+                <!-- Brand & Description -->
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="mb-3">
+                        <i class="bi bi-heart-pulse me-2 text-primary"></i>
+                        <span id="footer-brand">Sahatak</span>
+                    </h5>
+                    <div class="d-flex gap-3 social-links">
+                        <a href="#"><i class="bi bi-facebook fs-5"></i></a>
+                        <a href="#"><i class="bi bi-twitter fs-5"></i></a>
+                        <a href="#"><i class="bi bi-instagram fs-5"></i></a>
+                        <a href="#"><i class="bi bi-linkedin fs-5"></i></a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="mb-3" id="footer-links-title">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="#" class="text-muted text-decoration-none" id="footer-about">About Platform</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="text-muted text-decoration-none" id="footer-services">Services</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="mb-3" id="footer-support-title">Support & Help</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="#" class="text-muted text-decoration-none" id="footer-help">Help Center</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="text-muted text-decoration-none" id="footer-contact">Contact Us</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Emergency Contact -->
+                <div class="col-lg-3 col-md-6 emergency-section">
+                    <p class="mb-2 text-danger fw-bold" id="footer-emergency-text">
+                        For medical emergencies
+                    </p>
+                    <p class="mb-3 text-danger fw-bold fs-6" id="footer-emergency-action">
+                        <i class="bi bi-hospital me-2"></i>
+                        Go to nearest ER hospital
+                    </p>
+                    <p class="mb-0 text-muted small" id="footer-emergency-note">
+                        For non-urgent consultations use the platform
+                    </p>
+                </div>
+            </div>
+
+            <!-- Bottom Bar -->
+            <hr class="my-3">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="mb-0 fw-bold" id="footer-copyright">
+                        © 2025 Sahatak. All rights reserved.
+                    </p>
+                    <p class="mb-0 text-muted small mt-1" id="footer-medical-disclaimer">
+                        This platform does not replace visiting a doctor in emergency cases
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
     <!-- Custom JS -->
-    <script src="../../assets/js/main.js"></script>
-    <script src="../../assets/js/components/medical-records-api.js"></script>
+    <script src="../../../assets/js/main.js"></script>
+    <script src="../../../assets/js/components/auth-guard.js"></script>
+    <script src="../../../assets/js/components/dashboard-translations.js"></script>
+    <script src="../../../assets/js/components/medical-records-api.js"></script>
     
     <script>
         let prescriptions = [];
@@ -301,30 +405,10 @@
         let currentSearch = '';
         let userType = null;
 
-        // Initialize when page loads
+        // Initialize prescriptions page on page load
         document.addEventListener('DOMContentLoaded', async function() {
-            // Ensure translations are loaded
-            if (!LanguageManager.translations || !LanguageManager.translations.ar) {
-                await LanguageManager.loadTranslations();
-            }
-            
-            // Get user type
-            const userInfo = await getCurrentUser();
-            userType = userInfo?.user_type || 'patient';
-            
-            // Show create button for doctors
-            if (userType === 'doctor') {
-                document.getElementById('create-prescription-btn').style.display = 'block';
-                document.getElementById('doctor-stats').style.display = 'block';
-            }
-            
-            await loadPrescriptionStats();
-            await loadPrescriptions();
-            setupEventListeners();
-            
-            // Set today as default start date
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('start-date').value = today;
+            console.log('Prescriptions page initializing...');
+            await DashboardTranslations.initializeDashboard('records');
         });
 
         // Setup event listeners
@@ -964,9 +1048,11 @@
         }
 
         function goToDashboard() {
-            const dashboardUrl = userType === 'doctor' ? '../dashboard/doctor.html' : '../dashboard/patient.html';
+            const dashboardUrl = userType === 'doctor' ? '../../dashboard/doctor.html' : '../../dashboard/patient.html';
             window.location.href = dashboardUrl;
         }
+        
+        // Use the global language switching function
     </script>
 </body>
 </html>

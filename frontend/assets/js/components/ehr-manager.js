@@ -1537,7 +1537,7 @@ function scheduleFollowUp() {
 
 function managePrescriptions() {
     // Redirect to prescription management for this patient
-    window.location.href = `prescriptions.html?patient_id=${EHRManager.patientId}`;
+    window.location.href = `../medical/records/prescriptions.html?patient_id=${EHRManager.patientId}`;
 }
 
 function generateMedicalTimeline() {

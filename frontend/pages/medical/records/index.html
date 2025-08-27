@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="page-title">Medical Records | Sahatak</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%230d47a1' d='m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523.942-.661 2.27.067 3.71L8 15.5l6.533-8.737c.728-1.44.59-2.768.067-3.71C13.486.878 10.4.28 8.717 2.01L8 2.748z'/></svg>">
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -13,45 +16,58 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="../../assets/css/main.css">
-    <link rel="stylesheet" href="../../assets/css/components/medical-records.css">
+    <link rel="stylesheet" href="../../../assets/css/main.css">
+    <!-- Dashboard CSS -->
+    <link rel="stylesheet" href="../../../assets/css/components/dashboard.css">
+    <link rel="stylesheet" href="../../../assets/css/components/medical-records.css">
 </head>
 <body>
-    <!-- Header -->
-    <nav class="navbar navbar-expand-lg bg-primary navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="../../index.html">
-                <i class="bi bi-heart-pulse me-2"></i>
-                <span id="navbar-brand">Sahatak | صحتك</span>
-            </a>
-            <div class="d-flex align-items-center">
-                <!-- Language Toggle -->
-                <button class="btn btn-outline-light btn-sm me-2" onclick="toggleLanguage()" id="language-toggle">
-                    <i class="bi bi-translate me-1"></i>
-                    <span id="current-lang">العربية</span>
-                </button>
-                <!-- Navigation Buttons -->
-                <button class="btn btn-outline-light me-2" onclick="goToDashboard()">
-                    <i class="bi bi-house me-1"></i>
-                    <span id="nav-dashboard">Dashboard</span>
-                </button>
-                <button class="btn btn-outline-light" onclick="goBack()">
-                    <i class="bi bi-arrow-left me-1"></i>
-                    <span id="nav-back">Back</span>
-                </button>
+    <div class="dashboard-container">
+        <div class="container-fluid">
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <div class="row align-items-center">
+                    <!-- Profile Section - Left (Right in RTL) -->
+                    <div class="col-lg-4">
+                        <div class="profile-section">
+                            <div class="user-avatar">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <div class="user-details">
+                                <h5 class="mb-1" id="user-name">User Name</h5>
+                            </div>
+                            <!-- Vertical Action Buttons -->
+                            <div class="action-buttons">
+                                <button class="btn btn-action" onclick="goToDashboard()" title="Dashboard">
+                                    <i class="bi bi-house"></i>
+                                    <span id="nav-dashboard">Dashboard</span>
+                                </button>
+                                <button class="btn btn-action btn-logout" onclick="AuthGuard.logout()" title="Logout">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                    <span id="btn-logout">Logout</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Dashboard Title - Center -->
+                    <div class="col-lg-4 text-center">
+                        <h1 class="dashboard-title" id="records-title">Medical Records</h1>
+                        <p class="dashboard-subtitle" id="records-subtitle">Comprehensive management of medical history and prescriptions</p>
+                    </div>
+                    
+                    <!-- Language Selector - Right (Left in RTL) -->
+                    <div class="col-lg-4 text-end">
+                        <button class="btn btn-outline-medical btn-sm" onclick="showLanguageSelector()" id="language-toggle">
+                            <i class="bi bi-globe me-1"></i>
+                            <span id="current-lang">English</span>
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
-    </nav>
 
-    <div class="container my-5">
-        <!-- Page Header -->
-        <div class="text-center mb-5">
-            <h1 class="display-6 mb-3">
-                <i class="bi bi-folder-fill text-primary me-3"></i>
-                <span id="records-title">Medical Records</span>
-            </h1>
-            <p class="lead text-muted" id="records-subtitle">Comprehensive management of medical history and prescriptions</p>
-        </div>
+            <div class="row">
+                <div class="col-12">
 
         <!-- Quick Stats -->
         <div class="row mb-5">
@@ -89,25 +105,25 @@
         <div class="row">
             <!-- Medical History Card -->
             <div class="col-lg-6 mb-4">
-                <div class="card h-100 shadow-lg border-0 medical-nav-card" onclick="goToMedicalHistory()">
-                    <div class="card-header bg-primary text-white">
+                <div class="card h-100 border-0 medical-nav-card">
+                    <div class="card-header text-white" style="background: #0d47a1 !important;">
                         <h5 class="card-title mb-0">
                             <i class="bi bi-clipboard-medical me-2"></i>
-                            التاريخ الطبي
+                            <span id="medical-history-card-title">Medical History</span>
                         </h5>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-8">
-                                <p class="card-text mb-3">عرض وإدارة التاريخ الطبي الكامل والخط الزمني للتحديثات</p>
+                                <p class="card-text mb-3" id="medical-history-card-desc">View and manage complete medical history and timeline of updates</p>
                                 
                                 <div class="medical-summary mb-3" id="medical-summary-preview">
-                                    <small class="text-muted">جاري التحميل...</small>
+                                    <small class="text-muted" id="medical-loading-text">Loading...</small>
                                 </div>
                                 
                                 <div class="d-flex flex-wrap gap-2">
-                                    <button class="btn btn-outline-primary btn-sm">عرض التاريخ الكامل</button>
-                                    <button class="btn btn-outline-success btn-sm" id="update-history-btn">تحديث البيانات</button>
+                                    <button class="btn btn-outline-primary btn-sm" onclick="goToMedicalHistory()" id="view-complete-history-btn">View Complete History</button>
+                                    <button class="btn btn-outline-success btn-sm" onclick="goToMedicalHistory()" id="update-history-btn">Update Data</button>
                                 </div>
                             </div>
                             <div class="col-4 text-center">
@@ -120,25 +136,25 @@
 
             <!-- Prescriptions Card -->
             <div class="col-lg-6 mb-4">
-                <div class="card h-100 shadow-lg border-0 medical-nav-card" onclick="goToPrescriptions()">
-                    <div class="card-header bg-success text-white">
+                <div class="card h-100 border-0 medical-nav-card">
+                    <div class="card-header text-white" style="background: #0d47a1 !important;">
                         <h5 class="card-title mb-0">
                             <i class="bi bi-prescription2 me-2"></i>
-                            الوصفات الطبية
+                            <span id="prescriptions-card-title">Prescriptions</span>
                         </h5>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-8">
-                                <p class="card-text mb-3">إدارة الوصفات الطبية والأدوية الحالية والمكتملة</p>
+                                <p class="card-text mb-3" id="prescriptions-card-desc">Manage medical prescriptions and current and completed medications</p>
                                 
                                 <div class="prescription-summary mb-3" id="prescription-summary-preview">
-                                    <small class="text-muted">جاري التحميل...</small>
+                                    <small class="text-muted" id="prescription-loading-text">Loading...</small>
                                 </div>
                                 
                                 <div class="d-flex flex-wrap gap-2">
-                                    <button class="btn btn-outline-success btn-sm">عرض جميع الوصفات</button>
-                                    <button class="btn btn-outline-info btn-sm" id="active-prescriptions-btn">الوصفات النشطة</button>
+                                    <button class="btn btn-outline-primary btn-sm" onclick="goToPrescriptions()" id="view-all-prescriptions-btn">View All Prescriptions</button>
+                                    <button class="btn btn-outline-success btn-sm" onclick="goToPrescriptions('?status=active')" id="active-prescriptions-btn">Active Prescriptions</button>
                                 </div>
                             </div>
                             <div class="col-4 text-center">
@@ -153,23 +169,25 @@
         <!-- Recent Activity -->
         <div class="row">
             <div class="col-12">
-                <div class="card shadow-lg border-0">
-                    <div class="card-header bg-info text-white">
+                <div class="card recent-activity">
+                    <div class="card-header text-white" style="background: #0d47a1 !important;">
                         <h5 class="card-title mb-0">
                             <i class="bi bi-activity me-2"></i>
-                            النشاط الأخير
+                            <span id="recent-activity-title">Recent Activity</span>
                         </h5>
                     </div>
                     <div class="card-body">
                         <div id="recent-activity">
                             <div class="loading-state">
                                 <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">جاري التحميل...</span>
+                                    <span class="visually-hidden" id="spinner-loading-text">Loading...</span>
                                 </div>
-                                <p class="mt-3">جاري تحميل النشاط الأخير...</p>
+                                <p class="mt-3" id="loading-activity-text">Loading recent activity...</p>
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
                 </div>
             </div>
         </div>
@@ -179,87 +197,25 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
     <!-- Custom JS -->
-    <script src="../../assets/js/main.js"></script>
-    <script src="../../assets/js/components/auth-guard.js"></script>
-    <script src="../../assets/js/components/dashboard-translations.js"></script>
-    <script src="../../assets/js/components/medical-records-api.js"></script>
+    <script src="../../../assets/js/main.js"></script>
+    <script src="../../../assets/js/components/auth-guard.js"></script>
+    <script src="../../../assets/js/components/dashboard-translations.js"></script>
+    <script src="../../../assets/js/components/medical-records-api.js"></script>
     
     <script>
         let userType = null;
         let medicalData = null;
         let prescriptionData = null;
+        
+        // All translations are handled by dashboard-translations.js
 
-        // Initialize when page loads
+        // Initialize records dashboard on page load
         document.addEventListener('DOMContentLoaded', async function() {
-            // Initialize translations
-            await LanguageManager.init();
-            
-            // Apply current language to records page
-            const currentLang = LanguageManager.currentLanguage;
-            await applyRecordsTranslations(currentLang);
-            
-            // Get user type
-            const userInfo = await getCurrentUser();
-            userType = userInfo?.user_type || 'patient';
-            
-            await loadOverviewData();
-            setupEventListeners();
+            console.log('Records dashboard initializing...');
+            await DashboardTranslations.initializeDashboard('records');
         });
 
-        // Apply translations for records page
-        async function applyRecordsTranslations(lang) {
-            const t = LanguageManager.translations[lang];
-            if (!t) return;
 
-            // Update page direction and language
-            document.documentElement.lang = lang;
-            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-
-            // Update page title
-            document.getElementById('page-title').textContent = lang === 'ar' ? 
-                'السجلات الطبية | صحتك' : 'Medical Records | Sahatak';
-
-            // Update navigation
-            document.getElementById('navbar-brand').textContent = lang === 'ar' ? 
-                'صحتك | Sahatak' : 'Sahatak | صحتك';
-            document.getElementById('current-lang').textContent = lang === 'ar' ? 'English' : 'العربية';
-            document.getElementById('nav-dashboard').textContent = lang === 'ar' ? 'لوحة التحكم' : 'Dashboard';
-            document.getElementById('nav-back').textContent = lang === 'ar' ? 'العودة' : 'Back';
-            
-            // Update arrow direction for back button
-            const backIcon = document.querySelector('#nav-back').previousElementSibling;
-            if (backIcon) {
-                backIcon.className = lang === 'ar' ? 'bi bi-arrow-right me-1' : 'bi bi-arrow-left me-1';
-            }
-
-            // Update main content
-            document.getElementById('records-title').textContent = lang === 'ar' ? 
-                'السجلات الطبية' : 'Medical Records';
-            document.getElementById('records-subtitle').textContent = lang === 'ar' ? 
-                'إدارة شاملة للتاريخ الطبي والوصفات الطبية' : 'Comprehensive management of medical history and prescriptions';
-
-            // Update stats labels
-            document.getElementById('stat-history-completion').textContent = lang === 'ar' ? 
-                'اكتمال التاريخ الطبي' : 'Medical History Completion';
-            document.getElementById('stat-active-prescriptions').textContent = lang === 'ar' ? 
-                'الوصفات النشطة' : 'Active Prescriptions';
-            document.getElementById('stat-recent-updates').textContent = lang === 'ar' ? 
-                'التحديثات الأخيرة' : 'Recent Updates';
-            document.getElementById('stat-days-since-update').textContent = lang === 'ar' ? 
-                'أيام منذ آخر تحديث' : 'Days Since Last Update';
-
-            // Update footer using existing translation system
-            if (t.footer) {
-                DashboardTranslations.updateFooter(t);
-            }
-        }
-
-        // Language toggle function
-        async function toggleLanguage() {
-            const newLang = LanguageManager.currentLanguage === 'ar' ? 'en' : 'ar';
-            await LanguageManager.setLanguage(newLang);
-            await applyRecordsTranslations(newLang);
-        }
 
         // Setup event listeners
         function setupEventListeners() {
@@ -303,7 +259,7 @@
                 await loadRecentActivity();
             } catch (error) {
                 console.error('Error loading overview data:', error);
-                showError('خطأ في تحميل بيانات النظرة العامة');
+                showError('Error loading overview data');
             }
         }
 
@@ -312,7 +268,7 @@
             const container = document.getElementById('medical-summary-preview');
             
             if (!medicalData || !medicalData.medicalHistory) {
-                container.innerHTML = '<small class="text-warning">التاريخ الطبي غير مكتمل</small>';
+                container.innerHTML = '<small class="text-warning">Medical history incomplete</small>';
                 return;
             }
 
@@ -324,27 +280,27 @@
                 <div class="row text-center">
                     <div class="col-4">
                         <div class="bg-light rounded p-2 mb-1">
-                            <small class="text-muted d-block">فصيلة الدم</small>
+                            <small class="text-muted d-block">Blood Type</small>
                             <strong>${history.blood_type || '--'}</strong>
                         </div>
                     </div>
                     <div class="col-4">
                         <div class="bg-light rounded p-2 mb-1">
-                            <small class="text-muted d-block">الوزن</small>
-                            <strong>${history.weight ? history.weight + ' كجم' : '--'}</strong>
+                            <small class="text-muted d-block">Weight</small>
+                            <strong>${history.weight ? history.weight + ' kg' : '--'}</strong>
                         </div>
                     </div>
                     <div class="col-4">
                         <div class="bg-light rounded p-2 mb-1" style="background-color: ${bmiStatus.color}15 !important">
-                            <small class="text-muted d-block">مؤشر كتلة الجسم</small>
+                            <small class="text-muted d-block">BMI</small>
                             <strong style="color: ${bmiStatus.color}">${bmi || '--'}</strong>
                         </div>
                     </div>
                 </div>
                 <small class="text-muted">
-                    آخر تحديث: ${history.medical_history_last_updated ? 
-                        new Date(history.medical_history_last_updated).toLocaleDateString('ar-SA') : 
-                        'لم يتم التحديث'}
+                    Last updated: ${history.medical_history_last_updated ? 
+                        new Date(history.medical_history_last_updated).toLocaleDateString() : 
+                        'Not updated'}
                 </small>
             `;
 
@@ -356,7 +312,7 @@
             const container = document.getElementById('prescription-summary-preview');
             
             if (!prescriptionData || !prescriptionData.prescriptions) {
-                container.innerHTML = '<small class="text-muted">لا توجد وصفات طبية</small>';
+                container.innerHTML = '<small class="text-muted">No prescriptions found</small>';
                 return;
             }
 
@@ -372,26 +328,26 @@
                 <div class="row text-center">
                     <div class="col-4">
                         <div class="bg-light rounded p-2 mb-1">
-                            <small class="text-muted d-block">الإجمالي</small>
+                            <small class="text-muted d-block">Total</small>
                             <strong>${prescriptions.length}</strong>
                         </div>
                     </div>
                     <div class="col-4">
                         <div class="bg-light rounded p-2 mb-1">
-                            <small class="text-muted d-block">النشطة</small>
+                            <small class="text-muted d-block">Active</small>
                             <strong class="text-success">${activePrescriptions.length}</strong>
                         </div>
                     </div>
                     <div class="col-4">
                         <div class="bg-light rounded p-2 mb-1">
-                            <small class="text-muted d-block">تنتهي قريباً</small>
+                            <small class="text-muted d-block">Expiring Soon</small>
                             <strong class="text-warning">${expiringSoon.length}</strong>
                         </div>
                     </div>
                 </div>
                 ${expiringSoon.length > 0 ? 
-                    '<small class="text-warning"><i class="bi bi-exclamation-triangle me-1"></i>لديك وصفات تنتهي خلال أسبوع</small>' : 
-                    '<small class="text-muted">جميع الوصفات محدثة</small>'}
+                    '<small class="text-warning"><i class="bi bi-exclamation-triangle me-1"></i>Prescriptions expiring soon</small>' : 
+                    '<small class="text-muted">All prescriptions current</small>'}
             `;
 
             container.innerHTML = summaryHtml;
@@ -421,7 +377,7 @@
             document.getElementById('history-completion').textContent = completionPercentage + '%';
             document.getElementById('active-prescriptions-count').textContent = stats.active_prescriptions || 0;
             document.getElementById('recent-updates-count').textContent = (medicalData?.historyUpdates?.length || 0) + (prescriptionData?.prescriptions?.length || 0);
-            document.getElementById('last-update-days').textContent = daysSinceUpdate === '--' ? daysSinceUpdate : daysSinceUpdate + ' يوم';
+            document.getElementById('last-update-days').textContent = daysSinceUpdate === '--' ? daysSinceUpdate : daysSinceUpdate + ' days';
         }
 
         // Load recent activity
@@ -438,7 +394,7 @@
                             type: 'medical_update',
                             date: new Date(update.created_at),
                             title: MedicalRecordsUtils.getUpdateTypeInfo(update.update_type).title,
-                            description: update.notes || 'تحديث التاريخ الطبي',
+                            description: update.notes || 'Medical history update',
                             icon: MedicalRecordsUtils.getUpdateTypeInfo(update.update_type).icon,
                             color: MedicalRecordsUtils.getUpdateTypeInfo(update.update_type).class
                         });
@@ -451,7 +407,7 @@
                         activities.push({
                             type: 'prescription',
                             date: new Date(prescription.created_at),
-                            title: 'وصفة طبية جديدة',
+                            title: 'New prescription',
                             description: `${prescription.medication_name} - ${prescription.dosage}`,
                             icon: 'bi-prescription2',
                             color: 'bg-success'
@@ -467,8 +423,8 @@
                     container.innerHTML = `
                         <div class="empty-state">
                             <i class="bi bi-activity"></i>
-                            <h6>لا يوجد نشاط حديث</h6>
-                            <p>سيظهر هنا النشاط الطبي الأخير</p>
+                            <h6>No Recent Activity</h6>
+                            <p>Activity and updates will appear here</p>
                         </div>
                     `;
                 } else {
@@ -497,7 +453,7 @@
                 container.innerHTML = `
                     <div class="text-center text-muted py-4">
                         <i class="bi bi-exclamation-circle me-2"></i>
-                        خطأ في تحميل النشاط الأخير
+                        Error loading recent activity
                     </div>
                 `;
             }
@@ -547,30 +503,13 @@
         }
 
         function goToDashboard() {
-            const dashboardUrl = userType === 'doctor' ? '../dashboard/doctor.html' : '../dashboard/patient.html';
+            const dashboardUrl = userType === 'doctor' ? '../../dashboard/doctor.html' : '../../dashboard/patient.html';
             window.location.href = dashboardUrl;
         }
+        
+        // Use the global language switching function
     </script>
 
-    <style>
-        .medical-nav-card {
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .medical-nav-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
-        }
-
-        .activity-item:last-child {
-            border-bottom: none !important;
-        }
-
-        .activity-icon {
-            flex-shrink: 0;
-        }
-    </style>
 
     <!-- Footer -->
     <footer class="footer mt-auto py-3">
@@ -619,11 +558,11 @@
                 <!-- Emergency Contact -->
                 <div class="col-lg-3 col-md-6 emergency-section">
                     <p class="mb-2 text-danger fw-bold" id="footer-emergency-text">
-                        In Medical Emergencies
+                        For medical emergencies
                     </p>
                     <p class="mb-3 text-danger fw-bold fs-6" id="footer-emergency-action">
                         <i class="bi bi-hospital me-2"></i>
-                        Go to Nearest Emergency Hospital
+                        Go to nearest ER hospital
                     </p>
                     <p class="mb-0 text-muted small" id="footer-emergency-note">
                         For non-urgent consultations use the platform
@@ -636,7 +575,7 @@
             <div class="row">
                 <div class="col-12 text-center">
                     <p class="mb-0 fw-bold" id="footer-copyright">
-                        © 2025 Sahatak صحتك. All Rights Reserved.
+                        © 2025 Sahatak. All rights reserved.
                     </p>
                     <p class="mb-0 text-muted small mt-1" id="footer-medical-disclaimer">
                         This platform does not replace visiting a doctor in emergency cases
