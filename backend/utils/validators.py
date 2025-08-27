@@ -607,14 +607,21 @@ def validate_medical_history_data(medical_data: dict) -> Dict[str, Union[bool, s
                 'message': 'Weight must be a valid number'
             }
     
-    # Validate text fields length
+    # Validate text fields length (strict limits to prevent abuse)
     text_fields = {
-        'medical_history': 2000,
-        'allergies': 1000,
-        'current_medications': 1000,
-        'chronic_conditions': 1000,
-        'family_history': 2000,
-        'surgical_history': 2000
+        'medical_history': 5000,       # Increased for comprehensive history
+        'allergies': 1500,             # Detailed allergy information
+        'current_medications': 2000,   # Multiple medications with dosages
+        'chronic_conditions': 1500,    # Multiple conditions with details
+        'family_history': 3000,        # Extended family medical history
+        'surgical_history': 2500,      # Multiple surgeries with details
+        'symptoms': 1000,              # Appointment symptoms
+        'reason_for_visit': 500,       # Brief reason for visit
+        'notes': 2000,                 # General medical notes
+        'diagnosis': 1500,             # Detailed diagnosis
+        'treatment_plan': 2000,        # Comprehensive treatment plan
+        'prescription_instructions': 1000,  # Medication instructions
+        'prescription_notes': 500      # Additional prescription notes
     }
     
     for field, max_length in text_fields.items():
@@ -826,6 +833,135 @@ def validate_consultation_fee(fee: Union[str, float, int], participation_type: s
     return {
         'valid': True,
         'message': 'Consultation fee is valid'
+    }
+
+def validate_vital_signs_ranges(vital_signs_data: dict) -> Dict[str, Union[bool, str]]:
+    """
+    Validate vital signs values are within normal ranges
+    
+    Args:
+        vital_signs_data: Dictionary containing vital signs values
+        
+    Returns:
+        dict: Contains 'valid' (bool) and 'message' (str)
+    """
+    # Define normal ranges for vital signs
+    ranges = {
+        'systolic_bp': {'min': 60, 'max': 250, 'name': 'Systolic blood pressure'},
+        'diastolic_bp': {'min': 40, 'max': 150, 'name': 'Diastolic blood pressure'},
+        'heart_rate': {'min': 30, 'max': 200, 'name': 'Heart rate'},
+        'temperature': {'min': 32.0, 'max': 45.0, 'name': 'Temperature'},
+        'respiratory_rate': {'min': 8, 'max': 40, 'name': 'Respiratory rate'},
+        'oxygen_saturation': {'min': 70.0, 'max': 100.0, 'name': 'Oxygen saturation'},
+        'height': {'min': 30.0, 'max': 300.0, 'name': 'Height'},
+        'weight': {'min': 1.0, 'max': 1000.0, 'name': 'Weight'},
+        'pain_scale': {'min': 0, 'max': 10, 'name': 'Pain scale'}
+    }
+    
+    for field, range_info in ranges.items():
+        if field in vital_signs_data and vital_signs_data[field] is not None:
+            try:
+                value = float(vital_signs_data[field])
+                if value < range_info['min'] or value > range_info['max']:
+                    return {
+                        'valid': False,
+                        'message': f"{range_info['name']} must be between {range_info['min']} and {range_info['max']}"
+                    }
+            except (ValueError, TypeError):
+                return {
+                    'valid': False,
+                    'message': f"{range_info['name']} must be a valid number"
+                }
+    
+    # Additional validation for blood pressure relationship
+    if ('systolic_bp' in vital_signs_data and 'diastolic_bp' in vital_signs_data and 
+        vital_signs_data['systolic_bp'] is not None and vital_signs_data['diastolic_bp'] is not None):
+        try:
+            systolic = float(vital_signs_data['systolic_bp'])
+            diastolic = float(vital_signs_data['diastolic_bp'])
+            if diastolic >= systolic:
+                return {
+                    'valid': False,
+                    'message': 'Systolic blood pressure must be higher than diastolic pressure'
+                }
+        except (ValueError, TypeError):
+            pass  # Already handled above
+    
+    return {
+        'valid': True,
+        'message': 'Vital signs are within valid ranges'
+    }
+
+def validate_text_field_length(text: str, field_name: str, max_length: int, min_length: int = 0) -> Dict[str, Union[bool, str]]:
+    """
+    Validate text field length with security considerations
+    
+    Args:
+        text: Text to validate
+        field_name: Name of the field for error messages
+        max_length: Maximum allowed length
+        min_length: Minimum required length (default: 0)
+        
+    Returns:
+        dict: Contains 'valid' (bool) and 'message' (str)
+    """
+    if text is None:
+        if min_length > 0:
+            return {
+                'valid': False,
+                'message': f'{field_name} is required'
+            }
+        return {
+            'valid': True,
+            'message': f'{field_name} is valid'
+        }
+    
+    if not isinstance(text, str):
+        return {
+            'valid': False,
+            'message': f'{field_name} must be text'
+        }
+    
+    text_length = len(text.strip())
+    
+    if text_length < min_length:
+        return {
+            'valid': False,
+            'message': f'{field_name} must be at least {min_length} characters long'
+        }
+    
+    if text_length > max_length:
+        return {
+            'valid': False,
+            'message': f'{field_name} must be less than {max_length} characters (current: {text_length})'
+        }
+    
+    # Check for suspicious patterns that might indicate abuse
+    # Multiple consecutive spaces, excessive newlines, or repeated characters
+    cleaned_text = text.strip()
+    if '  ' * 10 in cleaned_text:  # 20+ consecutive spaces
+        return {
+            'valid': False,
+            'message': f'{field_name} contains excessive whitespace'
+        }
+    
+    if '\n' * 10 in cleaned_text:  # 10+ consecutive newlines
+        return {
+            'valid': False,
+            'message': f'{field_name} contains excessive line breaks'
+        }
+    
+    # Check for repeated character patterns (possible spam)
+    for char in 'abcdefghijklmnopqrstuvwxyz0123456789':
+        if char * 20 in cleaned_text.lower():  # 20+ repeated characters
+            return {
+                'valid': False,
+                'message': f'{field_name} contains suspicious repeated characters'
+            }
+    
+    return {
+        'valid': True,
+        'message': f'{field_name} is valid'
     }
 
 def sanitize_input(text: str, max_length: int = None) -> str:

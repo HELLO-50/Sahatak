@@ -434,41 +434,6 @@ const AppointmentBooking = {
         }
     },
 
-    // Confirm booking
-    async confirmBooking() {
-        const termsAgreed = document.getElementById('terms-agreement').checked;
-        if (!termsAgreed) {
-            this.showError('يرجى الموافقة على الشروط والأحكام');
-            return;
-        }
-
-        try {
-            const bookingData = {
-                doctor_id: this.selectedDoctor.id,
-                appointment_date: this.selectedDateTime.datetime,
-                appointment_type: this.selectedType,
-                reason_for_visit: document.getElementById('reason-visit').value
-            };
-
-            const response = await ApiHelper.makeRequest('/appointments/', {
-                method: 'POST',
-                body: JSON.stringify(bookingData)
-            });
-
-            if (response.success) {
-                // Show success message and modal
-                this.showSuccess('تم حجز الموعد بنجاح!');
-                const modal = new bootstrap.Modal(document.getElementById('success-modal'));
-                modal.show();
-            } else {
-                this.showError(response.message || 'فشل في حجز الموعد');
-            }
-        } catch (error) {
-            console.error('Error confirming booking:', error);
-            this.showError('خطأ في تأكيد الحجز');
-        }
-    },
-
     // Confirm and submit appointment booking
     async confirmBooking() {
         try {
