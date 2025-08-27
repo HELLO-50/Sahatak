@@ -796,6 +796,73 @@
     }
 }
 
+/* Improved text contrast for better readability - High specificity */
+.dashboard-card.quick-action-card .text-muted {
+    color: #1f2937 !important; /* Very dark for better contrast */
+    font-weight: 500 !important;
+}
+
+.dashboard-card.quick-action-card .text-muted.small {
+    color: #1f2937 !important; /* Very dark for main action card descriptions */
+    font-weight: 500 !important;
+    font-size: 0.875rem !important; /* Slightly larger than default small */
+}
+
+.dashboard-card.quick-action-card p.text-muted.small {
+    color: #1f2937 !important; /* Triple targeting for paragraphs */
+    font-weight: 500 !important;
+    font-size: 0.875rem !important;
+}
+
+/* Even more specific targeting */
+div.dashboard-card.quick-action-card p.text-muted {
+    color: #1f2937 !important;
+    font-weight: 500 !important;
+}
+
+/* Target specific action card descriptions by ID */
+#action-book-desc,
+#action-records-desc, 
+#action-chat-desc {
+    color: #1f2937 !important;
+    font-weight: 500 !important;
+    font-size: 0.875rem !important;
+}
+
+/* Alternative approach - target all p tags in quick action cards */
+.quick-action-card p {
+    color: #1f2937 !important;
+    font-weight: 500 !important;
+}
+
+.dashboard-card .text-muted {
+    color: #374151 !important; /* Even darker for health summary values */
+    font-weight: 500;
+}
+
+.appointment-type {
+    color: #4b5563 !important; /* Better contrast for appointment types */
+    font-weight: 500;
+}
+
+.stat-label {
+    color: #374151 !important; /* Darker color for stat labels */
+    font-weight: 600; /* Slightly bolder */
+    font-size: 0.85rem;
+}
+
+/* Footer text improvements */
+.footer .text-muted {
+    color: #6b7280 !important; /* Better contrast for footer links */
+}
+
+/* Health summary specific improvements */
+.health-summary .text-muted {
+    color: #1f2937 !important; /* Much darker for health values */
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
 /* RTL Support */
 [dir="rtl"] .sidebar-nav a:hover,
 [dir="rtl"] .sidebar-nav a.active {
@@ -828,6 +895,63 @@
 [dir="rtl"] .btn-action i {
     margin-right: 0;
     margin-left: 0.5rem;
+}
+
+/* PATIENT DASHBOARD ACTION CARDS - IMPROVED TEXT CONTRAST */
+/* These rules are placed at the very end to ensure highest priority */
+
+/* Override ALL text in action cards to be black - maximum specificity */
+.quick-action-card *,
+.quick-action-card p,
+.quick-action-card h6,
+.quick-action-card span,
+.quick-action-card .text-muted,
+.quick-action-card .text-muted.small,
+.quick-action-card p.text-muted,
+.quick-action-card p.text-muted.small {
+    color: black !important;
+    font-weight: 600 !important;
+}
+
+/* Specific font sizes */
+.quick-action-card p,
+.quick-action-card .small,
+.quick-action-card p.small {
+    font-size: 0.875rem !important;
+}
+
+/* Light Medical Green hover for all action cards */
+.quick-action-card:hover {
+    background: #a7f3d0 !important; 
+    border-color: #a7f3d0 !important;
+}
+
+/* All text stays black on hover */
+.quick-action-card:hover .text-muted,
+.quick-action-card:hover .text-muted.small,
+.quick-action-card:hover p.text-muted,
+.quick-action-card:hover p,
+.quick-action-card:hover h6 {
+    color: black !important;
+    font-weight: 600 !important;
+    text-shadow: none !important;
+}
+
+/* Target specific IDs that were problematic */
+#action-book-desc,
+#action-records-desc,
+#action-chat-desc,
+#action-book,
+#action-records,
+#action-chat {
+    color: black !important;
+    font-weight: 600 !important;
+}
+
+/* Force all paragraph text in action cards to be black */
+.quick-action-card p {
+    color: black !important;
+    font-weight: 600 !important;
 }
 
 [dir="rtl"] .col-lg-4.text-end {

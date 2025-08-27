@@ -257,6 +257,93 @@
       "update": "تحديث",
       "save": "حفظ",
       "cancel": "إلغاء"
+    },
+    
+    "timeline": {
+      "title": "الخط الزمني للتاريخ الطبي",
+      "all": "الكل",
+      "appointments": "المواعيد",
+      "self_updates": "التحديثات الشخصية",
+      "loading": "جاري تحميل الخط الزمني...",
+      "no_updates": "لا يوجد تاريخ للتحديثات",
+      "no_updates_desc": "ستظهر هنا جميع التحديثات على التاريخ الطبي",
+      "no_updates_category": "لا توجد تحديثات في هذه الفئة",
+      "default_note": "تحديث التاريخ الطبي",
+      "updated_fields": "حقل",
+      "by_doctor": "بواسطة: د."
+    },
+    
+    "summary": {
+      "title": "ملخص التاريخ الطبي",
+      "loading": "جاري تحميل التاريخ الطبي...",
+      "no_info": "لا توجد معلومات متاحة",
+      "completion_status": "حالة الإكمال:",
+      "last_update": "آخر تحديث:",
+      "never_updated": "لم يتم التحديث",
+      "blood_type_label": "فصيلة الدم",
+      "not_specified": "غير محدد",
+      "general_status": "الحالة العامة",
+      "good": "جيد",
+      "care_note": "للحصول على رعاية طبية شاملة، تأكد من اكتمال جميع المعلومات"
+    },
+    
+    "form": {
+      "basic_info": "المعلومات الأساسية",
+      "select_blood_type": "اختر فصيلة الدم",
+      "height_label": "الطول (سم)",
+      "weight_label": "الوزن (كجم)",
+      "lifestyle_section": "نمط الحياة",
+      "select_smoking": "اختر حالة التدخين",
+      "never_smoked": "لم أدخن مطلقاً",
+      "former_smoker": "مدخن سابق",
+      "current_smoker": "مدخن حالياً",
+      "select_exercise": "اختر تكرار التمارين",
+      "select_alcohol": "اختر حالة الكحول",
+      "no_drink": "لا أشرب",
+      "sometimes": "أحياناً",
+      "medical_conditions_section": "التاريخ المرضي",
+      "allergies_placeholder": "اكتب أي حساسية لديك من أدوية أو طعام...",
+      "medications_placeholder": "اكتب الأدوية التي تتناولها حالياً...",
+      "chronic_placeholder": "اكتب أي أمراض مزمنة لديك...",
+      "family_history_placeholder": "اكتب التاريخ المرضي للعائلة...",
+      "surgical_history_placeholder": "اكتب العمليات الجراحية السابقة...",
+      "general_history_placeholder": "اكتب أي معلومات طبية أخرى مهمة...",
+      "update_notes_label": "ملاحظات التحديث",
+      "update_notes_placeholder": "اكتب سبب تحديث التاريخ الطبي (اختياري)...",
+      "save_updates": "حفظ التحديثات"
+    },
+    
+    "modal": {
+      "update_details": "تفاصيل التحديث",
+      "close": "إغلاق",
+      "date": "التاريخ:",
+      "time": "الوقت:",
+      "doctor": "الطبيب:",
+      "notes": "الملاحظات:",
+      "updated_fields": "الحقول المحدثة:",
+      "no_details": "لا توجد تفاصيل متاحة",
+      "from": "من:",
+      "to": "إلى:"
+    },
+    
+    "bmi": {
+      "not_specified": "غير محدد",
+      "underweight": "نقص في الوزن",
+      "normal": "وزن طبيعي",
+      "overweight": "زيادة في الوزن",
+      "obese": "سمنة"
+    },
+    
+    "errors": {
+      "loading_failed": "فشل في تحميل التاريخ الطبي",
+      "access_failed": "فشل في الوصول للتاريخ الطبي",
+      "loading_error": "خطأ في تحميل التاريخ الطبي",
+      "update_failed": "فشل في تحديث التاريخ الطبي",
+      "save_error": "خطأ في حفظ التاريخ الطبي"
+    },
+    
+    "success": {
+      "updated_successfully": "تم تحديث التاريخ الطبي بنجاح"
     }
   },
 
@@ -666,22 +753,187 @@
     }
   },
 
+  "records": {
+    "title": "السجلات الطبية",
+    "subtitle": "إدارة شاملة للتاريخ الطبي والوصفات الطبية",
+    "dashboard_title": "لوحة تحكم السجلات الطبية",
+    "stats": {
+      "total_records": "إجمالي السجلات الطبية",
+      "active_prescriptions": "الوصفات النشطة", 
+      "recent_updates": "التحديثات الأخيرة",
+      "days_since_update": "أيام منذ آخر تحديث"
+    },
+    "navigation": {
+      "medical_history": "التاريخ الطبي",
+      "medical_history_desc": "عرض وإدارة التاريخ الطبي الكامل والخط الزمني للتحديثات",
+      "prescriptions": "الوصفات الطبية", 
+      "prescriptions_desc": "إدارة الوصفات الطبية والأدوية الحالية والمكتملة",
+      "view_complete_history": "عرض التاريخ الكامل",
+      "update_data": "تحديث البيانات",
+      "view_all_prescriptions": "عرض جميع الوصفات",
+      "active_prescriptions": "الوصفات النشطة"
+    },
+    "buttons": {
+      "view_complete_history": "عرض التاريخ الكامل",
+      "update_data": "تحديث البيانات", 
+      "view_all_prescriptions": "عرض جميع الوصفات",
+      "active_prescriptions": "الوصفات النشطة"
+    },
+    "recent_activity": {
+      "title": "النشاط الأخير",
+      "view_all": "عرض جميع الأنشطة",
+      "loading_activity": "جاري تحميل النشاط الأخير...",
+      "no_activity": "لا يوجد نشاط حديث",
+      "no_activity_desc": "سيظهر هنا النشاط الطبي الأخير"
+    },
+    "loading": {
+      "default": "جاري التحميل...",
+      "medical": "جاري التحميل...",
+      "prescription": "جاري التحميل...",
+      "activity": "جاري تحميل النشاط الأخير..."
+    },
+    "errors": {
+      "loading_overview": "خطأ في تحميل بيانات النظرة العامة",
+      "loading_activity": "خطأ في تحميل النشاط الأخير"
+    },
+    "status": {
+      "medical_incomplete": "التاريخ الطبي غير مكتمل",
+      "no_prescriptions": "لا توجد وصفات طبية",
+      "prescriptions_expiring": "لديك وصفات تنتهي خلال أسبوع",
+      "all_prescriptions_current": "جميع الوصفات محدثة"
+    },
+    "labels": {
+      "blood_type": "فصيلة الدم",
+      "weight": "الوزن",
+      "weight_unit": "كجم",
+      "bmi": "مؤشر كتلة الجسم",
+      "total": "الإجمالي",
+      "active": "النشطة",
+      "expiring_soon": "تنتهي قريباً",
+      "last_updated": "آخر تحديث",
+      "not_updated": "لم يتم التحديث",
+      "days": "يوم"
+    },
+    "updates": {
+      "medical_history": "تحديث التاريخ الطبي",
+      "new_prescription": "وصفة طبية جديدة"
+    },
+    "no_data": "لا توجد بيانات متاحة"
+  },
+
+  "availability": {
+    "dashboard_title": "إدارة الأوقات المتاحة",
+    "dashboard_subtitle": "حدد ساعات العمل والأوقات المتاحة",
+    "page_breadcrumb": "لوحة التحكم / الأوقات المتاحة",
+    "page_title": "إدارة الأوقات المتاحة",
+    "page_subtitle": "حدد ساعات العمل والأوقات المتاحة",
+    
+    "tabs": {
+      "weekly": "الجدول الأسبوعي",
+      "calendar": "التقويم الشهري", 
+      "blocked": "الأوقات المحجوبة"
+    },
+    
+    "weekly": {
+      "title": "إعداد الجدول الأسبوعي",
+      "loading": "جاري تحميل الجدول الأسبوعي...",
+      "quick_templates": "قوالب سريعة",
+      "template_fulltime": "دوام كامل",
+      "template_weekdays": "أيام العمل فقط",
+      "template_parttime": "دوام جزئي",
+      "from_time": "من الساعة",
+      "to_time": "إلى الساعة"
+    },
+    
+    "days": {
+      "saturday": "السبت",
+      "sunday": "الأحد",
+      "monday": "الإثنين",
+      "tuesday": "الثلاثاء",
+      "wednesday": "الأربعاء",
+      "thursday": "الخميس",
+      "friday": "الجمعة"
+    },
+    
+    "days_short": {
+      "sat": "السبت",
+      "sun": "الأحد",
+      "mon": "الإثنين",
+      "tue": "الثلاء",
+      "wed": "الأربعاء",
+      "thu": "الخميس",
+      "fri": "الجمعة"
+    },
+    
+    "calendar": {
+      "title": "التقويم الشهري",
+      "loading": "جاري تحميل التقويم..."
+    },
+    
+    "blocked": {
+      "title": "الأوقات المحجوبة",
+      "loading": "جاري تحميل الأوقات المحجوبة...",
+      "block_new": "حجب وقت جديد"
+    },
+    
+    "modal": {
+      "block_title": "حجب وقت محدد",
+      "edit_title": "تعديل الوقت المحجوب",
+      "date": "التاريخ",
+      "start_time": "وقت البداية", 
+      "end_time": "وقت النهاية",
+      "reason": "السبب (اختياري)",
+      "placeholder_reason": "اكتب سبب حجب هذا الوقت...",
+      "cancel": "إلغاء",
+      "block_time": "حجب الوقت",
+      "unblock": "إلغاء الحجب",
+      "close": "إغلاق"
+    },
+    
+    "buttons": {
+      "back": "العودة",
+      "profile": "الملف الشخصي",
+      "logout": "تسجيل الخروج",
+      "weekly": "العرض الأسبوعي",
+      "save_schedule": "حفظ الجدول",
+      "reset": "إعادة تعيين",
+      "export": "تصدير",
+      "block_new": "حجب وقت جديد"
+    },
+    
+    "loading": "جاري التحميل...",
+    "user_name": "الدكتورة سارة أحمد",
+    
+    "messages": {
+      "load_schedule_error": "فشل في تحميل الجدول الأسبوعي",
+      "save_schedule_error": "فشل في حفظ الجدول",
+      "save_schedule_success": "تم حفظ الجدول بنجاح",
+      "load_calendar_error": "فشل في تحميل التقويم",
+      "load_blocked_error": "فشل في تحميل الأوقات المحجوبة",
+      "block_time_error": "فشل في حجب الوقت",
+      "block_time_success": "تم حجب الوقت بنجاح",
+      "unblock_time_error": "فشل في إلغاء حجب الوقت",
+      "unblock_time_success": "تم إلغاء حجب الوقت بنجاح",
+      "reset_confirm": "هل أنت متأكد من إعادة تعيين الجدول الأسبوعي؟",
+      "template_applied": "تم تطبيق القالب بنجاح",
+      "invalid_time": "نطاق زمني غير صالح",
+      "overlap_error": "الوقت يتداخل مع الجدول الموجود"
+    }
+  },
+
   "footer": {
-    "brand": "صحتك | Sahatak",
+    "brand": "صحتك",
     "description": "منصة طبية آمنة وموثوقة للتواصل مع الأطباء عن بُعد",
-    "quick_links": "روابط سريعة",
+    "links_title": "روابط سريعة",
     "about": "عن المنصة",
     "services": "الخدمات",
-    "support": "الدعم والمساعدة",
+    "support_title": "الدعم والمساعدة",
     "help": "مركز المساعدة",
     "contact": "اتصل بنا",
-    "emergency": {
-      "title": "الطوارئ",
-      "text": "في حالات الطوارئ الطبية",
-      "action": "اذهب إلى أقرب مستشفى طوارئ",
-      "note": "للاستشارات غير العاجلة استخدم المنصة"
-    },
-    "copyright": "© 2025 صحتك | Sahatak. جميع الحقوق محفوظة.",
-    "disclaimer": "هذه المنصة لا تغني عن زيارة الطبيب في الحالات الطارئة"
+    "emergency_text": "في حالات الطوارئ الطبية",
+    "emergency_action": "اذهب إلى أقرب مستشفى طوارئ",
+    "emergency_note": "للاستشارات غير العاجلة استخدم المنصة",
+    "copyright": "© 2025 صحتك. جميع الحقوق محفوظة.",
+    "medical_disclaimer": "هذه المنصة لا تغني عن زيارة الطبيب في الحالات الطارئة"
   }
 }

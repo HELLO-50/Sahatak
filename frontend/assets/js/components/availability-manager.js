@@ -52,7 +52,9 @@ const AvailabilityManager = {
             }
         } catch (error) {
             console.error('Error loading weekly schedule:', error);
-            this.showAlert('error', 'فشل في تحميل الجدول الأسبوعي');
+            const lang = LanguageManager.getLanguage() || 'ar';
+            const errorMsg = LanguageManager.translations[lang]?.availability?.messages?.load_schedule_error || 'Failed to load weekly schedule';
+            this.showAlert('error', errorMsg);
             this.renderDefaultSchedule();
         }
     },
@@ -62,15 +64,24 @@ const AvailabilityManager = {
         const container = document.getElementById('weekly-schedule-container');
         if (!container) return;
         
-        const daysArabic = {
-            'saturday': 'السبت',
-            'sunday': 'الأحد',
-            'monday': 'الاثنين',
-            'tuesday': 'الثلاثاء',
-            'wednesday': 'الأربعاء',
-            'thursday': 'الخميس',
-            'friday': 'الجمعة'
+        // Get current language translations
+        const lang = LanguageManager.getLanguage() || 'ar';
+        const t = LanguageManager.translations[lang];
+        
+        // Get day names from translations
+        const dayNames = t?.availability?.days || {
+            'saturday': 'Saturday',
+            'sunday': 'Sunday',
+            'monday': 'Monday',
+            'tuesday': 'Tuesday',
+            'wednesday': 'Wednesday',
+            'thursday': 'Thursday',
+            'friday': 'Friday'
         };
+        
+        // Get time labels from translations
+        const fromLabel = t?.availability?.weekly?.from_time || 'From';
+        const toLabel = t?.availability?.weekly?.to_time || 'To';
         
         const daysOrder = ['saturday', 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
         
@@ -83,7 +94,7 @@ const AvailabilityManager = {
             html += `
                 <div class="schedule-day ${isEnabled ? 'enabled' : 'disabled'}" data-day="${dayKey}">
                     <div class="day-header">
-                        <div class="day-name">${daysArabic[dayKey]}</div>
+                        <div class="day-name">${dayNames[dayKey]}</div>
                         <label class="day-toggle">
                             <input type="checkbox" class="day-enabled-toggle" data-day="${dayKey}" ${isEnabled ? 'checked' : ''}>
                             <span class="toggle-slider"></span>
@@ -91,13 +102,13 @@ const AvailabilityManager = {
                     </div>
                     <div class="time-inputs">
                         <div class="time-input-group">
-                            <label>من الساعة</label>
+                            <label>${fromLabel}</label>
                             <input type="time" class="form-control start-time-input" 
                                    data-day="${dayKey}" value="${daySchedule.start}" 
                                    ${!isEnabled ? 'disabled' : ''}>
                         </div>
                         <div class="time-input-group">
-                            <label>إلى الساعة</label>
+                            <label>${toLabel}</label>
                             <input type="time" class="form-control end-time-input" 
                                    data-day="${dayKey}" value="${daySchedule.end}"
                                    ${!isEnabled ? 'disabled' : ''}>
@@ -296,14 +307,29 @@ const AvailabilityManager = {
             currentMonthSpan.textContent = `${monthNames[this.currentMonth.getMonth()]} ${this.currentMonth.getFullYear()}`;
         }
         
+        // Get current language translations
+        const lang = LanguageManager.getLanguage() || 'ar';
+        const t = LanguageManager.translations[lang];
+        
+        // Get day names from translations
+        const dayNames = t?.availability?.days || {
+            'saturday': 'Saturday',
+            'sunday': 'Sunday',
+            'monday': 'Monday',
+            'tuesday': 'Tuesday',
+            'wednesday': 'Wednesday',
+            'thursday': 'Thursday',
+            'friday': 'Friday'
+        };
+        
         // Build calendar HTML
         let html = '<table class="availability-calendar table table-bordered">';
         
         // Header
         html += '<thead class="calendar-header"><tr>';
-        const dayHeaders = ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
-        dayHeaders.forEach(day => {
-            html += `<th>${day}</th>`;
+        const daysOrder = ['saturday', 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+        daysOrder.forEach(dayKey => {
+            html += `<th>${dayNames[dayKey]}</th>`;
         });
         html += '</tr></thead><tbody>';
         
@@ -593,7 +619,9 @@ const AvailabilityManager = {
     
     // Reset schedule to default
     resetSchedule() {
-        if (confirm('هل أنت متأكد من إعادة تعيين الجدول الأسبوعي؟')) {
+        const lang = LanguageManager.getLanguage() || 'ar';
+        const confirmMsg = LanguageManager.translations[lang]?.availability?.messages?.reset_confirm || 'Are you sure you want to reset the weekly schedule?';
+        if (confirm(confirmMsg)) {
             this.renderDefaultSchedule();
         }
     },
@@ -666,7 +694,9 @@ const AvailabilityManager = {
         }
         
         this.renderWeeklySchedule();
-        this.showAlert('success', 'تم تطبيق الجدول المحدد بنجاح');
+        const lang = LanguageManager.getLanguage() || 'ar';
+        const successMsg = LanguageManager.translations[lang]?.availability?.messages?.template_applied || 'Template applied successfully';
+        this.showAlert('success', successMsg);
     },
     
     // Export schedule as JSON

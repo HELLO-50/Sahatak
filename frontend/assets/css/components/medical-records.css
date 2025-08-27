@@ -631,3 +631,182 @@
         transform: none;
     }
 }
+
+/* Records Page Specific Styles */
+.medical-nav-card {
+    cursor: default;
+    background: white !important;
+    border: 1px solid #e9ecef !important;
+    box-shadow: none !important;
+}
+
+.medical-nav-card .card-header {
+    border-radius: 10px 10px 0 0 !important;
+    font-weight: 600;
+}
+
+.medical-nav-card .card-header {
+    background: #0d47a1 !important;
+    color: white !important;
+    border-bottom: 1px solid #e9ecef !important;
+}
+
+.medical-nav-card .card-body {
+    background: white !important;
+    color: var(--text-color) !important;
+}
+
+/* Fix button contrast issues */
+.medical-nav-card .btn-outline-primary {
+    color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    background: white !important;
+}
+
+.medical-nav-card .btn-outline-primary:hover {
+    background: var(--primary-color) !important;
+    color: white !important;
+    border-color: var(--primary-color) !important;
+}
+
+.medical-nav-card .btn-outline-success {
+    color: var(--success-color) !important;
+    border-color: var(--success-color) !important;
+    background: white !important;
+}
+
+.medical-nav-card .btn-outline-success:hover {
+    background: var(--success-color) !important;
+    color: white !important;
+    border-color: var(--success-color) !important;
+}
+
+.medical-nav-card .btn-outline-info {
+    color: var(--info-color) !important;
+    border-color: var(--info-color) !important;
+    background: white !important;
+}
+
+.medical-nav-card .btn-outline-info:hover {
+    background: var(--info-color) !important;
+    color: white !important;
+    border-color: var(--info-color) !important;
+}
+
+.activity-item:last-child {
+    border-bottom: none !important;
+}
+
+.activity-icon {
+    flex-shrink: 0;
+}
+
+/* Stat cards improvements */
+.stat-card {
+    background: white !important;
+    border: 1px solid #e9ecef !important;
+    color: var(--text-color) !important;
+    box-shadow: none !important;
+    transform: none !important;
+    transition: none !important;
+}
+
+.stat-card:hover {
+    background: white !important;
+    border-color: #e9ecef !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.stat-card .stat-value {
+    color: var(--primary-color) !important;
+    font-weight: 600;
+    font-size: 1.5rem;
+    margin: 0.5rem 0;
+}
+
+.stat-card .stat-label {
+    color: var(--secondary-color) !important;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.stat-card .stat-icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+}
+
+/* Override any existing stat card hover effects */
+.stats-grid .stat-card:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Recent Activity Fixes */
+.recent-activity {
+    background: white !important;
+    color: var(--text-color) !important;
+    border: 1px solid #e9ecef !important;
+    box-shadow: none !important;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.recent-activity .card-header {
+    background: #0d47a1 !important;
+    color: white !important;
+    border-bottom: 1px solid #e9ecef !important;
+}
+
+.recent-activity .card-header .card-title {
+    color: white !important;
+    font-weight: 600;
+}
+
+.activity-item {
+    background: white !important;
+    color: var(--text-color) !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+}
+
+.activity-item:last-child {
+    border-bottom: none !important;
+}
+
+.activity-item small {
+    color: var(--secondary-color) !important;
+}
+
+.activity-icon {
+    background: #f8f9fa !important;
+    color: var(--primary-color) !important;
+}
+
+/* Medical History Page Cards */
+.medical-history-cards .card {
+    background: white !important;
+    border: 1px solid #e9ecef !important;
+    box-shadow: none !important;
+}
+
+.medical-history-cards .card-header {
+    background: #0d47a1 !important;
+    color: white !important;
+    border-bottom: 1px solid #e9ecef !important;
+}
+
+.medical-history-cards .card-body {
+    background: white !important;
+    color: var(--text-color) !important;
+}
+
+/* Ensure equal height cards */
+.medical-history-cards .card.h-100 {
+    display: flex;
+    flex-direction: column;
+}
+
+.medical-history-cards .card.h-100 .card-body {
+    flex: 1;
+}

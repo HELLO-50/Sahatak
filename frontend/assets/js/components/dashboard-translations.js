@@ -1,6 +1,20 @@
 // Dashboard Translation Management
 const DashboardTranslations = {
     
+    // Helper function to update element text
+    updateElementText(elementId, text) {
+        const element = document.getElementById(elementId);
+        if (element && text) {
+            const oldText = element.textContent;
+            element.textContent = text;
+            console.log(`✅ UPDATED ${elementId}: "${oldText}" → "${text}"`);
+        } else if (element && !text) {
+            console.log(`⚠️  ELEMENT FOUND BUT NO TEXT: ${elementId} (element exists but text is: ${text})`);
+        } else {
+            console.log(`❌ ELEMENT NOT FOUND: ${elementId}`);
+        }
+    },
+    
     // Update patient dashboard translations
     updatePatientDashboard(lang) {
         const t = LanguageManager.translations[lang];
@@ -417,6 +431,10 @@ const DashboardTranslations = {
             this.updateDoctorDashboard(savedLanguage);
         } else if (dashboardType === 'admin') {
             this.updateAdminDashboard(savedLanguage);
+        } else if (dashboardType === 'records') {
+            this.updateRecordsDashboard(savedLanguage);
+        } else if (dashboardType === 'availability') {
+            this.updateAvailabilityDashboard(savedLanguage);
         }
         
         // Update user name from localStorage (admin doesn't need this)
@@ -425,6 +443,28 @@ const DashboardTranslations = {
         }
         
         console.log(`${dashboardType} dashboard initialized with language: ${savedLanguage}`);
+    },
+
+    // Initialize records pages on page load
+    async initializeRecords() {
+        console.log('Initializing Records page translations...');
+        
+        // Load translations first
+        await LanguageManager.loadTranslations();
+        
+        // Get saved language or default to Arabic
+        const savedLanguage = LanguageManager.getLanguage() || 'ar';
+        
+        // Apply language settings
+        LanguageManager.applyLanguage(savedLanguage);
+        
+        // Update records content
+        this.updateRecordsDashboard(savedLanguage);
+        
+        // Update user name from localStorage
+        this.updateUserName();
+        
+        console.log(`Records page initialized with language: ${savedLanguage}`);
     }
 };
 
@@ -483,18 +523,31 @@ function showLanguageSelector() {
     const currentLang = LanguageManager.getLanguage() || 'ar';
     const newLang = currentLang === 'ar' ? 'en' : 'ar';
     
-    // Determine dashboard type from page URL or body class
+    // Determine page type from URL
     const isEHRPage = window.location.href.includes('patient-ehr.html');
     const isDoctorDashboard = window.location.href.includes('doctor.html');
+    const isRecordsPage = window.location.href.includes('/records/');
+    const isAvailabilityPage = window.location.href.includes('manage-availability.html');
     
     if (isEHRPage) {
         // Switch language for EHR page
         DashboardTranslations.switchEHRLanguage(newLang);
+    } else if (isRecordsPage) {
+        // Switch language for Records pages
+        DashboardTranslations.switchRecordsLanguage(newLang);
+    } else if (isAvailabilityPage) {
+        // Switch language for Availability pages
+        DashboardTranslations.switchAvailabilityLanguage(newLang);
     } else {
         const dashboardType = isDoctorDashboard ? 'doctor' : 'patient';
         // Switch language for dashboard
         DashboardTranslations.switchDashboardLanguage(newLang, dashboardType);
     }
+}
+
+// Also add the toggleLanguage function for compatibility
+function toggleLanguage() {
+    showLanguageSelector();
 }
 
 // Add EHR language switching function
@@ -513,5 +566,351 @@ DashboardTranslations.switchEHRLanguage = function(newLang) {
     
     // Update title
     const title = LanguageManager.translations[newLang]?.ehr?.page_title || 'السجل الطبي الإلكتروني | صحتك';
+    document.title = title;
+};
+
+// Update Records dashboard translations
+DashboardTranslations.updateRecordsDashboard = function(lang) {
+    console.log('updateRecordsDashboard called with language:', lang);
+    const t = LanguageManager.translations[lang];
+    console.log('Translation object for', lang, ':', t);
+    console.log('Records section:', t?.records);
+    
+    if (!t || !t.records) {
+        console.warn('Records translations not available for language:', lang);
+        console.log('Available translation keys:', t ? Object.keys(t) : 'No translations');
+        return;
+    }
+
+    const records = t.records;
+
+    // Main titles
+    console.log('Updating records-title with:', records.title);
+    this.updateElementText('records-title', records.title);
+    console.log('Updating records-subtitle with:', records.subtitle);
+    this.updateElementText('records-subtitle', records.subtitle);
+    
+    // Common navigation elements (same as patient dashboard)
+    this.updateElementText('nav-dashboard', t.dashboard?.patient?.nav?.home || 'Dashboard');
+    this.updateElementText('nav-back', t.auth?.back || 'Back');
+    this.updateElementText('btn-logout', t.dashboard?.patient?.buttons?.logout || 'Logout');
+    
+    // Stats
+    this.updateElementText('total-records-count', records.stats?.total_records || 'Total Records');
+    this.updateElementText('active-prescriptions-count', records.stats?.active_prescriptions || 'Active Prescriptions');
+    this.updateElementText('recent-updates-count', records.stats?.recent_updates || 'Recent Updates');
+    this.updateElementText('last-update-days', records.stats?.days_since_update || 'Days Since Update');
+    
+    this.updateElementText('stat-total-records', records.stats?.total_records);
+    this.updateElementText('stat-active-prescriptions', records.stats?.active_prescriptions);
+    this.updateElementText('stat-recent-updates', records.stats?.recent_updates);
+    this.updateElementText('stat-days-since-update', records.stats?.days_since_update);
+
+    // Navigation cards
+    this.updateElementText('medical-history-card-title', records.navigation?.medical_history);
+    this.updateElementText('medical-history-card-desc', records.navigation?.medical_history_desc);
+    this.updateElementText('prescriptions-card-title', records.navigation?.prescriptions);
+    this.updateElementText('prescriptions-card-desc', records.navigation?.prescriptions_desc);
+
+    // Buttons
+    this.updateElementText('view-complete-history-btn', records.buttons?.view_complete_history || 'View Complete History');
+    this.updateElementText('update-history-btn', records.buttons?.update_data || 'Update Data');
+    this.updateElementText('view-all-prescriptions-btn', records.buttons?.view_all_prescriptions || 'View All Prescriptions');
+    this.updateElementText('active-prescriptions-btn', records.buttons?.active_prescriptions || 'Active Prescriptions');
+
+    // Recent Activity
+    this.updateElementText('recent-activity-title', records.recent_activity?.title);
+    this.updateElementText('view-all-activity', records.recent_activity?.view_all);
+
+    // Loading states
+    this.updateElementText('loading-text', records.loading?.default || records.loading || 'Loading...');
+    this.updateElementText('medical-loading-text', records.loading?.medical || records.loading?.default || 'Loading medical data...');
+    this.updateElementText('prescription-loading-text', records.loading?.prescription || records.loading?.default || 'Loading prescriptions...');
+    this.updateElementText('spinner-loading-text', records.loading?.default || records.loading || 'Loading...');
+    this.updateElementText('loading-activity-text', records.loading?.activity || records.recent_activity?.loading_activity || 'Loading recent activity...');
+    this.updateElementText('loading-prescriptions-text', records.loading?.prescriptions || 'Loading prescriptions...');
+
+    // Medical History page specific
+    this.updateElementText('medical-history-title', t.medical_history?.title);
+    this.updateElementText('medical-history-subtitle', t.medical_history?.subtitle);
+    this.updateElementText('edit-history', t.medical_history?.buttons?.edit || 'Edit History');
+    this.updateElementText('summary-title', t.medical_history?.summary_title || 'Medical Summary');
+    this.updateElementText('timeline-title', t.medical_history?.timeline_title || 'Update Timeline');
+    this.updateElementText('filter-all', t.medical_history?.filter?.all || 'All');
+    this.updateElementText('filter-appointments', t.medical_history?.filter?.appointments || 'Appointments');
+    this.updateElementText('filter-self-updates', t.medical_history?.filter?.self_updates || 'Self Updates');
+    this.updateElementText('summary-loading', t.medical_history?.loading?.summary || 'Loading summary...');
+    this.updateElementText('timeline-loading', t.medical_history?.loading?.timeline || 'Loading timeline...');
+    
+    // Medical History Form Labels
+    this.updateElementText('modal-title', t.medical_history?.modal?.title || 'Edit Medical History');
+    this.updateElementText('basic-info-title', t.medical_history?.form?.basic_info || 'Basic Information');
+    this.updateElementText('lifestyle-title', t.medical_history?.form?.lifestyle || 'Lifestyle');
+    this.updateElementText('medical-conditions-title', t.medical_history?.form?.medical_conditions || 'Medical Conditions');
+    this.updateElementText('blood-type-label', t.medical_history?.form?.blood_type || 'Blood Type');
+    this.updateElementText('height-label', t.medical_history?.form?.height || 'Height (cm)');
+    this.updateElementText('weight-label', t.medical_history?.form?.weight || 'Weight (kg)');
+    this.updateElementText('smoking-label', t.medical_history?.form?.smoking || 'Smoking Status');
+    this.updateElementText('exercise-label', t.medical_history?.form?.exercise || 'Exercise Frequency');
+    this.updateElementText('alcohol-label', t.medical_history?.form?.alcohol || 'Alcohol Consumption');
+    this.updateElementText('allergies-label', t.medical_history?.form?.allergies || 'Allergies');
+    this.updateElementText('current-medications-label', t.medical_history?.form?.current_medications || 'Current Medications');
+    this.updateElementText('chronic-conditions-label', t.medical_history?.form?.chronic_conditions || 'Chronic Conditions');
+    this.updateElementText('family-history-label', t.medical_history?.form?.family_history || 'Family History');
+    this.updateElementText('surgical-history-label', t.medical_history?.form?.surgical_history || 'Surgical History');
+    this.updateElementText('medical-history-label', t.medical_history?.form?.general_history || 'General Medical History');
+    this.updateElementText('update-notes-label', t.medical_history?.form?.update_notes || 'Update Notes');
+    
+    // Medical History Form Options
+    this.updateElementText('select-blood-type', t.medical_history?.form?.select_blood_type || 'Select Blood Type');
+    this.updateElementText('select-smoking', t.medical_history?.form?.select_smoking || 'Select Status');
+    this.updateElementText('never-smoked', t.medical_history?.form?.never_smoked || 'Never');
+    this.updateElementText('former-smoker', t.medical_history?.form?.former_smoker || 'Former');
+    this.updateElementText('current-smoker', t.medical_history?.form?.current_smoker || 'Current');
+    this.updateElementText('select-exercise', t.medical_history?.form?.select_exercise || 'Select Frequency');
+    this.updateElementText('rare-exercise', t.medical_history?.form?.rare || 'Rare');
+    this.updateElementText('weekly-exercise', t.medical_history?.form?.weekly || 'Weekly');
+    this.updateElementText('daily-exercise', t.medical_history?.form?.daily || 'Daily');
+    this.updateElementText('select-alcohol', t.medical_history?.form?.select_alcohol || 'Select Consumption');
+    this.updateElementText('no-drink', t.medical_history?.form?.none || 'None');
+    this.updateElementText('sometimes', t.medical_history?.form?.occasional || 'Occasional');
+    this.updateElementText('moderate', t.medical_history?.form?.moderate || 'Moderate');
+    this.updateElementText('heavy', t.medical_history?.form?.heavy || 'Heavy');
+    
+    // Medical History Modal Buttons
+    this.updateElementText('cancel-btn-text', t.buttons?.cancel || 'Cancel');
+    this.updateElementText('save-btn-text', t.buttons?.save || 'Save Changes');
+    this.updateElementText('close-details-btn', t.buttons?.close || 'Close');
+    this.updateElementText('timeline-details-title', t.medical_history?.details_title || 'Update Details');
+
+    // Prescriptions page specific  
+    this.updateElementText('prescriptions-title', t.prescriptions?.title);
+    this.updateElementText('prescriptions-subtitle', t.prescriptions?.subtitle);
+    this.updateElementText('create-prescription', t.prescriptions?.create_prescription);
+    
+    // Prescriptions Stats
+    this.updateElementText('stat-total-prescriptions', t.prescriptions?.stats?.total || 'Total Prescriptions');
+    this.updateElementText('stat-active-prescriptions', t.prescriptions?.stats?.active || 'Active Prescriptions');
+    this.updateElementText('stat-completed-prescriptions', t.prescriptions?.stats?.completed || 'Completed Prescriptions');
+    this.updateElementText('stat-patients', t.prescriptions?.stats?.patients || 'Patients');
+    
+    // Prescriptions Search & Filter
+    const searchPlaceholder = t.prescriptions?.search_placeholder || 'Search prescriptions...';
+    const searchInput = document.getElementById('search-prescriptions');
+    if (searchInput) searchInput.placeholder = searchPlaceholder;
+    
+    this.updateElementText('filter-all-status', t.prescriptions?.filter?.all || 'All Status');
+    this.updateElementText('filter-active', t.prescriptions?.filter?.active || 'Active');
+    this.updateElementText('filter-completed', t.prescriptions?.filter?.completed || 'Completed');
+    this.updateElementText('filter-cancelled', t.prescriptions?.filter?.cancelled || 'Cancelled');
+    this.updateElementText('filter-expired', t.prescriptions?.filter?.expired || 'Expired');
+    
+    this.updateElementText('sort-newest', t.prescriptions?.sort?.newest || 'Newest First');
+    this.updateElementText('sort-oldest', t.prescriptions?.sort?.oldest || 'Oldest First');
+    this.updateElementText('sort-medication', t.prescriptions?.sort?.medication || 'By Medication');
+    this.updateElementText('sort-status', t.prescriptions?.sort?.status || 'By Status');
+    
+    this.updateElementText('loading-text', t.prescriptions?.loading?.default || 'Loading...');
+    this.updateElementText('loading-prescriptions-text', t.prescriptions?.loading?.prescriptions || 'Loading prescriptions...');
+    
+    // Prescriptions Modal
+    this.updateElementText('modal-new-prescription', t.prescriptions?.modal?.new_prescription || 'New Prescription');
+    this.updateElementText('patient-label', t.prescriptions?.form?.patient || 'Patient');
+    this.updateElementText('select-patient', t.prescriptions?.form?.select_patient || 'Select Patient');
+    this.updateElementText('appointment-label', t.prescriptions?.form?.appointment || 'Appointment');
+    this.updateElementText('select-appointment', t.prescriptions?.form?.select_appointment || 'Select Appointment');
+    this.updateElementText('medication-name-label', t.prescriptions?.form?.medication_name || 'Medication Name *');
+    this.updateElementText('dosage-label', t.prescriptions?.form?.dosage || 'Dosage *');
+    this.updateElementText('frequency-label', t.prescriptions?.form?.frequency || 'Frequency *');
+    this.updateElementText('duration-label', t.prescriptions?.form?.duration || 'Duration *');
+    this.updateElementText('quantity-label', t.prescriptions?.form?.quantity || 'Quantity');
+    this.updateElementText('refills-label', t.prescriptions?.form?.refills || 'Refills Allowed');
+    this.updateElementText('start-date-label', t.prescriptions?.form?.start_date || 'Start Date');
+    this.updateElementText('end-date-label', t.prescriptions?.form?.end_date || 'End Date');
+    this.updateElementText('instructions-label', t.prescriptions?.form?.instructions || 'Instructions');
+    this.updateElementText('notes-label', t.prescriptions?.form?.notes || 'Doctor Notes');
+    
+    // Prescriptions Modal Buttons
+    this.updateElementText('modal-cancel', t.buttons?.cancel || 'Cancel');
+    this.updateElementText('modal-save', t.buttons?.save || 'Save Prescription');
+    this.updateElementText('details-modal-title', t.prescriptions?.details_title || 'Prescription Details');
+    this.updateElementText('edit-btn-text', t.buttons?.edit || 'Edit');
+    this.updateElementText('mark-complete-btn', t.prescriptions?.mark_complete || 'Mark as Complete');
+    this.updateElementText('close-details-btn', t.buttons?.close || 'Close');
+    
+    // Status Change Modal
+    this.updateElementText('status-modal-title', t.prescriptions?.status_modal_title || 'Change Status');
+    this.updateElementText('confirm-complete-text', t.prescriptions?.confirm_complete || 'Do you want to mark this prescription as complete?');
+    this.updateElementText('completion-notes-label', t.prescriptions?.completion_notes || 'Notes (Optional)');
+    this.updateElementText('confirm-complete-btn-text', t.prescriptions?.confirm || 'Yes, Mark as Complete');
+    this.updateElementText('status-cancel-btn', t.buttons?.cancel || 'Cancel');
+
+    // Common navigation elements
+    this.updateElementText('nav-dashboard', t.dashboard?.patient?.nav?.home || 'لوحة التحكم');
+    this.updateElementText('nav-back', t.auth?.back || 'العودة');
+    this.updateElementText('btn-logout', t.dashboard?.patient?.buttons?.logout || 'تسجيل خروج');
+
+    // Language toggle - show the opposite language (the one you can switch TO)
+    const oppositeLanguage = lang === 'ar' ? 'English' : 'العربية';
+    this.updateElementText('current-lang', oppositeLanguage);
+
+    // Update footer
+    this.updateFooter(t);
+
+    console.log('Records dashboard translations updated for:', lang);
+};
+
+// Update Availability dashboard translations
+DashboardTranslations.updateAvailabilityDashboard = function(lang) {
+    console.log('updateAvailabilityDashboard called with language:', lang);
+    const t = LanguageManager.translations[lang];
+    
+    if (!t || !t.availability) {
+        console.warn('Availability translations not available for language:', lang);
+        return;
+    }
+
+    const availability = t.availability;
+
+    // Header section - match doctor dashboard
+    this.updateElementText('user-name', availability.user_name);
+    this.updateElementText('dashboard-title', availability.dashboard_title);
+    this.updateElementText('dashboard-subtitle', availability.dashboard_subtitle);
+
+    // Buttons
+    this.updateElementText('btn-back', availability.buttons?.back);
+    this.updateElementText('btn-profile', availability.buttons?.profile);
+    this.updateElementText('btn-logout', availability.buttons?.logout);
+    this.updateElementText('btn-weekly', availability.buttons?.weekly);
+
+    // Tabs
+    this.updateElementText('tab-weekly', availability.tabs?.weekly);
+    this.updateElementText('tab-calendar', availability.tabs?.calendar);
+    this.updateElementText('tab-blocked', availability.tabs?.blocked);
+
+    // Weekly schedule
+    this.updateElementText('weekly-title', availability.weekly?.title);
+    this.updateElementText('loading-weekly', availability.weekly?.loading);
+    this.updateElementText('quick-templates', availability.weekly?.quick_templates);
+    this.updateElementText('template-fulltime', availability.weekly?.template_fulltime);
+    this.updateElementText('template-weekdays', availability.weekly?.template_weekdays);
+    this.updateElementText('template-parttime', availability.weekly?.template_parttime);
+
+    // Calendar
+    this.updateElementText('calendar-title', availability.calendar?.title);
+    this.updateElementText('loading-calendar', availability.calendar?.loading);
+    this.updateElementText('current-month', 'January 2025'); // This would be dynamic
+
+    // Blocked times
+    this.updateElementText('blocked-title', availability.blocked?.title);
+    this.updateElementText('loading-blocked', availability.blocked?.loading);
+    this.updateElementText('btn-block-new', availability.blocked?.block_new);
+
+    // Modal elements
+    this.updateElementText('modal-block-title', availability.modal?.block_title);
+    this.updateElementText('modal-edit-title', availability.modal?.edit_title);
+    this.updateElementText('label-date', availability.modal?.date);
+    this.updateElementText('label-start-time', availability.modal?.start_time);
+    this.updateElementText('label-end-time', availability.modal?.end_time);
+    this.updateElementText('label-reason', availability.modal?.reason);
+    this.updateElementText('btn-cancel', availability.modal?.cancel);
+    this.updateElementText('btn-block-time', availability.modal?.block_time);
+    this.updateElementText('btn-unblock', availability.modal?.unblock);
+    this.updateElementText('btn-close', availability.modal?.close);
+
+    // Set placeholder for reason textarea
+    const reasonTextarea = document.getElementById('block-reason');
+    if (reasonTextarea && availability.modal?.placeholder_reason) {
+        reasonTextarea.setAttribute('placeholder', availability.modal.placeholder_reason);
+    }
+
+    // Action buttons
+    this.updateElementText('btn-save-schedule', availability.buttons?.save_schedule);
+    this.updateElementText('btn-reset', availability.buttons?.reset);
+    this.updateElementText('btn-export', availability.buttons?.export);
+
+    // Loading states
+    this.updateElementText('loading-text', availability.loading);
+    this.updateElementText('loading-text-2', availability.loading);
+    this.updateElementText('loading-text-3', availability.loading);
+
+    // Language toggle - show the opposite language (the one you can switch TO)
+    const oppositeLanguage = lang === 'ar' ? 'English' : 'العربية';
+    this.updateElementText('current-lang', oppositeLanguage);
+
+    // Update footer
+    this.updateFooter(t);
+
+    console.log('Availability dashboard translations updated for:', lang);
+};
+
+// Update footer translations  
+DashboardTranslations.updateFooter = function(t) {
+    if (t.footer) {
+        this.updateElementText('footer-brand', t.footer.brand || 'Sahatak | صحتك');
+        this.updateElementText('footer-links-title', t.footer.links_title || 'Quick Links');
+        this.updateElementText('footer-about', t.footer.about || 'About Platform');
+        this.updateElementText('footer-services', t.footer.services || 'Services');
+        this.updateElementText('footer-support-title', t.footer.support_title || 'Support & Help');
+        this.updateElementText('footer-help', t.footer.help || 'Help Center');
+        this.updateElementText('footer-contact', t.footer.contact || 'Contact Us');
+        this.updateElementText('footer-emergency-text', t.footer.emergency_text || 'For medical emergencies');
+        this.updateElementText('footer-emergency-action', t.footer.emergency_action || 'Go to nearest ER hospital');
+        this.updateElementText('footer-emergency-note', t.footer.emergency_note || 'For non-urgent consultations use the platform');
+        this.updateElementText('footer-copyright', t.footer.copyright || '© 2025 Sahatak. All rights reserved.');
+        this.updateElementText('footer-medical-disclaimer', t.footer.medical_disclaimer || 'This platform does not replace visiting a doctor in emergency cases');
+    }
+};
+
+// Add Records language switching function
+DashboardTranslations.switchRecordsLanguage = function(newLang) {
+    console.log('=== SWITCH RECORDS LANGUAGE ===');
+    console.log('Switching Records language to:', newLang);
+    console.log('Current translations object:', LanguageManager.translations);
+    
+    // Store new language
+    LanguageManager.setLanguage(newLang);
+    
+    // Apply language settings
+    LanguageManager.applyLanguage(newLang);
+    
+    // Update Records interface
+    console.log('About to call updateRecordsDashboard with:', newLang);
+    this.updateRecordsDashboard(newLang);
+    console.log('Finished calling updateRecordsDashboard');
+    
+    // Update HTML direction
+    document.documentElement.lang = newLang;
+    document.documentElement.dir = newLang === 'ar' ? 'rtl' : 'ltr';
+    
+    // Update page title
+    const t = LanguageManager.translations[newLang];
+    const title = t?.records?.title ? `${t.records.title} | ${t.app_name}` : 'Medical Records | Sahatak';
+    document.title = title;
+};
+
+// Add Availability language switching function
+DashboardTranslations.switchAvailabilityLanguage = function(newLang) {
+    console.log('=== SWITCH AVAILABILITY LANGUAGE ===');
+    console.log('Switching Availability language to:', newLang);
+    
+    // Store new language
+    LanguageManager.setLanguage(newLang);
+    
+    // Apply language settings
+    LanguageManager.applyLanguage(newLang);
+    
+    // Update Availability interface
+    console.log('About to call updateAvailabilityDashboard with:', newLang);
+    this.updateAvailabilityDashboard(newLang);
+    console.log('Finished calling updateAvailabilityDashboard');
+    
+    // Update HTML direction
+    document.documentElement.lang = newLang;
+    document.documentElement.dir = newLang === 'ar' ? 'rtl' : 'ltr';
+    
+    // Update page title
+    const t = LanguageManager.translations[newLang];
+    const title = t?.availability?.dashboard_title ? `${t.availability.dashboard_title} | ${t.app_name}` : 'Manage Availability | Sahatak';
     document.title = title;
 };

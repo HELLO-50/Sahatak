@@ -14,12 +14,24 @@ const LanguageManager = {
     async loadTranslations() {
         try {
             // Determine correct path based on current location
-            const isInSubdirectory = window.location.pathname.includes('/pages/');
+            const pathname = window.location.pathname;
+            const isInSubdirectory = pathname.includes('/pages/');
             const isGitHubPages = window.location.hostname.includes('github.io');
             
             let basePath;
             if (isInSubdirectory) {
-                basePath = '../../locales/';  // From pages/ to locales/ (up 2 levels)
+                // Count how many levels deep we are from the root
+                const pathParts = pathname.split('/');
+                const pagesIndex = pathParts.findIndex(part => part === 'pages');
+                if (pagesIndex >= 0) {
+                    // Count directories after 'pages' (excluding filename)
+                    const dirsAfterPages = pathParts.length - pagesIndex - 2; // -2 for 'pages' and filename
+                    // Go up from current dir to pages, then from pages to root
+                    const totalLevelsUp = dirsAfterPages + 1; // +1 to go from pages to root
+                    basePath = '../'.repeat(totalLevelsUp) + 'locales/';
+                } else {
+                    basePath = '../../locales/';  // Fallback
+                }
             } else if (isGitHubPages) {
                 basePath = 'frontend/locales/';
             } else {
@@ -27,6 +39,7 @@ const LanguageManager = {
             }
             
             console.log('Loading translations from:', basePath);
+            console.log('Current pathname:', pathname);
             console.log('Is subdirectory:', isInSubdirectory);
             console.log('Is GitHub Pages:', isGitHubPages);
             
@@ -45,6 +58,11 @@ const LanguageManager = {
             console.log('Translations loaded successfully:', this.translations);
             console.log('English translations available:', !!this.translations.en);
             console.log('Arabic translations available:', !!this.translations.ar);
+            console.log('Arabic records section:', this.translations.ar?.records ? 'EXISTS' : 'MISSING');
+            console.log('English records section:', this.translations.en?.records ? 'EXISTS' : 'MISSING');
+            if (this.translations.ar?.records) {
+                console.log('Arabic records title:', this.translations.ar.records.title);
+            }
             console.log('Available translation keys:', Object.keys(this.translations));
         } catch (error) {
             console.error('Failed to load translations:', error);
@@ -543,11 +561,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         LanguageManager.loadFallbackTranslations();
     }
     
-    // Ensure we have translations loaded
-    if (!LanguageManager.translations.ar || !LanguageManager.translations.en) {
-        console.warn('Translations missing, forcing fallback load');
-        LanguageManager.loadFallbackTranslations();
-    }
+    // Check translation loading status
+    console.log('Translation loading status:');
+    console.log('Arabic loaded:', !!LanguageManager.translations.ar);
+    console.log('English loaded:', !!LanguageManager.translations.en);
     
     console.log('Final translations state:', LanguageManager.translations);
     

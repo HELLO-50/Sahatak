@@ -41,7 +41,7 @@
 .day-name {
     font-weight: 600;
     font-size: 1.1rem;
-    color: var(--text-primary);
+    color: black !important;
 }
 
 .day-toggle {
@@ -429,4 +429,92 @@ input:checked + .toggle-slider:before {
 
 .schedule-day.enabled:hover {
     animation: pulse 2s infinite;
+}
+
+/* Consistent Medical Green Hover for Individual Schedule Days */
+.schedule-day:hover {
+    background: #a7f3d0 !important;
+    border-color: #059669 !important;
+    transition: all 0.3s ease;
+}
+
+/* Calendar individual day hover */
+.calendar-day:hover {
+    background: #a7f3d0 !important;
+    border-color: #059669 !important;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+/* Blocked time individual item hover */
+.blocked-time-item:hover {
+    background: #a7f3d0 !important;
+    border-color: #059669 !important;
+    transition: all 0.3s ease;
+}
+
+/* Ensure consistent button styles matching dashboard */
+.btn-medical,
+.btn-outline-medical {
+    transition: all 0.3s ease;
+}
+
+.btn-medical:hover {
+    background: linear-gradient(45deg, var(--medical-teal), var(--medical-blue)) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(13, 71, 161, 0.3);
+}
+
+.btn-outline-medical:hover {
+    background: linear-gradient(45deg, var(--medical-blue), var(--medical-teal)) !important;
+    color: white !important;
+    border-color: var(--medical-blue) !important;
+    transform: translateY(-2px);
+}
+
+/* Tab navigation - Medical blue default, green on hover */
+.nav-tabs .nav-link {
+    background: linear-gradient(45deg, #2563eb, #0891b2) !important;
+    color: white !important;
+    border: 1px solid #0d47a1 !important;
+    transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link:hover {
+    background: #a7f3d0 !important;
+    border-color: #059669 !important;
+    color: black !important;
+    transform: translateY(-2px);
+}
+
+.nav-tabs .nav-link.active {
+    background: #a7f3d0 !important;
+    border-color: #059669 !important;
+    color: black !important;
+    border-bottom-color: #a7f3d0 !important;
+}
+
+/* Quick template buttons - no hover effect, just standard medical button */
+#quick-templates {
+    color: black !important;
+}
+
+/* Ensure Save Schedule button has proper medical button styling */
+#save-schedule-btn {
+    background: linear-gradient(45deg, #2563eb, #0891b2) !important;
+    color: white !important;
+    border: none !important;
+}
+
+#save-schedule-btn:hover {
+    background: linear-gradient(45deg, #0891b2, #2563eb) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+}
+
+/* Reset button hover */
+.btn-outline-secondary:hover {
+    background: #6c757d !important;
+    color: white !important;
+    border-color: #6c757d !important;
 }
