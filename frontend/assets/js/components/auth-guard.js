@@ -2,10 +2,25 @@
 class AuthGuard {
     
     /**
+     * Check if we're in development mode (localhost)
+     * @returns {boolean} True if in development mode
+     */
+    static isDevelopmentMode() {
+        const hostname = window.location.hostname;
+        return hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname === '';
+    }
+    
+    /**
      * Check if user is authenticated
      * @returns {boolean} True if authenticated, false otherwise
      */
     static isAuthenticated() {
+        // Bypass authentication in development mode
+        if (this.isDevelopmentMode()) {
+            console.log('Development mode: bypassing authentication');
+            return true;
+        }
+        
         const userId = localStorage.getItem('sahatak_user_id');
         const userType = localStorage.getItem('sahatak_user_type');
         const userEmail = localStorage.getItem('sahatak_user_email');
@@ -22,6 +37,16 @@ class AuthGuard {
             return null;
         }
         
+        // Provide mock user data in development mode
+        if (this.isDevelopmentMode()) {
+            return {
+                id: '1',
+                userType: 'doctor', // Default to doctor for testing
+                email: 'dev@localhost.com',
+                fullName: 'Developer User'
+            };
+        }
+        
         return {
             id: localStorage.getItem('sahatak_user_id'),
             userType: localStorage.getItem('sahatak_user_type'),
@@ -36,6 +61,12 @@ class AuthGuard {
      * @returns {boolean} True if user has required type
      */
     static hasUserType(requiredType) {
+        // Bypass user type check in development mode
+        if (this.isDevelopmentMode()) {
+            console.log(`Development mode: bypassing user type check for ${requiredType}`);
+            return true;
+        }
+        
         const userType = localStorage.getItem('sahatak_user_type');
         return userType === requiredType;
     }
