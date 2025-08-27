@@ -106,6 +106,13 @@ class AuthGuard {
      * @param {string} requiredUserType - 'patient', 'doctor', or null for any authenticated user
      */
     static protectPage(requiredUserType = null) {
+        // Development mode bypass - always allow access
+        if (this.isDevelopmentMode()) {
+            console.log(`🔓 Development mode: Page protection bypassed (required: ${requiredUserType || 'any'})`);
+            this.addDevelopmentModeIndicator();
+            return true;
+        }
+        
         // Check if user is authenticated
         if (!this.isAuthenticated()) {
             console.warn('User not authenticated, redirecting to login');
@@ -138,6 +145,33 @@ class AuthGuard {
         }
         
         return true;
+    }
+    
+    /**
+     * Add visual indicator for development mode
+     */
+    static addDevelopmentModeIndicator() {
+        // Add a small dev indicator if not already present
+        if (!document.getElementById('dev-mode-indicator')) {
+            const indicator = document.createElement('div');
+            indicator.id = 'dev-mode-indicator';
+            indicator.innerHTML = '🚧 DEV MODE - Auth Disabled';
+            indicator.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #ff6b35;
+                color: white;
+                padding: 4px 12px;
+                font-size: 12px;
+                font-weight: bold;
+                z-index: 9999;
+                border-radius: 0 0 8px 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            `;
+            document.body.appendChild(indicator);
+        }
     }
     
     /**
