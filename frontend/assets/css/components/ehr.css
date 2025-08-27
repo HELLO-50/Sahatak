@@ -1,14 +1,18 @@
-/* Electronic Health Record (EHR) System Styles */
+/* Electronic Health Record (EHR) System Styles - Following Medical Scheme */
 
 /* Patient Overview Card */
 .patient-overview-card {
-    border-left: 4px solid var(--primary-color);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid var(--medical-blue);
+    box-shadow: var(--shadow);
+    background: rgba(2, 6, 23, 0.35);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
 }
 
 .patient-overview-card .card-header {
-    background: linear-gradient(135deg, var(--primary-color), #1e7e34);
-    color: white;
+    background: linear-gradient(135deg, var(--medical-blue), var(--medical-teal));
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
 }
 
 .patient-basic-info {
@@ -19,18 +23,18 @@
 }
 
 .info-group {
-    background: #f8f9fa;
+    background: rgba(2, 6, 23, 0.35);
     padding: 1rem;
-    border-radius: 8px;
-    border: 1px solid #e9ecef;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
 }
 
 .info-group h6 {
-    color: var(--primary-color);
+    color: var(--primary);
     font-weight: 600;
     margin-bottom: 0.75rem;
     padding-bottom: 0.5rem;
-    border-bottom: 1px solid #dee2e6;
+    border-bottom: 1px solid var(--border);
 }
 
 .info-item {
@@ -47,23 +51,24 @@
 
 .info-label {
     font-weight: 500;
-    color: #495057;
+    color: var(--muted);
 }
 
 .info-value {
-    color: #212529;
+    color: var(--text);
     font-weight: 600;
 }
 
 /* EHR Tabs */
 .ehr-tabs {
-    background: white;
-    border-bottom: 2px solid #e9ecef;
+    background: rgba(2, 6, 23, 0.35);
+    border-bottom: 2px solid var(--border);
     margin-bottom: 0;
+    border-radius: var(--radius) var(--radius) 0 0;
 }
 
 .ehr-tabs .nav-link {
-    color: #6c757d;
+    color: var(--muted);
     font-weight: 500;
     padding: 1rem 1.5rem;
     border: none;
@@ -71,43 +76,45 @@
 }
 
 .ehr-tabs .nav-link:hover {
-    color: var(--primary-color);
-    background: rgba(0, 123, 255, 0.1);
+    color: var(--primary);
+    background: var(--hover);
     border-color: transparent;
 }
 
 .ehr-tabs .nav-link.active {
-    color: var(--primary-color);
-    background: white;
-    border-color: transparent transparent var(--primary-color) transparent;
+    color: var(--primary);
+    background: rgba(34, 211, 238, 0.06);
+    border-color: transparent transparent var(--primary) transparent;
     border-width: 0 0 3px 0;
     border-style: solid;
 }
 
 .ehr-tab-content {
-    background: white;
+    background: rgba(2, 6, 23, 0.35);
     padding: 0;
-    border: 1px solid #e9ecef;
+    border: 1px solid var(--border);
     border-top: none;
-    border-radius: 0 0 8px 8px;
+    border-radius: 0 0 var(--radius) var(--radius);
 }
 
 /* Diagnosis Cards */
 .diagnosis-card {
-    border: 1px solid #e9ecef;
-    border-radius: 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
     margin-bottom: 1rem;
     transition: all 0.3s ease;
-    background: white;
+    background: rgba(2, 6, 23, 0.35);
+    box-shadow: var(--shadow);
 }
 
 .diagnosis-card:hover {
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    border-color: var(--primary-color);
+    box-shadow: var(--shadow);
+    border-color: var(--primary);
+    background: var(--hover);
 }
 
 .diagnosis-card.active-diagnosis {
-    border-left: 4px solid var(--success-color);
+    border-left: 4px solid var(--medical-green);
 }
 
 .diagnosis-card.resolved-diagnosis {
@@ -125,7 +132,7 @@
 .diagnosis-title {
     font-size: 1.1rem;
     font-weight: 600;
-    color: #212529;
+    color: var(--text);
     margin-bottom: 0.25rem;
 }
 
@@ -177,31 +184,34 @@
 
 /* Vital Signs */
 .vitals-chart-container {
-    background: white;
-    border: 1px solid #e9ecef;
-    border-radius: 8px;
+    background: rgba(2, 6, 23, 0.35);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
     padding: 1rem;
     margin-bottom: 1rem;
+    box-shadow: var(--shadow);
 }
 
 .vitals-chart-container h6 {
-    color: var(--primary-color);
+    color: var(--primary);
     font-weight: 600;
     margin-bottom: 1rem;
 }
 
 .vital-signs-card {
-    border: 1px solid #e9ecef;
-    border-radius: 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
     padding: 1rem;
     margin-bottom: 0.75rem;
-    background: white;
+    background: rgba(2, 6, 23, 0.35);
     transition: all 0.3s ease;
+    box-shadow: var(--shadow);
 }
 
 .vital-signs-card:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    border-color: var(--info-color);
+    box-shadow: var(--shadow);
+    border-color: var(--primary);
+    background: var(--hover);
 }
 
 .vitals-header {
@@ -215,7 +225,7 @@
 
 .vitals-date {
     font-weight: 600;
-    color: var(--primary-color);
+    color: var(--primary);
 }
 
 .vitals-grid {
@@ -235,13 +245,13 @@
 .vital-value {
     font-size: 1.1rem;
     font-weight: 600;
-    color: #212529;
+    color: var(--text);
     margin-bottom: 0.25rem;
 }
 
 .vital-label {
     font-size: 0.8rem;
-    color: #6c757d;
+    color: var(--muted);
     font-weight: 500;
 }
 
@@ -252,22 +262,23 @@
 
 /* Medical History */
 .history-section {
-    border: 1px solid #e9ecef;
-    border-radius: 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
     margin-bottom: 1rem;
-    background: white;
+    background: rgba(2, 6, 23, 0.35);
+    box-shadow: var(--shadow);
 }
 
 .history-section-header {
-    background: #f8f9fa;
+    background: var(--hover);
     padding: 1rem;
-    border-bottom: 1px solid #e9ecef;
-    border-radius: 8px 8px 0 0;
+    border-bottom: 1px solid var(--border);
+    border-radius: var(--radius) var(--radius) 0 0;
 }
 
 .history-section-title {
     font-weight: 600;
-    color: var(--primary-color);
+    color: var(--primary);
     margin: 0;
 }
 
@@ -299,17 +310,17 @@
 
 .history-label {
     font-weight: 500;
-    color: #495057;
+    color: var(--muted);
     margin-bottom: 0.25rem;
 }
 
 .history-value {
-    color: #212529;
+    color: var(--text);
     line-height: 1.4;
 }
 
 .history-date {
-    color: #6c757d;
+    color: var(--muted);
     font-size: 0.85rem;
     font-style: italic;
     white-space: nowrap;
@@ -318,17 +329,19 @@
 
 /* Appointments List */
 .appointment-card {
-    border: 1px solid #e9ecef;
-    border-radius: 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
     padding: 1rem;
     margin-bottom: 0.75rem;
-    background: white;
+    background: rgba(2, 6, 23, 0.35);
     transition: all 0.3s ease;
+    box-shadow: var(--shadow);
 }
 
 .appointment-card:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    border-color: var(--primary-color);
+    box-shadow: var(--shadow);
+    border-color: var(--primary);
+    background: var(--hover);
 }
 
 .appointment-header {
@@ -340,7 +353,7 @@
 
 .appointment-date {
     font-weight: 600;
-    color: var(--primary-color);
+    color: var(--primary);
     font-size: 1rem;
 }
 
@@ -356,7 +369,7 @@
 .status-cancelled { background: #f8d7da; color: #721c24; }
 
 .appointment-details {
-    color: #495057;
+    color: var(--muted);
     font-size: 0.9rem;
     line-height: 1.4;
 }
@@ -368,7 +381,7 @@
     align-items: center;
     justify-content: center;
     padding: 3rem;
-    color: #6c757d;
+    color: var(--muted);
 }
 
 .ehr-loading .spinner-border {
@@ -381,7 +394,7 @@
 .empty-state {
     text-align: center;
     padding: 3rem 1rem;
-    color: #6c757d;
+    color: var(--muted);
 }
 
 .empty-state i {
@@ -489,6 +502,201 @@
     }
 }
 
+/* Timeline Styles */
+.timeline {
+    position: relative;
+    padding: 1rem 0;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e9ecef;
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 60px;
+    margin-bottom: 2rem;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: 11px;
+    top: 5px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 0 0 3px #e9ecef;
+}
+
+.timeline-content {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.timeline-content h6 {
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.timeline-content p {
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+
+.timeline-content small {
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Health Score Display */
+.health-score-card {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.health-score-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.health-score-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.health-score-bar {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 1rem;
+}
+
+.health-score-fill {
+    height: 100%;
+    background: white;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+/* Search Enhancements */
+.ehr-search-container {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.search-filters {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.search-filters .form-control,
+.search-filters .form-select {
+    max-width: 200px;
+}
+
+/* Risk Factors Display */
+.risk-factors-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.risk-factor-item {
+    padding: 0.75rem;
+    border-radius: 6px;
+    border-left: 4px solid;
+    background: white;
+}
+
+.risk-factor-item.risk-high {
+    border-left-color: #dc3545;
+    background: rgba(220, 53, 69, 0.05);
+}
+
+.risk-factor-item.risk-medium {
+    border-left-color: #ffc107;
+    background: rgba(255, 193, 7, 0.05);
+}
+
+.risk-factor-item.risk-low {
+    border-left-color: #28a745;
+    background: rgba(40, 167, 69, 0.05);
+}
+
+.risk-factor-type {
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+}
+
+.risk-factor-description {
+    font-size: 0.9rem;
+    color: #495057;
+}
+
+/* Enhanced Action Buttons */
+.ehr-action-toolbar {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ehr-action-toolbar .btn-group {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.ehr-action-toolbar .btn {
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+}
+
+/* Print Timeline Styles */
+@media print {
+    .timeline::before {
+        background: #000 !important;
+    }
+    
+    .timeline-marker {
+        border-color: #000 !important;
+        background: #fff !important;
+    }
+    
+    .timeline-content {
+        border-color: #000 !important;
+    }
+}
+
 /* Animation Classes */
 @keyframes fadeInUp {
     from {
@@ -503,6 +711,16 @@
 
 .fade-in-up {
     animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.pulse-animation {
+    animation: pulse 0.5s ease-in-out;
 }
 
 /* Form Enhancements */

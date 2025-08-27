@@ -429,14 +429,89 @@ const DashboardTranslations = {
 };
 
 // Global function for language switching in dashboards
+// Update EHR (Electronic Health Record) dashboard translations
+DashboardTranslations.updateEHRDashboard = function(lang) {
+    const t = LanguageManager.translations[lang];
+    if (!t || !t.ehr) {
+        console.warn('EHR translations not available for language:', lang);
+        return;
+    }
+
+    const ehr = t.ehr;
+
+    // Header translations
+    this.updateElementText('ehr-title', ehr.title);
+    this.updateElementText('patient-info', ehr.patient_loading);
+
+    // Tab translations - check if tabs have text elements
+    const diagnosesTab = document.querySelector('#diagnoses-tab');
+    const vitalsTab = document.querySelector('#vitals-tab');
+    const historyTab = document.querySelector('#history-tab');
+    const appointmentsTab = document.querySelector('#appointments-tab');
+
+    if (diagnosesTab && ehr.tabs?.diagnoses) {
+        diagnosesTab.innerHTML = `<i class="bi bi-clipboard-pulse me-1"></i>${ehr.tabs.diagnoses}`;
+    }
+    if (vitalsTab && ehr.tabs?.vitals) {
+        vitalsTab.innerHTML = `<i class="bi bi-activity me-1"></i>${ehr.tabs.vitals}`;
+    }
+    if (historyTab && ehr.tabs?.history) {
+        historyTab.innerHTML = `<i class="bi bi-journal-medical me-1"></i>${ehr.tabs.history}`;
+    }
+    if (appointmentsTab && ehr.tabs?.appointments) {
+        appointmentsTab.innerHTML = `<i class="bi bi-calendar-event me-1"></i>${ehr.tabs.appointments}`;
+    }
+
+    // Footer translations
+    this.updateElementText('footer-brand', ehr.footer?.brand || t.footer?.brand);
+    this.updateElementText('footer-links-title', ehr.footer?.links_title || t.footer?.quick_links);
+    this.updateElementText('footer-support-title', ehr.footer?.support_title || t.footer?.support);
+    this.updateElementText('footer-emergency-text', ehr.footer?.emergency_text || t.footer?.emergency?.text);
+    this.updateElementText('footer-emergency-action', ehr.footer?.emergency_action || t.footer?.emergency?.action);
+    this.updateElementText('footer-emergency-note', ehr.footer?.emergency_note || t.footer?.emergency?.note);
+    this.updateElementText('footer-copyright', ehr.footer?.copyright || t.footer?.copyright);
+    this.updateElementText('footer-medical-disclaimer', ehr.footer?.medical_disclaimer || t.footer?.disclaimer);
+
+    // Language switch
+    const oppositeLanguage = lang === 'ar' ? 'English' : 'العربية';
+    this.updateElementText('current-lang', oppositeLanguage);
+
+    console.log('EHR dashboard translations updated for:', lang);
+};
+
 function showLanguageSelector() {
     const currentLang = LanguageManager.getLanguage() || 'ar';
     const newLang = currentLang === 'ar' ? 'en' : 'ar';
     
     // Determine dashboard type from page URL or body class
+    const isEHRPage = window.location.href.includes('patient-ehr.html');
     const isDoctorDashboard = window.location.href.includes('doctor.html');
-    const dashboardType = isDoctorDashboard ? 'doctor' : 'patient';
     
-    // Switch language
-    DashboardTranslations.switchDashboardLanguage(newLang, dashboardType);
+    if (isEHRPage) {
+        // Switch language for EHR page
+        DashboardTranslations.switchEHRLanguage(newLang);
+    } else {
+        const dashboardType = isDoctorDashboard ? 'doctor' : 'patient';
+        // Switch language for dashboard
+        DashboardTranslations.switchDashboardLanguage(newLang, dashboardType);
+    }
 }
+
+// Add EHR language switching function
+DashboardTranslations.switchEHRLanguage = function(newLang) {
+    console.log('Switching EHR language to:', newLang);
+    
+    // Store new language
+    LanguageManager.setLanguage(newLang);
+    
+    // Update EHR interface
+    this.updateEHRDashboard(newLang);
+    
+    // Update HTML direction
+    document.documentElement.lang = newLang;
+    document.documentElement.dir = newLang === 'ar' ? 'rtl' : 'ltr';
+    
+    // Update title
+    const title = LanguageManager.translations[newLang]?.ehr?.page_title || 'السجل الطبي الإلكتروني | صحتك';
+    document.title = title;
+};
