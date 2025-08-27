@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>السجلات الطبية | صحتك</title>
+    <title id="page-title">Medical Records | Sahatak</title>
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -20,18 +20,24 @@
     <!-- Header -->
     <nav class="navbar navbar-expand-lg bg-primary navbar-dark">
         <div class="container">
-            <a class="navbar-brand" href="#">
+            <a class="navbar-brand" href="../../index.html">
                 <i class="bi bi-heart-pulse me-2"></i>
-                صحتك | Sahatak
+                <span id="navbar-brand">Sahatak | صحتك</span>
             </a>
-            <div>
+            <div class="d-flex align-items-center">
+                <!-- Language Toggle -->
+                <button class="btn btn-outline-light btn-sm me-2" onclick="toggleLanguage()" id="language-toggle">
+                    <i class="bi bi-translate me-1"></i>
+                    <span id="current-lang">العربية</span>
+                </button>
+                <!-- Navigation Buttons -->
                 <button class="btn btn-outline-light me-2" onclick="goToDashboard()">
                     <i class="bi bi-house me-1"></i>
-                    لوحة التحكم
+                    <span id="nav-dashboard">Dashboard</span>
                 </button>
                 <button class="btn btn-outline-light" onclick="goBack()">
-                    <i class="bi bi-arrow-right me-1"></i>
-                    العودة
+                    <i class="bi bi-arrow-left me-1"></i>
+                    <span id="nav-back">Back</span>
                 </button>
             </div>
         </div>
@@ -42,9 +48,9 @@
         <div class="text-center mb-5">
             <h1 class="display-6 mb-3">
                 <i class="bi bi-folder-fill text-primary me-3"></i>
-                السجلات الطبية
+                <span id="records-title">Medical Records</span>
             </h1>
-            <p class="lead text-muted">إدارة شاملة للتاريخ الطبي والوصفات الطبية</p>
+            <p class="lead text-muted" id="records-subtitle">Comprehensive management of medical history and prescriptions</p>
         </div>
 
         <!-- Quick Stats -->
@@ -53,28 +59,28 @@
                 <div class="stat-card">
                     <i class="bi bi-file-medical stat-icon text-primary"></i>
                     <div class="stat-value" id="history-completion">--</div>
-                    <div class="stat-label">اكتمال التاريخ الطبي</div>
+                    <div class="stat-label" id="stat-history-completion">Medical History Completion</div>
                 </div>
             </div>
             <div class="col-md-3 mb-3">
                 <div class="stat-card">
                     <i class="bi bi-prescription2 stat-icon text-success"></i>
                     <div class="stat-value" id="active-prescriptions-count">--</div>
-                    <div class="stat-label">الوصفات النشطة</div>
+                    <div class="stat-label" id="stat-active-prescriptions">Active Prescriptions</div>
                 </div>
             </div>
             <div class="col-md-3 mb-3">
                 <div class="stat-card">
                     <i class="bi bi-clock-history stat-icon text-info"></i>
                     <div class="stat-value" id="recent-updates-count">--</div>
-                    <div class="stat-label">التحديثات الأخيرة</div>
+                    <div class="stat-label" id="stat-recent-updates">Recent Updates</div>
                 </div>
             </div>
             <div class="col-md-3 mb-3">
                 <div class="stat-card">
                     <i class="bi bi-calendar-check stat-icon text-warning"></i>
                     <div class="stat-value" id="last-update-days">--</div>
-                    <div class="stat-label">أيام منذ آخر تحديث</div>
+                    <div class="stat-label" id="stat-days-since-update">Days Since Last Update</div>
                 </div>
             </div>
         </div>
@@ -174,6 +180,8 @@
     
     <!-- Custom JS -->
     <script src="../../assets/js/main.js"></script>
+    <script src="../../assets/js/components/auth-guard.js"></script>
+    <script src="../../assets/js/components/dashboard-translations.js"></script>
     <script src="../../assets/js/components/medical-records-api.js"></script>
     
     <script>
@@ -183,10 +191,12 @@
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', async function() {
-            // Ensure translations are loaded
-            if (!LanguageManager.translations || !LanguageManager.translations.ar) {
-                await LanguageManager.loadTranslations();
-            }
+            // Initialize translations
+            await LanguageManager.init();
+            
+            // Apply current language to records page
+            const currentLang = LanguageManager.currentLanguage;
+            await applyRecordsTranslations(currentLang);
             
             // Get user type
             const userInfo = await getCurrentUser();
@@ -195,6 +205,61 @@
             await loadOverviewData();
             setupEventListeners();
         });
+
+        // Apply translations for records page
+        async function applyRecordsTranslations(lang) {
+            const t = LanguageManager.translations[lang];
+            if (!t) return;
+
+            // Update page direction and language
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+
+            // Update page title
+            document.getElementById('page-title').textContent = lang === 'ar' ? 
+                'السجلات الطبية | صحتك' : 'Medical Records | Sahatak';
+
+            // Update navigation
+            document.getElementById('navbar-brand').textContent = lang === 'ar' ? 
+                'صحتك | Sahatak' : 'Sahatak | صحتك';
+            document.getElementById('current-lang').textContent = lang === 'ar' ? 'English' : 'العربية';
+            document.getElementById('nav-dashboard').textContent = lang === 'ar' ? 'لوحة التحكم' : 'Dashboard';
+            document.getElementById('nav-back').textContent = lang === 'ar' ? 'العودة' : 'Back';
+            
+            // Update arrow direction for back button
+            const backIcon = document.querySelector('#nav-back').previousElementSibling;
+            if (backIcon) {
+                backIcon.className = lang === 'ar' ? 'bi bi-arrow-right me-1' : 'bi bi-arrow-left me-1';
+            }
+
+            // Update main content
+            document.getElementById('records-title').textContent = lang === 'ar' ? 
+                'السجلات الطبية' : 'Medical Records';
+            document.getElementById('records-subtitle').textContent = lang === 'ar' ? 
+                'إدارة شاملة للتاريخ الطبي والوصفات الطبية' : 'Comprehensive management of medical history and prescriptions';
+
+            // Update stats labels
+            document.getElementById('stat-history-completion').textContent = lang === 'ar' ? 
+                'اكتمال التاريخ الطبي' : 'Medical History Completion';
+            document.getElementById('stat-active-prescriptions').textContent = lang === 'ar' ? 
+                'الوصفات النشطة' : 'Active Prescriptions';
+            document.getElementById('stat-recent-updates').textContent = lang === 'ar' ? 
+                'التحديثات الأخيرة' : 'Recent Updates';
+            document.getElementById('stat-days-since-update').textContent = lang === 'ar' ? 
+                'أيام منذ آخر تحديث' : 'Days Since Last Update';
+
+            // Update footer using existing translation system
+            if (t.footer) {
+                DashboardTranslations.updateFooter(t);
+            }
+        }
+
+        // Language toggle function
+        async function toggleLanguage() {
+            const newLang = LanguageManager.currentLanguage === 'ar' ? 'en' : 'ar';
+            await LanguageManager.setLanguage(newLang);
+            await applyRecordsTranslations(newLang);
+        }
 
         // Setup event listeners
         function setupEventListeners() {
@@ -506,5 +571,79 @@
             flex-shrink: 0;
         }
     </style>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3">
+        <div class="container">
+            <div class="row g-3">
+                <!-- Brand & Description -->
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="mb-3">
+                        <i class="bi bi-heart-pulse me-2 text-primary"></i>
+                        <span id="footer-brand">Sahatak | صحتك</span>
+                    </h5>
+                    <div class="d-flex gap-3 social-links">
+                        <a href="#"><i class="bi bi-facebook fs-5"></i></a>
+                        <a href="#"><i class="bi bi-twitter fs-5"></i></a>
+                        <a href="#"><i class="bi bi-instagram fs-5"></i></a>
+                        <a href="#"><i class="bi bi-linkedin fs-5"></i></a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="mb-3" id="footer-links-title">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="#" class="text-muted text-decoration-none" id="footer-about">About Platform</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="text-muted text-decoration-none" id="footer-services">Services</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="mb-3" id="footer-support-title">Support & Help</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="#" class="text-muted text-decoration-none" id="footer-help">Help Center</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="text-muted text-decoration-none" id="footer-contact">Contact Us</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Emergency Contact -->
+                <div class="col-lg-3 col-md-6 emergency-section">
+                    <p class="mb-2 text-danger fw-bold" id="footer-emergency-text">
+                        In Medical Emergencies
+                    </p>
+                    <p class="mb-3 text-danger fw-bold fs-6" id="footer-emergency-action">
+                        <i class="bi bi-hospital me-2"></i>
+                        Go to Nearest Emergency Hospital
+                    </p>
+                    <p class="mb-0 text-muted small" id="footer-emergency-note">
+                        For non-urgent consultations use the platform
+                    </p>
+                </div>
+            </div>
+
+            <!-- Bottom Bar -->
+            <hr class="my-3">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="mb-0 fw-bold" id="footer-copyright">
+                        © 2025 Sahatak صحتك. All Rights Reserved.
+                    </p>
+                    <p class="mb-0 text-muted small mt-1" id="footer-medical-disclaimer">
+                        This platform does not replace visiting a doctor in emergency cases
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>
