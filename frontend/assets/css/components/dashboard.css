@@ -1087,6 +1087,289 @@ div.dashboard-card.quick-action-card p.text-muted {
 }
 
 /* Print Styles */
+/* Settings Section Styles */
+.settings-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    backdrop-filter: blur(5px);
+}
+
+.settings-container {
+    background: white;
+    border-radius: 15px;
+    max-width: 900px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.settings-header {
+    background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-teal) 100%);
+    color: white;
+    padding: 1.5rem 2rem;
+    border-radius: 15px 15px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.settings-header h4 {
+    margin: 0;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.btn-close-settings {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.btn-close-settings:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.settings-content {
+    padding: 2rem;
+}
+
+.settings-section {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.settings-section:last-of-type {
+    border-bottom: none;
+    margin-bottom: 1rem;
+}
+
+.settings-section-title {
+    color: var(--medical-blue);
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    font-size: 1.1rem;
+}
+
+.settings-section .form-label {
+    font-weight: 500;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+}
+
+.settings-section .form-control,
+.settings-section .form-select {
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 0.75rem;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.settings-section .form-control:focus,
+.settings-section .form-select:focus {
+    border-color: var(--medical-blue);
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+}
+
+.available-days-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.available-days-checkboxes .form-check {
+    background: #f8fafc;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    margin: 0;
+    transition: all 0.2s ease;
+}
+
+.available-days-checkboxes .form-check:hover {
+    background: #e0f2fe;
+    border-color: var(--medical-teal);
+}
+
+.available-days-checkboxes .form-check-input:checked + .form-check-label {
+    color: var(--medical-blue);
+    font-weight: 600;
+}
+
+.available-days-checkboxes .form-check-input:checked {
+    background-color: var(--medical-blue);
+    border-color: var(--medical-blue);
+}
+
+.form-check-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.form-check-group .form-check {
+    background: #f8fafc;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin: 0;
+    transition: all 0.2s ease;
+}
+
+.form-check-group .form-check:hover {
+    background: #e0f2fe;
+    border-color: var(--medical-teal);
+}
+
+.form-check-group .form-check-input:checked + .form-check-label {
+    color: var(--medical-blue);
+    font-weight: 600;
+}
+
+.settings-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+    flex-wrap: wrap;
+}
+
+.settings-actions .btn {
+    min-width: 120px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+/* Mobile Settings Styles */
+@media (max-width: 768px) {
+    .settings-overlay {
+        padding: 0.5rem;
+    }
+    
+    .settings-container {
+        max-height: 95vh;
+    }
+    
+    .settings-header {
+        padding: 1rem 1.5rem;
+    }
+    
+    .settings-header h4 {
+        font-size: 1.1rem;
+    }
+    
+    .settings-content {
+        padding: 1.5rem;
+    }
+    
+    .settings-section {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+    }
+    
+    .available-days-checkboxes {
+        justify-content: center;
+    }
+    
+    .available-days-checkboxes .form-check {
+        min-width: 45px;
+        text-align: center;
+    }
+    
+    .form-check-group .form-check {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .settings-actions {
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .settings-actions .btn {
+        min-width: 100px;
+        font-size: 0.85rem;
+        padding: 0.6rem 1rem;
+    }
+}
+
+/* Extra Small Mobile */
+@media (max-width: 576px) {
+    .settings-overlay {
+        padding: 0.25rem;
+    }
+    
+    .settings-header {
+        padding: 0.75rem 1rem;
+    }
+    
+    .settings-content {
+        padding: 1rem;
+    }
+    
+    .settings-section-title {
+        font-size: 1rem;
+    }
+    
+    .available-days-checkboxes .form-check-label {
+        font-size: 0.8rem;
+    }
+    
+    .settings-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .settings-actions .btn {
+        width: 100%;
+        max-width: 200px;
+    }
+}
+
+/* RTL Support for Settings */
+[dir="rtl"] .settings-header {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .settings-section-title {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .settings-actions {
+    justify-content: flex-start;
+}
+
+[dir="rtl"] .form-check-group .form-check-input {
+    margin-left: 0.5em;
+    margin-right: 0;
+}
+
 @media print {
     .dashboard-container {
         background: white !important;
@@ -1096,5 +1379,9 @@ div.dashboard-card.quick-action-card p.text-muted {
         background: white !important;
         box-shadow: none !important;
         border: 1px solid #ccc !important;
+    }
+    
+    .settings-overlay {
+        display: none !important;
     }
 }

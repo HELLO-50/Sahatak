@@ -42,7 +42,7 @@
                             <!-- Vertical Action Buttons -->
                             <div class="action-buttons">
                                 <button class="btn btn-action" onclick="showProfile()" title="Profile">
-                                    <i class="bi bi-person-gear"></i>
+                                    <i class="bi bi-person"></i>
                                     <span id="btn-profile">Profile</span>
                                 </button>
                                 <button class="btn btn-action" onclick="showSettings()" title="Settings">
@@ -85,12 +85,12 @@
                     <!-- Quick Actions -->
                     <div class="row mb-4">
                         <div class="col-lg-4 col-md-6 mb-3">
-                            <div class="dashboard-card quick-action-card" onclick="writePrescription()">
+                            <div class="dashboard-card quick-action-card" onclick="openCommunicationHub()">
                                 <div class="quick-action-icon">
-                                    <i class="bi bi-prescription2"></i>
+                                    <i class="bi bi-chat-dots"></i>
                                 </div>
-                                <h6 id="action-prescription">Write Prescription</h6>
-                                <p class="text-muted small" id="action-prescription-desc">Add medication for patient</p>
+                                <h6 id="action-communication">Patient Communication</h6>
+                                <p class="text-muted small" id="action-communication-desc">Message and connect with patients</p>
                             </div>
                         </div>
                         <div class="col-lg-4 col-md-6 mb-3">
@@ -311,6 +311,319 @@
         </div>
     </div>
 
+            <!-- Profile Section (Hidden by default) -->
+            <div id="profile-section" class="row mt-4" style="display: none;">
+                <div class="col-12">
+                    <div class="dashboard-card">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5><i class="bi bi-person me-2"></i><span id="profile-title">Doctor Profile</span></h5>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="hideProfile()">
+                                <i class="bi bi-x-lg me-1"></i><span id="close-profile">Close</span>
+                            </button>
+                        </div>
+
+                        <div class="row g-4">
+                            <!-- Personal Information -->
+                            <div class="col-lg-6">
+                                <div class="settings-group">
+                                    <h6 class="settings-group-title">
+                                        <i class="bi bi-person-badge me-2"></i><span id="personal-info">Personal Information</span>
+                                    </h6>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Doctor ID</label>
+                                        <p class="form-control-plaintext" id="doctorId">DOC-2024-001</p>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Full Name</label>
+                                        <p class="form-control-plaintext" id="profileFullName">Dr. Sarah Ahmed</p>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Email Address</label>
+                                        <p class="form-control-plaintext" id="profileEmail">sarah.ahmed@sahatak.com</p>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Phone Number</label>
+                                        <p class="form-control-plaintext" id="profilePhone">+20 123 456 7890</p>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Medical License Number</label>
+                                        <p class="form-control-plaintext" id="profileMedicalLicense">ML-2019-12345</p>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Specialization</label>
+                                        <p class="form-control-plaintext" id="profileSpecialization">Internal Medicine</p>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Years of Experience</label>
+                                        <p class="form-control-plaintext" id="profileExperience">12 years</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Professional Information -->
+                            <div class="col-lg-6">
+                                <div class="settings-group">
+                                    <h6 class="settings-group-title">
+                                        <i class="bi bi-hospital me-2"></i><span id="professional-info">Professional Information</span>
+                                    </h6>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Hospital Affiliations</label>
+                                        <p class="form-control-plaintext" id="profileHospitals">Cairo Medical Center, Al-Azhar Hospital</p>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Department</label>
+                                        <p class="form-control-plaintext" id="profileDepartment">Internal Medicine</p>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Consultation Fee</label>
+                                        <p class="form-control-plaintext" id="profileFee">300 EGP</p>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Education</label>
+                                        <div class="form-control-plaintext" id="profileEducation">
+                                            <div><strong>Medical School:</strong> Cairo University Faculty of Medicine</div>
+                                            <div><strong>Residency:</strong> Internal Medicine - Cairo Medical Center</div>
+                                            <div><strong>Fellowship:</strong> Cardiology - American University Hospital</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Certifications and Awards</label>
+                                        <p class="form-control-plaintext" id="profileCertifications">Board Certified Internal Medicine, Excellence in Patient Care Award 2023</p>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Languages Spoken</label>
+                                        <p class="form-control-plaintext" id="profileLanguages">Arabic, English, French</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Information -->
+                        <div class="row mt-4">
+                            <div class="col-lg-6">
+                                <div class="settings-group">
+                                    <h6 class="settings-group-title">
+                                        <i class="bi bi-clock me-2"></i><span id="schedule-info">Schedule & Availability</span>
+                                    </h6>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Consultation Hours</label>
+                                        <div class="form-control-plaintext" id="profileConsultationHours">
+                                            <div>Sunday - Thursday: 9:00 AM - 5:00 PM</div>
+                                            <div>Friday: 9:00 AM - 2:00 PM</div>
+                                            <div>Saturday: Closed</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-lg-6">
+                                <div class="settings-group">
+                                    <h6 class="settings-group-title">
+                                        <i class="bi bi-graph-up me-2"></i><span id="stats-info">Statistics</span>
+                                    </h6>
+                                    
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <label class="form-label fw-bold">Total Patients</label>
+                                            <p class="form-control-plaintext" id="profileTotalPatients">1,250</p>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label fw-bold">Total Consultations</label>
+                                            <p class="form-control-plaintext" id="profileTotalConsultations">3,890</p>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label fw-bold">Rating</label>
+                                            <p class="form-control-plaintext" id="profileRating">4.8/5.0</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Account Information -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="settings-group">
+                                    <h6 class="settings-group-title">
+                                        <i class="bi bi-info-circle me-2"></i><span id="account-info">Account Information</span>
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label class="form-label fw-bold">Registration Date</label>
+                                            <p class="form-control-plaintext" id="profileRegDate">15/06/2019</p>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label fw-bold">Last Login</label>
+                                            <p class="form-control-plaintext" id="profileLastLogin">Today at 9:15 AM</p>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label fw-bold">Account Status</label>
+                                            <p class="form-control-plaintext"><span class="badge bg-success">Active</span></p>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label fw-bold">Verification Status</label>
+                                            <p class="form-control-plaintext"><span class="badge bg-primary">Verified</span></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Edit Profile Button -->
+                        <div class="text-end mt-4">
+                            <button class="btn btn-primary" onclick="editProfile()">
+                                <i class="bi bi-pencil me-1"></i><span id="edit-profile">Edit Profile</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Section (Hidden by default) -->
+            <div id="settings-section" class="row mt-4" style="display: none;">
+                <div class="col-12">
+                    <div class="dashboard-card">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5><i class="bi bi-gear me-2"></i><span id="settings-title">Settings</span></h5>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="hideSettings()">
+                                <i class="bi bi-x-lg me-1"></i><span id="close-settings">Close</span>
+                            </button>
+                        </div>
+
+                        <div class="row g-4">
+                            <!-- Account Settings -->
+                            <div class="col-lg-6">
+                                <div class="settings-group">
+                                    <h6 class="settings-group-title">
+                                        <i class="bi bi-person-gear me-2"></i><span id="account-settings">Profile Information</span>
+                                    </h6>
+                                    
+                                    <div class="mb-3">
+                                        <label for="fullName" class="form-label" id="full-name-label">Full Name</label>
+                                        <input type="text" class="form-control" id="fullName" placeholder="Enter your full name">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label" id="email-label">Email Address</label>
+                                        <input type="email" class="form-control" id="email" placeholder="Enter your email">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="phone" class="form-label" id="phone-label">Phone Number</label>
+                                        <input type="tel" class="form-control" id="phone" placeholder="Enter your phone number">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="medicalLicense" class="form-label" id="medical-license-label">Medical License Number</label>
+                                        <input type="text" class="form-control" id="medicalLicense" placeholder="Enter your medical license number">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="specialization" class="form-label" id="specialization-label">Specialization</label>
+                                        <select class="form-select" id="specialization">
+                                            <option value="">Select Specialization</option>
+                                            <option value="cardiology">Cardiology</option>
+                                            <option value="neurology">Neurology</option>
+                                            <option value="orthopedics">Orthopedics</option>
+                                            <option value="pediatrics">Pediatrics</option>
+                                            <option value="psychiatry">Psychiatry</option>
+                                            <option value="surgery">Surgery</option>
+                                            <option value="internal-medicine">Internal Medicine</option>
+                                            <option value="dermatology">Dermatology</option>
+                                            <option value="ophthalmology">Ophthalmology</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Preferences & Notifications -->
+                            <div class="col-lg-6">
+                                <div class="settings-group">
+                                    <h6 class="settings-group-title">
+                                        <i class="bi bi-bell me-2"></i><span id="preferences-settings">Preferences & Notifications</span>
+                                    </h6>
+                                    
+                                    <div class="mb-3">
+                                        <label for="language" class="form-label" id="language-label">Language</label>
+                                        <select class="form-select" id="language">
+                                            <option value="en">English</option>
+                                            <option value="ar">العربية</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                                            <label class="form-check-label" for="emailNotifications" id="email-notifications-label">
+                                                Email Notifications
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="smsNotifications" checked>
+                                            <label class="form-check-label" for="smsNotifications" id="sms-notifications-label">
+                                                SMS Notifications
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="appointmentReminders" checked>
+                                            <label class="form-check-label" for="appointmentReminders" id="appointment-reminders-label">
+                                                Appointment Reminders
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="settings-group mt-4">
+                                        <h6 class="settings-group-title">
+                                            <i class="bi bi-shield-lock me-2"></i><span id="security-settings">Security</span>
+                                        </h6>
+                                        
+                                        <div class="mb-3">
+                                            <button class="btn btn-outline-primary btn-sm me-2" onclick="changePassword()">
+                                                <i class="bi bi-key me-1"></i><span id="change-password">Change Password</span>
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm" onclick="enableTwoFactor()">
+                                                <i class="bi bi-shield-check me-1"></i><span id="two-factor">Two-Factor Authentication</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Save Settings Button -->
+                        <div class="text-end mt-4">
+                            <button class="btn btn-secondary me-2" onclick="resetSettings()">
+                                <i class="bi bi-arrow-clockwise me-1"></i><span id="reset-settings">Reset</span>
+                            </button>
+                            <button class="btn btn-primary" onclick="saveSettings()">
+                                <i class="bi bi-check-lg me-1"></i><span id="save-settings">Save Settings</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
     <!-- Footer -->
     <footer class="footer mt-auto py-3">
         <div class="container">
@@ -400,34 +713,220 @@
     <!-- Doctor Dashboard JavaScript -->
     <script>
         // Doctor dashboard specific functions
-        function writePrescription() {
-            console.log('Write prescription clicked');
-            // Implement prescription writing logic
+        function openCommunicationHub() {
+            console.log('Communication Hub clicked');
+            window.location.href = '../medical/doctor/comm-hub.html';
         }
         
         function reviewRecords() {
             console.log('Review records clicked');
-            // Implement medical records review
+            window.location.href = '../medical/doctor/ehr.html';
         }
         
         function manageAvailability() {
             console.log('Manage availability clicked');
-            window.location.href = 'manage-availability.html';
+            window.location.href = 'doctor-availability.html';
         }
         
         function showProfile() {
             console.log('Show profile clicked');
-            // Implement profile view
+            const profileSection = document.getElementById('profile-section');
+            const settingsSection = document.getElementById('settings-section');
+            
+            // Hide settings if open
+            settingsSection.style.display = 'none';
+            
+            // Toggle profile
+            profileSection.style.display = profileSection.style.display === 'none' ? 'block' : 'none';
+            
+            // Smooth scroll to profile section
+            if (profileSection.style.display === 'block') {
+                profileSection.scrollIntoView({ behavior: 'smooth' });
+                loadUserProfile();
+            }
         }
-        
+
+        function hideProfile() {
+            document.getElementById('profile-section').style.display = 'none';
+        }
+
+        function loadUserProfile() {
+            // Load user profile from localStorage or API
+            const user = JSON.parse(localStorage.getItem('sahatak_doctor_data') || '{}');
+            
+            // Personal Information
+            document.getElementById('profileFullName').textContent = user.full_name || 'Dr. Sarah Ahmed';
+            document.getElementById('profileEmail').textContent = user.email || 'sarah.ahmed@sahatak.com';
+            document.getElementById('profilePhone').textContent = user.phone || '+20 123 456 7890';
+            document.getElementById('profileMedicalLicense').textContent = user.medical_license || 'ML-2019-12345';
+            document.getElementById('profileSpecialization').textContent = user.specialization || 'Internal Medicine';
+            document.getElementById('profileExperience').textContent = (user.experience || '12') + ' years';
+            document.getElementById('doctorId').textContent = user.doctor_id || 'DOC-2024-001';
+            
+            // Professional Information
+            document.getElementById('profileHospitals').textContent = user.hospital_affiliations || 'Cairo Medical Center, Al-Azhar Hospital';
+            document.getElementById('profileDepartment').textContent = user.department || 'Internal Medicine';
+            document.getElementById('profileFee').textContent = (user.consultation_fee || '300') + ' EGP';
+            document.getElementById('profileCertifications').textContent = user.certifications || 'Board Certified Internal Medicine, Excellence in Patient Care Award 2023';
+            document.getElementById('profileLanguages').textContent = user.languages || 'Arabic, English, French';
+            
+            // Education
+            const educationDiv = document.getElementById('profileEducation');
+            if (user.education) {
+                educationDiv.innerHTML = `
+                    <div><strong>Medical School:</strong> ${user.education.medical_school || 'Cairo University Faculty of Medicine'}</div>
+                    <div><strong>Residency:</strong> ${user.education.residency || 'Internal Medicine - Cairo Medical Center'}</div>
+                    <div><strong>Fellowship:</strong> ${user.education.fellowship || 'Cardiology - American University Hospital'}</div>
+                `;
+            }
+            
+            // Schedule
+            const scheduleDiv = document.getElementById('profileConsultationHours');
+            if (user.consultation_hours) {
+                scheduleDiv.innerHTML = user.consultation_hours;
+            }
+            
+            // Statistics
+            document.getElementById('profileTotalPatients').textContent = user.total_patients || '1,250';
+            document.getElementById('profileTotalConsultations').textContent = user.total_consultations || '3,890';
+            document.getElementById('profileRating').textContent = (user.rating || '4.8') + '/5.0';
+            
+            // Account Information
+            document.getElementById('profileRegDate').textContent = user.registration_date || '15/06/2019';
+            document.getElementById('profileLastLogin').textContent = user.last_login || 'Today at 9:15 AM';
+        }
+
+        function editProfile() {
+            // Switch to settings section for editing
+            hideProfile();
+            showSettings();
+            alert('Please use the Settings section to edit your profile information.');
+        }
+
         function showSettings() {
             console.log('Show settings clicked');
-            // Implement settings view
+            const settingsSection = document.getElementById('settings-section');
+            const profileSection = document.getElementById('profile-section');
+            
+            // Hide profile if open
+            profileSection.style.display = 'none';
+            
+            // Toggle settings
+            settingsSection.style.display = settingsSection.style.display === 'none' ? 'block' : 'none';
+            
+            // Smooth scroll to settings section
+            if (settingsSection.style.display === 'block') {
+                settingsSection.scrollIntoView({ behavior: 'smooth' });
+                loadUserSettings();
+            }
+        }
+
+        function hideSettings() {
+            document.getElementById('settings-section').style.display = 'none';
+        }
+
+        function loadUserSettings() {
+            // Load user settings from localStorage (simulating database)
+            const user = JSON.parse(localStorage.getItem('sahatak_doctor_data') || '{}');
+            
+            // If no data exists, set default doctor values (simulating initial database load)
+            if (!user.full_name) {
+                user.full_name = 'Dr. Sarah Ahmed';
+                user.email = 'sarah.ahmed@sahatak.com';
+                user.phone = '+20 123 456 7890';
+                user.medical_license = 'ML-2019-12345';
+                user.specialization = 'internal-medicine';
+                localStorage.setItem('sahatak_doctor_data', JSON.stringify(user));
+            }
+            
+            // Populate form fields with current values from database
+            document.getElementById('fullName').value = user.full_name || '';
+            document.getElementById('email').value = user.email || '';
+            document.getElementById('phone').value = user.phone || '';
+            document.getElementById('medicalLicense').value = user.medical_license || '';
+            document.getElementById('specialization').value = user.specialization || '';
+            
+            // Load preferences from database
+            const preferences = JSON.parse(localStorage.getItem('sahatak_doctor_preferences') || '{}');
+            document.getElementById('language').value = preferences.language || 'en';
+            document.getElementById('emailNotifications').checked = preferences.email_notifications !== false;
+            document.getElementById('smsNotifications').checked = preferences.sms_notifications !== false;
+            document.getElementById('appointmentReminders').checked = preferences.appointment_reminders !== false;
+        }
+
+        function saveSettings() {
+            // Get current data from database
+            const currentUser = JSON.parse(localStorage.getItem('sahatak_doctor_data') || '{}');
+            const currentPrefs = JSON.parse(localStorage.getItem('sahatak_doctor_preferences') || '{}');
+            
+            // Collect only changed fields
+            const updatedUser = {
+                ...currentUser,
+                full_name: document.getElementById('fullName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                medical_license: document.getElementById('medicalLicense').value,
+                specialization: document.getElementById('specialization').value
+            };
+            
+            // Update preferences
+            const updatedPrefs = {
+                language: document.getElementById('language').value,
+                email_notifications: document.getElementById('emailNotifications').checked,
+                sms_notifications: document.getElementById('smsNotifications').checked,
+                appointment_reminders: document.getElementById('appointmentReminders').checked
+            };
+            
+            // Save to database (localStorage)
+            localStorage.setItem('sahatak_doctor_data', JSON.stringify(updatedUser));
+            localStorage.setItem('sahatak_doctor_preferences', JSON.stringify(updatedPrefs));
+            
+            // Update displayed name in header if changed
+            if (updatedUser.full_name && updatedUser.full_name !== currentUser.full_name) {
+                document.getElementById('user-name').textContent = updatedUser.full_name;
+            }
+            
+            // Show success message with which fields were updated
+            const changedFields = [];
+            if (currentUser.full_name !== updatedUser.full_name) changedFields.push('Name');
+            if (currentUser.email !== updatedUser.email) changedFields.push('Email');
+            if (currentUser.phone !== updatedUser.phone) changedFields.push('Phone');
+            if (currentUser.medical_license !== updatedUser.medical_license) changedFields.push('Medical License');
+            if (currentUser.specialization !== updatedUser.specialization) changedFields.push('Specialization');
+            
+            if (changedFields.length > 0) {
+                alert(`Settings saved successfully!\nUpdated: ${changedFields.join(', ')}`);
+            } else {
+                alert('Settings saved successfully!');
+            }
+            
+            console.log('Settings saved:', updatedUser, updatedPrefs);
+            
+            // Refresh profile section if it's open
+            if (document.getElementById('profile-section').style.display !== 'none') {
+                loadUserProfile();
+            }
+        }
+
+        function resetSettings() {
+            if (confirm('Are you sure you want to reload settings from database?')) {
+                // Reload original values from database
+                loadUserSettings();
+                alert('Settings reloaded from database.');
+            }
+        }
+        
+        function changePassword() {
+            alert('Password change functionality will redirect to secure password update page.');
+        }
+        
+        function enableTwoFactor() {
+            alert('Two-factor authentication setup will be implemented.');
         }
         
         function viewFullSchedule() {
             console.log('View full schedule clicked');
-            // Implement full schedule view
+            window.location.href = 'doctor-availability.html';
         }
         
         function viewAllActivity() {

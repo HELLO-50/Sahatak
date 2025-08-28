@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Communication Hub - Sahatak</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%230d47a1' d='m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523.942-.661 2.27.067 3.71L8 15.5l6.533-8.737c.728-1.44.59-2.768.067-3.71C13.486.878 10.4.28 8.717 2.01L8 2.748z'/></svg>">
+    
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Arabic Font - Noto Sans Arabic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="../../../assets/css/main.css">
+    <!-- Dashboard CSS -->
+    <link rel="stylesheet" href="../../../assets/css/components/dashboard.css">
+</head>
+<body data-protect="doctor">
+    <!-- Header -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="../../dashboard/doctor.html">
+                <i class="bi bi-heart-pulse me-2"></i>
+                صحتك | Sahatak
+            </a>
+            
+            <div class="d-flex align-items-center">
+                <!-- Language Toggle -->
+                <button class="btn btn-outline-light me-3" onclick="LanguageManager.toggleLanguage()">
+                    <i class="bi bi-translate me-1"></i>
+                    <span id="current-lang">English</span>
+                </button>
+                
+                <div class="dropdown me-3">
+                    <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle me-1"></i>
+                        <span id="doctor-name">Dr. Sarah Ahmed</span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="../../dashboard/doctor.html">
+                            <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                        </a></li>
+                        <li><a class="dropdown-item" href="../../dashboard/doctor.html" onclick="setTimeout(() => showSettings(), 100)">
+                            <i class="bi bi-person me-2"></i>Profile
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" onclick="logout()">
+                            <i class="bi bi-box-arrow-right me-2"></i>Logout
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="container-fluid">
+            <!-- Page Header -->
+            <div class="dashboard-header">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="dashboard-title">
+                            <i class="bi bi-chat-dots me-2 text-primary"></i>
+                            Patient Communication Hub
+                        </h1>
+                        <p class="dashboard-subtitle">Secure messaging and communication with your patients</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <button class="btn btn-primary" onclick="startNewConversation()">
+                            <i class="bi bi-plus-circle me-1"></i>New Message
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Patient List Panel -->
+                <div class="col-lg-4">
+                    <div class="dashboard-card h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5><i class="bi bi-people me-2"></i>Patients</h5>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-outline-primary active" onclick="filterPatients('all')">All</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="filterPatients('unread')">Unread</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="filterPatients('urgent')">Urgent</button>
+                            </div>
+                        </div>
+
+                        <!-- Search Bar -->
+                        <div class="mb-3">
+                            <input type="text" class="form-control" id="patientSearch" placeholder="Search patients..." onkeyup="searchPatients()">
+                        </div>
+
+                        <!-- Patient List -->
+                        <div class="patient-list" id="patientList">
+                            <div class="patient-item active" onclick="selectPatient('patient1')" data-patient="patient1">
+                                <div class="d-flex align-items-start">
+                                    <div class="patient-avatar me-3">
+                                        <i class="bi bi-person-circle"></i>
+                                    </div>
+                                    <div class="patient-info flex-grow-1">
+                                        <h6 class="patient-name">Ahmed Mohamed</h6>
+                                        <p class="last-message text-muted">Thank you for the prescription...</p>
+                                        <small class="text-muted">2 hours ago</small>
+                                    </div>
+                                    <div class="message-status">
+                                        <span class="badge bg-primary">3</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="patient-item" onclick="selectPatient('patient2')" data-patient="patient2">
+                                <div class="d-flex align-items-start">
+                                    <div class="patient-avatar me-3">
+                                        <i class="bi bi-person-circle"></i>
+                                    </div>
+                                    <div class="patient-info flex-grow-1">
+                                        <h6 class="patient-name">Fatima Ali</h6>
+                                        <p class="last-message text-muted">When should I take the medication?</p>
+                                        <small class="text-muted">5 hours ago</small>
+                                    </div>
+                                    <div class="message-status">
+                                        <span class="badge bg-danger urgent">!</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="patient-item" onclick="selectPatient('patient3')" data-patient="patient3">
+                                <div class="d-flex align-items-start">
+                                    <div class="patient-avatar me-3">
+                                        <i class="bi bi-person-circle"></i>
+                                    </div>
+                                    <div class="patient-info flex-grow-1">
+                                        <h6 class="patient-name">Omar Hassan</h6>
+                                        <p class="last-message text-muted">Appointment rescheduled successfully</p>
+                                        <small class="text-muted">1 day ago</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="patient-item" onclick="selectPatient('patient4')" data-patient="patient4">
+                                <div class="d-flex align-items-start">
+                                    <div class="patient-avatar me-3">
+                                        <i class="bi bi-person-circle"></i>
+                                    </div>
+                                    <div class="patient-info flex-grow-1">
+                                        <h6 class="patient-name">Layla Ibrahim</h6>
+                                        <p class="last-message text-muted">Lab results look good!</p>
+                                        <small class="text-muted">2 days ago</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Panel -->
+                <div class="col-lg-8">
+                    <div class="dashboard-card h-100">
+                        <!-- Chat Header -->
+                        <div class="chat-header d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                            <div class="d-flex align-items-center">
+                                <div class="patient-avatar me-3">
+                                    <i class="bi bi-person-circle fs-2"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0" id="selectedPatientName">Ahmed Mohamed</h5>
+                                    <small class="text-muted">Patient ID: PAT-2024-001 | Last seen: Today</small>
+                                </div>
+                            </div>
+                            <div class="chat-actions">
+                                <button class="btn btn-outline-primary btn-sm me-2" onclick="viewPatientRecord()">
+                                    <i class="bi bi-file-medical me-1"></i>View Record
+                                </button>
+                                <button class="btn btn-outline-success btn-sm me-2" onclick="scheduleFollowUp()">
+                                    <i class="bi bi-calendar-plus me-1"></i>Schedule
+                                </button>
+                                <button class="btn btn-outline-info btn-sm" onclick="startVideoCall()">
+                                    <i class="bi bi-camera-video me-1"></i>Video Call
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Chat Messages -->
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="message patient-message">
+                                <div class="message-content">
+                                    <p>Hello Dr. Ahmed, I wanted to ask about the prescription you gave me yesterday. When should I take the medication?</p>
+                                    <small class="message-time">Today 10:30 AM</small>
+                                </div>
+                            </div>
+
+                            <div class="message doctor-message">
+                                <div class="message-content">
+                                    <p>Hello Ahmed! Take the medication twice daily - once in the morning with breakfast and once in the evening with dinner. Make sure to take it at the same times each day.</p>
+                                    <small class="message-time">Today 11:45 AM</small>
+                                </div>
+                            </div>
+
+                            <div class="message patient-message">
+                                <div class="message-content">
+                                    <p>Thank you for the clarification! Should I continue taking my other medications as usual?</p>
+                                    <small class="message-time">Today 12:15 PM</small>
+                                </div>
+                            </div>
+
+                            <div class="message patient-message">
+                                <div class="message-content">
+                                    <p>Also, I've been feeling a bit dizzy since starting the new medication. Is this normal?</p>
+                                    <small class="message-time">Today 2:30 PM</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Message Input -->
+                        <div class="message-input-area mt-3 pt-3 border-top">
+                            <div class="row g-2 mb-2">
+                                <div class="col-auto">
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="insertTemplate('greeting')">
+                                        <i class="bi bi-chat-quote me-1"></i>Templates
+                                    </button>
+                                </div>
+                                <div class="col-auto">
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="attachFile()">
+                                        <i class="bi bi-paperclip me-1"></i>Attach
+                                    </button>
+                                </div>
+                                <div class="col-auto">
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="insertPrescription()">
+                                        <i class="bi bi-prescription2 me-1"></i>Prescription
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <textarea class="form-control" id="messageInput" rows="3" placeholder="Type your message to the patient..." onkeypress="handleKeyPress(event)"></textarea>
+                                <button class="btn btn-primary" onclick="sendMessage()">
+                                    <i class="bi bi-send"></i>
+                                    Send
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions Panel -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="dashboard-card">
+                        <h5 class="mb-3"><i class="bi bi-lightning me-2"></i>Quick Actions</h5>
+                        <div class="row">
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <button class="btn btn-outline-primary w-100" onclick="broadcastMessage()">
+                                    <i class="bi bi-broadcast me-2"></i>Send Broadcast
+                                </button>
+                            </div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <button class="btn btn-outline-success w-100" onclick="scheduleReminder()">
+                                    <i class="bi bi-alarm me-2"></i>Set Reminder
+                                </button>
+                            </div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <button class="btn btn-outline-info w-100" onclick="viewMessageHistory()">
+                                    <i class="bi bi-clock-history me-2"></i>Message History
+                                </button>
+                            </div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <button class="btn btn-outline-warning w-100" onclick="exportChat()">
+                                    <i class="bi bi-download me-2"></i>Export Chat
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3">
+        <div class="container">
+            <div class="row g-3">
+                <!-- Brand & Description -->
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="mb-3">
+                        <i class="bi bi-heart-pulse me-2 text-primary"></i>
+                        <span id="footer-brand">Sahatak</span>
+                    </h5>
+                    <div class="d-flex gap-3 social-links">
+                        <a href="https://facebook.com/sahatak" target="_blank" rel="noopener"><i class="bi bi-facebook fs-5"></i></a>
+                        <a href="https://twitter.com/sahatak" target="_blank" rel="noopener"><i class="bi bi-twitter fs-5"></i></a>
+                        <a href="https://instagram.com/sahatak" target="_blank" rel="noopener"><i class="bi bi-instagram fs-5"></i></a>
+                        <a href="https://linkedin.com/company/sahatak" target="_blank" rel="noopener"><i class="bi bi-linkedin fs-5"></i></a>
+                    </div>
+                </div>
+                <!-- Quick Links -->
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="mb-3" id="footer-links-title">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="../../common/about.html" class="text-muted text-decoration-none" id="footer-about">About Platform</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="../../common/services.html" class="text-muted text-decoration-none" id="footer-services">Services</a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- Support -->
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="mb-3" id="footer-support-title">Support & Help</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="../../common/support.html" class="text-muted text-decoration-none" id="footer-help">Help Center</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="../../common/contact-us.html" class="text-muted text-decoration-none" id="footer-contact">Contact Us</a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- Emergency Contact -->
+                <div class="col-lg-3 col-md-6 emergency-section">
+                    <p class="mb-2 text-danger fw-bold" id="footer-emergency-text">
+                        For medical emergencies
+                    </p>
+                    <p class="mb-3 text-danger fw-bold fs-6" id="footer-emergency-action">
+                        <i class="bi bi-hospital me-2"></i>
+                        Go to nearest ER hospital
+                    </p>
+                    <p class="mb-0 text-muted small" id="footer-emergency-note">
+                        For non-urgent consultations use the platform
+                    </p>
+                </div>
+            </div>
+            <!-- Bottom Bar -->
+            <hr class="my-3">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="mb-0 fw-bold" id="footer-copyright">
+                        © 2025 Sahatak. All rights reserved.
+                    </p>
+                    <p class="mb-0 text-muted small mt-1" id="footer-medical-disclaimer">
+                        This platform does not replace visiting a doctor in emergency cases
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JavaScript Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Core JavaScript Files -->
+    <script src="../../../assets/js/main.js"></script>
+    <script src="../../../assets/js/components/language-manager.js"></script>
+    <script src="../../../assets/js/components/auth-guard.js"></script>
+
+    <style>
+        .patient-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .patient-item {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .patient-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .patient-item.active {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2563eb;
+        }
+
+        .patient-avatar i {
+            font-size: 2rem;
+            color: #6c757d;
+        }
+
+        .patient-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .last-message {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .message-status .badge {
+            font-size: 0.7rem;
+        }
+
+        .urgent {
+            background-color: #dc3545 !important;
+        }
+
+        .chat-messages {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 15px 0;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+        }
+
+        .patient-message {
+            justify-content: flex-start;
+        }
+
+        .doctor-message {
+            justify-content: flex-end;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+        }
+
+        .patient-message .message-content {
+            background-color: #e9ecef;
+            color: #333;
+        }
+
+        .doctor-message .message-content {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .message-time {
+            display: block;
+            margin-top: 5px;
+            opacity: 0.7;
+        }
+
+        .message-input-area textarea {
+            resize: none;
+            border-radius: 10px 0 0 10px;
+        }
+
+        .message-input-area .btn {
+            border-radius: 0 10px 10px 0;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            margin: -20px -20px 20px -20px;
+            padding: 20px;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .dashboard-card {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: none;
+            border-radius: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .chat-actions {
+                display: none;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+        }
+    </style>
+
+    <script>
+        // Communication Hub specific functions
+        let currentPatient = 'patient1';
+        let patients = {
+            patient1: {
+                name: 'Ahmed Mohamed',
+                id: 'PAT-2024-001',
+                lastSeen: 'Today',
+                status: 'online',
+                unreadCount: 3,
+                isUrgent: false,
+                lastMessage: 'Also, I\'ve been feeling a bit dizzy since starting the new medication. Is this normal?',
+                lastMessageTime: 'Today 2:30 PM',
+                messages: [
+                    {
+                        id: 1,
+                        sender: 'patient',
+                        message: 'Hello Dr. Ahmed, I wanted to ask about the prescription you gave me yesterday. When should I take the medication?',
+                        timestamp: 'Today 10:30 AM',
+                        read: true
+                    },
+                    {
+                        id: 2,
+                        sender: 'doctor',
+                        message: 'Hello Ahmed! Take the medication twice daily - once in the morning with breakfast and once in the evening with dinner. Make sure to take it at the same times each day.',
+                        timestamp: 'Today 11:45 AM',
+                        read: true
+                    },
+                    {
+                        id: 3,
+                        sender: 'patient',
+                        message: 'Thank you for the clarification! Should I continue taking my other medications as usual?',
+                        timestamp: 'Today 12:15 PM',
+                        read: true
+                    },
+                    {
+                        id: 4,
+                        sender: 'patient',
+                        message: 'Also, I\'ve been feeling a bit dizzy since starting the new medication. Is this normal?',
+                        timestamp: 'Today 2:30 PM',
+                        read: false
+                    }
+                ]
+            },
+            patient2: {
+                name: 'Fatima Ali', 
+                id: 'PAT-2024-002',
+                lastSeen: 'Yesterday',
+                status: 'offline',
+                unreadCount: 1,
+                isUrgent: true,
+                lastMessage: 'When should I take the medication?',
+                lastMessageTime: '5 hours ago',
+                messages: [
+                    {
+                        id: 1,
+                        sender: 'patient',
+                        message: 'When should I take the medication?',
+                        timestamp: '5 hours ago',
+                        read: false
+                    }
+                ]
+            },
+            patient3: {
+                name: 'Omar Hassan',
+                id: 'PAT-2024-003', 
+                lastSeen: '2 days ago',
+                status: 'offline',
+                unreadCount: 0,
+                isUrgent: false,
+                lastMessage: 'Appointment rescheduled successfully',
+                lastMessageTime: '1 day ago',
+                messages: [
+                    {
+                        id: 1,
+                        sender: 'doctor',
+                        message: 'Your appointment has been rescheduled to next week Tuesday at 10 AM.',
+                        timestamp: '2 days ago',
+                        read: true
+                    },
+                    {
+                        id: 2,
+                        sender: 'patient',
+                        message: 'Appointment rescheduled successfully',
+                        timestamp: '1 day ago',
+                        read: true
+                    }
+                ]
+            },
+            patient4: {
+                name: 'Layla Ibrahim',
+                id: 'PAT-2024-004',
+                lastSeen: '3 days ago',
+                status: 'offline', 
+                unreadCount: 0,
+                isUrgent: false,
+                lastMessage: 'Lab results look good!',
+                lastMessageTime: '2 days ago',
+                messages: [
+                    {
+                        id: 1,
+                        sender: 'doctor',
+                        message: 'Your lab results look good! Continue with your current treatment plan.',
+                        timestamp: '3 days ago',
+                        read: true
+                    },
+                    {
+                        id: 2,
+                        sender: 'patient',
+                        message: 'Lab results look good!',
+                        timestamp: '2 days ago',
+                        read: true
+                    }
+                ]
+            }
+        };
+
+        function selectPatient(patientId) {
+            currentPatient = patientId;
+            
+            // Update active patient in list
+            document.querySelectorAll('.patient-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`[data-patient="${patientId}"]`).classList.add('active');
+            
+            // Update chat header
+            const patient = patients[patientId];
+            document.getElementById('selectedPatientName').textContent = patient.name;
+            document.querySelector('.chat-header small').textContent = `Patient ID: ${patient.id} | Last seen: ${patient.lastSeen}`;
+            
+            // Mark messages as read
+            markMessagesAsRead(patientId);
+            
+            // Load patient messages
+            loadPatientMessages(patientId);
+        }
+
+        function loadPatientMessages(patientId) {
+            const chatMessages = document.getElementById('chatMessages');
+            const patient = patients[patientId];
+            
+            // Clear existing messages
+            chatMessages.innerHTML = '';
+            
+            // Load messages from patient data
+            patient.messages.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${msg.sender}-message`;
+                messageDiv.innerHTML = `
+                    <div class="message-content">
+                        <p>${msg.message}</p>
+                        <small class="message-time">${msg.timestamp}</small>
+                    </div>
+                `;
+                chatMessages.appendChild(messageDiv);
+            });
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Save messages to localStorage for persistence
+            saveMessagesToStorage();
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if (message && currentPatient) {
+                const timestamp = new Date().toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                });
+                
+                // Create new message object
+                const newMessage = {
+                    id: Date.now(),
+                    sender: 'doctor',
+                    message: message,
+                    timestamp: `Today ${timestamp}`,
+                    read: true
+                };
+                
+                // Add to patient's messages
+                patients[currentPatient].messages.push(newMessage);
+                
+                // Update patient's last message info
+                patients[currentPatient].lastMessage = message;
+                patients[currentPatient].lastMessageTime = `Just now`;
+                
+                // Add message to chat display
+                const chatMessages = document.getElementById('chatMessages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message doctor-message';
+                messageDiv.innerHTML = `
+                    <div class="message-content">
+                        <p>${message}</p>
+                        <small class="message-time">Just now</small>
+                    </div>
+                `;
+                chatMessages.appendChild(messageDiv);
+                
+                // Update patient list display
+                updatePatientListDisplay();
+                
+                // Clear input
+                messageInput.value = '';
+                
+                // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                // Save to localStorage
+                saveMessagesToStorage();
+                
+                // Simulate patient response after 3-10 seconds
+                simulatePatientResponse();
+                
+                console.log(`Message sent to ${currentPatient}: ${message}`);
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function markMessagesAsRead(patientId) {
+            const patient = patients[patientId];
+            patient.messages.forEach(msg => {
+                if (msg.sender === 'patient') {
+                    msg.read = true;
+                }
+            });
+            patient.unreadCount = 0;
+            updatePatientListDisplay();
+            saveMessagesToStorage();
+        }
+
+        function updatePatientListDisplay() {
+            const patientList = document.getElementById('patientList');
+            patientList.innerHTML = '';
+            
+            Object.keys(patients).forEach(patientId => {
+                const patient = patients[patientId];
+                const patientItem = document.createElement('div');
+                patientItem.className = `patient-item ${currentPatient === patientId ? 'active' : ''}`;
+                patientItem.setAttribute('data-patient', patientId);
+                patientItem.onclick = () => selectPatient(patientId);
+                
+                patientItem.innerHTML = `
+                    <div class="d-flex align-items-start">
+                        <div class="patient-avatar me-3">
+                            <i class="bi bi-person-circle"></i>
+                        </div>
+                        <div class="patient-info flex-grow-1">
+                            <h6 class="patient-name">${patient.name}</h6>
+                            <p class="last-message text-muted">${patient.lastMessage}</p>
+                            <small class="text-muted">${patient.lastMessageTime}</small>
+                        </div>
+                        <div class="message-status">
+                            ${patient.unreadCount > 0 ? `<span class="badge bg-primary">${patient.unreadCount}</span>` : ''}
+                            ${patient.isUrgent ? `<span class="badge bg-danger urgent">!</span>` : ''}
+                        </div>
+                    </div>
+                `;
+                
+                patientList.appendChild(patientItem);
+            });
+        }
+
+        function saveMessagesToStorage() {
+            localStorage.setItem('sahatak_messages', JSON.stringify(patients));
+        }
+
+        function loadMessagesFromStorage() {
+            const stored = localStorage.getItem('sahatak_messages');
+            if (stored) {
+                patients = {...patients, ...JSON.parse(stored)};
+            }
+        }
+
+        function simulatePatientResponse() {
+            const responses = [
+                "Thank you, Doctor!",
+                "That's very helpful, I appreciate it.",
+                "I understand. When should I schedule a follow-up?",
+                "Got it, I'll make sure to follow your instructions.",
+                "Thank you for the quick response!",
+                "Should I be concerned about any side effects?"
+            ];
+            
+            const randomDelay = Math.random() * 7000 + 3000; // 3-10 seconds
+            
+            setTimeout(() => {
+                if (Math.random() > 0.3) { // 70% chance of response
+                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                    const timestamp = new Date().toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                    });
+                    
+                    const newMessage = {
+                        id: Date.now(),
+                        sender: 'patient',
+                        message: randomResponse,
+                        timestamp: `Today ${timestamp}`,
+                        read: false
+                    };
+                    
+                    patients[currentPatient].messages.push(newMessage);
+                    patients[currentPatient].lastMessage = randomResponse;
+                    patients[currentPatient].lastMessageTime = 'Just now';
+                    patients[currentPatient].unreadCount++;
+                    
+                    // Add to chat if current patient is selected
+                    const chatMessages = document.getElementById('chatMessages');
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = 'message patient-message';
+                    messageDiv.innerHTML = `
+                        <div class="message-content">
+                            <p>${randomResponse}</p>
+                            <small class="message-time">Just now</small>
+                        </div>
+                    `;
+                    chatMessages.appendChild(messageDiv);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                    
+                    // Update displays
+                    updatePatientListDisplay();
+                    saveMessagesToStorage();
+                    
+                    // Mark as read immediately since doctor is viewing
+                    markMessagesAsRead(currentPatient);
+                }
+            }, randomDelay);
+        }
+
+        function filterPatients(filter) {
+            // Update active button
+            document.querySelectorAll('.btn-group .btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Filter patients based on criteria
+            const patientItems = document.querySelectorAll('.patient-item');
+            
+            patientItems.forEach(item => {
+                const patientId = item.getAttribute('data-patient');
+                const patient = patients[patientId];
+                let showPatient = true;
+                
+                switch(filter) {
+                    case 'unread':
+                        showPatient = patient.unreadCount > 0;
+                        break;
+                    case 'urgent':
+                        showPatient = patient.isUrgent;
+                        break;
+                    case 'all':
+                    default:
+                        showPatient = true;
+                }
+                
+                item.style.display = showPatient ? 'block' : 'none';
+            });
+            
+            console.log(`Filtering patients: ${filter}`);
+        }
+
+        function searchPatients() {
+            const search = document.getElementById('patientSearch').value.toLowerCase();
+            const patientItems = document.querySelectorAll('.patient-item');
+            
+            patientItems.forEach(item => {
+                const patientName = item.querySelector('.patient-name').textContent.toLowerCase();
+                if (patientName.includes(search)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        function startNewConversation() {
+            alert('New conversation feature - would open patient selector modal');
+        }
+
+        function viewPatientRecord() {
+            window.location.href = 'ehr.html';
+        }
+
+        function scheduleFollowUp() {
+            alert('Schedule follow-up feature - would open scheduling modal');
+        }
+
+        function startVideoCall() {
+            alert('Video call feature - would initiate video consultation');
+        }
+
+        function insertTemplate(template) {
+            const templates = {
+                greeting: "Hello! Thank you for reaching out. How can I help you today?",
+                followup: "Please continue taking your medication as prescribed and let me know if you have any concerns.",
+                appointment: "I would like to schedule a follow-up appointment to monitor your progress.",
+                medication: "Please take your medication as prescribed: [medication name] [dosage] [frequency]. Contact me if you experience any side effects.",
+                labResults: "Your lab results are ready. Overall, the results look [good/concerning]. Please schedule a follow-up appointment to discuss them in detail.",
+                sideEffects: "If you experience any side effects from your medication, please contact me immediately. Common side effects include [list symptoms].",
+                appointment_reminder: "This is a reminder that you have an appointment scheduled for [date] at [time]. Please arrive 15 minutes early."
+            };
+            
+            // Create template dropdown if not exists
+            if (!document.querySelector('.template-dropdown')) {
+                const templateDropdown = document.createElement('div');
+                templateDropdown.className = 'template-dropdown position-relative d-inline-block';
+                templateDropdown.innerHTML = `
+                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-chat-quote me-1"></i>Templates
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="selectTemplate('greeting')">Greeting</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="selectTemplate('followup')">Follow-up</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="selectTemplate('appointment')">Appointment</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="selectTemplate('medication')">Medication</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="selectTemplate('labResults')">Lab Results</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="selectTemplate('sideEffects')">Side Effects</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="selectTemplate('appointment_reminder')">Appointment Reminder</a></li>
+                    </ul>
+                `;
+                
+                // Replace the existing template button
+                const existingBtn = document.querySelector('button[onclick="insertTemplate(\'greeting\')"]');
+                existingBtn.parentNode.replaceChild(templateDropdown, existingBtn);
+            }
+        }
+
+        function selectTemplate(template) {
+            const templates = {
+                greeting: "Hello! Thank you for reaching out. How can I help you today?",
+                followup: "Please continue taking your medication as prescribed and let me know if you have any concerns.",
+                appointment: "I would like to schedule a follow-up appointment to monitor your progress.",
+                medication: "Please take your medication as prescribed: [medication name] [dosage] [frequency]. Contact me if you experience any side effects.",
+                labResults: "Your lab results are ready. Overall, the results look [good/concerning]. Please schedule a follow-up appointment to discuss them in detail.",
+                sideEffects: "If you experience any side effects from your medication, please contact me immediately. Common side effects include [list symptoms].",
+                appointment_reminder: "This is a reminder that you have an appointment scheduled for [date] at [time]. Please arrive 15 minutes early."
+            };
+            
+            document.getElementById('messageInput').value = templates[template] || '';
+        }
+
+        function attachFile() {
+            // Simulate file picker
+            const fileTypes = ['.pdf', '.jpg', '.png', '.doc', '.docx'];
+            const randomFile = `prescription_${Math.floor(Math.random() * 1000)}.pdf`;
+            
+            const messageInput = document.getElementById('messageInput');
+            const currentMessage = messageInput.value;
+            messageInput.value = currentMessage + `\n\n📎 Attached: ${randomFile}`;
+            
+            console.log('File attached:', randomFile);
+        }
+
+        function insertPrescription() {
+            const prescriptionTemplate = `
+📋 PRESCRIPTION
+
+Patient: ${patients[currentPatient].name}
+Date: ${new Date().toLocaleDateString()}
+
+Medication: [Medication Name]
+Dosage: [Dosage Amount]
+Frequency: [Times per day]
+Duration: [Treatment duration]
+
+Instructions: [Special instructions]
+
+Please take this prescription to your pharmacy.
+Contact me if you have any questions or concerns.
+
+Dr. Sarah Ahmed
+            `.trim();
+            
+            document.getElementById('messageInput').value = prescriptionTemplate;
+        }
+
+        function broadcastMessage() {
+            const message = prompt('Enter broadcast message to send to all patients:');
+            if (message) {
+                const timestamp = new Date().toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                });
+                
+                // Send to all patients
+                Object.keys(patients).forEach(patientId => {
+                    const broadcastMsg = {
+                        id: Date.now() + Math.random(),
+                        sender: 'doctor',
+                        message: message,
+                        timestamp: `Today ${timestamp}`,
+                        read: true
+                    };
+                    
+                    patients[patientId].messages.push(broadcastMsg);
+                    patients[patientId].lastMessage = message;
+                    patients[patientId].lastMessageTime = 'Just now';
+                });
+                
+                updatePatientListDisplay();
+                saveMessagesToStorage();
+                
+                alert(`Broadcast message sent to ${Object.keys(patients).length} patients`);
+            }
+        }
+
+        function scheduleReminder() {
+            const reminderText = prompt('Enter reminder message:');
+            if (reminderText) {
+                const reminderTime = prompt('Reminder time (e.g., "2 hours", "tomorrow 9 AM"):');
+                if (reminderTime) {
+                    alert(`Reminder scheduled: "${reminderText}" for ${reminderTime}`);
+                    console.log('Reminder scheduled:', {
+                        patient: currentPatient,
+                        message: reminderText,
+                        time: reminderTime
+                    });
+                }
+            }
+        }
+
+        function viewMessageHistory() {
+            const patient = patients[currentPatient];
+            const historyWindow = window.open('', '_blank', 'width=800,height=600');
+            
+            historyWindow.document.write(`
+                <html>
+                <head><title>Message History - ${patient.name}</title></head>
+                <body style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2>Message History: ${patient.name}</h2>
+                    <p>Patient ID: ${patient.id}</p>
+                    <hr>
+                    <div>
+                        ${patient.messages.map(msg => `
+                            <div style="margin: 10px 0; padding: 10px; background: ${msg.sender === 'doctor' ? '#e3f2fd' : '#f5f5f5'}; border-radius: 8px;">
+                                <strong>${msg.sender === 'doctor' ? 'Dr. Sarah Ahmed' : patient.name}:</strong><br>
+                                ${msg.message}<br>
+                                <small style="color: #666;">${msg.timestamp}</small>
+                            </div>
+                        `).join('')}
+                    </div>
+                </body>
+                </html>
+            `);
+        }
+
+        function exportChat() {
+            const patient = patients[currentPatient];
+            const chatData = {
+                patient: patient.name,
+                patientId: patient.id,
+                exportDate: new Date().toISOString(),
+                messages: patient.messages
+            };
+            
+            const blob = new Blob([JSON.stringify(chatData, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `chat_${patient.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function logout() {
+            AuthGuard.logout();
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            AuthGuard.protectPage('doctor');
+            
+            // Load saved messages from localStorage
+            loadMessagesFromStorage();
+            
+            // Initialize patient list display
+            updatePatientListDisplay();
+            
+            // Select first patient
+            selectPatient('patient1');
+            
+            // Setup template dropdown
+            setTimeout(() => {
+                insertTemplate();
+            }, 100);
+        });
+    </script>
+</body>
+</html>
