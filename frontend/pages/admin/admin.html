@@ -63,12 +63,8 @@
                         <p class="dashboard-subtitle" id="admin-dashboard-subtitle">Sahatak Medical Platform Management</p>
                     </div>
                     
-                    <!-- Language Selector - Right (Left in RTL) -->
+                    <!-- Right Side - Empty -->
                     <div class="col-lg-4 text-end">
-                        <button class="btn btn-outline-medical btn-sm" onclick="showLanguageSelector()">
-                            <i class="bi bi-globe me-1"></i>
-                            <span id="current-admin-language">English</span>
-                        </button>
                     </div>
                 </div>
             </div>
@@ -1028,8 +1024,6 @@
     <!-- Main JavaScript -->
     <script src="../../assets/js/main.js"></script>
     
-    <!-- Dashboard Translations -->
-    <script src="../../assets/js/components/dashboard-translations.js"></script>
     
     <!-- Admin JavaScript -->
     <script src="../../assets/js/components/admin.js"></script>
@@ -1045,20 +1039,12 @@
             // Show settings functionality
         }
         
-        // Language selector function
-        function showLanguageSelector() {
-            const currentLang = LanguageManager.getLanguage() || 'en';
-            const newLang = currentLang === 'en' ? 'ar' : 'en';
-            DashboardTranslations.switchDashboardLanguage(newLang, 'admin');
-        }
         
         // logout function is now defined globally in main.js
         
         // Initialize admin dashboard with translations
         document.addEventListener('DOMContentLoaded', async function() {
             
-            // Initialize admin dashboard translations
-            await DashboardTranslations.initializeDashboard('admin');
             
             // Note: Language display will be handled by the translation system
             

@@ -214,6 +214,7 @@ def api_info():
                 'ehr': {
                     'base': '/api/ehr',
                     'routes': [
+                        'GET /api/ehr/patients/search - Search for patients',
                         'GET /api/ehr/patient/{id} - Get patient EHR',
                         'POST /api/ehr/diagnoses - Add diagnosis',
                         'PUT /api/ehr/diagnoses/{id} - Update diagnosis',

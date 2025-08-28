@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,10 +14,10 @@
     <!-- Bootstrap Icons CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
-    <!-- Arabic Font - Noto Sans Arabic -->
+    <!-- English Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Main CSS -->
     <link rel="stylesheet" href="../../assets/css/main.css">
@@ -47,9 +47,13 @@
                                     <i class="bi bi-arrow-left"></i>
                                     <span id="btn-back">Back</span>
                                 </button>
-                                <button class="btn btn-action" onclick="goToDashboardSettings()" title="Profile & Settings">
-                                    <i class="bi bi-person-gear"></i>
-                                    <span id="btn-profile">Profile & Settings</span>
+                                <button class="btn btn-action" onclick="showProfile()" title="Profile">
+                                    <i class="bi bi-person"></i>
+                                    <span id="btn-profile">Profile</span>
+                                </button>
+                                <button class="btn btn-action" onclick="showSettings()" title="Settings">
+                                    <i class="bi bi-gear"></i>
+                                    <span id="btn-settings">Settings</span>
                                 </button>
                                 <button class="btn btn-action btn-logout" onclick="AuthGuard.logout()" title="Logout">
                                     <i class="bi bi-box-arrow-right"></i>
@@ -65,12 +69,12 @@
                         <p class="dashboard-subtitle" id="dashboard-subtitle">Set your working hours and availability</p>
                     </div>
                     
-                    <!-- Controls - Right (Left in RTL) -->
+                    <!-- Controls - Right -->
                     <div class="col-lg-4 text-end">
                         <div class="dashboard-controls">
-                            <button class="btn btn-outline-medical btn-sm" onclick="showLanguageSelector()">
-                                <i class="bi bi-globe me-1"></i>
-                                <span id="current-lang">English</span>
+                            <button class="btn btn-outline-medical btn-sm" onclick="goBack()">
+                                <i class="bi bi-arrow-left me-1"></i>
+                                <span>Back to Dashboard</span>
                             </button>
                         </div>
                     </div>
@@ -411,15 +415,53 @@
             window.history.back();
         }
         
-        function goToDashboardSettings() {
-            console.log('Go to dashboard settings clicked');
-            window.location.href = '../dashboard/doctor.html';
-            // Will open settings section on the dashboard
-            setTimeout(() => {
-                if (typeof showSettings === 'function') {
-                    showSettings();
+        // Profile and settings functions - standardized across all doctor pages
+        function showProfile() {
+            // Check if we're on the main dashboard page
+            if (window.location.pathname.includes('dashboard/doctor.html')) {
+                // On dashboard - show profile section directly
+                const profileSection = document.getElementById('profile-section');
+                const settingsSection = document.getElementById('settings-section');
+                
+                if (profileSection && settingsSection) {
+                    settingsSection.style.display = 'none';
+                    profileSection.style.display = profileSection.style.display === 'none' ? 'block' : 'none';
+                    
+                    if (profileSection.style.display === 'block') {
+                        profileSection.scrollIntoView({ behavior: 'smooth' });
+                        loadUserProfile();
+                    }
+                    return;
                 }
-            }, 100);
+            }
+            
+            // On other pages - redirect to dashboard and show profile
+            sessionStorage.setItem('sahatak_show_profile_on_load', 'true');
+            window.location.href = '../../dashboard/doctor.html';
+        }
+        
+        function showSettings() {
+            // Check if we're on the main dashboard page
+            if (window.location.pathname.includes('dashboard/doctor.html')) {
+                // On dashboard - show settings section directly
+                const settingsSection = document.getElementById('settings-section');
+                const profileSection = document.getElementById('profile-section');
+                
+                if (settingsSection && profileSection) {
+                    profileSection.style.display = 'none';
+                    settingsSection.style.display = settingsSection.style.display === 'none' ? 'block' : 'none';
+                    
+                    if (settingsSection.style.display === 'block') {
+                        settingsSection.scrollIntoView({ behavior: 'smooth' });
+                        loadUserSettings();
+                    }
+                    return;
+                }
+            }
+            
+            // On other pages - redirect to dashboard and show settings
+            sessionStorage.setItem('sahatak_show_settings_on_load', 'true');
+            window.location.href = '../../dashboard/doctor.html';
         }
         
         function showWeeklySchedule() {

@@ -3,12 +3,95 @@ from flask_login import login_required, current_user
 from datetime import datetime, timedelta
 from sqlalchemy import and_, or_, desc
 
-from models import db, Patient, Doctor, Appointment, Diagnosis, VitalSigns
+from models import db, Patient, Doctor, Appointment, Diagnosis, VitalSigns, User
 from utils.responses import APIResponse, ErrorCodes
 from utils.validators import validate_date, validate_vital_signs_ranges, validate_text_field_length
 from utils.logging_config import app_logger, log_user_action
 
 ehr_bp = Blueprint('ehr', __name__)
+
+@ehr_bp.route('/patients/search', methods=['GET'])
+@login_required
+def search_patients():
+    """Search for patients by name, ID, or phone number"""
+    try:
+        if current_user.user_type != 'doctor':
+            return APIResponse.forbidden(message='Only doctors can search patients')
+        
+        doctor = current_user.doctor_profile
+        if not doctor:
+            return APIResponse.not_found(message='Doctor profile not found')
+        
+        # Get search parameters
+        query = request.args.get('q', '').strip()
+        if not query or len(query) < 2:
+            return APIResponse.validation_error(
+                field='q',
+                message='Search query must be at least 2 characters'
+            )
+        
+        limit = min(int(request.args.get('limit', 10)), 50)  # Max 50 results
+        
+        # Search patients by name, phone, or ID
+        search_pattern = f'%{query}%'
+        
+        # Join with User table to get basic user info and search by name
+        patients = db.session.query(Patient, User).join(
+            User, Patient.user_id == User.id
+        ).filter(
+            or_(
+                User.full_name.ilike(search_pattern),
+                Patient.phone.ilike(search_pattern),
+                Patient.medical_id.ilike(search_pattern)
+            )
+        ).limit(limit).all()
+        
+        # Format results
+        search_results = []
+        for patient, user in patients:
+            # Check if doctor has any appointment history with this patient
+            has_appointment = Appointment.query.filter_by(
+                patient_id=patient.id,
+                doctor_id=doctor.id
+            ).first() is not None
+            
+            # Get last visit date if any
+            last_appointment = Appointment.query.filter_by(
+                patient_id=patient.id,
+                doctor_id=doctor.id
+            ).order_by(desc(Appointment.appointment_date)).first()
+            
+            search_results.append({
+                'id': patient.id,
+                'name': user.full_name,
+                'medical_id': patient.medical_id,
+                'age': patient.age,
+                'phone': patient.phone,
+                'gender': patient.gender,
+                'has_history': has_appointment,
+                'last_visit': last_appointment.appointment_date.strftime('%Y-%m-%d') if last_appointment else None
+            })
+        
+        # Log the search action
+        log_user_action(
+            current_user.id,
+            'patient_search',
+            {
+                'query': query,
+                'results_count': len(search_results),
+                'doctor_id': doctor.id
+            },
+            request
+        )
+        
+        return APIResponse.success(
+            data={'patients': search_results, 'query': query},
+            message=f'Found {len(search_results)} patient(s)'
+        )
+        
+    except Exception as e:
+        app_logger.error(f"Patient search error: {str(e)}")
+        return APIResponse.internal_error(message='Failed to search patients')
 
 @ehr_bp.route('/patient/<int:patient_id>', methods=['GET'])
 @login_required
