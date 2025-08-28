@@ -42,7 +42,7 @@
                             <!-- Vertical Action Buttons -->
                             <div class="action-buttons">
                                 <button class="btn btn-action" onclick="showProfile()" title="Profile">
-                                    <i class="bi bi-person-gear"></i>
+                                    <i class="bi bi-person"></i>
                                     <span id="btn-profile">Profile</span>
                                 </button>
                                 <button class="btn btn-action" onclick="showSettings()" title="Settings">
@@ -217,6 +217,286 @@
 
                 </div>
             </div>
+
+            <!-- Profile Section (Hidden by default) -->
+            <div id="profile-section" class="row mt-4" style="display: none;">
+                <div class="col-12">
+                    <div class="dashboard-card">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5><i class="bi bi-person me-2"></i><span id="profile-title">Patient Profile</span></h5>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="hideProfile()">
+                                <i class="bi bi-x-lg me-1"></i><span id="close-profile">Close</span>
+                            </button>
+                        </div>
+
+                        <div class="row g-4">
+                            <!-- Personal Information -->
+                            <div class="col-lg-6">
+                                <div class="settings-group">
+                                    <h6 class="settings-group-title">
+                                        <i class="bi bi-person-badge me-2"></i><span id="personal-info">Personal Information</span>
+                                    </h6>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Patient ID</label>
+                                        <p class="form-control-plaintext" id="patientId">PAT-2024-001</p>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Full Name</label>
+                                        <p class="form-control-plaintext" id="profileFullName">Ahmed Mohamed</p>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Email Address</label>
+                                        <p class="form-control-plaintext" id="profileEmail">ahmed.mohamed@example.com</p>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Phone Number</label>
+                                        <p class="form-control-plaintext" id="profilePhone">+20 123 456 7890</p>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Date of Birth</label>
+                                        <p class="form-control-plaintext" id="profileDOB">15/03/1985</p>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Gender</label>
+                                        <p class="form-control-plaintext" id="profileGender">Male</p>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Blood Type</label>
+                                        <p class="form-control-plaintext" id="profileBloodType">O+</p>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">National ID</label>
+                                        <p class="form-control-plaintext" id="profileNationalId">29503151234567</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Medical Information & Emergency Contact -->
+                            <div class="col-lg-6">
+                                <div class="settings-group">
+                                    <h6 class="settings-group-title">
+                                        <i class="bi bi-heart-pulse me-2"></i><span id="medical-info">Medical Information</span>
+                                    </h6>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Allergies</label>
+                                        <p class="form-control-plaintext" id="profileAllergies">Penicillin, Pollen</p>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Chronic Conditions</label>
+                                        <p class="form-control-plaintext" id="profileChronicConditions">Hypertension, Diabetes Type 2</p>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Current Medications</label>
+                                        <p class="form-control-plaintext" id="profileMedications">Metformin 500mg, Lisinopril 10mg</p>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Insurance Provider</label>
+                                        <p class="form-control-plaintext" id="profileInsurance">Blue Cross Blue Shield</p>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Insurance Number</label>
+                                        <p class="form-control-plaintext" id="profileInsuranceNumber">INS-123456789</p>
+                                    </div>
+
+                                    <div class="settings-group mt-4">
+                                        <h6 class="settings-group-title">
+                                            <i class="bi bi-telephone me-2"></i><span id="emergency-contact">Emergency Contact</span>
+                                        </h6>
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Contact Name</label>
+                                            <p class="form-control-plaintext" id="emergencyName">Fatima Mohamed</p>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Relationship</label>
+                                            <p class="form-control-plaintext" id="emergencyRelation">Wife</p>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Contact Phone</label>
+                                            <p class="form-control-plaintext" id="emergencyPhone">+20 123 456 7891</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Account Information -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="settings-group">
+                                    <h6 class="settings-group-title">
+                                        <i class="bi bi-info-circle me-2"></i><span id="account-info">Account Information</span>
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label class="form-label fw-bold">Registration Date</label>
+                                            <p class="form-control-plaintext" id="profileRegDate">01/01/2024</p>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label fw-bold">Last Login</label>
+                                            <p class="form-control-plaintext" id="profileLastLogin">Today at 10:30 AM</p>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label fw-bold">Total Appointments</label>
+                                            <p class="form-control-plaintext" id="profileTotalAppointments">24</p>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label fw-bold">Account Status</label>
+                                            <p class="form-control-plaintext"><span class="badge bg-success">Active</span></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Edit Profile Button -->
+                        <div class="text-end mt-4">
+                            <button class="btn btn-primary" onclick="editProfile()">
+                                <i class="bi bi-pencil me-1"></i><span id="edit-profile">Edit Profile</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Section (Hidden by default) -->
+            <div id="settings-section" class="row mt-4" style="display: none;">
+                <div class="col-12">
+                    <div class="dashboard-card">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5><i class="bi bi-gear me-2"></i><span id="settings-title">Settings</span></h5>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="hideSettings()">
+                                <i class="bi bi-x-lg me-1"></i><span id="close-settings">Close</span>
+                            </button>
+                        </div>
+
+                        <div class="row g-4">
+                            <!-- Account Settings -->
+                            <div class="col-lg-6">
+                                <div class="settings-group">
+                                    <h6 class="settings-group-title">
+                                        <i class="bi bi-person-gear me-2"></i><span id="account-settings">Profile Information</span>
+                                    </h6>
+                                    
+                                    <div class="mb-3">
+                                        <label for="fullName" class="form-label" id="full-name-label">Full Name</label>
+                                        <input type="text" class="form-control" id="fullName" placeholder="Enter your full name">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label" id="email-label">Email Address</label>
+                                        <input type="email" class="form-control" id="email" placeholder="Enter your email">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="phone" class="form-label" id="phone-label">Phone Number</label>
+                                        <input type="tel" class="form-control" id="phone" placeholder="Enter your phone number">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="dateOfBirth" class="form-label" id="dob-label">Date of Birth</label>
+                                        <input type="date" class="form-control" id="dateOfBirth">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="gender" class="form-label" id="gender-label">Gender</label>
+                                        <select class="form-select" id="gender">
+                                            <option value="">Select Gender</option>
+                                            <option value="male">Male</option>
+                                            <option value="female">Female</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Preferences & Notifications -->
+                            <div class="col-lg-6">
+                                <div class="settings-group">
+                                    <h6 class="settings-group-title">
+                                        <i class="bi bi-bell me-2"></i><span id="preferences-settings">Preferences & Notifications</span>
+                                    </h6>
+                                    
+                                    <div class="mb-3">
+                                        <label for="language" class="form-label" id="language-label">Language</label>
+                                        <select class="form-select" id="language">
+                                            <option value="en">English</option>
+                                            <option value="ar">العربية</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                                            <label class="form-check-label" for="emailNotifications" id="email-notifications-label">
+                                                Email Notifications
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="smsNotifications" checked>
+                                            <label class="form-check-label" for="smsNotifications" id="sms-notifications-label">
+                                                SMS Notifications
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="appointmentReminders" checked>
+                                            <label class="form-check-label" for="appointmentReminders" id="appointment-reminders-label">
+                                                Appointment Reminders
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="settings-group mt-4">
+                                        <h6 class="settings-group-title">
+                                            <i class="bi bi-shield-lock me-2"></i><span id="security-settings">Security</span>
+                                        </h6>
+                                        
+                                        <div class="mb-3">
+                                            <button class="btn btn-outline-primary btn-sm me-2" onclick="changePassword()">
+                                                <i class="bi bi-key me-1"></i><span id="change-password">Change Password</span>
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm" onclick="enableTwoFactor()">
+                                                <i class="bi bi-shield-check me-1"></i><span id="two-factor">Two-Factor Authentication</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Save Settings Button -->
+                        <div class="text-end mt-4">
+                            <button class="btn btn-secondary me-2" onclick="resetSettings()">
+                                <i class="bi bi-arrow-clockwise me-1"></i><span id="reset-settings">Reset</span>
+                            </button>
+                            <button class="btn btn-primary" onclick="saveSettings()">
+                                <i class="bi bi-check-lg me-1"></i><span id="save-settings">Save Settings</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -311,32 +591,202 @@
         // Dashboard specific functions
         function bookAppointment() {
             console.log('Book appointment clicked');
-            // Implement appointment booking logic
+            window.location.href = '../appointments/book-appointment.html';
         }
         
         function viewRecords() {
             console.log('View records clicked');
-            window.location.href = '../medical/records/index.html';
+            window.location.href = '../medical/patient/index.html';
         }
         
         function chatWithDoctor() {
             console.log('Chat with doctor clicked');
-            // Implement chat logic
+            window.location.href = '../medical/patient/comm-hub.html';
         }
         
         function showProfile() {
             console.log('Show profile clicked');
-            // Implement profile view
+            const profileSection = document.getElementById('profile-section');
+            const settingsSection = document.getElementById('settings-section');
+            
+            // Hide settings if open
+            settingsSection.style.display = 'none';
+            
+            // Toggle profile
+            profileSection.style.display = profileSection.style.display === 'none' ? 'block' : 'none';
+            
+            // Smooth scroll to profile section
+            if (profileSection.style.display === 'block') {
+                profileSection.scrollIntoView({ behavior: 'smooth' });
+                loadUserProfile();
+            }
         }
-        
+
+        function hideProfile() {
+            document.getElementById('profile-section').style.display = 'none';
+        }
+
+        function loadUserProfile() {
+            // Load user profile from localStorage or API
+            const user = JSON.parse(localStorage.getItem('sahatak_user_data') || '{}');
+            
+            // Personal Information
+            document.getElementById('profileFullName').textContent = user.full_name || 'Ahmed Mohamed';
+            document.getElementById('profileEmail').textContent = user.email || 'ahmed.mohamed@example.com';
+            document.getElementById('profilePhone').textContent = user.phone || '+20 123 456 7890';
+            document.getElementById('profileDOB').textContent = user.date_of_birth || '15/03/1985';
+            document.getElementById('profileGender').textContent = user.gender || 'Male';
+            document.getElementById('profileBloodType').textContent = user.blood_type || 'O+';
+            document.getElementById('profileNationalId').textContent = user.national_id || '29503151234567';
+            document.getElementById('patientId').textContent = user.patient_id || 'PAT-2024-001';
+            
+            // Medical Information
+            document.getElementById('profileAllergies').textContent = user.allergies || 'Penicillin, Pollen';
+            document.getElementById('profileChronicConditions').textContent = user.chronic_conditions || 'Hypertension, Diabetes Type 2';
+            document.getElementById('profileMedications').textContent = user.current_medications || 'Metformin 500mg, Lisinopril 10mg';
+            document.getElementById('profileInsurance').textContent = user.insurance_provider || 'Blue Cross Blue Shield';
+            document.getElementById('profileInsuranceNumber').textContent = user.insurance_number || 'INS-123456789';
+            
+            // Emergency Contact
+            document.getElementById('emergencyName').textContent = user.emergency_name || 'Fatima Mohamed';
+            document.getElementById('emergencyRelation').textContent = user.emergency_relation || 'Wife';
+            document.getElementById('emergencyPhone').textContent = user.emergency_phone || '+20 123 456 7891';
+            
+            // Account Information
+            document.getElementById('profileRegDate').textContent = user.registration_date || '01/01/2024';
+            document.getElementById('profileLastLogin').textContent = user.last_login || 'Today at 10:30 AM';
+            document.getElementById('profileTotalAppointments').textContent = user.total_appointments || '24';
+        }
+
+        function editProfile() {
+            // Switch to settings section for editing
+            hideProfile();
+            showSettings();
+            alert('Please use the Settings section to edit your profile information.');
+        }
+
         function showSettings() {
             console.log('Show settings clicked');
-            // Implement settings view
+            const settingsSection = document.getElementById('settings-section');
+            const profileSection = document.getElementById('profile-section');
+            
+            // Hide profile if open
+            profileSection.style.display = 'none';
+            
+            // Toggle settings
+            settingsSection.style.display = settingsSection.style.display === 'none' ? 'block' : 'none';
+            
+            // Smooth scroll to settings section
+            if (settingsSection.style.display === 'block') {
+                settingsSection.scrollIntoView({ behavior: 'smooth' });
+                loadUserSettings();
+            }
+        }
+
+        function hideSettings() {
+            document.getElementById('settings-section').style.display = 'none';
+        }
+
+        function loadUserSettings() {
+            // Load user settings from localStorage (simulating database)
+            const user = JSON.parse(localStorage.getItem('sahatak_user_data') || '{}');
+            
+            // If no data exists, set default values (simulating initial database load)
+            if (!user.full_name) {
+                user.full_name = 'Ahmed Mohamed';
+                user.email = 'ahmed.mohamed@example.com';
+                user.phone = '+20 123 456 7890';
+                user.date_of_birth = '1985-03-15';
+                user.gender = 'male';
+                localStorage.setItem('sahatak_user_data', JSON.stringify(user));
+            }
+            
+            // Populate form fields with current values from database
+            document.getElementById('fullName').value = user.full_name || '';
+            document.getElementById('email').value = user.email || '';
+            document.getElementById('phone').value = user.phone || '';
+            document.getElementById('dateOfBirth').value = user.date_of_birth || '';
+            document.getElementById('gender').value = user.gender || '';
+            
+            // Load preferences from database
+            const preferences = JSON.parse(localStorage.getItem('sahatak_preferences') || '{}');
+            document.getElementById('language').value = preferences.language || 'en';
+            document.getElementById('emailNotifications').checked = preferences.email_notifications !== false;
+            document.getElementById('smsNotifications').checked = preferences.sms_notifications !== false;
+            document.getElementById('appointmentReminders').checked = preferences.appointment_reminders !== false;
+        }
+
+        function saveSettings() {
+            // Get current data from database
+            const currentUser = JSON.parse(localStorage.getItem('sahatak_user_data') || '{}');
+            const currentPrefs = JSON.parse(localStorage.getItem('sahatak_preferences') || '{}');
+            
+            // Collect only changed fields
+            const updatedUser = {
+                ...currentUser,
+                full_name: document.getElementById('fullName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                date_of_birth: document.getElementById('dateOfBirth').value,
+                gender: document.getElementById('gender').value
+            };
+            
+            // Update preferences
+            const updatedPrefs = {
+                language: document.getElementById('language').value,
+                email_notifications: document.getElementById('emailNotifications').checked,
+                sms_notifications: document.getElementById('smsNotifications').checked,
+                appointment_reminders: document.getElementById('appointmentReminders').checked
+            };
+            
+            // Save to database (localStorage simulating database)
+            localStorage.setItem('sahatak_user_data', JSON.stringify(updatedUser));
+            localStorage.setItem('sahatak_preferences', JSON.stringify(updatedPrefs));
+            
+            // Update displayed name in header if changed
+            if (updatedUser.full_name !== currentUser.full_name) {
+                document.getElementById('user-name').textContent = updatedUser.full_name;
+            }
+            
+            // Show success message with changes
+            const changedFields = [];
+            if (currentUser.full_name !== updatedUser.full_name) changedFields.push('Name');
+            if (currentUser.email !== updatedUser.email) changedFields.push('Email');
+            if (currentUser.phone !== updatedUser.phone) changedFields.push('Phone');
+            
+            if (changedFields.length > 0) {
+                alert(`Settings saved successfully!\nUpdated: ${changedFields.join(', ')}`);
+            } else {
+                alert('Settings saved successfully!');
+            }
+            
+            console.log('Settings saved:', updatedUser, updatedPrefs);
+            
+            // Refresh profile section if it's open
+            if (document.getElementById('profile-section').style.display !== 'none') {
+                loadUserProfile();
+            }
+        }
+
+        function resetSettings() {
+            if (confirm('Are you sure you want to reload settings from database?')) {
+                // Reload original values from database
+                loadUserSettings();
+                alert('Settings reloaded from database.');
+            }
+        }
+
+        function changePassword() {
+            alert('Password change functionality will redirect to secure password update page.');
+        }
+
+        function enableTwoFactor() {
+            alert('Two-factor authentication setup will be implemented.');
         }
         
         function viewAllAppointments() {
             console.log('View all appointments clicked');
-            // Implement view all appointments
+            window.location.href = '../appointments/appointment-list.html';
         }
         
         // logout function is now defined globally in main.js

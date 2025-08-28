@@ -109,7 +109,7 @@ class AuthGuard {
         // Development mode bypass - always allow access
         if (this.isDevelopmentMode()) {
             console.log(`🔓 Development mode: Page protection bypassed (required: ${requiredUserType || 'any'})`);
-            this.addDevelopmentModeIndicator();
+            // this.addDevelopmentModeIndicator(); // Commented out to hide dev banner in UI
             return true;
         }
         

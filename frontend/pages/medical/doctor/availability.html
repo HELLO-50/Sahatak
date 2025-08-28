@@ -47,9 +47,9 @@
                                     <i class="bi bi-arrow-left"></i>
                                     <span id="btn-back">Back</span>
                                 </button>
-                                <button class="btn btn-action" onclick="showProfile()" title="Profile">
+                                <button class="btn btn-action" onclick="goToDashboardSettings()" title="Profile & Settings">
                                     <i class="bi bi-person-gear"></i>
-                                    <span id="btn-profile">Profile</span>
+                                    <span id="btn-profile">Profile & Settings</span>
                                 </button>
                                 <button class="btn btn-action btn-logout" onclick="AuthGuard.logout()" title="Logout">
                                     <i class="bi bi-box-arrow-right"></i>
@@ -411,9 +411,15 @@
             window.history.back();
         }
         
-        function showProfile() {
-            console.log('Show profile clicked');
-            // Implement profile view
+        function goToDashboardSettings() {
+            console.log('Go to dashboard settings clicked');
+            window.location.href = '../dashboard/doctor.html';
+            // Will open settings section on the dashboard
+            setTimeout(() => {
+                if (typeof showSettings === 'function') {
+                    showSettings();
+                }
+            }, 100);
         }
         
         function showWeeklySchedule() {

@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with Doctor - Sahatak</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%230d47a1' d='m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523.942-.661 2.27.067 3.71L8 15.5l6.533-8.737c.728-1.44.59-2.768.067-3.71C13.486.878 10.4.28 8.717 2.01L8 2.748z'/></svg>">
+    
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Arabic Font - Noto Sans Arabic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="../../../assets/css/main.css">
+    <!-- Dashboard CSS -->
+    <link rel="stylesheet" href="../../../assets/css/components/dashboard.css">
+</head>
+<body data-protect="patient">
+    <!-- Header -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="../../dashboard/patient.html">
+                <i class="bi bi-heart-pulse me-2"></i>
+                صحتك | Sahatak
+            </a>
+            
+            <div class="d-flex align-items-center">
+                <!-- Language Toggle -->
+                <button class="btn btn-outline-light me-3" onclick="LanguageManager.toggleLanguage()">
+                    <i class="bi bi-translate me-1"></i>
+                    <span id="current-lang">English</span>
+                </button>
+                
+                <div class="dropdown me-3">
+                    <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle me-1"></i>
+                        <span id="patient-name">Ahmed Mohamed</span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="../../dashboard/patient.html">
+                            <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                        </a></li>
+                        <li><a class="dropdown-item" href="../../dashboard/patient.html" onclick="setTimeout(() => showProfile(), 100)">
+                            <i class="bi bi-person me-2"></i>Profile
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" onclick="logout()">
+                            <i class="bi bi-box-arrow-right me-2"></i>Logout
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="container-fluid">
+            <!-- Page Header -->
+            <div class="dashboard-header">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="dashboard-title">
+                            <i class="bi bi-chat-dots me-2 text-primary"></i>
+                            Chat with Doctor
+                        </h1>
+                        <p class="dashboard-subtitle">Secure messaging with your healthcare provider</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <button class="btn btn-primary" onclick="requestUrgentConsultation()">
+                            <i class="bi bi-exclamation-triangle me-1"></i>Urgent
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Doctor Info Panel -->
+                <div class="col-lg-4">
+                    <div class="dashboard-card h-100">
+                        <div class="text-center mb-3">
+                            <div class="doctor-avatar mb-3">
+                                <i class="bi bi-person-circle fs-1 text-primary"></i>
+                            </div>
+                            <h5 id="doctorName">Dr. Sarah Ahmed</h5>
+                            <p class="text-muted">Internal Medicine Specialist</p>
+                            <div class="mb-3">
+                                <span class="badge bg-success">
+                                    <i class="bi bi-circle-fill me-1"></i>Online
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="doctor-info">
+                            <div class="mb-3">
+                                <small class="text-muted">Last Appointment:</small>
+                                <p class="mb-0">Today - 2:00 PM</p>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted">Next Appointment:</small>
+                                <p class="mb-0">Next Week Tuesday - 10:00 AM</p>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted">Response Time:</small>
+                                <p class="mb-0">Usually within 1 hour</p>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="mt-4">
+                            <button class="btn btn-outline-primary w-100 mb-2" onclick="requestAppointment()">
+                                <i class="bi bi-calendar-plus me-2"></i>Request Appointment
+                            </button>
+                            <button class="btn btn-outline-success w-100 mb-2" onclick="requestPrescriptionRefill()">
+                                <i class="bi bi-prescription2 me-2"></i>Request Prescription Refill
+                            </button>
+                            <button class="btn btn-outline-info w-100" onclick="viewMedicalHistory()">
+                                <i class="bi bi-file-medical me-2"></i>View Medical History
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Panel -->
+                <div class="col-lg-8">
+                    <div class="dashboard-card h-100">
+                        <!-- Chat Header -->
+                        <div class="chat-header d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                            <div class="d-flex align-items-center">
+                                <div class="doctor-avatar me-3">
+                                    <i class="bi bi-person-circle fs-2 text-primary"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0">Dr. Sarah Ahmed</h5>
+                                    <small class="text-muted">Internal Medicine | Last seen: Just now</small>
+                                </div>
+                            </div>
+                            <div class="chat-actions">
+                                <button class="btn btn-outline-success btn-sm" onclick="startVideoCall()" title="Request Video Call">
+                                    <i class="bi bi-camera-video"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Chat Messages -->
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="message doctor-message">
+                                <div class="message-content">
+                                    <p>Hello Ahmed! How are you feeling today? I noticed you requested to chat - is there anything specific you'd like to discuss about your recent appointment?</p>
+                                    <small class="message-time">Today 9:30 AM</small>
+                                </div>
+                            </div>
+
+                            <div class="message patient-message">
+                                <div class="message-content">
+                                    <p>Hi Dr. Ahmed! Thank you for following up. I've been taking the medication you prescribed, but I'm experiencing some mild dizziness. Is this normal?</p>
+                                    <small class="message-time">Today 10:15 AM</small>
+                                </div>
+                            </div>
+
+                            <div class="message doctor-message">
+                                <div class="message-content">
+                                    <p>Mild dizziness can be a side effect of the medication, especially in the first week. Are you taking it with food as instructed? Also, please make sure to stay well hydrated.</p>
+                                    <small class="message-time">Today 10:45 AM</small>
+                                </div>
+                            </div>
+
+                            <div class="message patient-message">
+                                <div class="message-content">
+                                    <p>Yes, I'm taking it with breakfast and dinner as you recommended. I'll make sure to drink more water. Should I be concerned if it continues?</p>
+                                    <small class="message-time">Today 11:00 AM</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Message Input -->
+                        <div class="message-input-area mt-3 pt-3 border-top">
+                            <div class="row g-2 mb-2">
+                                <div class="col-auto">
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="insertCommonMessage()">
+                                        <i class="bi bi-chat-quote me-1"></i>Common
+                                    </button>
+                                </div>
+                                <div class="col-auto">
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="attachImage()">
+                                        <i class="bi bi-image me-1"></i>Photo
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <textarea class="form-control" id="messageInput" rows="3" placeholder="Type your message to the doctor..." onkeypress="handleKeyPress(event)"></textarea>
+                                <button class="btn btn-primary" onclick="sendMessage()">
+                                    <i class="bi bi-send"></i>
+                                    Send
+                                </button>
+                            </div>
+                            <div class="text-center mt-2">
+                                <small class="text-muted">
+                                    <i class="bi bi-shield-check me-1"></i>
+                                    Your messages are secure and confidential
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Important Notes -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="dashboard-card bg-light">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="d-flex align-items-start">
+                                    <i class="bi bi-info-circle text-primary me-2 mt-1"></i>
+                                    <div>
+                                        <h6>Non-Emergency Use</h6>
+                                        <small class="text-muted">This chat is for non-urgent medical questions. For emergencies, call 911 immediately.</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="d-flex align-items-start">
+                                    <i class="bi bi-clock text-warning me-2 mt-1"></i>
+                                    <div>
+                                        <h6>Response Time</h6>
+                                        <small class="text-muted">Your doctor typically responds within 1-4 hours during business hours.</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="d-flex align-items-start">
+                                    <i class="bi bi-shield-lock text-success me-2 mt-1"></i>
+                                    <div>
+                                        <h6>Privacy & Security</h6>
+                                        <small class="text-muted">All messages are encrypted and comply with HIPAA privacy standards.</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3">
+        <div class="container">
+            <div class="row g-3">
+                <!-- Brand & Description -->
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="mb-3">
+                        <i class="bi bi-heart-pulse me-2 text-primary"></i>
+                        <span id="footer-brand">Sahatak</span>
+                    </h5>
+                    <div class="d-flex gap-3 social-links">
+                        <a href="https://facebook.com/sahatak" target="_blank" rel="noopener"><i class="bi bi-facebook fs-5"></i></a>
+                        <a href="https://twitter.com/sahatak" target="_blank" rel="noopener"><i class="bi bi-twitter fs-5"></i></a>
+                        <a href="https://instagram.com/sahatak" target="_blank" rel="noopener"><i class="bi bi-instagram fs-5"></i></a>
+                        <a href="https://linkedin.com/company/sahatak" target="_blank" rel="noopener"><i class="bi bi-linkedin fs-5"></i></a>
+                    </div>
+                </div>
+                <!-- Quick Links -->
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="mb-3" id="footer-links-title">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="../../common/about.html" class="text-muted text-decoration-none" id="footer-about">About Platform</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="../../common/services.html" class="text-muted text-decoration-none" id="footer-services">Services</a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- Support -->
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="mb-3" id="footer-support-title">Support & Help</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="../../common/support.html" class="text-muted text-decoration-none" id="footer-help">Help Center</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="../../common/contact-us.html" class="text-muted text-decoration-none" id="footer-contact">Contact Us</a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- Emergency Contact -->
+                <div class="col-lg-3 col-md-6 emergency-section">
+                    <p class="mb-2 text-danger fw-bold" id="footer-emergency-text">
+                        For medical emergencies
+                    </p>
+                    <p class="mb-3 text-danger fw-bold fs-6" id="footer-emergency-action">
+                        <i class="bi bi-hospital me-2"></i>
+                        Go to nearest ER hospital
+                    </p>
+                    <p class="mb-0 text-muted small" id="footer-emergency-note">
+                        For non-urgent consultations use the platform
+                    </p>
+                </div>
+            </div>
+            <!-- Bottom Bar -->
+            <hr class="my-3">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="mb-0 fw-bold" id="footer-copyright">
+                        © 2025 Sahatak. All rights reserved.
+                    </p>
+                    <p class="mb-0 text-muted small mt-1" id="footer-medical-disclaimer">
+                        This platform does not replace visiting a doctor in emergency cases
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JavaScript Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Core JavaScript Files -->
+    <script src="../../../assets/js/main.js"></script>
+    <script src="../../../assets/js/components/language-manager.js"></script>
+    <script src="../../../assets/js/components/auth-guard.js"></script>
+
+    <style>
+        .doctor-avatar i {
+            font-size: 3rem;
+            color: #2563eb;
+        }
+
+        .chat-messages {
+            max-height: 450px;
+            overflow-y: auto;
+            padding: 15px 0;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+        }
+
+        .patient-message {
+            justify-content: flex-end;
+        }
+
+        .doctor-message {
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 75%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+        }
+
+        .patient-message .message-content {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .doctor-message .message-content {
+            background-color: #e9ecef;
+            color: #333;
+        }
+
+        .message-time {
+            display: block;
+            margin-top: 5px;
+            opacity: 0.7;
+        }
+
+        .message-input-area textarea {
+            resize: none;
+            border-radius: 10px 0 0 10px;
+        }
+
+        .message-input-area .btn {
+            border-radius: 0 10px 10px 0;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            margin: -20px -20px 20px -20px;
+            padding: 20px;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .dashboard-card {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: none;
+            border-radius: 12px;
+        }
+
+        .doctor-info {
+            border-top: 1px solid #e9ecef;
+            padding-top: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .chat-actions {
+                display: none;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+        }
+    </style>
+
+    <script>
+        // Patient Communication Hub functions
+        let doctorInfo = {
+            name: 'Dr. Sarah Ahmed',
+            specialty: 'Internal Medicine Specialist',
+            status: 'online',
+            responseTime: 'Usually within 1 hour'
+        };
+
+        let messages = [];
+
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                const timestamp = new Date().toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                });
+                
+                // Create new message object
+                const newMessage = {
+                    id: Date.now(),
+                    sender: 'patient',
+                    message: message,
+                    timestamp: `Today ${timestamp}`
+                };
+                
+                // Add to messages array
+                messages.push(newMessage);
+                
+                // Add message to chat display
+                const chatMessages = document.getElementById('chatMessages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message patient-message';
+                messageDiv.innerHTML = `
+                    <div class="message-content">
+                        <p>${message}</p>
+                        <small class="message-time">Just now</small>
+                    </div>
+                `;
+                chatMessages.appendChild(messageDiv);
+                
+                // Clear input
+                messageInput.value = '';
+                
+                // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                // Save to localStorage
+                saveMessagesToStorage();
+                
+                // Simulate doctor response
+                simulateDoctorResponse();
+                
+                console.log(`Message sent: ${message}`);
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function insertCommonMessage() {
+            const commonMessages = [
+                "Thank you for the prescription. When should I take it?",
+                "I'm feeling better after following your advice.",
+                "I have some questions about my treatment.",
+                "Can we schedule a follow-up appointment?",
+                "I'm experiencing some side effects from the medication.",
+                "When will my test results be ready?",
+                "Can you refill my prescription?"
+            ];
+            
+            // Create dropdown if not exists
+            if (!document.querySelector('.common-messages-dropdown')) {
+                const dropdown = document.createElement('div');
+                dropdown.className = 'common-messages-dropdown position-relative d-inline-block';
+                dropdown.innerHTML = `
+                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-chat-quote me-1"></i>Common
+                    </button>
+                    <ul class="dropdown-menu" style="max-width: 300px;">
+                        ${commonMessages.map((msg, index) => 
+                            `<li><a class="dropdown-item text-wrap" href="#" onclick="selectCommonMessage('${msg.replace(/'/g, "\\'")}')">${msg}</a></li>`
+                        ).join('')}
+                    </ul>
+                `;
+                
+                const existingBtn = document.querySelector('button[onclick="insertCommonMessage()"]');
+                existingBtn.parentNode.replaceChild(dropdown, existingBtn);
+            }
+        }
+
+        function selectCommonMessage(message) {
+            document.getElementById('messageInput').value = message;
+        }
+
+        function attachImage() {
+            // Simulate image attachment
+            const imageTypes = ['symptom_photo.jpg', 'prescription_image.jpg', 'test_results.pdf'];
+            const randomImage = imageTypes[Math.floor(Math.random() * imageTypes.length)];
+            
+            const messageInput = document.getElementById('messageInput');
+            const currentMessage = messageInput.value;
+            messageInput.value = currentMessage + `\n\n📷 Attached: ${randomImage}`;
+            
+            console.log('Image attached:', randomImage);
+        }
+
+        function simulateDoctorResponse() {
+            const responses = [
+                "Thank you for your message. Let me review your concerns and get back to you shortly.",
+                "I understand your concern. This is a common question and I'm happy to help clarify.",
+                "Based on your symptoms, please continue with the current treatment. Let me know if symptoms persist.",
+                "That's a great question! I'll provide you with detailed information about this.",
+                "Your progress sounds encouraging. Let's schedule a follow-up to monitor your condition.",
+                "I recommend you continue the medication as prescribed. The side effects should subside soon."
+            ];
+            
+            const randomDelay = Math.random() * 8000 + 2000; // 2-10 seconds
+            
+            setTimeout(() => {
+                if (Math.random() > 0.2) { // 80% chance of response
+                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                    const timestamp = new Date().toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                    });
+                    
+                    const newMessage = {
+                        id: Date.now(),
+                        sender: 'doctor',
+                        message: randomResponse,
+                        timestamp: `Today ${timestamp}`
+                    };
+                    
+                    messages.push(newMessage);
+                    
+                    // Add to chat display
+                    const chatMessages = document.getElementById('chatMessages');
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = 'message doctor-message';
+                    messageDiv.innerHTML = `
+                        <div class="message-content">
+                            <p>${randomResponse}</p>
+                            <small class="message-time">Just now</small>
+                        </div>
+                    `;
+                    chatMessages.appendChild(messageDiv);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                    
+                    saveMessagesToStorage();
+                }
+            }, randomDelay);
+        }
+
+        function saveMessagesToStorage() {
+            localStorage.setItem('sahatak_patient_messages', JSON.stringify(messages));
+        }
+
+        function loadMessagesFromStorage() {
+            const stored = localStorage.getItem('sahatak_patient_messages');
+            if (stored) {
+                messages = JSON.parse(stored);
+                // Reload chat messages if needed
+            }
+        }
+
+        function requestUrgentConsultation() {
+            if (confirm('Request urgent consultation? This will notify the doctor immediately and may incur additional charges.')) {
+                alert('Urgent consultation requested. Your doctor will be notified immediately.');
+                
+                // Add urgent message to chat
+                const urgentMessage = "🚨 URGENT CONSULTATION REQUESTED - Patient needs immediate medical attention";
+                const chatMessages = document.getElementById('chatMessages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message patient-message';
+                messageDiv.innerHTML = `
+                    <div class="message-content" style="background-color: #dc3545;">
+                        <p>${urgentMessage}</p>
+                        <small class="message-time">Just now</small>
+                    </div>
+                `;
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }
+
+        function requestAppointment() {
+            const message = "Hi Doctor, I would like to schedule an appointment. When is your next available slot?";
+            document.getElementById('messageInput').value = message;
+        }
+
+        function requestPrescriptionRefill() {
+            const message = "Hi Doctor, I need a refill for my current prescription. Can you please help me with this?";
+            document.getElementById('messageInput').value = message;
+        }
+
+        function viewMedicalHistory() {
+            window.location.href = 'medical-history.html';
+        }
+
+        function startVideoCall() {
+            if (confirm('Request video call with your doctor? This will send a video consultation request.')) {
+                alert('Video call request sent to Dr. Sarah Ahmed. You will receive a notification when the call is ready.');
+                
+                const videoMessage = "📹 Video consultation requested";
+                document.getElementById('messageInput').value = videoMessage;
+            }
+        }
+
+        function logout() {
+            AuthGuard.logout();
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            AuthGuard.protectPage('patient');
+            
+            // Load saved messages
+            loadMessagesFromStorage();
+            
+            // Setup common messages dropdown
+            setTimeout(() => {
+                insertCommonMessage();
+            }, 100);
+            
+            // Focus on message input
+            document.getElementById('messageInput').focus();
+        });
+    </script>
+</body>
+</html>
