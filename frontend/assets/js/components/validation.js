@@ -278,9 +278,13 @@ const ValidationManager = {
             isValid = false;
         }
 
-        // Validate email (optional for patients)
-        if (data.email && !this.validateEmail(data.email)) {
-            errors.email = 'Please enter a valid email address';
+        // Validate email (required for all users)
+        if (!this.validateEmail(data.email)) {
+            if (!data.email || data.email.trim() === '') {
+                errors.email = 'Email address is required';
+            } else {
+                errors.email = 'Please enter a valid email address';
+            }
             isValid = false;
         }
 

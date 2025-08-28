@@ -1,0 +1,246 @@
+{
+	"info": {
+		"name": "01 - Email Requirement Tests",
+		"description": "Test email requirement enforcement in registration",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Email Validation Tests",
+			"item": [
+				{
+					"name": "Register Patient WITHOUT Email (Should Fail)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"password\": \"patient123\",\n  \"user_type\": \"patient\",\n  \"full_name\": \"Test Patient No Email\",\n  \"phone\": \"+249555999999\",\n  \"age\": 25,\n  \"gender\": \"male\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/auth/register",
+							"host": ["{{backend_url}}"],
+							"path": ["auth", "register"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Registration without email should fail', function () {",
+									"    pm.response.to.have.status(400);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.false;",
+									"    pm.expect(jsonData.field).to.equal('email');",
+									"    pm.expect(jsonData.message.toLowerCase()).to.contain('required');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Register Doctor WITHOUT Email (Should Fail)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"password\": \"doctor123\",\n  \"user_type\": \"doctor\",\n  \"full_name\": \"Dr. No Email\",\n  \"phone\": \"+249555888888\",\n  \"specialty\": \"general\",\n  \"license_number\": \"DOC999\",\n  \"years_of_experience\": 3\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/auth/register",
+							"host": ["{{backend_url}}"],
+							"path": ["auth", "register"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Doctor registration without email should fail', function () {",
+									"    pm.response.to.have.status(400);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.false;",
+									"    pm.expect(jsonData.field).to.equal('email');",
+									"    pm.expect(jsonData.message.toLowerCase()).to.contain('required');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Register Patient with INVALID Email (Should Fail)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"not-valid-email\",\n  \"password\": \"patient123\",\n  \"user_type\": \"patient\",\n  \"full_name\": \"Invalid Email Patient\",\n  \"phone\": \"+249555777777\",\n  \"age\": 30,\n  \"gender\": \"female\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/auth/register",
+							"host": ["{{backend_url}}"],
+							"path": ["auth", "register"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Registration with invalid email should fail', function () {",
+									"    pm.response.to.have.status(400);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.false;",
+									"    pm.expect(jsonData.field).to.equal('email');",
+									"    pm.expect(jsonData.message.toLowerCase()).to.contain('format');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Register Patient with VALID Email (Should Succeed & Require Verification)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"valid.patient@example.com\",\n  \"password\": \"patient123\",\n  \"user_type\": \"patient\",\n  \"full_name\": \"Valid Email Patient\",\n  \"phone\": \"+249555666666\",\n  \"age\": 28,\n  \"gender\": \"male\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/auth/register",
+							"host": ["{{backend_url}}"],
+							"path": ["auth", "register"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Registration with valid email should succeed', function () {",
+									"    pm.response.to.have.status(201);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('id');",
+									"    pm.expect(jsonData.data.email).to.equal('valid.patient@example.com');",
+									"});",
+									"",
+									"pm.test('Email verification should be required', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.requires_email_verification).to.be.true;",
+									"    pm.expect(jsonData.data.is_verified).to.be.false;",
+									"    pm.expect(jsonData.message.toLowerCase()).to.contain('verify');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Login with Unverified Email (Should Fail)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"valid.patient@example.com\",\n  \"password\": \"patient123\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/auth/login",
+							"host": ["{{backend_url}}"],
+							"path": ["auth", "login"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Login with unverified email should fail', function () {",
+									"    pm.response.to.have.status(403);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.false;",
+									"    pm.expect(jsonData.message.toLowerCase()).to.contain('verify');",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Email Verification Workflow",
+			"item": [
+				{
+					"name": "Resend Email Verification",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"valid.patient@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/auth/resend-verification",
+							"host": ["{{backend_url}}"],
+							"path": ["auth", "resend-verification"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Resend verification email should succeed', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.message.toLowerCase()).to.contain('sent');",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}
