@@ -17,8 +17,8 @@ def register():
     try:
         data = request.get_json()
         
-        # Validate required fields - mobile and phone are required, email is optional
-        required_fields = ['password', 'full_name', 'user_type', 'phone']
+        # Validate required fields - email is now required for all users
+        required_fields = ['password', 'full_name', 'user_type', 'phone', 'email']
         for field in required_fields:
             if not data.get(field):
                 return APIResponse.validation_error(
@@ -33,9 +33,9 @@ def register():
                 message='Invalid phone number format'
             )
         
-        # Validate email format if provided (optional)
+        # Validate email format (now required)
         email = data.get('email', '').strip()
-        if email and not validate_email(email):
+        if not validate_email(email):
             return APIResponse.validation_error(
                 field='email',
                 message='Invalid email format'
@@ -52,15 +52,14 @@ def register():
                 field='phone'
             )
         
-        # Check if email already exists (if provided)
-        if email:
-            existing_user_email = User.query.filter_by(email=email.lower()).first()
-            if existing_user_email:
-                auth_logger.warning(f"Registration attempt with existing email: {email}")
-                return APIResponse.conflict(
-                    message='Email already registered',
-                    field='email'
-                )
+        # Check if email already exists (now always provided)
+        existing_user_email = User.query.filter_by(email=email.lower()).first()
+        if existing_user_email:
+            auth_logger.warning(f"Registration attempt with existing email: {email}")
+            return APIResponse.conflict(
+                message='Email already registered',
+                field='email'
+            )
         
         # Validate password
         password_validation = validate_password(data['password'])
@@ -88,18 +87,17 @@ def register():
         
         # Create user
         user = User(
-            email=email.lower() if email else None,
+            email=email.lower(),
             full_name=data['full_name'].strip(),
             user_type=data['user_type'],
             language_preference=data.get('language_preference', 'ar'),
-            is_verified=not bool(email)  # If email provided, needs verification; if no email, auto-verified
+            is_verified=False  # All users must verify email before account activation
         )
         user.set_password(data['password'])
         
-        # Generate verification token if email is provided
-        if email:
-            import secrets
-            user.verification_token = secrets.token_urlsafe(32)
+        # Generate verification token (always required now)
+        import secrets
+        user.verification_token = secrets.token_urlsafe(32)
         
         db.session.add(user)
         db.session.flush()  # Get user ID without committing
@@ -212,9 +210,8 @@ def register():
         # Commit transaction
         db.session.commit()
         
-        # Send email confirmation if email was provided
-        if email:
-            try:
+        # Send email confirmation (always required now)
+        try:
                 email_language = data.get('language_preference', 'ar')
                 auth_logger.info(f"=== EMAIL LANGUAGE DEBUG ===")
                 auth_logger.info(f"Raw registration data keys: {list(data.keys())}")
@@ -251,16 +248,13 @@ def register():
         
         auth_logger.info(f"New user registered: {user.email} ({user.user_type})")
         
-        # Prepare response message based on email verification
-        if email:
-            message = 'User registered successfully. Please check your email to verify your account.'
-        else:
-            message = 'User registered successfully'
+        # Prepare response message (email verification always required)
+        message = 'User registered successfully. Please check your email to verify your account.'
         
         return APIResponse.success(
             data={
                 **user.to_dict(),
-                'requires_email_verification': bool(email and not user.is_verified)
+                'requires_email_verification': True  # Always true now since email is always required
             },
             message=message,
             status_code=201

@@ -300,17 +300,30 @@ const AdminAPI = {
 
     // Doctor Verification APIs
     async getPendingVerifications() {
-        return this.makeRequest('/doctors/pending-verification');
+        return this.makeRequest('/doctor-verification/admin/pending');
+    },
+
+    async getDoctorVerificationDetails(doctorId) {
+        return this.makeRequest(`/doctor-verification/admin/review/${doctorId}`);
     },
 
     async verifyDoctor(doctorId, approved, notes = '') {
-        return this.makeRequest(`/doctors/${doctorId}/verify`, {
-            method: 'POST',
-            body: JSON.stringify({
-                approved,
-                verification_notes: notes
-            })
-        });
+        if (approved) {
+            return this.makeRequest(`/doctor-verification/admin/approve/${doctorId}`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    notes: notes || 'Verification approved by admin'
+                })
+            });
+        } else {
+            return this.makeRequest(`/doctor-verification/admin/reject/${doctorId}`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    reason: notes || 'Verification rejected',
+                    notes: notes || 'Verification rejected by admin'
+                })
+            });
+        }
     },
 
     async addDoctorManually(doctorData) {
@@ -747,12 +760,13 @@ const DoctorVerification = {
             }
             
             const response = await AdminAPI.getPendingVerifications();
-            this.renderPendingList(response.data?.pending_doctors || response.pending_doctors || []);
+            const doctors = response.data?.doctors || response.doctors || [];
+            this.renderPendingList(doctors);
             
             // Update pending count
             const pendingCount = document.getElementById('pending-count');
             if (pendingCount) {
-                pendingCount.textContent = response.data?.pending_doctors?.length || response.pending_doctors?.length || 0;
+                pendingCount.textContent = doctors.length;
             }
             
         } catch (error) {
@@ -810,37 +824,40 @@ const DoctorVerification = {
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col-md-6">
-                            <h6 class="mb-1 text-primary">${doctor.full_name || doctor.name || 'غير محدد'}</h6>
+                            <h6 class="mb-1 text-primary">${doctor.full_name || 'غير محدد'}</h6>
                             <p class="text-muted mb-1">
                                 <i class="bi bi-envelope me-1"></i>
                                 ${doctor.email || 'غير محدد'}
                             </p>
                             <small class="text-muted">
                                 <i class="bi bi-stethoscope me-1"></i>
-                                ${doctor.specialty || 'غير محدد'} • 
-                                <i class="bi bi-calendar me-1"></i>
-                                ${doctor.years_of_experience || 0} سنوات خبرة
+                                ${doctor.specialty || 'غير محدد'}
+                                ${doctor.license_number ? ` • License: ${doctor.license_number}` : ''}
                             </small>
                         </div>
                         <div class="col-md-4">
                             <p class="mb-1">
-                                <strong>رقم الترخيص:</strong>
-                                <span class="text-muted">${doctor.license_number || 'غير محدد'}</span>
+                                <strong>Status:</strong>
+                                <span class="badge ${doctor.verification_status === 'submitted' ? 'bg-warning' : 'bg-info'}">${doctor.verification_status}</span>
+                            </p>
+                            <p class="mb-1">
+                                <strong>Profile:</strong>
+                                <span class="badge ${doctor.profile_completed ? 'bg-success' : 'bg-secondary'}">${doctor.profile_completed ? 'Completed' : 'Incomplete'}</span>
                             </p>
                             <p class="mb-0">
-                                <strong>تاريخ الطلب:</strong>
+                                <strong>Submitted:</strong>
                                 <span class="text-muted">${this.formatDate(doctor.submitted_at)}</span>
                             </p>
                         </div>
                         <div class="col-md-2 text-end">
                             <div class="d-flex flex-column gap-2">
-                                <button class="btn btn-success btn-sm" onclick="DoctorVerification.approveDoctor(${doctor.id})" title="اعتماد">
+                                <button class="btn btn-success btn-sm" onclick="DoctorVerification.approveDoctor(${doctor.doctor_id})" title="اعتماد">
                                     <i class="bi bi-check me-1"></i>اعتماد
                                 </button>
-                                <button class="btn btn-danger btn-sm" onclick="DoctorVerification.rejectDoctor(${doctor.id})" title="رفض">
+                                <button class="btn btn-danger btn-sm" onclick="DoctorVerification.rejectDoctor(${doctor.doctor_id})" title="رفض">
                                     <i class="bi bi-x me-1"></i>رفض
                                 </button>
-                                <button class="btn btn-outline-info btn-sm" onclick="DoctorVerification.viewDetails(${doctor.id})" title="عرض التفاصيل">
+                                <button class="btn btn-outline-info btn-sm" onclick="DoctorVerification.viewDetails(${doctor.doctor_id})" title="عرض التفاصيل">
                                     <i class="bi bi-eye me-1"></i>تفاصيل
                                 </button>
                             </div>
@@ -911,8 +928,76 @@ const DoctorVerification = {
             const response = await AdminAPI.getDoctorVerificationDetails(doctorId);
             const doctor = response.data || response;
             
-            // Show detailed modal (simplified for now)
-            alert(`تفاصيل الطبيب:\nالاسم: ${doctor.full_name}\nالتخصص: ${doctor.specialty}\nالخبرة: ${doctor.years_of_experience} سنوات\nرقم الترخيص: ${doctor.license_number}`);
+            // Create detailed modal content
+            const modalHtml = `
+                <div class="modal fade" id="doctorDetailsModal" tabindex="-1" aria-labelledby="doctorDetailsModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="doctorDetailsModalLabel">Doctor Verification Details</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Basic Information</h6>
+                                        <p><strong>Name:</strong> ${doctor.user?.full_name || doctor.full_name || 'N/A'}</p>
+                                        <p><strong>Email:</strong> ${doctor.user?.email || doctor.email || 'N/A'}</p>
+                                        <p><strong>Phone:</strong> ${doctor.user?.phone || 'N/A'}</p>
+                                        <p><strong>Specialty:</strong> ${doctor.specialty || 'N/A'}</p>
+                                        <p><strong>License Number:</strong> ${doctor.license_number || 'N/A'}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Verification Status</h6>
+                                        <p><strong>Status:</strong> <span class="badge bg-warning">${doctor.verification_status}</span></p>
+                                        <p><strong>Profile Completed:</strong> <span class="badge ${doctor.profile_completed ? 'bg-success' : 'bg-secondary'}">${doctor.profile_completed ? 'Yes' : 'No'}</span></p>
+                                        <p><strong>Submitted:</strong> ${this.formatDate(doctor.verification_submitted_at)}</p>
+                                        <p><strong>Documents:</strong> ${doctor.documents?.license ? 'License ✓' : ''} ${doctor.documents?.degree ? 'Degree ✓' : ''} ${doctor.documents?.id ? 'ID ✓' : ''}</p>
+                                    </div>
+                                </div>
+                                
+                                ${doctor.education_details ? `
+                                <div class="mt-3">
+                                    <h6>Education Details</h6>
+                                    <p>${doctor.education_details}</p>
+                                </div>
+                                ` : ''}
+                                
+                                ${doctor.office_address ? `
+                                <div class="mt-3">
+                                    <h6>Office Information</h6>
+                                    <p><strong>Address:</strong> ${doctor.office_address}</p>
+                                    ${doctor.office_phone ? `<p><strong>Phone:</strong> ${doctor.office_phone}</p>` : ''}
+                                </div>
+                                ` : ''}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-success" onclick="DoctorVerification.approveDoctor(${doctorId})">
+                                    <i class="bi bi-check me-1"></i>Approve
+                                </button>
+                                <button type="button" class="btn btn-danger" onclick="DoctorVerification.rejectDoctor(${doctorId})">
+                                    <i class="bi bi-x me-1"></i>Reject
+                                </button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remove existing modal if any
+            const existingModal = document.getElementById('doctorDetailsModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // Add modal to DOM
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('doctorDetailsModal'));
+            modal.show();
+            
         } catch (error) {
             console.error('Failed to load doctor details:', error);
             AdminUI.showError('فشل في تحميل تفاصيل الطبيب');

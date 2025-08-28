@@ -1,0 +1,355 @@
+{
+	"info": {
+		"name": "01 - Authentication Tests",
+		"description": "Test user registration and login for all user types",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Doctor Authentication",
+			"item": [
+				{
+					"name": "Register Doctor",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"doctor.test@example.com\",\n  \"phone\": \"+249555111111\",\n  \"password\": \"doctor123\",\n  \"user_type\": \"doctor\",\n  \"full_name\": \"Dr. John Smith\",\n  \"specialty\": \"general\",\n  \"license_number\": \"DOC001\",\n  \"years_of_experience\": 5\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/auth/register",
+							"host": ["{{backend_url}}"],
+							"path": ["auth", "register"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Doctor registration successful', function () {",
+									"    pm.response.to.have.status(201);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('id');",
+									"    pm.expect(jsonData.data.requires_email_verification).to.be.true;",
+									"    pm.expect(jsonData.data.is_verified).to.be.false;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Login Doctor",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"doctor.test@example.com\",\n  \"password\": \"doctor123\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/auth/login",
+							"host": ["{{backend_url}}"],
+							"path": ["auth", "login"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Doctor login successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('token');",
+									"    pm.expect(jsonData.data.user.user_type).to.equal('doctor');",
+									"    ",
+									"    // Save token for other collections",
+									"    pm.environment.set('doctor_token', jsonData.data.token);",
+									"    pm.environment.set('doctor_id', jsonData.data.user.id);",
+									"    console.log('Doctor token saved:', jsonData.data.token);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Patient Authentication",
+			"item": [
+				{
+					"name": "Register Patient",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"patient.test@example.com\",\n  \"password\": \"patient123\",\n  \"user_type\": \"patient\",\n  \"full_name\": \"Sarah Johnson\",\n  \"phone\": \"+249555123456\",\n  \"age\": 33,\n  \"gender\": \"female\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/auth/register",
+							"host": ["{{backend_url}}"],
+							"path": ["auth", "register"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Patient registration successful', function () {",
+									"    pm.response.to.have.status(201);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('user_id');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Login Patient",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"patient.test@example.com\",\n  \"password\": \"patient123\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/auth/login",
+							"host": ["{{backend_url}}"],
+							"path": ["auth", "login"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Patient login successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('token');",
+									"    pm.expect(jsonData.data.user.user_type).to.equal('patient');",
+									"    ",
+									"    // Save token for other collections",
+									"    pm.environment.set('patient_token', jsonData.data.token);",
+									"    pm.environment.set('patient_id', jsonData.data.user.id);",
+									"    console.log('Patient token saved:', jsonData.data.token);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Admin Authentication",
+			"item": [
+				{
+					"name": "Register Admin",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin.test@example.com\",\n  \"password\": \"admin123\",\n  \"user_type\": \"admin\",\n  \"full_name\": \"Admin User\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/auth/register",
+							"host": ["{{backend_url}}"],
+							"path": ["auth", "register"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Admin registration successful', function () {",
+									"    pm.response.to.have.status(201);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('user_id');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Login Admin",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin.test@example.com\",\n  \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/auth/login",
+							"host": ["{{backend_url}}"],
+							"path": ["auth", "login"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Admin login successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('token');",
+									"    pm.expect(jsonData.data.user.user_type).to.equal('admin');",
+									"    ",
+									"    // Save token for other collections",
+									"    pm.environment.set('admin_token', jsonData.data.token);",
+									"    pm.environment.set('admin_id', jsonData.data.user.id);",
+									"    console.log('Admin token saved:', jsonData.data.token);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Authentication Edge Cases",
+			"item": [
+				{
+					"name": "Login with Invalid Email",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"nonexistent@example.com\",\n  \"password\": \"wrongpassword\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/auth/login",
+							"host": ["{{backend_url}}"],
+							"path": ["auth", "login"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Invalid login rejected', function () {",
+									"    pm.response.to.have.status(401);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.false;",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Register Duplicate Email",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"doctor.test@example.com\",\n  \"password\": \"duplicate123\",\n  \"user_type\": \"doctor\",\n  \"full_name\": \"Dr. Duplicate\",\n  \"specialty\": \"Cardiology\",\n  \"license_number\": \"DUP001\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/auth/register",
+							"host": ["{{backend_url}}"],
+							"path": ["auth", "register"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Duplicate email registration rejected', function () {",
+									"    pm.response.to.have.status(409);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.false;",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global test for all requests",
+					"pm.test('Response time is acceptable', function () {",
+					"    pm.expect(pm.response.responseTime).to.be.below(3000);",
+					"});",
+					"",
+					"pm.test('Response has proper JSON structure', function () {",
+					"    pm.response.to.be.json;",
+					"    var jsonData = pm.response.json();",
+					"    pm.expect(jsonData).to.have.property('success');",
+					"});"
+				]
+			}
+		}
+	]
+}

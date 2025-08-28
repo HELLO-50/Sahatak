@@ -297,10 +297,10 @@ class SMSService:
         """Get default SMS template when file is missing"""
         language = data.get('language', 'ar')
         doctor_name = data.get('doctor_name', 'الطبيب')
-        appointment_date = data.get('appointment_date', 'غير محدد')
+        appointment_date = data.get('appointment_date', 'تاريخ غير محدد')
         
         if language == 'ar':
-            return f"تذكير: موعد مع د.{doctor_name} في {appointment_date}. منصة صحتك"
+            return f"تذكير: موعدك الطبي مع د.{doctor_name} في {appointment_date}. منصة صحتك"
         else:
             return f"Reminder: Your appointment with Dr.{doctor_name} on {appointment_date}. Sahatak Platform"
     
