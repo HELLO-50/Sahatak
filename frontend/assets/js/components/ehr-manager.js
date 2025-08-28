@@ -25,6 +25,94 @@ const EHRManager = {
         console.log('✅ EHRManager initialized successfully');
     },
     
+    // Load mock EHR data for development mode
+    loadMockEHRData() {
+        console.log('🔧 Loading mock EHR data for development...');
+        
+        this.ehrData = {
+            patient_info: {
+                user: { full_name: 'Ahmed Mohamed - Development Patient' },
+                age: 35,
+                gender: 'male',
+                phone: '+249123456789',
+                blood_type: 'A+',
+                height: 175,
+                weight: 78,
+                emergency_contact: '+249987654321',
+                medical_history_completed: true,
+                medical_history: 'No significant medical history',
+                allergies: 'Allergic to Penicillin',
+                current_medications: 'Vitamin D daily',
+                chronic_conditions: null,
+                family_history: 'Family history of diabetes',
+                surgical_history: null,
+                smoking_status: 'never',
+                alcohol_consumption: 'none',
+                exercise_frequency: 'weekly'
+            },
+            diagnoses: [
+                {
+                    id: 1,
+                    primary_diagnosis: 'Acute Pharyngitis',
+                    severity: 'mild',
+                    icd_10_code: 'J02.9',
+                    status: 'confirmed',
+                    clinical_findings: 'Throat redness, pain when swallowing',
+                    treatment_plan: 'Antibiotic for 7 days, rest',
+                    diagnosis_date: '2025-01-20T10:00:00Z',
+                    doctor_name: 'Dr. Sarah Ahmed',
+                    resolved: false,
+                    follow_up_required: true,
+                    follow_up_date: '2025-01-27',
+                    follow_up_notes: 'Follow-up to ensure recovery'
+                }
+            ],
+            vital_signs: [
+                {
+                    id: 1,
+                    measured_at: '2025-01-20T10:00:00Z',
+                    systolic_bp: 120,
+                    diastolic_bp: 80,
+                    heart_rate: 72,
+                    temperature: 36.8,
+                    respiratory_rate: 16,
+                    oxygen_saturation: 98,
+                    bmi: 25.1,
+                    pain_scale: 3,
+                    blood_pressure: '120/80',
+                    notes: 'Normal vital signs',
+                    recorded_by: 'Nurse Fatima'
+                }
+            ],
+            appointments: [
+                {
+                    id: 1,
+                    appointment_date: '2025-01-20T10:00:00Z',
+                    appointment_type: 'video',
+                    status: 'completed',
+                    reason_for_visit: 'Throat inflammation',
+                    diagnosis: 'Acute Pharyngitis',
+                    notes: 'Patient improving, continuing treatment',
+                    consultation_fee: 150
+                }
+            ],
+            medical_history_updates: [
+                {
+                    update_type: 'doctor_update',
+                    updated_fields: ['current_medications', 'allergies'],
+                    notes: 'Updated medications and allergies',
+                    created_at: '2025-01-20T10:00:00Z'
+                }
+            ]
+        };
+        
+        this.renderPatientOverview();
+        this.renderAllTabs();
+        this.showContent(true);
+        
+        console.log('✅ Mock EHR data loaded successfully');
+    },
+    
     // Load comprehensive EHR data
     async loadEHRData() {
         try {
@@ -43,10 +131,16 @@ const EHRManager = {
             
         } catch (error) {
             console.error('Error loading EHR data:', error);
-            this.showAlert('error', 'فشل في تحميل السجل الطبي');
+            this.showAlert('error', 'Failed to load medical record');
             // Redirect back to doctor dashboard
             setTimeout(() => {
-                window.location.href = 'doctor.html';
+                // Check if we're in development mode and provide mock data instead
+                if (typeof AuthGuard !== 'undefined' && AuthGuard.isDevelopmentMode()) {
+                    console.log('🔧 Development mode: Using mock EHR data instead of redirecting');
+                    this.loadMockEHRData();
+                    return;
+                }
+                window.location.href = '../../dashboard/doctor.html';
             }, 2000);
         } finally {
             this.showLoading(false);
@@ -63,8 +157,8 @@ const EHRManager = {
         
         // Update header
         if (patientInfoEl) {
-            const userName = patient.user ? patient.user.full_name : 'غير محدد';
-            patientInfoEl.textContent = `المريض: ${userName} - العمر: ${patient.age} سنة`;
+            const userName = patient.user ? patient.user.full_name : 'Not specified';
+            patientInfoEl.textContent = `Patient: ${userName} - Age: ${patient.age} years`;
         }
         
         // Render overview
@@ -74,57 +168,57 @@ const EHRManager = {
             overviewEl.innerHTML = `
                 <div class="patient-basic-info">
                     <div class="info-group">
-                        <h6><i class="bi bi-person-badge me-2"></i>المعلومات الأساسية</h6>
+                        <h6><i class="bi bi-person-badge me-2"></i>Basic Information</h6>
                         <div class="info-item">
-                            <span class="info-label">الاسم الكامل:</span>
-                            <span class="info-value">${patient.user ? patient.user.full_name : 'غير محدد'}</span>
+                            <span class="info-label">Full Name:</span>
+                            <span class="info-value">${patient.user ? patient.user.full_name : 'Not specified'}</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">العمر:</span>
-                            <span class="info-value">${patient.age} سنة</span>
+                            <span class="info-label">Age:</span>
+                            <span class="info-value">${patient.age} years</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">الجنس:</span>
-                            <span class="info-value">${patient.gender === 'male' ? 'ذكر' : 'أنثى'}</span>
+                            <span class="info-label">Gender:</span>
+                            <span class="info-value">${patient.gender === 'male' ? 'Male' : 'Female'}</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">رقم الهاتف:</span>
-                            <span class="info-value">${patient.phone || 'غير محدد'}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="info-group">
-                        <h6><i class="bi bi-droplet me-2"></i>المعلومات الطبية</h6>
-                        <div class="info-item">
-                            <span class="info-label">فصيلة الدم:</span>
-                            <span class="info-value">${patient.blood_type || 'غير محددة'}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">الطول:</span>
-                            <span class="info-value">${patient.height ? patient.height + ' سم' : 'غير محدد'}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">الوزن:</span>
-                            <span class="info-value">${patient.weight ? patient.weight + ' كغ' : 'غير محدد'}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">مؤشر كتلة الجسم:</span>
-                            <span class="info-value">${bmi || 'غير محسوب'}</span>
+                            <span class="info-label">Phone Number:</span>
+                            <span class="info-value">${patient.phone || 'Not specified'}</span>
                         </div>
                     </div>
                     
                     <div class="info-group">
-                        <h6><i class="bi bi-shield-check me-2"></i>جهة الاتصال للطوارئ</h6>
+                        <h6><i class="bi bi-droplet me-2"></i>Medical Information</h6>
                         <div class="info-item">
-                            <span class="info-label">رقم الطوارئ:</span>
-                            <span class="info-value">${patient.emergency_contact || 'غير محدد'}</span>
+                            <span class="info-label">Blood Type:</span>
+                            <span class="info-value">${patient.blood_type || 'Not specified'}</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">حالة التاريخ الطبي:</span>
+                            <span class="info-label">Height:</span>
+                            <span class="info-value">${patient.height ? patient.height + ' cm' : 'Not specified'}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Weight:</span>
+                            <span class="info-value">${patient.weight ? patient.weight + ' kg' : 'Not specified'}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">BMI:</span>
+                            <span class="info-value">${bmi || 'Not calculated'}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-group">
+                        <h6><i class="bi bi-shield-check me-2"></i>Emergency Contact</h6>
+                        <div class="info-item">
+                            <span class="info-label">Emergency Number:</span>
+                            <span class="info-value">${patient.emergency_contact || 'Not specified'}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Medical History Status:</span>
                             <span class="info-value">
                                 ${patient.medical_history_completed ? 
-                                    '<span class="badge bg-success">مكتمل</span>' : 
-                                    '<span class="badge bg-warning">غير مكتمل</span>'
+                                    '<span class="badge bg-success">Complete</span>' : 
+                                    '<span class="badge bg-warning">Incomplete</span>'
                                 }
                             </span>
                         </div>
@@ -151,8 +245,8 @@ const EHRManager = {
             container.innerHTML = `
                 <div class="empty-state">
                     <i class="bi bi-clipboard-pulse"></i>
-                    <h6>لا توجد تشخيصات</h6>
-                    <p>لم يتم تسجيل أي تشخيصات لهذا المريض بعد</p>
+                    <h6>No Diagnoses</h6>
+                    <p>No diagnoses have been recorded for this patient yet</p>
                 </div>
             `;
             return;
@@ -169,47 +263,47 @@ const EHRManager = {
                         <div>
                             <div class="diagnosis-title">${diagnosis.primary_diagnosis}</div>
                             <div class="diagnosis-meta">
-                                ${diagnosis.severity ? `<span class="diagnosis-badge severity-${diagnosis.severity}">شدة: ${this.getSeverityArabic(diagnosis.severity)}</span>` : ''}
-                                <span class="diagnosis-badge status-${diagnosis.status}">الحالة: ${this.getStatusArabic(diagnosis.status)}</span>
+                                ${diagnosis.severity ? `<span class="diagnosis-badge severity-${diagnosis.severity}">Severity: ${this.getSeverityEnglish(diagnosis.severity)}</span>` : ''}
+                                <span class="diagnosis-badge status-${diagnosis.status}">Status: ${this.getStatusEnglish(diagnosis.status)}</span>
                                 ${diagnosis.icd_10_code ? `<span class="diagnosis-badge" style="background: #e3f2fd; color: #1565c0;">ICD-10: ${diagnosis.icd_10_code}</span>` : ''}
-                                ${isActive ? '<span class="diagnosis-badge" style="background: #d4edda; color: #155724;">نشط</span>' : '<span class="diagnosis-badge" style="background: #f8f9fa; color: #6c757d;">محلول</span>'}
+                                ${isActive ? '<span class="diagnosis-badge" style="background: #d4edda; color: #155724;">Active</span>' : '<span class="diagnosis-badge" style="background: #f8f9fa; color: #6c757d;">Resolved</span>'}
                             </div>
                         </div>
                         <div class="text-muted small">
-                            ${new Date(diagnosis.diagnosis_date).toLocaleDateString('ar-SA')}
+                            ${new Date(diagnosis.diagnosis_date).toLocaleDateString('en-US')}
                         </div>
                     </div>
                     
                     <div class="diagnosis-content">
                         ${diagnosis.clinical_findings ? `
                             <div class="diagnosis-section">
-                                <h6>الفحوصات السريرية</h6>
+                                <h6>Clinical Findings</h6>
                                 <p>${diagnosis.clinical_findings}</p>
                             </div>
                         ` : ''}
                         
                         ${diagnosis.treatment_plan ? `
                             <div class="diagnosis-section">
-                                <h6>خطة العلاج</h6>
+                                <h6>Treatment Plan</h6>
                                 <p>${diagnosis.treatment_plan}</p>
                             </div>
                         ` : ''}
                         
                         ${diagnosis.follow_up_required ? `
                             <div class="diagnosis-section">
-                                <h6>المتابعة المطلوبة</h6>
+                                <h6>Required Follow-up</h6>
                                 <p>
-                                    ${diagnosis.follow_up_date ? `تاريخ المتابعة: ${new Date(diagnosis.follow_up_date).toLocaleDateString('ar-SA')}` : 'مطلوبة متابعة'}
-                                    ${diagnosis.follow_up_notes ? `<br>ملاحظات: ${diagnosis.follow_up_notes}` : ''}
+                                    ${diagnosis.follow_up_date ? `Follow-up Date: ${new Date(diagnosis.follow_up_date).toLocaleDateString('en-US')}` : 'Follow-up Required'}
+                                    ${diagnosis.follow_up_notes ? `<br>Notes: ${diagnosis.follow_up_notes}` : ''}
                                 </p>
                             </div>
                         ` : ''}
                         
                         ${diagnosis.resolution_date ? `
                             <div class="diagnosis-section">
-                                <h6>تاريخ الشفاء</h6>
+                                <h6>Recovery Date</h6>
                                 <p>
-                                    ${new Date(diagnosis.resolution_date).toLocaleDateString('ar-SA')}
+                                    ${new Date(diagnosis.resolution_date).toLocaleDateString('en-US')}
                                     ${diagnosis.resolution_notes ? `<br>${diagnosis.resolution_notes}` : ''}
                                 </p>
                             </div>
@@ -218,18 +312,18 @@ const EHRManager = {
                         <div class="diagnosis-actions mt-3 d-flex justify-content-between align-items-center">
                             <div class="text-muted small">
                                 <i class="bi bi-person-badge me-1"></i>
-                                الطبيب: ${diagnosis.doctor_name}
+                                Doctor: ${diagnosis.doctor_name}
                             </div>
                             <div class="btn-group btn-group-sm">
                                 ${!diagnosis.resolved ? `
-                                    <button class="btn btn-outline-primary" onclick="editDiagnosis(${diagnosis.id})" title="تعديل">
+                                    <button class="btn btn-outline-primary" onclick="editDiagnosis(${diagnosis.id})" title="Edit">
                                         <i class="bi bi-pencil"></i>
                                     </button>
-                                    <button class="btn btn-outline-success" onclick="EHRManager.resolveDiagnosis(${diagnosis.id})" title="وضع علامة كمحلول">
+                                    <button class="btn btn-outline-success" onclick="EHRManager.resolveDiagnosis(${diagnosis.id})" title="وضع علامة كResolved">
                                         <i class="bi bi-check-circle"></i>
                                     </button>
                                 ` : ''}
-                                <button class="btn btn-outline-info" onclick="viewDiagnosisDetails(${diagnosis.id})" title="عرض التفاصيل">
+                                <button class="btn btn-outline-info" onclick="viewDiagnosisDetails(${diagnosis.id})" title="View Details">
                                     <i class="bi bi-eye"></i>
                                 </button>
                             </div>
@@ -251,8 +345,8 @@ const EHRManager = {
             container.innerHTML = `
                 <div class="empty-state">
                     <i class="bi bi-activity"></i>
-                    <h6>لا توجد علامات حيوية</h6>
-                    <p>لم يتم تسجيل أي علامات حيوية لهذا المريض بعد</p>
+                    <h6>No Vital Signs</h6>
+                    <p>No vital signs have been recorded for this patient yet</p>
                 </div>
             `;
             return;
@@ -266,64 +360,64 @@ const EHRManager = {
                     <div class="vitals-header">
                         <div class="vitals-date">
                             <i class="bi bi-calendar3 me-2"></i>
-                            ${new Date(vital.measured_at).toLocaleDateString('ar-SA')} - 
-                            ${new Date(vital.measured_at).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
+                            ${new Date(vital.measured_at).toLocaleDateString('en-US')} - 
+                            ${new Date(vital.measured_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                         </div>
-                        ${vital.recorded_by ? `<small class="text-muted">سجله: ${vital.recorded_by}</small>` : ''}
+                        ${vital.recorded_by ? `<small class="text-muted">Recorded by: ${vital.recorded_by}</small>` : ''}
                     </div>
                     
                     <div class="vitals-grid">
                         ${vital.blood_pressure ? `
                             <div class="vital-item">
                                 <div class="vital-value">${vital.blood_pressure}</div>
-                                <div class="vital-label">ضغط الدم</div>
+                                <div class="vital-label">Blood Pressure</div>
                             </div>
                         ` : ''}
                         
                         ${vital.heart_rate ? `
                             <div class="vital-item">
                                 <div class="vital-value">${vital.heart_rate}</div>
-                                <div class="vital-label">نبضات القلب</div>
+                                <div class="vital-label">Heart Rate</div>
                             </div>
                         ` : ''}
                         
                         ${vital.temperature ? `
                             <div class="vital-item">
                                 <div class="vital-value">${vital.temperature}°</div>
-                                <div class="vital-label">درجة الحرارة</div>
+                                <div class="vital-label">Temperature</div>
                             </div>
                         ` : ''}
                         
                         ${vital.respiratory_rate ? `
                             <div class="vital-item">
                                 <div class="vital-value">${vital.respiratory_rate}</div>
-                                <div class="vital-label">معدل التنفس</div>
+                                <div class="vital-label">Respiratory Rate</div>
                             </div>
                         ` : ''}
                         
                         ${vital.oxygen_saturation ? `
                             <div class="vital-item">
                                 <div class="vital-value">${vital.oxygen_saturation}%</div>
-                                <div class="vital-label">الأكسجين</div>
+                                <div class="vital-label">Oxygen Saturation</div>
                             </div>
                         ` : ''}
                         
                         ${vital.bmi ? `
                             <div class="vital-item">
                                 <div class="vital-value">${vital.bmi}</div>
-                                <div class="vital-label">مؤشر كتلة الجسم</div>
+                                <div class="vital-label">BMI</div>
                             </div>
                         ` : ''}
                         
                         ${vital.pain_scale !== null && vital.pain_scale !== undefined ? `
                             <div class="vital-item">
                                 <div class="vital-value">${vital.pain_scale}/10</div>
-                                <div class="vital-label">مقياس الألم</div>
+                                <div class="vital-label">Pain Scale</div>
                             </div>
                         ` : ''}
                     </div>
                     
-                    ${vital.notes ? `<div class="mt-2 text-muted small"><strong>ملاحظات:</strong> ${vital.notes}</div>` : ''}
+                    ${vital.notes ? `<div class="mt-2 text-muted small"><strong>Notes:</strong> ${vital.notes}</div>` : ''}
                 </div>
             `;
         });
@@ -355,31 +449,31 @@ const EHRManager = {
         // Check if Chart.js is available
         if (typeof Chart === 'undefined') {
             console.error('Chart.js library is not loaded');
-            ctx.parentElement.innerHTML = '<p class="text-center text-muted">خطأ: مكتبة الرسوم البيانية غير متاحة</p>';
+            ctx.parentElement.innerHTML = '<p class="text-center text-muted">Error: Charts library not available</p>';
             return;
         }
         
         const data = vitals.filter(v => v.systolic_bp && v.diastolic_bp);
         
         if (data.length === 0) {
-            ctx.parentElement.innerHTML = '<p class="text-center text-muted">لا توجد بيانات كافية</p>';
+            ctx.parentElement.innerHTML = '<p class="text-center text-muted">Insufficient data available</p>';
             return;
         }
         
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: data.map(v => new Date(v.measured_at).toLocaleDateString('ar-SA')),
+                labels: data.map(v => new Date(v.measured_at).toLocaleDateString('en-US')),
                 datasets: [
                     {
-                        label: 'الانقباضي',
+                        label: 'Systolic',
                         data: data.map(v => v.systolic_bp),
                         borderColor: '#dc3545',
                         backgroundColor: 'rgba(220, 53, 69, 0.1)',
                         tension: 0.4
                     },
                     {
-                        label: 'الانبساطي',
+                        label: 'Diastolic',
                         data: data.map(v => v.diastolic_bp),
                         borderColor: '#007bff',
                         backgroundColor: 'rgba(0, 123, 255, 0.1)',
@@ -413,23 +507,23 @@ const EHRManager = {
         // Check if Chart.js is available
         if (typeof Chart === 'undefined') {
             console.error('Chart.js library is not loaded');
-            ctx.parentElement.innerHTML = '<p class="text-center text-muted">خطأ: مكتبة الرسوم البيانية غير متاحة</p>';
+            ctx.parentElement.innerHTML = '<p class="text-center text-muted">Error: Charts library not available</p>';
             return;
         }
         
         const data = vitals.filter(v => v.heart_rate);
         
         if (data.length === 0) {
-            ctx.parentElement.innerHTML = '<p class="text-center text-muted">لا توجد بيانات كافية</p>';
+            ctx.parentElement.innerHTML = '<p class="text-center text-muted">Insufficient data available</p>';
             return;
         }
         
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: data.map(v => new Date(v.measured_at).toLocaleDateString('ar-SA')),
+                labels: data.map(v => new Date(v.measured_at).toLocaleDateString('en-US')),
                 datasets: [{
-                    label: 'نبضات القلب',
+                    label: 'Heart Rate',
                     data: data.map(v => v.heart_rate),
                     borderColor: '#28a745',
                     backgroundColor: 'rgba(40, 167, 69, 0.1)',
@@ -463,30 +557,30 @@ const EHRManager = {
         
         const sections = [
             {
-                title: 'التاريخ الطبي العام',
+                title: 'General Medical History',
                 icon: 'journal-medical',
                 items: [
-                    { label: 'التاريخ الطبي', value: patient.medical_history },
-                    { label: 'الحساسية', value: patient.allergies },
-                    { label: 'الأدوية الحالية', value: patient.current_medications }
+                    { label: 'Medical History', value: patient.medical_history },
+                    { label: 'Allergies', value: patient.allergies },
+                    { label: 'Current Medications', value: patient.current_medications }
                 ]
             },
             {
-                title: 'الحالات المزمنة والتاريخ العائلي',
+                title: 'Chronic Conditions and Family History',
                 icon: 'people',
                 items: [
-                    { label: 'الحالات المزمنة', value: patient.chronic_conditions },
-                    { label: 'التاريخ العائلي', value: patient.family_history },
-                    { label: 'التاريخ الجراحي', value: patient.surgical_history }
+                    { label: 'Chronic Conditions', value: patient.chronic_conditions },
+                    { label: 'Family History', value: patient.family_history },
+                    { label: 'Surgical History', value: patient.surgical_history }
                 ]
             },
             {
-                title: 'نمط الحياة',
+                title: 'Lifestyle',
                 icon: 'activity',
                 items: [
-                    { label: 'التدخين', value: this.getSmokingStatusArabic(patient.smoking_status) },
-                    { label: 'استهلاك الكحول', value: this.getAlcoholConsumptionArabic(patient.alcohol_consumption) },
-                    { label: 'تكرار التمارين', value: this.getExerciseFrequencyArabic(patient.exercise_frequency) }
+                    { label: 'Smoking', value: this.getSmokingStatusEnglish(patient.smoking_status) },
+                    { label: 'Alcohol Consumption', value: this.getAlcoholConsumptionEnglish(patient.alcohol_consumption) },
+                    { label: 'Exercise Frequency', value: this.getExerciseFrequencyEnglish(patient.exercise_frequency) }
                 ]
             }
         ];
@@ -515,7 +609,7 @@ const EHRManager = {
                                 ` : '').join('')}
                             </ul>
                         ` : `
-                            <p class="text-muted mb-0">لا توجد معلومات متاحة في هذا القسم</p>
+                            <p class="text-muted mb-0">No information available in this section</p>
                         `}
                     </div>
                 </div>
@@ -528,7 +622,7 @@ const EHRManager = {
                 <div class="history-section">
                     <div class="history-section-header">
                         <h6 class="history-section-title">
-                            <i class="bi bi-clock-history me-2"></i>آخر التحديثات
+                            <i class="bi bi-clock-history me-2"></i>Recent Updates
                         </h6>
                     </div>
                     <div class="history-section-content">
@@ -536,14 +630,14 @@ const EHRManager = {
                             ${this.ehrData.medical_history_updates.map(update => `
                                 <li class="history-item">
                                     <div class="history-content">
-                                        <div class="history-label">نوع التحديث: ${this.getUpdateTypeArabic(update.update_type)}</div>
+                                        <div class="history-label">Update Type: ${this.getUpdateTypeEnglish(update.update_type)}</div>
                                         <div class="history-value">
-                                            الحقول المحدثة: ${update.updated_fields.join(', ')}
-                                            ${update.notes ? `<br>ملاحظات: ${update.notes}` : ''}
+                                            Updated Fields: ${update.updated_fields.join(', ')}
+                                            ${update.notes ? `<br>Notes: ${update.notes}` : ''}
                                         </div>
                                     </div>
                                     <div class="history-date">
-                                        ${new Date(update.created_at).toLocaleDateString('ar-SA')}
+                                        ${new Date(update.created_at).toLocaleDateString('en-US')}
                                     </div>
                                 </li>
                             `).join('')}
@@ -579,8 +673,8 @@ const EHRManager = {
                     <div class="appointment-header">
                         <div class="appointment-date">
                             <i class="bi bi-calendar3 me-2"></i>
-                            ${new Date(appointment.appointment_date).toLocaleDateString('ar-SA')} - 
-                            ${new Date(appointment.appointment_date).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
+                            ${new Date(appointment.appointment_date).toLocaleDateString('en-US')} - 
+                            ${new Date(appointment.appointment_date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                         </div>
                         <span class="appointment-status status-${appointment.status}">
                             ${this.getAppointmentStatusArabic(appointment.status)}
@@ -588,10 +682,10 @@ const EHRManager = {
                     </div>
                     
                     <div class="appointment-details">
-                        <div><strong>النوع:</strong> ${this.getAppointmentTypeArabic(appointment.appointment_type)}</div>
+                        <div><strong>النوع:</strong> ${this.getAppointmentTypeEnglish(appointment.appointment_type)}</div>
                         ${appointment.reason_for_visit ? `<div><strong>سبب الزيارة:</strong> ${appointment.reason_for_visit}</div>` : ''}
                         ${appointment.diagnosis ? `<div><strong>التشخيص:</strong> ${appointment.diagnosis}</div>` : ''}
-                        ${appointment.notes ? `<div><strong>ملاحظات:</strong> ${appointment.notes}</div>` : ''}
+                        ${appointment.notes ? `<div><strong>Notes:</strong> ${appointment.notes}</div>` : ''}
                         ${appointment.consultation_fee ? `<div><strong>الأجر:</strong> ${appointment.consultation_fee} ج.س</div>` : ''}
                     </div>
                 </div>
@@ -805,7 +899,7 @@ const EHRManager = {
             });
 
             if (response.success) {
-                this.showAlert('success', 'تم وضع علامة على التشخيص كمحلول');
+                this.showAlert('success', 'تم وضع علامة على التشخيص كResolved');
                 await this.loadEHRData();
             } else {
                 throw new Error(response.message);
@@ -874,7 +968,7 @@ const EHRManager = {
 
         // Lifestyle risks
         if (patient.smoking_status === 'current') {
-            risks.push({ type: 'lifestyle', level: 'high', description: 'التدخين - خطر عالي على القلب والرئتين' });
+            risks.push({ type: 'lifestyle', level: 'high', description: 'Smoking - خطر عالي على القلب والرئتين' });
         }
 
         if (patient.alcohol_consumption === 'heavy') {
@@ -898,11 +992,11 @@ const EHRManager = {
         const latestVitals = this.ehrData.vital_signs?.[0];
         if (latestVitals) {
             if (latestVitals.systolic_bp > 140 || latestVitals.diastolic_bp > 90) {
-                risks.push({ type: 'vitals', level: 'high', description: 'ارتفاع ضغط الدم' });
+                risks.push({ type: 'vitals', level: 'high', description: 'ارتفاع Blood Pressure' });
             }
             
             if (latestVitals.bmi > 30) {
-                risks.push({ type: 'vitals', level: 'medium', description: 'السمنة - مؤشر كتلة الجسم مرتفع' });
+                risks.push({ type: 'vitals', level: 'medium', description: 'السمنة - BMI مرتفع' });
             }
         }
 
@@ -916,7 +1010,7 @@ const EHRManager = {
         // For now, we'll create a simple text export
         // In a full implementation, you would use a PDF library like jsPDF
         let exportText = `سجل طبي إلكتروني - ${summary.patient_info.user?.full_name}\n`;
-        exportText += `التاريخ: ${new Date().toLocaleDateString('ar-SA')}\n\n`;
+        exportText += `التاريخ: ${new Date().toLocaleDateString('en-US')}\n\n`;
         
         exportText += `المعلومات الأساسية:\n`;
         exportText += `العمر: ${summary.patient_info.age}\n`;
@@ -924,7 +1018,7 @@ const EHRManager = {
         exportText += `فصيلة الدم: ${summary.patient_info.blood_type || 'غير محددة'}\n\n`;
         
         if (summary.active_diagnoses.length > 0) {
-            exportText += `التشخيصات النشطة:\n`;
+            exportText += `التشخيصات الActiveة:\n`;
             summary.active_diagnoses.forEach(diagnosis => {
                 exportText += `- ${diagnosis.primary_diagnosis}\n`;
             });
@@ -934,10 +1028,10 @@ const EHRManager = {
         if (summary.latest_vitals) {
             exportText += `آخر العلامات الحيوية:\n`;
             if (summary.latest_vitals.blood_pressure) {
-                exportText += `ضغط الدم: ${summary.latest_vitals.blood_pressure}\n`;
+                exportText += `Blood Pressure: ${summary.latest_vitals.blood_pressure}\n`;
             }
             if (summary.latest_vitals.heart_rate) {
-                exportText += `نبضات القلب: ${summary.latest_vitals.heart_rate}\n`;
+                exportText += `Heart Rate: ${summary.latest_vitals.heart_rate}\n`;
             }
             exportText += '\n';
         }
@@ -1068,7 +1162,7 @@ const EHRManager = {
         return 'مستقر';
     },
     
-    getSeverityArabic(severity) {
+    getSeverityEnglish(severity) {
         const severityMap = {
             'mild': 'خفيفة',
             'moderate': 'متوسطة',
@@ -1078,7 +1172,7 @@ const EHRManager = {
         return severityMap[severity] || severity;
     },
     
-    getStatusArabic(status) {
+    getStatusEnglish(status) {
         const statusMap = {
             'provisional': 'مبدئي',
             'confirmed': 'مؤكد',
@@ -1088,7 +1182,7 @@ const EHRManager = {
         return statusMap[status] || status;
     },
     
-    getSmokingStatusArabic(status) {
+    getSmokingStatusEnglish(status) {
         const statusMap = {
             'never': 'لا يدخن',
             'former': 'مدخن سابق',
@@ -1097,7 +1191,7 @@ const EHRManager = {
         return statusMap[status] || 'غير محدد';
     },
     
-    getAlcoholConsumptionArabic(consumption) {
+    getAlcoholConsumptionEnglish(consumption) {
         const consumptionMap = {
             'none': 'لا يستهلك',
             'occasional': 'أحياناً',
@@ -1107,7 +1201,7 @@ const EHRManager = {
         return consumptionMap[consumption] || 'غير محدد';
     },
     
-    getExerciseFrequencyArabic(frequency) {
+    getExerciseFrequencyEnglish(frequency) {
         const frequencyMap = {
             'none': 'لا يمارس',
             'rare': 'نادراً',
@@ -1117,7 +1211,7 @@ const EHRManager = {
         return frequencyMap[frequency] || 'غير محدد';
     },
     
-    getUpdateTypeArabic(type) {
+    getUpdateTypeEnglish(type) {
         const typeMap = {
             'initial_registration': 'التسجيل الأولي',
             'appointment_update': 'تحديث خلال الموعد',
@@ -1139,7 +1233,7 @@ const EHRManager = {
         return statusMap[status] || status;
     },
     
-    getAppointmentTypeArabic(type) {
+    getAppointmentTypeEnglish(type) {
         const typeMap = {
             'video': 'مكالمة فيديو',
             'audio': 'مكالمة صوتية',
@@ -1201,8 +1295,8 @@ const EHRManager = {
         // Add vital signs to timeline
         this.ehrData.vital_signs?.forEach(vital => {
             const measurements = [];
-            if (vital.blood_pressure) measurements.push(`ضغط الدم: ${vital.blood_pressure}`);
-            if (vital.heart_rate) measurements.push(`نبضات القلب: ${vital.heart_rate}`);
+            if (vital.blood_pressure) measurements.push(`Blood Pressure: ${vital.blood_pressure}`);
+            if (vital.heart_rate) measurements.push(`Heart Rate: ${vital.heart_rate}`);
             if (vital.temperature) measurements.push(`الحرارة: ${vital.temperature}°`);
             
             timeline.push({
@@ -1219,7 +1313,7 @@ const EHRManager = {
             timeline.push({
                 date: appointment.appointment_date,
                 type: 'appointment',
-                title: `موعد طبي - ${this.getAppointmentTypeArabic(appointment.appointment_type)}`,
+                title: `موعد طبي - ${this.getAppointmentTypeEnglish(appointment.appointment_type)}`,
                 description: appointment.reason_for_visit || 'زيارة طبية',
                 data: appointment
             });
@@ -1402,25 +1496,25 @@ function viewDiagnosisDetails(diagnosisId) {
                         <p class="form-control-plaintext">${diagnosis.primary_diagnosis}</p>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label"><strong>الشدة:</strong></label>
-                        <p class="form-control-plaintext">${diagnosis.severity ? EHRManager.getSeverityArabic(diagnosis.severity) : 'غير محددة'}</p>
+                        <label class="form-label"><strong>الSeverity:</strong></label>
+                        <p class="form-control-plaintext">${diagnosis.severity ? EHRManager.getSeverityEnglish(diagnosis.severity) : 'غير محددة'}</p>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label"><strong>الحالة:</strong></label>
-                        <p class="form-control-plaintext">${EHRManager.getStatusArabic(diagnosis.status)}</p>
+                        <label class="form-label"><strong>Status:</strong></label>
+                        <p class="form-control-plaintext">${EHRManager.getStatusEnglish(diagnosis.status)}</p>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="mb-3">
                         <label class="form-label"><strong>تاريخ التشخيص:</strong></label>
-                        <p class="form-control-plaintext">${new Date(diagnosis.diagnosis_date).toLocaleDateString('ar-SA')}</p>
+                        <p class="form-control-plaintext">${new Date(diagnosis.diagnosis_date).toLocaleDateString('en-US')}</p>
                     </div>
                     <div class="mb-3">
                         <label class="form-label"><strong>رمز ICD-10:</strong></label>
                         <p class="form-control-plaintext">${diagnosis.icd_10_code || 'غير محدد'}</p>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label"><strong>الطبيب:</strong></label>
+                        <label class="form-label"><strong>Doctor:</strong></label>
                         <p class="form-control-plaintext">${diagnosis.doctor_name}</p>
                     </div>
                 </div>
@@ -1428,22 +1522,22 @@ function viewDiagnosisDetails(diagnosisId) {
             
             ${diagnosis.clinical_findings ? `
                 <div class="mb-3">
-                    <label class="form-label"><strong>الفحوصات السريرية:</strong></label>
+                    <label class="form-label"><strong>Clinical Findings:</strong></label>
                     <p class="form-control-plaintext">${diagnosis.clinical_findings}</p>
                 </div>
             ` : ''}
             
             ${diagnosis.treatment_plan ? `
                 <div class="mb-3">
-                    <label class="form-label"><strong>خطة العلاج:</strong></label>
+                    <label class="form-label"><strong>Treatment Plan:</strong></label>
                     <p class="form-control-plaintext">${diagnosis.treatment_plan}</p>
                 </div>
             ` : ''}
             
             ${diagnosis.follow_up_required ? `
                 <div class="mb-3">
-                    <label class="form-label"><strong>المتابعة المطلوبة:</strong></label>
-                    <p class="form-control-plaintext">نعم ${diagnosis.follow_up_date ? `- ${new Date(diagnosis.follow_up_date).toLocaleDateString('ar-SA')}` : ''}</p>
+                    <label class="form-label"><strong>Required Follow-up:</strong></label>
+                    <p class="form-control-plaintext">نعم ${diagnosis.follow_up_date ? `- ${new Date(diagnosis.follow_up_date).toLocaleDateString('en-US')}` : ''}</p>
                     ${diagnosis.follow_up_notes ? `<p class="form-control-plaintext"><strong>ملاحظات المتابعة:</strong> ${diagnosis.follow_up_notes}</p>` : ''}
                 </div>
             ` : ''}
@@ -1451,7 +1545,7 @@ function viewDiagnosisDetails(diagnosisId) {
             ${diagnosis.resolved ? `
                 <div class="mb-3">
                     <label class="form-label"><strong>تاريخ الحل:</strong></label>
-                    <p class="form-control-plaintext">${new Date(diagnosis.resolution_date).toLocaleDateString('ar-SA')}</p>
+                    <p class="form-control-plaintext">${new Date(diagnosis.resolution_date).toLocaleDateString('en-US')}</p>
                     ${diagnosis.resolution_notes ? `<p class="form-control-plaintext"><strong>ملاحظات الحل:</strong> ${diagnosis.resolution_notes}</p>` : ''}
                 </div>
             ` : ''}
@@ -1502,17 +1596,17 @@ function searchEHRData() {
                         <div>
                             <div class="diagnosis-title">${diagnosis.primary_diagnosis}</div>
                             <div class="diagnosis-meta">
-                                ${diagnosis.severity ? `<span class="diagnosis-badge severity-${diagnosis.severity}">شدة: ${EHRManager.getSeverityArabic(diagnosis.severity)}</span>` : ''}
-                                <span class="diagnosis-badge status-${diagnosis.status}">الحالة: ${EHRManager.getStatusArabic(diagnosis.status)}</span>
+                                ${diagnosis.severity ? `<span class="diagnosis-badge severity-${diagnosis.severity}">Severity: ${EHRManager.getSeverityEnglish(diagnosis.severity)}</span>` : ''}
+                                <span class="diagnosis-badge status-${diagnosis.status}">Status: ${EHRManager.getStatusEnglish(diagnosis.status)}</span>
                             </div>
                         </div>
                         <div class="text-muted small">
-                            ${new Date(diagnosis.diagnosis_date).toLocaleDateString('ar-SA')}
+                            ${new Date(diagnosis.diagnosis_date).toLocaleDateString('en-US')}
                         </div>
                     </div>
                     <div class="diagnosis-content">
-                        ${diagnosis.clinical_findings ? `<div class="diagnosis-section"><h6>الفحوصات السريرية</h6><p>${diagnosis.clinical_findings}</p></div>` : ''}
-                        ${diagnosis.treatment_plan ? `<div class="diagnosis-section"><h6>خطة العلاج</h6><p>${diagnosis.treatment_plan}</p></div>` : ''}
+                        ${diagnosis.clinical_findings ? `<div class="diagnosis-section"><h6>Clinical Findings</h6><p>${diagnosis.clinical_findings}</p></div>` : ''}
+                        ${diagnosis.treatment_plan ? `<div class="diagnosis-section"><h6>Treatment Plan</h6><p>${diagnosis.treatment_plan}</p></div>` : ''}
                     </div>
                 </div>
             `;
@@ -1543,7 +1637,7 @@ function managePrescriptions() {
 function generateMedicalTimeline() {
     const timeline = EHRManager.generateMedicalTimeline();
     if (!timeline || timeline.length === 0) {
-        EHRManager.showAlert('info', 'لا توجد بيانات كافية لإنشاء الجدول الزمني');
+        EHRManager.showAlert('info', 'Insufficient data available لإنشاء الجدول الزمني');
         return;
     }
     
@@ -1561,7 +1655,7 @@ function generateMedicalTimeline() {
                         <div class="timeline-content">
                             <h6 class="mb-1">${event.title}</h6>
                             <p class="mb-1">${event.description}</p>
-                            <small class="text-muted">${new Date(event.date).toLocaleDateString('ar-SA')}</small>
+                            <small class="text-muted">${new Date(event.date).toLocaleDateString('en-US')}</small>
                         </div>
                     </div>
                 `).join('')}

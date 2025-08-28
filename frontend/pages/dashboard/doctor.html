@@ -1166,6 +1166,19 @@
             document.getElementById('profileDegreeDoc')?.addEventListener('change', (e) => handleProfileFileUpload(e, 'degree-upload-status'));
             document.getElementById('profileIdDoc')?.addEventListener('change', (e) => handleProfileFileUpload(e, 'id-upload-status'));
             document.getElementById('profileOtherDocs')?.addEventListener('change', (e) => handleProfileFileUpload(e, 'other-upload-status'));
+            
+            // Check if we should show profile or settings (when redirected from other pages)
+            if (sessionStorage.getItem('sahatak_show_profile_on_load') === 'true') {
+                sessionStorage.removeItem('sahatak_show_profile_on_load');
+                setTimeout(() => {
+                    showProfile();
+                }, 500);
+            } else if (sessionStorage.getItem('sahatak_show_settings_on_load') === 'true') {
+                sessionStorage.removeItem('sahatak_show_settings_on_load');
+                setTimeout(() => {
+                    showSettings();
+                }, 500);
+            }
         });
     </script>
 </body>

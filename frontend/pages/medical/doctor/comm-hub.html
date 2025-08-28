@@ -14,10 +14,10 @@
     <!-- Bootstrap Icons CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
-    <!-- Arabic Font - Noto Sans Arabic -->
+    <!-- English Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Main CSS -->
     <link rel="stylesheet" href="../../../assets/css/main.css">
@@ -25,59 +25,56 @@
     <link rel="stylesheet" href="../../../assets/css/components/dashboard.css">
 </head>
 <body data-protect="doctor">
-    <!-- Header -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="../../dashboard/doctor.html">
-                <i class="bi bi-heart-pulse me-2"></i>
-                صحتك | Sahatak
-            </a>
-            
-            <div class="d-flex align-items-center">
-                <!-- Language Toggle -->
-                <button class="btn btn-outline-light me-3" onclick="LanguageManager.toggleLanguage()">
-                    <i class="bi bi-translate me-1"></i>
-                    <span id="current-lang">English</span>
-                </button>
-                
-                <div class="dropdown me-3">
-                    <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-person-circle me-1"></i>
-                        <span id="doctor-name">Dr. Sarah Ahmed</span>
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="../../dashboard/doctor.html">
-                            <i class="bi bi-speedometer2 me-2"></i>Dashboard
-                        </a></li>
-                        <li><a class="dropdown-item" href="../../dashboard/doctor.html" onclick="setTimeout(() => showSettings(), 100)">
-                            <i class="bi bi-person me-2"></i>Profile
-                        </a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" onclick="logout()">
-                            <i class="bi bi-box-arrow-right me-2"></i>Logout
-                        </a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </nav>
-
     <div class="dashboard-container">
         <div class="container-fluid">
-            <!-- Page Header -->
+            <!-- Dashboard Header -->
             <div class="dashboard-header">
                 <div class="row align-items-center">
-                    <div class="col-md-8">
-                        <h1 class="dashboard-title">
-                            <i class="bi bi-chat-dots me-2 text-primary"></i>
-                            Patient Communication Hub
-                        </h1>
-                        <p class="dashboard-subtitle">Secure messaging and communication with your patients</p>
+                    <!-- Profile Section - Left -->
+                    <div class="col-lg-4">
+                        <div class="profile-section">
+                            <div class="user-avatar">
+                                <i class="bi bi-person-badge"></i>
+                            </div>
+                            <div class="user-details">
+                                <h5 class="mb-1" id="user-name">Dr. Sarah Ahmed</h5>
+                                <span class="badge bg-success" id="verification-status">Verified</span>
+                            </div>
+                            <!-- Vertical Action Buttons -->
+                            <div class="action-buttons">
+                                <button class="btn btn-action" onclick="showProfile()" title="Profile">
+                                    <i class="bi bi-person"></i>
+                                    <span id="btn-profile">Profile</span>
+                                </button>
+                                <button class="btn btn-action" onclick="showSettings()" title="Settings">
+                                    <i class="bi bi-gear"></i>
+                                    <span id="btn-settings">Settings</span>
+                                </button>
+                                <button class="btn btn-action btn-logout" onclick="logout()" title="Logout">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                    <span id="btn-logout">Logout</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-4 text-end">
-                        <button class="btn btn-primary" onclick="startNewConversation()">
-                            <i class="bi bi-plus-circle me-1"></i>New Message
-                        </button>
+                    
+                    <!-- Dashboard Title - Center -->
+                    <div class="col-lg-4 text-center">
+                        <h1 class="dashboard-title" id="dashboard-title">Patient Communication Hub</h1>
+                        <p class="dashboard-subtitle" id="dashboard-subtitle">Secure messaging and communication with your patients</p>
+                    </div>
+                    
+                    <!-- Controls - Right -->
+                    <div class="col-lg-4 text-end">
+                        <div class="dashboard-controls">
+                            <button class="btn btn-outline-medical btn-sm me-2" onclick="window.location.href='../../dashboard/doctor.html'">
+                                <i class="bi bi-arrow-left me-1"></i>
+                                <span>Back to Dashboard</span>
+                            </button>
+                            <button class="btn btn-primary btn-sm" onclick="startNewConversation()">
+                                <i class="bi bi-plus-circle me-1"></i>New Message
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1065,6 +1062,55 @@ Dr. Sarah Ahmed
             URL.revokeObjectURL(url);
         }
 
+        // Profile and settings functions - standardized across all doctor pages
+        function showProfile() {
+            // Check if we're on the main dashboard page
+            if (window.location.pathname.includes('dashboard/doctor.html')) {
+                // On dashboard - show profile section directly
+                const profileSection = document.getElementById('profile-section');
+                const settingsSection = document.getElementById('settings-section');
+                
+                if (profileSection && settingsSection) {
+                    settingsSection.style.display = 'none';
+                    profileSection.style.display = profileSection.style.display === 'none' ? 'block' : 'none';
+                    
+                    if (profileSection.style.display === 'block') {
+                        profileSection.scrollIntoView({ behavior: 'smooth' });
+                        loadUserProfile();
+                    }
+                    return;
+                }
+            }
+            
+            // On other pages - redirect to dashboard and show profile
+            sessionStorage.setItem('sahatak_show_profile_on_load', 'true');
+            window.location.href = '../../dashboard/doctor.html';
+        }
+        
+        function showSettings() {
+            // Check if we're on the main dashboard page
+            if (window.location.pathname.includes('dashboard/doctor.html')) {
+                // On dashboard - show settings section directly
+                const settingsSection = document.getElementById('settings-section');
+                const profileSection = document.getElementById('profile-section');
+                
+                if (settingsSection && profileSection) {
+                    profileSection.style.display = 'none';
+                    settingsSection.style.display = settingsSection.style.display === 'none' ? 'block' : 'none';
+                    
+                    if (settingsSection.style.display === 'block') {
+                        settingsSection.scrollIntoView({ behavior: 'smooth' });
+                        loadUserSettings();
+                    }
+                    return;
+                }
+            }
+            
+            // On other pages - redirect to dashboard and show settings
+            sessionStorage.setItem('sahatak_show_settings_on_load', 'true');
+            window.location.href = '../../dashboard/doctor.html';
+        }
+        
         function logout() {
             AuthGuard.logout();
         }

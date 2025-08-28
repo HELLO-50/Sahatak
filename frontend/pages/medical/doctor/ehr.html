@@ -1,116 +1,250 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>السجل الطبي الإلكتروني | صحتك</title>
+    <title>Electronic Health Record | Sahatak</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%230d47a1' d='m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523.942-.661 2.27.067 3.71L8 15.5l6.533-8.737c.728-1.44.59-2.768.067-3.71C13.486.878 10.4.28 8.717 2.01L8 2.748z'/></svg>">
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
-    <!-- Arabic Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- English Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Chart.js for vital signs graphs -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="../../assets/css/main.css">
-    <link rel="stylesheet" href="../../assets/css/components/dashboard.css">
-    <link rel="stylesheet" href="../../assets/css/components/ehr.css">
+    <link rel="stylesheet" href="../../../assets/css/main.css">
+    <link rel="stylesheet" href="../../../assets/css/components/dashboard.css">
+    <link rel="stylesheet" href="../../../assets/css/components/ehr.css">
+    
+    <!-- Inline CSS for Patient Search -->
+    <style>
+        .patient-result-card {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .patient-result-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            border-color: #007bff;
+        }
+        
+        .patient-result-card:hover .btn-primary {
+            background-color: #0056b3;
+        }
+        
+        #patient-search-input {
+            border: 2px solid #e0e0e0;
+            transition: border-color 0.2s ease;
+        }
+        
+        #patient-search-input:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        
+        .input-group-lg .input-group-text {
+            background-color: #f8f9fa;
+            border-color: #e0e0e0;
+        }
+    </style>
 </head>
-<body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+<body data-protect="doctor">
+    <div class="dashboard-container">
         <div class="container-fluid">
-            <a class="navbar-brand" href="../../dashboard/doctor.html">
-                <i class="bi bi-heart-pulse me-2"></i>
-                صحتك | Sahatak
-            </a>
-            
-            <div class="d-flex align-items-center">
-                <!-- Language Toggle -->
-                <button class="btn btn-outline-light me-3" onclick="LanguageManager.toggleLanguage()">
-                    <i class="bi bi-translate me-1"></i>
-                    <span id="current-lang">English</span>
-                </button>
-                
-                <div class="dropdown me-3">
-                    <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-person-circle me-1"></i>
-                        <span id="doctor-name">الطبيب</span>
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="../../dashboard/doctor.html">
-                            <i class="bi bi-speedometer2 me-2"></i>لوحة التحكم
-                        </a></li>
-                        <li><a class="dropdown-item" href="../../dashboard/doctor.html" onclick="setTimeout(() => showSettings(), 100)">
-                            <i class="bi bi-person me-2"></i>الملف الشخصي
-                        </a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" onclick="logout()">
-                            <i class="bi bi-box-arrow-right me-2"></i>تسجيل الخروج
-                        </a></li>
-                    </ul>
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <div class="row align-items-center">
+                    <!-- Profile Section - Left -->
+                    <div class="col-lg-4">
+                        <div class="profile-section">
+                            <div class="user-avatar">
+                                <i class="bi bi-person-badge"></i>
+                            </div>
+                            <div class="user-details">
+                                <h5 class="mb-1" id="user-name">Dr. Sarah Ahmed</h5>
+                                <span class="badge bg-success" id="verification-status">Verified</span>
+                            </div>
+                            <!-- Vertical Action Buttons -->
+                            <div class="action-buttons">
+                                <button class="btn btn-action" onclick="showProfile()" title="Profile">
+                                    <i class="bi bi-person"></i>
+                                    <span id="btn-profile">Profile</span>
+                                </button>
+                                <button class="btn btn-action" onclick="showSettings()" title="Settings">
+                                    <i class="bi bi-gear"></i>
+                                    <span id="btn-settings">Settings</span>
+                                </button>
+                                <button class="btn btn-action btn-logout" onclick="logout()" title="Logout">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                    <span id="btn-logout">Logout</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Dashboard Title - Center -->
+                    <div class="col-lg-4 text-center">
+                        <h1 class="dashboard-title" id="dashboard-title">Electronic Health Record</h1>
+                        <p class="dashboard-subtitle" id="dashboard-subtitle">Patient Medical Records Management</p>
+                    </div>
+                    
+                    <!-- Controls - Right -->
+                    <div class="col-lg-4 text-end">
+                        <div class="dashboard-controls">
+                            <button class="btn btn-outline-medical btn-sm me-2" onclick="window.location.href='../../dashboard/doctor.html'">
+                                <i class="bi bi-arrow-left me-1"></i>
+                                <span>Back to Dashboard</span>
+                            </button>
+                            <button class="btn btn-medical btn-sm" onclick="addNewDiagnosis()">
+                                <i class="bi bi-plus-circle me-1"></i>New Diagnosis
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </nav>
-
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Main content -->
-            <main class="col-12">
-                <!-- Header -->
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <div>
-                        <h1 class="h2">
-                            <i class="bi bi-file-medical text-primary me-2"></i>
-                            <span id="ehr-title">السجل الطبي الإلكتروني</span>
-                        </h1>
-                        <p class="text-muted" id="patient-info">جاري تحميل معلومات المريض...</p>
-                    </div>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <div class="btn-group me-2">
-                            <button class="btn btn-outline-primary" onclick="printEHR()">
-                                <i class="bi bi-printer me-1"></i>طباعة
-                            </button>
-                            <button class="btn btn-outline-success" onclick="exportEHR()">
-                                <i class="bi bi-download me-1"></i>تصدير
-                            </button>
-                            <button class="btn btn-outline-info" onclick="generateMedicalTimeline()">
-                                <i class="bi bi-clock-history me-1"></i>الجدول الزمني
-                            </button>
-                        </div>
-                        <div class="btn-group me-2">
-                            <button class="btn btn-outline-secondary" onclick="scheduleFollowUp()">
-                                <i class="bi bi-calendar-plus me-1"></i>موعد متابعة
-                            </button>
-                            <button class="btn btn-outline-warning" onclick="managePrescriptions()">
-                                <i class="bi bi-prescription2 me-1"></i>الوصفات
-                            </button>
-                        </div>
-                        <div class="btn-group">
-                            <button class="btn btn-primary" onclick="addNewDiagnosis()">
-                                <i class="bi bi-plus-circle me-1"></i>تشخيص جديد
-                            </button>
-                            <button class="btn btn-success" onclick="recordVitalSigns()">
-                                <i class="bi bi-activity me-1"></i>علامات حيوية
-                            </button>
+            
+            <!-- Patient Search Section -->
+            <div class="row mb-4" id="patient-search-section">
+                <div class="col-12">
+                    <div class="card" style="background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);">
+                        <div class="card-body py-4">
+                            <div class="text-center mb-4">
+                                <h4 class="text-dark fw-bold mb-2">
+                                    <i class="bi bi-search me-2 text-primary"></i>Search for Patient
+                                </h4>
+                                <p class="text-muted mb-0">Enter patient name or ID to access their medical record</p>
+                            </div>
+                            
+                            <form id="patient-search-form" onsubmit="searchPatient(event)">
+                                <div class="row justify-content-center">
+                                    <div class="col-lg-8">
+                                        <div class="row">
+                                            <div class="col-md-8 mb-3">
+                                                <div class="input-group input-group-lg">
+                                                    <span class="input-group-text">
+                                                        <i class="bi bi-person"></i>
+                                                    </span>
+                                                    <input type="text" class="form-control" id="patient-search-input" 
+                                                           placeholder="Enter patient name or ID" 
+                                                           required autocomplete="off">
+                                                </div>
+                                                <div class="form-text">Search by full name, first name, last name, or patient ID</div>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <button type="submit" class="btn btn-primary btn-lg w-100" id="search-patient-btn">
+                                                    <i class="bi bi-search me-1"></i>Search Patient
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                            
+                            <!-- Search Results -->
+                            <div id="patient-search-results" class="d-none">
+                                <div class="row justify-content-center mt-4">
+                                    <div class="col-lg-8">
+                                        <div class="alert alert-info mb-3">
+                                            <i class="bi bi-info-circle me-2"></i>
+                                            <span id="search-results-count">Found patients:</span>
+                                        </div>
+                                        <div id="patient-results-list">
+                                            <!-- Patient results will be populated here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
+            
+            <!-- Selected Patient Info (Hidden initially) -->
+            <div class="row mb-4 d-none" id="selected-patient-section">
+                <div class="col-12">
+                    <div class="card" style="background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);">
+                        <div class="card-body py-3">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <h4 class="mb-1 text-dark fw-bold" id="selected-patient-info"></h4>
+                                    <p class="text-muted mb-0" id="selected-patient-details"></p>
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    <button class="btn btn-outline-secondary btn-sm me-2" onclick="clearPatientSearch()">
+                                        <i class="bi bi-arrow-left me-1"></i>Back to Search
+                                    </button>
+                                    <button class="btn btn-outline-primary btn-sm me-2" onclick="printEHR()">
+                                        <i class="bi bi-printer me-1"></i>Print EHR
+                                    </button>
+                                    <button class="btn btn-outline-primary btn-sm" onclick="exportEHR()">
+                                        <i class="bi bi-download me-1"></i>Export EHR
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                <!-- Alert container -->
-                <div id="alert-container"></div>
+            <!-- Main EHR Content (Hidden until patient selected) -->
+            <div id="main-ehr-content" class="d-none">
+                <!-- Quick Actions -->
+                <div class="row mb-4">
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="dashboard-card quick-action-card" onclick="generateMedicalTimeline()">
+                        <div class="quick-action-icon">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                        <h6>Medical Timeline</h6>
+                        <p class="text-muted small">View chronological medical history</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="dashboard-card quick-action-card" onclick="scheduleNewAppointment()">
+                        <div class="quick-action-icon">
+                            <i class="bi bi-calendar-plus"></i>
+                        </div>
+                        <h6>Schedule Appointment</h6>
+                        <p class="text-muted small">Schedule new patient appointment</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="dashboard-card quick-action-card" onclick="addNewPrescription()">
+                        <div class="quick-action-icon">
+                            <i class="bi bi-prescription2"></i>
+                        </div>
+                        <h6>New Prescription</h6>
+                        <p class="text-muted small">Create new medication prescription</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="dashboard-card quick-action-card" onclick="recordVitalSigns()">
+                        <div class="quick-action-icon">
+                            <i class="bi bi-activity"></i>
+                        </div>
+                        <h6>Vital Signs</h6>
+                        <p class="text-muted small">Record vital sign readings</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Alert container -->
+            <div id="alert-container"></div>
 
-                <!-- Search and Filter Section -->
-                <div class="ehr-search-container d-none" id="search-container">
+            <!-- Search and Filter Section -->
+            <div class="ehr-search-container d-none" id="search-container">
                     <div class="row align-items-center">
                         <div class="col-md-6">
                             <div class="input-group">
-                                <input type="text" class="form-control" id="ehr-search" placeholder="البحث في السجل الطبي..." onkeyup="if(event.key === 'Enter') searchEHRData()">
+                                <input type="text" class="form-control" id="ehr-search" placeholder="Search medical records..." onkeyup="if(event.key === 'Enter') searchEHRData()">
                                 <button class="btn btn-outline-secondary" type="button" onclick="searchEHRData()">
                                     <i class="bi bi-search"></i>
                                 </button>
@@ -122,38 +256,38 @@
                         <div class="col-md-6">
                             <div class="search-filters">
                                 <select class="form-select" id="search-date-from">
-                                    <option value="">من تاريخ</option>
+                                    <option value="">From Date</option>
                                 </select>
                                 <select class="form-select" id="search-date-to">
-                                    <option value="">إلى تاريخ</option>
+                                    <option value="">To Date</option>
                                 </select>
                                 <select class="form-select" id="search-diagnosis-status">
-                                    <option value="">كافة التشخيصات</option>
-                                    <option value="active">النشطة فقط</option>
-                                    <option value="resolved">المحلولة فقط</option>
+                                    <option value="">All Diagnoses</option>
+                                    <option value="active">Active Only</option>
+                                    <option value="resolved">Resolved Only</option>
                                 </select>
                             </div>
                         </div>
                     </div>
-                </div>
+            </div>
 
-                <!-- Loading State -->
-                <div id="loading-container" class="text-center py-5">
+            <!-- Loading State -->
+            <div id="loading-container" class="text-center py-5">
                     <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">جاري التحميل...</span>
+                        <span class="visually-hidden">Loading...</span>
                     </div>
-                    <p class="mt-3 text-muted">جاري تحميل السجل الطبي...</p>
-                </div>
+                    <p class="mt-3 text-muted">Loading medical records...</p>
+            </div>
 
-                <!-- EHR Content -->
-                <div id="ehr-content" class="d-none">
-                    <!-- Patient Overview Card -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <div class="card patient-overview-card">
+            <!-- EHR Content -->
+            <div id="ehr-content" class="d-none">
+                <!-- Patient Overview Card -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="dashboard-card patient-overview-card">
                                 <div class="card-header">
                                     <h5 class="card-title mb-0">
-                                        <i class="bi bi-person-badge me-2"></i>معلومات المريض الأساسية
+                                        <i class="bi bi-person-badge me-2"></i>Patient Basic Information
                                     </h5>
                                 </div>
                                 <div class="card-body">
@@ -161,66 +295,66 @@
                                         <!-- Patient info will be populated here -->
                                     </div>
                                 </div>
-                            </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- EHR Tabs -->
-                    <ul class="nav nav-tabs ehr-tabs" id="ehrTab" role="tablist">
+                <!-- EHR Tabs -->
+                <ul class="nav nav-tabs ehr-tabs" id="ehrTab" role="tablist">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" id="diagnoses-tab" data-bs-toggle="tab" data-bs-target="#diagnoses" type="button" role="tab">
-                                <i class="bi bi-clipboard-pulse me-1"></i>التشخيصات
+                                <i class="bi bi-clipboard-pulse me-1"></i>Diagnoses
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="vitals-tab" data-bs-toggle="tab" data-bs-target="#vitals" type="button" role="tab">
-                                <i class="bi bi-activity me-1"></i>العلامات الحيوية
+                                <i class="bi bi-activity me-1"></i>Vital Signs
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab">
-                                <i class="bi bi-journal-medical me-1"></i>التاريخ الطبي
+                                <i class="bi bi-journal-medical me-1"></i>Medical History
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="appointments-tab" data-bs-toggle="tab" data-bs-target="#appointments" type="button" role="tab">
-                                <i class="bi bi-calendar-event me-1"></i>المواعيد
+                                <i class="bi bi-calendar-event me-1"></i>Appointments
                             </button>
                         </li>
-                    </ul>
+                </ul>
 
-                    <div class="tab-content ehr-tab-content" id="ehrTabContent">
-                        <!-- Diagnoses Tab -->
-                        <div class="tab-pane fade show active" id="diagnoses" role="tabpanel">
-                            <div class="card">
+                <div class="tab-content ehr-tab-content" id="ehrTabContent">
+                    <!-- Diagnoses Tab -->
+                    <div class="tab-pane fade show active" id="diagnoses" role="tabpanel">
+                        <div class="dashboard-card">
                                 <div class="card-header d-flex justify-content-between align-items-center">
                                     <h6 class="card-title mb-0">
-                                        <i class="bi bi-clipboard-pulse me-2"></i>سجل التشخيصات
+                                        <i class="bi bi-clipboard-pulse me-2"></i>Diagnosis Records
                                     </h6>
                                     <button class="btn btn-success btn-sm" onclick="addNewDiagnosis()">
-                                        <i class="bi bi-plus me-1"></i>تشخيص جديد
+                                        <i class="bi bi-plus me-1"></i>New Diagnosis
                                     </button>
                                 </div>
                                 <div class="card-body">
                                     <div id="diagnoses-list">
                                         <div class="text-center py-3">
                                             <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                                            <p class="mt-2 text-muted small">جاري تحميل التشخيصات...</p>
+                                            <p class="mt-2 text-muted small">Loading diagnoses...</p>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
                         </div>
+                    </div>
 
-                        <!-- Vital Signs Tab -->
-                        <div class="tab-pane fade" id="vitals" role="tabpanel">
-                            <div class="card">
+                    <!-- Vital Signs Tab -->
+                    <div class="tab-pane fade" id="vitals" role="tabpanel">
+                        <div class="dashboard-card">
                                 <div class="card-header d-flex justify-content-between align-items-center">
                                     <h6 class="card-title mb-0">
-                                        <i class="bi bi-activity me-2"></i>العلامات الحيوية
+                                        <i class="bi bi-activity me-2"></i>Vital Signs
                                     </h6>
                                     <button class="btn btn-success btn-sm" onclick="recordVitalSigns()">
-                                        <i class="bi bi-plus me-1"></i>تسجيل قراءات جديدة
+                                        <i class="bi bi-plus me-1"></i>Record New Readings
                                     </button>
                                 </div>
                                 <div class="card-body">
@@ -228,13 +362,13 @@
                                     <div class="row mb-4">
                                         <div class="col-md-6 mb-3">
                                             <div class="vitals-chart-container">
-                                                <h6 class="text-center">ضغط الدم</h6>
+                                                <h6 class="text-center">Blood Pressure</h6>
                                                 <canvas id="bloodPressureChart"></canvas>
                                             </div>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <div class="vitals-chart-container">
-                                                <h6 class="text-center">معدل ضربات القلب</h6>
+                                                <h6 class="text-center">Heart Rate</h6>
                                                 <canvas id="heartRateChart"></canvas>
                                             </div>
                                         </div>
@@ -244,53 +378,280 @@
                                     <div id="vital-signs-list">
                                         <div class="text-center py-3">
                                             <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                                            <p class="mt-2 text-muted small">جاري تحميل العلامات الحيوية...</p>
+                                            <p class="mt-2 text-muted small">Loading vital signs...</p>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
                         </div>
+                    </div>
 
-                        <!-- Medical History Tab -->
-                        <div class="tab-pane fade" id="history" role="tabpanel">
-                            <div class="card">
+                    <!-- Medical History Tab -->
+                    <div class="tab-pane fade" id="history" role="tabpanel">
+                        <div class="dashboard-card">
                                 <div class="card-header">
                                     <h6 class="card-title mb-0">
-                                        <i class="bi bi-journal-medical me-2"></i>التاريخ الطبي
+                                        <i class="bi bi-journal-medical me-2"></i>Medical History
                                     </h6>
                                 </div>
                                 <div class="card-body">
                                     <div id="medical-history-content">
                                         <div class="text-center py-3">
                                             <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                                            <p class="mt-2 text-muted small">جاري تحميل التاريخ الطبي...</p>
+                                            <p class="mt-2 text-muted small">Loading medical history...</p>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
                         </div>
+                    </div>
 
-                        <!-- Appointments Tab -->
-                        <div class="tab-pane fade" id="appointments" role="tabpanel">
-                            <div class="card">
+                    <!-- Appointments Tab -->
+                    <div class="tab-pane fade" id="appointments" role="tabpanel">
+                        <div class="dashboard-card">
                                 <div class="card-header">
                                     <h6 class="card-title mb-0">
-                                        <i class="bi bi-calendar-event me-2"></i>سجل المواعيد
+                                        <i class="bi bi-calendar-event me-2"></i>Appointments Record
                                     </h6>
                                 </div>
                                 <div class="card-body">
                                     <div id="appointments-list">
                                         <div class="text-center py-3">
                                             <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                                            <p class="mt-2 text-muted small">جاري تحميل المواعيد...</p>
+                                            <p class="mt-2 text-muted small">Loading appointments...</p>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
                         </div>
                     </div>
                 </div>
-            </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prescription Modal -->
+    <div class="modal fade" id="prescriptionModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-prescription2 me-2"></i>New Prescription
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="prescription-form">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="medication_name" class="form-label">Medication Name *</label>
+                                <input type="text" class="form-control" id="medication_name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="medication_strength" class="form-label">Strength/Dosage</label>
+                                <input type="text" class="form-control" id="medication_strength" placeholder="e.g., 500mg, 10ml">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="dosage_form" class="form-label">Form</label>
+                                <select class="form-select" id="dosage_form">
+                                    <option value="">Select Form</option>
+                                    <option value="tablet">Tablet</option>
+                                    <option value="capsule">Capsule</option>
+                                    <option value="syrup">Syrup</option>
+                                    <option value="injection">Injection</option>
+                                    <option value="cream">Cream</option>
+                                    <option value="drops">Drops</option>
+                                    <option value="inhaler">Inhaler</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="frequency" class="form-label">Frequency *</label>
+                                <select class="form-select" id="frequency" required>
+                                    <option value="">Select Frequency</option>
+                                    <option value="once_daily">Once Daily</option>
+                                    <option value="twice_daily">Twice Daily</option>
+                                    <option value="three_times_daily">Three Times Daily</option>
+                                    <option value="four_times_daily">Four Times Daily</option>
+                                    <option value="as_needed">As Needed</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="duration_days" class="form-label">Duration (Days)</label>
+                                <input type="number" class="form-control" id="duration_days" min="1" max="365">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="timing" class="form-label">Timing</label>
+                                <select class="form-select" id="timing">
+                                    <option value="">Select Timing</option>
+                                    <option value="before_meals">Before Meals</option>
+                                    <option value="after_meals">After Meals</option>
+                                    <option value="with_meals">With Meals</option>
+                                    <option value="empty_stomach">Empty Stomach</option>
+                                    <option value="bedtime">At Bedtime</option>
+                                    <option value="morning">Morning</option>
+                                    <option value="evening">Evening</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="quantity" class="form-label">Quantity</label>
+                                <input type="number" class="form-control" id="quantity" min="1">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="prescription_instructions" class="form-label">Instructions</label>
+                            <textarea class="form-control" id="prescription_instructions" rows="3" placeholder="Additional instructions for the patient"></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="generic_substitution">
+                                    <label class="form-check-label" for="generic_substitution">
+                                        Allow Generic Substitution
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="refill_allowed">
+                                    <label class="form-check-label" for="refill_allowed">
+                                        Refill Allowed
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="prescription_notes" class="form-label">Doctor's Notes</label>
+                            <textarea class="form-control" id="prescription_notes" rows="2" placeholder="Internal notes for medical record"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="save-prescription-btn">
+                            <i class="bi bi-check-circle me-1"></i>Save Prescription
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule Appointment Modal -->
+    <div class="modal fade" id="appointmentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-calendar-plus me-2"></i>Schedule Appointment
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="appointment-form">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="appointment_date" class="form-label">Appointment Date *</label>
+                                <input type="date" class="form-control" id="appointment_date" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="appointment_time" class="form-label">Appointment Time *</label>
+                                <input type="time" class="form-control" id="appointment_time" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="appointment_type" class="form-label">Appointment Type *</label>
+                                <select class="form-select" id="appointment_type" required>
+                                    <option value="">Select Type</option>
+                                    <option value="follow_up">Follow-up</option>
+                                    <option value="consultation">Consultation</option>
+                                    <option value="check_up">Regular Check-up</option>
+                                    <option value="procedure">Procedure</option>
+                                    <option value="emergency">Emergency</option>
+                                    <option value="video_call">Video Call</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="duration_minutes" class="form-label">Duration (Minutes)</label>
+                                <select class="form-select" id="duration_minutes">
+                                    <option value="15">15 minutes</option>
+                                    <option value="30" selected>30 minutes</option>
+                                    <option value="45">45 minutes</option>
+                                    <option value="60">60 minutes</option>
+                                    <option value="90">90 minutes</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="appointment_priority" class="form-label">Priority</label>
+                                <select class="form-select" id="appointment_priority">
+                                    <option value="routine">Routine</option>
+                                    <option value="urgent">Urgent</option>
+                                    <option value="emergency">Emergency</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="appointment_status" class="form-label">Status</label>
+                                <select class="form-select" id="appointment_status">
+                                    <option value="scheduled" selected>Scheduled</option>
+                                    <option value="confirmed">Confirmed</option>
+                                    <option value="pending">Pending</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="appointment_reason" class="form-label">Reason for Visit</label>
+                            <textarea class="form-control" id="appointment_reason" rows="2" placeholder="Brief description of the reason for this appointment"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="appointment_location" class="form-label">Location</label>
+                            <input type="text" class="form-control" id="appointment_location" placeholder="Clinic address or video call link">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="send_reminder">
+                                    <label class="form-check-label" for="send_reminder">
+                                        Send Reminder to Patient
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="recurring_appointment">
+                                    <label class="form-check-label" for="recurring_appointment">
+                                        Recurring Appointment
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="appointment_notes" class="form-label">Doctor's Notes</label>
+                            <textarea class="form-control" id="appointment_notes" rows="2" placeholder="Internal notes for this appointment"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="save-appointment-btn">
+                            <i class="bi bi-check-circle me-1"></i>Schedule Appointment
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -300,7 +661,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">
-                        <i class="bi bi-clipboard-pulse me-2"></i>تشخيص جديد
+                        <i class="bi bi-clipboard-pulse me-2"></i>New Diagnosis
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
@@ -308,44 +669,44 @@
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-md-8 mb-3">
-                                <label for="primary_diagnosis" class="form-label">التشخيص الأساسي *</label>
+                                <label for="primary_diagnosis" class="form-label">Primary Diagnosis *</label>
                                 <textarea class="form-control" id="primary_diagnosis" rows="2" required></textarea>
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label for="severity" class="form-label">شدة الحالة</label>
+                                <label for="severity" class="form-label">Condition Severity</label>
                                 <select class="form-select" id="severity">
-                                    <option value="">اختر الشدة</option>
-                                    <option value="mild">خفيفة</option>
-                                    <option value="moderate">متوسطة</option>
-                                    <option value="severe">شديدة</option>
-                                    <option value="critical">حرجة</option>
+                                    <option value="">Select Severity</option>
+                                    <option value="mild">Mild</option>
+                                    <option value="moderate">Moderate</option>
+                                    <option value="severe">Severe</option>
+                                    <option value="critical">Critical</option>
                                 </select>
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="icd_10_code" class="form-label">رمز ICD-10</label>
-                                <input type="text" class="form-control" id="icd_10_code" placeholder="مثل: K30">
+                                <label for="icd_10_code" class="form-label">ICD-10 Code</label>
+                                <input type="text" class="form-control" id="icd_10_code" placeholder="e.g., K30">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="status" class="form-label">حالة التشخيص</label>
+                                <label for="status" class="form-label">Diagnosis Status</label>
                                 <select class="form-select" id="status">
-                                    <option value="provisional">مبدئي</option>
-                                    <option value="confirmed">مؤكد</option>
-                                    <option value="differential">تشخيص تفريقي</option>
-                                    <option value="rule_out">استبعاد</option>
+                                    <option value="provisional">Provisional</option>
+                                    <option value="confirmed">Confirmed</option>
+                                    <option value="differential">Differential</option>
+                                    <option value="rule_out">Rule Out</option>
                                 </select>
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label for="clinical_findings" class="form-label">الفحوصات السريرية</label>
+                            <label for="clinical_findings" class="form-label">Clinical Findings</label>
                             <textarea class="form-control" id="clinical_findings" rows="3"></textarea>
                         </div>
 
                         <div class="mb-3">
-                            <label for="treatment_plan" class="form-label">خطة العلاج</label>
+                            <label for="treatment_plan" class="form-label">Treatment Plan</label>
                             <textarea class="form-control" id="treatment_plan" rows="3"></textarea>
                         </div>
 
@@ -354,25 +715,25 @@
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="follow_up_required">
                                     <label class="form-check-label" for="follow_up_required">
-                                        يتطلب متابعة
+                                        Requires Follow-up
                                     </label>
                                 </div>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="follow_up_date" class="form-label">تاريخ المتابعة</label>
+                                <label for="follow_up_date" class="form-label">Follow-up Date</label>
                                 <input type="date" class="form-control" id="follow_up_date">
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label for="follow_up_notes" class="form-label">ملاحظات المتابعة</label>
+                            <label for="follow_up_notes" class="form-label">Follow-up Notes</label>
                             <textarea class="form-control" id="follow_up_notes" rows="2"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary" id="save-diagnosis-btn">
-                            <i class="bi bi-check-circle me-1"></i>حفظ التشخيص
+                            <i class="bi bi-check-circle me-1"></i>Save Diagnosis
                         </button>
                     </div>
                 </form>
@@ -386,7 +747,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">
-                        <i class="bi bi-activity me-2"></i>تسجيل العلامات الحيوية
+                        <i class="bi bi-activity me-2"></i>Record Vital Signs
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
@@ -394,63 +755,63 @@
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-md-3 mb-3">
-                                <label for="systolic_bp" class="form-label">ضغط الدم الانقباضي</label>
+                                <label for="systolic_bp" class="form-label">Systolic Blood Pressure</label>
                                 <input type="number" class="form-control" id="systolic_bp" min="60" max="250">
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label for="diastolic_bp" class="form-label">ضغط الدم الانبساطي</label>
+                                <label for="diastolic_bp" class="form-label">Diastolic Blood Pressure</label>
                                 <input type="number" class="form-control" id="diastolic_bp" min="40" max="150">
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label for="heart_rate" class="form-label">معدل ضربات القلب</label>
+                                <label for="heart_rate" class="form-label">Heart Rate</label>
                                 <input type="number" class="form-control" id="heart_rate" min="30" max="200">
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label for="temperature" class="form-label">درجة الحرارة (°م)</label>
+                                <label for="temperature" class="form-label">Temperature (°C)</label>
                                 <input type="number" class="form-control" id="temperature" min="35" max="45" step="0.1">
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-4 mb-3">
-                                <label for="respiratory_rate" class="form-label">معدل التنفس</label>
+                                <label for="respiratory_rate" class="form-label">Respiratory Rate</label>
                                 <input type="number" class="form-control" id="respiratory_rate" min="8" max="40">
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label for="oxygen_saturation" class="form-label">نسبة الأكسجين (%)</label>
+                                <label for="oxygen_saturation" class="form-label">Oxygen Saturation (%)</label>
                                 <input type="number" class="form-control" id="oxygen_saturation" min="70" max="100" step="0.1">
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label for="pain_scale" class="form-label">مقياس الألم (0-10)</label>
+                                <label for="pain_scale" class="form-label">Pain Scale (0-10)</label>
                                 <input type="number" class="form-control" id="pain_scale" min="0" max="10">
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="height" class="form-label">الطول (سم)</label>
+                                <label for="height" class="form-label">Height (cm)</label>
                                 <input type="number" class="form-control" id="height" min="100" max="250" step="0.1">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="weight" class="form-label">الوزن (كغ)</label>
+                                <label for="weight" class="form-label">Weight (kg)</label>
                                 <input type="number" class="form-control" id="weight" min="30" max="300" step="0.1">
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label for="pain_location" class="form-label">موقع الألم</label>
-                            <input type="text" class="form-control" id="pain_location" placeholder="مثل: الرأس، الصدر، البطن">
+                            <label for="pain_location" class="form-label">Pain Location</label>
+                            <input type="text" class="form-control" id="pain_location" placeholder="e.g., Head, Chest, Abdomen">
                         </div>
 
                         <div class="mb-3">
-                            <label for="vitals_notes" class="form-label">ملاحظات</label>
+                            <label for="vitals_notes" class="form-label">Notes</label>
                             <textarea class="form-control" id="vitals_notes" rows="2"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary" id="save-vitals-btn">
-                            <i class="bi bi-check-circle me-1"></i>حفظ القراءات
+                            <i class="bi bi-check-circle me-1"></i>Save Readings
                         </button>
                     </div>
                 </form>
@@ -462,45 +823,266 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
     <!-- Custom JS -->
-    <script src="../../assets/js/main.js"></script>
-    <script src="../../assets/js/components/dashboard-translations.js"></script>
-    <script src="../../assets/js/components/ehr-manager.js"></script>
+    <script src="../../../assets/js/main.js"></script>
+    <script src="../../../assets/js/components/ehr-manager.js"></script>
+    <script src="../../../assets/js/components/auth-guard.js"></script>
     
     <script>
-        // Initialize EHR when page loads
-        document.addEventListener('DOMContentLoaded', async function() {
-            console.log('EHR page loaded');
+        // Initialize EHR page (but don't load patient data until search)
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('EHR page loaded - Patient search mode');
             
-            // Initialize language system first
-            try {
-                await LanguageManager.loadTranslations();
-                const currentLang = LanguageManager.getLanguage() || 'ar';
-                
-                // Apply translations to EHR interface
-                DashboardTranslations.updateEHRDashboard(currentLang);
-                
-                // Set HTML language and direction
-                document.documentElement.lang = currentLang;
-                document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
-                
-                console.log('EHR translations initialized for:', currentLang);
-            } catch (error) {
-                console.error('Failed to initialize EHR translations:', error);
-            }
+            // Protect page with auth guard
+            AuthGuard.protectPage('doctor');
             
-            // Get patient ID from URL params
+            // Check if a patient ID was provided in URL (for direct access)
             const urlParams = new URLSearchParams(window.location.search);
             const patientId = urlParams.get('patient_id');
             
-            if (!patientId) {
-                alert('معرف المريض مفقود');
-                window.location.href = '../../dashboard/doctor.html';
-                return;
+            if (patientId) {
+                console.log('🔍 Direct patient access via URL:', patientId);
+                
+                // For direct access, simulate selecting the patient
+                // In a real implementation, you'd fetch patient details first
+                const patientName = 'Direct Access Patient';
+                const patientAge = '35';
+                
+                selectPatient(patientId, patientName, patientAge);
+            } else {
+                // Show search interface
+                console.log('📋 Showing patient search interface');
+                document.getElementById('patient-search-input').focus();
+            }
+        });
+        
+        // Modal functions for new forms
+        function addNewPrescription() {
+            const prescriptionModal = new bootstrap.Modal(document.getElementById('prescriptionModal'));
+            prescriptionModal.show();
+        }
+        
+        function scheduleNewAppointment() {
+            const appointmentModal = new bootstrap.Modal(document.getElementById('appointmentModal'));
+            appointmentModal.show();
+        }
+        
+        // Form submission handlers
+        document.addEventListener('DOMContentLoaded', function() {
+            // Prescription form handler
+            document.getElementById('prescription-form')?.addEventListener('submit', function(e) {
+                e.preventDefault();
+                console.log('Prescription form submitted');
+                // Add prescription saving logic here
+                alert('Prescription saved successfully!');
+                bootstrap.Modal.getInstance(document.getElementById('prescriptionModal')).hide();
+                // Clear form
+                this.reset();
+            });
+            
+            // Appointment form handler  
+            document.getElementById('appointment-form')?.addEventListener('submit', function(e) {
+                e.preventDefault();
+                console.log('Appointment form submitted');
+                // Add appointment saving logic here
+                alert('Appointment scheduled successfully!');
+                bootstrap.Modal.getInstance(document.getElementById('appointmentModal')).hide();
+                // Clear form
+                this.reset();
+            });
+        });
+        
+        // Profile and settings functions - standardized across all doctor pages
+        function showProfile() {
+            // Check if we're on the main dashboard page
+            if (window.location.pathname.includes('dashboard/doctor.html')) {
+                // On dashboard - show profile section directly
+                const profileSection = document.getElementById('profile-section');
+                const settingsSection = document.getElementById('settings-section');
+                
+                if (profileSection && settingsSection) {
+                    settingsSection.style.display = 'none';
+                    profileSection.style.display = profileSection.style.display === 'none' ? 'block' : 'none';
+                    
+                    if (profileSection.style.display === 'block') {
+                        profileSection.scrollIntoView({ behavior: 'smooth' });
+                        loadUserProfile();
+                    }
+                    return;
+                }
             }
             
-            await EHRManager.init(patientId);
-        });
+            // On other pages - redirect to dashboard and show profile
+            sessionStorage.setItem('sahatak_show_profile_on_load', 'true');
+            window.location.href = '../../dashboard/doctor.html';
+        }
+        
+        function showSettings() {
+            // Check if we're on the main dashboard page
+            if (window.location.pathname.includes('dashboard/doctor.html')) {
+                // On dashboard - show settings section directly
+                const settingsSection = document.getElementById('settings-section');
+                const profileSection = document.getElementById('profile-section');
+                
+                if (settingsSection && profileSection) {
+                    profileSection.style.display = 'none';
+                    settingsSection.style.display = settingsSection.style.display === 'none' ? 'block' : 'none';
+                    
+                    if (settingsSection.style.display === 'block') {
+                        settingsSection.scrollIntoView({ behavior: 'smooth' });
+                        loadUserSettings();
+                    }
+                    return;
+                }
+            }
+            
+            // On other pages - redirect to dashboard and show settings
+            sessionStorage.setItem('sahatak_show_settings_on_load', 'true');
+            window.location.href = '../../dashboard/doctor.html';
+        }
+        
+        // Logout function
+        function logout() {
+            AuthGuard.logout();
+        }
+        
+        // Patient search functions
+        async function searchPatient(event) {
+            event.preventDefault();
+            
+            const searchTerm = document.getElementById('patient-search-input').value.trim();
+            if (!searchTerm) return;
+            
+            const searchBtn = document.getElementById('search-patient-btn');
+            const originalText = searchBtn.innerHTML;
+            
+            // Show loading state
+            searchBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Searching...';
+            searchBtn.disabled = true;
+            
+            try {
+                // Call the real patient search API
+                const response = await ApiHelper.makeRequest(`/ehr/patients/search?q=${encodeURIComponent(searchTerm)}&limit=10`);
+                
+                if (response.success) {
+                    displaySearchResults(response.data.patients || []);
+                } else {
+                    throw new Error(response.message || 'Failed to search patients');
+                }
+            } catch (error) {
+                console.error('Patient search error:', error);
+                
+                // Show error message
+                const resultsContainer = document.getElementById('patient-search-results');
+                const countElement = document.getElementById('search-results-count');
+                const listElement = document.getElementById('patient-results-list');
+                
+                countElement.textContent = 'Error occurred while searching:';
+                listElement.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        ${error.message || 'Unable to search patients. Please try again.'}
+                    </div>
+                `;
+                resultsContainer.classList.remove('d-none');
+            } finally {
+                // Reset button
+                searchBtn.innerHTML = originalText;
+                searchBtn.disabled = false;
+            }
+        }
+        
+        function displaySearchResults(results) {
+            const resultsContainer = document.getElementById('patient-search-results');
+            const countElement = document.getElementById('search-results-count');
+            const listElement = document.getElementById('patient-results-list');
+            
+            if (results.length === 0) {
+                countElement.textContent = 'No patients found matching your search.';
+                listElement.innerHTML = `
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        No patients found. Please try a different search term.
+                    </div>
+                `;
+            } else {
+                countElement.textContent = `Found ${results.length} patient${results.length > 1 ? 's' : ''}:`;
+                
+                listElement.innerHTML = results.map(patient => `
+                    <div class="card mb-2 patient-result-card" onclick="selectPatient('${patient.id}', '${patient.name}', ${patient.age || 'N/A'})">
+                        <div class="card-body py-3">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h6 class="mb-1">
+                                        <i class="bi bi-person-circle me-2 text-primary"></i>
+                                        ${patient.name}
+                                        ${patient.has_history ? '<span class="badge bg-success ms-2">History</span>' : '<span class="badge bg-secondary ms-2">New</span>'}
+                                    </h6>
+                                    <div class="text-muted small">
+                                        ${patient.medical_id ? `<span class="me-3"><i class="bi bi-card-text me-1"></i>ID: ${patient.medical_id}</span>` : ''}
+                                        <span class="me-3">
+                                            <i class="bi bi-calendar me-1"></i>
+                                            Age: ${patient.age || 'N/A'} years
+                                        </span>
+                                        ${patient.phone ? `<span class="me-3"><i class="bi bi-telephone me-1"></i>${patient.phone}</span>` : ''}
+                                        <span>
+                                            <i class="bi bi-clock me-1"></i>
+                                            Last visit: ${patient.last_visit || 'Never'}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <button class="btn btn-primary btn-sm">
+                                        <i class="bi bi-arrow-right me-1"></i>
+                                        Select Patient
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            resultsContainer.classList.remove('d-none');
+        }
+        
+        function selectPatient(patientId, patientName, patientAge) {
+            // Update selected patient info
+            document.getElementById('selected-patient-info').textContent = patientName;
+            document.getElementById('selected-patient-details').textContent = `Age: ${patientAge} years • ID: ${patientId}`;
+            
+            // Hide search section and show selected patient section
+            document.getElementById('patient-search-section').classList.add('d-none');
+            document.getElementById('selected-patient-section').classList.remove('d-none');
+            
+            // Show main EHR content
+            document.getElementById('main-ehr-content').classList.remove('d-none');
+            
+            // Initialize EHR for selected patient
+            EHRManager.init(patientId);
+            
+            // Scroll to top of EHR content
+            document.getElementById('selected-patient-section').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function clearPatientSearch() {
+            // Hide main content and selected patient section
+            document.getElementById('main-ehr-content').classList.add('d-none');
+            document.getElementById('selected-patient-section').classList.add('d-none');
+            
+            // Show search section
+            document.getElementById('patient-search-section').classList.remove('d-none');
+            
+            // Clear search form
+            document.getElementById('patient-search-input').value = '';
+            document.getElementById('patient-search-results').classList.add('d-none');
+            
+            // Scroll back to search
+            document.getElementById('patient-search-section').scrollIntoView({ behavior: 'smooth' });
+        }
     </script>
+            </div> <!-- Close main-ehr-content div -->
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer class="footer mt-auto py-3">
@@ -510,7 +1092,7 @@
                 <div class="col-lg-4 col-md-6">
                     <h5 class="mb-3">
                         <i class="bi bi-heart-pulse me-2 text-primary"></i>
-                        <span id="footer-brand">صحتك | Sahatak</span>
+                        <span id="footer-brand">Sahatak</span>
                     </h5>
                     <div class="d-flex gap-3 social-links">
                         <a href="#">
@@ -527,32 +1109,32 @@
 
                 <!-- Quick Links -->
                 <div class="col-lg-2 col-md-6">
-                    <h6 class="mb-3" id="footer-links-title">روابط سريعة</h6>
+                    <h6 class="mb-3" id="footer-links-title">Quick Links</h6>
                     <ul class="list-unstyled">
                         <li class="mb-2">
-                            <a href="../../common/about.html" class="text-muted text-decoration-none" id="footer-about">عن المنصة</a>
+                            <a href="../../common/about.html" class="text-muted text-decoration-none" id="footer-about">About Platform</a>
                         </li>
                         <li class="mb-2">
-                            <a href="../../common/services.html" class="text-muted text-decoration-none" id="footer-services">الخدمات</a>
+                            <a href="../../common/services.html" class="text-muted text-decoration-none" id="footer-services">Services</a>
                         </li>
                         <li class="mb-2">
-                            <a href="../../dashboard/doctor.html" class="text-muted text-decoration-none" id="footer-dashboard">لوحة التحكم</a>
+                            <a href="../../dashboard/doctor.html" class="text-muted text-decoration-none" id="footer-dashboard">Dashboard</a>
                         </li>
                     </ul>
                 </div>
 
                 <!-- Support -->
                 <div class="col-lg-3 col-md-6">
-                    <h6 class="mb-3" id="footer-support-title">الدعم والمساعدة</h6>
+                    <h6 class="mb-3" id="footer-support-title">Support & Help</h6>
                     <ul class="list-unstyled">
                         <li class="mb-2">
-                            <a href="../../common/support.html" class="text-muted text-decoration-none" id="footer-help">مركز المساعدة</a>
+                            <a href="../../common/support.html" class="text-muted text-decoration-none" id="footer-help">Help Center</a>
                         </li>
                         <li class="mb-2">
-                            <a href="../../common/contact-us.html" class="text-muted text-decoration-none" id="footer-contact">اتصل بنا</a>
+                            <a href="../../common/contact-us.html" class="text-muted text-decoration-none" id="footer-contact">Contact Us</a>
                         </li>
                         <li class="mb-2">
-                            <a href="../../dashboard/doctor.html" class="text-muted text-decoration-none" id="footer-profile">الملف الشخصي</a>
+                            <a href="../../dashboard/doctor.html" class="text-muted text-decoration-none" id="footer-profile">Profile</a>
                         </li>
                     </ul>
                 </div>
@@ -560,14 +1142,14 @@
                 <!-- Emergency Contact -->
                 <div class="col-lg-3 col-md-6 emergency-section">
                     <p class="mb-2 text-danger fw-bold" id="footer-emergency-text">
-                        في حالات الطوارئ الطبية
+                        For medical emergencies
                     </p>
                     <p class="mb-3 text-danger fw-bold fs-6" id="footer-emergency-action">
                         <i class="bi bi-hospital me-2"></i>
-                        اذهب إلى أقرب مستشفى طوارئ
+                        Go to nearest ER hospital
                     </p>
                     <p class="mb-0 text-muted small" id="footer-emergency-note">
-                        للاستشارات غير العاجلة استخدم المنصة
+                        For non-urgent consultations use the platform
                     </p>
                 </div>
             </div>
@@ -577,10 +1159,10 @@
             <div class="row">
                 <div class="col-12 text-center">
                     <p class="mb-0 fw-bold" id="footer-copyright">
-                        © 2025 صحتك Sahatak. جميع الحقوق محفوظة.
+                        © 2025 Sahatak. All rights reserved.
                     </p>
                     <p class="mb-0 text-muted small mt-1" id="footer-medical-disclaimer">
-                        هذه المنصة لا تغني عن زيارة الطبيب في الحالات الطارئة
+                        This platform does not replace visiting a doctor in emergency cases
                     </p>
                 </div>
             </div>
