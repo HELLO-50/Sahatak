@@ -242,6 +242,33 @@ class Doctor(db.Model):
     is_verified = db.Column(db.Boolean, default=False, nullable=False)
     rating = db.Column(db.Float, default=0.0, nullable=False)
     total_reviews = db.Column(db.Integer, default=0, nullable=False)
+    
+    # Profile completion and verification fields
+    profile_completed = db.Column(db.Boolean, default=False, nullable=False)
+    profile_completion_date = db.Column(db.DateTime, nullable=True)
+    verification_status = db.Column(db.Enum('pending', 'submitted', 'under_review', 'approved', 'rejected', name='verification_statuses'), default='pending', nullable=False)
+    verification_submitted_at = db.Column(db.DateTime, nullable=True)
+    verification_reviewed_at = db.Column(db.DateTime, nullable=True)
+    verified_by_admin_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    rejection_reason = db.Column(db.Text, nullable=True)
+    
+    # Additional profile fields for verification
+    education_details = db.Column(db.Text, nullable=True)
+    certifications = db.Column(db.JSON, nullable=True)
+    professional_memberships = db.Column(db.JSON, nullable=True)
+    languages_spoken = db.Column(db.JSON, nullable=True)
+    consultation_areas = db.Column(db.JSON, nullable=True)
+    
+    # Document uploads for verification
+    license_document_path = db.Column(db.String(500), nullable=True)
+    degree_document_path = db.Column(db.String(500), nullable=True)
+    id_document_path = db.Column(db.String(500), nullable=True)
+    other_documents = db.Column(db.JSON, nullable=True)
+    
+    # Contact information for verification
+    office_phone = db.Column(db.String(20), nullable=True)
+    office_address = db.Column(db.Text, nullable=True)
+    emergency_contact = db.Column(db.String(20), nullable=True)
     # Notification preferences for communicating with patients
     patient_notification_method = db.Column(db.Enum('email', 'sms', 'both', name='doctor_contact_methods'), default='email', nullable=False)
     notification_settings = db.Column(db.JSON, nullable=True)  # Detailed notification settings
@@ -281,6 +308,42 @@ class Doctor(db.Model):
     
     def __repr__(self):
         return f'<Doctor {self.user.get_full_name()} - {self.specialty}>'
+
+class DoctorVerificationLog(db.Model):
+    """
+    Audit trail for doctor verification process
+    """
+    __tablename__ = 'doctor_verification_logs'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=False)
+    action = db.Column(db.Enum('submitted', 'reviewed', 'approved', 'rejected', 'updated', name='verification_actions'), nullable=False)
+    performed_by_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    notes = db.Column(db.Text, nullable=True)
+    previous_status = db.Column(db.String(50), nullable=True)
+    new_status = db.Column(db.String(50), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    
+    # Relationships
+    doctor = db.relationship('Doctor', backref='verification_logs', lazy=True)
+    performed_by = db.relationship('User', backref='doctor_verifications_performed', lazy=True)
+    
+    def to_dict(self):
+        """Convert verification log to dictionary"""
+        return {
+            'id': self.id,
+            'doctor_id': self.doctor_id,
+            'action': self.action,
+            'performed_by_id': self.performed_by_id,
+            'performed_by_name': self.performed_by.get_full_name() if self.performed_by else 'System',
+            'notes': self.notes,
+            'previous_status': self.previous_status,
+            'new_status': self.new_status,
+            'created_at': self.created_at.isoformat()
+        }
+    
+    def __repr__(self):
+        return f'<DoctorVerificationLog {self.id} - {self.action} for Doctor {self.doctor_id}>'
 
 class Appointment(db.Model):
     __tablename__ = 'appointments'

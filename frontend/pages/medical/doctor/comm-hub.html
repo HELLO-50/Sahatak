@@ -360,7 +360,7 @@
     
     <!-- Core JavaScript Files -->
     <script src="../../../assets/js/main.js"></script>
-    <script src="../../../assets/js/components/language-manager.js"></script>
+    <script src="../../../assets/js/components/dashboard-translations.js"></script>
     <script src="../../../assets/js/components/auth-guard.js"></script>
 
     <style>
@@ -1072,6 +1072,15 @@ Dr. Sarah Ahmed
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
             AuthGuard.protectPage('doctor');
+            
+            // Initialize translations
+            const currentLang = localStorage.getItem('sahatak_language') || 'ar';
+            if (typeof LanguageManager !== 'undefined' && LanguageManager.translations[currentLang]) {
+                const t = LanguageManager.translations[currentLang];
+                if (typeof DashboardTranslations !== 'undefined' && DashboardTranslations.updateFooter) {
+                    DashboardTranslations.updateFooter(t);
+                }
+            }
             
             // Load saved messages from localStorage
             loadMessagesFromStorage();

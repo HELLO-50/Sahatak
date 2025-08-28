@@ -327,7 +327,7 @@
     
     <!-- Core JavaScript Files -->
     <script src="../../../assets/js/main.js"></script>
-    <script src="../../../assets/js/components/language-manager.js"></script>
+    <script src="../../../assets/js/components/dashboard-translations.js"></script>
     <script src="../../../assets/js/components/auth-guard.js"></script>
 
     <style>
@@ -652,6 +652,15 @@
             
             // Focus on message input
             document.getElementById('messageInput').focus();
+            
+            // Initialize footer translations
+            const currentLang = localStorage.getItem('sahatak_language') || 'ar';
+            if (typeof LanguageManager !== 'undefined' && LanguageManager.translations[currentLang]) {
+                const t = LanguageManager.translations[currentLang];
+                if (typeof DashboardTranslations !== 'undefined' && DashboardTranslations.updateFooter) {
+                    DashboardTranslations.updateFooter(t);
+                }
+            }
         });
     </script>
 </body>

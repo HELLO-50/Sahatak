@@ -123,7 +123,7 @@
                                 
                                 <div class="d-flex flex-wrap gap-2">
                                     <button class="btn btn-outline-primary btn-sm" onclick="goToMedicalHistory()" id="view-complete-history-btn">View Complete History</button>
-                                    <button class="btn btn-outline-success btn-sm" onclick="goToMedicalHistory()" id="update-history-btn">Update Data</button>
+                                    <button class="btn btn-outline-success btn-sm" onclick="updateMedicalHistory()" id="update-history-btn">Update Data</button>
                                 </div>
                             </div>
                             <div class="col-4 text-center">
@@ -461,6 +461,10 @@
         // Navigation functions
         function goToMedicalHistory() {
             window.location.href = 'medical-history.html';
+        }
+
+        function updateMedicalHistory() {
+            window.location.href = 'medical-history-form.html';
         }
 
         function goToPrescriptions(params = '') {
