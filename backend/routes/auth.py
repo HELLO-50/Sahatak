@@ -337,8 +337,34 @@ def login():
         if profile:
             user_data['profile'] = profile.to_dict()
         
+        # Check if doctor needs to complete profile verification
+        needs_verification = False
+        verification_redirect = None
+        
+        if user.user_type == 'doctor' and profile:
+            if not profile.profile_completed:
+                needs_verification = True
+                verification_redirect = '/doctor/complete-profile'
+            elif profile.verification_status == 'pending':
+                needs_verification = True
+                verification_redirect = '/doctor/submit-verification'
+            elif profile.verification_status == 'rejected':
+                needs_verification = True
+                verification_redirect = '/doctor/resubmit-verification'
+        
+        response_data = {
+            'user': user_data,
+            'needs_verification': needs_verification,
+            'verification_redirect': verification_redirect
+        }
+        
+        # Add verification status to response for doctors
+        if user.user_type == 'doctor' and profile:
+            response_data['verification_status'] = profile.verification_status
+            response_data['profile_completed'] = profile.profile_completed
+        
         return APIResponse.success(
-            data={'user': user_data},
+            data=response_data,
             message='Login successful'
         )
         

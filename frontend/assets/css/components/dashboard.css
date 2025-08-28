@@ -28,6 +28,67 @@
     padding-bottom: 2rem;
 }
 
+/* Settings Groups - Global contrast fix for all screen sizes */
+.settings-group {
+    background: var(--soft-gray);
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+}
+
+/* Ensure good contrast for text in settings groups - All screen sizes */
+.settings-group .settings-group-title,
+.settings-group .settings-group-title span,
+.settings-group .form-label,
+.settings-group .form-check-label,
+.settings-group label,
+.settings-group h6 {
+    color: var(--medical-blue) !important;
+    font-weight: 600 !important;
+}
+
+/* Settings group title icons - All screen sizes */
+.settings-group-title i {
+    color: var(--medical-blue) !important;
+}
+
+/* Settings group titles styling */
+.settings-group-title {
+    font-size: 1.1rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+}
+
+/* Fix contrast for small text and muted text on light backgrounds */
+.settings-group .text-muted,
+.settings-group .text-muted.small,
+.settings-group small.text-muted,
+.dashboard-card .text-muted.small {
+    color: #4b5563 !important; /* Darker gray for better contrast */
+    font-weight: 500 !important;
+}
+
+/* Help text under form fields */
+.settings-group small,
+.form-text,
+.invalid-feedback {
+    color: #4b5563 !important;
+    font-weight: 500 !important;
+}
+
+/* General text within settings groups */
+.settings-group p,
+.settings-group div:not(.form-check):not(.row):not(.col-md-4):not(.col-md-8) {
+    color: #374151 !important; /* Dark gray for regular text */
+}
+
+/* Form control text (input values) */
+.settings-group .form-control,
+.settings-group .form-select {
+    color: #374151 !important;
+}
+
 /* Dashboard Header */
 .dashboard-header {
     background: rgba(255, 255, 255, 0.95);
@@ -853,7 +914,8 @@ div.dashboard-card.quick-action-card p.text-muted {
 
 /* Footer text improvements */
 .footer .text-muted {
-    color: #6b7280 !important; /* Better contrast for footer links */
+    color: #4b5563 !important; /* Better contrast for footer links */
+    font-weight: 500 !important;
 }
 
 /* Health summary specific improvements */
@@ -1317,6 +1379,75 @@ div.dashboard-card.quick-action-card p.text-muted {
         font-size: 0.85rem;
         padding: 0.6rem 1rem;
     }
+    
+    /* Profile and Settings mobile optimizations */
+    #profile-section, #settings-section {
+        margin-top: 1rem !important;
+    }
+    
+    .settings-group {
+        margin-bottom: 2rem;
+        padding: 1rem;
+        border-radius: 10px;
+        /* Background and text colors already set globally */
+    }
+    
+    .settings-group-title {
+        font-size: 1rem !important;
+        margin-bottom: 1rem;
+    }
+    
+    /* Form elements mobile optimization */
+    .form-control, .form-select {
+        padding: 0.75rem;
+        font-size: 1rem;
+        border-radius: 8px;
+    }
+    
+    /* Input group mobile optimization */
+    .row.g-2 {
+        gap: 0.5rem !important;
+    }
+    
+    /* Country dropdown mobile */
+    .col-md-4 {
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Phone number input mobile */
+    .col-md-8 input {
+        margin-top: 0;
+    }
+    
+    /* File upload mobile */
+    .form-control[type="file"] {
+        padding: 0.5rem;
+    }
+    
+    /* Textarea mobile */
+    textarea.form-control {
+        min-height: 100px;
+    }
+    
+    /* Button spacing mobile */
+    .btn + .btn {
+        margin-left: 0.5rem;
+    }
+    
+    /* Action buttons mobile */
+    .text-end {
+        text-align: center !important;
+        margin-top: 1.5rem;
+    }
+    
+    .text-end .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .text-end .btn:not(:last-child) {
+        margin-right: 0;
+    }
 }
 
 /* Extra Small Mobile */
@@ -1348,7 +1479,45 @@ div.dashboard-card.quick-action-card p.text-muted {
     
     .settings-actions .btn {
         width: 100%;
-        max-width: 200px;
+    }
+    
+    /* Extra small mobile profile/settings */
+    .settings-group {
+        padding: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .settings-group-title {
+        font-size: 0.9rem !important;
+    }
+    
+    .form-control, .form-select {
+        padding: 0.6rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Column adjustments for extra small screens */
+    .col-lg-6 {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+    
+    /* Profile and settings sections */
+    #profile-section .dashboard-card,
+    #settings-section .dashboard-card {
+        margin: 0 0.5rem;
+        padding: 1rem;
+    }
+    
+    /* Form labels */
+    .form-label {
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    /* Small text */
+    .text-muted, .text-muted small {
+        font-size: 0.8rem;
     }
 }
 

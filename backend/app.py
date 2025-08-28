@@ -96,6 +96,7 @@ from routes.prescriptions import prescriptions_bp
 from routes.medical_history import medical_history_bp
 from routes.user_settings import user_settings_bp
 from routes.admin import admin_bp
+from routes.doctor_verification import doctor_verification_bp
 
 # Register blueprints with logging
 app_logger.info("Registering API blueprints")
@@ -111,6 +112,7 @@ app.register_blueprint(prescriptions_bp, url_prefix='/api/prescriptions')
 app.register_blueprint(medical_history_bp, url_prefix='/api/medical-history')
 app.register_blueprint(user_settings_bp, url_prefix='/api/user-settings')
 app.register_blueprint(admin_bp, url_prefix='/api/admin')
+app.register_blueprint(doctor_verification_bp, url_prefix='/api/doctor-verification')
 
 @login_manager.user_loader
 def load_user(user_id):

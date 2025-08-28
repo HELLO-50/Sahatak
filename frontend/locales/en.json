@@ -49,6 +49,135 @@
     "submit": "Create Account"
   },
 
+  "medical_history_form": {
+    "title": "Medical History Form",
+    "subtitle": "Required for Appointment Booking",
+    "info": "Please fill out this form accurately to ensure you receive the best healthcare. All information is confidential and protected.",
+    
+    "sections": {
+      "basic_info": "Basic Information",
+      "medical_history": "Medical History", 
+      "lifestyle": "Lifestyle"
+    },
+    
+    "labels": {
+      "height": "Height (cm)",
+      "weight": "Weight (kg)",
+      "blood_type": "Blood Type",
+      "history": "Medical History",
+      "allergies": "Allergies",
+      "medications": "Current Medications",
+      "chronic": "Chronic Conditions",
+      "surgeries": "Previous Surgeries",
+      "family_history": "Family Medical History",
+      "smoking": "Smoking",
+      "alcohol": "Alcohol Consumption",
+      "exercise": "Exercise Frequency"
+    },
+    
+    "placeholders": {
+      "height": "e.g., 170",
+      "weight": "e.g., 75",
+      "history": "Please mention any past or current medical conditions",
+      "allergies": "Do you have any allergies to medications or foods?",
+      "medications": "What medications are you currently taking?",
+      "chronic": "e.g., Diabetes, Hypertension, Heart Disease",
+      "surgeries": "Have you had any surgeries? When?",
+      "family_history": "Are there any hereditary diseases in your family?"
+    },
+    
+    "options": {
+      "select_blood": "Select blood type",
+      "never_smoke": "Never",
+      "former_smoke": "Former",
+      "current_smoke": "Current",
+      "no_exercise": "None",
+      "rare_exercise": "Rarely",
+      "weekly": "Weekly",
+      "daily": "Daily"
+    },
+    
+    "buttons": {
+      "skip": "Skip for Now",
+      "save": "Save and Continue Booking"
+    }
+  },
+
+  "doctor_profile": {
+    "title": "Complete Your Profile",
+    "subtitle": "Required for Account Verification",
+    
+    "alerts": {
+      "title": "Profile Completion Required",
+      "message": "Please complete all required information to submit your profile for verification."
+    },
+    
+    "steps": {
+      "professional": "Professional Info",
+      "contact": "Contact Details",
+      "documents": "Documents",
+      "review": "Review & Submit"
+    },
+    
+    "sections": {
+      "professional": "Professional Information",
+      "contact": "Contact Information", 
+      "documents": "Document Upload",
+      "review": "Review & Submit"
+    },
+    
+    "labels": {
+      "education": "Education Details",
+      "certifications": "Certifications",
+      "memberships": "Professional Memberships",
+      "languages": "Languages Spoken",
+      "areas": "Consultation Areas",
+      "office_phone": "Office Phone",
+      "emergency": "Emergency Contact",
+      "address": "Office Address",
+      "license_doc": "Medical License",
+      "degree_doc": "Medical Degree",
+      "id_doc": "National ID/Passport",
+      "other_doc": "Other Documents (Optional)",
+      "confirm": "I confirm that all information provided is accurate and complete"
+    },
+    
+    "placeholders": {
+      "education": "List your medical degrees, universities, and graduation years",
+      "certifications": "e.g., Board Certified in Internal Medicine",
+      "memberships": "e.g., Sudan Medical Association",
+      "languages": "e.g., Arabic, English",
+      "areas": "e.g., General Medicine, Diabetes Management",
+      "office_phone": "+249 xx xxx xxxx",
+      "emergency": "+249 xx xxx xxxx",
+      "address": "Enter your clinic or hospital address"
+    },
+    
+    "hints": {
+      "certifications": "Separate multiple certifications with commas",
+      "memberships": "Separate multiple memberships with commas",
+      "languages": "List all languages you can consult in",
+      "areas": "Your areas of expertise",
+      "other": "Additional certifications or relevant documents"
+    },
+    
+    "document_info": "Please upload clear copies of your documents. Accepted formats: PDF, JPG, PNG (Max 5MB)",
+    "review_message": "Please review your information before submitting for verification.",
+    
+    "buttons": {
+      "previous": "Previous",
+      "next": "Next",
+      "submit": "Submit for Verification"
+    },
+    
+    "status": {
+      "incomplete": "Profile Incomplete",
+      "pending": "Pending Verification",
+      "approved": "Verified",
+      "rejected": "Rejected"
+    }
+  },
+
   "email_verification": {
     "title": "Email Verification",
     "loading": "Verifying your email address...",
@@ -411,6 +540,17 @@
     "GB": "United Kingdom"
   },
 
+  "country_options": {
+    "select_country": "Select Country",
+    "country_sudan": "🇸🇩 Sudan (+249)",
+    "country_egypt": "🇪🇬 Egypt (+20)",
+    "country_saudi": "🇸🇦 Saudi Arabia (+966)",
+    "country_uae": "🇦🇪 UAE (+971)",
+    "country_ireland": "🇮🇪 Ireland (+353)",
+    "country_usa": "🇺🇸 United States (+1)",
+    "country_uk": "🇬🇧 United Kingdom (+44)"
+  },
+
   "validation": {
     "required": "This field is required",
     "email_invalid": "Please enter a valid email address",
@@ -478,6 +618,56 @@
         "weight": "Weight",
         "normal": "Normal",
         "ideal": "Ideal"
+      },
+      "profile": {
+        "title": "Patient Profile",
+        "close": "Close",
+        "personal_info": "Personal Information",
+        "medical_info": "Medical Information",
+        "contact_info": "Contact Information",
+        "save_profile": "Save Profile",
+        "reset_profile": "Reset Changes",
+        "edit_profile": "Edit Profile",
+        "fields": {
+          "patient_id": "Patient ID",
+          "full_name": "Full Name",
+          "email": "Email Address",
+          "phone": "Phone Number",
+          "date_of_birth": "Date of Birth",
+          "gender": "Gender",
+          "blood_type": "Blood Type",
+          "emergency_contact": "Emergency Contact",
+          "address": "Address",
+          "medical_history": "Medical History",
+          "allergies": "Allergies",
+          "current_medications": "Current Medications",
+          "chronic_conditions": "Chronic Conditions",
+          "national_id": "National ID",
+          "insurance_provider": "Insurance Provider",
+          "insurance_number": "Insurance Number",
+          "registration_date": "Registration Date",
+          "last_login": "Last Login"
+        }
+      },
+      "settings": {
+        "title": "Settings",
+        "close": "Close",
+        "account_settings": "Profile Information",
+        "preferences_settings": "Preferences & Notifications",
+        "privacy_settings": "Privacy Settings",
+        "save_settings": "Save Settings",
+        "reset_settings": "Reset",
+        "fields": {
+          "full_name": "Full Name",
+          "email": "Email Address",
+          "phone": "Phone Number",
+          "language": "Language",
+          "email_notifications": "Email Notifications",
+          "sms_notifications": "SMS Notifications",
+          "appointment_reminders": "Appointment Reminders",
+          "privacy_consent": "Privacy Consent",
+          "data_sharing": "Data Sharing Preferences"
+        }
       }
     },
     "doctor": {
@@ -499,6 +689,8 @@
         "settings": "Settings"
       },
       "quick_actions": {
+        "communication": "Patient Communication",
+        "communication_desc": "Message and connect with patients",
         "prescription": "Write Prescription",
         "prescription_desc": "Add medication for patient",
         "records": "Review Records",
@@ -539,6 +731,78 @@
         "title": "Patients Waiting for Response",
         "reply": "Reply",
         "view_all": "View All Messages"
+      },
+      "verification_status": {
+        "verified": "Verified",
+        "unverified": "Unverified"
+      },
+      "profile": {
+        "title": "Doctor Profile",
+        "close": "Close",
+        "personal_info": "Personal Information",
+        "professional_info": "Professional Information",
+        "contact_info": "Contact Information",
+        "documents_info": "Documents & Verification",
+        "schedule_info": "Schedule & Availability",
+        "stats_info": "Statistics",
+        "account_info": "Account Information",
+        "save_profile": "Save Profile",
+        "reset_profile": "Reset Changes",
+        "edit_profile": "Edit Profile",
+        "fields": {
+          "doctor_id": "Doctor ID",
+          "full_name": "Full Name",
+          "email": "Email Address",
+          "phone": "Phone Number",
+          "medical_license": "Medical License Number",
+          "specialization": "Specialization",
+          "experience": "Years of Experience",
+          "hospital_affiliations": "Hospital Affiliations",
+          "department": "Department",
+          "consultation_fee": "Consultation Fee (EGP)",
+          "education_details": "Education Details",
+          "certifications": "Certifications",
+          "memberships": "Professional Memberships",
+          "languages": "Languages Spoken",
+          "consultation_areas": "Consultation Areas",
+          "office_phone": "Office Phone",
+          "emergency_contact": "Emergency Contact",
+          "office_address": "Office Address",
+          "license_document": "Medical License Document",
+          "degree_document": "Medical Degree Document",
+          "id_document": "National ID/Passport",
+          "other_documents": "Other Documents (Optional)",
+          "consultation_hours": "Consultation Hours",
+          "total_patients": "Total Patients",
+          "total_consultations": "Total Consultations",
+          "rating": "Rating",
+          "registration_date": "Registration Date",
+          "last_login": "Last Login",
+          "account_status": "Account Status",
+          "verification_status": "Verification Status"
+        }
+      },
+      "settings": {
+        "title": "Settings",
+        "close": "Close",
+        "account_settings": "Profile Information",
+        "preferences_settings": "Preferences & Notifications",
+        "security_settings": "Security",
+        "save_settings": "Save Settings",
+        "reset_settings": "Reset",
+        "fields": {
+          "full_name": "Full Name",
+          "email": "Email Address",
+          "phone": "Phone Number",
+          "medical_license": "Medical License Number",
+          "specialization": "Specialization",
+          "language": "Language",
+          "email_notifications": "Email Notifications",
+          "sms_notifications": "SMS Notifications",
+          "appointment_reminders": "Appointment Reminders",
+          "change_password": "Change Password",
+          "two_factor": "Two-Factor Authentication"
+        }
       }
     }
   },
@@ -761,7 +1025,9 @@
       "total_records": "Total Medical Records",
       "active_prescriptions": "Active Prescriptions", 
       "recent_updates": "Recent Updates",
-      "days_since_update": "Days Since Last Update"
+      "days_since_update": "Days Since Last Update",
+      "history_completion": "Medical History Completion",
+      "click_to_update": "Click to update"
     },
     "navigation": {
       "medical_history": "Medical History",

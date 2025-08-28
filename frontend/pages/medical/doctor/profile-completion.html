@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Profile - Sahatak</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%230d47a1' d='m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523.942-.661 2.27.067 3.71L8 15.5l6.533-8.737c.728-1.44.59-2.768.067-3.71C13.486.878 10.4.28 8.717 2.01L8 2.748z'/></svg>">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Arabic Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="../../../assets/css/main.css">
+    <!-- Dashboard CSS -->
+    <link rel="stylesheet" href="../../../assets/css/components/dashboard.css">
+</head>
+<body data-protect="doctor">
+    <div class="dashboard-container">
+        <div class="container-fluid">
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <div class="row align-items-center">
+                    <!-- Profile Section - Left (Right in RTL) -->
+                    <div class="col-lg-4">
+                        <div class="profile-section">
+                            <div class="user-avatar">
+                                <i class="bi bi-person-badge"></i>
+                            </div>
+                            <div class="user-details">
+                                <h5 class="mb-1" id="user-name">Doctor Name</h5>
+                                <small class="text-muted">
+                                    <span class="badge bg-warning" id="status-badge">Profile Incomplete</span>
+                                </small>
+                            </div>
+                            <!-- Vertical Action Buttons -->
+                            <div class="action-buttons">
+                                <button class="btn btn-action" onclick="goToDashboard()" title="Dashboard">
+                                    <i class="bi bi-house"></i>
+                                    <span id="nav-dashboard">Dashboard</span>
+                                </button>
+                                <button class="btn btn-action btn-logout" onclick="AuthGuard.logout()" title="Logout">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                    <span id="btn-logout">Logout</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Dashboard Title - Center -->
+                    <div class="col-lg-4 text-center">
+                        <h1 class="dashboard-title" id="page-title">Complete Your Profile</h1>
+                        <p class="dashboard-subtitle" id="page-subtitle">Required for Account Verification</p>
+                    </div>
+                    
+                    <!-- Controls - Right (Left in RTL) -->
+                    <div class="col-lg-4 text-end">
+                        <div class="dashboard-controls">
+                            <button class="btn btn-outline-medical btn-sm" onclick="showLanguageSelector()">
+                                <i class="bi bi-globe me-1"></i>
+                                <span id="current-lang">English</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alert Message -->
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div class="alert alert-warning d-flex align-items-center" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <div>
+                            <strong id="alert-title">Profile Completion Required</strong>
+                            <p class="mb-0" id="alert-message">Please complete all required information to submit your profile for verification.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Steps -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="dashboard-card">
+                        <div class="d-flex justify-content-center">
+                            <div class="progress-steps">
+                                <div class="step active" id="step-1">
+                                    <div class="step-number">1</div>
+                                    <div class="step-title" id="step-1-title">Professional Info</div>
+                                </div>
+                                <div class="step" id="step-2">
+                                    <div class="step-number">2</div>
+                                    <div class="step-title" id="step-2-title">Contact Details</div>
+                                </div>
+                                <div class="step" id="step-3">
+                                    <div class="step-number">3</div>
+                                    <div class="step-title" id="step-3-title">Documents</div>
+                                </div>
+                                <div class="step" id="step-4">
+                                    <div class="step-number">4</div>
+                                    <div class="step-title" id="step-4-title">Review & Submit</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Content -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="dashboard-card">
+                        <form id="profileCompletionForm">
+                            <!-- Step 1: Professional Information -->
+                            <div class="form-step active" id="form-step-1">
+                                <h4 class="mb-4">
+                                    <i class="bi bi-briefcase text-primary me-2"></i>
+                                    <span id="section-professional">Professional Information</span>
+                                </h4>
+                                
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <label class="form-label" id="label-education">Education Details <span class="text-danger">*</span></label>
+                                        <textarea class="form-control" id="education_details" rows="3" required
+                                            placeholder="List your medical degrees, universities, and graduation years"></textarea>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label" id="label-certifications">Certifications</label>
+                                        <input type="text" class="form-control" id="certifications" 
+                                            placeholder="e.g., Board Certified in Internal Medicine">
+                                        <small class="text-muted" id="hint-certifications">Separate multiple certifications with commas</small>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label" id="label-memberships">Professional Memberships</label>
+                                        <input type="text" class="form-control" id="memberships" 
+                                            placeholder="e.g., Sudan Medical Association">
+                                        <small class="text-muted" id="hint-memberships">Separate multiple memberships with commas</small>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label" id="label-languages">Languages Spoken <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="languages_spoken" required
+                                            placeholder="e.g., Arabic, English">
+                                        <small class="text-muted" id="hint-languages">List all languages you can consult in</small>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label" id="label-areas">Consultation Areas <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="consultation_areas" required
+                                            placeholder="e.g., General Medicine, Diabetes Management">
+                                        <small class="text-muted" id="hint-areas">Your areas of expertise</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Step 2: Contact Details -->
+                            <div class="form-step" id="form-step-2" style="display: none;">
+                                <h4 class="mb-4">
+                                    <i class="bi bi-telephone text-primary me-2"></i>
+                                    <span id="section-contact">Contact Information</span>
+                                </h4>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label" id="label-office-phone">Office Phone <span class="text-danger">*</span></label>
+                                        <input type="tel" class="form-control" id="office_phone" required
+                                            placeholder="+249 xx xxx xxxx">
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label" id="label-emergency">Emergency Contact</label>
+                                        <input type="tel" class="form-control" id="emergency_contact" 
+                                            placeholder="+249 xx xxx xxxx">
+                                    </div>
+                                    
+                                    <div class="col-md-12 mb-3">
+                                        <label class="form-label" id="label-address">Office Address <span class="text-danger">*</span></label>
+                                        <textarea class="form-control" id="office_address" rows="2" required
+                                            placeholder="Enter your clinic or hospital address"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Step 3: Documents -->
+                            <div class="form-step" id="form-step-3" style="display: none;">
+                                <h4 class="mb-4">
+                                    <i class="bi bi-file-earmark-medical text-primary me-2"></i>
+                                    <span id="section-documents">Document Upload</span>
+                                </h4>
+                                
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <span id="document-info">Please upload clear copies of your documents. Accepted formats: PDF, JPG, PNG (Max 5MB)</span>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label" id="label-license-doc">Medical License <span class="text-danger">*</span></label>
+                                        <input type="file" class="form-control" id="license_document" accept=".pdf,.jpg,.jpeg,.png" required>
+                                        <div class="upload-status mt-2" id="license-status"></div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label" id="label-degree-doc">Medical Degree <span class="text-danger">*</span></label>
+                                        <input type="file" class="form-control" id="degree_document" accept=".pdf,.jpg,.jpeg,.png" required>
+                                        <div class="upload-status mt-2" id="degree-status"></div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label" id="label-id-doc">National ID/Passport <span class="text-danger">*</span></label>
+                                        <input type="file" class="form-control" id="id_document" accept=".pdf,.jpg,.jpeg,.png" required>
+                                        <div class="upload-status mt-2" id="id-status"></div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label" id="label-other-doc">Other Documents (Optional)</label>
+                                        <input type="file" class="form-control" id="other_documents" accept=".pdf,.jpg,.jpeg,.png" multiple>
+                                        <small class="text-muted" id="hint-other">Additional certifications or relevant documents</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Step 4: Review -->
+                            <div class="form-step" id="form-step-4" style="display: none;">
+                                <h4 class="mb-4">
+                                    <i class="bi bi-check-circle text-primary me-2"></i>
+                                    <span id="section-review">Review & Submit</span>
+                                </h4>
+                                
+                                <div class="alert alert-success">
+                                    <i class="bi bi-check-circle me-2"></i>
+                                    <span id="review-message">Please review your information before submitting for verification.</span>
+                                </div>
+                                
+                                <div class="review-summary" id="review-summary">
+                                    <!-- Summary will be populated by JavaScript -->
+                                </div>
+                                
+                                <div class="form-check mt-4">
+                                    <input class="form-check-input" type="checkbox" id="confirmAccuracy" required>
+                                    <label class="form-check-label" for="confirmAccuracy" id="label-confirm">
+                                        I confirm that all information provided is accurate and complete
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Navigation Buttons -->
+                            <div class="d-flex justify-content-between mt-4">
+                                <button type="button" class="btn btn-secondary" id="btnPrevious" onclick="previousStep()" style="display: none;">
+                                    <i class="bi bi-arrow-left me-1"></i>
+                                    <span id="btn-previous">Previous</span>
+                                </button>
+                                <button type="button" class="btn btn-medical ms-auto" id="btnNext" onclick="nextStep()">
+                                    <span id="btn-next">Next</span>
+                                    <i class="bi bi-arrow-right ms-1"></i>
+                                </button>
+                                <button type="submit" class="btn btn-success ms-auto" id="btnSubmit" style="display: none;">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    <span id="btn-submit">Submit for Verification</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .progress-steps::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #e0e0e0;
+            z-index: -1;
+        }
+        
+        .step {
+            text-align: center;
+            position: relative;
+        }
+        
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .step.active .step-number {
+            background: var(--medical-blue);
+            color: white;
+        }
+        
+        .step.completed .step-number {
+            background: var(--medical-green);
+            color: white;
+        }
+        
+        .step-title {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .step.active .step-title {
+            color: var(--medical-blue);
+            font-weight: 500;
+        }
+        
+        .upload-status {
+            font-size: 0.85rem;
+        }
+        
+        .upload-status.success {
+            color: var(--medical-green);
+        }
+        
+        .upload-status.error {
+            color: #dc3545;
+        }
+        
+        .review-summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        .review-summary h6 {
+            color: var(--medical-blue);
+            margin-bottom: 15px;
+        }
+        
+        .review-summary .review-item {
+            margin-bottom: 10px;
+        }
+        
+        .review-summary .review-label {
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        .review-summary .review-value {
+            color: #212529;
+        }
+    </style>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- AuthGuard -->
+    <script src="../../../assets/js/components/auth-guard.js"></script>
+    
+    <!-- Main JS -->
+    <script src="../../../assets/js/main.js"></script>
+    
+    <!-- Dashboard Translations -->
+    <script src="../../../assets/js/components/dashboard-translations.js"></script>
+    
+    <script>
+        // Protect page - doctor only
+        AuthGuard.protectPage('doctor');
+        
+        // Get current user (will have mock data in dev mode)
+        const currentUser = AuthGuard.getCurrentUser();
+        
+        // Current step tracking
+        let currentStep = 1;
+        const totalSteps = 4;
+        
+        // Form data storage
+        let formData = {
+            professional: {},
+            contact: {},
+            documents: {},
+            uploadedFiles: {}
+        };
+        
+        // Initialize translations
+        async function initializePageTranslations() {
+            await LanguageManager.loadTranslations();
+            const lang = LanguageManager.getLanguage() || 'en';
+            
+            // Apply RTL/LTR
+            document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+            document.documentElement.setAttribute('lang', lang);
+            
+            // Update page translations
+            if (typeof DashboardTranslations !== 'undefined') {
+                DashboardTranslations.updateDoctorProfile(lang);
+            }
+            
+            // Update user name if available
+            if (currentUser && currentUser.fullName) {
+                document.getElementById('user-name').textContent = currentUser.fullName;
+            }
+        }
+        
+        // Initialize on page load
+        initializePageTranslations();
+        
+        // Language selector
+        function showLanguageSelector() {
+            const currentLang = LanguageManager.getLanguage() || 'en';
+            const newLang = currentLang === 'ar' ? 'en' : 'ar';
+            LanguageManager.setLanguage(newLang);
+            window.location.reload();
+        }
+        
+        // Navigation functions
+        function goToDashboard() {
+            window.location.href = '../../dashboard/doctor.html';
+        }
+        
+        // Step navigation
+        function nextStep() {
+            if (validateCurrentStep()) {
+                saveCurrentStepData();
+                
+                if (currentStep < totalSteps) {
+                    // Hide current step
+                    document.getElementById(`form-step-${currentStep}`).style.display = 'none';
+                    document.getElementById(`step-${currentStep}`).classList.remove('active');
+                    document.getElementById(`step-${currentStep}`).classList.add('completed');
+                    
+                    // Show next step
+                    currentStep++;
+                    document.getElementById(`form-step-${currentStep}`).style.display = 'block';
+                    document.getElementById(`step-${currentStep}`).classList.add('active');
+                    
+                    // Update buttons
+                    updateNavigationButtons();
+                    
+                    // If review step, populate summary
+                    if (currentStep === 4) {
+                        populateReviewSummary();
+                    }
+                }
+            }
+        }
+        
+        function previousStep() {
+            if (currentStep > 1) {
+                // Hide current step
+                document.getElementById(`form-step-${currentStep}`).style.display = 'none';
+                document.getElementById(`step-${currentStep}`).classList.remove('active');
+                
+                // Show previous step
+                currentStep--;
+                document.getElementById(`form-step-${currentStep}`).style.display = 'block';
+                
+                // Update buttons
+                updateNavigationButtons();
+            }
+        }
+        
+        function updateNavigationButtons() {
+            const btnPrevious = document.getElementById('btnPrevious');
+            const btnNext = document.getElementById('btnNext');
+            const btnSubmit = document.getElementById('btnSubmit');
+            
+            // Show/hide previous button
+            btnPrevious.style.display = currentStep > 1 ? 'block' : 'none';
+            
+            // Show/hide next vs submit button
+            if (currentStep === totalSteps) {
+                btnNext.style.display = 'none';
+                btnSubmit.style.display = 'block';
+            } else {
+                btnNext.style.display = 'block';
+                btnSubmit.style.display = 'none';
+            }
+        }
+        
+        function validateCurrentStep() {
+            // Basic validation for required fields in current step
+            const currentFormStep = document.getElementById(`form-step-${currentStep}`);
+            const requiredFields = currentFormStep.querySelectorAll('[required]');
+            
+            for (let field of requiredFields) {
+                if (!field.value) {
+                    field.classList.add('is-invalid');
+                    field.focus();
+                    return false;
+                }
+                field.classList.remove('is-invalid');
+            }
+            
+            return true;
+        }
+        
+        function saveCurrentStepData() {
+            // Save data based on current step
+            switch(currentStep) {
+                case 1:
+                    formData.professional = {
+                        education_details: document.getElementById('education_details').value,
+                        certifications: document.getElementById('certifications').value.split(',').map(s => s.trim()).filter(s => s),
+                        memberships: document.getElementById('memberships').value.split(',').map(s => s.trim()).filter(s => s),
+                        languages_spoken: document.getElementById('languages_spoken').value.split(',').map(s => s.trim()).filter(s => s),
+                        consultation_areas: document.getElementById('consultation_areas').value.split(',').map(s => s.trim()).filter(s => s)
+                    };
+                    break;
+                case 2:
+                    formData.contact = {
+                        office_phone: document.getElementById('office_phone').value,
+                        emergency_contact: document.getElementById('emergency_contact').value,
+                        office_address: document.getElementById('office_address').value
+                    };
+                    break;
+                case 3:
+                    // File handling is done separately
+                    break;
+            }
+        }
+        
+        function populateReviewSummary() {
+            const summary = document.getElementById('review-summary');
+            
+            let html = `
+                <h6><i class="bi bi-briefcase me-2"></i>Professional Information</h6>
+                <div class="review-item">
+                    <span class="review-label">Education:</span>
+                    <span class="review-value">${formData.professional.education_details || ''}</span>
+                </div>
+                <div class="review-item">
+                    <span class="review-label">Languages:</span>
+                    <span class="review-value">${formData.professional.languages_spoken?.join(', ') || ''}</span>
+                </div>
+                <div class="review-item">
+                    <span class="review-label">Consultation Areas:</span>
+                    <span class="review-value">${formData.professional.consultation_areas?.join(', ') || ''}</span>
+                </div>
+                
+                <h6 class="mt-3"><i class="bi bi-telephone me-2"></i>Contact Information</h6>
+                <div class="review-item">
+                    <span class="review-label">Office Phone:</span>
+                    <span class="review-value">${formData.contact.office_phone || ''}</span>
+                </div>
+                <div class="review-item">
+                    <span class="review-label">Office Address:</span>
+                    <span class="review-value">${formData.contact.office_address || ''}</span>
+                </div>
+                
+                <h6 class="mt-3"><i class="bi bi-file-earmark me-2"></i>Documents</h6>
+                <div class="review-item">
+                    <span class="review-label">Documents Uploaded:</span>
+                    <span class="review-value">${Object.keys(formData.uploadedFiles).length} file(s)</span>
+                </div>
+            `;
+            
+            summary.innerHTML = html;
+        }
+        
+        // File upload handling
+        document.getElementById('license_document').addEventListener('change', function(e) {
+            handleFileUpload(e, 'license');
+        });
+        
+        document.getElementById('degree_document').addEventListener('change', function(e) {
+            handleFileUpload(e, 'degree');
+        });
+        
+        document.getElementById('id_document').addEventListener('change', function(e) {
+            handleFileUpload(e, 'id');
+        });
+        
+        async function handleFileUpload(event, docType) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // Validate file size (5MB max)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size must be less than 5MB');
+                event.target.value = '';
+                return;
+            }
+            
+            // Store file reference
+            formData.uploadedFiles[docType] = file;
+            
+            // Update status
+            const statusEl = document.getElementById(`${docType}-status`);
+            statusEl.className = 'upload-status success';
+            statusEl.innerHTML = `<i class="bi bi-check-circle me-1"></i> ${file.name} uploaded`;
+        }
+        
+        // Form submission
+        document.getElementById('profileCompletionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!document.getElementById('confirmAccuracy').checked) {
+                alert('Please confirm the accuracy of your information');
+                return;
+            }
+            
+            // Prepare data for submission
+            const submitData = {
+                ...formData.professional,
+                ...formData.contact,
+                profile_completed: true
+            };
+            
+            try {
+                // Show loading state
+                const submitBtn = document.getElementById('btnSubmit');
+                submitBtn.disabled = true;
+                submitBtn.querySelector('span').textContent = 'Submitting...';
+                
+                // In development mode, just log the data
+                if (AuthGuard.isDevelopmentMode()) {
+                    console.log('Profile completion data:', submitData);
+                    console.log('Uploaded files:', formData.uploadedFiles);
+                    alert('Profile submitted successfully! (Development Mode)');
+                    
+                    // Redirect to dashboard after a delay
+                    setTimeout(() => {
+                        window.location.href = '../../dashboard/doctor.html';
+                    }, 2000);
+                    return;
+                }
+                
+                // Production submission would go here
+                const response = await fetch('http://127.0.0.1:5000/doctor-verification/complete-profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(submitData),
+                    credentials: 'include'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Upload documents
+                    for (const [docType, file] of Object.entries(formData.uploadedFiles)) {
+                        const formDataUpload = new FormData();
+                        formDataUpload.append('file', file);
+                        formDataUpload.append('doc_type', docType);
+                        
+                        await fetch('http://127.0.0.1:5000/doctor-verification/upload-document', {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                            },
+                            body: formDataUpload,
+                            credentials: 'include'
+                        });
+                    }
+                    
+                    // Submit for verification
+                    await fetch('http://127.0.0.1:5000/doctor-verification/submit-for-verification', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        },
+                        credentials: 'include'
+                    });
+                    
+                    alert('Profile submitted for verification successfully!');
+                    window.location.href = '../../dashboard/doctor.html';
+                } else {
+                    alert(result.message || 'Failed to submit profile');
+                }
+            } catch (error) {
+                console.error('Error submitting profile:', error);
+                alert('Error submitting profile. Please try again.');
+            } finally {
+                // Reset button state
+                const submitBtn = document.getElementById('btnSubmit');
+                submitBtn.disabled = false;
+                submitBtn.querySelector('span').textContent = 'Submit for Verification';
+            }
+        });
+    </script>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3">
+        <div class="container">
+            <div class="row g-3">
+                <!-- Brand & Description -->
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="mb-3">
+                        <i class="bi bi-heart-pulse me-2 text-primary"></i>
+                        <span id="footer-brand">Sahatak | صحتك</span>
+                    </h5>
+                    <div class="d-flex gap-3 social-links">
+                        <a href="https://facebook.com/sahatak" target="_blank" rel="noopener"><i class="bi bi-facebook fs-5"></i></a>
+                        <a href="https://twitter.com/sahatak" target="_blank" rel="noopener"><i class="bi bi-twitter fs-5"></i></a>
+                        <a href="https://instagram.com/sahatak" target="_blank" rel="noopener"><i class="bi bi-instagram fs-5"></i></a>
+                        <a href="https://linkedin.com/company/sahatak" target="_blank" rel="noopener"><i class="bi bi-linkedin fs-5"></i></a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="mb-3" id="footer-links-title">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="../../../common/about.html" class="text-muted text-decoration-none" id="footer-about">About Platform</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="../../../common/services.html" class="text-muted text-decoration-none" id="footer-services">Services</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="mb-3" id="footer-support-title">Support & Help</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="../../../common/support.html" class="text-muted text-decoration-none" id="footer-help">Help Center</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="../../../common/contact-us.html" class="text-muted text-decoration-none" id="footer-contact">Contact Us</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Emergency Contact -->
+                <div class="col-lg-3 col-md-6 emergency-section">
+                    <p class="mb-2 text-danger fw-bold" id="footer-emergency-text">
+                        For medical emergencies
+                    </p>
+                    <p class="mb-3 text-danger fw-bold fs-6" id="footer-emergency-action">
+                        <i class="bi bi-hospital me-2"></i>
+                        Go to nearest ER hospital
+                    </p>
+                    <p class="mb-0 text-muted small" id="footer-emergency-note">
+                        For non-urgent consultations use the platform
+                    </p>
+                </div>
+            </div>
+
+            <!-- Bottom Bar -->
+            <hr class="my-3">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="mb-0 fw-bold" id="footer-copyright">
+                        © 2025 Sahatak. All rights reserved.
+                    </p>
+                    <p class="mb-0 text-muted small mt-1" id="footer-medical-disclaimer">
+                        This platform does not replace visiting a doctor in emergency cases
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

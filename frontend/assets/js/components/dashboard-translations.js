@@ -5,13 +5,11 @@ const DashboardTranslations = {
     updateElementText(elementId, text) {
         const element = document.getElementById(elementId);
         if (element && text) {
-            const oldText = element.textContent;
+            // Debug for footer elements
+            if (elementId.includes('footer-')) {
+                console.log(`🔄 Updating ${elementId}: "${text}"`);
+            }
             element.textContent = text;
-            console.log(`✅ UPDATED ${elementId}: "${oldText}" → "${text}"`);
-        } else if (element && !text) {
-            console.log(`⚠️  ELEMENT FOUND BUT NO TEXT: ${elementId} (element exists but text is: ${text})`);
-        } else {
-            console.log(`❌ ELEMENT NOT FOUND: ${elementId}`);
         }
     },
     
@@ -80,21 +78,43 @@ const DashboardTranslations = {
         this.updateElementText('blood-sugar', patient.health_summary.blood_sugar);
         this.updateElementText('weight', patient.health_summary.weight);
         
-        // Update footer
-        this.updateFooter(t);
+        // Profile and Settings
+        console.log('🔸 About to update patient profile and settings');
+        console.log('🔸 patient.profile exists:', !!patient.profile);
+        console.log('🔸 patient.settings exists:', !!patient.settings);
+        try {
+            this.updateProfileAndSettings(patient.profile, patient.settings);
+            console.log('🔸 Patient profile and settings updated');
+        } catch (profileError) {
+            console.error('❌ Patient profile and settings update failed:', profileError);
+        }
+        
+        // Update footer using standalone function to ensure it works
+        console.log('🚀 Reached patient footer update section');
+        try {
+            DashboardTranslations.updateFooter(t);
+            console.log('✅ Patient dashboard footer update completed');
+        } catch (footerError) {
+            console.error('❌ Patient footer update failed:', footerError);
+        }
     },
     
     // Update doctor dashboard translations
     updateDoctorDashboard(lang) {
+        console.log('🩺 updateDoctorDashboard called with language:', lang);
         const t = LanguageManager.translations[lang];
         if (!t || !t.dashboard || !t.dashboard.doctor) {
-            console.error('Doctor dashboard translations not found');
+            console.error('❌ Doctor dashboard translations not found for:', lang);
             return;
         }
+        console.log('✅ Doctor dashboard translations found, footer available:', !!t.footer);
         
         const doctor = t.dashboard.doctor;
+        console.log('🔍 Doctor object available:', !!doctor);
         
-        // Header section
+        try {
+            console.log('🔸 Starting header section updates');
+            // Header section
         this.updateElementText('dashboard-title', doctor.title);
         this.updateElementText('dashboard-subtitle', doctor.subtitle);
         this.updateElementText('user-status', doctor.user_status);
@@ -117,6 +137,8 @@ const DashboardTranslations = {
         this.updateElementText('nav-settings', doctor.nav.settings);
         
         // Quick Actions
+        this.updateElementText('action-communication', doctor.quick_actions.communication);
+        this.updateElementText('action-communication-desc', doctor.quick_actions.communication_desc);
         this.updateElementText('action-prescription', doctor.quick_actions.prescription);
         this.updateElementText('action-prescription-desc', doctor.quick_actions.prescription_desc);
         this.updateElementText('action-records', doctor.quick_actions.records);
@@ -157,36 +179,163 @@ const DashboardTranslations = {
         this.updateElementText('reply-2', doctor.waiting.reply);
         this.updateElementText('view-all-messages', doctor.waiting.view_all);
         
-        // Update footer
-        this.updateFooter(t);
+        // Update verification status dynamically
+        console.log('🔸 About to update verification status');
+        this.updateVerificationStatus(doctor.verification_status);
+        console.log('🔸 Verification status updated');
+        
+        // Profile and Settings (always update during language switch)
+        console.log('🔸 About to update profile and settings');
+        console.log('🔸 doctor.profile exists:', !!doctor.profile);
+        console.log('🔸 doctor.settings exists:', !!doctor.settings);
+        try {
+            this.updateProfileAndSettings(doctor.profile, doctor.settings);
+            console.log('🔸 Profile and settings updated');
+        } catch (profileError) {
+            console.error('❌ Profile and settings update failed:', profileError);
+        }
+        
+        console.log('🚀 Reached footer update section');
+        console.log('🔍 DashboardTranslations.updateFooter exists:', typeof DashboardTranslations.updateFooter);
+        
+        // Update footer using standalone function to ensure it works
+        console.log('🔧 About to call DashboardTranslations.updateFooter with:', t.footer ? 'footer data available' : 'NO FOOTER DATA');
+        try {
+            DashboardTranslations.updateFooter(t);
+            console.log('✅ Doctor dashboard footer update completed');
+        } catch (error) {
+            console.error('❌ Doctor dashboard footer update failed:', error);
+        }
+        
+        } catch (error) {
+            console.error('❌ Doctor dashboard update failed at:', error.message, error);
+        }
+        
+        console.log('🏁 Doctor dashboard update completed');
+    },
+    
+    // Update verification status with translation
+    updateVerificationStatus(verificationTranslations) {
+        const statusElement = document.getElementById('verification-status');
+        if (!statusElement || !verificationTranslations) return;
+        
+        // Get verification status from user data
+        const user = JSON.parse(localStorage.getItem('sahatak_doctor_data') || '{}');
+        const isVerified = user.verification_status === 'verified';
+        
+        if (isVerified) {
+            statusElement.textContent = verificationTranslations.verified;
+            statusElement.className = 'badge bg-success';
+        } else {
+            statusElement.textContent = verificationTranslations.unverified;
+            statusElement.className = 'badge bg-warning text-dark';
+        }
+    },
+    
+    // Update profile and settings translations (shared between dashboards)
+    updateProfileAndSettings(profileTranslations, settingsTranslations) {
+        // Profile translations
+        if (profileTranslations) {
+            // Section headers
+            this.updateElementText('profile-title', profileTranslations.title);
+            this.updateElementText('close-profile', profileTranslations.close);
+            this.updateElementText('personal-info', profileTranslations.personal_info);
+            this.updateElementText('professional-info', profileTranslations.professional_info);
+            this.updateElementText('medical-info', profileTranslations.medical_info);
+            this.updateElementText('contact-info', profileTranslations.contact_info);
+            this.updateElementText('documents-info', profileTranslations.documents_info);
+            this.updateElementText('schedule-info', profileTranslations.schedule_info);
+            this.updateElementText('stats-info', profileTranslations.stats_info);
+            this.updateElementText('account-info', profileTranslations.account_info);
+            this.updateElementText('save-profile', profileTranslations.save_profile);
+            this.updateElementText('reset-profile', profileTranslations.reset_profile);
+            this.updateElementText('edit-profile', profileTranslations.edit_profile);
+            
+            // Field labels (shared fields)
+            if (profileTranslations.fields) {
+                this.updateElementText('label-full-name', profileTranslations.fields.full_name);
+                this.updateElementText('label-email', profileTranslations.fields.email);
+                this.updateElementText('label-phone', profileTranslations.fields.phone);
+                
+                // Doctor-specific fields
+                this.updateElementText('label-doctor-id', profileTranslations.fields.doctor_id);
+                this.updateElementText('label-medical-license', profileTranslations.fields.medical_license);
+                this.updateElementText('label-specialization', profileTranslations.fields.specialization);
+                this.updateElementText('label-experience', profileTranslations.fields.experience);
+                this.updateElementText('label-hospital-affiliations', profileTranslations.fields.hospital_affiliations);
+                this.updateElementText('label-department', profileTranslations.fields.department);
+                this.updateElementText('label-consultation-fee', profileTranslations.fields.consultation_fee);
+                this.updateElementText('label-education-details', profileTranslations.fields.education_details);
+                this.updateElementText('label-certifications', profileTranslations.fields.certifications);
+                this.updateElementText('label-memberships', profileTranslations.fields.memberships);
+                this.updateElementText('label-languages', profileTranslations.fields.languages);
+                this.updateElementText('label-consultation-areas', profileTranslations.fields.consultation_areas);
+                
+                // Patient-specific fields
+                this.updateElementText('label-patient-id', profileTranslations.fields.patient_id);
+                this.updateElementText('label-date-of-birth', profileTranslations.fields.date_of_birth);
+                this.updateElementText('label-gender', profileTranslations.fields.gender);
+                this.updateElementText('label-blood-type', profileTranslations.fields.blood_type);
+                this.updateElementText('label-national-id', profileTranslations.fields.national_id);
+                this.updateElementText('label-allergies', profileTranslations.fields.allergies);
+                this.updateElementText('label-chronic-conditions', profileTranslations.fields.chronic_conditions);
+                this.updateElementText('label-current-medications', profileTranslations.fields.current_medications);
+                this.updateElementText('label-insurance-provider', profileTranslations.fields.insurance_provider);
+                this.updateElementText('label-insurance-number', profileTranslations.fields.insurance_number);
+            }
+            
+            // Update country dropdown options (for doctor profile only)
+            this.updateCountryOptions();
+        }
+        
+        // Settings translations
+        if (settingsTranslations) {
+            // Section headers
+            this.updateElementText('settings-title', settingsTranslations.title);
+            this.updateElementText('close-settings', settingsTranslations.close);
+            this.updateElementText('account-settings', settingsTranslations.account_settings);
+            this.updateElementText('preferences-settings', settingsTranslations.preferences_settings);
+            this.updateElementText('privacy-settings', settingsTranslations.privacy_settings);
+            this.updateElementText('security-settings', settingsTranslations.security_settings);
+            this.updateElementText('save-settings', settingsTranslations.save_settings);
+            this.updateElementText('reset-settings', settingsTranslations.reset_settings);
+            
+            // Field labels
+            if (settingsTranslations.fields) {
+                this.updateElementText('full-name-label', settingsTranslations.fields.full_name);
+                this.updateElementText('email-label', settingsTranslations.fields.email);
+                this.updateElementText('phone-label', settingsTranslations.fields.phone);
+                this.updateElementText('medical-license-label', settingsTranslations.fields.medical_license);
+                this.updateElementText('specialization-label', settingsTranslations.fields.specialization);
+                this.updateElementText('language-label', settingsTranslations.fields.language);
+                this.updateElementText('email-notifications-label', settingsTranslations.fields.email_notifications);
+                this.updateElementText('sms-notifications-label', settingsTranslations.fields.sms_notifications);
+                this.updateElementText('appointment-reminders-label', settingsTranslations.fields.appointment_reminders);
+            }
+        }
     },
     
     // Update footer translations (shared between dashboards)
     updateFooter(t) {
-        if (!t.footer) return;
+        console.log('🔍 Main updateFooter called with:', t.footer);
+        if (!t.footer) {
+            console.log('❌ No footer data found');
+            return;
+        }
         
         this.updateElementText('footer-brand', t.footer.brand);
-        this.updateElementText('footer-links-title', t.footer.quick_links);
+        this.updateElementText('footer-links-title', t.footer.links_title);
         this.updateElementText('footer-about', t.footer.about);
         this.updateElementText('footer-services', t.footer.services);
-        this.updateElementText('footer-support-title', t.footer.support);
+        this.updateElementText('footer-support-title', t.footer.support_title);
         this.updateElementText('footer-help', t.footer.help);
         this.updateElementText('footer-contact', t.footer.contact);
-        this.updateElementText('footer-emergency-text', t.footer.emergency.text);
-        this.updateElementText('footer-emergency-action', t.footer.emergency.action);
-        this.updateElementText('footer-emergency-note', t.footer.emergency.note);
+        this.updateElementText('footer-emergency-text', t.footer.emergency_text);
+        this.updateElementText('footer-emergency-action', t.footer.emergency_action);
+        this.updateElementText('footer-emergency-note', t.footer.emergency_note);
         this.updateElementText('footer-copyright', t.footer.copyright);
-        this.updateElementText('footer-medical-disclaimer', t.footer.disclaimer);
     },
     
-    // Helper function to update element text safely
-    updateElementText(elementId, text) {
-        const element = document.getElementById(elementId);
-        if (element && text) {
-            element.textContent = text;
-        }
-    },
-
     // Update admin dashboard translations
     updateAdminDashboard(lang) {
         const t = LanguageManager.translations[lang];
@@ -442,6 +591,12 @@ const DashboardTranslations = {
             this.updateUserName();
         }
         
+        // Update footer translations for all pages
+        const t = LanguageManager.translations[savedLanguage];
+        if (t && this.updateFooter) {
+            this.updateFooter(t);
+        }
+        
         console.log(`${dashboardType} dashboard initialized with language: ${savedLanguage}`);
     },
 
@@ -465,6 +620,26 @@ const DashboardTranslations = {
         this.updateUserName();
         
         console.log(`Records page initialized with language: ${savedLanguage}`);
+    },
+
+    // Update country dropdown options
+    updateCountryOptions() {
+        const lang = localStorage.getItem('sahatak_language') || 'ar';
+        const translations = this.translations[lang];
+        
+        if (!translations?.country_options) return;
+        
+        const countryOptions = translations.country_options;
+        
+        // Update each country option
+        this.updateElementText('select-country', countryOptions.select_country);
+        this.updateElementText('country-sudan', countryOptions.country_sudan);
+        this.updateElementText('country-egypt', countryOptions.country_egypt);
+        this.updateElementText('country-saudi', countryOptions.country_saudi);
+        this.updateElementText('country-uae', countryOptions.country_uae);
+        this.updateElementText('country-ireland', countryOptions.country_ireland);
+        this.updateElementText('country-usa', countryOptions.country_usa);
+        this.updateElementText('country-uk', countryOptions.country_uk);
     }
 };
 
@@ -846,7 +1021,13 @@ DashboardTranslations.updateAvailabilityDashboard = function(lang) {
 
 // Update footer translations  
 DashboardTranslations.updateFooter = function(t) {
+    console.log('🎯 Standalone updateFooter called with:', t.footer);
     if (t.footer) {
+        console.log('✅ Footer data found:', {
+            links_title: t.footer.links_title,
+            support_title: t.footer.support_title,
+            emergency_text: t.footer.emergency_text
+        });
         this.updateElementText('footer-brand', t.footer.brand || 'Sahatak | صحتك');
         this.updateElementText('footer-links-title', t.footer.links_title || 'Quick Links');
         this.updateElementText('footer-about', t.footer.about || 'About Platform');
@@ -914,3 +1095,171 @@ DashboardTranslations.switchAvailabilityLanguage = function(newLang) {
     const title = t?.availability?.dashboard_title ? `${t.availability.dashboard_title} | ${t.app_name}` : 'Manage Availability | Sahatak';
     document.title = title;
 };
+
+// Update medical history form translations
+DashboardTranslations.updateMedicalHistoryForm = function(lang) {
+    const t = LanguageManager.translations[lang];
+    if (!t || !t.medical_history_form) {
+        console.error('Medical history form translations not found');
+        return;
+    }
+
+    const form = t.medical_history_form;
+
+    // Header and main elements
+    this.updateElementText('form-title', form.title);
+    this.updateElementText('form-info', form.info);
+    this.updateElementText('brand-name', t.app_name);
+    
+    // Show opposite language for language toggle
+    const oppositeLanguage = lang === 'ar' ? 'English' : 'العربية';
+    this.updateElementText('current-lang', oppositeLanguage);
+    
+    // Navigation elements
+    this.updateElementText('nav-dashboard', t.dashboard?.patient?.nav?.home || 'Dashboard');
+    this.updateElementText('btn-logout', t.dashboard?.patient?.buttons?.logout || 'Logout');
+
+    // Section headers
+    this.updateElementText('section-basic-info', form.sections.basic_info);
+    this.updateElementText('section-medical-history', form.sections.medical_history);
+    this.updateElementText('section-lifestyle', form.sections.lifestyle);
+
+    // Form labels
+    this.updateElementText('label-height', form.labels.height);
+    this.updateElementText('label-weight', form.labels.weight);
+    this.updateElementText('label-blood-type', form.labels.blood_type);
+    this.updateElementText('label-history', form.labels.history);
+    this.updateElementText('label-allergies', form.labels.allergies);
+    this.updateElementText('label-medications', form.labels.medications);
+    this.updateElementText('label-chronic', form.labels.chronic);
+    this.updateElementText('label-surgeries', form.labels.surgeries);
+    this.updateElementText('label-family-history', form.labels.family_history);
+    this.updateElementText('label-smoking', form.labels.smoking);
+    this.updateElementText('label-alcohol', form.labels.alcohol);
+    this.updateElementText('label-exercise', form.labels.exercise);
+
+    // Placeholders
+    this.updatePlaceholder('height', form.placeholders.height);
+    this.updatePlaceholder('weight', form.placeholders.weight);
+    this.updatePlaceholder('medical_history', form.placeholders.history);
+    this.updatePlaceholder('allergies', form.placeholders.allergies);
+    this.updatePlaceholder('current_medications', form.placeholders.medications);
+    this.updatePlaceholder('chronic_conditions', form.placeholders.chronic);
+    this.updatePlaceholder('surgical_history', form.placeholders.surgeries);
+    this.updatePlaceholder('family_history', form.placeholders.family_history);
+
+    // Options
+    this.updateElementText('option-select-blood', form.options.select_blood);
+    this.updateElementText('label-never-smoke', form.options.never_smoke);
+    this.updateElementText('label-former-smoke', form.options.former_smoke);
+    this.updateElementText('label-current-smoke', form.options.current_smoke);
+    this.updateElementText('option-none', form.options.none || 'None');
+    this.updateElementText('option-occasional', form.options.occasional || 'Occasional');
+    this.updateElementText('option-moderate', form.options.moderate || 'Moderate');
+    this.updateElementText('option-heavy', form.options.heavy || 'Heavy');
+    this.updateElementText('option-no-exercise', form.options.no_exercise);
+    this.updateElementText('option-rare-exercise', form.options.rare_exercise);
+    this.updateElementText('option-weekly', form.options.weekly);
+    this.updateElementText('option-daily', form.options.daily);
+
+    // Buttons
+    this.updateElementText('btn-skip', form.buttons.skip);
+    this.updateElementText('btn-save', form.buttons.save);
+
+    console.log('✅ Medical history form translations updated for language:', lang);
+};
+
+// Update doctor profile completion translations
+DashboardTranslations.updateDoctorProfile = function(lang) {
+    const t = LanguageManager.translations[lang];
+    if (!t || !t.doctor_profile) {
+        console.error('Doctor profile translations not found');
+        return;
+    }
+
+    const profile = t.doctor_profile;
+
+    // Header and main elements
+    this.updateElementText('page-title', profile.title);
+    this.updateElementText('page-subtitle', profile.subtitle);
+    
+    // Show opposite language for language toggle
+    const oppositeLanguage = lang === 'ar' ? 'English' : 'العربية';
+    this.updateElementText('current-lang', oppositeLanguage);
+    
+    // Navigation elements
+    this.updateElementText('nav-dashboard', t.dashboard?.doctor?.nav?.home || 'Dashboard');
+    this.updateElementText('btn-logout', t.dashboard?.doctor?.buttons?.logout || 'Logout');
+
+    // Alert messages
+    this.updateElementText('alert-title', profile.alerts.title);
+    this.updateElementText('alert-message', profile.alerts.message);
+
+    // Status badge
+    this.updateElementText('status-badge', profile.status.incomplete);
+
+    // Step titles
+    this.updateElementText('step-1-title', profile.steps.professional);
+    this.updateElementText('step-2-title', profile.steps.contact);
+    this.updateElementText('step-3-title', profile.steps.documents);
+    this.updateElementText('step-4-title', profile.steps.review);
+
+    // Section headers
+    this.updateElementText('section-professional', profile.sections.professional);
+    this.updateElementText('section-contact', profile.sections.contact);
+    this.updateElementText('section-documents', profile.sections.documents);
+    this.updateElementText('section-review', profile.sections.review);
+
+    // Form labels
+    this.updateElementText('label-education', profile.labels.education);
+    this.updateElementText('label-certifications', profile.labels.certifications);
+    this.updateElementText('label-memberships', profile.labels.memberships);
+    this.updateElementText('label-languages', profile.labels.languages);
+    this.updateElementText('label-areas', profile.labels.areas);
+    this.updateElementText('label-office-phone', profile.labels.office_phone);
+    this.updateElementText('label-emergency', profile.labels.emergency);
+    this.updateElementText('label-address', profile.labels.address);
+    this.updateElementText('label-license-doc', profile.labels.license_doc);
+    this.updateElementText('label-degree-doc', profile.labels.degree_doc);
+    this.updateElementText('label-id-doc', profile.labels.id_doc);
+    this.updateElementText('label-other-doc', profile.labels.other_doc);
+    this.updateElementText('label-confirm', profile.labels.confirm);
+
+    // Placeholders
+    this.updatePlaceholder('education_details', profile.placeholders.education);
+    this.updatePlaceholder('certifications', profile.placeholders.certifications);
+    this.updatePlaceholder('memberships', profile.placeholders.memberships);
+    this.updatePlaceholder('languages_spoken', profile.placeholders.languages);
+    this.updatePlaceholder('consultation_areas', profile.placeholders.areas);
+    this.updatePlaceholder('office_phone', profile.placeholders.office_phone);
+    this.updatePlaceholder('emergency_contact', profile.placeholders.emergency);
+    this.updatePlaceholder('office_address', profile.placeholders.address);
+
+    // Hints
+    this.updateElementText('hint-certifications', profile.hints.certifications);
+    this.updateElementText('hint-memberships', profile.hints.memberships);
+    this.updateElementText('hint-languages', profile.hints.languages);
+    this.updateElementText('hint-areas', profile.hints.areas);
+    this.updateElementText('hint-other', profile.hints.other);
+
+    // Document info and review message
+    this.updateElementText('document-info', profile.document_info);
+    this.updateElementText('review-message', profile.review_message);
+
+    // Buttons
+    this.updateElementText('btn-previous', profile.buttons.previous);
+    this.updateElementText('btn-next', profile.buttons.next);
+    this.updateElementText('btn-submit', profile.buttons.submit);
+
+    console.log('✅ Doctor profile completion translations updated for language:', lang);
+};
+
+// Helper function to update input placeholder (add if not already present)
+if (!DashboardTranslations.updatePlaceholder) {
+    DashboardTranslations.updatePlaceholder = function(elementId, text) {
+        const element = document.getElementById(elementId);
+        if (element && text) {
+            element.placeholder = text;
+        }
+    };
+}

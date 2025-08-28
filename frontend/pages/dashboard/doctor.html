@@ -38,6 +38,7 @@
                             </div>
                             <div class="user-details">
                                 <h5 class="mb-1" id="user-name">Dr. Sarah Ahmed</h5>
+                                <span class="badge bg-warning text-dark" id="verification-status">Unverified</span>
                             </div>
                             <!-- Vertical Action Buttons -->
                             <div class="action-buttons">
@@ -331,38 +332,54 @@
                                     </h6>
                                     
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Doctor ID</label>
+                                        <label class="form-label fw-bold" id="label-doctor-id">Doctor ID</label>
                                         <p class="form-control-plaintext" id="doctorId">DOC-2024-001</p>
                                     </div>
                                     
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Full Name</label>
+                                        <label class="form-label fw-bold" id="label-full-name">Full Name</label>
                                         <p class="form-control-plaintext" id="profileFullName">Dr. Sarah Ahmed</p>
                                     </div>
                                     
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Email Address</label>
+                                        <label class="form-label fw-bold" id="label-email">Email Address</label>
                                         <p class="form-control-plaintext" id="profileEmail">sarah.ahmed@sahatak.com</p>
                                     </div>
                                     
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Phone Number</label>
-                                        <p class="form-control-plaintext" id="profilePhone">+20 123 456 7890</p>
+                                        <label class="form-label fw-bold" id="label-phone">Phone Number</label>
+                                        <div class="row g-2">
+                                            <div class="col-md-4">
+                                                <select class="form-select" id="profilePhoneCountry">
+                                                    <option value="" id="select-country">Select Country</option>
+                                                    <option value="SD" id="country-sudan">🇸🇩 Sudan (+249)</option>
+                                                    <option value="EG" id="country-egypt">🇪🇬 Egypt (+20)</option>
+                                                    <option value="SA" id="country-saudi">🇸🇦 Saudi Arabia (+966)</option>
+                                                    <option value="AE" id="country-uae">🇦🇪 UAE (+971)</option>
+                                                    <option value="IE" id="country-ireland">🇮🇪 Ireland (+353)</option>
+                                                    <option value="US" id="country-usa">🇺🇸 United States (+1)</option>
+                                                    <option value="GB" id="country-uk">🇬🇧 United Kingdom (+44)</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <input type="tel" class="form-control" id="profilePhone" placeholder="123456789">
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Medical License Number</label>
+                                        <label class="form-label fw-bold" id="label-medical-license">Medical License Number</label>
                                         <p class="form-control-plaintext" id="profileMedicalLicense">ML-2019-12345</p>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Specialization</label>
+                                        <label class="form-label fw-bold" id="label-specialization">Specialization</label>
                                         <p class="form-control-plaintext" id="profileSpecialization">Internal Medicine</p>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Years of Experience</label>
-                                        <p class="form-control-plaintext" id="profileExperience">12 years</p>
+                                        <label class="form-label fw-bold" id="label-experience">Years of Experience</label>
+                                        <input type="number" class="form-control" id="profileExperience" min="0" max="60">
                                     </div>
                                 </div>
                             </div>
@@ -375,37 +392,109 @@
                                     </h6>
                                     
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Hospital Affiliations</label>
-                                        <p class="form-control-plaintext" id="profileHospitals">Cairo Medical Center, Al-Azhar Hospital</p>
+                                        <label class="form-label fw-bold" id="label-hospital-affiliations">Hospital Affiliations</label>
+                                        <input type="text" class="form-control" id="profileHospitals" placeholder="e.g., Cairo Medical Center, Al-Azhar Hospital">
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Department</label>
-                                        <p class="form-control-plaintext" id="profileDepartment">Internal Medicine</p>
+                                        <label class="form-label fw-bold" id="label-department">Department</label>
+                                        <input type="text" class="form-control" id="profileDepartment" placeholder="e.g., Internal Medicine">
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Consultation Fee</label>
-                                        <p class="form-control-plaintext" id="profileFee">300 EGP</p>
+                                        <label class="form-label fw-bold" id="label-consultation-fee">Consultation Fee (EGP)</label>
+                                        <input type="number" class="form-control" id="profileFee" min="0" placeholder="300">
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Education</label>
-                                        <div class="form-control-plaintext" id="profileEducation">
-                                            <div><strong>Medical School:</strong> Cairo University Faculty of Medicine</div>
-                                            <div><strong>Residency:</strong> Internal Medicine - Cairo Medical Center</div>
-                                            <div><strong>Fellowship:</strong> Cardiology - American University Hospital</div>
-                                        </div>
+                                        <label class="form-label fw-bold" id="label-education-details">Education Details</label>
+                                        <textarea class="form-control" id="profileEducation" rows="3" placeholder="List your medical degrees, universities, and graduation years"></textarea>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Certifications and Awards</label>
-                                        <p class="form-control-plaintext" id="profileCertifications">Board Certified Internal Medicine, Excellence in Patient Care Award 2023</p>
+                                        <label class="form-label fw-bold" id="label-certifications">Certifications</label>
+                                        <input type="text" class="form-control" id="profileCertifications" placeholder="e.g., Board Certified Internal Medicine">
+                                        <small class="text-muted">Separate multiple certifications with commas</small>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Languages Spoken</label>
-                                        <p class="form-control-plaintext" id="profileLanguages">Arabic, English, French</p>
+                                        <label class="form-label fw-bold" id="label-memberships">Professional Memberships</label>
+                                        <input type="text" class="form-control" id="profileMemberships" placeholder="e.g., Sudan Medical Association">
+                                        <small class="text-muted">Separate multiple memberships with commas</small>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold" id="label-languages">Languages Spoken</label>
+                                        <input type="text" class="form-control" id="profileLanguages" placeholder="e.g., Arabic, English, French">
+                                        <small class="text-muted">List all languages you can consult in</small>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold" id="label-consultation-areas">Consultation Areas</label>
+                                        <input type="text" class="form-control" id="profileConsultationAreas" placeholder="e.g., General Medicine, Diabetes Management">
+                                        <small class="text-muted">Your areas of expertise</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Information -->
+                        <div class="row mt-4">
+                            <div class="col-lg-6">
+                                <div class="settings-group">
+                                    <h6 class="settings-group-title">
+                                        <i class="bi bi-telephone me-2"></i><span id="contact-info">Contact Information</span>
+                                    </h6>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Office Phone</label>
+                                        <input type="tel" class="form-control" id="profileOfficePhone" placeholder="+249 xx xxx xxxx">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Emergency Contact</label>
+                                        <input type="tel" class="form-control" id="profileEmergencyContact" placeholder="+249 xx xxx xxxx">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Office Address</label>
+                                        <textarea class="form-control" id="profileOfficeAddress" rows="2" placeholder="Enter your clinic or hospital address"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-lg-6">
+                                <div class="settings-group">
+                                    <h6 class="settings-group-title">
+                                        <i class="bi bi-file-earmark-medical me-2"></i><span id="documents-info">Documents & Verification</span>
+                                    </h6>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Medical License Document</label>
+                                        <input type="file" class="form-control" id="profileLicenseDoc" accept=".pdf,.jpg,.jpeg,.png">
+                                        <small class="text-muted">PDF, JPG, PNG (Max 5MB)</small>
+                                        <div class="upload-status mt-1" id="license-upload-status"></div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Medical Degree Document</label>
+                                        <input type="file" class="form-control" id="profileDegreeDoc" accept=".pdf,.jpg,.jpeg,.png">
+                                        <small class="text-muted">PDF, JPG, PNG (Max 5MB)</small>
+                                        <div class="upload-status mt-1" id="degree-upload-status"></div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">National ID/Passport</label>
+                                        <input type="file" class="form-control" id="profileIdDoc" accept=".pdf,.jpg,.jpeg,.png">
+                                        <small class="text-muted">PDF, JPG, PNG (Max 5MB)</small>
+                                        <div class="upload-status mt-1" id="id-upload-status"></div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Other Documents (Optional)</label>
+                                        <input type="file" class="form-control" id="profileOtherDocs" accept=".pdf,.jpg,.jpeg,.png" multiple>
+                                        <small class="text-muted">Additional certifications or relevant documents</small>
+                                        <div class="upload-status mt-1" id="other-upload-status"></div>
                                     </div>
                                 </div>
                             </div>
@@ -483,10 +572,13 @@
                             </div>
                         </div>
 
-                        <!-- Edit Profile Button -->
+                        <!-- Profile Action Buttons -->
                         <div class="text-end mt-4">
-                            <button class="btn btn-primary" onclick="editProfile()">
-                                <i class="bi bi-pencil me-1"></i><span id="edit-profile">Edit Profile</span>
+                            <button class="btn btn-secondary me-2" onclick="loadUserProfile()">
+                                <i class="bi bi-arrow-clockwise me-1"></i><span id="reset-profile">Reset Changes</span>
+                            </button>
+                            <button class="btn btn-primary" onclick="saveProfile()">
+                                <i class="bi bi-check-lg me-1"></i><span id="save-profile">Save Profile</span>
                             </button>
                         </div>
                     </div>
@@ -601,9 +693,6 @@
                                         <div class="mb-3">
                                             <button class="btn btn-outline-primary btn-sm me-2" onclick="changePassword()">
                                                 <i class="bi bi-key me-1"></i><span id="change-password">Change Password</span>
-                                            </button>
-                                            <button class="btn btn-outline-secondary btn-sm" onclick="enableTwoFactor()">
-                                                <i class="bi bi-shield-check me-1"></i><span id="two-factor">Two-Factor Authentication</span>
                                             </button>
                                         </div>
                                     </div>
@@ -743,6 +832,13 @@
             if (profileSection.style.display === 'block') {
                 profileSection.scrollIntoView({ behavior: 'smooth' });
                 loadUserProfile();
+                
+                // Update translations for profile section
+                const currentLang = LanguageManager.getLanguage() || 'ar';
+                const translations = LanguageManager.translations[currentLang];
+                if (translations && translations.dashboard && translations.dashboard.doctor && translations.dashboard.doctor.profile) {
+                    DashboardTranslations.updateProfileAndSettings(translations.dashboard.doctor.profile, null);
+                }
             }
         }
 
@@ -750,35 +846,49 @@
             document.getElementById('profile-section').style.display = 'none';
         }
 
+        function updateVerificationStatus(user) {
+            const statusElement = document.getElementById('verification-status');
+            const isVerified = user.verification_status === 'verified';
+            
+            if (isVerified) {
+                statusElement.textContent = 'Verified';
+                statusElement.className = 'badge bg-success';
+            } else {
+                statusElement.textContent = 'Unverified';
+                statusElement.className = 'badge bg-warning text-dark';
+            }
+        }
+
         function loadUserProfile() {
             // Load user profile from localStorage or API
             const user = JSON.parse(localStorage.getItem('sahatak_doctor_data') || '{}');
             
-            // Personal Information
+            // Update verification status in header
+            updateVerificationStatus(user);
+            
+            // Personal Information (display-only fields)
             document.getElementById('profileFullName').textContent = user.full_name || 'Dr. Sarah Ahmed';
             document.getElementById('profileEmail').textContent = user.email || 'sarah.ahmed@sahatak.com';
             document.getElementById('profilePhone').textContent = user.phone || '+20 123 456 7890';
             document.getElementById('profileMedicalLicense').textContent = user.medical_license || 'ML-2019-12345';
             document.getElementById('profileSpecialization').textContent = user.specialization || 'Internal Medicine';
-            document.getElementById('profileExperience').textContent = (user.experience || '12') + ' years';
             document.getElementById('doctorId').textContent = user.doctor_id || 'DOC-2024-001';
             
-            // Professional Information
-            document.getElementById('profileHospitals').textContent = user.hospital_affiliations || 'Cairo Medical Center, Al-Azhar Hospital';
-            document.getElementById('profileDepartment').textContent = user.department || 'Internal Medicine';
-            document.getElementById('profileFee').textContent = (user.consultation_fee || '300') + ' EGP';
-            document.getElementById('profileCertifications').textContent = user.certifications || 'Board Certified Internal Medicine, Excellence in Patient Care Award 2023';
-            document.getElementById('profileLanguages').textContent = user.languages || 'Arabic, English, French';
+            // Editable Professional Information
+            document.getElementById('profileExperience').value = user.experience || '';
+            document.getElementById('profileHospitals').value = user.hospital_affiliations || '';
+            document.getElementById('profileDepartment').value = user.department || '';
+            document.getElementById('profileFee').value = user.consultation_fee || '';
+            document.getElementById('profileEducation').value = user.education_details || '';
+            document.getElementById('profileCertifications').value = user.certifications || '';
+            document.getElementById('profileMemberships').value = user.memberships || '';
+            document.getElementById('profileLanguages').value = user.languages || '';
+            document.getElementById('profileConsultationAreas').value = user.consultation_areas || '';
             
-            // Education
-            const educationDiv = document.getElementById('profileEducation');
-            if (user.education) {
-                educationDiv.innerHTML = `
-                    <div><strong>Medical School:</strong> ${user.education.medical_school || 'Cairo University Faculty of Medicine'}</div>
-                    <div><strong>Residency:</strong> ${user.education.residency || 'Internal Medicine - Cairo Medical Center'}</div>
-                    <div><strong>Fellowship:</strong> ${user.education.fellowship || 'Cardiology - American University Hospital'}</div>
-                `;
-            }
+            // Contact Information
+            document.getElementById('profileOfficePhone').value = user.office_phone || '';
+            document.getElementById('profileEmergencyContact').value = user.emergency_contact || '';
+            document.getElementById('profileOfficeAddress').value = user.office_address || '';
             
             // Schedule
             const scheduleDiv = document.getElementById('profileConsultationHours');
@@ -796,11 +906,45 @@
             document.getElementById('profileLastLogin').textContent = user.last_login || 'Today at 9:15 AM';
         }
 
+        function saveProfile() {
+            // Get current data from database
+            const currentUser = JSON.parse(localStorage.getItem('sahatak_doctor_data') || '{}');
+            
+            // Collect all profile data from form fields
+            const updatedUser = {
+                ...currentUser,
+                // Professional Information
+                experience: document.getElementById('profileExperience').value,
+                hospital_affiliations: document.getElementById('profileHospitals').value,
+                department: document.getElementById('profileDepartment').value,
+                consultation_fee: document.getElementById('profileFee').value,
+                education_details: document.getElementById('profileEducation').value,
+                certifications: document.getElementById('profileCertifications').value,
+                memberships: document.getElementById('profileMemberships').value,
+                languages: document.getElementById('profileLanguages').value,
+                consultation_areas: document.getElementById('profileConsultationAreas').value,
+                // Contact Information
+                office_phone: document.getElementById('profileOfficePhone').value,
+                emergency_contact: document.getElementById('profileEmergencyContact').value,
+                office_address: document.getElementById('profileOfficeAddress').value
+            };
+            
+            // Save to database (localStorage)
+            localStorage.setItem('sahatak_doctor_data', JSON.stringify(updatedUser));
+            
+            // Show success message
+            alert('Profile updated successfully!');
+            
+            // Update verification status if profile is more complete
+            updateVerificationStatus(updatedUser);
+            
+            console.log('Profile saved:', updatedUser);
+        }
+
         function editProfile() {
-            // Switch to settings section for editing
-            hideProfile();
-            showSettings();
-            alert('Please use the Settings section to edit your profile information.');
+            // This function is no longer needed since profile is directly editable
+            // Just show a message that profile can be edited directly
+            alert('You can now edit your profile information directly in the form above. Click "Save Profile" when done.');
         }
 
         function showSettings() {
@@ -818,6 +962,13 @@
             if (settingsSection.style.display === 'block') {
                 settingsSection.scrollIntoView({ behavior: 'smooth' });
                 loadUserSettings();
+                
+                // Update translations for settings section
+                const currentLang = LanguageManager.getLanguage() || 'ar';
+                const translations = LanguageManager.translations[currentLang];
+                if (translations && translations.dashboard && translations.dashboard.doctor && translations.dashboard.doctor.settings) {
+                    DashboardTranslations.updateProfileAndSettings(null, translations.dashboard.doctor.settings);
+                }
             }
         }
 
@@ -936,7 +1087,7 @@
         
         function viewAllMessages() {
             console.log('View all messages clicked');
-            // Implement view all messages
+            window.location.href = '../medical/patient/comm-hub.html';
         }
         
         function toggleAvailability() {
@@ -954,12 +1105,67 @@
             }
         }
         
+        function showLanguageSelector() {
+            console.log('🌐 Language selector clicked');
+            // Toggle between Arabic and English
+            const currentLang = LanguageManager.getLanguage() || 'ar';
+            const newLang = currentLang === 'ar' ? 'en' : 'ar';
+            console.log('🔄 Switching from', currentLang, 'to', newLang);
+            
+            // Change language
+            LanguageManager.setLanguage(newLang);
+            LanguageManager.applyLanguage(newLang);
+            
+            // Update dashboard translations (call after applyLanguage to ensure footer is properly updated)
+            if (DashboardTranslations && DashboardTranslations.updateDoctorDashboard) {
+                console.log('📊 Calling updateDoctorDashboard with:', newLang);
+                DashboardTranslations.updateDoctorDashboard(newLang);
+            } else {
+                console.log('❌ DashboardTranslations not available');
+            }
+            
+            // Update the language button text
+            const langBtn = document.getElementById('current-lang');
+            langBtn.textContent = newLang === 'ar' ? 'العربية' : 'English';
+        }
+        
         // logout function is now defined globally in main.js
         
+        // File upload handler for profile documents
+        function handleProfileFileUpload(event, statusId) {
+            const file = event.target.files[0];
+            const statusElement = document.getElementById(statusId);
+            
+            if (!file) {
+                statusElement.innerHTML = '';
+                return;
+            }
+            
+            // Validate file size (5MB max)
+            if (file.size > 5 * 1024 * 1024) {
+                statusElement.innerHTML = '<small class="text-danger"><i class="bi bi-x-circle me-1"></i>File size must be less than 5MB</small>';
+                event.target.value = '';
+                return;
+            }
+            
+            // Show success message
+            statusElement.innerHTML = `<small class="text-success"><i class="bi bi-check-circle me-1"></i>${file.name} selected</small>`;
+        }
+
         // Initialize doctor dashboard on page load
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('Doctor dashboard initializing...');
             await DashboardTranslations.initializeDashboard('doctor');
+            
+            // Load user data and update verification status
+            const user = JSON.parse(localStorage.getItem('sahatak_doctor_data') || '{}');
+            updateVerificationStatus(user);
+            
+            // Add file upload event listeners
+            document.getElementById('profileLicenseDoc')?.addEventListener('change', (e) => handleProfileFileUpload(e, 'license-upload-status'));
+            document.getElementById('profileDegreeDoc')?.addEventListener('change', (e) => handleProfileFileUpload(e, 'degree-upload-status'));
+            document.getElementById('profileIdDoc')?.addEventListener('change', (e) => handleProfileFileUpload(e, 'id-upload-status'));
+            document.getElementById('profileOtherDocs')?.addEventListener('change', (e) => handleProfileFileUpload(e, 'other-upload-status'));
         });
     </script>
 </body>

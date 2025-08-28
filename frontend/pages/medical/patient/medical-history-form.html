@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical History Form - Sahatak</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%230d47a1' d='m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523.942-.661 2.27.067 3.71L8 15.5l6.533-8.737c.728-1.44.59-2.768.067-3.71C13.486.878 10.4.28 8.717 2.01L8 2.748z'/></svg>">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Arabic Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="../../../assets/css/main.css">
+    <!-- Dashboard CSS -->
+    <link rel="stylesheet" href="../../../assets/css/components/dashboard.css">
+    <link rel="stylesheet" href="../../../assets/css/components/medical-records.css">
+</head>
+<body data-protect="patient">
+    <div class="dashboard-container">
+        <div class="container-fluid">
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <div class="row align-items-center">
+                    <!-- Profile Section - Left (Right in RTL) -->
+                    <div class="col-lg-4">
+                        <div class="profile-section">
+                            <div class="user-avatar">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <div class="user-details">
+                                <h5 class="mb-1" id="user-name">Patient Name</h5>
+                            </div>
+                            <!-- Vertical Action Buttons -->
+                            <div class="action-buttons">
+                                <button class="btn btn-action" onclick="goToDashboard()" title="Dashboard">
+                                    <i class="bi bi-house"></i>
+                                    <span id="nav-dashboard">Dashboard</span>
+                                </button>
+                                <button class="btn btn-action btn-logout" onclick="AuthGuard.logout()" title="Logout">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                    <span id="btn-logout">Logout</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Dashboard Title - Center -->
+                    <div class="col-lg-4 text-center">
+                        <h1 class="dashboard-title" id="form-title">Medical History Form</h1>
+                        <p class="dashboard-subtitle" id="form-subtitle">Required for Appointment Booking</p>
+                    </div>
+                    
+                    <!-- Language Selector - Right (Left in RTL) -->
+                    <div class="col-lg-4 text-end">
+                        <button class="btn btn-outline-medical btn-sm" onclick="showLanguageSelector()">
+                            <i class="bi bi-globe me-1"></i>
+                            <span id="current-lang">English</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alert Message -->
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div class="alert alert-info d-flex align-items-center" role="alert">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <div>
+                            <p class="mb-0" id="form-info">Please fill out this form accurately to ensure you receive the best healthcare. All information is confidential and protected.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Content -->
+            <div class="row">
+                <div class="col-12">
+                    <form id="medicalHistoryForm">
+                        <!-- Basic Information Section -->
+                        <div class="card border-0 mb-4" style="background: white; border: 1px solid #e9ecef !important;">
+                            <div class="card-header text-white" style="background: #0d47a1 !important;">
+                                <h5 class="card-title mb-0">
+                                    <i class="bi bi-person me-2"></i>
+                                    <span id="section-basic-info">Basic Information</span>
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label" id="label-height">Height (cm)</label>
+                                        <input type="number" class="form-control" name="height" id="height" placeholder="e.g., 170">
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label" id="label-weight">Weight (kg)</label>
+                                        <input type="number" class="form-control" name="weight" id="weight" placeholder="e.g., 75">
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label" id="label-blood-type">Blood Type</label>
+                                        <select class="form-select" name="blood_type" id="blood_type">
+                                            <option value="" id="option-select-blood">Select blood type</option>
+                                            <option value="A+">A+</option>
+                                            <option value="A-">A-</option>
+                                            <option value="B+">B+</option>
+                                            <option value="B-">B-</option>
+                                            <option value="AB+">AB+</option>
+                                            <option value="AB-">AB-</option>
+                                            <option value="O+">O+</option>
+                                            <option value="O-">O-</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Medical History Section -->
+                        <div class="card border-0 mb-4" style="background: white; border: 1px solid #e9ecef !important;">
+                            <div class="card-header text-white" style="background: #0d47a1 !important;">
+                                <h5 class="card-title mb-0">
+                                    <i class="bi bi-clipboard-data me-2"></i>
+                                    <span id="section-medical-history">Medical History</span>
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label" id="label-history">Medical History <span class="text-danger">*</span></label>
+                                        <textarea class="form-control" name="medical_history" id="medical_history" rows="3" required
+                                                placeholder="Please mention any past or current medical conditions"></textarea>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label" id="label-allergies">Allergies <span class="text-danger">*</span></label>
+                                        <textarea class="form-control" name="allergies" id="allergies" rows="3" required
+                                                placeholder="Do you have any allergies to medications or foods?"></textarea>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label" id="label-medications">Current Medications <span class="text-danger">*</span></label>
+                                        <textarea class="form-control" name="current_medications" id="current_medications" rows="3" required
+                                                placeholder="What medications are you currently taking?"></textarea>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label" id="label-chronic">Chronic Conditions</label>
+                                        <textarea class="form-control" name="chronic_conditions" id="chronic_conditions" rows="3"
+                                                placeholder="e.g., Diabetes, Hypertension, Heart Disease"></textarea>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label" id="label-surgeries">Previous Surgeries</label>
+                                        <textarea class="form-control" name="surgical_history" id="surgical_history" rows="3"
+                                                placeholder="Have you had any surgeries? When?"></textarea>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label" id="label-family-history">Family Medical History</label>
+                                        <textarea class="form-control" name="family_history" id="family_history" rows="3"
+                                                placeholder="Are there any hereditary diseases in your family?"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lifestyle Section -->
+                        <div class="card border-0 mb-4" style="background: white; border: 1px solid #e9ecef !important;">
+                            <div class="card-header text-white" style="background: #0d47a1 !important;">
+                                <h5 class="card-title mb-0">
+                                    <i class="bi bi-heart me-2"></i>
+                                    <span id="section-lifestyle">Lifestyle</span>
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label" id="label-smoking">Smoking</label>
+                                        <div class="d-flex gap-3 mt-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="smoking_status" value="never" id="smoke_never">
+                                                <label class="form-check-label" for="smoke_never" id="label-never-smoke">Never</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="smoking_status" value="former" id="smoke_former">
+                                                <label class="form-check-label" for="smoke_former" id="label-former-smoke">Former</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="smoking_status" value="current" id="smoke_current">
+                                                <label class="form-check-label" for="smoke_current" id="label-current-smoke">Current</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label" id="label-alcohol">Alcohol Consumption</label>
+                                        <select class="form-select" name="alcohol_consumption" id="alcohol_consumption">
+                                            <option value="none" id="option-none">None</option>
+                                            <option value="occasional" id="option-occasional">Occasional</option>
+                                            <option value="moderate" id="option-moderate">Moderate</option>
+                                            <option value="heavy" id="option-heavy">Heavy</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label" id="label-exercise">Exercise Frequency</label>
+                                        <select class="form-select" name="exercise_frequency" id="exercise_frequency">
+                                            <option value="none" id="option-no-exercise">None</option>
+                                            <option value="rare" id="option-rare-exercise">Rarely</option>
+                                            <option value="weekly" id="option-weekly">Weekly</option>
+                                            <option value="daily" id="option-daily">Daily</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-secondary" onclick="skipMedicalHistory()">
+                                <span id="btn-skip">Skip for Now</span>
+                            </button>
+                            <button type="submit" class="btn btn-medical">
+                                <span id="btn-save">Save and Continue Booking</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- AuthGuard -->
+    <script src="../../../assets/js/components/auth-guard.js"></script>
+    
+    <!-- Main JS -->
+    <script src="../../../assets/js/main.js"></script>
+    
+    <!-- Dashboard Translations -->
+    <script src="../../../assets/js/components/dashboard-translations.js"></script>
+    
+    <script>
+        // Protect page - patient only
+        AuthGuard.protectPage('patient');
+        
+        // Get current user (will have mock data in dev mode)
+        const currentUser = AuthGuard.getCurrentUser();
+        
+        // Get appointment data from session storage
+        const appointmentData = JSON.parse(sessionStorage.getItem('pendingAppointment'));
+        
+        // Initialize translations
+        async function initializePageTranslations() {
+            await LanguageManager.loadTranslations();
+            const lang = LanguageManager.getLanguage() || 'en';
+            
+            // Apply RTL/LTR
+            document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+            document.documentElement.setAttribute('lang', lang);
+            
+            // Update page translations
+            if (typeof DashboardTranslations !== 'undefined') {
+                DashboardTranslations.updateMedicalHistoryForm(lang);
+            }
+            
+            // Update user name if available
+            if (currentUser && currentUser.fullName) {
+                document.getElementById('user-name').textContent = currentUser.fullName;
+            }
+        }
+        
+        // Initialize on page load
+        initializePageTranslations();
+        
+        // Language selector
+        function showLanguageSelector() {
+            const currentLang = LanguageManager.getLanguage() || 'en';
+            const newLang = currentLang === 'ar' ? 'en' : 'ar';
+            LanguageManager.setLanguage(newLang);
+            window.location.reload();
+        }
+        
+        // Navigation functions
+        function goToDashboard() {
+            window.location.href = '../../dashboard/patient.html';
+        }
+        
+        // Skip medical history (for returning patients)
+        function skipMedicalHistory() {
+            if (appointmentData) {
+                bookAppointment(appointmentData);
+            } else {
+                window.location.href = '../../dashboard/patient.html';
+            }
+        }
+        
+        // Form submission
+        document.getElementById('medicalHistoryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {};
+            formData.forEach((value, key) => {
+                if (value) data[key] = value;
+            });
+            
+            try {
+                // Show loading state
+                const submitBtn = e.target.querySelector('.btn-medical');
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Saving...';
+                
+                // In development mode, just log the data
+                if (AuthGuard.isDevelopmentMode()) {
+                    console.log('Medical history data:', data);
+                    alert('Medical history saved successfully! (Development Mode)');
+                    
+                    // Mark medical history as completed
+                    localStorage.setItem('medicalHistoryCompleted', 'true');
+                    
+                    // If there's a pending appointment, continue with booking
+                    if (appointmentData) {
+                        await bookAppointment(appointmentData);
+                    } else {
+                        setTimeout(() => {
+                            window.location.href = '../../dashboard/patient.html';
+                        }, 1000);
+                    }
+                    return;
+                }
+                
+                // Production mode API call
+                const response = await fetch('http://127.0.0.1:5000/medical-history/complete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(data),
+                    credentials: 'include'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Mark medical history as completed
+                    localStorage.setItem('medicalHistoryCompleted', 'true');
+                    
+                    // If there's a pending appointment, continue with booking
+                    if (appointmentData) {
+                        await bookAppointment(appointmentData);
+                    } else {
+                        alert('Medical history saved successfully!');
+                        window.location.href = '../../dashboard/patient.html';
+                    }
+                } else {
+                    alert(result.message || 'Error saving medical history');
+                }
+            } catch (error) {
+                console.error('Error saving medical history:', error);
+                alert('Error connecting to server');
+            } finally {
+                // Reset button state
+                const submitBtn = e.target.querySelector('.btn-medical');
+                submitBtn.disabled = false;
+                submitBtn.querySelector('span').textContent = 'Save and Continue Booking';
+            }
+        });
+        
+        // Book appointment after medical history
+        async function bookAppointment(data) {
+            try {
+                const response = await fetch('http://127.0.0.1:5000/appointments/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(data),
+                    credentials: 'include'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Clear pending appointment
+                    sessionStorage.removeItem('pendingAppointment');
+                    alert('Appointment booked successfully!');
+                    window.location.href = '../../appointments/appointment-list.html';
+                } else {
+                    alert(result.message || 'Error booking appointment');
+                }
+            } catch (error) {
+                console.error('Error booking appointment:', error);
+                alert('Error connecting to server');
+            }
+        }
+        
+        // Load existing medical history if available
+        async function loadExistingHistory() {
+            if (AuthGuard.isDevelopmentMode()) {
+                console.log('Development mode: Skipping history load');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`http://127.0.0.1:5000/medical-history/patient/${currentUser.id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success && result.data.patient_medical_history) {
+                        const history = result.data.patient_medical_history;
+                        
+                        // Fill form with existing data
+                        if (history.height) document.getElementById('height').value = history.height;
+                        if (history.weight) document.getElementById('weight').value = history.weight;
+                        if (history.blood_type) document.getElementById('blood_type').value = history.blood_type;
+                        if (history.medical_history) document.getElementById('medical_history').value = history.medical_history;
+                        if (history.allergies) document.getElementById('allergies').value = history.allergies;
+                        if (history.current_medications) document.getElementById('current_medications').value = history.current_medications;
+                        if (history.chronic_conditions) document.getElementById('chronic_conditions').value = history.chronic_conditions;
+                        if (history.surgical_history) document.getElementById('surgical_history').value = history.surgical_history;
+                        if (history.family_history) document.getElementById('family_history').value = history.family_history;
+                        if (history.smoking_status) {
+                            const smoking = document.querySelector(`input[name="smoking_status"][value="${history.smoking_status}"]`);
+                            if (smoking) smoking.checked = true;
+                        }
+                        if (history.alcohol_consumption) document.getElementById('alcohol_consumption').value = history.alcohol_consumption;
+                        if (history.exercise_frequency) document.getElementById('exercise_frequency').value = history.exercise_frequency;
+                        
+                        // Change button text for update
+                        document.querySelector('#btn-save').textContent = 'Update and Continue Booking';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading medical history:', error);
+            }
+        }
+        
+        // Load existing history on page load
+        loadExistingHistory();
+    </script>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3">
+        <div class="container">
+            <div class="row g-3">
+                <!-- Brand & Description -->
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="mb-3">
+                        <i class="bi bi-heart-pulse me-2 text-primary"></i>
+                        <span id="footer-brand">Sahatak | صحتك</span>
+                    </h5>
+                    <div class="d-flex gap-3 social-links">
+                        <a href="https://facebook.com/sahatak" target="_blank" rel="noopener"><i class="bi bi-facebook fs-5"></i></a>
+                        <a href="https://twitter.com/sahatak" target="_blank" rel="noopener"><i class="bi bi-twitter fs-5"></i></a>
+                        <a href="https://instagram.com/sahatak" target="_blank" rel="noopener"><i class="bi bi-instagram fs-5"></i></a>
+                        <a href="https://linkedin.com/company/sahatak" target="_blank" rel="noopener"><i class="bi bi-linkedin fs-5"></i></a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="mb-3" id="footer-links-title">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="../../../common/about.html" class="text-muted text-decoration-none" id="footer-about">About Platform</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="../../../common/services.html" class="text-muted text-decoration-none" id="footer-services">Services</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="mb-3" id="footer-support-title">Support & Help</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="../../../common/support.html" class="text-muted text-decoration-none" id="footer-help">Help Center</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="../../../common/contact-us.html" class="text-muted text-decoration-none" id="footer-contact">Contact Us</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Emergency Contact -->
+                <div class="col-lg-3 col-md-6 emergency-section">
+                    <p class="mb-2 text-danger fw-bold" id="footer-emergency-text">
+                        For medical emergencies
+                    </p>
+                    <p class="mb-3 text-danger fw-bold fs-6" id="footer-emergency-action">
+                        <i class="bi bi-hospital me-2"></i>
+                        Go to nearest ER hospital
+                    </p>
+                    <p class="mb-0 text-muted small" id="footer-emergency-note">
+                        For non-urgent consultations use the platform
+                    </p>
+                </div>
+            </div>
+
+            <!-- Bottom Bar -->
+            <hr class="my-3">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="mb-0 fw-bold" id="footer-copyright">
+                        © 2025 Sahatak. All rights reserved.
+                    </p>
+                    <p class="mb-0 text-muted small mt-1" id="footer-medical-disclaimer">
+                        This platform does not replace visiting a doctor in emergency cases
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

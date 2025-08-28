@@ -238,42 +238,42 @@
                                     </h6>
                                     
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Patient ID</label>
+                                        <label class="form-label fw-bold" id="label-patient-id">Patient ID</label>
                                         <p class="form-control-plaintext" id="patientId">PAT-2024-001</p>
                                     </div>
                                     
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Full Name</label>
+                                        <label class="form-label fw-bold" id="label-full-name">Full Name</label>
                                         <p class="form-control-plaintext" id="profileFullName">Ahmed Mohamed</p>
                                     </div>
                                     
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Email Address</label>
+                                        <label class="form-label fw-bold" id="label-email">Email Address</label>
                                         <p class="form-control-plaintext" id="profileEmail">ahmed.mohamed@example.com</p>
                                     </div>
                                     
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Phone Number</label>
-                                        <p class="form-control-plaintext" id="profilePhone">+20 123 456 7890</p>
+                                        <label class="form-label fw-bold" id="label-phone">Phone Number</label>
+                                        <input type="tel" class="form-control" id="profilePhone" placeholder="+249 123456789">
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Date of Birth</label>
+                                        <label class="form-label fw-bold" id="label-date-of-birth">Date of Birth</label>
                                         <p class="form-control-plaintext" id="profileDOB">15/03/1985</p>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Gender</label>
+                                        <label class="form-label fw-bold" id="label-gender">Gender</label>
                                         <p class="form-control-plaintext" id="profileGender">Male</p>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Blood Type</label>
+                                        <label class="form-label fw-bold" id="label-blood-type">Blood Type</label>
                                         <p class="form-control-plaintext" id="profileBloodType">O+</p>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">National ID</label>
+                                        <label class="form-label fw-bold" id="label-national-id">National ID</label>
                                         <p class="form-control-plaintext" id="profileNationalId">29503151234567</p>
                                     </div>
                                 </div>
@@ -287,27 +287,27 @@
                                     </h6>
                                     
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Allergies</label>
+                                        <label class="form-label fw-bold" id="label-allergies">Allergies</label>
                                         <p class="form-control-plaintext" id="profileAllergies">Penicillin, Pollen</p>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Chronic Conditions</label>
+                                        <label class="form-label fw-bold" id="label-chronic-conditions">Chronic Conditions</label>
                                         <p class="form-control-plaintext" id="profileChronicConditions">Hypertension, Diabetes Type 2</p>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Current Medications</label>
+                                        <label class="form-label fw-bold" id="label-current-medications">Current Medications</label>
                                         <p class="form-control-plaintext" id="profileMedications">Metformin 500mg, Lisinopril 10mg</p>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Insurance Provider</label>
+                                        <label class="form-label fw-bold" id="label-insurance-provider">Insurance Provider</label>
                                         <p class="form-control-plaintext" id="profileInsurance">Blue Cross Blue Shield</p>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Insurance Number</label>
+                                        <label class="form-label fw-bold" id="label-insurance-number">Insurance Number</label>
                                         <p class="form-control-plaintext" id="profileInsuranceNumber">INS-123456789</p>
                                     </div>
 
@@ -476,9 +476,6 @@
                                             <button class="btn btn-outline-primary btn-sm me-2" onclick="changePassword()">
                                                 <i class="bi bi-key me-1"></i><span id="change-password">Change Password</span>
                                             </button>
-                                            <button class="btn btn-outline-secondary btn-sm" onclick="enableTwoFactor()">
-                                                <i class="bi bi-shield-check me-1"></i><span id="two-factor">Two-Factor Authentication</span>
-                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -604,6 +601,26 @@
             window.location.href = '../medical/patient/comm-hub.html';
         }
         
+        function showLanguageSelector() {
+            console.log('Language selector clicked');
+            // Toggle between Arabic and English
+            const currentLang = LanguageManager.getLanguage() || 'ar';
+            const newLang = currentLang === 'ar' ? 'en' : 'ar';
+            
+            // Change language
+            LanguageManager.setLanguage(newLang);
+            LanguageManager.applyLanguage(newLang);
+            
+            // Update dashboard translations (call after applyLanguage to ensure footer is properly updated)
+            if (DashboardTranslations && DashboardTranslations.updatePatientDashboard) {
+                DashboardTranslations.updatePatientDashboard(newLang);
+            }
+            
+            // Update the language button text
+            const langBtn = document.getElementById('current-lang');
+            langBtn.textContent = newLang === 'ar' ? 'العربية' : 'English';
+        }
+        
         function showProfile() {
             console.log('Show profile clicked');
             const profileSection = document.getElementById('profile-section');
@@ -619,6 +636,13 @@
             if (profileSection.style.display === 'block') {
                 profileSection.scrollIntoView({ behavior: 'smooth' });
                 loadUserProfile();
+                
+                // Update translations for profile section
+                const currentLang = LanguageManager.getLanguage() || 'ar';
+                const translations = LanguageManager.translations[currentLang];
+                if (translations && translations.dashboard && translations.dashboard.patient && translations.dashboard.patient.profile) {
+                    DashboardTranslations.updateProfileAndSettings(translations.dashboard.patient.profile, null);
+                }
             }
         }
 
@@ -680,6 +704,13 @@
             if (settingsSection.style.display === 'block') {
                 settingsSection.scrollIntoView({ behavior: 'smooth' });
                 loadUserSettings();
+                
+                // Update translations for settings section
+                const currentLang = LanguageManager.getLanguage() || 'ar';
+                const translations = LanguageManager.translations[currentLang];
+                if (translations && translations.dashboard && translations.dashboard.patient && translations.dashboard.patient.settings) {
+                    DashboardTranslations.updateProfileAndSettings(null, translations.dashboard.patient.settings);
+                }
             }
         }
 
