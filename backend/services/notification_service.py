@@ -79,10 +79,6 @@ class NotificationService:
             else:
                 app_logger.warning(f"No email provided for appointment {notification_type}")
                 return False
-                )
-                success = success or sms_success
-            
-            return success
             
         except Exception as e:
             app_logger.error(f"Appointment notification error: {str(e)}")
