@@ -1,0 +1,715 @@
+{
+	"info": {
+		"name": "03 - Appointments Tests",
+		"description": "Complete appointment lifecycle testing - booking, managing, and integration",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Setup - Authentication",
+			"item": [
+				{
+					"name": "Login Patient for Appointments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"patient.test@example.com\",\n  \"password\": \"patient123\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/api/auth/login",
+							"host": ["{{backend_url}}"],
+							"path": ["api", "auth", "login"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Patient login successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.environment.set('patient_token', jsonData.data.token);",
+									"    pm.environment.set('patient_id', jsonData.data.user.id);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Login Doctor for Appointments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"doctor.test@example.com\",\n  \"password\": \"doctor123\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/api/auth/login",
+							"host": ["{{backend_url}}"],
+							"path": ["api", "auth", "login"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Doctor login successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.environment.set('doctor_token', jsonData.data.token);",
+									"    pm.environment.set('doctor_id', jsonData.data.user.id);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Doctor Discovery",
+			"item": [
+				{
+					"name": "Get Available Doctors",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patient_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{backend_url}}/api/appointments/doctors",
+							"host": ["{{backend_url}}"],
+							"path": ["api", "appointments", "doctors"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Available doctors retrieved', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data.doctors).to.be.an('array');",
+									"    if (jsonData.data.doctors.length > 0) {",
+									"        pm.environment.set('available_doctor_id', jsonData.data.doctors[0].id);",
+									"        console.log('Doctor ID saved:', jsonData.data.doctors[0].id);",
+									"    }",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Search Doctors by Specialty",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patient_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{backend_url}}/api/appointments/doctors?specialty=general",
+							"host": ["{{backend_url}}"],
+							"path": ["api", "appointments", "doctors"],
+							"query": [
+								{
+									"key": "specialty",
+									"value": "general"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Doctors filtered by specialty', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data.doctors).to.be.an('array');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Get Doctor Availability",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patient_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{backend_url}}/api/appointments/doctors/{{available_doctor_id}}/availability",
+							"host": ["{{backend_url}}"],
+							"path": ["api", "appointments", "doctors", "{{available_doctor_id}}", "availability"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Doctor availability retrieved', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('available_slots');",
+									"    ",
+									"    // Save first available slot for booking",
+									"    if (jsonData.data.available_slots && jsonData.data.available_slots.length > 0) {",
+									"        pm.environment.set('available_slot', jsonData.data.available_slots[0]);",
+									"        console.log('Available slot saved:', jsonData.data.available_slots[0]);",
+									"    }",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Appointment Booking",
+			"item": [
+				{
+					"name": "Create New Appointment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patient_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"doctor_id\": {{available_doctor_id}},\n  \"appointment_date\": \"2024-02-15T10:00:00Z\",\n  \"appointment_type\": \"video\",\n  \"reason_for_visit\": \"Regular checkup\",\n  \"symptoms\": \"Feeling tired lately, want to get checked\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/api/appointments",
+							"host": ["{{backend_url}}"],
+							"path": ["api", "appointments"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Appointment created successfully', function () {",
+									"    pm.response.to.have.status(201);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('appointment_id');",
+									"    pm.expect(jsonData.data.status).to.equal('scheduled');",
+									"    ",
+									"    // Save appointment ID for further tests",
+									"    pm.environment.set('appointment_id', jsonData.data.appointment_id);",
+									"    console.log('Appointment ID saved:', jsonData.data.appointment_id);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Book Appointment with Invalid Date",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patient_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"doctor_id\": {{available_doctor_id}},\n  \"appointment_date\": \"2023-01-01T10:00:00Z\",\n  \"appointment_type\": \"video\",\n  \"reason_for_visit\": \"Test past date\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/api/appointments",
+							"host": ["{{backend_url}}"],
+							"path": ["api", "appointments"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Past date appointment rejected', function () {",
+									"    pm.response.to.have.status(400);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.false;",
+									"    pm.expect(jsonData.message).to.include('past');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Book Duplicate Appointment Slot",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patient_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"doctor_id\": {{available_doctor_id}},\n  \"appointment_date\": \"2024-02-15T10:00:00Z\",\n  \"appointment_type\": \"video\",\n  \"reason_for_visit\": \"Duplicate slot test\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/api/appointments",
+							"host": ["{{backend_url}}"],
+							"path": ["api", "appointments"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Duplicate slot booking rejected', function () {",
+									"    pm.response.to.have.status(409);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.false;",
+									"    pm.expect(jsonData.message).to.include('already booked');",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Appointment Management",
+			"item": [
+				{
+					"name": "Get Patient Appointments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patient_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{backend_url}}/api/appointments",
+							"host": ["{{backend_url}}"],
+							"path": ["api", "appointments"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Patient appointments retrieved', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data.appointments).to.be.an('array');",
+									"    pm.expect(jsonData.data.appointments.length).to.be.greaterThan(0);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Get Appointment Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patient_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{backend_url}}/api/appointments/{{appointment_id}}",
+							"host": ["{{backend_url}}"],
+							"path": ["api", "appointments", "{{appointment_id}}"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Appointment details retrieved', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('appointment_id');",
+									"    pm.expect(jsonData.data).to.have.property('doctor_info');",
+									"    pm.expect(jsonData.data).to.have.property('appointment_date');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Reschedule Appointment",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patient_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"new_appointment_date\": \"2024-02-16T14:00:00Z\",\n  \"reason\": \"Schedule conflict\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/api/appointments/{{appointment_id}}/reschedule",
+							"host": ["{{backend_url}}"],
+							"path": ["api", "appointments", "{{appointment_id}}", "reschedule"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Appointment rescheduled successfully', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data.status).to.equal('rescheduled');",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Doctor Appointment Views",
+			"item": [
+				{
+					"name": "Get Doctor Appointments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{doctor_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{backend_url}}/api/appointments",
+							"host": ["{{backend_url}}"],
+							"path": ["api", "appointments"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Doctor appointments retrieved', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data.appointments).to.be.an('array');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Confirm Appointment (Doctor)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{doctor_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"confirmed\",\n  \"notes\": \"Appointment confirmed by doctor\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/api/appointments/{{appointment_id}}/status",
+							"host": ["{{backend_url}}"],
+							"path": ["api", "appointments", "{{appointment_id}}", "status"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Appointment confirmed by doctor', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data.status).to.equal('confirmed');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Complete Appointment with Notes",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{doctor_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"completed\",\n  \"diagnosis\": \"General fatigue, recommend more rest\",\n  \"notes\": \"Patient reports feeling better after discussion\",\n  \"prescription\": \"Vitamin D supplement, 1000 IU daily\",\n  \"follow_up_date\": \"2024-03-15T10:00:00Z\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/api/appointments/{{appointment_id}}/status",
+							"host": ["{{backend_url}}"],
+							"path": ["api", "appointments", "{{appointment_id}}", "status"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Appointment completed with notes', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data.status).to.equal('completed');",
+									"    pm.expect(jsonData.data).to.have.property('diagnosis');",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Appointment Cancellation",
+			"item": [
+				{
+					"name": "Create Test Appointment for Cancellation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patient_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"doctor_id\": {{available_doctor_id}},\n  \"appointment_date\": \"2024-02-20T15:00:00Z\",\n  \"appointment_type\": \"audio\",\n  \"reason_for_visit\": \"Test appointment for cancellation\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/api/appointments",
+							"host": ["{{backend_url}}"],
+							"path": ["api", "appointments"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Test appointment created', function () {",
+									"    pm.response.to.have.status(201);",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set('cancellation_appointment_id', jsonData.data.appointment_id);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Cancel Appointment (Patient)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patient_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reason\": \"Personal emergency, need to cancel\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/api/appointments/{{cancellation_appointment_id}}/cancel",
+							"host": ["{{backend_url}}"],
+							"path": ["api", "appointments", "{{cancellation_appointment_id}}", "cancel"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Appointment cancelled successfully', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data.status).to.equal('cancelled');",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Integration Tests",
+			"item": [
+				{
+					"name": "Verify Appointment in Message System",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{patient_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{backend_url}}/api/messages/conversations/appointment/{{appointment_id}}",
+							"host": ["{{backend_url}}"],
+							"path": ["api", "messages", "conversations", "appointment", "{{appointment_id}}"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Appointment-linked conversation created', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('conversation');",
+									"    pm.expect(jsonData.data).to.have.property('appointment');",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global test for all requests",
+					"pm.test('Response time is acceptable', function () {",
+					"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+					"});",
+					"",
+					"pm.test('Response has proper JSON structure', function () {",
+					"    pm.response.to.be.json;",
+					"    var jsonData = pm.response.json();",
+					"    pm.expect(jsonData).to.have.property('success');",
+					"});"
+				]
+			}
+		}
+	]
+}
