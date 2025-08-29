@@ -1452,7 +1452,7 @@ class Message(db.Model):
     read_at = db.Column(db.DateTime, nullable=True)
     
     # Metadata
-    metadata = db.Column(db.JSON, nullable=True)  # For storing additional message context
+    message_metadata = db.Column(db.JSON, nullable=True)  # For storing additional message context
     
     # Relationships
     conversation = db.relationship('Conversation', back_populates='messages')
@@ -1476,7 +1476,7 @@ class Message(db.Model):
             'is_system_message': self.is_system_message,
             'created_at': self.created_at.isoformat(),
             'read_at': self.read_at.isoformat() if self.read_at else None,
-            'metadata': self.conversation_metadata,
+            'metadata': self.message_metadata,
             'sender_info': {
                 'id': self.sender.id,
                 'name': self.sender.full_name,
