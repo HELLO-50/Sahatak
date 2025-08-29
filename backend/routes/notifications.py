@@ -56,7 +56,7 @@ def update_notification_preferences():
         
         if current_user.user_type == 'patient':
             # Validate patient notification preferences
-            valid_methods = ['email', 'sms', 'both']
+            valid_methods = ['email']
             if 'preferred_contact_method' in data:
                 if data['preferred_contact_method'] not in valid_methods:
                     return error_response('Invalid contact method', 400)
@@ -83,7 +83,7 @@ def update_notification_preferences():
                 
         elif current_user.user_type == 'doctor':
             # Validate doctor notification preferences
-            valid_methods = ['email', 'sms', 'both']
+            valid_methods = ['email']
             if 'patient_notification_method' in data:
                 if data['patient_notification_method'] not in valid_methods:
                     return error_response('Invalid notification method', 400)

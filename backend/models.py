@@ -177,7 +177,7 @@ class Patient(db.Model):
     medical_history_completed = db.Column(db.Boolean, default=False, nullable=False)
     medical_history_last_updated = db.Column(db.DateTime, nullable=True)
     # Notification preferences
-    preferred_contact_method = db.Column(db.Enum('email', 'sms', 'both', name='contact_methods'), default='email', nullable=False)
+    preferred_contact_method = db.Column(db.Enum('email', name='contact_methods'), default='email', nullable=False)
     notification_preferences = db.Column(db.JSON, nullable=True)  # Store detailed notification settings
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
@@ -270,7 +270,7 @@ class Doctor(db.Model):
     office_address = db.Column(db.Text, nullable=True)
     emergency_contact = db.Column(db.String(20), nullable=True)
     # Notification preferences for communicating with patients
-    patient_notification_method = db.Column(db.Enum('email', 'sms', 'both', name='doctor_contact_methods'), default='email', nullable=False)
+    patient_notification_method = db.Column(db.Enum('email', name='doctor_contact_methods'), default='email', nullable=False)
     notification_settings = db.Column(db.JSON, nullable=True)  # Detailed notification settings
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
@@ -847,10 +847,10 @@ class NotificationQueue(db.Model):
     __tablename__ = 'notification_queue'
     
     id = db.Column(db.Integer, primary_key=True)
-    recipient_type = db.Column(db.Enum('user', 'email', 'phone', name='recipient_types'), nullable=False)
+    recipient_type = db.Column(db.Enum('user', 'email', name='recipient_types'), nullable=False)
     recipient_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)  # For user notifications
-    recipient_value = db.Column(db.String(255), nullable=True)  # Email or phone for direct notifications
-    notification_type = db.Column(db.Enum('email', 'sms', 'push', 'in_app', name='notification_types'), nullable=False)
+    recipient_value = db.Column(db.String(255), nullable=True)  # Email for direct notifications
+    notification_type = db.Column(db.Enum('email', 'push', 'in_app', name='notification_types'), nullable=False)
     priority = db.Column(db.Enum('low', 'normal', 'high', 'urgent', name='notification_priorities'), default='normal')
     
     # Notification content

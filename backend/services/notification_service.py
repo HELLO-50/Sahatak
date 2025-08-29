@@ -1,7 +1,6 @@
 from typing import Dict, Any, Optional, List
 from utils.logging_config import app_logger
 from .email_service import send_registration_confirmation_email, send_appointment_reminder, send_appointment_confirmation, send_appointment_cancellation
-from .sms_service import send_registration_confirmation_sms, send_appointment_reminder_sms, send_appointment_confirmation_sms, send_appointment_cancellation_sms
 
 
 class NotificationService:
@@ -22,40 +21,26 @@ class NotificationService:
         language: str = 'ar'
     ) -> bool:
         """
-        Send registration confirmation via user's preferred method
+        Send registration confirmation via email
         
         Args:
-            user_data: User registration details (must include email and/or phone)
-            preferred_method: 'email', 'sms', or 'both'
+            user_data: User registration details (must include email)
+            preferred_method: 'email' (kept for compatibility)
             language: Language preference ('ar' or 'en')
             
         Returns:
-            bool: True if at least one notification sent successfully
+            bool: True if notification sent successfully
         """
         try:
-            success = False
-            
-            if preferred_method in ['email', 'both']:
-                email = user_data.get('email')
-                if email:
-                    email_success = send_registration_confirmation_email(email, user_data, language)
-                    success = success or email_success
-                    if email_success:
-                        app_logger.info(f"Registration confirmation email sent to {email}")
-                else:
-                    app_logger.warning("Email registration confirmation requested but no email provided")
-            
-            if preferred_method in ['sms', 'both']:
-                phone = user_data.get('phone')
-                if phone:
-                    sms_success = send_registration_confirmation_sms(phone, user_data, language)
-                    success = success or sms_success
-                    if sms_success:
-                        app_logger.info(f"Registration confirmation SMS sent to {phone}")
-                else:
-                    app_logger.warning("SMS registration confirmation requested but no phone provided")
-            
-            return success
+            email = user_data.get('email')
+            if email:
+                email_success = send_registration_confirmation_email(email, user_data, language)
+                if email_success:
+                    app_logger.info(f"Registration confirmation email sent to {email}")
+                return email_success
+            else:
+                app_logger.warning("Email registration confirmation requested but no email provided")
+                return False
             
         except Exception as e:
             app_logger.error(f"Registration confirmation notification error: {str(e)}")
@@ -70,34 +55,30 @@ class NotificationService:
         reminder_type: str = '24h'  # Only used for reminders
     ) -> bool:
         """
-        Send appointment notifications via preferred method
+        Send appointment notifications via email
         
         Args:
-            appointment_data: Appointment details (must include patient email/phone)
+            appointment_data: Appointment details (must include patient email)
             notification_type: 'confirmation', 'reminder', 'cancellation'
-            preferred_method: 'email', 'sms', or 'both'
+            preferred_method: 'email' (kept for compatibility)
             language: Language preference ('ar' or 'en')
             reminder_type: Type of reminder ('24h', '1h', 'now') - only for reminders
             
         Returns:
-            bool: True if at least one notification sent successfully
+            bool: True if notification sent successfully
         """
         try:
-            success = False
-            
             # Get recipient contact info
             recipient_email = appointment_data.get('patient_email') or appointment_data.get('email')
-            recipient_phone = appointment_data.get('patient_phone') or appointment_data.get('phone')
             
-            if preferred_method in ['email', 'both'] and recipient_email:
+            if recipient_email:
                 email_success = self._send_appointment_email(
                     recipient_email, appointment_data, notification_type, language, reminder_type
                 )
-                success = success or email_success
-            
-            if preferred_method in ['sms', 'both'] and recipient_phone:
-                sms_success = self._send_appointment_sms(
-                    recipient_phone, appointment_data, notification_type, language, reminder_type
+                return email_success
+            else:
+                app_logger.warning(f"No email provided for appointment {notification_type}")
+                return False
                 )
                 success = success or sms_success
             
@@ -131,29 +112,6 @@ class NotificationService:
             app_logger.error(f"Appointment email error: {str(e)}")
             return False
     
-    def _send_appointment_sms(
-        self, 
-        recipient_phone: str, 
-        appointment_data: Dict[str, Any], 
-        notification_type: str, 
-        language: str,
-        reminder_type: str
-    ) -> bool:
-        """Send appointment SMS based on type"""
-        try:
-            if notification_type == 'confirmation':
-                return send_appointment_confirmation_sms(recipient_phone, appointment_data, language)
-            elif notification_type == 'reminder':
-                return send_appointment_reminder_sms(recipient_phone, appointment_data, language, reminder_type)
-            elif notification_type == 'cancellation':
-                return send_appointment_cancellation_sms(recipient_phone, appointment_data, language)
-            else:
-                app_logger.error(f"Unknown SMS notification type: {notification_type}")
-                return False
-                
-        except Exception as e:
-            app_logger.error(f"Appointment SMS error: {str(e)}")
-            return False
     
     def send_doctor_notification(
         self,
@@ -164,22 +122,21 @@ class NotificationService:
         language: str = 'ar'
     ) -> bool:
         """
-        Send notifications from doctors to patients
+        Send notifications from doctors to patients via email
         
         Args:
             doctor_data: Doctor information
-            patient_data: Patient information (must include email/phone)
+            patient_data: Patient information (must include email)
             message_content: Message details and content
-            preferred_method: 'email', 'sms', or 'both'
+            preferred_method: 'email' (kept for compatibility)
             language: Language preference ('ar' or 'en')
             
         Returns:
-            bool: True if at least one notification sent successfully
+            bool: True if notification sent successfully
         """
         try:
             # This is a placeholder for doctor-to-patient communications
             # Can be expanded based on specific requirements
-            success = False
             
             message_data = {
                 **message_content,
@@ -188,21 +145,14 @@ class NotificationService:
                 'language': language
             }
             
-            if preferred_method in ['email', 'both']:
-                email = patient_data.get('email')
-                if email:
-                    # For now, log the message - can be extended with custom templates
-                    app_logger.info(f"Doctor message email to {email}: {message_content.get('subject', 'No subject')}")
-                    success = True
-            
-            if preferred_method in ['sms', 'both']:
-                phone = patient_data.get('phone')
-                if phone:
-                    # For now, log the message - can be extended with custom templates
-                    app_logger.info(f"Doctor message SMS to {phone}: {message_content.get('message', 'No message')}")
-                    success = True
-            
-            return success
+            email = patient_data.get('email')
+            if email:
+                # For now, log the message - can be extended with custom templates
+                app_logger.info(f"Doctor message email to {email}: {message_content.get('subject', 'No subject')}")
+                return True
+            else:
+                app_logger.warning("Doctor notification requested but no patient email provided")
+                return False
             
         except Exception as e:
             app_logger.error(f"Doctor notification error: {str(e)}")

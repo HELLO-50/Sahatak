@@ -704,6 +704,74 @@ const AppointmentBooking = {
         }, 5000);
     },
 
+    // Get user appointments
+    async getUserAppointments(filters = {}) {
+        try {
+            const params = new URLSearchParams();
+            if (filters.status) params.append('status', filters.status);
+            if (filters.from_date) params.append('from_date', filters.from_date);
+            if (filters.to_date) params.append('to_date', filters.to_date);
+            
+            const response = await ApiHelper.makeRequest(`/appointments/${params ? '?' + params : ''}`);
+            return response;
+        } catch (error) {
+            console.error('Error fetching appointments:', error);
+            this.showError('Failed to load appointments');
+            return null;
+        }
+    },
+
+    // Get appointment details
+    async getAppointmentDetails(appointmentId) {
+        try {
+            const response = await ApiHelper.makeRequest(`/appointments/${appointmentId}`);
+            return response;
+        } catch (error) {
+            console.error('Error fetching appointment details:', error);
+            this.showError('Failed to load appointment details');
+            return null;
+        }
+    },
+
+    // Cancel appointment
+    async cancelAppointment(appointmentId, reason = '') {
+        try {
+            const response = await ApiHelper.makeRequest(`/appointments/${appointmentId}/cancel`, {
+                method: 'PUT',
+                body: JSON.stringify({ cancellation_reason: reason })
+            });
+            if (response.success) {
+                this.showSuccess('Appointment cancelled successfully');
+            }
+            return response;
+        } catch (error) {
+            console.error('Error cancelling appointment:', error);
+            this.showError('Failed to cancel appointment');
+            return null;
+        }
+    },
+
+    // Reschedule appointment
+    async rescheduleAppointment(appointmentId, newDateTime, reason = '') {
+        try {
+            const response = await ApiHelper.makeRequest(`/appointments/${appointmentId}/reschedule`, {
+                method: 'PUT',
+                body: JSON.stringify({ 
+                    new_date_time: newDateTime,
+                    reschedule_reason: reason 
+                })
+            });
+            if (response.success) {
+                this.showSuccess('Appointment rescheduled successfully');
+            }
+            return response;
+        } catch (error) {
+            console.error('Error rescheduling appointment:', error);
+            this.showError('Failed to reschedule appointment');
+            return null;
+        }
+    },
+
     showSuccess(message) {
         // Enhanced success display with toast-like notification
         const successDiv = document.createElement('div');

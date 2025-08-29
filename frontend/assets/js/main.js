@@ -1309,6 +1309,72 @@ async function logout() {
 }
 
 
+// Get current user info
+async function getCurrentUser() {
+    try {
+        const response = await ApiHelper.makeRequest('/auth/me', {
+            method: 'GET'
+        });
+        
+        if (response.success) {
+            // Store user info in localStorage
+            localStorage.setItem('sahatak_user_id', response.data.id);
+            localStorage.setItem('sahatak_user_name', response.data.full_name);
+            localStorage.setItem('sahatak_user_email', response.data.email);
+            localStorage.setItem('sahatak_user_type', response.data.user_type);
+            return response.data;
+        }
+        return null;
+    } catch (error) {
+        console.error('Error fetching current user:', error);
+        return null;
+    }
+}
+
+// Change password
+async function changePassword(currentPassword, newPassword) {
+    try {
+        const response = await ApiHelper.makeRequest('/auth/change-password', {
+            method: 'POST',
+            body: JSON.stringify({
+                current_password: currentPassword,
+                new_password: newPassword
+            })
+        });
+        
+        if (response.success) {
+            showNotification('success', 'Password changed successfully');
+        } else {
+            showNotification('error', response.message || 'Failed to change password');
+        }
+        return response;
+    } catch (error) {
+        console.error('Error changing password:', error);
+        showNotification('error', 'Failed to change password');
+        return null;
+    }
+}
+
+// Update language preference
+async function updateLanguagePreference(language) {
+    try {
+        const response = await ApiHelper.makeRequest('/auth/update-language', {
+            method: 'POST',
+            body: JSON.stringify({ language })
+        });
+        
+        if (response.success) {
+            localStorage.setItem('sahatak_language', language);
+            // Reload page to apply language changes
+            window.location.reload();
+        }
+        return response;
+    } catch (error) {
+        console.error('Error updating language:', error);
+        return null;
+    }
+}
+
 // Set up form event listeners when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     // Only attach form event listeners if the forms exist (not on dashboard pages)

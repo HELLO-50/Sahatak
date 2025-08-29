@@ -115,9 +115,7 @@ class SettingsManager:
             'enable_video_calls': cls.get_setting('enable_video_calls', True, 'boolean'),
             'enable_prescription_module': cls.get_setting('enable_prescription_module', True, 'boolean'),
             'enable_ai_assessment': cls.get_setting('enable_ai_assessment', True, 'boolean'),
-            'enable_sms_reminders': cls.get_setting('enable_sms_reminders', True, 'boolean'),
             'email_notifications_enabled': cls.get_setting('email_notifications_enabled', True, 'boolean'),
-            'sms_notifications_enabled': cls.get_setting('sms_notifications_enabled', True, 'boolean'),
             'maintenance_mode': cls.get_setting('maintenance_mode', False, 'boolean'),
             'registration_enabled': cls.get_setting('registration_enabled', True, 'boolean'),
         }

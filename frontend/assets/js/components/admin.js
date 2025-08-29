@@ -354,9 +354,97 @@ const AdminAPI = {
         return this.makeRequest('/health/detailed');
     },
 
-    // Notification APIs
+    // User Management APIs
+    async getAllUsers(filters = {}) {
+        const params = new URLSearchParams();
+        if (filters.page) params.append('page', filters.page);
+        if (filters.per_page) params.append('per_page', filters.per_page);
+        if (filters.user_type) params.append('user_type', filters.user_type);
+        if (filters.is_active) params.append('is_active', filters.is_active);
+        
+        return this.makeRequest(`/admin/users${params ? '?' + params : ''}`);
+    },
+
+    async getUserDetails(userId) {
+        return this.makeRequest(`/admin/users/${userId}`);
+    },
+
+    async toggleUserStatus(userId) {
+        return this.makeRequest(`/admin/users/${userId}/toggle-status`, {
+            method: 'POST'
+        });
+    },
+
+    async createAdminUser(adminData) {
+        return this.makeRequest('/admin/create-admin', {
+            method: 'POST',
+            body: JSON.stringify(adminData)
+        });
+    },
+
+    async initFirstAdmin(adminData) {
+        return this.makeRequest('/admin/init-first-admin', {
+            method: 'POST',
+            body: JSON.stringify(adminData)
+        });
+    },
+
+    // Platform Settings APIs (updated paths)
+    async getPlatformSettings() {
+        return this.makeRequest('/admin/settings');
+    },
+
+    async updatePlatformSettings(settings) {
+        return this.makeRequest('/admin/settings', {
+            method: 'PUT',
+            body: JSON.stringify(settings)
+        });
+    },
+
+    // Analytics APIs (updated paths)
+    async getAdminDashboard(period = 'week') {
+        return this.makeRequest(`/admin/analytics/dashboard?period=${period}`);
+    },
+
+    async getDetailedHealthStatus() {
+        return this.makeRequest('/admin/health/detailed');
+    },
+
+    // Audit Log APIs
+    async getAuditLogs(filters = {}) {
+        const params = new URLSearchParams();
+        if (filters.page) params.append('page', filters.page);
+        if (filters.per_page) params.append('per_page', filters.per_page);
+        if (filters.action_type) params.append('action_type', filters.action_type);
+        if (filters.user_id) params.append('user_id', filters.user_id);
+        if (filters.from_date) params.append('from_date', filters.from_date);
+        if (filters.to_date) params.append('to_date', filters.to_date);
+        
+        return this.makeRequest(`/admin/audit-logs${params ? '?' + params : ''}`);
+    },
+
+    async getAuditLogDetails(logId) {
+        return this.makeRequest(`/admin/audit-logs/${logId}`);
+    },
+
+    // Doctor Management APIs
+    async createDoctorAccount(doctorData) {
+        return this.makeRequest('/admin/doctors', {
+            method: 'POST',
+            body: JSON.stringify(doctorData)
+        });
+    },
+
+    async verifyDoctor(doctorId, notes = '') {
+        return this.makeRequest(`/admin/doctors/${doctorId}/verify`, {
+            method: 'POST',
+            body: JSON.stringify({ notes })
+        });
+    },
+
+    // Notification APIs (updated path)
     async sendBroadcastNotification(notification) {
-        return this.makeRequest('/notifications/broadcast', {
+        return this.makeRequest('/admin/notifications/broadcast', {
             method: 'POST',
             body: JSON.stringify(notification)
         });

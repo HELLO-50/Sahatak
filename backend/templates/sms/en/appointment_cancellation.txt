@@ -1,1 +1,0 @@
-Cancelled: Appointment with Dr.{{ doctor_name }} on {{ appointment_date }} cancelled. Sahatak

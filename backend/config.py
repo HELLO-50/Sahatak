@@ -32,11 +32,6 @@ class Config:
     LANGUAGES = os.getenv('LANGUAGES', 'ar,en').split(',')
     DEFAULT_LANGUAGE = os.getenv('DEFAULT_LANGUAGE', 'ar')
     
-    # SMS Configuration (for AfricasTalking)
-    SMS_USERNAME = os.getenv('SMS_USERNAME', 'sandbox')
-    SMS_API_KEY = os.getenv('SMS_API_KEY')
-    SMS_SENDER_ID = os.getenv('SMS_SENDER_ID', 'SAHATAK')
-    
     # Validation settings
     PASSWORD_MIN_LENGTH = int(os.getenv('PASSWORD_MIN_LENGTH', 6))
     PASSWORD_MAX_LENGTH = int(os.getenv('PASSWORD_MAX_LENGTH', 128))

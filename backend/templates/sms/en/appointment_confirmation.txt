@@ -1,1 +1,0 @@
-Confirmed: Appointment booked with Dr.{{ doctor_name }} on {{ appointment_date }} at {{ appointment_time }}. Sahatak

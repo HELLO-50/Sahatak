@@ -125,6 +125,61 @@ const MedicalRecordsAPI = {
     }
 };
 
+// Additional Medical History API endpoints
+const MedicalHistoryAPI = {
+    // Get patient medical history
+    async getPatientMedicalHistory(patientId) {
+        try {
+            const response = await ApiHelper.makeRequest(`/medical-history/patient/${patientId}`);
+            
+            if (response.success) {
+                return {
+                    success: true,
+                    data: response.data
+                };
+            } else {
+                console.error('Error fetching patient medical history:', response.message);
+                return {
+                    success: false,
+                    error: response.message || 'Failed to load medical history'
+                };
+            }
+        } catch (error) {
+            console.error('Error fetching patient medical history:', error);
+            return {
+                success: false,
+                error: 'Failed to load medical history'
+            };
+        }
+    },
+
+    // Check medical history completion status
+    async checkMedicalHistoryCompletion() {
+        try {
+            const response = await ApiHelper.makeRequest('/medical-history/check-completion');
+            
+            if (response.success) {
+                return {
+                    success: true,
+                    data: response.data
+                };
+            } else {
+                console.error('Error checking medical history completion:', response.message);
+                return {
+                    success: false,
+                    error: response.message || 'Failed to check completion status'
+                };
+            }
+        } catch (error) {
+            console.error('Error checking medical history completion:', error);
+            return {
+                success: false,
+                error: 'Failed to check completion status'
+            };
+        }
+    }
+};
+
 // Prescription Management API
 const PrescriptionsAPI = {
     // Get prescriptions with optional filters
