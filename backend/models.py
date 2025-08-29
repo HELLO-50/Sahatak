@@ -1295,3 +1295,263 @@ class ConsultationSession(db.Model):
     
     def __repr__(self):
         return f'<ConsultationSession {self.id} for appointment {self.appointment_id}>'
+
+
+class Conversation(db.Model):
+    """
+    Conversation between patient and doctor
+    Organizes messages into conversations/threads
+    """
+    __tablename__ = 'conversations'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    
+    # Participants
+    patient_id = db.Column(db.Integer, db.ForeignKey('patients.id'), nullable=False, index=True)
+    doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=False, index=True)
+    
+    # Optional appointment context
+    appointment_id = db.Column(db.Integer, db.ForeignKey('appointments.id'), nullable=True)
+    
+    # Conversation details
+    subject = db.Column(db.String(200), nullable=True)
+    status = db.Column(db.Enum('active', 'archived', 'closed', name='conversation_status'), 
+                      default='active', nullable=False)
+    
+    # Timestamps
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    last_message_at = db.Column(db.DateTime, nullable=True)
+    
+    # Metadata
+    metadata = db.Column(db.JSON, nullable=True)  # For storing additional conversation context
+    
+    # Relationships
+    patient = db.relationship('Patient', backref='conversations', lazy=True)
+    doctor = db.relationship('Doctor', backref='conversations', lazy=True)
+    appointment = db.relationship('Appointment', backref='conversation', lazy=True)
+    messages = db.relationship('Message', back_populates='conversation', lazy='dynamic', 
+                             order_by='Message.created_at.desc()')
+    
+    def to_dict(self, include_messages=False, message_limit=50):
+        result = {
+            'id': self.id,
+            'patient_id': self.patient_id,
+            'doctor_id': self.doctor_id,
+            'appointment_id': self.appointment_id,
+            'subject': self.subject,
+            'status': self.status,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat(),
+            'last_message_at': self.last_message_at.isoformat() if self.last_message_at else None,
+            'metadata': self.metadata,
+            'unread_count': self.get_unread_count(),
+            'participant_info': {
+                'patient': {
+                    'id': self.patient.id,
+                    'name': self.patient.user.full_name,
+                    'avatar': None  # Can be added later
+                },
+                'doctor': {
+                    'id': self.doctor.id,
+                    'name': self.doctor.user.full_name,
+                    'specialty': self.doctor.specialty,
+                    'avatar': None  # Can be added later
+                }
+            }
+        }
+        
+        if include_messages:
+            messages = self.messages.limit(message_limit).all()
+            result['messages'] = [msg.to_dict() for msg in messages]
+            result['has_more_messages'] = self.messages.count() > message_limit
+        
+        return result
+    
+    def get_unread_count(self, user_id=None):
+        """Get unread message count for conversation"""
+        if user_id is None:
+            return self.messages.filter_by(is_read=False).count()
+        else:
+            return self.messages.filter_by(is_read=False).filter(
+                Message.sender_id != user_id
+            ).count()
+    
+    def get_last_message(self):
+        """Get the most recent message in conversation"""
+        return self.messages.first()
+    
+    def mark_messages_read(self, user_id):
+        """Mark all messages as read for a specific user"""
+        unread_messages = self.messages.filter_by(is_read=False).filter(
+            Message.sender_id != user_id
+        ).all()
+        
+        for message in unread_messages:
+            message.is_read = True
+            message.read_at = datetime.utcnow()
+        
+        db.session.commit()
+        return len(unread_messages)
+    
+    @staticmethod
+    def get_or_create_conversation(patient_id, doctor_id, appointment_id=None, subject=None):
+        """Get existing conversation or create new one"""
+        # Try to find existing active conversation
+        conversation = Conversation.query.filter_by(
+            patient_id=patient_id,
+            doctor_id=doctor_id,
+            status='active'
+        ).first()
+        
+        if not conversation:
+            conversation = Conversation(
+                patient_id=patient_id,
+                doctor_id=doctor_id,
+                appointment_id=appointment_id,
+                subject=subject or 'Medical Consultation'
+            )
+            db.session.add(conversation)
+            db.session.commit()
+        
+        return conversation
+    
+    def __repr__(self):
+        return f'<Conversation {self.id}: Patient {self.patient_id} <-> Doctor {self.doctor_id}>'
+
+
+class Message(db.Model):
+    """
+    Individual messages within conversations
+    """
+    __tablename__ = 'messages'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    
+    # Conversation and participants
+    conversation_id = db.Column(db.Integer, db.ForeignKey('conversations.id'), nullable=False, index=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    recipient_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    
+    # Message content
+    content = db.Column(db.Text, nullable=False)
+    message_type = db.Column(db.Enum('text', 'image', 'file', 'appointment_request', 
+                                   'prescription_request', 'urgent', name='message_types'), 
+                           default='text', nullable=False)
+    
+    # Message status
+    is_read = db.Column(db.Boolean, default=False, nullable=False)
+    is_urgent = db.Column(db.Boolean, default=False, nullable=False)
+    is_system_message = db.Column(db.Boolean, default=False, nullable=False)
+    
+    # Timestamps
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+    read_at = db.Column(db.DateTime, nullable=True)
+    
+    # Metadata
+    metadata = db.Column(db.JSON, nullable=True)  # For storing additional message context
+    
+    # Relationships
+    conversation = db.relationship('Conversation', back_populates='messages')
+    sender = db.relationship('User', foreign_keys=[sender_id], backref='sent_messages')
+    recipient = db.relationship('User', foreign_keys=[recipient_id], backref='received_messages')
+    attachments = db.relationship('MessageAttachment', backref='message', lazy=True, 
+                                cascade='all, delete-orphan')
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'conversation_id': self.conversation_id,
+            'sender_id': self.sender_id,
+            'recipient_id': self.recipient_id,
+            'content': self.content,
+            'message_type': self.message_type,
+            'is_read': self.is_read,
+            'is_urgent': self.is_urgent,
+            'is_system_message': self.is_system_message,
+            'created_at': self.created_at.isoformat(),
+            'read_at': self.read_at.isoformat() if self.read_at else None,
+            'metadata': self.metadata,
+            'sender_info': {
+                'id': self.sender.id,
+                'name': self.sender.full_name,
+                'user_type': self.sender.user_type
+            },
+            'attachments': [att.to_dict() for att in self.attachments]
+        }
+    
+    def mark_as_read(self):
+        """Mark message as read"""
+        if not self.is_read:
+            self.is_read = True
+            self.read_at = datetime.utcnow()
+            
+            # Update conversation's last_message_at
+            self.conversation.last_message_at = self.created_at
+            
+            db.session.commit()
+    
+    @staticmethod
+    def create_message(conversation_id, sender_id, recipient_id, content, 
+                      message_type='text', is_urgent=False, metadata=None):
+        """Create a new message"""
+        message = Message(
+            conversation_id=conversation_id,
+            sender_id=sender_id,
+            recipient_id=recipient_id,
+            content=content,
+            message_type=message_type,
+            is_urgent=is_urgent,
+            metadata=metadata
+        )
+        
+        db.session.add(message)
+        
+        # Update conversation's last message timestamp
+        conversation = Conversation.query.get(conversation_id)
+        if conversation:
+            conversation.last_message_at = datetime.utcnow()
+            conversation.updated_at = datetime.utcnow()
+        
+        db.session.commit()
+        return message
+    
+    def __repr__(self):
+        return f'<Message {self.id} in conversation {self.conversation_id}>'
+
+
+class MessageAttachment(db.Model):
+    """
+    File attachments for messages (for future use)
+    """
+    __tablename__ = 'message_attachments'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    message_id = db.Column(db.Integer, db.ForeignKey('messages.id'), nullable=False)
+    
+    # File information
+    filename = db.Column(db.String(255), nullable=False)
+    file_path = db.Column(db.String(500), nullable=False)
+    file_type = db.Column(db.String(100), nullable=False)
+    file_size = db.Column(db.Integer, nullable=False)
+    mime_type = db.Column(db.String(100), nullable=True)
+    
+    # Metadata
+    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    is_image = db.Column(db.Boolean, default=False, nullable=False)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'message_id': self.message_id,
+            'filename': self.filename,
+            'file_type': self.file_type,
+            'file_size': self.file_size,
+            'mime_type': self.mime_type,
+            'uploaded_at': self.uploaded_at.isoformat(),
+            'is_image': self.is_image,
+            'download_url': f'/api/messages/attachments/{self.id}/download'
+        }
+    
+    def __repr__(self):
+        return f'<MessageAttachment {self.id}: {self.filename}>'

@@ -359,6 +359,8 @@
     <script src="../../../assets/js/main.js"></script>
     <script src="../../../assets/js/components/dashboard-translations.js"></script>
     <script src="../../../assets/js/components/auth-guard.js"></script>
+    <script src="../../../assets/js/components/logger.js"></script>
+    <script src="../../../assets/js/components/messaging.js"></script>
 
     <style>
         .patient-list {
@@ -649,60 +651,8 @@
         }
 
         function sendMessage() {
-            const messageInput = document.getElementById('messageInput');
-            const message = messageInput.value.trim();
-            
-            if (message && currentPatient) {
-                const timestamp = new Date().toLocaleTimeString('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                });
-                
-                // Create new message object
-                const newMessage = {
-                    id: Date.now(),
-                    sender: 'doctor',
-                    message: message,
-                    timestamp: `Today ${timestamp}`,
-                    read: true
-                };
-                
-                // Add to patient's messages
-                patients[currentPatient].messages.push(newMessage);
-                
-                // Update patient's last message info
-                patients[currentPatient].lastMessage = message;
-                patients[currentPatient].lastMessageTime = `Just now`;
-                
-                // Add message to chat display
-                const chatMessages = document.getElementById('chatMessages');
-                const messageDiv = document.createElement('div');
-                messageDiv.className = 'message doctor-message';
-                messageDiv.innerHTML = `
-                    <div class="message-content">
-                        <p>${message}</p>
-                        <small class="message-time">Just now</small>
-                    </div>
-                `;
-                chatMessages.appendChild(messageDiv);
-                
-                // Update patient list display
-                updatePatientListDisplay();
-                
-                // Clear input
-                messageInput.value = '';
-                
-                // Scroll to bottom
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-                
-                // Save to localStorage
-                saveMessagesToStorage();
-                
-                // Simulate patient response after 3-10 seconds
-                simulatePatientResponse();
-                
-                console.log(`Message sent to ${currentPatient}: ${message}`);
+            if (messagingSystem) {
+                messagingSystem.handleSendMessage();
             }
         }
 
@@ -1115,8 +1065,112 @@ Dr. Sarah Ahmed
             AuthGuard.logout();
         }
 
+        // Initialize messaging system
+        let messagingSystem;
+        let currentPatientId = null;
+
+        // Initialize messaging system for doctor
+        async function initializeDoctorMessaging() {
+            try {
+                messagingSystem = new MessagingSystem();
+                await messagingSystem.initialize(); // Initialize without specific patient
+                
+                // Load all conversations for this doctor
+                await loadDoctorConversations();
+                
+                Logger.info('Doctor messaging initialized');
+            } catch (error) {
+                Logger.error('Failed to initialize doctor messaging', error);
+                showErrorMessage('Failed to load messaging system. Please refresh the page.');
+            }
+        }
+
+        // Load all conversations for doctor
+        async function loadDoctorConversations() {
+            try {
+                const conversations = await messagingSystem.loadConversations();
+                displayConversationsAsPatients(conversations);
+            } catch (error) {
+                Logger.error('Failed to load conversations', error);
+            }
+        }
+
+        // Display conversations as patient list
+        function displayConversationsAsPatients(conversations) {
+            const patientList = document.getElementById('patientList');
+            patientList.innerHTML = '';
+            
+            conversations.forEach((conversation, index) => {
+                const patient = conversation.other_participant;
+                const patientItem = document.createElement('div');
+                patientItem.className = `patient-item ${index === 0 ? 'active' : ''}`;
+                patientItem.setAttribute('data-conversation', conversation.id);
+                patientItem.onclick = () => selectPatientConversation(conversation.id, patient.id);
+                
+                patientItem.innerHTML = `
+                    <div class="d-flex align-items-start">
+                        <div class="patient-avatar me-3">
+                            <i class="bi bi-person-circle"></i>
+                        </div>
+                        <div class="patient-info flex-grow-1">
+                            <h6 class="patient-name">${patient.full_name || patient.first_name + ' ' + patient.last_name}</h6>
+                            <p class="last-message text-muted">${conversation.last_message_content || 'No messages yet'}</p>
+                            <small class="text-muted">${conversation.last_message_at ? messagingSystem.formatTimestamp(conversation.last_message_at) : ''}</small>
+                        </div>
+                        ${conversation.unread_count > 0 ? 
+                            `<div class="message-badge">${conversation.unread_count > 99 ? '99+' : conversation.unread_count}</div>` : ''
+                        }
+                    </div>
+                `;
+                
+                patientList.appendChild(patientItem);
+            });
+            
+            // Select first conversation if available
+            if (conversations.length > 0) {
+                selectPatientConversation(conversations[0].id, conversations[0].other_participant.id);
+            }
+        }
+
+        // Select patient conversation
+        async function selectPatientConversation(conversationId, patientId) {
+            try {
+                currentPatientId = patientId;
+                messagingSystem.currentConversationId = conversationId;
+                
+                // Update UI
+                document.querySelectorAll('.patient-item').forEach(item => item.classList.remove('active'));
+                document.querySelector(`[data-conversation="${conversationId}"]`).classList.add('active');
+                
+                // Load messages for this conversation
+                await messagingSystem.loadMessages();
+                
+                // Mark as read
+                await messagingSystem.markAsRead(conversationId);
+                
+                Logger.info('Selected patient conversation', { conversationId, patientId });
+            } catch (error) {
+                Logger.error('Failed to select patient conversation', error);
+                showErrorMessage('Failed to load patient messages');
+            }
+        }
+
+        function showErrorMessage(message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            const container = document.querySelector('.container-fluid');
+            if (container) {
+                container.insertBefore(alertDiv, container.firstChild);
+            }
+        }
+
         // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             AuthGuard.protectPage('doctor');
             
             // Initialize translations
@@ -1128,14 +1182,8 @@ Dr. Sarah Ahmed
                 }
             }
             
-            // Load saved messages from localStorage
-            loadMessagesFromStorage();
-            
-            // Initialize patient list display
-            updatePatientListDisplay();
-            
-            // Select first patient
-            selectPatient('patient1');
+            // Initialize real messaging system
+            await initializeDoctorMessaging();
             
             // Setup template dropdown
             setTimeout(() => {
