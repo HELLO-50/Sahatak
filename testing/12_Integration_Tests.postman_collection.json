@@ -1,0 +1,1111 @@
+{
+	"info": {
+		"name": "12 - Integration & Workflow Tests",
+		"description": "Test complete end-to-end workflows and feature integrations across the healthcare platform",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Complete Patient Journey",
+			"item": [
+				{
+					"name": "1. Patient Registration with Email Verification",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"integration.patient@test.com\",\n  \"password\": \"Integration123!\",\n  \"user_type\": \"patient\",\n  \"full_name\": \"Integration Test Patient\",\n  \"phone\": \"+249555999888\",\n  \"age\": 30,\n  \"gender\": \"female\",\n  \"language_preference\": \"en\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/auth/register",
+							"host": ["{{backend_url}}"],
+							"path": ["auth", "register"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Patient registration successful', function () {",
+									"    pm.response.to.have.status(201);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('id');",
+									"    pm.expect(jsonData.data.requires_email_verification).to.be.true;",
+									"    ",
+									"    // Save patient info for workflow",
+									"    pm.environment.set('integration_patient_id', jsonData.data.id);",
+									"    pm.environment.set('integration_patient_email', 'integration.patient@test.com');",
+									"    console.log('Integration patient registered:', jsonData.data.id);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "2. Patient Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{integration_patient_email}}\",\n  \"password\": \"Integration123!\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/auth/login",
+							"host": ["{{backend_url}}"],
+							"path": ["auth", "login"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Patient login successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('token');",
+									"    ",
+									"    // Save token for workflow",
+									"    pm.environment.set('integration_patient_token', jsonData.data.token);",
+									"    console.log('Integration patient logged in');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "3. Complete Medical History",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{integration_patient_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"height\": 165,\n  \"weight\": 60,\n  \"blood_type\": \"A+\",\n  \"allergies\": [\"Penicillin\"],\n  \"chronic_conditions\": [],\n  \"current_medications\": [],\n  \"family_medical_history\": {\n    \"diabetes\": \"Father - Type 2 at age 55\"\n  },\n  \"previous_surgeries\": [],\n  \"smoking_status\": \"never\",\n  \"alcohol_consumption\": \"rarely\",\n  \"exercise_frequency\": \"2-3 times per week\",\n  \"emergency_contact\": {\n    \"name\": \"Jane Smith\",\n    \"relationship\": \"sister\",\n    \"phone\": \"+249555888777\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/medical-history/complete",
+							"host": ["{{backend_url}}"],
+							"path": ["medical-history", "complete"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Medical history completed', function () {",
+									"    pm.response.to.have.status(201);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data.medical_history_completed).to.be.true;",
+									"    console.log('Medical history completed for integration test');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "4. Search for Available Doctors",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{integration_patient_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{backend_url}}/availability/search-doctors?date=2024-02-10&specialty=general&preferred_time=morning",
+							"host": ["{{backend_url}}"],
+							"path": ["availability", "search-doctors"],
+							"query": [
+								{
+									"key": "date",
+									"value": "2024-02-10"
+								},
+								{
+									"key": "specialty",
+									"value": "general"
+								},
+								{
+									"key": "preferred_time",
+									"value": "morning"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Available doctors found', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data.available_doctors).to.be.an('array');",
+									"    ",
+									"    // Use existing doctor from environment or first available",
+									"    var doctorId = pm.environment.get('doctor_id');",
+									"    if (jsonData.data.available_doctors.length > 0 && !doctorId) {",
+									"        pm.environment.set('integration_doctor_id', jsonData.data.available_doctors[0].doctor_id);",
+									"    } else if (doctorId) {",
+									"        pm.environment.set('integration_doctor_id', doctorId);",
+									"    }",
+									"    console.log('Doctor search completed for integration test');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "5. Book Appointment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{integration_patient_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"doctor_id\": {{integration_doctor_id}},\n  \"appointment_date\": \"2024-02-10\",\n  \"appointment_time\": \"10:00\",\n  \"appointment_type\": \"consultation\",\n  \"duration_minutes\": 30,\n  \"reason_for_visit\": \"General health checkup and discussion about family diabetes history\",\n  \"urgency_level\": \"routine\",\n  \"preferred_language\": \"en\",\n  \"special_instructions\": \"First time patient, completed medical history\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/appointments/book",
+							"host": ["{{backend_url}}"],
+							"path": ["appointments", "book"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Appointment booked successfully', function () {",
+									"    pm.response.to.have.status(201);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('appointment_id');",
+									"    pm.expect(jsonData.data.status).to.equal('confirmed');",
+									"    ",
+									"    // Save appointment for workflow",
+									"    pm.environment.set('integration_appointment_id', jsonData.data.appointment_id);",
+									"    console.log('Appointment booked:', jsonData.data.appointment_id);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "6. Send Pre-Appointment Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{integration_patient_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"recipient_id\": {{integration_doctor_id}},\n  \"appointment_id\": {{integration_appointment_id}},\n  \"message_content\": \"Hello Doctor, I have my appointment scheduled for tomorrow. I wanted to mention that I have some questions about diabetes prevention since there's a family history. Looking forward to our consultation.\",\n  \"message_type\": \"pre_appointment\",\n  \"priority\": \"normal\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/messages/appointments/pre-appointment",
+							"host": ["{{backend_url}}"],
+							"path": ["messages", "appointments", "pre-appointment"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Pre-appointment message sent', function () {",
+									"    pm.response.to.have.status(201);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('message_id');",
+									"    pm.expect(jsonData.data.appointment_linked).to.be.true;",
+									"    ",
+									"    // Save conversation for workflow",
+									"    pm.environment.set('integration_conversation_id', jsonData.data.conversation_id);",
+									"    console.log('Pre-appointment message sent');",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Doctor Workflow Integration",
+			"item": [
+				{
+					"name": "7. Doctor Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"doctor.test@example.com\",\n  \"password\": \"doctor123\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/auth/login",
+							"host": ["{{backend_url}}"],
+							"path": ["auth", "login"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Doctor login successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('token');",
+									"    ",
+									"    // Save doctor token for workflow",
+									"    pm.environment.set('integration_doctor_token', jsonData.data.token);",
+									"    console.log('Doctor logged in for integration test');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "8. View Upcoming Appointments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{integration_doctor_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{backend_url}}/appointments/doctor/upcoming?date=2024-02-10&include_patient_notes=true",
+							"host": ["{{backend_url}}"],
+							"path": ["appointments", "doctor", "upcoming"],
+							"query": [
+								{
+									"key": "date",
+									"value": "2024-02-10"
+								},
+								{
+									"key": "include_patient_notes",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Upcoming appointments retrieved', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data.appointments).to.be.an('array');",
+									"    console.log('Doctor viewed upcoming appointments');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "9. Reply to Patient Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{integration_doctor_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"conversation_id\": {{integration_conversation_id}},\n  \"message_content\": \"Thank you for your message! I'm glad you're thinking proactively about diabetes prevention given your family history. We'll definitely discuss this during your appointment tomorrow. I'll review your medical history beforehand and prepare some personalized recommendations for you.\",\n  \"message_type\": \"reply\",\n  \"priority\": \"normal\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/messages/send",
+							"host": ["{{backend_url}}"],
+							"path": ["messages", "send"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Doctor reply sent', function () {",
+									"    pm.response.to.have.status(201);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('message_id');",
+									"    console.log('Doctor replied to patient message');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "10. Access Patient Medical History",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{integration_doctor_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{backend_url}}/medical-history/patient/{{integration_patient_id}}",
+							"host": ["{{backend_url}}"],
+							"path": ["medical-history", "patient", "{{integration_patient_id}}"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Patient medical history accessed', function () {",
+									"    // May succeed if appointment relationship exists",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 403]);",
+									"    ",
+									"    if (pm.response.code === 200) {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.true;",
+									"        pm.expect(jsonData.data).to.have.property('patient_info');",
+									"        pm.expect(jsonData.data).to.have.property('medical_summary');",
+									"        console.log('Doctor accessed patient medical history');",
+									"    } else {",
+									"        console.log('Medical history access denied - no appointment relationship');",
+									"    }",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "11. Create Prescription",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{integration_doctor_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"patient_id\": {{integration_patient_id}},\n  \"appointment_id\": {{integration_appointment_id}},\n  \"diagnosis_code\": \"Z00.00\",\n  \"diagnosis_description\": \"General health examination\",\n  \"medications\": [\n    {\n      \"name\": \"Multivitamin\",\n      \"generic_name\": \"Multivitamin Complex\",\n      \"strength\": \"1 tablet\",\n      \"dosage_form\": \"tablet\",\n      \"quantity\": 30,\n      \"directions\": \"Take one tablet daily with breakfast\",\n      \"duration_days\": 30,\n      \"refills_allowed\": 2,\n      \"substitution_allowed\": true,\n      \"priority\": \"routine\"\n    }\n  ],\n  \"patient_instructions\": \"Take as directed. This is a preventive measure to support your overall health.\",\n  \"follow_up_required\": true,\n  \"follow_up_days\": 90\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/prescriptions/create",
+							"host": ["{{backend_url}}"],
+							"path": ["prescriptions", "create"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Prescription created', function () {",
+									"    pm.response.to.have.status(201);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('prescription_id');",
+									"    ",
+									"    // Save prescription for workflow",
+									"    pm.environment.set('integration_prescription_id', jsonData.data.prescription_id);",
+									"    console.log('Prescription created:', jsonData.data.prescription_id);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "12. Send Post-Appointment Follow-up",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{integration_doctor_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"recipient_id\": {{integration_patient_id}},\n  \"appointment_id\": {{integration_appointment_id}},\n  \"message_content\": \"Thank you for coming in today! Your health checkup results look good. I've prescribed a multivitamin as discussed, and we talked about diabetes prevention strategies. Please continue your current exercise routine and maintain a balanced diet. Don't hesitate to reach out if you have any questions.\",\n  \"message_type\": \"post_appointment\",\n  \"priority\": \"normal\",\n  \"include_prescription_info\": true,\n  \"care_instructions\": [\n    \"Take multivitamin daily with breakfast\",\n    \"Continue regular exercise 2-3 times per week\",\n    \"Monitor blood sugar occasionally\",\n    \"Schedule follow-up in 3 months\"\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/messages/appointments/post-appointment",
+							"host": ["{{backend_url}}"],
+							"path": ["messages", "appointments", "post-appointment"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Post-appointment follow-up sent', function () {",
+									"    pm.response.to.have.status(201);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('message_id');",
+									"    pm.expect(jsonData.data.care_instructions_included).to.be.true;",
+									"    console.log('Post-appointment follow-up sent');",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Patient Follow-up Actions",
+			"item": [
+				{
+					"name": "13. Patient Views Prescription",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{integration_patient_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{backend_url}}/prescriptions/{{integration_prescription_id}}/details",
+							"host": ["{{backend_url}}"],
+							"path": ["prescriptions", "{{integration_prescription_id}}", "details"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Patient views prescription details', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('prescription_number');",
+									"    pm.expect(jsonData.data).to.have.property('medications');",
+									"    pm.expect(jsonData.data).to.have.property('patient_instructions');",
+									"    console.log('Patient viewed prescription details');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "14. Find Nearby Pharmacies",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{integration_patient_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{backend_url}}/pharmacies/search?latitude=15.5007&longitude=32.5599&radius=5",
+							"host": ["{{backend_url}}"],
+							"path": ["pharmacies", "search"],
+							"query": [
+								{
+									"key": "latitude",
+									"value": "15.5007"
+								},
+								{
+									"key": "longitude",
+									"value": "32.5599"
+								},
+								{
+									"key": "radius",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Nearby pharmacies found', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data.pharmacies).to.be.an('array');",
+									"    ",
+									"    // Save first pharmacy for workflow",
+									"    if (jsonData.data.pharmacies.length > 0) {",
+									"        pm.environment.set('integration_pharmacy_id', jsonData.data.pharmacies[0].id);",
+									"    }",
+									"    console.log('Patient found nearby pharmacies');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "15. Send Prescription to Pharmacy",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{integration_patient_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"prescription_id\": {{integration_prescription_id}},\n  \"pharmacy_id\": {{integration_pharmacy_id}},\n  \"preferred_pickup_time\": \"2024-02-11T15:00:00Z\",\n  \"contact_when_ready\": true,\n  \"contact_method\": \"sms\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/prescriptions/send-to-pharmacy",
+							"host": ["{{backend_url}}"],
+							"path": ["prescriptions", "send-to-pharmacy"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Prescription sent to pharmacy', function () {",
+									"    pm.response.to.have.status(201);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('pharmacy_order_id');",
+									"    pm.expect(jsonData.data.status).to.equal('sent_to_pharmacy');",
+									"    console.log('Prescription sent to pharmacy');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "16. Update Notification Preferences",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{integration_patient_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email_notifications\": {\n    \"enabled\": true,\n    \"categories\": {\n      \"prescription_ready\": true,\n      \"appointment_reminders\": true,\n      \"doctor_messages\": true,\n      \"lab_results\": true\n    }\n  },\n  \"sms_notifications\": {\n    \"enabled\": true,\n    \"categories\": {\n      \"prescription_ready\": true,\n      \"urgent_messages\": true\n    },\n    \"phone_number\": \"+249555999888\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/notifications/preferences",
+							"host": ["{{backend_url}}"],
+							"path": ["notifications", "preferences"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Notification preferences updated', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data.updated_preferences.email_notifications.enabled).to.be.true;",
+									"    console.log('Patient updated notification preferences');",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Admin Oversight Workflow",
+			"item": [
+				{
+					"name": "17. Admin Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin.test@example.com\",\n  \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/auth/login",
+							"host": ["{{backend_url}}"],
+							"path": ["auth", "login"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Admin login successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data.user.user_type).to.equal('admin');",
+									"    ",
+									"    // Save admin token for workflow",
+									"    pm.environment.set('integration_admin_token', jsonData.data.token);",
+									"    console.log('Admin logged in for integration test');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "18. View System Dashboard",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{integration_admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{backend_url}}/admin/dashboard?period=24hours",
+							"host": ["{{backend_url}}"],
+							"path": ["admin", "dashboard"],
+							"query": [
+								{
+									"key": "period",
+									"value": "24hours"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Admin dashboard accessed', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('user_statistics');",
+									"    pm.expect(jsonData.data).to.have.property('appointment_statistics');",
+									"    console.log('Admin viewed system dashboard');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "19. Review Recent User Activity",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{integration_admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{backend_url}}/admin/logs/activities?limit=20&category=user_actions&last_24_hours=true",
+							"host": ["{{backend_url}}"],
+							"path": ["admin", "logs", "activities"],
+							"query": [
+								{
+									"key": "limit",
+									"value": "20"
+								},
+								{
+									"key": "category",
+									"value": "user_actions"
+								},
+								{
+									"key": "last_24_hours",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Recent activity logs reviewed', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data.logs).to.be.an('array');",
+									"    console.log('Admin reviewed recent user activities');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "20. Check System Health",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{integration_admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{backend_url}}/admin/system/health",
+							"host": ["{{backend_url}}"],
+							"path": ["admin", "system", "health"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('System health checked', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('overall_status');",
+									"    pm.expect(['healthy', 'warning', 'critical']).to.include(jsonData.data.overall_status);",
+									"    console.log('Admin checked system health');",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Cross-Feature Integration Tests",
+			"item": [
+				{
+					"name": "21. Verify Appointment-Message Integration",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{integration_patient_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{backend_url}}/messages/appointments/{{integration_appointment_id}}/conversations",
+							"host": ["{{backend_url}}"],
+							"path": ["messages", "appointments", "{{integration_appointment_id}}", "conversations"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Appointment-message integration verified', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('appointment_id');",
+									"    pm.expect(jsonData.data.conversations).to.be.an('array');",
+									"    pm.expect(jsonData.data.conversations.length).to.be.greaterThan(0);",
+									"    console.log('Appointment-message integration verified');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "22. Verify Prescription-Appointment Integration",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{integration_patient_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{backend_url}}/appointments/{{integration_appointment_id}}/prescriptions",
+							"host": ["{{backend_url}}"],
+							"path": ["appointments", "{{integration_appointment_id}}", "prescriptions"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Prescription-appointment integration verified', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('appointment_id');",
+									"    pm.expect(jsonData.data.prescriptions).to.be.an('array');",
+									"    ",
+									"    // Check if our prescription is linked",
+									"    var prescriptionFound = jsonData.data.prescriptions.some(p => ",
+									"        p.prescription_id == pm.environment.get('integration_prescription_id')",
+									"    );",
+									"    pm.expect(prescriptionFound).to.be.true;",
+									"    console.log('Prescription-appointment integration verified');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "23. Verify Medical History Access Control",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{integration_admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{backend_url}}/medical-history/patient/{{integration_patient_id}}",
+							"host": ["{{backend_url}}"],
+							"path": ["medical-history", "patient", "{{integration_patient_id}}"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Medical history access control verified', function () {",
+									"    // Admin should not have access to patient medical history",
+									"    pm.response.to.have.status(403);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.false;",
+									"    pm.expect(jsonData.message).to.include('access');",
+									"    console.log('Medical history access control verified - Admin denied');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "24. Test Notification Delivery Chain",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{integration_admin_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"trigger_type\": \"prescription_ready\",\n  \"patient_id\": {{integration_patient_id}},\n  \"prescription_id\": {{integration_prescription_id}},\n  \"pharmacy_info\": {\n    \"name\": \"Test Pharmacy\",\n    \"phone\": \"+249111222333\"\n  },\n  \"medications_ready\": [\n    {\n      \"name\": \"Multivitamin\",\n      \"quantity\": \"30 tablets\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{backend_url}}/notifications/triggers/prescription-ready",
+							"host": ["{{backend_url}}"],
+							"path": ["notifications", "triggers", "prescription-ready"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Notification delivery chain tested', function () {",
+									"    pm.response.to.have.status(201);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('trigger_id');",
+									"    pm.expect(jsonData.data).to.have.property('delivery_channels');",
+									"    console.log('Notification delivery chain tested');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "25. Verify Complete Patient Data Consistency",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{integration_patient_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{backend_url}}/users/profile",
+							"host": ["{{backend_url}}"],
+							"path": ["users", "profile"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Patient data consistency verified', function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('user_id');",
+									"    pm.expect(jsonData.data.email).to.equal(pm.environment.get('integration_patient_email'));",
+									"    pm.expect(jsonData.data.full_name).to.equal('Integration Test Patient');",
+									"    console.log('Patient data consistency verified across all systems');",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Initialize integration test environment",
+					"console.log('Starting integration test workflow');",
+					"",
+					"// Set up base environment variables if not already set",
+					"if (!pm.environment.get('backend_url')) {",
+					"    pm.environment.set('backend_url', 'https://sahatak.pythonanywhere.com/api');",
+					"}",
+					"",
+					"// Log current test step",
+					"console.log('Test:', pm.info.requestName);"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global integration test validation",
+					"pm.test('Integration test response time acceptable', function () {",
+					"    pm.expect(pm.response.responseTime).to.be.below(10000); // 10 seconds",
+					"});",
+					"",
+					"pm.test('Integration test proper JSON response', function () {",
+					"    if (pm.response.headers.get('Content-Type') && ",
+					"        pm.response.headers.get('Content-Type').includes('application/json')) {",
+					"        pm.response.to.be.json;",
+					"    }",
+					"});",
+					"",
+					"// Log test completion",
+					"console.log('Completed:', pm.info.requestName, '- Status:', pm.response.code);"
+				]
+			}
+		}
+	]
+}
