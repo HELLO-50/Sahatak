@@ -7,6 +7,8 @@ from utils.responses import APIResponse, ErrorCodes
 from utils.validators import validate_text_field_length
 from utils.logging_config import app_logger, log_user_action
 from utils.db_optimize import cached_query, invalidate_user_cache
+from services.websocket_service import emit_new_message, emit_message_status_update, emit_notification
+from routes.notifications import queue_notification
 
 messages_bp = Blueprint('messages', __name__)
 
@@ -211,6 +213,7 @@ def send_message(conversation_id):
         content = data['content'].strip()
         message_type = data.get('message_type', 'text')
         is_urgent = data.get('is_urgent', False)
+        appointment_id = data.get('appointment_id')
         
         # Validate message content length
         validation = validate_text_field_length(content, 'content', 5000, 1)
@@ -245,7 +248,8 @@ def send_message(conversation_id):
             content=content,
             message_type=message_type,
             is_urgent=is_urgent,
-            metadata=data.get('metadata')
+            metadata=data.get('metadata'),
+            appointment_id=appointment_id
         )
         
         # Log action
@@ -260,11 +264,34 @@ def send_message(conversation_id):
             request
         )
         
-        # TODO: Send real-time notification via WebSocket
-        # TODO: Send email notification if urgent or user offline
+        # Emit real-time message via WebSocket
+        message_data = message.to_dict()
+        emit_new_message(conversation_id, message_data, current_user.id)
+        
+        # Emit real-time notification to recipient
+        notification_data = {
+            'type': 'new_message',
+            'title': f'New message from {current_user.full_name}',
+            'message': content[:100] + ('...' if len(content) > 100 else ''),
+            'conversation_id': conversation_id,
+            'sender_id': current_user.id,
+            'sender_name': current_user.full_name,
+            'is_urgent': is_urgent,
+            'timestamp': datetime.utcnow().isoformat()
+        }
+        emit_notification(recipient_id, notification_data)
+        
+        # Queue in-app notification
+        queue_notification(
+            user_id=recipient_id,
+            title=f'New message from {current_user.full_name}',
+            message=content[:200] + ('...' if len(content) > 200 else ''),
+            notification_type='message',
+            send_email=False  # Don't send email for regular messages
+        )
         
         return APIResponse.success(
-            data=message.to_dict(),
+            data=message_data,
             message='Message sent successfully'
         )
         
@@ -287,6 +314,14 @@ def mark_message_read(message_id):
             return APIResponse.forbidden(message='Cannot mark message as read')
         
         message.mark_as_read()
+        
+        # Emit message status update via WebSocket
+        emit_message_status_update(
+            message.conversation_id,
+            message_id,
+            'read',
+            current_user.id
+        )
         
         return APIResponse.success(
             data={'message_id': message_id, 'read_at': message.read_at.isoformat()},
@@ -519,3 +554,79 @@ def get_quick_templates():
     except Exception as e:
         app_logger.error(f"Get quick templates error: {str(e)}")
         return APIResponse.internal_error(message='Failed to get quick templates')
+
+
+@messages_bp.route('/conversations/appointment/<int:appointment_id>', methods=['POST'])
+@login_required
+def create_appointment_conversation(appointment_id):
+    """Create or get conversation for a specific appointment"""
+    try:
+        # Import here to avoid circular imports
+        from models import Appointment
+        
+        # Get the appointment
+        appointment = Appointment.query.get(appointment_id)
+        if not appointment:
+            return APIResponse.not_found(message='Appointment not found')
+        
+        # Verify user has access to this appointment
+        if current_user.user_type == 'patient':
+            if appointment.patient_id != current_user.patient_profile.id:
+                return APIResponse.forbidden(message='Access denied to this appointment')
+        elif current_user.user_type == 'doctor':
+            if appointment.doctor_id != current_user.doctor_profile.id:
+                return APIResponse.forbidden(message='Access denied to this appointment')
+        else:
+            return APIResponse.forbidden(message='Invalid user type for messaging')
+        
+        # Check if conversation already exists for this appointment
+        conversation = Conversation.query.filter_by(
+            patient_id=appointment.patient_id,
+            doctor_id=appointment.doctor_id,
+            appointment_id=appointment_id,
+            status='active'
+        ).first()
+        
+        if not conversation:
+            # Create new conversation linked to appointment
+            conversation = Conversation.get_or_create_conversation(
+                patient_id=appointment.patient_id,
+                doctor_id=appointment.doctor_id,
+                appointment_id=appointment_id,
+                subject=f"Appointment Discussion - {appointment.appointment_date.strftime('%B %d, %Y')}"
+            )
+            
+            # Create initial system message
+            initial_message = f"Conversation started for appointment on {appointment.appointment_date.strftime('%B %d, %Y at %I:%M %p')}"
+            if appointment.reason_for_visit:
+                initial_message += f"\nReason: {appointment.reason_for_visit}"
+            
+            Message.create_message(
+                conversation_id=conversation.id,
+                sender_id=current_user.id,
+                recipient_id=appointment.doctor.user_id if current_user.user_type == 'patient' else appointment.patient.user_id,
+                content=initial_message,
+                message_type='text',
+                is_system_message=True,
+                appointment_id=appointment_id
+            )
+        
+        # Log action
+        log_user_action(
+            current_user.id,
+            'appointment_conversation_created',
+            {'conversation_id': conversation.id, 'appointment_id': appointment_id},
+            request
+        )
+        
+        return APIResponse.success(
+            data={
+                'conversation': conversation.to_dict(include_messages=True),
+                'appointment': appointment.to_dict()
+            },
+            message='Appointment conversation created successfully'
+        )
+        
+    except Exception as e:
+        app_logger.error(f"Create appointment conversation error: {str(e)}")
+        return APIResponse.internal_error(message='Failed to create appointment conversation')

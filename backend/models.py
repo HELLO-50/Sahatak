@@ -1433,6 +1433,9 @@ class Message(db.Model):
     sender_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     recipient_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     
+    # Optional appointment link
+    appointment_id = db.Column(db.Integer, db.ForeignKey('appointments.id'), nullable=True, index=True)
+    
     # Message content
     content = db.Column(db.Text, nullable=False)
     message_type = db.Column(db.Enum('text', 'image', 'file', 'appointment_request', 
@@ -1455,6 +1458,7 @@ class Message(db.Model):
     conversation = db.relationship('Conversation', back_populates='messages')
     sender = db.relationship('User', foreign_keys=[sender_id], backref='sent_messages')
     recipient = db.relationship('User', foreign_keys=[recipient_id], backref='received_messages')
+    appointment = db.relationship('Appointment', backref='messages', lazy=True)
     attachments = db.relationship('MessageAttachment', backref='message', lazy=True, 
                                 cascade='all, delete-orphan')
     
@@ -1464,6 +1468,7 @@ class Message(db.Model):
             'conversation_id': self.conversation_id,
             'sender_id': self.sender_id,
             'recipient_id': self.recipient_id,
+            'appointment_id': self.appointment_id,
             'content': self.content,
             'message_type': self.message_type,
             'is_read': self.is_read,
@@ -1477,6 +1482,7 @@ class Message(db.Model):
                 'name': self.sender.full_name,
                 'user_type': self.sender.user_type
             },
+            'appointment_info': self.appointment.to_dict() if self.appointment else None,
             'attachments': [att.to_dict() for att in self.attachments]
         }
     
@@ -1493,7 +1499,7 @@ class Message(db.Model):
     
     @staticmethod
     def create_message(conversation_id, sender_id, recipient_id, content, 
-                      message_type='text', is_urgent=False, metadata=None):
+                      message_type='text', is_urgent=False, metadata=None, appointment_id=None):
         """Create a new message"""
         message = Message(
             conversation_id=conversation_id,
@@ -1502,7 +1508,8 @@ class Message(db.Model):
             content=content,
             message_type=message_type,
             is_urgent=is_urgent,
-            metadata=metadata
+            metadata=metadata,
+            appointment_id=appointment_id
         )
         
         db.session.add(message)

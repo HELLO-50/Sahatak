@@ -3,9 +3,11 @@ from flask_login import login_required, current_user
 from models import db, Appointment, Doctor, Patient, User
 from datetime import datetime, timedelta
 from sqlalchemy import and_, or_
+from sqlalchemy.orm import joinedload
 from utils.responses import APIResponse, ErrorCodes
 from utils.validators import validate_date, validate_appointment_type, validate_text_field_length
 from utils.logging_config import app_logger, log_user_action
+from utils.db_optimize import OptimizedQueries, QueryOptimizer, invalidate_appointment_cache, cached_query
 
 appointments_bp = Blueprint('appointments', __name__)
 
@@ -67,13 +69,13 @@ def get_available_doctors():
 @appointments_bp.route('/', methods=['GET'])
 @login_required
 def get_appointments():
-    """Get user's appointments"""
+    """Get user's appointments with optimized queries"""
     try:
-        # Get appointments based on user type
+        # Get appointments based on user type using optimized queries
         if current_user.user_type == 'patient':
-            appointments = Appointment.query.filter_by(patient_id=current_user.patient_profile.id).order_by(Appointment.appointment_date.desc()).all()
+            appointments = OptimizedQueries.get_patient_appointments(current_user.patient_profile.id)
         elif current_user.user_type == 'doctor':
-            appointments = Appointment.query.filter_by(doctor_id=current_user.doctor_profile.id).order_by(Appointment.appointment_date.desc()).all()
+            appointments = OptimizedQueries.get_doctor_appointments(current_user.doctor_profile.id)
         else:
             return APIResponse.validation_error(message='Invalid user type')
         
@@ -237,6 +239,9 @@ def create_appointment():
             
             db.session.add(appointment)
             db.session.commit()  # Commit the transaction
+            
+            # Invalidate related caches
+            invalidate_appointment_cache()
             
         except Exception as e:
             db.session.rollback()
