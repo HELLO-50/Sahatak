@@ -329,6 +329,8 @@
     <script src="../../../assets/js/main.js"></script>
     <script src="../../../assets/js/components/dashboard-translations.js"></script>
     <script src="../../../assets/js/components/auth-guard.js"></script>
+    <script src="../../../assets/js/components/logger.js"></script>
+    <script src="../../../assets/js/components/messaging.js"></script>
 
     <style>
         .doctor-avatar i {
@@ -417,7 +419,11 @@
     </style>
 
     <script>
-        // Patient Communication Hub functions
+        // Initialize messaging system
+        let messagingSystem;
+        let currentDoctorId = null; // This should be set based on appointment or selection
+
+        // Mock doctor info for display - in real app this comes from API
         let doctorInfo = {
             name: 'Dr. Sarah Ahmed',
             specialty: 'Internal Medicine Specialist',
@@ -425,55 +431,10 @@
             responseTime: 'Usually within 1 hour'
         };
 
-        let messages = [];
-
+        // Legacy function - replaced with messaging system
         function sendMessage() {
-            const messageInput = document.getElementById('messageInput');
-            const message = messageInput.value.trim();
-            
-            if (message) {
-                const timestamp = new Date().toLocaleTimeString('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                });
-                
-                // Create new message object
-                const newMessage = {
-                    id: Date.now(),
-                    sender: 'patient',
-                    message: message,
-                    timestamp: `Today ${timestamp}`
-                };
-                
-                // Add to messages array
-                messages.push(newMessage);
-                
-                // Add message to chat display
-                const chatMessages = document.getElementById('chatMessages');
-                const messageDiv = document.createElement('div');
-                messageDiv.className = 'message patient-message';
-                messageDiv.innerHTML = `
-                    <div class="message-content">
-                        <p>${message}</p>
-                        <small class="message-time">Just now</small>
-                    </div>
-                `;
-                chatMessages.appendChild(messageDiv);
-                
-                // Clear input
-                messageInput.value = '';
-                
-                // Scroll to bottom
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-                
-                // Save to localStorage
-                saveMessagesToStorage();
-                
-                // Simulate doctor response
-                simulateDoctorResponse();
-                
-                console.log(`Message sent: ${message}`);
+            if (messagingSystem) {
+                messagingSystem.handleSendMessage();
             }
         }
 
@@ -520,94 +481,54 @@
         }
 
         function attachImage() {
-            // Simulate image attachment
-            const imageTypes = ['symptom_photo.jpg', 'prescription_image.jpg', 'test_results.pdf'];
-            const randomImage = imageTypes[Math.floor(Math.random() * imageTypes.length)];
-            
-            const messageInput = document.getElementById('messageInput');
-            const currentMessage = messageInput.value;
-            messageInput.value = currentMessage + `\n\n📷 Attached: ${randomImage}`;
-            
-            console.log('Image attached:', randomImage);
-        }
-
-        function simulateDoctorResponse() {
-            const responses = [
-                "Thank you for your message. Let me review your concerns and get back to you shortly.",
-                "I understand your concern. This is a common question and I'm happy to help clarify.",
-                "Based on your symptoms, please continue with the current treatment. Let me know if symptoms persist.",
-                "That's a great question! I'll provide you with detailed information about this.",
-                "Your progress sounds encouraging. Let's schedule a follow-up to monitor your condition.",
-                "I recommend you continue the medication as prescribed. The side effects should subside soon."
-            ];
-            
-            const randomDelay = Math.random() * 8000 + 2000; // 2-10 seconds
-            
-            setTimeout(() => {
-                if (Math.random() > 0.2) { // 80% chance of response
-                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                    const timestamp = new Date().toLocaleTimeString('en-US', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: true
-                    });
-                    
-                    const newMessage = {
-                        id: Date.now(),
-                        sender: 'doctor',
-                        message: randomResponse,
-                        timestamp: `Today ${timestamp}`
-                    };
-                    
-                    messages.push(newMessage);
-                    
-                    // Add to chat display
-                    const chatMessages = document.getElementById('chatMessages');
-                    const messageDiv = document.createElement('div');
-                    messageDiv.className = 'message doctor-message';
-                    messageDiv.innerHTML = `
-                        <div class="message-content">
-                            <p>${randomResponse}</p>
-                            <small class="message-time">Just now</small>
-                        </div>
-                    `;
-                    chatMessages.appendChild(messageDiv);
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-                    
-                    saveMessagesToStorage();
-                }
-            }, randomDelay);
-        }
-
-        function saveMessagesToStorage() {
-            localStorage.setItem('sahatak_patient_messages', JSON.stringify(messages));
-        }
-
-        function loadMessagesFromStorage() {
-            const stored = localStorage.getItem('sahatak_patient_messages');
-            if (stored) {
-                messages = JSON.parse(stored);
-                // Reload chat messages if needed
+            if (messagingSystem) {
+                messagingSystem.handleFileAttachment();
             }
         }
 
-        function requestUrgentConsultation() {
-            if (confirm('Request urgent consultation? This will notify the doctor immediately and may incur additional charges.')) {
-                alert('Urgent consultation requested. Your doctor will be notified immediately.');
+        // Initialize messaging system with real backend integration
+        async function initializeMessaging() {
+            try {
+                // In a real app, currentDoctorId would come from URL params or appointment data
+                const urlParams = new URLSearchParams(window.location.search);
+                currentDoctorId = urlParams.get('doctorId') || 1; // Default to doctor ID 1 for now
                 
-                // Add urgent message to chat
+                messagingSystem = new MessagingSystem();
+                await messagingSystem.initialize(currentDoctorId, 'doctor');
+                
+                Logger.info('Patient messaging initialized', { doctorId: currentDoctorId });
+            } catch (error) {
+                Logger.error('Failed to initialize messaging', error);
+                showErrorMessage('Failed to load messaging system. Please refresh the page.');
+            }
+        }
+
+        function showErrorMessage(message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            const container = document.querySelector('.container-fluid');
+            if (container) {
+                container.insertBefore(alertDiv, container.firstChild);
+            }
+        }
+
+        async function requestUrgentConsultation() {
+            if (confirm('Request urgent consultation? This will notify the doctor immediately and may incur additional charges.')) {
                 const urgentMessage = "🚨 URGENT CONSULTATION REQUESTED - Patient needs immediate medical attention";
-                const chatMessages = document.getElementById('chatMessages');
-                const messageDiv = document.createElement('div');
-                messageDiv.className = 'message patient-message';
-                messageDiv.innerHTML = `
-                    <div class="message-content" style="background-color: #dc3545;">
-                        <p>${urgentMessage}</p>
-                        <small class="message-time">Just now</small>
-                    </div>
-                `;
-                chatMessages.appendChild(messageDiv);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                if (messagingSystem) {
+                    try {
+                        await messagingSystem.sendMessage(urgentMessage);
+                        alert('Urgent consultation requested. Your doctor will be notified immediately.');
+                    } catch (error) {
+                        alert('Failed to send urgent consultation request. Please try again.');
+                    }
+                }
             }
         }
 
@@ -639,11 +560,11 @@
         }
 
         // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             AuthGuard.protectPage('patient');
             
-            // Load saved messages
-            loadMessagesFromStorage();
+            // Initialize real messaging system
+            await initializeMessaging();
             
             // Setup common messages dropdown
             setTimeout(() => {
