@@ -80,6 +80,50 @@ def validate_date_range(start_date, end_date):
         raise RequestValidationError("Invalid date format")
 
 # =============================================================================
+# DASHBOARD ENDPOINT
+# =============================================================================
+
+@admin_bp.route('/dashboard', methods=['GET', 'OPTIONS'])
+@login_required
+@admin_required
+def dashboard():
+    """Get admin dashboard data"""
+    try:
+        # Get basic statistics
+        total_users = User.query.count()
+        total_patients = User.query.filter_by(user_type='patient').count()
+        total_doctors = User.query.filter_by(user_type='doctor').count()
+        total_admins = User.query.filter_by(user_type='admin').count()
+        
+        # Get recent activities (last 10)
+        recent_users = User.query.order_by(User.created_at.desc()).limit(10).all()
+        
+        return APIResponse.success(
+            data={
+                'stats': {
+                    'total_users': total_users,
+                    'total_patients': total_patients,
+                    'total_doctors': total_doctors,
+                    'total_admins': total_admins
+                },
+                'recent_activities': [
+                    {
+                        'type': 'user_registration',
+                        'description': f'New {user.user_type} registered: {user.full_name}',
+                        'timestamp': user.created_at.isoformat()
+                    }
+                    for user in recent_users
+                ]
+            },
+            message='Dashboard data loaded successfully'
+        )
+    except Exception as e:
+        app_logger.error(f"Dashboard error: {str(e)}")
+        return APIResponse.internal_error(
+            message='Failed to load dashboard data'
+        )
+
+# =============================================================================
 # USER MANAGEMENT ENDPOINTS
 # =============================================================================
 
