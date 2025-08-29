@@ -33,7 +33,7 @@ class User(UserMixin, db.Model):
     
     # Relationships
     patient_profile = db.relationship('Patient', backref='user', uselist=False, cascade='all, delete-orphan')
-    doctor_profile = db.relationship('Doctor', backref='user', uselist=False, cascade='all, delete-orphan')
+    doctor_profile = db.relationship('Doctor', backref='user', uselist=False, cascade='all, delete-orphan', foreign_keys='Doctor.user_id')
     
     def set_password(self, password):
         """Hash and set password"""
