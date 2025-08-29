@@ -279,6 +279,7 @@ def login():
         
         if not login_identifier or not password:
             return APIResponse.validation_error(
+                field='login_identifier',
                 message='Email/phone and password are required'
             )
         
