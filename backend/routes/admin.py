@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify, current_app, make_response
 from flask_login import login_required, current_user
 from functools import wraps
 from models import db, User, Patient, Doctor, Appointment
@@ -84,10 +84,22 @@ def validate_date_range(start_date, end_date):
 # =============================================================================
 
 @admin_bp.route('/dashboard', methods=['GET', 'OPTIONS'])
-@login_required
-@admin_required
 def dashboard():
     """Get admin dashboard data"""
+    # Handle OPTIONS request for CORS
+    if request.method == 'OPTIONS':
+        response = make_response()
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        return response
+    
+    # For GET requests, require authentication
+    if not current_user.is_authenticated or current_user.user_type != 'admin':
+        return APIResponse.unauthorized(
+            message="Admin authentication required"
+        )
+    
     try:
         # Get basic statistics
         total_users = User.query.count()
