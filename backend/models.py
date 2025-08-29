@@ -1499,7 +1499,7 @@ class Message(db.Model):
     
     @staticmethod
     def create_message(conversation_id, sender_id, recipient_id, content, 
-                      message_type='text', is_urgent=False, metadata=None, appointment_id=None):
+                      message_type='text', is_urgent=False, message_metadata=None, appointment_id=None):
         """Create a new message"""
         message = Message(
             conversation_id=conversation_id,
@@ -1508,7 +1508,7 @@ class Message(db.Model):
             content=content,
             message_type=message_type,
             is_urgent=is_urgent,
-            metadata=metadata,
+            message_metadata=message_metadata,
             appointment_id=appointment_id
         )
         
