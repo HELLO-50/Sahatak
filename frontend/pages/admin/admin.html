@@ -40,7 +40,7 @@
                                 <i class="bi bi-person-badge"></i>
                             </div>
                             <div class="user-details">
-                                <h5 class="mb-1" id="user-name">Awab Ahmed</h5>
+                                <h5 class="mb-1" id="user-name" class="user-name">Admin</h5>
                                 <span class="status-badge status-active" id="user-status">System Administrator</span>
                             </div>
                             <!-- Vertical Action Buttons -->
@@ -1076,6 +1076,32 @@
             // Ensure dashboard is active by default
             document.getElementById('dashboard').classList.add('active');
         });
+    </script>
+    
+    <!-- Admin Authentication JS -->
+    <script src="../../assets/js/admin.js"></script>
+    
+    <script>
+        // Initialize authentication guard
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication before allowing access
+            if (!AdminAuth.guard()) {
+                return; // Will redirect to login if not authenticated
+            }
+            
+            // Initialize dashboard
+            AdminDashboard.init();
+        });
+        
+        // Update logout button to use AdminAuth
+        const logoutBtn = document.getElementById('admin-btn-logout');
+        if (logoutBtn) {
+            logoutBtn.onclick = function() {
+                if (confirm('Are you sure you want to logout?')) {
+                    AdminAuth.logout();
+                }
+            };
+        }
     </script>
 </body>
 </html>
