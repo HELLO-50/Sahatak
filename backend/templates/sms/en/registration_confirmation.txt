@@ -1,1 +1,0 @@
-Welcome {{ full_name }}, your Sahatak account has been created successfully. You can now book medical appointments.

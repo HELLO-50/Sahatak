@@ -111,7 +111,7 @@ def update_doctor_participation_settings():
         
         # Update notification settings if provided
         if 'patient_notification_method' in data:
-            valid_methods = ['email', 'sms', 'both']
+            valid_methods = ['email']
             if data['patient_notification_method'] in valid_methods:
                 doctor.patient_notification_method = data['patient_notification_method']
         
@@ -250,7 +250,7 @@ def update_doctor_notification_settings():
         
         # Update patient notification method
         if 'patient_notification_method' in data:
-            valid_methods = ['email', 'sms', 'both']
+            valid_methods = ['email']
             if data['patient_notification_method'] not in valid_methods:
                 return validation_error_response(f"Invalid notification method. Must be one of: {', '.join(valid_methods)}")
             doctor.patient_notification_method = data['patient_notification_method']
@@ -333,7 +333,7 @@ def update_patient_preferences():
         
         # Update preferred contact method
         if 'preferred_contact_method' in data:
-            valid_methods = ['email', 'sms', 'both']
+            valid_methods = ['email']
             if data['preferred_contact_method'] not in valid_methods:
                 return validation_error_response(f"Invalid contact method. Must be one of: {', '.join(valid_methods)}")
             patient.preferred_contact_method = data['preferred_contact_method']

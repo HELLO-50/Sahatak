@@ -330,8 +330,7 @@ def toggle_user_status(user_id):
             title=notification_title,
             message=notification_message,
             notification_type='warning' if not user.is_active else 'info',
-            send_email=True,
-            send_sms=False
+            send_email=True
         )
         
         # Log admin action
@@ -557,8 +556,7 @@ def verify_doctor(doctor_id):
             title=notification_title,
             message=notification_message,
             notification_type='success' if approved else 'warning',
-            send_email=False,  # Already sent detailed email above
-            send_sms=True if approved else False
+            send_email=False  # Already sent detailed email above
             )
             
         return APIResponse.success(
@@ -757,8 +755,7 @@ def get_system_settings():
             'max_login_attempts': {'value': 5, 'type': 'integer', 'desc': 'Max failed login attempts'},
             'consultation_duration_minutes': {'value': 30, 'type': 'integer', 'desc': 'Default consultation duration'},
             'platform_commission_percent': {'value': 10.0, 'type': 'float', 'desc': 'Platform commission percentage'},
-            'email_notifications_enabled': {'value': True, 'type': 'boolean', 'desc': 'Enable email notifications'},
-            'sms_notifications_enabled': {'value': True, 'type': 'boolean', 'desc': 'Enable SMS notifications'}
+            'email_notifications_enabled': {'value': True, 'type': 'boolean', 'desc': 'Enable email notifications'}
         }
         
         for key, config in default_settings.items():
@@ -816,8 +813,7 @@ def update_system_settings():
             'max_login_attempts': {'type': int, 'required': False, 'min': 3, 'max': 20},
             'consultation_duration_minutes': {'type': int, 'required': False, 'min': 15, 'max': 180},
             'platform_commission_percent': {'type': float, 'required': False, 'min': 0.0, 'max': 50.0},
-            'email_notifications_enabled': {'type': bool, 'required': False},
-            'sms_notifications_enabled': {'type': bool, 'required': False}
+            'email_notifications_enabled': {'type': bool, 'required': False}
         }
         
         # Validate each setting
@@ -1279,12 +1275,11 @@ def send_broadcast_notification():
             )
             
     # Validate delivery options
-        send_email = data.get('send_email', False)
-        send_sms = data.get('send_sms', False)
+        send_email = data.get('send_email', True)  # Default to email
         
-        if not send_email and not send_sms:
+        if not send_email:
             return APIResponse.error(
-                message="At least one delivery method (email or SMS) must be selected",
+                message="Email delivery must be enabled",
                 status_code=400,
                 error_code="NO_DELIVERY_METHOD"
             )
@@ -1340,7 +1335,6 @@ def send_broadcast_notification():
                     message=message,
                     notification_type=notification_type,
                     send_email=send_email,
-                    send_sms=send_sms,
                     scheduled_time=schedule_datetime,
                     sender_id=current_user.id,
                     metadata={
@@ -1365,7 +1359,6 @@ def send_broadcast_notification():
                 'target': target,
                 'type': notification_type,
                 'send_email': send_email,
-                'send_sms': send_sms,
                 'scheduled': bool(schedule_datetime),
                 'schedule_time': schedule_datetime.isoformat() if schedule_datetime else None,
                 'notifications_queued': notifications_queued,
@@ -1863,9 +1856,8 @@ AHMED - IMPLEMENTATION CHECKLIST:
    - Log all admin actions for audit trails
    - Implement rate limiting for admin endpoints
 
-3. EMAIL/SMS INTEGRATION:
+3. EMAIL INTEGRATION:
    - Set up email templates for doctor verification
-   - Implement SMS notifications for urgent broadcasts
    - Create notification queue system
 
 4. ANALYTICS IMPLEMENTATION:

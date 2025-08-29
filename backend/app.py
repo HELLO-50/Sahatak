@@ -50,10 +50,8 @@ login_manager.login_message_category = 'info'
 
 # Initialize notification services
 from services.email_service import email_service
-from services.sms_service import sms_service
 email_service.init_app(app)
-sms_service.init_app(app)
-app_logger.info("Notification services initialized")
+app_logger.info("Email notification service initialized")
 
 # Configure CORS
 CORS(app, 

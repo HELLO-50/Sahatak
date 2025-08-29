@@ -113,6 +113,25 @@ const EHRManager = {
         console.log('✅ Mock EHR data loaded successfully');
     },
     
+    // Search for patients (for doctors/admin)
+    async searchPatients(searchTerm, filters = {}) {
+        try {
+            const params = new URLSearchParams();
+            params.append('search', searchTerm);
+            if (filters.age_min) params.append('age_min', filters.age_min);
+            if (filters.age_max) params.append('age_max', filters.age_max);
+            if (filters.gender) params.append('gender', filters.gender);
+            if (filters.condition) params.append('condition', filters.condition);
+            
+            const response = await ApiHelper.makeRequest(`/ehr/patients/search?${params}`);
+            return response;
+        } catch (error) {
+            console.error('Error searching patients:', error);
+            this.showError('Failed to search patients');
+            return { success: false, error: error.message };
+        }
+    },
+
     // Load comprehensive EHR data
     async loadEHRData() {
         try {
