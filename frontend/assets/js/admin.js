@@ -14,22 +14,12 @@ const AdminAuth = {
         return localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
     },
     
-    // Verify token validity
+    // Verify token validity (simplified for now)
     async verifyToken() {
+        // For now, just check if token exists
+        // The actual verification will happen when making API calls
         const token = this.getToken();
-        if (!token) return false;
-        
-        try {
-            const response = await fetch(`${this.API_BASE_URL}/admin/dashboard`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            return response.ok;
-        } catch (error) {
-            console.error('Token verification failed:', error);
-            return false;
-        }
+        return !!token;
     },
     
     // Login function
@@ -146,21 +136,18 @@ const AdminDashboard = {
         // Check authentication
         if (!AdminAuth.guard()) return;
         
-        // Verify token is still valid
-        const isValid = await AdminAuth.verifyToken();
-        if (!isValid) {
-            AdminAuth.logout();
-            return;
-        }
-        
         // Set user info in UI
         this.updateUserInfo();
         
-        // Load dashboard data
-        await this.loadDashboardData();
-        
         // Setup event listeners
         this.setupEventListeners();
+        
+        // Try to load dashboard data (but don't logout on failure)
+        try {
+            await this.loadDashboardData();
+        } catch (error) {
+            console.error('Failed to load initial dashboard data:', error);
+        }
         
         // Setup periodic refresh
         this.setupAutoRefresh();
