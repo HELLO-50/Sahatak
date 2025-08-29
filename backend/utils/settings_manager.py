@@ -9,7 +9,7 @@ Provides a unified interface for accessing settings with priority order:
 import os
 from typing import Union, Optional, Dict, Any
 from flask import current_app
-from models import PlatformSetting
+from models import SystemSettings
 
 class SettingsManager:
     """
@@ -31,8 +31,8 @@ class SettingsManager:
         if current_time - cls._last_cache_update > cls._cache_timeout:
             try:
                 # Query all platform settings from database
-                settings = PlatformSetting.query.all()
-                cls._cache = {setting.key: setting.get_typed_value() for setting in settings}
+                settings = SystemSettings.query.all()
+                cls._cache = {setting.setting_key: setting.get_typed_value() for setting in settings}
                 cls._last_cache_update = current_time
             except Exception:
                 # If database is not available, use empty cache
