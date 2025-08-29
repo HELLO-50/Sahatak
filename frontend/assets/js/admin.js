@@ -55,23 +55,24 @@ const AdminAuth = {
             console.log('Login response:', response.status, data);
             
             if (response.ok && data.success) {
-                // Check if user is admin
-                if (data.data.user_type !== 'admin') {
+                // Check if user is admin (user data is nested under data.data.user)
+                const userData = data.data.user;
+                if (userData.user_type !== 'admin') {
                     throw new Error('Access denied. Admin credentials required.');
                 }
                 
                 // Store authentication data
                 const storage = remember ? localStorage : sessionStorage;
-                storage.setItem('adminToken', data.data.access_token);
-                localStorage.setItem('userType', data.data.user_type);
-                localStorage.setItem('adminEmail', data.data.email);
-                localStorage.setItem('adminName', data.data.full_name);
+                storage.setItem('adminToken', data.data.access_token || 'temp-token');
+                localStorage.setItem('userType', userData.user_type);
+                localStorage.setItem('adminEmail', userData.email);
+                localStorage.setItem('adminName', userData.full_name);
                 
                 if (remember) {
                     localStorage.setItem('rememberAdmin', 'true');
                 }
                 
-                return { success: true, data: data.data };
+                return { success: true, data: userData };
             } else {
                 throw new Error(data.message || 'Invalid email or password');
             }
