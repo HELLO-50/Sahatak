@@ -35,19 +35,24 @@ const AdminAuth = {
     // Login function
     async login(email, password, remember = false) {
         try {
+            const requestBody = {
+                login_identifier: email,
+                password: password,
+                remember_me: remember
+            };
+            
+            console.log('Sending login request with:', requestBody);
+            
             const response = await fetch(`${this.API_BASE_URL}/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    login_identifier: email,
-                    password: password,
-                    remember_me: remember
-                })
+                body: JSON.stringify(requestBody)
             });
             
             const data = await response.json();
+            console.log('Login response:', response.status, data);
             
             if (response.ok && data.success) {
                 // Check if user is admin
