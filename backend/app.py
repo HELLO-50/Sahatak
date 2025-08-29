@@ -347,6 +347,22 @@ def api_info():
         message='Sahatak API v1.3.0'
     )
 
+@app.route('/init-db', methods=['POST'])
+def init_database():
+    """Initialize database tables - for deployment purposes"""
+    try:
+        db.create_all()
+        return jsonify({
+            'success': True,
+            'message': 'Database tables created successfully'
+        })
+    except Exception as e:
+        app_logger.error(f"Database initialization error: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'Database initialization failed: {str(e)}'
+        }), 500
+
 if __name__ == '__main__':
     try:
         with app.app_context():
