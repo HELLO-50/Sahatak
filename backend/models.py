@@ -1324,7 +1324,7 @@ class Conversation(db.Model):
     last_message_at = db.Column(db.DateTime, nullable=True)
     
     # Metadata
-    metadata = db.Column(db.JSON, nullable=True)  # For storing additional conversation context
+    conversation_metadata = db.Column(db.JSON, nullable=True)  # For storing additional conversation context
     
     # Relationships
     patient = db.relationship('Patient', backref='conversations', lazy=True)
@@ -1344,7 +1344,7 @@ class Conversation(db.Model):
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat(),
             'last_message_at': self.last_message_at.isoformat() if self.last_message_at else None,
-            'metadata': self.metadata,
+            'metadata': self.conversation_metadata,
             'unread_count': self.get_unread_count(),
             'participant_info': {
                 'patient': {
@@ -1476,7 +1476,7 @@ class Message(db.Model):
             'is_system_message': self.is_system_message,
             'created_at': self.created_at.isoformat(),
             'read_at': self.read_at.isoformat() if self.read_at else None,
-            'metadata': self.metadata,
+            'metadata': self.conversation_metadata,
             'sender_info': {
                 'id': self.sender.id,
                 'name': self.sender.full_name,
