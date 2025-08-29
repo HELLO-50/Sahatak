@@ -41,7 +41,7 @@ const AdminAuth = {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    email: email,
+                    login_identifier: email,
                     password: password,
                     remember_me: remember
                 })
@@ -72,7 +72,7 @@ const AdminAuth = {
             }
         } catch (error) {
             console.error('Login error:', error);
-            return { success: false, error: error.message };
+            return { success: false, error: error.message || 'Login failed. Please try again.' };
         }
     },
     
