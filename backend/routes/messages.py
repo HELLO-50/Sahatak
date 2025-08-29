@@ -248,7 +248,7 @@ def send_message(conversation_id):
             content=content,
             message_type=message_type,
             is_urgent=is_urgent,
-            metadata=data.get('metadata'),
+            message_metadata=data.get('metadata'),
             appointment_id=appointment_id
         )
         
