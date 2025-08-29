@@ -1794,11 +1794,9 @@ def create_first_admin():
         first_admin = User(
             email=email,
             full_name=data['full_name'].strip(),
-            phone=data.get('phone', '').strip(),
             user_type='admin',
             is_active=True,
             is_verified=True,
-            profile_completed=True,
             created_at=datetime.utcnow()
         )
         first_admin.set_password(data['password'])
