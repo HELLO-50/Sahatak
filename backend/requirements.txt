@@ -4,6 +4,7 @@ Flask-SQLAlchemy==3.0.5
 Flask-Login==0.6.3
 Flask-CORS==4.0.0
 Flask-Mail==0.9.1
+Flask-SocketIO==5.3.6
 Werkzeug==2.3.7
 python-dotenv==1.0.0
 africastalking==1.2.5

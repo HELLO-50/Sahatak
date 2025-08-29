@@ -53,6 +53,11 @@ from services.email_service import email_service
 email_service.init_app(app)
 app_logger.info("Email notification service initialized")
 
+# Initialize WebSocket service
+from services.websocket_service import init_socketio
+socketio = init_socketio(app)
+app_logger.info("WebSocket service initialized")
+
 # Initialize database optimization
 from utils.db_optimize import init_db_optimization
 init_db_optimization(app)
@@ -352,12 +357,12 @@ if __name__ == '__main__':
         # Set start time for health checks
         app._start_time = datetime.utcnow().timestamp()
         
-        # Start the application
+        # Start the application with SocketIO
         port = int(os.getenv('PORT', 5000))
         debug = os.getenv('FLASK_ENV') == 'development'
         
-        app_logger.info(f"Starting Sahatak API server on port {port} (debug={debug})")
-        app.run(debug=debug, host='0.0.0.0', port=port)
+        app_logger.info(f"Starting Sahatak API server with WebSocket support on port {port} (debug={debug})")
+        socketio.run(app, debug=debug, host='0.0.0.0', port=port)
         
     except Exception as e:
         app_logger.error(f"Failed to start application: {str(e)}")

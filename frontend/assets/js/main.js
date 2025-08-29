@@ -579,14 +579,64 @@ const ApiHelper = {
     // Update this to your deployed backend URL
     baseUrl: 'https://sahatak.pythonanywhere.com/api', // Your PythonAnywhere backend URL
     
-    // Make API call with language preference and proper credentials
-    async makeRequest(endpoint, options = {}) {
+    // Cacheable endpoints (GET requests that can be cached)
+    cacheableEndpoints: [
+        '/users/doctors',
+        '/users/specialties',
+        '/user-settings/profile',
+        '/notifications/settings/defaults',
+        '/admin/settings'
+    ],
+
+    // Determine if endpoint should be cached
+    _shouldCache(endpoint, method) {
+        return method === 'GET' && this.cacheableEndpoints.some(cacheable => 
+            endpoint.startsWith(cacheable) || endpoint.includes('/availability/') || endpoint.includes('/ehr/')
+        );
+    },
+
+    // Generate cache key for request
+    _getCacheKey(endpoint, options) {
+        const method = options.method || 'GET';
         const language = LanguageManager.getLanguage() || 'ar';
+        const body = options.body || '';
+        return `api_${method}_${endpoint}_${language}_${btoa(body).slice(0, 10)}`;
+    },
+
+    // Determine cache data type
+    _getCacheDataType(endpoint) {
+        if (endpoint.includes('/doctors')) return 'doctors_list';
+        if (endpoint.includes('/availability')) return 'doctor_availability';
+        if (endpoint.includes('/appointments')) return 'appointments_list';
+        if (endpoint.includes('/ehr/')) return 'patient_ehr';
+        if (endpoint.includes('/prescriptions')) return 'prescriptions';
+        if (endpoint.includes('/medical-history')) return 'medical_history';
+        if (endpoint.includes('/user-settings') || endpoint.includes('/profile')) return 'user_settings';
+        if (endpoint.includes('/specialties') || endpoint.includes('/defaults')) return 'specialties';
+        return 'api_response';
+    },
+    
+    // Make API call with caching, logging, and proper credentials
+    async makeRequest(endpoint, options = {}) {
+        const startTime = Date.now();
+        const language = LanguageManager.getLanguage() || 'ar';
+        const method = options.method || 'GET';
+        
+        // Check cache first for GET requests
+        if (this._shouldCache(endpoint, method) && window.SahatakCache) {
+            const cacheKey = this._getCacheKey(endpoint, options);
+            const cached = window.SahatakCache.get(cacheKey);
+            if (cached) {
+                window.SahatakLogger?.debug(`Cache hit for ${method} ${endpoint}`);
+                return cached;
+            }
+        }
         
         const defaultOptions = {
             headers: {
                 'Content-Type': 'application/json',
                 'Accept-Language': language,
+                'X-Timestamp': Date.now().toString(),
                 ...options.headers
             },
             credentials: 'include' // Important for session-based authentication
@@ -595,19 +645,95 @@ const ApiHelper = {
         const requestOptions = { ...defaultOptions, ...options };
         
         try {
+            window.SahatakLogger?.debug(`API Request: ${method} ${endpoint}`, {
+                headers: requestOptions.headers,
+                body: options.body ? JSON.parse(options.body) : null
+            });
+
             const response = await fetch(`${this.baseUrl}${endpoint}`, requestOptions);
+            const duration = Date.now() - startTime;
+            
+            // Log API call performance
+            window.SahatakLogger?.apiCall(method, endpoint, response.status, duration);
+            
+            // Performance warning for slow requests
+            if (duration > 5000) {
+                window.SahatakLogger?.warn(`Slow API request: ${method} ${endpoint} took ${duration}ms`);
+            }
+            
             const data = await response.json();
             
             // Handle standardized API response format
             if (data.success === false) {
-                throw new ApiError(data.message, data.status_code, data.error_code, data.field);
+                const error = new ApiError(data.message, data.status_code, data.error_code, data.field);
+                window.SahatakLogger?.error(`API Error: ${method} ${endpoint}`, {
+                    statusCode: data.status_code,
+                    errorCode: data.error_code,
+                    message: data.message,
+                    field: data.field
+                });
+                throw error;
+            }
+            
+            // Cache successful GET requests
+            if (this._shouldCache(endpoint, method) && window.SahatakCache && response.ok) {
+                const cacheKey = this._getCacheKey(endpoint, options);
+                const dataType = this._getCacheDataType(endpoint);
+                window.SahatakCache.set(cacheKey, data, dataType);
+            }
+            
+            // Clear related cache on data modifications
+            if (['POST', 'PUT', 'DELETE'].includes(method) && window.SahatakCache) {
+                this._invalidateRelatedCache(endpoint);
             }
             
             return data;
         } catch (error) {
-            console.error('API request failed:', error);
+            const duration = Date.now() - startTime;
+            window.SahatakLogger?.error(`API request failed: ${method} ${endpoint} (${duration}ms)`, {
+                error: error.message,
+                stack: error.stack
+            });
             throw error;
         }
+    },
+
+    // Invalidate cache entries related to modified data
+    _invalidateRelatedCache(endpoint) {
+        if (endpoint.includes('/appointments')) {
+            window.SahatakCache.clearByType('appointments_list');
+            window.SahatakCache.clearByType('doctor_availability');
+        }
+        if (endpoint.includes('/ehr/') || endpoint.includes('/medical-history')) {
+            window.SahatakCache.clearByType('patient_ehr');
+            window.SahatakCache.clearByType('medical_history');
+        }
+        if (endpoint.includes('/prescriptions')) {
+            window.SahatakCache.clearByType('prescriptions');
+        }
+        if (endpoint.includes('/user-settings')) {
+            window.SahatakCache.clearByType('user_settings');
+        }
+        if (endpoint.includes('/doctors')) {
+            window.SahatakCache.clearByType('doctors_list');
+        }
+    },
+
+    // Force refresh cache for specific endpoint
+    async forceRefresh(endpoint, options = {}) {
+        const cacheKey = this._getCacheKey(endpoint, options);
+        if (window.SahatakCache) {
+            window.SahatakCache.delete(cacheKey);
+        }
+        return this.makeRequest(endpoint, options);
+    },
+
+    // Get API performance stats
+    getPerformanceStats() {
+        return {
+            cache: window.SahatakCache?.getStats(),
+            logs: window.SahatakLogger?.getRecentLogs(20)
+        };
     }
 };
 
@@ -1374,6 +1500,205 @@ async function updateLanguagePreference(language) {
         return null;
     }
 }
+
+// User Settings API Functions
+const UserSettingsAPI = {
+    // Doctor Settings
+    async getDoctorParticipation() {
+        try {
+            const response = await ApiHelper.makeRequest('/user-settings/doctor/participation');
+            return response;
+        } catch (error) {
+            console.error('Error fetching doctor participation:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async updateDoctorParticipation(participationData) {
+        try {
+            const response = await ApiHelper.makeRequest('/user-settings/doctor/participation', {
+                method: 'PUT',
+                body: JSON.stringify(participationData)
+            });
+            return response;
+        } catch (error) {
+            console.error('Error updating doctor participation:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async switchToVolunteer() {
+        try {
+            const response = await ApiHelper.makeRequest('/user-settings/doctor/switch-to-volunteer', {
+                method: 'POST'
+            });
+            return response;
+        } catch (error) {
+            console.error('Error switching to volunteer:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async switchToPaid(fee) {
+        try {
+            const response = await ApiHelper.makeRequest('/user-settings/doctor/switch-to-paid', {
+                method: 'POST',
+                body: JSON.stringify({ consultation_fee: fee })
+            });
+            return response;
+        } catch (error) {
+            console.error('Error switching to paid:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async updateDoctorNotificationSettings(settings) {
+        try {
+            const response = await ApiHelper.makeRequest('/user-settings/doctor/notification-settings', {
+                method: 'PUT',
+                body: JSON.stringify(settings)
+            });
+            return response;
+        } catch (error) {
+            console.error('Error updating doctor notification settings:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    // Patient Settings
+    async getPatientPreferences() {
+        try {
+            const response = await ApiHelper.makeRequest('/user-settings/patient/preferences');
+            return response;
+        } catch (error) {
+            console.error('Error fetching patient preferences:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async updatePatientPreferences(preferences) {
+        try {
+            const response = await ApiHelper.makeRequest('/user-settings/patient/preferences', {
+                method: 'PUT',
+                body: JSON.stringify(preferences)
+            });
+            return response;
+        } catch (error) {
+            console.error('Error updating patient preferences:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    // General Settings
+    async getUserProfileSettings() {
+        try {
+            const response = await ApiHelper.makeRequest('/user-settings/profile');
+            return response;
+        } catch (error) {
+            console.error('Error fetching profile settings:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async updateUserLanguage(language) {
+        try {
+            const response = await ApiHelper.makeRequest('/user-settings/language', {
+                method: 'PUT',
+                body: JSON.stringify({ language })
+            });
+            return response;
+        } catch (error) {
+            console.error('Error updating language:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async changeUserPassword(currentPassword, newPassword) {
+        try {
+            const response = await ApiHelper.makeRequest('/user-settings/password', {
+                method: 'PUT',
+                body: JSON.stringify({
+                    current_password: currentPassword,
+                    new_password: newPassword
+                })
+            });
+            return response;
+        } catch (error) {
+            console.error('Error changing password:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async getSettingsSummary() {
+        try {
+            const response = await ApiHelper.makeRequest('/user-settings/summary');
+            return response;
+        } catch (error) {
+            console.error('Error fetching settings summary:', error);
+            return { success: false, error: error.message };
+        }
+    }
+};
+
+// Notifications API Functions
+const NotificationsAPI = {
+    async getNotificationPreferences() {
+        try {
+            const response = await ApiHelper.makeRequest('/notifications/preferences');
+            return response;
+        } catch (error) {
+            console.error('Error fetching notification preferences:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async updateNotificationPreferences(preferences) {
+        try {
+            const response = await ApiHelper.makeRequest('/notifications/preferences', {
+                method: 'PUT',
+                body: JSON.stringify(preferences)
+            });
+            return response;
+        } catch (error) {
+            console.error('Error updating notification preferences:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async testRegistrationNotification() {
+        try {
+            const response = await ApiHelper.makeRequest('/notifications/test/registration', {
+                method: 'POST'
+            });
+            return response;
+        } catch (error) {
+            console.error('Error testing registration notification:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async testAppointmentNotification() {
+        try {
+            const response = await ApiHelper.makeRequest('/notifications/test/appointment', {
+                method: 'POST'
+            });
+            return response;
+        } catch (error) {
+            console.error('Error testing appointment notification:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async getDefaultNotificationSettings() {
+        try {
+            const response = await ApiHelper.makeRequest('/notifications/settings/defaults');
+            return response;
+        } catch (error) {
+            console.error('Error fetching default notification settings:', error);
+            return { success: false, error: error.message };
+        }
+    }
+};
 
 // Set up form event listeners when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
