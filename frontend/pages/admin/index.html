@@ -318,9 +318,13 @@
         // Check if already logged in
         window.addEventListener('DOMContentLoaded', async function() {
             if (AdminAuth.isAuthenticated()) {
-                const isValid = await AdminAuth.verifyToken();
-                if (isValid) {
-                    window.location.href = './admin.html';
+                try {
+                    const isValid = await AdminAuth.verifyToken();
+                    if (isValid) {
+                        window.location.href = './admin.html';
+                    }
+                } catch (error) {
+                    console.log('Token verification failed:', error);
                 }
             }
         });
