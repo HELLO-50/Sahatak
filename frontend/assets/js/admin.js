@@ -178,7 +178,6 @@ const AdminDashboard = {
     // Update user info in UI
     updateUserInfo() {
         const adminName = localStorage.getItem('adminName');
-        const adminEmail = localStorage.getItem('adminEmail');
         
         // Update name elements
         const userNameElement = document.getElementById('user-name');
@@ -186,21 +185,10 @@ const AdminDashboard = {
             userNameElement.textContent = adminName || 'Admin User';
         }
         
-        // Update email elements
-        const userEmailElement = document.getElementById('user-email');
-        if (userEmailElement) {
-            userEmailElement.textContent = adminEmail || 'admin@sahatak.com';
-        }
-        
-        // Also update any elements with these classes
+        // Also update any elements with user-name class
         const userNameElements = document.querySelectorAll('.user-name');
-        const userEmailElements = document.querySelectorAll('.user-email');
-        
         userNameElements.forEach(el => {
             if (!el.id) el.textContent = adminName || 'Admin User';
-        });
-        userEmailElements.forEach(el => {
-            if (!el.id) el.textContent = adminEmail || '';
         });
     },
     
@@ -251,6 +239,11 @@ const AdminDashboard = {
         // Update recent activities
         if (data.recent_activities) {
             this.updateRecentActivities(data.recent_activities);
+        }
+        
+        // Update analytics data
+        if (data.analytics) {
+            this.updateAnalytics(data.analytics);
         }
     },
     
@@ -688,6 +681,201 @@ const AdminDashboard = {
     exportAppointments() {
         console.log('Export appointments functionality - to be implemented');
         this.showNotification('Export appointments functionality will be implemented soon', 'info');
+    },
+    
+    // Update analytics data and charts
+    updateAnalytics(analytics) {
+        // Update performance metrics
+        if (analytics.system_performance) {
+            const uptimeEl = document.getElementById('uptime-value');
+            if (uptimeEl) uptimeEl.textContent = analytics.system_performance.uptime_percentage + '%';
+            
+            const responseEl = document.getElementById('response-time-value');
+            if (responseEl) responseEl.textContent = analytics.system_performance.avg_response_time + 'ms';
+            
+            const errorEl = document.getElementById('error-rate-value');
+            if (errorEl) errorEl.textContent = analytics.system_performance.error_rate + '%';
+        }
+        
+        // Update user activity metrics
+        if (analytics.user_activity) {
+            const activeUsersEl = document.getElementById('active-users-7d');
+            if (activeUsersEl) activeUsersEl.textContent = analytics.user_activity.active_users_7d;
+            
+            const newUsers30dEl = document.getElementById('new-users-30d');
+            if (newUsers30dEl) newUsers30dEl.textContent = analytics.user_activity.new_users_30d;
+        }
+        
+        // Update appointment metrics
+        if (analytics.appointment_metrics) {
+            const appointments30dEl = document.getElementById('appointments-30d');
+            if (appointments30dEl) appointments30dEl.textContent = analytics.appointment_metrics.appointments_30d;
+            
+            const completedEl = document.getElementById('completed-appointments');
+            if (completedEl) completedEl.textContent = analytics.appointment_metrics.completed_appointments;
+        }
+        
+        // Create charts
+        this.createAnalyticsCharts(analytics);
+    },
+    
+    // Create analytics charts
+    createAnalyticsCharts(analytics) {
+        // Registration trends chart
+        if (analytics.user_activity && analytics.user_activity.registration_trends) {
+            this.createLineChart('registrationTrendsChart', {
+                labels: analytics.user_activity.registration_trends.map(item => new Date(item.date).toLocaleDateString()),
+                data: analytics.user_activity.registration_trends.map(item => item.count),
+                label: 'New Registrations',
+                color: 'rgb(54, 162, 235)'
+            });
+        }
+        
+        // Appointment trends chart
+        if (analytics.appointment_metrics && analytics.appointment_metrics.appointment_trends) {
+            this.createLineChart('appointmentTrendsChart', {
+                labels: analytics.appointment_metrics.appointment_trends.map(item => new Date(item.date).toLocaleDateString()),
+                data: analytics.appointment_metrics.appointment_trends.map(item => item.count),
+                label: 'New Appointments',
+                color: 'rgb(75, 192, 192)'
+            });
+        }
+        
+        // Doctor specialty distribution
+        if (analytics.doctor_analytics && analytics.doctor_analytics.specialty_distribution) {
+            this.createPieChart('specialtyDistributionChart', {
+                labels: analytics.doctor_analytics.specialty_distribution.map(item => item.specialty || 'Not Specified'),
+                data: analytics.doctor_analytics.specialty_distribution.map(item => item.count),
+                title: 'Doctor Specialties'
+            });
+        }
+        
+        // Appointment status distribution
+        if (analytics.appointment_metrics && analytics.appointment_metrics.appointment_status) {
+            this.createDoughnutChart('appointmentStatusChart', {
+                labels: analytics.appointment_metrics.appointment_status.map(item => item.status),
+                data: analytics.appointment_metrics.appointment_status.map(item => item.count),
+                title: 'Appointment Status'
+            });
+        }
+    },
+    
+    // Create line chart
+    createLineChart(canvasId, config) {
+        const ctx = document.getElementById(canvasId);
+        if (!ctx) return;
+        
+        // Destroy existing chart if it exists
+        if (window[canvasId + 'Instance']) {
+            window[canvasId + 'Instance'].destroy();
+        }
+        
+        window[canvasId + 'Instance'] = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: config.labels,
+                datasets: [{
+                    label: config.label,
+                    data: config.data,
+                    borderColor: config.color,
+                    backgroundColor: config.color.replace('rgb', 'rgba').replace(')', ', 0.2)'),
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    },
+    
+    // Create pie chart
+    createPieChart(canvasId, config) {
+        const ctx = document.getElementById(canvasId);
+        if (!ctx) return;
+        
+        // Destroy existing chart if it exists
+        if (window[canvasId + 'Instance']) {
+            window[canvasId + 'Instance'].destroy();
+        }
+        
+        const colors = [
+            'rgb(255, 99, 132)',
+            'rgb(54, 162, 235)',
+            'rgb(255, 205, 86)',
+            'rgb(75, 192, 192)',
+            'rgb(153, 102, 255)',
+            'rgb(255, 159, 64)'
+        ];
+        
+        window[canvasId + 'Instance'] = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: config.labels,
+                datasets: [{
+                    data: config.data,
+                    backgroundColor: colors.slice(0, config.data.length)
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    },
+    
+    // Create doughnut chart
+    createDoughnutChart(canvasId, config) {
+        const ctx = document.getElementById(canvasId);
+        if (!ctx) return;
+        
+        // Destroy existing chart if it exists
+        if (window[canvasId + 'Instance']) {
+            window[canvasId + 'Instance'].destroy();
+        }
+        
+        const colors = [
+            'rgb(34, 197, 94)',   // Green for completed
+            'rgb(234, 179, 8)',   // Yellow for pending
+            'rgb(239, 68, 68)',   // Red for cancelled
+            'rgb(59, 130, 246)',  // Blue for confirmed
+            'rgb(168, 85, 247)'   // Purple for other
+        ];
+        
+        window[canvasId + 'Instance'] = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: config.labels,
+                datasets: [{
+                    data: config.data,
+                    backgroundColor: colors.slice(0, config.data.length)
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
     }
 };
 

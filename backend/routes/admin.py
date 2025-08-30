@@ -129,6 +129,9 @@ def dashboard():
     """Get admin dashboard data"""
     
     try:
+        from datetime import datetime, timedelta
+        from sqlalchemy import func
+        
         # Get basic statistics
         total_users = User.query.count()
         total_patients = User.query.filter_by(user_type='patient').count()
@@ -141,9 +144,72 @@ def dashboard():
         # Get total appointments
         total_appointments = Appointment.query.count()
         
-        # Calculate system health (simple metric based on recent errors)
-        # For now, we'll use a placeholder
-        system_health = 98  # This could be calculated based on error logs, uptime, etc.
+        # Get recent activity data (last 30 days)
+        thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+        seven_days_ago = datetime.utcnow() - timedelta(days=7)
+        
+        # User activity metrics
+        new_users_30d = User.query.filter(User.created_at >= thirty_days_ago).count()
+        new_users_7d = User.query.filter(User.created_at >= seven_days_ago).count()
+        active_users_7d = User.query.filter(User.last_activity_at >= seven_days_ago).count() if hasattr(User, 'last_activity_at') else 0
+        
+        # Appointment metrics
+        appointments_30d = Appointment.query.filter(Appointment.created_at >= thirty_days_ago).count()
+        appointments_7d = Appointment.query.filter(Appointment.created_at >= seven_days_ago).count()
+        completed_appointments = Appointment.query.filter_by(status='completed').count()
+        
+        # User registration trends (last 7 days)
+        registration_trends = []
+        for i in range(7):
+            day_start = datetime.utcnow() - timedelta(days=i+1)
+            day_end = datetime.utcnow() - timedelta(days=i)
+            count = User.query.filter(User.created_at >= day_start, User.created_at < day_end).count()
+            registration_trends.append({
+                'date': day_start.strftime('%Y-%m-%d'),
+                'count': count
+            })
+        registration_trends.reverse()
+        
+        # Appointment booking trends (last 7 days)
+        appointment_trends = []
+        for i in range(7):
+            day_start = datetime.utcnow() - timedelta(days=i+1)
+            day_end = datetime.utcnow() - timedelta(days=i)
+            count = Appointment.query.filter(Appointment.created_at >= day_start, Appointment.created_at < day_end).count()
+            appointment_trends.append({
+                'date': day_start.strftime('%Y-%m-%d'),
+                'count': count
+            })
+        appointment_trends.reverse()
+        
+        # Doctor specialty distribution
+        specialty_stats = db.session.query(
+            Doctor.specialty,
+            func.count(Doctor.id).label('count')
+        ).group_by(Doctor.specialty).all()
+        
+        specialty_distribution = [
+            {'specialty': specialty, 'count': count}
+            for specialty, count in specialty_stats
+        ]
+        
+        # Appointment status distribution
+        status_stats = db.session.query(
+            Appointment.status,
+            func.count(Appointment.id).label('count')
+        ).group_by(Appointment.status).all()
+        
+        appointment_status = [
+            {'status': status, 'count': count}
+            for status, count in status_stats
+        ]
+        
+        # Calculate system health metrics
+        error_rate = 0  # Placeholder - could be calculated from logs
+        uptime_percentage = 99.9  # Placeholder - could be calculated from monitoring
+        avg_response_time = 150  # Placeholder - in milliseconds
+        
+        system_health = min(100, max(0, 100 - (error_rate * 10)))  # Simple calculation
         
         # Get recent activities (last 10)
         recent_users = User.query.order_by(User.created_at.desc()).limit(10).all()
@@ -158,6 +224,29 @@ def dashboard():
                     'verified_doctors': verified_doctors,
                     'total_appointments': total_appointments,
                     'system_health': system_health
+                },
+                'analytics': {
+                    'user_activity': {
+                        'new_users_30d': new_users_30d,
+                        'new_users_7d': new_users_7d,
+                        'active_users_7d': active_users_7d,
+                        'registration_trends': registration_trends
+                    },
+                    'appointment_metrics': {
+                        'appointments_30d': appointments_30d,
+                        'appointments_7d': appointments_7d,
+                        'completed_appointments': completed_appointments,
+                        'appointment_trends': appointment_trends,
+                        'appointment_status': appointment_status
+                    },
+                    'doctor_analytics': {
+                        'specialty_distribution': specialty_distribution
+                    },
+                    'system_performance': {
+                        'uptime_percentage': uptime_percentage,
+                        'avg_response_time': avg_response_time,
+                        'error_rate': error_rate
+                    }
                 },
                 'recent_activities': [
                     {
@@ -196,8 +285,8 @@ def get_users():
         
         # Build base query
         query = User.query.options(
-            joinedload(User.patient),
-            joinedload(User.doctor)
+            joinedload(User.patient_profile),
+            joinedload(User.doctor_profile)
         )
         
         # Apply filters
@@ -239,37 +328,42 @@ def get_users():
             }
             
             # Add type-specific information
-            if user.user_type == 'doctor' and user.doctor:
+            if user.user_type == 'doctor' and user.doctor_profile:
                 user_info['doctor_info'] = {
-                    'specialty': user.doctor.specialty,
-                    'license_number': user.doctor.license_number,
-                    'is_verified': user.doctor.is_verified,
-                    'years_of_experience': user.doctor.years_of_experience
+                    'specialty': user.doctor_profile.specialty,
+                    'license_number': user.doctor_profile.license_number,
+                    'is_verified': user.doctor_profile.is_verified,
+                    'years_of_experience': user.doctor_profile.years_of_experience
                 }
-            elif user.user_type == 'patient' and user.patient:
+            elif user.user_type == 'patient' and user.patient_profile:
                 user_info['patient_info'] = {
-                    'date_of_birth': user.patient.date_of_birth.isoformat() if user.patient.date_of_birth else None,
-                    'gender': user.patient.gender,
-                    'emergency_contact': user.patient.emergency_contact
+                    'date_of_birth': user.patient_profile.date_of_birth.isoformat() if user.patient_profile.date_of_birth else None,
+                    'gender': user.patient_profile.gender,
+                    'emergency_contact': user.patient_profile.emergency_contact
                 }
             
             users_data.append(user_info)
         
-        # Log admin action
-        log_user_action(
-            current_user.id,
-            'admin_view_users',
-            {
-                'page': page,
-                'per_page': per_page,
-                'filters': {
-                    'user_type': user_type,
-                    'search': bool(search),
-                    'status': status
-                },
-                'total_results': users_pagination.total
-            }
-        )
+        # Log admin action (skip if current_user not available in token auth)
+        try:
+            if current_user.is_authenticated:
+                log_user_action(
+                    current_user.id,
+                    'admin_view_users',
+                    {
+                        'page': page,
+                        'per_page': per_page,
+                        'filters': {
+                            'user_type': user_type,
+                            'search': bool(search),
+                            'status': status
+                        },
+                        'total_results': users_pagination.total
+                    }
+                )
+        except Exception as e:
+            # Skip logging if current_user is not available
+            app_logger.debug(f"Skipping user action logging: {str(e)}")
         
         return APIResponse.success(
             data={

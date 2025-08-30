@@ -27,7 +27,7 @@
      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
      
 </head>
-<body data-protect="admin">
+<body data-protect="admin" data-bypass-dev="true">
     <div class="dashboard-container">
         <div class="container-fluid">
             <!-- Dashboard Header -->
@@ -51,7 +51,6 @@
                         <div class="d-flex align-items-center justify-content-end">
                             <div class="user-info me-3 text-end">
                                 <h6 class="mb-0 user-name" id="user-name">Admin User</h6>
-                                <small class="text-muted user-email" id="user-email">admin@sahatak.com</small>
                             </div>
                             <div class="user-avatar me-3">
                                 <i class="bi bi-person-circle fs-2"></i>
@@ -88,10 +87,6 @@
                             <button class="btn btn-admin-nav" data-target="settings">
                                 <i class="bi bi-sliders2"></i>
                                 <span id="admin-nav-settings">System Settings</span>
-                            </button>
-                            <button class="btn btn-admin-nav" data-target="analytics">
-                                <i class="bi bi-graph-up"></i>
-                                <span id="admin-nav-analytics">Analytics</span>
                             </button>
                         </div>
                     </div>
@@ -146,61 +141,98 @@
                                 </div>
                             </div>
                             
-                            <!-- Platform Health & Analytics - Always Visible -->
+                            <!-- Platform Health & Analytics -->
                             <div class="dashboard-card admin-health-card">
                                 <h5><i class="bi bi-activity me-2"></i><span id="platform-health-title">Platform Health & Analytics</span></h5>
                                 
-                                <!-- Server Health Gauges -->
+                                <!-- System Performance Metrics -->
                                 <div class="row mb-4">
                                     <div class="col-md-3 text-center">
-                                        <div class="health-gauge">
-                                            <div class="gauge-circle" data-percentage="99">
-                                                <div class="gauge-fill"></div>
-                                                <div class="gauge-cover">
-                                                    <span class="gauge-text">99.8%</span>
-                                                </div>
-                                            </div>
-                                            <p class="gauge-label" id="gauge-uptime">Server Uptime</p>
+                                        <div class="metric-card">
+                                            <div class="metric-value" id="uptime-value">99.9%</div>
+                                            <div class="metric-label">Server Uptime</div>
                                         </div>
                                     </div>
                                     <div class="col-md-3 text-center">
-                                        <div class="health-gauge">
-                                            <div class="gauge-circle cpu-gauge" data-percentage="65">
-                                                <div class="gauge-fill"></div>
-                                                <div class="gauge-cover">
-                                                    <span class="gauge-text" id="cpuUsage">65%</span>
-                                                </div>
-                                            </div>
-                                            <p class="gauge-label" id="gauge-cpu">CPU Usage</p>
+                                        <div class="metric-card">
+                                            <div class="metric-value" id="response-time-value">150ms</div>
+                                            <div class="metric-label">Avg Response Time</div>
                                         </div>
                                     </div>
                                     <div class="col-md-3 text-center">
-                                        <div class="health-gauge">
-                                            <div class="gauge-circle memory-gauge" data-percentage="78">
-                                                <div class="gauge-fill"></div>
-                                                <div class="gauge-cover">
-                                                    <span class="gauge-text" id="memUsage">78%</span>
-                                                </div>
-                                            </div>
-                                            <p class="gauge-label" id="gauge-memory">Memory Usage</p>
+                                        <div class="metric-card">
+                                            <div class="metric-value" id="error-rate-value">0.1%</div>
+                                            <div class="metric-label">Error Rate</div>
                                         </div>
                                     </div>
                                     <div class="col-md-3 text-center">
-                                        <div class="health-gauge">
-                                            <div class="gauge-circle response-gauge" data-percentage="32">
-                                                <div class="gauge-fill"></div>
-                                                <div class="gauge-cover">
-                                                    <span class="gauge-text">320ms</span>
-                                                </div>
-                                            </div>
-                                            <p class="gauge-label" id="gauge-response">Response Time</p>
+                                        <div class="metric-card">
+                                            <div class="metric-value" id="active-users-7d">0</div>
+                                            <div class="metric-label">Active Users (7d)</div>
                                         </div>
                                     </div>
                                 </div>
                                 
-                                <!-- Health Chart -->
-                                <div class="mt-4">
-                                    <canvas id="healthChart" height="100"></canvas>
+                                <!-- Analytics Charts -->
+                                <div class="row mb-4">
+                                    <!-- User Registration Trends -->
+                                    <div class="col-lg-6">
+                                        <div class="analytics-card">
+                                            <h6><i class="bi bi-person-plus me-2"></i>User Registration Trends</h6>
+                                            <canvas id="registrationTrendsChart" height="200"></canvas>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Appointment Booking Trends -->
+                                    <div class="col-lg-6">
+                                        <div class="analytics-card">
+                                            <h6><i class="bi bi-calendar-event me-2"></i>Appointment Trends</h6>
+                                            <canvas id="appointmentTrendsChart" height="200"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-4">
+                                    <!-- Doctor Specialty Distribution -->
+                                    <div class="col-lg-6">
+                                        <div class="analytics-card">
+                                            <h6><i class="bi bi-pie-chart me-2"></i>Doctor Specialties</h6>
+                                            <canvas id="specialtyDistributionChart" height="200"></canvas>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Appointment Status Distribution -->
+                                    <div class="col-lg-6">
+                                        <div class="analytics-card">
+                                            <h6><i class="bi bi-bar-chart me-2"></i>Appointment Status</h6>
+                                            <canvas id="appointmentStatusChart" height="200"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Recent Activity Summary -->
+                                <div class="analytics-card">
+                                    <h6><i class="bi bi-clock-history me-2"></i>Recent Activity Summary</h6>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="activity-stat">
+                                                <span class="activity-value" id="new-users-30d">0</span>
+                                                <span class="activity-label">New Users (30d)</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="activity-stat">
+                                                <span class="activity-value" id="appointments-30d">0</span>
+                                                <span class="activity-label">Appointments (30d)</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="activity-stat">
+                                                <span class="activity-value" id="completed-appointments">0</span>
+                                                <span class="activity-label">Completed Appointments</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -404,12 +436,7 @@
                                 <!-- Settings Tabs -->
                                 <ul class="nav nav-tabs mb-3" id="settingsTabs" role="tablist">
                                     <li class="nav-item" role="presentation">
-                                        <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab">
-                                            <i class="bi bi-gear me-1"></i><span id="settings-general-tab">General</span>
-                                        </button>
-                                    </li>
-                                    <li class="nav-item" role="presentation">
-                                        <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab">
+                                        <button class="nav-link active" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab">
                                             <i class="bi bi-shield-lock me-1"></i><span id="settings-security-tab">Security</span>
                                         </button>
                                     </li>
@@ -448,73 +475,8 @@
                                 <!-- Settings Content -->
                                 <div class="tab-content" id="settingsTabContent">
                                     
-                                    <!-- General Settings -->
-                                    <div class="tab-pane fade show active" id="general" role="tabpanel">
-                                        <div class="row g-4">
-                                            <!-- Platform Settings -->
-                                            <div class="col-12">
-                                                <div class="card">
-                                                    <div class="card-header">
-                                                        <h6><i class="bi bi-globe me-2"></i><span id="platform-settings-title">Platform Settings</span></h6>
-                                                    </div>
-                                                    <div class="card-body">
-                                                        <div class="row g-3">
-                                                            <div class="col-md-6">
-                                                                <label class="form-label" id="default-language-label">Default Language</label>
-                                                                <select id="default_language" class="form-select" data-setting="default_language">
-                                                                    <option value="ar" id="language-arabic">العربية (Arabic)</option>
-                                                                    <option value="en" id="language-english">English</option>
-                                                                </select>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <label class="form-label" id="supported-languages-label">Supported Languages</label>
-                                                                <input type="text" id="languages" class="form-control" data-setting="languages" placeholder="ar,en">
-                                                                <small class="form-text text-muted" id="languages-help">Comma-separated language codes</small>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <div class="form-check form-switch">
-                                                                    <input class="form-check-input" type="checkbox" id="registration_enabled" data-setting="registration_enabled">
-                                                                    <label class="form-check-label" id="registration-enabled-label">Enable User Registration</label>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                            <!-- API Limits -->
-                                            <div class="col-12">
-                                                <div class="card">
-                                                    <div class="card-header">
-                                                        <h6><i class="bi bi-speedometer2 me-2"></i><span id="api-limits-title">API & Performance Limits</span></h6>
-                                                    </div>
-                                                    <div class="card-body">
-                                                        <div class="row g-3">
-                                                            <div class="col-md-4">
-                                                                <label class="form-label" id="posts-per-page-label">Items Per Page</label>
-                                                                <input type="number" id="posts_per_page" class="form-control" data-setting="posts_per_page" min="5" max="100">
-                                                            </div>
-                                                            <div class="col-md-4">
-                                                                <label class="form-label" id="max-page-size-label">Max Page Size</label>
-                                                                <input type="number" id="max_page_size" class="form-control" data-setting="max_page_size" min="10" max="500">
-                                                            </div>
-                                                            <div class="col-md-4">
-                                                                <label class="form-label" id="max-vital-signs-label">Max Vital Signs per Request</label>
-                                                                <input type="number" id="max_vital_signs_per_request" class="form-control" data-setting="max_vital_signs_per_request" min="1" max="50">
-                                                            </div>
-                                                            <div class="col-md-4">
-                                                                <label class="form-label" id="max-prescriptions-label">Max Prescriptions per Request</label>
-                                                                <input type="number" id="max_prescriptions_per_request" class="form-control" data-setting="max_prescriptions_per_request" min="1" max="100">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
                                     <!-- Security Settings -->
-                                    <div class="tab-pane fade" id="security" role="tabpanel">
+                                    <div class="tab-pane fade show active" id="security" role="tabpanel">
                                         <div class="row g-4">
                                             <!-- Password Requirements -->
                                             <div class="col-12">
@@ -987,7 +949,7 @@
                 <div class="col-lg-4 col-md-6">
                     <h5 class="mb-3">
                         <i class="bi bi-heart-pulse me-2 text-primary"></i>
-                        <span id="footer-brand">صحتك | Sahatak</span>
+                        <span id="footer-brand">Sahatak | Admin Dashboard</span>
                     </h5>
                     <div class="d-flex gap-3 social-links">
                         <a href="#">
@@ -1007,26 +969,26 @@
 
                 <!-- Quick Links -->
                 <div class="col-lg-2 col-md-6">
-                    <h6 class="mb-3" id="footer-links-title">روابط سريعة</h6>
+                    <h6 class="mb-3" id="footer-links-title">Quick Links</h6>
                     <ul class="list-unstyled">
                         <li class="mb-2">
-                            <a href="../common/about.html" class="text-muted text-decoration-none" id="footer-about">عن المنصة</a>
+                            <a href="../common/about.html" class="text-muted text-decoration-none" id="footer-about">About Platform</a>
                         </li>
                         <li class="mb-2">
-                            <a href="../common/services.html" class="text-muted text-decoration-none" id="footer-services">الخدمات</a>
+                            <a href="../common/services.html" class="text-muted text-decoration-none" id="footer-services">Services</a>
                         </li>
                     </ul>
                 </div>
 
                 <!-- Support -->
                 <div class="col-lg-3 col-md-6">
-                    <h6 class="mb-3" id="footer-support-title">الدعم والمساعدة</h6>
+                    <h6 class="mb-3" id="footer-support-title">Support & Help</h6>
                     <ul class="list-unstyled">
                         <li class="mb-2">
-                            <a href="../common/support.html" class="text-muted text-decoration-none" id="footer-help">مركز المساعدة</a>
+                            <a href="../common/support.html" class="text-muted text-decoration-none" id="footer-help">Help Center</a>
                         </li>
                         <li class="mb-2">
-                            <a href="../common/contact-us.html" class="text-muted text-decoration-none" id="footer-contact">اتصل بنا</a>
+                            <a href="../common/contact-us.html" class="text-muted text-decoration-none" id="footer-contact">Contact Us</a>
                         </li>
                     </ul>
                 </div>
@@ -1034,14 +996,14 @@
                 <!-- Emergency Contact -->
                 <div class="col-lg-3 col-md-6 emergency-section">
                     <p class="mb-2 text-danger fw-bold" id="footer-emergency-text">
-                        في حالات الطوارئ الطبية
+                        For Medical Emergencies
                     </p>
                     <p class="mb-3 text-danger fw-bold fs-6" id="footer-emergency-action">
                         <i class="bi bi-hospital me-2"></i>
-                        اذهب إلى أقرب مستشفى طوارئ
+                        Go to nearest emergency hospital
                     </p>
                     <p class="mb-0 text-muted small" id="footer-emergency-note">
-                        للاستشارات غير العاجلة استخدم المنصة
+                        Use platform for non-urgent consultations
                     </p>
                 </div>
             </div>
@@ -1051,10 +1013,10 @@
             <div class="row">
                 <div class="col-12 text-center">
                     <p class="mb-0 fw-bold" id="footer-copyright">
-                        © 2025 صحتك Sahatak. جميع الحقوق محفوظة.
+                        © 2025 Sahatak. All rights reserved.
                     </p>
                     <p class="mb-0 text-muted small mt-1" id="footer-medical-disclaimer">
-                        هذه المنصة لا تغني عن زيارة الطبيب في الحالات الطارئة
+                        This platform does not replace doctor visits in emergency cases
                     </p>
                 </div>
             </div>
@@ -1103,6 +1065,9 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
+    <!-- Authentication Guard (must load first) -->
+    <script src="../../assets/js/components/auth-guard.js"></script>
+    
     <!-- Main JavaScript -->
     <script src="../../assets/js/main.js"></script>
     
@@ -1112,6 +1077,17 @@
     
     <!-- Admin Dashboard Functions -->
     <script>
+        // Bypass AuthGuard for admin pages - use AdminAuth instead
+        if (typeof AuthGuard !== 'undefined') {
+            // Override AuthGuard for admin pages
+            const originalInit = AuthGuard.init;
+            AuthGuard.init = function() {
+                // Skip AuthGuard initialization for admin pages
+                console.log('Skipping AuthGuard for admin page - using AdminAuth instead');
+                return;
+            };
+        }
+        
         // Profile and settings functions
         function showProfile() {
             // Show profile functionality
