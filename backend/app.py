@@ -70,11 +70,7 @@ CORS(app,
          'http://localhost:8000', 
          'http://127.0.0.1:8000',
          'https://hmb104.github.io',
-         'https://hmb104.github.io/Sahatak',
-         'https://hello-50.github.io',
-         'https://hello-50.github.io/Sahatak',
-         'file://*',  # Allow local file access for development
-         '*'  # Allow all origins for admin testing
+         'https://hello-50.github.io'
      ],
      allow_headers=['Content-Type', 'Authorization', 'Accept-Language', 'X-Requested-With'],
      methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
