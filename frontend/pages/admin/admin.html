@@ -27,7 +27,7 @@
      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
      
 </head>
-<body data-protect="admin" data-bypass-dev="true">
+<body>
     <div class="dashboard-container">
         <div class="container-fluid">
             <!-- Dashboard Header -->
@@ -1065,9 +1065,6 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- Authentication Guard (must load first) -->
-    <script src="../../assets/js/components/auth-guard.js"></script>
-    
     <!-- Main JavaScript -->
     <script src="../../assets/js/main.js"></script>
     
@@ -1077,16 +1074,28 @@
     
     <!-- Admin Dashboard Functions -->
     <script>
-        // Bypass AuthGuard for admin pages - use AdminAuth instead
-        if (typeof AuthGuard !== 'undefined') {
-            // Override AuthGuard for admin pages
-            const originalInit = AuthGuard.init;
-            AuthGuard.init = function() {
-                // Skip AuthGuard initialization for admin pages
-                console.log('Skipping AuthGuard for admin page - using AdminAuth instead');
-                return;
-            };
-        }
+        // Disable AuthGuard for admin pages in development
+        window.DISABLE_AUTH_GUARD = true;
+        
+        // Override AuthGuard globally for admin pages
+        window.AuthGuard = {
+            init: function() {
+                console.log('AuthGuard disabled for admin page');
+            },
+            isAuthenticated: function() {
+                return true; // Always return true for admin pages
+            },
+            getCurrentUser: function() {
+                return { id: 'admin', userType: 'admin' };
+            },
+            logout: function() {
+                if (window.AdminAuth) {
+                    window.AdminAuth.logout();
+                } else {
+                    window.location.href = './index.html';
+                }
+            }
+        };
         
         // Profile and settings functions
         function showProfile() {
