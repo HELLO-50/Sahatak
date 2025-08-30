@@ -278,6 +278,22 @@ const AdminDashboard = {
         if (data.analytics) {
             this.updateAnalytics(data.analytics);
         }
+        
+        // Update individual activity stats that might be in stats instead of analytics
+        if (data.stats) {
+            // Update recent activity summary
+            const newUsers30dEl = document.getElementById('new-users-30d');
+            if (newUsers30dEl) newUsers30dEl.textContent = data.stats.new_users_30d || 0;
+            
+            const appointments30dEl = document.getElementById('appointments-30d');
+            if (appointments30dEl) appointments30dEl.textContent = data.stats.appointments_30d || 0;
+            
+            const completedEl = document.getElementById('completed-appointments');
+            if (completedEl) completedEl.textContent = data.stats.completed_appointments || 0;
+            
+            const activeUsers7dEl = document.getElementById('active-users-7d');
+            if (activeUsers7dEl) activeUsers7dEl.textContent = data.stats.active_users_7d || 0;
+        }
     },
     
     // Update recent activities
