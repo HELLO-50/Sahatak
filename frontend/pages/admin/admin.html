@@ -442,6 +442,11 @@
                                             <i class="bi bi-tools me-1"></i><span id="settings-maintenance-tab">Maintenance</span>
                                         </button>
                                     </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="admin-management-tab" data-bs-toggle="tab" data-bs-target="#admin-management" type="button" role="tab">
+                                            <i class="bi bi-person-badge me-1"></i><span id="settings-admin-management-tab">Admin Management</span>
+                                        </button>
+                                    </li>
                                 </ul>
                                 
                                 <!-- Settings Content -->
@@ -865,6 +870,84 @@
                                                                     <label class="form-check-label" id="maintenance-mode-label">Enable Maintenance Mode</label>
                                                                 </div>
                                                             </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Admin Management -->
+                                    <div class="tab-pane fade" id="admin-management" role="tabpanel">
+                                        <div class="row g-4">
+                                            <!-- Create Admin User -->
+                                            <div class="col-12">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <h6><i class="bi bi-person-plus me-2"></i><span id="create-admin-title">Create Admin User</span></h6>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <form id="create-admin-form">
+                                                            <div class="row g-3">
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label" id="admin-full-name-label">Full Name</label>
+                                                                    <input type="text" id="admin-full-name" class="form-control" required placeholder="Enter admin full name">
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label" id="admin-email-label">Email Address</label>
+                                                                    <input type="email" id="admin-email" class="form-control" required placeholder="Enter admin email">
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label" id="admin-password-label">Password</label>
+                                                                    <input type="password" id="admin-password" class="form-control" required placeholder="Enter secure password">
+                                                                    <small class="form-text text-muted">Password must be at least 8 characters long</small>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label" id="admin-phone-label">Phone Number (Optional)</label>
+                                                                    <input type="tel" id="admin-phone" class="form-control" placeholder="Enter phone number">
+                                                                </div>
+                                                                <div class="col-12">
+                                                                    <button type="submit" class="btn btn-primary">
+                                                                        <i class="bi bi-person-plus me-1"></i>
+                                                                        <span id="create-admin-btn">Create Admin User</span>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Current Admin Users -->
+                                            <div class="col-12">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <h6><i class="bi bi-people me-2"></i><span id="current-admins-title">Current Admin Users</span></h6>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="table-responsive">
+                                                            <table class="table table-hover">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Full Name</th>
+                                                                        <th>Email</th>
+                                                                        <th>Phone</th>
+                                                                        <th>Status</th>
+                                                                        <th>Created</th>
+                                                                        <th>Actions</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody id="admin-users-table">
+                                                                    <tr>
+                                                                        <td colspan="6" class="text-center py-3">
+                                                                            <div class="spinner-border text-primary" role="status">
+                                                                                <span class="visually-hidden">Loading...</span>
+                                                                            </div>
+                                                                            <p class="mt-2 text-muted">Loading admin users...</p>
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
                                                         </div>
                                                     </div>
                                                 </div>

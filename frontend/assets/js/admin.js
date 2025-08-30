@@ -170,6 +170,9 @@ const AdminDashboard = {
         
         // Setup periodic refresh
         this.setupAutoRefresh();
+        
+        // Setup create admin form
+        this.setupCreateAdminForm();
     },
     
     // Update user info in UI
@@ -367,19 +370,35 @@ const AdminDashboard = {
         if (loader) {
             await loader.call(this);
         }
+        
+        // Also load admin users when settings section is opened
+        if (section === 'settings') {
+            this.loadAdminUsers();
+        }
     },
     
     // Load users data
     async loadUsersData() {
         try {
-            const response = await AdminAuth.apiRequest('/admin/users?page=1&limit=20');
+            const response = await AdminAuth.apiRequest('/admin/users?page=1&per_page=20');
             const data = await response.json();
             
-            if (data.success) {
+            console.log('Users data received:', data); // Debug log
+            
+            if (data.success && data.data.users) {
                 this.displayUsersTable(data.data.users);
+                // Update pagination if needed
+                if (data.data.pagination) {
+                    this.updateUsersPagination(data.data.pagination);
+                }
+            } else {
+                console.error('Invalid users response:', data);
+                this.displayUsersTable([]);
             }
         } catch (error) {
             console.error('Failed to load users:', error);
+            this.showNotification('Failed to load users: ' + error.message, 'error');
+            this.displayUsersTable([]);
         }
     },
     
@@ -429,6 +448,55 @@ const AdminDashboard = {
                 </td>
             </tr>
         `).join('');
+    },
+    
+    // Update users pagination
+    updateUsersPagination(pagination) {
+        const paginationContainer = document.getElementById('users-pagination');
+        if (!paginationContainer || !pagination) return;
+        
+        let html = '';
+        
+        // Previous button
+        if (pagination.has_prev) {
+            html += `<li class="page-item"><a class="page-link" href="#" onclick="AdminDashboard.loadUsersPage(${pagination.page - 1})">Previous</a></li>`;
+        } else {
+            html += `<li class="page-item disabled"><span class="page-link">Previous</span></li>`;
+        }
+        
+        // Page numbers
+        for (let i = 1; i <= pagination.pages; i++) {
+            if (i === pagination.page) {
+                html += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
+            } else {
+                html += `<li class="page-item"><a class="page-link" href="#" onclick="AdminDashboard.loadUsersPage(${i})">${i}</a></li>`;
+            }
+        }
+        
+        // Next button
+        if (pagination.has_next) {
+            html += `<li class="page-item"><a class="page-link" href="#" onclick="AdminDashboard.loadUsersPage(${pagination.page + 1})">Next</a></li>`;
+        } else {
+            html += `<li class="page-item disabled"><span class="page-link">Next</span></li>`;
+        }
+        
+        paginationContainer.innerHTML = html;
+    },
+    
+    // Load specific users page
+    async loadUsersPage(page = 1) {
+        try {
+            const response = await AdminAuth.apiRequest(`/admin/users?page=${page}&per_page=20`);
+            const data = await response.json();
+            
+            if (data.success && data.data.users) {
+                this.displayUsersTable(data.data.users);
+                this.updateUsersPagination(data.data.pagination);
+            }
+        } catch (error) {
+            console.error('Failed to load users page:', error);
+            this.showNotification('Failed to load users', 'error');
+        }
     },
     
     // Handle search
@@ -495,6 +563,113 @@ const AdminDashboard = {
             console.error('Toggle user status error:', error);
             this.showNotification('Failed to update user status', 'error');
         }
+    },
+    
+    // Setup create admin form
+    setupCreateAdminForm() {
+        const form = document.getElementById('create-admin-form');
+        if (form) {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await this.createAdminUser();
+            });
+        }
+    },
+    
+    // Create admin user
+    async createAdminUser() {
+        const form = document.getElementById('create-admin-form');
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        
+        try {
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Creating...';
+            
+            const formData = {
+                full_name: document.getElementById('admin-full-name').value,
+                email: document.getElementById('admin-email').value,
+                password: document.getElementById('admin-password').value,
+                phone: document.getElementById('admin-phone').value || null,
+                user_type: 'admin'
+            };
+            
+            const response = await AdminAuth.apiRequest('/auth/register', {
+                method: 'POST',
+                body: JSON.stringify(formData)
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                this.showNotification('Admin user created successfully', 'success');
+                form.reset();
+                // Reload admin users table
+                this.loadAdminUsers();
+            } else {
+                this.showNotification(data.message || 'Failed to create admin user', 'error');
+            }
+        } catch (error) {
+            console.error('Create admin error:', error);
+            this.showNotification('Failed to create admin user: ' + error.message, 'error');
+        } finally {
+            // Reset button
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    },
+    
+    // Load admin users
+    async loadAdminUsers() {
+        try {
+            const response = await AdminAuth.apiRequest('/admin/users?user_type=admin&per_page=50');
+            const data = await response.json();
+            
+            if (data.success && data.data.users) {
+                this.displayAdminUsersTable(data.data.users);
+            }
+        } catch (error) {
+            console.error('Failed to load admin users:', error);
+        }
+    },
+    
+    // Display admin users table
+    displayAdminUsersTable(adminUsers) {
+        const tbody = document.getElementById('admin-users-table');
+        if (!tbody) return;
+        
+        if (!adminUsers || adminUsers.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center py-3">
+                        <p class="text-muted">No admin users found</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        tbody.innerHTML = adminUsers.map(admin => `
+            <tr>
+                <td>${admin.full_name || 'N/A'}</td>
+                <td>${admin.email}</td>
+                <td>${admin.phone || 'N/A'}</td>
+                <td>
+                    <span class="badge bg-${admin.is_active ? 'success' : 'secondary'}">
+                        ${admin.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                </td>
+                <td>${new Date(admin.created_at).toLocaleDateString()}</td>
+                <td>
+                    <button class="btn btn-sm btn-${admin.is_active ? 'danger' : 'success'} me-1" 
+                            onclick="AdminDashboard.toggleUserStatus(${admin.id})" 
+                            title="${admin.is_active ? 'Deactivate' : 'Activate'}">
+                        <i class="bi bi-${admin.is_active ? 'x-circle' : 'check-circle'}"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
     }
 };
 
