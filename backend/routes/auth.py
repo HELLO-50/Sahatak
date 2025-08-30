@@ -363,19 +363,22 @@ def login():
         # Generate a simple access token for admin users
         # This is a temporary solution for cross-origin admin access
         if user.user_type == 'admin':
-            token_data = {
-                'user_id': user.id,
-                'email': user.email,
-                'user_type': 'admin',
-                'exp': (datetime.utcnow() + timedelta(hours=24)).isoformat()
-            }
-            # Simple token generation (not JWT, but works for our needs)
-            token = hashlib.sha256(
-                f"{json.dumps(token_data)}{current_app.config['SECRET_KEY']}".encode()
-            ).hexdigest()
-            response_data['access_token'] = token
-            # Store token in memory or cache for validation later
-            # For now, we'll rely on session for non-admin and token for admin
+            try:
+                token_data = {
+                    'user_id': str(user.id),  # Convert to string for JSON serialization
+                    'email': user.email,
+                    'user_type': 'admin',
+                    'exp': (datetime.utcnow() + timedelta(hours=24)).isoformat()
+                }
+                # Simple token generation (not JWT, but works for our needs)
+                token_string = json.dumps(token_data) + current_app.config.get('SECRET_KEY', 'default-secret')
+                token = hashlib.sha256(token_string.encode()).hexdigest()
+                response_data['access_token'] = token
+                # Store token in memory or cache for validation later
+                # For now, we'll rely on session for non-admin and token for admin
+            except Exception as e:
+                auth_logger.error(f"Token generation error: {str(e)}")
+                # Continue without token if generation fails
         
         return APIResponse.success(
             data=response_data,
