@@ -4,15 +4,6 @@ const AdminAuth = {
     
     // Check if user is authenticated
     isAuthenticated() {
-        // Check if running in development mode
-        const hostname = window.location.hostname;
-        const isDev = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname === '';
-        
-        if (isDev) {
-            console.log('Development mode: admin authentication bypassed');
-            return true;
-        }
-        
         const userType = localStorage.getItem('userType');
         const adminLoggedIn = localStorage.getItem('adminLoggedIn') === 'true' || sessionStorage.getItem('adminLoggedIn') === 'true';
         const hasToken = !!(localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken'));
@@ -21,15 +12,6 @@ const AdminAuth = {
     
     // Get auth token
     getToken() {
-        // Check if running in development mode
-        const hostname = window.location.hostname;
-        const isDev = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname === '';
-        
-        if (isDev) {
-            // Return a mock token for development
-            return 'dev-mode-token-' + Date.now().toString().substr(-8);
-        }
-        
         return localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
     },
     
@@ -52,15 +34,6 @@ const AdminAuth = {
     
     // Admin authentication guard
     guard() {
-        // Check if running in development mode (localhost)
-        const hostname = window.location.hostname;
-        const isDev = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname === '';
-        
-        if (isDev) {
-            console.log('Development mode: bypassing admin authentication guard');
-            return true;
-        }
-        
         // Check if user is authenticated as admin
         if (!this.isAuthenticated()) {
             console.log('Admin not authenticated, redirecting to login');
@@ -73,15 +46,6 @@ const AdminAuth = {
     
     // Verify token (for compatibility)
     async verifyToken() {
-        // Check if running in development mode
-        const hostname = window.location.hostname;
-        const isDev = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname === '';
-        
-        if (isDev) {
-            console.log('Development mode: token verification bypassed');
-            return true;
-        }
-        
         const token = this.getToken();
         if (!token) return false;
         
@@ -253,14 +217,26 @@ const AdminDashboard = {
     async loadDashboardData() {
         try {
             const response = await AdminAuth.apiRequest('/admin/dashboard');
+            
+            if (!response.ok) {
+                console.error(`Dashboard API returned ${response.status}: ${response.statusText}`);
+                const errorText = await response.text();
+                console.error('Error response:', errorText);
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
             const data = await response.json();
+            console.log('Dashboard data received:', data);
             
             if (data.success) {
                 this.updateDashboardStats(data.data);
+            } else {
+                console.error('Dashboard API returned success=false:', data);
+                throw new Error(data.error || 'Unknown error');
             }
         } catch (error) {
             console.error('Failed to load dashboard data:', error);
-            this.showNotification('Failed to load dashboard data', 'error');
+            this.showNotification(`Failed to load dashboard data: ${error.message}`, 'error');
         }
     },
     
@@ -674,13 +650,29 @@ const AdminDashboard = {
     async loadAdminUsers() {
         try {
             const response = await AdminAuth.apiRequest('/admin/users?user_type=admin&per_page=50');
-            const data = await response.json();
             
-            if (data.success && data.data.users) {
+            if (!response.ok) {
+                console.error(`Admin users API returned ${response.status}: ${response.statusText}`);
+                const errorText = await response.text();
+                console.error('Error response:', errorText);
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            console.log('Admin users data received:', data);
+            
+            if (data.success && data.data && data.data.users) {
                 this.displayAdminUsersTable(data.data.users);
+            } else if (data.success && data.users) {
+                // Fallback for different response structure
+                this.displayAdminUsersTable(data.users);
+            } else {
+                console.error('Admin users API returned unexpected structure:', data);
+                this.displayAdminUsersTable([]);
             }
         } catch (error) {
             console.error('Failed to load admin users:', error);
+            this.displayAdminUsersTable([]);
         }
     },
     
