@@ -177,11 +177,28 @@ const AdminDashboard = {
         const adminName = localStorage.getItem('adminName');
         const adminEmail = localStorage.getItem('adminEmail');
         
+        // Update name elements
+        const userNameElement = document.getElementById('user-name');
+        if (userNameElement) {
+            userNameElement.textContent = adminName || 'Admin User';
+        }
+        
+        // Update email elements
+        const userEmailElement = document.getElementById('user-email');
+        if (userEmailElement) {
+            userEmailElement.textContent = adminEmail || 'admin@sahatak.com';
+        }
+        
+        // Also update any elements with these classes
         const userNameElements = document.querySelectorAll('.user-name');
         const userEmailElements = document.querySelectorAll('.user-email');
         
-        userNameElements.forEach(el => el.textContent = adminName || 'Admin');
-        userEmailElements.forEach(el => el.textContent = adminEmail || '');
+        userNameElements.forEach(el => {
+            if (!el.id) el.textContent = adminName || 'Admin User';
+        });
+        userEmailElements.forEach(el => {
+            if (!el.id) el.textContent = adminEmail || '';
+        });
     },
     
     // Load dashboard data
