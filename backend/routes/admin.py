@@ -29,9 +29,23 @@ admin_bp = Blueprint('admin', __name__)
 def handle_preflight():
     if request.method == 'OPTIONS':
         response = make_response()
-        response.headers['Access-Control-Allow-Origin'] = '*'
+        origin = request.headers.get('Origin')
+        # Allow specific origins that need credentials
+        allowed_origins = [
+            'https://hello-50.github.io',
+            'https://hmb104.github.io',
+            'http://localhost:3000',
+            'http://localhost:8000',
+            'http://127.0.0.1:3000',
+            'http://127.0.0.1:8000'
+        ]
+        if origin in allowed_origins:
+            response.headers['Access-Control-Allow-Origin'] = origin
+        else:
+            response.headers['Access-Control-Allow-Origin'] = 'https://hello-50.github.io'
         response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
         response.headers['Access-Control-Max-Age'] = '3600'
         return response
 
