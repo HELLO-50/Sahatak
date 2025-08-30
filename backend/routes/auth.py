@@ -1,7 +1,9 @@
 from flask import Blueprint, request, jsonify, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import check_password_hash
-from datetime import datetime
+from datetime import datetime, timedelta
+import hashlib
+import json
 from models import db, User, Patient, Doctor
 from utils.validators import validate_email, validate_password, validate_phone
 from utils.responses import APIResponse, ErrorCodes
@@ -361,9 +363,6 @@ def login():
         # Generate a simple access token for admin users
         # This is a temporary solution for cross-origin admin access
         if user.user_type == 'admin':
-            import hashlib
-            import json
-            from datetime import datetime, timedelta
             token_data = {
                 'user_id': user.id,
                 'email': user.email,
