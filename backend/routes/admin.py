@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, current_app, make_response
 from flask_login import login_required, current_user
 from functools import wraps
+import hashlib
 from models import db, User, Patient, Doctor, Appointment
 from datetime import datetime, timedelta
 from routes.notifications import queue_notification, send_email
@@ -63,7 +64,6 @@ def admin_required(f):
             token = auth_header.split(' ')[1]
             # Simple token validation (matches what we generate in login)
             # In production, you'd want to use proper JWT or store tokens in Redis
-            import hashlib
             # For now, we'll just check if it's a valid hash format
             if len(token) == 64:  # SHA256 produces 64 character hex string
                 # Token is valid format, allow access
