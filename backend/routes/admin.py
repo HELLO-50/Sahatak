@@ -135,6 +135,16 @@ def dashboard():
         total_doctors = User.query.filter_by(user_type='doctor').count()
         total_admins = User.query.filter_by(user_type='admin').count()
         
+        # Get verified doctors count
+        verified_doctors = Doctor.query.filter_by(is_verified=True).count()
+        
+        # Get total appointments
+        total_appointments = Appointment.query.count()
+        
+        # Calculate system health (simple metric based on recent errors)
+        # For now, we'll use a placeholder
+        system_health = 98  # This could be calculated based on error logs, uptime, etc.
+        
         # Get recent activities (last 10)
         recent_users = User.query.order_by(User.created_at.desc()).limit(10).all()
         
@@ -144,7 +154,10 @@ def dashboard():
                     'total_users': total_users,
                     'total_patients': total_patients,
                     'total_doctors': total_doctors,
-                    'total_admins': total_admins
+                    'total_admins': total_admins,
+                    'verified_doctors': verified_doctors,
+                    'total_appointments': total_appointments,
+                    'system_health': system_health
                 },
                 'recent_activities': [
                     {

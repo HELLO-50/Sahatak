@@ -220,12 +220,29 @@ const AdminDashboard = {
     updateDashboardStats(data) {
         // Update stat cards
         if (data.stats) {
-            document.querySelectorAll('.stat-card').forEach(card => {
-                const statType = card.dataset.stat;
-                if (data.stats[statType] !== undefined) {
-                    card.querySelector('.stat-value').textContent = data.stats[statType];
-                }
-            });
+            // Update Total Users card
+            const totalUsersElement = document.getElementById('total-users-count');
+            if (totalUsersElement) {
+                totalUsersElement.textContent = data.stats.total_users || 0;
+            }
+            
+            // Update Verified Doctors card
+            const verifiedDoctorsElement = document.getElementById('verified-doctors-count');
+            if (verifiedDoctorsElement) {
+                verifiedDoctorsElement.textContent = data.stats.verified_doctors || 0;
+            }
+            
+            // Update Appointments card
+            const appointmentsElement = document.getElementById('appointments-count');
+            if (appointmentsElement) {
+                appointmentsElement.textContent = data.stats.total_appointments || 0;
+            }
+            
+            // Update System Health card
+            const systemHealthElement = document.getElementById('system-health-percentage');
+            if (systemHealthElement) {
+                systemHealthElement.textContent = (data.stats.system_health || 0) + '%';
+            }
         }
         
         // Update recent activities
