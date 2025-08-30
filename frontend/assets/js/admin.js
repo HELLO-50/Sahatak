@@ -4,22 +4,26 @@ const AdminAuth = {
     
     // Check if user is authenticated
     isAuthenticated() {
-        const token = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
         const userType = localStorage.getItem('userType');
-        return token && userType === 'admin';
+        const adminLoggedIn = localStorage.getItem('adminLoggedIn') === 'true' || sessionStorage.getItem('adminLoggedIn') === 'true';
+        return adminLoggedIn && userType === 'admin';
     },
     
-    // Get auth token
-    getToken() {
-        return localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
-    },
-    
-    // Verify token validity (simplified for now)
-    async verifyToken() {
-        // For now, just check if token exists
-        // The actual verification will happen when making API calls
-        const token = this.getToken();
-        return !!token;
+    // Verify session validity
+    async verifySession() {
+        // Check with the backend if the session is still valid
+        try {
+            const response = await fetch(`${this.API_BASE_URL}/auth/me`, {
+                method: 'GET',
+                credentials: 'include', // Important for session cookies
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            return response.ok;
+        } catch (error) {
+            return false;
+        }
     },
     
     // Login function
@@ -35,6 +39,7 @@ const AdminAuth = {
             
             const response = await fetch(`${this.API_BASE_URL}/auth/login`, {
                 method: 'POST',
+                credentials: 'include', // Important: include cookies for session
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -51,9 +56,9 @@ const AdminAuth = {
                     throw new Error('Access denied. Admin credentials required.');
                 }
                 
-                // Store authentication data
+                // Store authentication data (session-based, no token)
                 const storage = remember ? localStorage : sessionStorage;
-                storage.setItem('adminToken', data.data.access_token || 'temp-token');
+                storage.setItem('adminLoggedIn', 'true');
                 localStorage.setItem('userType', userData.user_type);
                 localStorage.setItem('adminEmail', userData.email);
                 localStorage.setItem('adminName', userData.full_name);
@@ -74,12 +79,12 @@ const AdminAuth = {
     
     // Logout function
     logout() {
-        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminLoggedIn');
         localStorage.removeItem('userType');
         localStorage.removeItem('adminEmail');
         localStorage.removeItem('adminName');
         localStorage.removeItem('rememberAdmin');
-        sessionStorage.removeItem('adminToken');
+        sessionStorage.removeItem('adminLoggedIn');
         window.location.href = './index.html';
     },
     
@@ -94,14 +99,13 @@ const AdminAuth = {
     
     // Make authenticated API request
     async apiRequest(endpoint, options = {}) {
-        const token = this.getToken();
-        if (!token) {
-            throw new Error('No authentication token');
+        if (!this.isAuthenticated()) {
+            throw new Error('Not authenticated');
         }
         
         const defaultOptions = {
+            credentials: 'include', // Important: include cookies for session
             headers: {
-                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             }
         };
