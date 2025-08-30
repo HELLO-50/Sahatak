@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import check_password_hash
-from datetime import datetime, timedelta
+import datetime
+from datetime import timedelta
 import hashlib
 import json
 from models import db, User, Patient, Doctor
@@ -325,7 +326,7 @@ def login():
         
         # Login user and update last login
         login_user(user, remember=data.get('remember_me', False))
-        user.last_login = datetime.utcnow()
+        user.last_login = datetime.datetime.utcnow()
         db.session.commit()
         
         # Prepare response with user data and profile
@@ -368,7 +369,7 @@ def login():
                     'user_id': str(user.id),  # Convert to string for JSON serialization
                     'email': user.email,
                     'user_type': 'admin',
-                    'exp': (datetime.utcnow() + timedelta(hours=24)).isoformat()
+                    'exp': (datetime.datetime.utcnow() + timedelta(hours=24)).isoformat()
                 }
                 # Simple token generation (not JWT, but works for our needs)
                 token_string = json.dumps(token_data) + current_app.config.get('SECRET_KEY', 'default-secret')
@@ -473,7 +474,7 @@ def change_password():
         
         # Update password
         current_user.set_password(data['new_password'])
-        current_user.updated_at = datetime.utcnow()
+        current_user.updated_at = datetime.datetime.utcnow()
         db.session.commit()
         
         return jsonify({
@@ -505,7 +506,7 @@ def update_language():
         
         # Update language preference
         current_user.language_preference = data['language']
-        current_user.updated_at = datetime.utcnow()
+        current_user.updated_at = datetime.datetime.utcnow()
         db.session.commit()
         
         return jsonify({
@@ -561,7 +562,7 @@ def verify_email():
         # Verify the user
         user.is_verified = True
         user.verification_token = None  # Clear the token
-        user.updated_at = datetime.utcnow()
+        user.updated_at = datetime.datetime.utcnow()
         db.session.commit()
         
         # Log successful verification
@@ -621,7 +622,7 @@ def resend_verification():
         # Generate new verification token
         import secrets
         user.verification_token = secrets.token_urlsafe(32)
-        user.updated_at = datetime.utcnow()
+        user.updated_at = datetime.datetime.utcnow()
         db.session.commit()
         
         # Send verification email
