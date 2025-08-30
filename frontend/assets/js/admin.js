@@ -6,7 +6,13 @@ const AdminAuth = {
     isAuthenticated() {
         const userType = localStorage.getItem('userType');
         const adminLoggedIn = localStorage.getItem('adminLoggedIn') === 'true' || sessionStorage.getItem('adminLoggedIn') === 'true';
-        return adminLoggedIn && userType === 'admin';
+        const hasToken = !!(localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken'));
+        return adminLoggedIn && userType === 'admin' && hasToken;
+    },
+    
+    // Get auth token
+    getToken() {
+        return localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
     },
     
     // Verify session validity
@@ -56,9 +62,15 @@ const AdminAuth = {
                     throw new Error('Access denied. Admin credentials required.');
                 }
                 
-                // Store authentication data (session-based, no token)
+                // Store authentication data
                 const storage = remember ? localStorage : sessionStorage;
                 storage.setItem('adminLoggedIn', 'true');
+                
+                // Store token if provided (for admin users)
+                if (data.data.access_token) {
+                    storage.setItem('adminToken', data.data.access_token);
+                }
+                
                 localStorage.setItem('userType', userData.user_type);
                 localStorage.setItem('adminEmail', userData.email);
                 localStorage.setItem('adminName', userData.full_name);
@@ -80,11 +92,13 @@ const AdminAuth = {
     // Logout function
     logout() {
         localStorage.removeItem('adminLoggedIn');
+        localStorage.removeItem('adminToken');
         localStorage.removeItem('userType');
         localStorage.removeItem('adminEmail');
         localStorage.removeItem('adminName');
         localStorage.removeItem('rememberAdmin');
         sessionStorage.removeItem('adminLoggedIn');
+        sessionStorage.removeItem('adminToken');
         window.location.href = './index.html';
     },
     
@@ -99,14 +113,15 @@ const AdminAuth = {
     
     // Make authenticated API request
     async apiRequest(endpoint, options = {}) {
-        if (!this.isAuthenticated()) {
+        const token = this.getToken();
+        if (!token) {
             throw new Error('Not authenticated');
         }
         
         const defaultOptions = {
-            credentials: 'include', // Important: include cookies for session
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             }
         };
         

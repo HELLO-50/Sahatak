@@ -358,6 +358,26 @@ def login():
             response_data['verification_status'] = profile.verification_status
             response_data['profile_completed'] = profile.profile_completed
         
+        # Generate a simple access token for admin users
+        # This is a temporary solution for cross-origin admin access
+        if user.user_type == 'admin':
+            import hashlib
+            import json
+            from datetime import datetime, timedelta
+            token_data = {
+                'user_id': user.id,
+                'email': user.email,
+                'user_type': 'admin',
+                'exp': (datetime.utcnow() + timedelta(hours=24)).isoformat()
+            }
+            # Simple token generation (not JWT, but works for our needs)
+            token = hashlib.sha256(
+                f"{json.dumps(token_data)}{current_app.config['SECRET_KEY']}".encode()
+            ).hexdigest()
+            response_data['access_token'] = token
+            # Store token in memory or cache for validation later
+            # For now, we'll rely on session for non-admin and token for admin
+        
         return APIResponse.success(
             data=response_data,
             message='Login successful'
