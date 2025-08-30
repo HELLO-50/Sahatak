@@ -670,6 +670,24 @@ const AdminDashboard = {
                 </td>
             </tr>
         `).join('');
+    },
+    
+    // Export users data
+    exportUsers() {
+        console.log('Export users functionality - to be implemented');
+        this.showNotification('Export functionality will be implemented soon', 'info');
+    },
+    
+    // Add doctor manually
+    addDoctorManually() {
+        console.log('Add doctor manually functionality - to be implemented');
+        this.showNotification('Add doctor functionality will be implemented soon', 'info');
+    },
+    
+    // Export appointments data
+    exportAppointments() {
+        console.log('Export appointments functionality - to be implemented');
+        this.showNotification('Export appointments functionality will be implemented soon', 'info');
     }
 };
 
