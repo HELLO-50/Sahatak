@@ -33,38 +33,33 @@
             <!-- Dashboard Header -->
             <div class="dashboard-header">
                 <div class="row align-items-center">
-                    <!-- Profile Section - Left (Right in RTL) -->
-                    <div class="col-lg-4">
-                        <div class="profile-section">
-                            <div class="user-avatar">
-                                <i class="bi bi-person-badge"></i>
+                    <!-- Logo and Title - Left -->
+                    <div class="col-lg-6">
+                        <div class="d-flex align-items-center">
+                            <div class="admin-logo me-3">
+                                <i class="bi bi-shield-lock-fill text-primary fs-1"></i>
                             </div>
-                            <div class="user-details">
-                                <h5 class="mb-1" id="user-name" class="user-name">Admin</h5>
-                                <span class="status-badge status-active" id="user-status">System Administrator</span>
-                            </div>
-                            <!-- Vertical Action Buttons -->
-                            <div class="action-buttons">
-                                <button class="btn btn-action" id="admin-btn-settings" onclick="showSettings()" title="Profile & Settings">
-                                    <i class="bi bi-person-gear"></i>
-                                    <span id="btn-settings">Profile & Settings</span>
-                                </button>
-                                <button class="btn btn-action btn-logout" id="admin-btn-logout" onclick="AuthGuard.logout()" title="Logout">
-                                    <i class="bi bi-box-arrow-right"></i>
-                                    <span id="btn-logout">Logout</span>
-                                </button>
+                            <div>
+                                <h1 class="dashboard-title mb-0" id="admin-dashboard-title">Admin Dashboard</h1>
+                                <p class="dashboard-subtitle mb-0" id="admin-dashboard-subtitle">Sahatak Platform Management</p>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Dashboard Title - Center -->
-                    <div class="col-lg-4 text-center">
-                        <h1 class="dashboard-title" id="admin-dashboard-title">Admin Dashboard</h1>
-                        <p class="dashboard-subtitle" id="admin-dashboard-subtitle">Sahatak Medical Platform Management</p>
-                    </div>
-                    
-                    <!-- Right Side - Empty -->
-                    <div class="col-lg-4 text-end">
+                    <!-- User Info and Actions - Right -->
+                    <div class="col-lg-6 text-end">
+                        <div class="d-flex align-items-center justify-content-end">
+                            <div class="user-info me-3 text-end">
+                                <h6 class="mb-0 user-name" id="user-name">Admin User</h6>
+                                <small class="text-muted user-email" id="user-email">admin@sahatak.com</small>
+                            </div>
+                            <div class="user-avatar me-3">
+                                <i class="bi bi-person-circle fs-2"></i>
+                            </div>
+                            <button class="btn btn-outline-danger btn-sm" onclick="AdminAuth.logout()" title="Logout">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
