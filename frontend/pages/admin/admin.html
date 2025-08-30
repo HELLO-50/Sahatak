@@ -1116,28 +1116,6 @@
     
     <!-- Admin Dashboard Functions -->
     <script>
-        // Disable AuthGuard for admin pages in development
-        window.DISABLE_AUTH_GUARD = true;
-        
-        // Override AuthGuard globally for admin pages
-        window.AuthGuard = {
-            init: function() {
-                console.log('AuthGuard disabled for admin page');
-            },
-            isAuthenticated: function() {
-                return true; // Always return true for admin pages
-            },
-            getCurrentUser: function() {
-                return { id: 'admin', userType: 'admin' };
-            },
-            logout: function() {
-                if (window.AdminAuth) {
-                    window.AdminAuth.logout();
-                } else {
-                    window.location.href = './index.html';
-                }
-            }
-        };
         
         // Profile and settings functions
         function showProfile() {
