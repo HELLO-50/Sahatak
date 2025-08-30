@@ -778,26 +778,6 @@ const AdminDashboard = {
     
     // Create analytics charts
     createAnalyticsCharts(analytics) {
-        // Registration trends chart
-        if (analytics.user_activity && analytics.user_activity.registration_trends) {
-            this.createLineChart('registrationTrendsChart', {
-                labels: analytics.user_activity.registration_trends.map(item => new Date(item.date).toLocaleDateString()),
-                data: analytics.user_activity.registration_trends.map(item => item.count),
-                label: 'New Registrations',
-                color: 'rgb(54, 162, 235)'
-            });
-        }
-        
-        // Appointment trends chart
-        if (analytics.appointment_metrics && analytics.appointment_metrics.appointment_trends) {
-            this.createLineChart('appointmentTrendsChart', {
-                labels: analytics.appointment_metrics.appointment_trends.map(item => new Date(item.date).toLocaleDateString()),
-                data: analytics.appointment_metrics.appointment_trends.map(item => item.count),
-                label: 'New Appointments',
-                color: 'rgb(75, 192, 192)'
-            });
-        }
-        
         // Doctor specialty distribution
         if (analytics.doctor_analytics && analytics.doctor_analytics.specialty_distribution) {
             this.createPieChart('specialtyDistributionChart', {
@@ -815,45 +795,6 @@ const AdminDashboard = {
                 title: 'Appointment Status'
             });
         }
-    },
-    
-    // Create line chart
-    createLineChart(canvasId, config) {
-        const ctx = document.getElementById(canvasId);
-        if (!ctx) return;
-        
-        // Destroy existing chart if it exists
-        if (window[canvasId + 'Instance']) {
-            window[canvasId + 'Instance'].destroy();
-        }
-        
-        window[canvasId + 'Instance'] = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: config.labels,
-                datasets: [{
-                    label: config.label,
-                    data: config.data,
-                    borderColor: config.color,
-                    backgroundColor: config.color.replace('rgb', 'rgba').replace(')', ', 0.2)'),
-                    tension: 0.1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
     },
     
     // Create pie chart
