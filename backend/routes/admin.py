@@ -318,17 +318,18 @@ def get_users():
                 'id': user.id,
                 'email': user.email,
                 'full_name': user.full_name,
-                'phone': user.phone,
+                'phone': None,  # Will be populated from profile if exists
                 'user_type': user.user_type,
                 'is_active': user.is_active,
                 'is_verified': user.is_verified,
                 'created_at': user.created_at.isoformat(),
                 'last_login': user.last_login.isoformat() if user.last_login else None,
-                'profile_completed': user.profile_completed
+                'profile_completed': user.profile_completed if hasattr(user, 'profile_completed') else False
             }
             
             # Add type-specific information
             if user.user_type == 'doctor' and user.doctor_profile:
+                user_info['phone'] = user.doctor_profile.phone  # Get phone from doctor profile
                 user_info['doctor_info'] = {
                     'specialty': user.doctor_profile.specialty,
                     'license_number': user.doctor_profile.license_number,
@@ -336,6 +337,7 @@ def get_users():
                     'years_of_experience': user.doctor_profile.years_of_experience
                 }
             elif user.user_type == 'patient' and user.patient_profile:
+                user_info['phone'] = user.patient_profile.phone  # Get phone from patient profile
                 user_info['patient_info'] = {
                     'date_of_birth': user.patient_profile.date_of_birth.isoformat() if user.patient_profile.date_of_birth else None,
                     'gender': user.patient_profile.gender,
