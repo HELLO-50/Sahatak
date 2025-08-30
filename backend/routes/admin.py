@@ -160,7 +160,7 @@ def dashboard():
         
         # User registration trends (last 7 days)
         registration_trends = []
-        for i in range(7):
+        for i in range(6, -1, -1):  # Start from 6 days ago and go to today
             day_start = datetime.utcnow() - timedelta(days=i+1)
             day_end = datetime.utcnow() - timedelta(days=i)
             count = User.query.filter(User.created_at >= day_start, User.created_at < day_end).count()
@@ -168,11 +168,11 @@ def dashboard():
                 'date': day_start.strftime('%Y-%m-%d'),
                 'count': count
             })
-        registration_trends.reverse()
+        # No need to reverse since we're already building in chronological order
         
         # Appointment booking trends (last 7 days)
         appointment_trends = []
-        for i in range(7):
+        for i in range(6, -1, -1):  # Start from 6 days ago and go to today
             day_start = datetime.utcnow() - timedelta(days=i+1)
             day_end = datetime.utcnow() - timedelta(days=i)
             count = Appointment.query.filter(Appointment.created_at >= day_start, Appointment.created_at < day_end).count()
@@ -180,7 +180,7 @@ def dashboard():
                 'date': day_start.strftime('%Y-%m-%d'),
                 'count': count
             })
-        appointment_trends.reverse()
+        # No need to reverse since we're already building in chronological order
         
         # Doctor specialty distribution
         specialty_stats = db.session.query(
