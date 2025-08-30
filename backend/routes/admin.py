@@ -24,6 +24,17 @@ from models import AuditLog
 # Create admin blueprint
 admin_bp = Blueprint('admin', __name__)
 
+# Add CORS preflight handler for all admin routes
+@admin_bp.before_request
+def handle_preflight():
+    if request.method == 'OPTIONS':
+        response = make_response()
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+        response.headers['Access-Control-Max-Age'] = '3600'
+        return response
+
 # Admin Authentication Decorator
 def admin_required(f):
     """
@@ -86,14 +97,6 @@ def validate_date_range(start_date, end_date):
 @admin_bp.route('/dashboard', methods=['GET', 'OPTIONS'])
 def dashboard():
     """Get admin dashboard data"""
-    # Handle OPTIONS request for CORS
-    if request.method == 'OPTIONS':
-        response = make_response()
-        response.headers['Access-Control-Allow-Origin'] = '*'
-        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-        return response
-    
     # For GET requests, require authentication
     if not current_user.is_authenticated or current_user.user_type != 'admin':
         return APIResponse.unauthorized(

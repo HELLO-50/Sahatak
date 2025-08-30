@@ -72,11 +72,14 @@ CORS(app,
          'https://hmb104.github.io',
          'https://hmb104.github.io/Sahatak',
          'https://hello-50.github.io',
-         'https://hello-50.github.io/Sahatak'
+         'https://hello-50.github.io/Sahatak',
+         'file://*',  # Allow local file access for development
+         '*'  # Allow all origins for admin testing
      ],
-     allow_headers=['Content-Type', 'Authorization', 'Accept-Language'],
-     methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-     supports_credentials=True)
+     allow_headers=['Content-Type', 'Authorization', 'Accept-Language', 'X-Requested-With'],
+     methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+     supports_credentials=True,
+     max_age=3600)
 
 # Import models after db initialization
 from models import User, Doctor, Patient, Appointment, Prescription, MedicalHistoryUpdate
