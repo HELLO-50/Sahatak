@@ -307,10 +307,10 @@ const AdminDashboard = {
         }
         
         // Navigation menu items
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', (e) => {
+        document.querySelectorAll('.btn-admin-nav').forEach(btn => {
+            btn.addEventListener('click', (e) => {
                 e.preventDefault();
-                const section = link.dataset.section;
+                const section = btn.dataset.target;
                 if (section) {
                     this.switchSection(section);
                 }
@@ -329,21 +329,21 @@ const AdminDashboard = {
     // Switch dashboard section
     switchSection(section) {
         // Hide all sections
-        document.querySelectorAll('.dashboard-section').forEach(sec => {
+        document.querySelectorAll('.admin-section').forEach(sec => {
             sec.style.display = 'none';
         });
         
         // Show selected section
-        const selectedSection = document.getElementById(`${section}Section`);
+        const selectedSection = document.getElementById(section);
         if (selectedSection) {
             selectedSection.style.display = 'block';
         }
         
         // Update active nav item
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.classList.remove('active');
-            if (link.dataset.section === section) {
-                link.classList.add('active');
+        document.querySelectorAll('.btn-admin-nav').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.target === section) {
+                btn.classList.add('active');
             }
         });
         
@@ -385,27 +385,46 @@ const AdminDashboard = {
     
     // Display users table
     displayUsersTable(users) {
-        const tbody = document.querySelector('#usersTable tbody');
+        const tbody = document.getElementById('users-table-body');
         if (!tbody) return;
         
-        tbody.innerHTML = users.map(user => `
+        if (!users || users.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center py-4">
+                        <p class="text-muted">No users found</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        tbody.innerHTML = users.map((user, index) => `
             <tr>
-                <td>${user.id}</td>
-                <td>${user.full_name}</td>
+                <td>${index + 1}</td>
+                <td>${user.full_name || 'N/A'}</td>
                 <td>${user.email}</td>
-                <td>${user.user_type}</td>
+                <td>${user.phone || 'N/A'}</td>
                 <td>
-                    <span class="badge badge-${user.is_active ? 'success' : 'danger'}">
+                    <span class="badge bg-${user.user_type === 'admin' ? 'danger' : user.user_type === 'doctor' ? 'info' : 'primary'}">
+                        ${user.user_type}
+                    </span>
+                </td>
+                <td>
+                    <span class="badge bg-${user.is_active ? 'success' : 'secondary'}">
                         ${user.is_active ? 'Active' : 'Inactive'}
                     </span>
                 </td>
                 <td>${new Date(user.created_at).toLocaleDateString()}</td>
                 <td>
-                    <button class="btn btn-sm btn-primary" onclick="AdminDashboard.viewUser(${user.id})">
-                        <i class="fas fa-eye"></i>
+                    <button class="btn btn-sm btn-primary me-1" onclick="AdminDashboard.viewUser(${user.id})" title="View">
+                        <i class="bi bi-eye"></i>
                     </button>
-                    <button class="btn btn-sm btn-warning" onclick="AdminDashboard.editUser(${user.id})">
-                        <i class="fas fa-edit"></i>
+                    <button class="btn btn-sm btn-warning me-1" onclick="AdminDashboard.editUser(${user.id})" title="Edit">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-${user.is_active ? 'danger' : 'success'}" onclick="AdminDashboard.toggleUserStatus(${user.id})" title="${user.is_active ? 'Deactivate' : 'Activate'}">
+                        <i class="bi bi-${user.is_active ? 'x-circle' : 'check-circle'}"></i>
                     </button>
                 </td>
             </tr>
@@ -451,6 +470,31 @@ const AdminDashboard = {
     editUser(userId) {
         console.log('Edit user:', userId);
         // Implement edit user modal
+    },
+    
+    // Toggle user status
+    async toggleUserStatus(userId) {
+        if (!confirm('Are you sure you want to change this user\'s status?')) {
+            return;
+        }
+        
+        try {
+            const response = await AdminAuth.apiRequest(`/admin/users/${userId}/toggle-status`, {
+                method: 'POST'
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                this.showNotification('User status updated successfully', 'success');
+                // Reload users data
+                this.loadUsersData();
+            } else {
+                this.showNotification(data.message || 'Failed to update user status', 'error');
+            }
+        } catch (error) {
+            console.error('Toggle user status error:', error);
+            this.showNotification('Failed to update user status', 'error');
+        }
     }
 };
 
