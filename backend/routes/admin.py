@@ -181,7 +181,6 @@ def dashboard():
 # =============================================================================
 
 @admin_bp.route('/users', methods=['GET'])
-@login_required
 @admin_required
 def get_users():
     """Get paginated list of users with filtering and search"""
@@ -297,7 +296,6 @@ def get_users():
         )
 
 @admin_bp.route('/users/<int:user_id>', methods=['GET'])
-@login_required
 @admin_required
 def get_user_details(user_id):
     """Get user details for admin view"""
@@ -391,7 +389,6 @@ def get_user_details(user_id):
         )
 
 @admin_bp.route('/users/<int:user_id>/toggle-status', methods=['POST'])
-@login_required
 @admin_required
 def toggle_user_status(user_id):
     """Ahmed: Toggle user active status"""
@@ -459,7 +456,6 @@ def toggle_user_status(user_id):
 # =============================================================================
 # Get list of doctors pending verification
 @admin_bp.route('/doctors/pending-verification', methods=['GET'])
-@login_required
 @admin_required
 def get_pending_verifications():
     try:
@@ -536,7 +532,6 @@ def get_pending_verifications():
         )
 #Verify a doctor
 @admin_bp.route('/doctors/<int:doctor_id>/verify', methods=['POST'])
-@login_required
 @admin_required
 def verify_doctor(doctor_id):    
     
@@ -675,7 +670,6 @@ def verify_doctor(doctor_id):
         
 # add a verified doctor
 @admin_bp.route('/doctors', methods=['POST'])
-@login_required
 @admin_required
 def add_doctor_manually():
      
@@ -824,7 +818,6 @@ def add_doctor_manually():
 # =============================================================================
 # current system settings
 @admin_bp.route('/settings', methods=['GET'])
-@login_required
 @admin_required
 def get_system_settings():
     try:
@@ -884,7 +877,6 @@ def get_system_settings():
         )
 
 @admin_bp.route('/settings', methods=['PUT'])
-@login_required
 @admin_required
 def update_system_settings():
 # Update system settings
@@ -1015,7 +1007,6 @@ def update_system_settings():
 # =============================================================================
 
 @admin_bp.route('/health/detailed', methods=['GET'])
-@login_required
 @admin_required
 def get_detailed_health():
     try:
@@ -1121,7 +1112,6 @@ def get_detailed_health():
         )
 
 @admin_bp.route('/analytics/dashboard', methods=['GET'])
-@login_required
 @admin_required
 def get_dashboard_analytics():
     try:
@@ -1313,7 +1303,6 @@ def get_dashboard_analytics():
 # =============================================================================
 
 @admin_bp.route('/notifications/broadcast', methods=['POST'])
-@login_required
 @admin_required
 def send_broadcast_notification():
 # Send notification to all users or specific groups
@@ -1493,7 +1482,6 @@ def send_broadcast_notification():
 # =============================================================================
 
 @admin_bp.route('/audit-logs', methods=['GET'])
-@login_required
 @admin_required
 def get_audit_logs():
     """Get paginated list of audit logs with filtering"""
@@ -1599,7 +1587,6 @@ def get_audit_logs():
         )
 
 @admin_bp.route('/audit-logs/<int:log_id>', methods=['GET'])
-@login_required
 @admin_required
 def get_audit_log_details(log_id):
     """Get detailed information for a specific audit log entry"""
@@ -1704,7 +1691,6 @@ def get_audit_log_details(log_id):
 # =============================================================================
 
 @admin_bp.route('/create-admin', methods=['POST'])
-@login_required
 @admin_required
 def create_admin_user():
     """Create a new admin user - only existing admins can create new admins"""

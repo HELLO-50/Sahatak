@@ -212,13 +212,9 @@
                                 <div class="d-flex justify-content-between align-items-center mb-4">
                                     <h5><i class="bi bi-people me-2"></i><span id="user-management-title">User Management</span></h5>
                                     <div>
-                                        <button class="btn btn-success me-2" onclick="AdminActions.exportUsers()">
+                                        <button class="btn btn-success me-2" onclick="AdminDashboard.exportUsers()">
                                             <i class="bi bi-download me-1"></i>
                                             <span id="export-data">Export Data</span>
-                                        </button>
-                                        <button class="btn btn-primary" onclick="AdminActions.createAdminUser()">
-                                            <i class="bi bi-person-plus me-1"></i>
-                                            <span id="add-admin">Add Admin</span>
                                         </button>
                                     </div>
                                 </div>
@@ -302,7 +298,7 @@
                                             <i class="bi bi-arrow-clockwise me-1"></i>
                                             <span id="refresh-button">Refresh</span>
                                         </button>
-                                        <button class="btn btn-success" onclick="AdminActions.addDoctorManually()">
+                                        <button class="btn btn-success" onclick="AdminDashboard.addDoctorManually()">
                                             <i class="bi bi-person-plus me-1"></i>
                                             <span id="add-doctor-manually">Add Doctor Manually</span>
                                         </button>
@@ -349,7 +345,7 @@
                                             <i class="bi bi-arrow-clockwise me-1"></i>
                                             <span id="refresh-appointments">Refresh</span>
                                         </button>
-                                        <button class="btn btn-success" onclick="AdminActions.exportAppointments()">
+                                        <button class="btn btn-success" onclick="AdminDashboard.exportAppointments()">
                                             <i class="bi bi-download me-1"></i>
                                             <span id="export-appointments">Export Data</span>
                                         </button>
