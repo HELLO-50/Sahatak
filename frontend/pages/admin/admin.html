@@ -26,6 +26,55 @@
     <!-- Chart.js -->
      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
      
+     <!-- Custom Chart Styles -->
+     <style>
+         .analytics-card {
+             background: #fff;
+             border: 1px solid #e0e0e0;
+             border-radius: 8px;
+             padding: 20px;
+             margin-bottom: 20px;
+             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+         }
+         
+         .metric-card {
+             background: #f8f9fa;
+             border: 1px solid #e9ecef;
+             border-radius: 6px;
+             padding: 15px;
+             text-align: center;
+         }
+         
+         .metric-value {
+             font-size: 2rem;
+             font-weight: bold;
+             color: #0d6efd;
+             margin-bottom: 5px;
+         }
+         
+         .metric-label {
+             font-size: 0.875rem;
+             color: #6c757d;
+         }
+         
+         .activity-stat {
+             text-align: center;
+             padding: 10px;
+         }
+         
+         .activity-value {
+             display: block;
+             font-size: 1.5rem;
+             font-weight: bold;
+             color: #198754;
+         }
+         
+         .activity-label {
+             font-size: 0.875rem;
+             color: #6c757d;
+         }
+     </style>
+     
 </head>
 <body>
     <div class="dashboard-container">
@@ -179,7 +228,9 @@
                                     <div class="col-lg-6">
                                         <div class="analytics-card">
                                             <h6><i class="bi bi-pie-chart me-2"></i>Doctor Specialties</h6>
-                                            <canvas id="specialtyDistributionChart" height="200"></canvas>
+                                            <div style="position: relative; height: 300px;">
+                                                <canvas id="specialtyDistributionChart"></canvas>
+                                            </div>
                                         </div>
                                     </div>
                                     
@@ -187,7 +238,9 @@
                                     <div class="col-lg-6">
                                         <div class="analytics-card">
                                             <h6><i class="bi bi-bar-chart me-2"></i>Appointment Status</h6>
-                                            <canvas id="appointmentStatusChart" height="200"></canvas>
+                                            <div style="position: relative; height: 300px;">
+                                                <canvas id="appointmentStatusChart"></canvas>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
