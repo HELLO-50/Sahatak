@@ -283,15 +283,23 @@ def get_users():
         
         page, per_page = validate_pagination_params(page, per_page)
         
+        # Debug logging
+        app_logger.info(f"Getting users - page: {page}, per_page: {per_page}, user_type: {user_type}, search: {search}, status: {status}")
+        
         # Build base query
         query = User.query.options(
             joinedload(User.patient_profile),
             joinedload(User.doctor_profile)
         )
         
+        # Log total count before filters
+        total_before_filters = query.count()
+        app_logger.info(f"Total users before filters: {total_before_filters}")
+        
         # Apply filters
         if user_type and user_type in ['patient', 'doctor', 'admin']:
             query = query.filter(User.user_type == user_type)
+            app_logger.info(f"Applied user_type filter: {user_type}")
         
         if status is not None:
             is_active = status.lower() == 'true'
@@ -304,12 +312,18 @@ def get_users():
             )
             query = query.filter(search_filter)
         
+        # Log total count after all filters
+        total_after_filters = query.count()
+        app_logger.info(f"Total users after filters: {total_after_filters}")
+        
         # Apply pagination
         users_pagination = query.paginate(
             page=page, 
             per_page=per_page, 
             error_out=False
         )
+        
+        app_logger.info(f"Pagination results - items count: {len(users_pagination.items)}, total: {users_pagination.total}, pages: {users_pagination.pages}")
         
         # Format user data (exclude sensitive information)
         users_data = []
