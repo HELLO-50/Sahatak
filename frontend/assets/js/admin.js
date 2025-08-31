@@ -427,11 +427,11 @@ const AdminDashboard = {
             
             console.log('Users data received:', data); // Debug log
             
-            if (data.success && data.data.users) {
-                this.displayUsersTable(data.data.users);
+            if (data.success && data.users) {
+                this.displayUsersTable(data.users);
                 // Update pagination if needed
-                if (data.data.pagination) {
-                    this.updateUsersPagination(data.data.pagination);
+                if (data.pagination) {
+                    this.updateUsersPagination(data.pagination);
                 }
             } else {
                 console.error('Invalid users response:', data);
@@ -531,9 +531,9 @@ const AdminDashboard = {
             const response = await AdminAuth.apiRequest(`/admin/users?page=${page}&per_page=20`);
             const data = await response.json();
             
-            if (data.success && data.data.users) {
-                this.displayUsersTable(data.data.users);
-                this.updateUsersPagination(data.data.pagination);
+            if (data.success && data.users) {
+                this.displayUsersTable(data.users);
+                this.updateUsersPagination(data.pagination);
             }
         } catch (error) {
             console.error('Failed to load users page:', error);
@@ -677,10 +677,7 @@ const AdminDashboard = {
             const data = await response.json();
             console.log('Admin users data received:', data);
             
-            if (data.success && data.data && data.data.users) {
-                this.displayAdminUsersTable(data.data.users);
-            } else if (data.success && data.users) {
-                // Fallback for different response structure
+            if (data.success && data.users) {
                 this.displayAdminUsersTable(data.users);
             } else {
                 console.error('Admin users API returned unexpected structure:', data);
