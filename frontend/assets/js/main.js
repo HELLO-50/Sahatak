@@ -661,8 +661,9 @@ const ApiHelper = {
                 window.SahatakLogger?.warn(`Slow API request: ${method} ${endpoint} took ${duration}ms`);
             }
             
-            // Check for session invalidation (redirects to login)
-            if (response.status === 302 || response.url.includes('/auth/login')) {
+            // Check for session invalidation (but not during login attempts)
+            const isLoginEndpoint = endpoint.includes('/auth/login') || endpoint.includes('/auth/register');
+            if (!isLoginEndpoint && (response.status === 401 || (response.status === 302 && response.url.includes('/auth/login')))) {
                 window.SahatakLogger?.warn('Session expired or invalid - auto logging out');
                 await this.handleSessionExpired();
                 throw new ApiError(
