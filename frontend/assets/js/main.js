@@ -661,10 +661,27 @@ const ApiHelper = {
                 window.SahatakLogger?.warn(`Slow API request: ${method} ${endpoint} took ${duration}ms`);
             }
             
+            // Check for session invalidation (redirects to login)
+            if (response.status === 302 || response.url.includes('/auth/login')) {
+                window.SahatakLogger?.warn('Session expired or invalid - auto logging out');
+                await this.handleSessionExpired();
+                throw new ApiError(
+                    'Your session has expired. Please log in again.',
+                    401,
+                    'SESSION_EXPIRED'
+                );
+            }
+            
             const data = await response.json();
             
             // Handle standardized API response format
             if (data.success === false) {
+                // Handle authentication errors
+                if (data.status_code === 401) {
+                    window.SahatakLogger?.warn('Authentication failed - auto logging out');
+                    await this.handleSessionExpired();
+                }
+                
                 const error = new ApiError(data.message, data.status_code, data.error_code, data.field);
                 window.SahatakLogger?.error(`API Error: ${method} ${endpoint}`, {
                     statusCode: data.status_code,
@@ -734,6 +751,47 @@ const ApiHelper = {
             cache: window.SahatakCache?.getStats(),
             logs: window.SahatakLogger?.getRecentLogs(20)
         };
+    },
+
+    /**
+     * Handle session expiration - clear local data and redirect to login
+     */
+    async handleSessionExpired() {
+        try {
+            // Clear all local storage data
+            localStorage.removeItem('sahatak_user');
+            localStorage.removeItem('sahatak_user_data');
+            localStorage.removeItem('sahatak_preferences');
+            sessionStorage.clear();
+            
+            // Show user-friendly message
+            window.SahatakLogger?.warn('Session expired - clearing data and redirecting to login');
+            
+            if (typeof showNotification === 'function') {
+                showNotification('Your session has expired. Redirecting to login...', 'warning');
+            } else {
+                alert('Your session has expired. Please log in again.');
+            }
+            
+            // Small delay to show the message
+            setTimeout(() => {
+                // Redirect based on current location
+                if (window.location.pathname.includes('/dashboard/') || 
+                    window.location.pathname.includes('/medical/') ||
+                    window.location.pathname.includes('/appointments/')) {
+                    window.location.href = '../../auth/login.html';
+                } else if (window.location.pathname.includes('/pages/')) {
+                    window.location.href = '../auth/login.html';
+                } else {
+                    window.location.href = '/frontend/pages/auth/login.html';
+                }
+            }, 1500);
+            
+        } catch (error) {
+            window.SahatakLogger?.error('Error handling session expiration', error);
+            // Fallback - force reload to login page
+            window.location.href = '/frontend/pages/auth/login.html';
+        }
     }
 };
 
