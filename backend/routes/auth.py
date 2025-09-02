@@ -296,8 +296,14 @@ def login():
             auth_logger.info(f"Looking for user with email: {login_identifier.lower()}")
             try:
                 # Test database connection
+                from sqlalchemy import text
                 total_users = User.query.count()
                 auth_logger.info(f"Total users in database: {total_users}")
+                
+                # Try raw SQL query to see what database we're actually connected to
+                result = db.session.execute(text("SELECT COUNT(*) as count FROM users WHERE email = :email"), {"email": login_identifier.lower()})
+                count_result = result.fetchone()
+                auth_logger.info(f"Raw SQL count for {login_identifier.lower()}: {count_result[0] if count_result else 'None'}")
                 
                 user = User.query.filter_by(email=login_identifier.lower()).first()
                 auth_logger.info(f"User found: {user is not None}")
