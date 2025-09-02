@@ -46,9 +46,11 @@ class Config:
     SESSION_COOKIE_SECURE = False  # Allow HTTP during development
     SESSION_COOKIE_HTTPONLY = False  # Allow JavaScript access
     SESSION_COOKIE_SAMESITE = None   # Allow cross-origin
+    SESSION_COOKIE_DOMAIN = None  # Don't restrict domain for cross-origin
     REMEMBER_COOKIE_SECURE = False
     REMEMBER_COOKIE_HTTPONLY = False
     REMEMBER_COOKIE_SAMESITE = None
+    REMEMBER_COOKIE_DOMAIN = None
     
     # Rate limiting settings
     MAX_LOGIN_ATTEMPTS = int(os.getenv('MAX_LOGIN_ATTEMPTS', 5))
@@ -90,10 +92,10 @@ class ProductionConfig(Config):
         'max_overflow': 0
     }
     
-    # Production security settings
-    SESSION_COOKIE_SECURE = True
-    SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SAMESITE = 'Lax'
+    # Production security settings - adjusted for cross-origin access
+    SESSION_COOKIE_SECURE = False  # Allow HTTP during development/testing
+    SESSION_COOKIE_HTTPONLY = False  # Allow JavaScript access for debugging
+    SESSION_COOKIE_SAMESITE = None  # Allow cross-origin requests
     
     # CORS settings
     CORS_ORIGINS = os.getenv('CORS_ORIGINS', 'https://hello-50.github.io,https://hello-50.github.io/Sahatak,https://hmb104.github.io,https://hmb104.github.io/Sahatak').split(',')
