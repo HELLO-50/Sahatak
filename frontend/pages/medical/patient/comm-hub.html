@@ -23,6 +23,8 @@
     <link rel="stylesheet" href="../../../assets/css/main.css">
     <!-- Dashboard CSS -->
     <link rel="stylesheet" href="../../../assets/css/components/dashboard.css">
+    <!-- Messaging CSS -->
+    <link rel="stylesheet" href="../../../assets/css/messaging.css">
 </head>
 <body data-protect="patient">
     <!-- Header -->
@@ -43,7 +45,7 @@
                 <div class="dropdown me-3">
                     <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
                         <i class="bi bi-person-circle me-1"></i>
-                        <span id="patient-name">Ahmed Mohamed</span>
+                        <span id="patient-name">Patient</span>
                     </button>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="../../dashboard/patient.html">
@@ -90,24 +92,16 @@
                             <div class="doctor-avatar mb-3">
                                 <i class="bi bi-person-circle fs-1 text-primary"></i>
                             </div>
-                            <h5 id="doctorName">Dr. Sarah Ahmed</h5>
-                            <p class="text-muted">Internal Medicine Specialist</p>
+                            <h5 id="doctorName">Your Doctor</h5>
+                            <p class="text-muted">Specialist</p>
                             <div class="mb-3">
                                 <span class="badge bg-success">
-                                    <i class="bi bi-circle-fill me-1"></i>Online
+                                    <i class="bi bi-circle-fill me-1"></i>Available
                                 </span>
                             </div>
                         </div>
 
                         <div class="doctor-info">
-                            <div class="mb-3">
-                                <small class="text-muted">Last Appointment:</small>
-                                <p class="mb-0">Today - 2:00 PM</p>
-                            </div>
-                            <div class="mb-3">
-                                <small class="text-muted">Next Appointment:</small>
-                                <p class="mb-0">Next Week Tuesday - 10:00 AM</p>
-                            </div>
                             <div class="mb-3">
                                 <small class="text-muted">Response Time:</small>
                                 <p class="mb-0">Usually within 1 hour</p>
@@ -139,8 +133,8 @@
                                     <i class="bi bi-person-circle fs-2 text-primary"></i>
                                 </div>
                                 <div>
-                                    <h5 class="mb-0">Dr. Sarah Ahmed</h5>
-                                    <small class="text-muted">Internal Medicine | Last seen: Just now</small>
+                                    <h5 class="mb-0" id="chat-doctor-name">Your Doctor</h5>
+                                    <small class="text-muted">Secure messaging | End-to-end encrypted</small>
                                 </div>
                             </div>
                             <div class="chat-actions">
@@ -152,32 +146,10 @@
 
                         <!-- Chat Messages -->
                         <div class="chat-messages" id="chatMessages">
-                            <div class="message doctor-message">
-                                <div class="message-content">
-                                    <p>Hello Ahmed! How are you feeling today? I noticed you requested to chat - is there anything specific you'd like to discuss about your recent appointment?</p>
-                                    <small class="message-time">Today 9:30 AM</small>
-                                </div>
-                            </div>
-
-                            <div class="message patient-message">
-                                <div class="message-content">
-                                    <p>Hi Dr. Ahmed! Thank you for following up. I've been taking the medication you prescribed, but I'm experiencing some mild dizziness. Is this normal?</p>
-                                    <small class="message-time">Today 10:15 AM</small>
-                                </div>
-                            </div>
-
-                            <div class="message doctor-message">
-                                <div class="message-content">
-                                    <p>Mild dizziness can be a side effect of the medication, especially in the first week. Are you taking it with food as instructed? Also, please make sure to stay well hydrated.</p>
-                                    <small class="message-time">Today 10:45 AM</small>
-                                </div>
-                            </div>
-
-                            <div class="message patient-message">
-                                <div class="message-content">
-                                    <p>Yes, I'm taking it with breakfast and dinner as you recommended. I'll make sure to drink more water. Should I be concerned if it continues?</p>
-                                    <small class="message-time">Today 11:00 AM</small>
-                                </div>
+                            <!-- Messages will be loaded dynamically -->
+                            <div class="text-center text-muted py-5" id="no-messages">
+                                <i class="bi bi-chat-dots fs-1"></i>
+                                <p class="mt-2">No messages yet. Start a conversation with your doctor.</p>
                             </div>
                         </div>
 
@@ -334,435 +306,5 @@
     <script src="../../../assets/js/components/auth-guard.js"></script>
     <script src="../../../assets/js/components/logger.js"></script>
     <script src="../../../assets/js/components/messaging.js"></script>
-
-    <style>
-        .doctor-avatar i {
-            font-size: 3rem;
-            color: #2563eb;
-        }
-
-        .chat-messages {
-            max-height: 450px;
-            overflow-y: auto;
-            padding: 15px 0;
-        }
-
-        .message {
-            margin-bottom: 20px;
-            display: flex;
-        }
-
-        .patient-message {
-            justify-content: flex-end;
-        }
-
-        .doctor-message {
-            justify-content: flex-start;
-        }
-
-        .message-content {
-            max-width: 75%;
-            padding: 12px 16px;
-            border-radius: 18px;
-            position: relative;
-        }
-
-        .patient-message .message-content {
-            background-color: #2563eb;
-            color: white;
-        }
-
-        .doctor-message .message-content {
-            background-color: #e9ecef;
-            color: #333;
-        }
-
-        .message-time {
-            display: block;
-            margin-top: 5px;
-            opacity: 0.7;
-        }
-
-        .message-input-area textarea {
-            resize: none;
-            border-radius: 10px 0 0 10px;
-        }
-
-        .message-input-area .btn {
-            border-radius: 0 10px 10px 0;
-        }
-
-        .chat-header {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            margin: -20px -20px 20px -20px;
-            padding: 20px;
-            border-radius: 10px 10px 0 0;
-        }
-
-        .dashboard-card {
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            border: none;
-            border-radius: 12px;
-        }
-
-        .doctor-info {
-            border-top: 1px solid #e9ecef;
-            padding-top: 15px;
-        }
-
-        /* Messaging enhancements */
-        .typing-indicator {
-            padding: 10px 15px;
-            margin: 5px 0;
-            background: rgba(0, 123, 255, 0.1);
-            border-radius: 10px;
-            font-style: italic;
-            color: #007bff;
-        }
-        
-        .typing-dots .dots {
-            display: inline-block;
-            margin-left: 5px;
-        }
-        
-        .typing-dots .dots span {
-            display: inline-block;
-            width: 4px;
-            height: 4px;
-            border-radius: 50%;
-            background: #007bff;
-            margin: 0 1px;
-            animation: typing-bounce 1.4s ease-in-out infinite both;
-        }
-        
-        .typing-dots .dots span:nth-child(1) { animation-delay: -0.32s; }
-        .typing-dots .dots span:nth-child(2) { animation-delay: -0.16s; }
-        
-        @keyframes typing-bounce {
-            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
-            40% { transform: scale(1); opacity: 1; }
-        }
-        
-        .appointment-context {
-            background: rgba(25, 135, 84, 0.1);
-            border: 1px solid rgba(25, 135, 84, 0.3);
-            border-radius: 8px;
-            padding: 8px 12px;
-            margin-bottom: 8px;
-            font-size: 0.85em;
-            color: #198754;
-        }
-        
-        .appointment-context i {
-            margin-right: 5px;
-        }
-        
-        .appointment-reason {
-            font-size: 0.8em;
-            opacity: 0.8;
-            margin-top: 2px;
-        }
-        
-        .appointment-info {
-            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-        }
-        
-        .appointment-badge {
-            display: flex;
-            align-items: center;
-        }
-        
-        .appointment-badge i {
-            font-size: 1.5em;
-            margin-right: 12px;
-        }
-        
-        .appointment-details strong {
-            display: block;
-            font-size: 1.1em;
-            margin-bottom: 5px;
-        }
-        
-        .appointment-meta {
-            display: flex;
-            gap: 10px;
-            font-size: 0.9em;
-            opacity: 0.9;
-        }
-        
-        .appointment-reason {
-            margin-top: 8px;
-            font-size: 0.85em;
-            font-style: italic;
-            opacity: 0.8;
-        }
-        
-        .message-footer {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-top: 8px;
-        }
-        
-        .message-status {
-            font-size: 0.7em;
-            padding: 2px 6px;
-            border-radius: 10px;
-            background: rgba(0, 0, 0, 0.1);
-        }
-        
-        .status-sent { color: #6c757d; }
-        .status-delivered { color: #007bff; }
-        .status-read { color: #28a745; }
-        
-        .urgent-indicator {
-            color: #dc3545;
-            margin-left: 5px;
-        }
-        
-        .connection-status {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.75em;
-            font-weight: 500;
-        }
-        
-        .status-connected {
-            background: rgba(25, 135, 84, 0.1);
-            color: #198754;
-        }
-        
-        .status-disconnected {
-            background: rgba(220, 53, 69, 0.1);
-            color: #dc3545;
-        }
-        
-        .message-notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-            padding: 15px;
-            min-width: 300px;
-            max-width: 400px;
-            border-left: 4px solid #007bff;
-        }
-        
-        .notification-content {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .notification-title {
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-        
-        .notification-message {
-            color: #6c757d;
-            font-size: 0.9em;
-        }
-        
-        .notification-close {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: none;
-            border: none;
-            font-size: 1.2em;
-            cursor: pointer;
-            color: #6c757d;
-        }
-
-        @media (max-width: 768px) {
-            .chat-actions {
-                display: none;
-            }
-            
-            .message-content {
-                max-width: 85%;
-            }
-            
-            .message-notification {
-                right: 10px;
-                left: 10px;
-                min-width: auto;
-            }
-        }
-    </style>
-
-    <script>
-        // Initialize messaging system
-        let messagingSystem;
-        let currentDoctorId = null; // This should be set based on appointment or selection
-
-        // Mock doctor info for display - in real app this comes from API
-        let doctorInfo = {
-            name: 'Dr. Sarah Ahmed',
-            specialty: 'Internal Medicine Specialist',
-            status: 'online',
-            responseTime: 'Usually within 1 hour'
-        };
-
-        // Legacy function - replaced with messaging system
-        function sendMessage() {
-            if (messagingSystem) {
-                messagingSystem.handleSendMessage();
-            }
-        }
-
-        function handleKeyPress(event) {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                sendMessage();
-            }
-        }
-
-        function insertCommonMessage() {
-            const commonMessages = [
-                "Thank you for the prescription. When should I take it?",
-                "I'm feeling better after following your advice.",
-                "I have some questions about my treatment.",
-                "Can we schedule a follow-up appointment?",
-                "I'm experiencing some side effects from the medication.",
-                "When will my test results be ready?",
-                "Can you refill my prescription?"
-            ];
-            
-            // Create dropdown if not exists
-            if (!document.querySelector('.common-messages-dropdown')) {
-                const dropdown = document.createElement('div');
-                dropdown.className = 'common-messages-dropdown position-relative d-inline-block';
-                dropdown.innerHTML = `
-                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-chat-quote me-1"></i>Common
-                    </button>
-                    <ul class="dropdown-menu" style="max-width: 300px;">
-                        ${commonMessages.map((msg, index) => 
-                            `<li><a class="dropdown-item text-wrap" href="#" onclick="selectCommonMessage('${msg.replace(/'/g, "\\'")}')">${msg}</a></li>`
-                        ).join('')}
-                    </ul>
-                `;
-                
-                const existingBtn = document.querySelector('button[onclick="insertCommonMessage()"]');
-                existingBtn.parentNode.replaceChild(dropdown, existingBtn);
-            }
-        }
-
-        function selectCommonMessage(message) {
-            document.getElementById('messageInput').value = message;
-        }
-
-        function attachImage() {
-            if (messagingSystem) {
-                messagingSystem.handleFileAttachment();
-            }
-        }
-
-        // Initialize messaging system with real backend integration
-        async function initializeMessaging() {
-            try {
-                // In a real app, currentDoctorId would come from URL params or appointment data
-                const urlParams = new URLSearchParams(window.location.search);
-                currentDoctorId = urlParams.get('doctorId') || 1; // Default to doctor ID 1 for now
-                
-                messagingSystem = new MessagingSystem();
-                await messagingSystem.initialize(currentDoctorId, 'doctor');
-                
-                Logger.info('Patient messaging initialized', { doctorId: currentDoctorId });
-            } catch (error) {
-                Logger.error('Failed to initialize messaging', error);
-                showErrorMessage('Failed to load messaging system. Please refresh the page.');
-            }
-        }
-
-        function showErrorMessage(message) {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = 'alert alert-danger alert-dismissible fade show';
-            alertDiv.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            
-            const container = document.querySelector('.container-fluid');
-            if (container) {
-                container.insertBefore(alertDiv, container.firstChild);
-            }
-        }
-
-        async function requestUrgentConsultation() {
-            if (confirm('Request urgent consultation? This will notify the doctor immediately and may incur additional charges.')) {
-                const urgentMessage = "🚨 URGENT CONSULTATION REQUESTED - Patient needs immediate medical attention";
-                
-                if (messagingSystem) {
-                    try {
-                        await messagingSystem.sendMessage(urgentMessage);
-                        alert('Urgent consultation requested. Your doctor will be notified immediately.');
-                    } catch (error) {
-                        alert('Failed to send urgent consultation request. Please try again.');
-                    }
-                }
-            }
-        }
-
-        function requestAppointment() {
-            const message = "Hi Doctor, I would like to schedule an appointment. When is your next available slot?";
-            document.getElementById('messageInput').value = message;
-        }
-
-        function requestPrescriptionRefill() {
-            const message = "Hi Doctor, I need a refill for my current prescription. Can you please help me with this?";
-            document.getElementById('messageInput').value = message;
-        }
-
-        function viewMedicalHistory() {
-            window.location.href = 'medical-history.html';
-        }
-
-        function startVideoCall() {
-            if (confirm('Request video call with your doctor? This will send a video consultation request.')) {
-                alert('Video call request sent to Dr. Sarah Ahmed. You will receive a notification when the call is ready.');
-                
-                const videoMessage = "📹 Video consultation requested";
-                document.getElementById('messageInput').value = videoMessage;
-            }
-        }
-
-        function logout() {
-            AuthGuard.logout();
-        }
-
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', async function() {
-            AuthGuard.protectPage('patient');
-            
-            // Initialize real messaging system
-            await initializeMessaging();
-            
-            // Setup common messages dropdown
-            setTimeout(() => {
-                insertCommonMessage();
-            }, 100);
-            
-            // Focus on message input
-            document.getElementById('messageInput').focus();
-            
-            // Initialize footer translations
-            const currentLang = localStorage.getItem('sahatak_language') || 'ar';
-            if (typeof LanguageManager !== 'undefined' && LanguageManager.translations[currentLang]) {
-                const t = LanguageManager.translations[currentLang];
-                if (typeof DashboardTranslations !== 'undefined' && DashboardTranslations.updateFooter) {
-                    DashboardTranslations.updateFooter(t);
-                }
-            }
-        });
-    </script>
 </body>
 </html>
