@@ -274,7 +274,9 @@ def register():
 def login():
     """Login user with email or phone"""
     try:
+        app_logger.info(f"Login attempt received from {request.remote_addr}")
         data = request.get_json()
+        app_logger.info(f"Login data: {data}")
         
         # Validate required fields
         login_identifier = data.get('login_identifier', '').strip()  # Can be email or phone
