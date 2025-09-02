@@ -9,7 +9,7 @@ from utils.validators import validate_prescription_data, validate_prescription_s
 from utils.logging_config import app_logger
 from routes.auth import api_login_required
 
-prescriptions_bp = Blueprint('prescriptions', __name__, url_prefix='/prescriptions')
+prescriptions_bp = Blueprint('prescriptions', __name__)
 
 @prescriptions_bp.route('/', methods=['GET'])
 @api_login_required

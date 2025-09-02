@@ -103,7 +103,7 @@ const Dashboard = {
      */
     async loadAppointments() {
         try {
-            const response = await ApiHelper.makeRequest('/appointments');
+            const response = await ApiHelper.makeRequest('/appointments/');
             
             if (response.data) {
                 this.cache.appointments = response.data;
@@ -229,7 +229,7 @@ const Dashboard = {
      */
     async loadPrescriptions() {
         try {
-            const response = await ApiHelper.makeRequest('/prescriptions');
+            const response = await ApiHelper.makeRequest('/prescriptions/');
             
             if (response.data) {
                 this.cache.prescriptions = response.data;
