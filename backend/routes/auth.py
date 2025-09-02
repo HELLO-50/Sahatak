@@ -294,8 +294,14 @@ def login():
         # Try to find by email first
         if validate_email(login_identifier):
             auth_logger.info(f"Looking for user with email: {login_identifier.lower()}")
-            user = User.query.filter_by(email=login_identifier.lower()).first()
-            auth_logger.info(f"User found: {user is not None}")
+            try:
+                user = User.query.filter_by(email=login_identifier.lower()).first()
+                auth_logger.info(f"User found: {user is not None}")
+                if user:
+                    auth_logger.info(f"User details: id={user.id}, email={user.email}, is_active={user.is_active}")
+            except Exception as e:
+                auth_logger.error(f"Database error during user lookup: {str(e)}")
+                user = None
         
         # If not found by email, try to find by phone
         if not user and validate_phone(login_identifier)['valid']:
