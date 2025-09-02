@@ -111,19 +111,19 @@
                     <div class="row mb-4">
                         <div class="col-lg-4 col-md-6 mb-3">
                             <div class="dashboard-card stat-card">
-                                <div class="stat-number">12</div>
+                                <div class="stat-number" id="stat-appointments-count">-</div>
                                 <div class="stat-label" id="stat-appointments">Scheduled Appointments</div>
                             </div>
                         </div>
                         <div class="col-lg-4 col-md-6 mb-3">
                             <div class="dashboard-card stat-card">
-                                <div class="stat-number">5</div>
+                                <div class="stat-number" id="stat-prescriptions-count">-</div>
                                 <div class="stat-label" id="stat-prescriptions">Active Prescriptions</div>
                             </div>
                         </div>
                         <div class="col-lg-4 col-md-6 mb-3">
                             <div class="dashboard-card stat-card">
-                                <div class="stat-number">15</div>
+                                <div class="stat-number" id="stat-reports-count">-</div>
                                 <div class="stat-label" id="stat-reports">Medical Reports</div>
                             </div>
                         </div>
@@ -134,38 +134,14 @@
                         <!-- Upcoming Appointments -->
                         <div class="col-lg-6 mb-4">
                             <div class="dashboard-card">
-                                <h5 id="upcoming-title">
-                                    <i class="bi bi-calendar-event me-2"></i>
-                                    Upcoming Appointments
-                                </h5>
-                                <div class="appointment-card">
-                                    <div class="appointment-time">Today - 2:00 PM</div>
-                                    <div class="appointment-doctor">Dr. Sarah Ahmed - Internal Medicine</div>
-                                    <div class="appointment-type">Video Consultation</div>
-                                    <div class="mt-2">
-                                        <button class="btn btn-medical btn-sm me-2">
-                                            <i class="bi bi-camera-video me-1"></i>
-                                            <span id="join-call">Join Now</span>
-                                        </button>
-                                        <button class="btn btn-outline-medical btn-sm">
-                                            <i class="bi bi-pencil me-1"></i>
-                                            <span id="reschedule">Reschedule</span>
-                                        </button>
+                                <div id="appointments-container">
+                                    <!-- Appointments will be loaded dynamically -->
+                                    <div class="text-center py-4">
+                                        <div class="spinner-border" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p class="mt-2">Loading appointments...</p>
                                     </div>
-                                </div>
-                                <div class="appointment-card">
-                                    <div class="appointment-time">Tomorrow - 10:30 AM</div>
-                                    <div class="appointment-doctor">Dr. Mohamed Ali - Cardiology</div>
-                                    <div class="appointment-type">Regular Checkup</div>
-                                    <div class="mt-2">
-                                        <span class="status-badge status-pending" id="status-pending">Pending</span>
-                                    </div>
-                                </div>
-                                <div class="text-center mt-3">
-                                    <button class="btn btn-outline-medical" onclick="viewAllAppointments()">
-                                        <span id="view-all-appointments">View All Appointments</span>
-                                        <i class="bi bi-arrow-right ms-1"></i>
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -173,42 +149,43 @@
                         <!-- Health Summary -->
                         <div class="col-lg-6 mb-4">
                             <div class="dashboard-card">
-                                <h5 id="health-summary-title">
-                                    <i class="bi bi-heart-pulse me-2"></i>
-                                    Health Summary
-                                </h5>
-                                <div class="row">
-                                    <div class="col-6 text-center mb-3">
-                                        <div class="text-success fs-3 mb-2">
-                                            <i class="bi bi-heart"></i>
+                                <div id="health-summary-container">
+                                    <!-- Health summary will be loaded dynamically -->
+                                    <div class="text-center py-4">
+                                        <div class="spinner-border" role="status">
+                                            <span class="visually-hidden">Loading...</span>
                                         </div>
-                                        <h6 id="blood-pressure">Blood Pressure</h6>
-                                        <p class="text-muted mb-1">120/80 mmHg</p>
-                                        <span class="status-badge status-active">Normal</span>
+                                        <p class="mt-2">Loading health data...</p>
                                     </div>
-                                    <div class="col-6 text-center mb-3">
-                                        <div class="text-info fs-3 mb-2">
-                                            <i class="bi bi-thermometer"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Active Prescriptions -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="dashboard-card">
+                                <div id="prescriptions-container">
+                                    <!-- Prescriptions will be loaded dynamically -->
+                                    <div class="text-center py-4">
+                                        <div class="spinner-border" role="status">
+                                            <span class="visually-hidden">Loading...</span>
                                         </div>
-                                        <h6 id="temperature">Temperature</h6>
-                                        <p class="text-muted mb-1">36.8°C</p>
-                                        <span class="status-badge status-active">Normal</span>
+                                        <p class="mt-2">Loading prescriptions...</p>
                                     </div>
-                                    <div class="col-6 text-center">
-                                        <div class="text-warning fs-3 mb-2">
-                                            <i class="bi bi-droplet"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Medical Records -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="dashboard-card">
+                                <div id="medical-records-container">
+                                    <!-- Medical records will be loaded dynamically -->
+                                    <div class="text-center py-4">
+                                        <div class="spinner-border" role="status">
+                                            <span class="visually-hidden">Loading...</span>
                                         </div>
-                                        <h6 id="blood-sugar">Blood Sugar</h6>
-                                        <p class="text-muted mb-1">95 mg/dL</p>
-                                        <span class="status-badge status-active">Normal</span>
-                                    </div>
-                                    <div class="col-6 text-center">
-                                        <div class="text-danger fs-3 mb-2">
-                                            <i class="bi bi-speedometer2"></i>
-                                        </div>
-                                        <h6 id="weight">Weight</h6>
-                                        <p class="text-muted mb-1">72 kg</p>
-                                        <span class="status-badge status-active">Ideal</span>
+                                        <p class="mt-2">Loading medical records...</p>
                                     </div>
                                 </div>
                             </div>
@@ -582,6 +559,9 @@
     
     <!-- Dashboard Translations -->
     <script src="../../assets/js/components/dashboard-translations.js"></script>
+    
+    <!-- Dashboard Data Handler -->
+    <script src="../../assets/js/components/dashboard.js"></script>
     
     <!-- Dashboard JavaScript -->
     <script>
