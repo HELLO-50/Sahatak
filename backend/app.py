@@ -133,10 +133,8 @@ from utils.logging_config import log_api_request
 def log_request_info():
     """Log API requests for monitoring"""
     if request.path.startswith('/api/'):
-        user_id = None
-        if hasattr(current_user, 'id') and current_user.is_authenticated:
-            user_id = current_user.id
-        log_api_request(request, user_id=user_id)
+        print(f"DEBUG: API request to {request.path} from {request.remote_addr}")
+        # Temporarily disabled: log_api_request(request, user_id=user_id)
 
 @app.after_request
 def log_response_info(response):
