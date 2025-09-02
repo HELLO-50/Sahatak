@@ -106,11 +106,19 @@ const Dashboard = {
             const response = await ApiHelper.makeRequest('/appointments/');
             
             if (response.data) {
-                this.cache.appointments = response.data;
-                this.displayAppointments(response.data);
+                // Ensure data is always an array
+                const appointments = Array.isArray(response.data) ? response.data : 
+                                   (response.data.appointments && Array.isArray(response.data.appointments)) ? response.data.appointments : [];
+                
+                this.cache.appointments = appointments;
+                this.displayAppointments(appointments);
+            } else {
+                this.cache.appointments = [];
+                this.displayNoAppointments();
             }
         } catch (error) {
             console.error('Error loading appointments:', error);
+            this.cache.appointments = [];
             this.displayNoAppointments();
         }
     },
@@ -122,8 +130,11 @@ const Dashboard = {
         const container = document.getElementById('appointments-container');
         if (!container) return;
         
+        // Ensure appointments is an array
+        const appointmentsArray = Array.isArray(appointments) ? appointments : [];
+        
         // Filter upcoming appointments
-        const upcoming = appointments.filter(apt => {
+        const upcoming = appointmentsArray.filter(apt => {
             const aptDate = new Date(apt.appointment_date);
             return aptDate >= new Date() && apt.status === 'scheduled';
         }).sort((a, b) => new Date(a.appointment_date) - new Date(b.appointment_date));
@@ -232,11 +243,19 @@ const Dashboard = {
             const response = await ApiHelper.makeRequest('/prescriptions/');
             
             if (response.data) {
-                this.cache.prescriptions = response.data;
-                this.displayPrescriptions(response.data);
+                // Ensure data is always an array
+                const prescriptions = Array.isArray(response.data) ? response.data : 
+                                    (response.data.prescriptions && Array.isArray(response.data.prescriptions)) ? response.data.prescriptions : [];
+                
+                this.cache.prescriptions = prescriptions;
+                this.displayPrescriptions(prescriptions);
+            } else {
+                this.cache.prescriptions = [];
+                this.displayNoPrescriptions();
             }
         } catch (error) {
             console.error('Error loading prescriptions:', error);
+            this.cache.prescriptions = [];
             this.displayNoPrescriptions();
         }
     },
@@ -248,8 +267,11 @@ const Dashboard = {
         const container = document.getElementById('prescriptions-container');
         if (!container) return;
         
+        // Ensure prescriptions is an array
+        const prescriptionsArray = Array.isArray(prescriptions) ? prescriptions : [];
+        
         // Filter active prescriptions
-        const active = prescriptions.filter(p => p.status === 'active');
+        const active = prescriptionsArray.filter(p => p.status === 'active');
         
         if (active.length === 0) {
             this.displayNoPrescriptions();
@@ -741,17 +763,15 @@ const Dashboard = {
      * Update dashboard statistics
      */
     updateStatistics() {
-        // Update appointment count
-        const appointmentsCount = this.cache.appointments 
-            ? this.cache.appointments.filter(apt => 
-                new Date(apt.appointment_date) >= new Date() && apt.status === 'scheduled'
-              ).length 
-            : 0;
+        // Update appointment count - ensure appointments is an array
+        const appointments = Array.isArray(this.cache.appointments) ? this.cache.appointments : [];
+        const appointmentsCount = appointments.filter(apt => 
+            new Date(apt.appointment_date) >= new Date() && apt.status === 'scheduled'
+        ).length;
         
-        // Update prescriptions count
-        const prescriptionsCount = this.cache.prescriptions 
-            ? this.cache.prescriptions.filter(p => p.status === 'active').length 
-            : 0;
+        // Update prescriptions count - ensure prescriptions is an array
+        const prescriptions = Array.isArray(this.cache.prescriptions) ? this.cache.prescriptions : [];
+        const prescriptionsCount = prescriptions.filter(p => p.status === 'active').length;
         
         // Update medical records count
         const recordsCount = this.cache.medicalRecords 
