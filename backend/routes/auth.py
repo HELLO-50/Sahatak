@@ -305,6 +305,12 @@ def login():
                 if doctor_user:
                     user = doctor_user
         
+        # Debug logging
+        if not user:
+            app_logger.error(f"Login failed: User not found for {login_identifier}")
+        elif not user.check_password(password):
+            app_logger.error(f"Login failed: Password check failed for user {user.id} ({user.email})")
+        
         if not user or not user.check_password(password):
             return APIResponse.unauthorized(
                 message='Invalid email/phone or password'
