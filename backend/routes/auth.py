@@ -274,9 +274,7 @@ def register():
 def login():
     """Login user with email or phone"""
     try:
-        auth_logger.info(f"Login attempt received from {request.remote_addr}")
         data = request.get_json()
-        auth_logger.info(f"Login data: {data}")
         
         # Validate required fields
         login_identifier = data.get('login_identifier', '').strip()  # Can be email or phone
@@ -293,25 +291,7 @@ def login():
         
         # Try to find by email first
         if validate_email(login_identifier):
-            auth_logger.info(f"Looking for user with email: {login_identifier.lower()}")
-            try:
-                # Test database connection
-                from sqlalchemy import text
-                total_users = User.query.count()
-                auth_logger.info(f"Total users in database: {total_users}")
-                
-                # Try raw SQL query to see what database we're actually connected to
-                result = db.session.execute(text("SELECT COUNT(*) as count FROM users WHERE email = :email"), {"email": login_identifier.lower()})
-                count_result = result.fetchone()
-                auth_logger.info(f"Raw SQL count for {login_identifier.lower()}: {count_result[0] if count_result else 'None'}")
-                
-                user = User.query.filter_by(email=login_identifier.lower()).first()
-                auth_logger.info(f"User found: {user is not None}")
-                if user:
-                    auth_logger.info(f"User details: id={user.id}, email={user.email}, is_active={user.is_active}")
-            except Exception as e:
-                auth_logger.error(f"Database error during user lookup: {str(e)}")
-                user = None
+            user = User.query.filter_by(email=login_identifier.lower()).first()
         
         # If not found by email, try to find by phone
         if not user and validate_phone(login_identifier)['valid']:
@@ -324,12 +304,6 @@ def login():
                 doctor_user = User.query.join(Doctor).filter(Doctor.phone == login_identifier).first()
                 if doctor_user:
                     user = doctor_user
-        
-        # Debug logging
-        if not user:
-            auth_logger.error(f"Login failed: User not found for {login_identifier}")
-        elif not user.check_password(password):
-            auth_logger.error(f"Login failed: Password check failed for user {user.id} ({user.email})")
         
         if not user or not user.check_password(password):
             return APIResponse.unauthorized(
