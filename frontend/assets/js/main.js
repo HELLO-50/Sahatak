@@ -775,22 +775,14 @@ const ApiHelper = {
             
             // Small delay to show the message
             setTimeout(() => {
-                // Redirect based on current location
-                if (window.location.pathname.includes('/dashboard/') || 
-                    window.location.pathname.includes('/medical/') ||
-                    window.location.pathname.includes('/appointments/')) {
-                    window.location.href = '../../auth/login.html';
-                } else if (window.location.pathname.includes('/pages/')) {
-                    window.location.href = '../auth/login.html';
-                } else {
-                    window.location.href = '/frontend/pages/auth/login.html';
-                }
+                // Always redirect to index.html to properly handle auth
+                window.location.href = 'https://hello-50.github.io/Sahatak/index.html';
             }, 1500);
             
         } catch (error) {
             window.SahatakLogger?.error('Error handling session expiration', error);
-            // Fallback - force reload to login page
-            window.location.href = '/frontend/pages/auth/login.html';
+            // Fallback - redirect to index page
+            window.location.href = 'https://hello-50.github.io/Sahatak/index.html';
         }
     }
 };
