@@ -10,11 +10,11 @@ const Dashboard = {
     // Cache for loaded data
     cache: {
         user: null,
-        appointments: null,
-        prescriptions: null,
+        appointments: [],
+        prescriptions: [],
         vitals: null,
         medicalRecords: null,
-        patients: null,  // For doctors
+        patients: [],  // For doctors
         stats: null      // For dashboard statistics
     },
 
@@ -50,15 +50,20 @@ const Dashboard = {
      * Initialize patient-specific dashboard
      */
     async initializePatientDashboard() {
-        await Promise.all([
-            this.loadAppointments(),
-            this.loadPrescriptions(),
-            this.loadHealthSummary(),
-            this.loadMedicalRecords()
-        ]);
-        
-        // Update statistics after loading data
-        this.updateStatistics();
+        try {
+            await Promise.all([
+                this.loadAppointments(),
+                this.loadPrescriptions(),
+                this.loadHealthSummary(),
+                this.loadMedicalRecords()
+            ]);
+            
+            // Update statistics after loading data
+            this.updateStatistics();
+        } catch (error) {
+            console.error('Error initializing patient dashboard:', error);
+            this.showError('Failed to load some dashboard data');
+        }
     },
 
     /**
@@ -133,8 +138,14 @@ const Dashboard = {
         // Ensure appointments is an array
         const appointmentsArray = Array.isArray(appointments) ? appointments : [];
         
+        if (!appointmentsArray || appointmentsArray.length === 0) {
+            this.displayNoAppointments();
+            return;
+        }
+        
         // Filter upcoming appointments
         const upcoming = appointmentsArray.filter(apt => {
+            if (!apt || !apt.appointment_date) return false;
             const aptDate = new Date(apt.appointment_date);
             return aptDate >= new Date() && apt.status === 'scheduled';
         }).sort((a, b) => new Date(a.appointment_date) - new Date(b.appointment_date));
@@ -270,8 +281,13 @@ const Dashboard = {
         // Ensure prescriptions is an array
         const prescriptionsArray = Array.isArray(prescriptions) ? prescriptions : [];
         
+        if (!prescriptionsArray || prescriptionsArray.length === 0) {
+            this.displayNoPrescriptions();
+            return;
+        }
+        
         // Filter active prescriptions
-        const active = prescriptionsArray.filter(p => p.status === 'active');
+        const active = prescriptionsArray.filter(p => p && p.status === 'active');
         
         if (active.length === 0) {
             this.displayNoPrescriptions();
@@ -766,12 +782,12 @@ const Dashboard = {
         // Update appointment count - ensure appointments is an array
         const appointments = Array.isArray(this.cache.appointments) ? this.cache.appointments : [];
         const appointmentsCount = appointments.filter(apt => 
-            new Date(apt.appointment_date) >= new Date() && apt.status === 'scheduled'
+            apt && apt.appointment_date && new Date(apt.appointment_date) >= new Date() && apt.status === 'scheduled'
         ).length;
         
         // Update prescriptions count - ensure prescriptions is an array
         const prescriptions = Array.isArray(this.cache.prescriptions) ? this.cache.prescriptions : [];
-        const prescriptionsCount = prescriptions.filter(p => p.status === 'active').length;
+        const prescriptionsCount = prescriptions.filter(p => p && p.status === 'active').length;
         
         // Update medical records count
         const recordsCount = this.cache.medicalRecords 
