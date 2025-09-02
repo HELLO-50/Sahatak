@@ -5,11 +5,12 @@ from utils.validators import validate_name, validate_phone, validate_age
 from utils.responses import APIResponse
 from utils.logging_config import app_logger
 from datetime import datetime
+from routes.auth import api_login_required
 
 users_bp = Blueprint('users', __name__)
 
 @users_bp.route('/profile', methods=['GET'])
-@login_required
+@api_login_required
 def get_profile():
     """Get user profile with complete information"""
     try:

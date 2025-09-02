@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import check_password_hash
+from functools import wraps
 import datetime
 from datetime import timedelta
 import hashlib
@@ -11,6 +12,18 @@ from utils.responses import APIResponse, ErrorCodes
 from utils.logging_config import auth_logger, log_user_action
 from services.notification_service import NotificationService
 import re
+
+def api_login_required(f):
+    """
+    Custom login_required decorator that returns JSON responses instead of redirects
+    This prevents CORS issues with cross-origin requests
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            return APIResponse.unauthorized(message='Authentication required')
+        return f(*args, **kwargs)
+    return decorated_function
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -270,10 +283,14 @@ def register():
             message='Registration failed. Please try again.'
         )
 
-@auth_bp.route('/login', methods=['POST'])
+@auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     """Login user with email or phone"""
     try:
+        # Handle GET requests (redirected by Flask-Login)
+        if request.method == 'GET':
+            return APIResponse.unauthorized(message='Authentication required')
+        
         data = request.get_json()
         
         # Validate required fields

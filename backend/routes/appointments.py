@@ -8,11 +8,12 @@ from utils.responses import APIResponse, ErrorCodes
 from utils.validators import validate_date, validate_appointment_type, validate_text_field_length
 from utils.logging_config import app_logger, log_user_action
 from utils.db_optimize import OptimizedQueries, QueryOptimizer, invalidate_appointment_cache, cached_query
+from routes.auth import api_login_required
 
 appointments_bp = Blueprint('appointments', __name__)
 
 @appointments_bp.route('/doctors', methods=['GET'])
-@login_required
+@api_login_required
 def get_available_doctors():
     """Get list of available doctors for appointment booking"""
     try:
@@ -67,7 +68,7 @@ def get_available_doctors():
         return APIResponse.internal_error(message='Failed to get available doctors')
 
 @appointments_bp.route('/', methods=['GET'])
-@login_required
+@api_login_required
 def get_appointments():
     """Get user's appointments with optimized queries"""
     try:
