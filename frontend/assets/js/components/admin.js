@@ -258,7 +258,7 @@ const AdminAPI = {
                 // Unauthorized - redirect to login
                 localStorage.removeItem('authToken');
                 sessionStorage.removeItem('authToken');
-                window.location.href = '/pages/auth/login.html';
+                window.location.href = 'https://hello-50.github.io/Sahatak/index.html';
                 return;
             }
             
