@@ -4,11 +4,12 @@ from flask_login import login_required, current_user
 from models import db, Prescription, Appointment
 from utils.responses import success_response, error_response, not_found_response
 from utils.logging_config import app_logger
+from routes.auth import api_login_required
 
 medical_bp = Blueprint('medical', __name__)
 
 @medical_bp.route('/records', methods=['GET'])
-@login_required
+@api_login_required
 def get_medical_records():
     """
     Get user's medical records (placeholder - to be fully implemented)

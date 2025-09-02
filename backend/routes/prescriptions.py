@@ -7,11 +7,12 @@ from models import db, Prescription, Patient, Doctor, Appointment
 from utils.responses import success_response, error_response, validation_error_response, not_found_response, forbidden_response, ErrorCodes
 from utils.validators import validate_prescription_data, validate_prescription_status, validate_json_data, sanitize_input
 from utils.logging_config import app_logger
+from routes.auth import api_login_required
 
 prescriptions_bp = Blueprint('prescriptions', __name__, url_prefix='/prescriptions')
 
 @prescriptions_bp.route('/', methods=['GET'])
-@login_required
+@api_login_required
 def get_prescriptions():
     """
     Get user's prescriptions (patients see their own, doctors see their prescribed)

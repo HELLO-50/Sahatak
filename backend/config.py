@@ -43,10 +43,10 @@ class Config:
     # Session settings
     SESSION_TIMEOUT_MINUTES = int(os.getenv('SESSION_TIMEOUT_MINUTES', 15))
     AUTO_LOGOUT_WARNING_MINUTES = int(os.getenv('AUTO_LOGOUT_WARNING_MINUTES', 2))
-    SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', 'False').lower() == 'true'
-    SESSION_COOKIE_HTTPONLY = False  # Allow JavaScript access for debugging
-    SESSION_COOKIE_SAMESITE = None   # Allow cross-origin (None, not string)
-    REMEMBER_COOKIE_SECURE = SESSION_COOKIE_SECURE
+    SESSION_COOKIE_SECURE = False  # Allow HTTP during development
+    SESSION_COOKIE_HTTPONLY = False  # Allow JavaScript access
+    SESSION_COOKIE_SAMESITE = None   # Allow cross-origin
+    REMEMBER_COOKIE_SECURE = False
     REMEMBER_COOKIE_HTTPONLY = False
     REMEMBER_COOKIE_SAMESITE = None
     
