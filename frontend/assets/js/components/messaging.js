@@ -1,1017 +1,693 @@
 /**
- * Messaging System - Real-time patient-doctor communication
- * Integrates with backend messaging API and WebSocket
+ * Unified Messaging System for Doctors and Patients
+ * Handles real-time communication in comm-hub pages
  */
-class MessagingSystem {
-    constructor() {
-        this.apiBase = '/api/messages';
-        this.currentConversationId = null;
-        this.messages = [];
-        this.pollInterval = null;
-        this.lastMessageTimestamp = null;
-        this.isInitialized = false;
+
+// Global variables
+let currentConversationId = null;
+let currentRecipientId = null;
+let currentRecipientName = null;
+let conversations = [];
+let socket = null;
+let userType = null;
+let userId = null;
+
+// Initialize messaging based on user type
+async function initializeMessaging() {
+    try {
+        // Get user info
+        userType = localStorage.getItem('sahatak_user_type');
+        userId = parseInt(localStorage.getItem('sahatak_user_id'));
         
-        // WebSocket properties
-        this.socket = null;
-        this.isConnected = false;
-        this.reconnectAttempts = 0;
-        this.maxReconnectAttempts = 5;
-        this.reconnectDelay = 1000;
-    }
-
-    /**
-     * Initialize messaging system
-     */
-    async initialize(recipientId = null, recipientType = 'doctor') {
-        try {
-            // Initialize WebSocket connection
-            await this.initializeWebSocket();
-            
-            if (recipientId) {
-                await this.startConversation(recipientId, recipientType);
-            }
-            
-            await this.loadConversations();
-            this.setupEventHandlers();
-            
-            // Only use polling as fallback if WebSocket fails
-            if (!this.isConnected) {
-                this.startPolling();
-                Logger.warn('WebSocket unavailable, using polling fallback');
-            }
-            
-            this.isInitialized = true;
-            
-            Logger.info('Messaging system initialized');
-        } catch (error) {
-            Logger.error('Failed to initialize messaging system', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Initialize WebSocket connection
-     */
-    async initializeWebSocket() {
-        return new Promise((resolve) => {
-            try {
-                // Check if Socket.IO is available
-                if (typeof io === 'undefined') {
-                    Logger.warn('Socket.IO not available, using polling fallback');
-                    resolve();
-                    return;
-                }
-                
-                // Create socket connection
-                this.socket = io({
-                    autoConnect: true,
-                    reconnection: true,
-                    reconnectionAttempts: this.maxReconnectAttempts,
-                    reconnectionDelay: this.reconnectDelay
-                });
-                
-                this.setupWebSocketHandlers();
-                
-                // Wait for connection
-                this.socket.on('connect', () => {
-                    this.isConnected = true;
-                    this.reconnectAttempts = 0;
-                    this.updateConnectionStatus('connected');
-                    Logger.info('WebSocket connected');
-                    resolve();
-                });
-                
-                this.socket.on('connect_error', (error) => {
-                    Logger.error('WebSocket connection error', error);
-                    resolve(); // Don't fail, use polling fallback
-                });
-                
-                // Set timeout for connection
-                setTimeout(() => {
-                    if (!this.isConnected) {
-                        Logger.warn('WebSocket connection timeout');
-                        resolve();
-                    }
-                }, 5000);
-                
-            } catch (error) {
-                Logger.error('WebSocket initialization failed', error);
-                resolve(); // Don't fail, use polling fallback
-            }
-        });
-    }
-
-    /**
-     * Setup WebSocket event handlers
-     */
-    setupWebSocketHandlers() {
-        if (!this.socket) return;
-        
-        // Connection events
-        this.socket.on('disconnect', () => {
-            this.isConnected = false;
-            this.updateConnectionStatus('disconnected');
-            Logger.warn('WebSocket disconnected');
-        });
-        
-        this.socket.on('reconnect', () => {
-            this.isConnected = true;
-            this.updateConnectionStatus('connected');
-            Logger.info('WebSocket reconnected');
-            
-            // Rejoin current conversation
-            if (this.currentConversationId) {
-                this.joinConversation(this.currentConversationId);
-            }
-        });
-        
-        // Message events
-        this.socket.on('new_message', (data) => {
-            this.handleNewMessage(data);
-        });
-        
-        this.socket.on('message_status_update', (data) => {
-            this.handleMessageStatusUpdate(data);
-        });
-        
-        this.socket.on('user_typing_start', (data) => {
-            this.handleTypingStart(data);
-        });
-        
-        this.socket.on('user_typing_stop', (data) => {
-            this.handleTypingStop(data);
-        });
-        
-        // Notification events
-        this.socket.on('notification', (data) => {
-            this.handleNotification(data);
-        });
-        
-        // User status events
-        this.socket.on('user_status_change', (data) => {
-            this.handleUserStatusChange(data);
-        });
-    }
-
-    /**
-     * Join a conversation room
-     */
-    joinConversation(conversationId) {
-        if (this.socket && this.isConnected) {
-            this.socket.emit('join_conversation', { conversation_id: conversationId });
-        }
-    }
-
-    /**
-     * Leave a conversation room
-     */
-    leaveConversation(conversationId) {
-        if (this.socket && this.isConnected) {
-            this.socket.emit('leave_conversation', { conversation_id: conversationId });
-        }
-    }
-
-    /**
-     * Start or get existing conversation
-     */
-    async startConversation(recipientId, recipientType = 'doctor') {
-        try {
-            const response = await fetch(`${this.apiBase}/conversations`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                },
-                body: JSON.stringify({
-                    recipient_id: recipientId,
-                    recipient_type: recipientType
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-
-            const data = await response.json();
-            this.currentConversationId = data.data.id;
-            
-            await this.loadMessages();
-            Logger.info('Conversation started', { conversationId: this.currentConversationId });
-            
-            return data.data;
-        } catch (error) {
-            Logger.error('Failed to start conversation', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Load user's conversations
-     */
-    async loadConversations() {
-        try {
-            const response = await fetch(`${this.apiBase}/conversations`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-
-            const data = await response.json();
-            this.renderConversationsList(data.data);
-            
-            return data.data;
-        } catch (error) {
-            Logger.error('Failed to load conversations', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Load messages for current conversation
-     */
-    async loadMessages() {
-        if (!this.currentConversationId) return;
-
-        try {
-            const response = await fetch(`${this.apiBase}/conversations/${this.currentConversationId}/messages`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-
-            const data = await response.json();
-            this.messages = data.data;
-            this.renderMessages();
-            this.updateLastMessageTimestamp();
-            
-            // Join WebSocket room for this conversation
-            this.joinConversation(this.currentConversationId);
-            
-            return data.data;
-        } catch (error) {
-            Logger.error('Failed to load messages', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Send a message
-     */
-    async sendMessage(content, attachments = []) {
-        if (!this.currentConversationId || !content.trim()) return;
-
-        try {
-            const formData = new FormData();
-            formData.append('conversation_id', this.currentConversationId);
-            formData.append('content', content.trim());
-            
-            // Add attachments if any
-            attachments.forEach((file, index) => {
-                formData.append(`attachments[${index}]`, file);
-            });
-
-            const response = await fetch(`${this.apiBase}/send`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                },
-                body: formData
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-
-            const data = await response.json();
-            
-            // Add message to local array and re-render
-            this.messages.push(data.data);
-            this.renderMessages();
-            this.updateLastMessageTimestamp();
-            
-            // Clear input
-            const messageInput = document.getElementById('messageInput');
-            if (messageInput) {
-                messageInput.value = '';
-            }
-            
-            Logger.info('Message sent successfully');
-            return data.data;
-        } catch (error) {
-            Logger.error('Failed to send message', error);
-            this.showError('Failed to send message. Please try again.');
-            throw error;
-        }
-    }
-
-    /**
-     * Search messages
-     */
-    async searchMessages(query, conversationId = null) {
-        try {
-            const params = new URLSearchParams({ q: query });
-            if (conversationId) {
-                params.append('conversation_id', conversationId);
-            }
-
-            const response = await fetch(`${this.apiBase}/search?${params}`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-
-            const data = await response.json();
-            return data.data;
-        } catch (error) {
-            Logger.error('Failed to search messages', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Create conversation for appointment
-     */
-    async createAppointmentConversation(appointmentId) {
-        try {
-            const response = await fetch(`${this.apiBase}/conversations/appointment/${appointmentId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-
-            const data = await response.json();
-            
-            // Set current conversation
-            this.currentConversationId = data.data.conversation.id;
-            this.messages = data.data.conversation.messages || [];
-            
-            // Update UI
-            this.renderMessages();
-            this.updateAppointmentHeader(data.data.appointment);
-            
-            Logger.info('Appointment conversation created', { 
-                conversationId: this.currentConversationId,
-                appointmentId 
-            });
-            
-            return data.data;
-        } catch (error) {
-            Logger.error('Failed to create appointment conversation', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Update appointment header in chat interface
-     */
-    updateAppointmentHeader(appointment) {
-        const headerElement = document.querySelector('.chat-header, .appointment-header');
-        if (headerElement && appointment) {
-            const appointmentInfo = document.createElement('div');
-            appointmentInfo.className = 'appointment-info';
-            appointmentInfo.innerHTML = `
-                <div class="appointment-badge">
-                    <i class="bi bi-calendar-event"></i>
-                    <div class="appointment-details">
-                        <strong>Appointment Discussion</strong>
-                        <div class="appointment-meta">
-                            <span class="appointment-date">${this.formatTimestamp(appointment.appointment_date)}</span>
-                            ${appointment.appointment_type ? `<span class="appointment-type">${appointment.appointment_type}</span>` : ''}
-                        </div>
-                        ${appointment.reason_for_visit ? 
-                            `<div class="appointment-reason">${appointment.reason_for_visit}</div>` : ''
-                        }
-                    </div>
-                </div>
-            `;
-            
-            // Insert at the beginning of header or replace existing
-            const existingInfo = headerElement.querySelector('.appointment-info');
-            if (existingInfo) {
-                existingInfo.replaceWith(appointmentInfo);
-            } else {
-                headerElement.insertBefore(appointmentInfo, headerElement.firstChild);
-            }
-        }
-    }
-
-    /**
-     * Get unread message count
-     */
-    async getUnreadCount() {
-        try {
-            const response = await fetch(`${this.apiBase}/unread-count`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-
-            const data = await response.json();
-            this.updateUnreadIndicator(data.data.unread_count);
-            
-            return data.data.unread_count;
-        } catch (error) {
-            Logger.error('Failed to get unread count', error);
-            return 0;
-        }
-    }
-
-    /**
-     * Mark conversation as read
-     */
-    async markAsRead(conversationId = null) {
-        const id = conversationId || this.currentConversationId;
-        if (!id) return;
-
-        try {
-            await fetch(`${this.apiBase}/conversations/${id}/read`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-            
-            // Update UI
-            this.getUnreadCount();
-        } catch (error) {
-            Logger.error('Failed to mark as read', error);
-        }
-    }
-
-    /**
-     * Setup event handlers
-     */
-    setupEventHandlers() {
-        // Send button click
-        const sendBtn = document.querySelector('button[onclick*="sendMessage"]') || 
-                       document.querySelector('.btn-primary[onclick*="send"]');
-        if (sendBtn) {
-            sendBtn.onclick = () => this.handleSendMessage();
-        }
-
-        // Enter key in message input and typing indicators
-        const messageInput = document.getElementById('messageInput');
-        if (messageInput) {
-            let typingTimer = null;
-            let isTyping = false;
-            
-            messageInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    this.handleSendMessage();
-                } else {
-                    // Start typing indicator
-                    if (!isTyping) {
-                        this.startTyping();
-                        isTyping = true;
-                    }
-                    
-                    // Reset typing timer
-                    clearTimeout(typingTimer);
-                    typingTimer = setTimeout(() => {
-                        this.stopTyping();
-                        isTyping = false;
-                    }, 2000);
-                }
-            });
-            
-            messageInput.addEventListener('input', (e) => {
-                if (e.target.value.trim() === '') {
-                    // Stop typing if input is empty
-                    this.stopTyping();
-                    isTyping = false;
-                    clearTimeout(typingTimer);
-                }
-            });
-        }
-
-        // File attachment
-        const attachBtn = document.querySelector('button[onclick*="attach"]');
-        if (attachBtn) {
-            attachBtn.onclick = () => this.handleFileAttachment();
-        }
-    }
-
-    /**
-     * Handle send message event
-     */
-    async handleSendMessage() {
-        const messageInput = document.getElementById('messageInput');
-        if (!messageInput) return;
-
-        const content = messageInput.value.trim();
-        if (!content) return;
-
-        try {
-            await this.sendMessage(content);
-            this.scrollToBottom();
-        } catch (error) {
-            this.showError('Failed to send message');
-        }
-    }
-
-    /**
-     * Handle file attachment
-     */
-    handleFileAttachment() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*,.pdf,.doc,.docx';
-        input.multiple = false;
-        
-        input.onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                this.attachFile(file);
-            }
-        };
-        
-        input.click();
-    }
-
-    /**
-     * Attach file to message
-     */
-    async attachFile(file) {
-        // Validate file size (5MB max)
-        if (file.size > 5 * 1024 * 1024) {
-            this.showError('File size must be less than 5MB');
-            return;
-        }
-
-        try {
-            const messageInput = document.getElementById('messageInput');
-            const content = messageInput ? messageInput.value.trim() : '';
-            
-            if (!content) {
-                messageInput.value = `📎 ${file.name}`;
-            }
-            
-            await this.sendMessage(content || `📎 ${file.name}`, [file]);
-        } catch (error) {
-            this.showError('Failed to send attachment');
-        }
-    }
-
-    /**
-     * Start polling for new messages
-     */
-    startPolling() {
-        if (this.pollInterval) {
-            clearInterval(this.pollInterval);
-        }
-
-        this.pollInterval = setInterval(async () => {
-            if (this.currentConversationId) {
-                await this.checkForNewMessages();
-            }
-            await this.getUnreadCount();
-        }, 5000); // Poll every 5 seconds
-    }
-
-    /**
-     * Check for new messages
-     */
-    async checkForNewMessages() {
-        if (!this.currentConversationId || !this.lastMessageTimestamp) return;
-
-        try {
-            const params = new URLSearchParams({
-                since: this.lastMessageTimestamp
-            });
-
-            const response = await fetch(
-                `${this.apiBase}/conversations/${this.currentConversationId}/messages?${params}`,
-                {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                    }
-                }
-            );
-
-            if (!response.ok) return;
-
-            const data = await response.json();
-            if (data.data && data.data.length > 0) {
-                this.messages.push(...data.data);
-                this.renderMessages();
-                this.updateLastMessageTimestamp();
-                this.scrollToBottom();
-                
-                // Mark as read if page is visible
-                if (!document.hidden) {
-                    await this.markAsRead();
-                }
-            }
-        } catch (error) {
-            Logger.error('Failed to check for new messages', error);
-        }
-    }
-
-    /**
-     * Render messages in chat container
-     */
-    renderMessages() {
-        const chatContainer = document.getElementById('chatMessages');
-        if (!chatContainer) return;
-
-        chatContainer.innerHTML = '';
-
-        this.messages.forEach(message => {
-            const messageDiv = document.createElement('div');
-            const isOwn = message.sender_id === parseInt(localStorage.getItem('userId'));
-            
-            messageDiv.className = `message ${isOwn ? 'patient-message' : 'doctor-message'}`;
-            messageDiv.setAttribute('data-message-id', message.id);
-            
-            // Build appointment context if available
-            const appointmentContext = message.appointment_info ? `
-                <div class="appointment-context">
-                    <i class="bi bi-calendar-check"></i>
-                    <span>Appointment: ${this.formatTimestamp(message.appointment_info.appointment_date)}</span>
-                    ${message.appointment_info.reason_for_visit ? 
-                        `<div class="appointment-reason">${message.appointment_info.reason_for_visit}</div>` : ''
-                    }
-                </div>
-            ` : '';
-            
-            messageDiv.innerHTML = `
-                <div class="message-content">
-                    ${appointmentContext}
-                    <p>${this.escapeHtml(message.content)}</p>
-                    ${message.attachments && message.attachments.length > 0 ? 
-                        `<div class="message-attachments">
-                            ${message.attachments.map(att => 
-                                `<a href="${att.file_url}" target="_blank" class="attachment-link">
-                                    <i class="bi bi-paperclip"></i> ${att.filename}
-                                </a>`
-                            ).join('')}
-                        </div>` : ''
-                    }
-                    <div class="message-footer">
-                        <small class="message-time">${this.formatTimestamp(message.sent_at || message.created_at)}</small>
-                        ${message.is_urgent ? '<span class="urgent-indicator"><i class="bi bi-exclamation-triangle"></i></span>' : ''}
-                        <span class="message-status status-sent"></span>
-                    </div>
-                </div>
-            `;
-            
-            chatContainer.appendChild(messageDiv);
-        });
-
-        this.scrollToBottom();
-    }
-
-    /**
-     * Render conversations list
-     */
-    renderConversationsList(conversations) {
-        // This would be implemented if there's a conversations sidebar
-        Logger.info('Conversations loaded', { count: conversations.length });
-    }
-
-    /**
-     * Update unread message indicator
-     */
-    updateUnreadIndicator(count) {
-        const indicators = document.querySelectorAll('.unread-count, [data-unread-count]');
-        indicators.forEach(indicator => {
-            if (count > 0) {
-                indicator.textContent = count > 99 ? '99+' : count;
-                indicator.style.display = 'inline-block';
-            } else {
-                indicator.style.display = 'none';
-            }
-        });
-    }
-
-    /**
-     * Scroll chat to bottom
-     */
-    scrollToBottom() {
-        const chatContainer = document.getElementById('chatMessages');
-        if (chatContainer) {
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
-    }
-
-    /**
-     * Update last message timestamp
-     */
-    updateLastMessageTimestamp() {
-        if (this.messages.length > 0) {
-            this.lastMessageTimestamp = this.messages[this.messages.length - 1].sent_at;
-        }
-    }
-
-    /**
-     * Format timestamp for display
-     */
-    formatTimestamp(timestamp) {
-        const date = new Date(timestamp);
-        const now = new Date();
-        const diff = now - date;
-        
-        // Less than 1 minute
-        if (diff < 60000) {
-            return 'Just now';
+        if (userType === 'doctor') {
+            await initializeDoctorMessaging();
+        } else if (userType === 'patient') {
+            await initializePatientMessaging();
         }
         
-        // Less than 1 hour
-        if (diff < 3600000) {
-            const minutes = Math.floor(diff / 60000);
-            return `${minutes}m ago`;
-        }
+        initializeWebSocket();
         
-        // Same day
-        if (date.toDateString() === now.toDateString()) {
-            return date.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true
-            });
+        if (typeof Logger !== 'undefined') {
+            Logger.info(`${userType} messaging initialized`);
         }
-        
-        // Different day
-        return date.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-        });
-    }
-
-    /**
-     * Escape HTML to prevent XSS
-     */
-    escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    /**
-     * Show error message
-     */
-    showError(message) {
-        // Create or update error toast/alert
-        const alertDiv = document.createElement('div');
-        alertDiv.className = 'alert alert-danger alert-dismissible fade show position-fixed';
-        alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 300px;';
-        alertDiv.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-        
-        document.body.appendChild(alertDiv);
-        
-        // Auto remove after 5 seconds
-        setTimeout(() => {
-            if (alertDiv.parentNode) {
-                alertDiv.parentNode.removeChild(alertDiv);
-            }
-        }, 5000);
-    }
-
-    /**
-     * Handle new message from WebSocket
-     */
-    handleNewMessage(data) {
-        if (data.conversation_id === this.currentConversationId) {
-            // Add message to current conversation
-            this.messages.push(data.message);
-            this.renderMessages();
-            this.scrollToBottom();
-            
-            // Mark as read if page is visible
-            if (!document.hidden && data.message.sender_id !== parseInt(localStorage.getItem('userId'))) {
-                this.markAsRead();
-            }
-            
-            Logger.info('Received new message via WebSocket');
-        }
-        
-        // Update unread count for all conversations
-        this.getUnreadCount();
-    }
-
-    /**
-     * Handle message status update from WebSocket
-     */
-    handleMessageStatusUpdate(data) {
-        if (data.conversation_id === this.currentConversationId) {
-            // Update message status in UI
-            const messageElement = document.querySelector(`[data-message-id="${data.message_id}"]`);
-            if (messageElement) {
-                const statusElement = messageElement.querySelector('.message-status');
-                if (statusElement) {
-                    statusElement.textContent = data.status;
-                    statusElement.className = `message-status status-${data.status}`;
-                }
-            }
-            
-            Logger.info('Message status updated via WebSocket', data);
-        }
-    }
-
-    /**
-     * Handle user typing start
-     */
-    handleTypingStart(data) {
-        if (data.conversation_id === this.currentConversationId) {
-            this.showTypingIndicator(data.user_name);
-            Logger.info(`${data.user_name} started typing`);
-        }
-    }
-
-    /**
-     * Handle user typing stop
-     */
-    handleTypingStop(data) {
-        if (data.conversation_id === this.currentConversationId) {
-            this.hideTypingIndicator();
-            Logger.info('Typing indicator hidden');
-        }
-    }
-
-    /**
-     * Handle notification from WebSocket
-     */
-    handleNotification(data) {
-        if (data.type === 'new_message') {
-            // Show in-app notification
-            this.showInAppNotification(data);
-            
-            // Update badge counts
-            this.getUnreadCount();
-        }
-        
-        Logger.info('Received notification via WebSocket', data);
-    }
-
-    /**
-     * Handle user status change
-     */
-    handleUserStatusChange(data) {
-        // Update user online status in UI
-        const userElements = document.querySelectorAll(`[data-user-id="${data.user_id}"]`);
-        userElements.forEach(element => {
-            const statusElement = element.querySelector('.user-status');
-            if (statusElement) {
-                statusElement.className = `user-status status-${data.status}`;
-                statusElement.title = `${data.status} - ${data.timestamp}`;
-            }
-        });
-        
-        Logger.info('User status updated', data);
-    }
-
-    /**
-     * Send typing indicator
-     */
-    startTyping() {
-        if (this.socket && this.isConnected && this.currentConversationId) {
-            this.socket.emit('typing_start', { conversation_id: this.currentConversationId });
-        }
-    }
-
-    /**
-     * Stop typing indicator
-     */
-    stopTyping() {
-        if (this.socket && this.isConnected && this.currentConversationId) {
-            this.socket.emit('typing_stop', { conversation_id: this.currentConversationId });
-        }
-    }
-
-    /**
-     * Show typing indicator in UI
-     */
-    showTypingIndicator(userName) {
-        let indicator = document.querySelector('.typing-indicator');
-        if (!indicator) {
-            indicator = document.createElement('div');
-            indicator.className = 'typing-indicator';
-            indicator.innerHTML = `
-                <div class="typing-dots">
-                    <span class="typing-user">${userName} is typing</span>
-                    <div class="dots">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </div>
-                </div>
-            `;
-            
-            const chatContainer = document.getElementById('chatMessages');
-            if (chatContainer) {
-                chatContainer.appendChild(indicator);
-                this.scrollToBottom();
-            }
-        } else {
-            indicator.querySelector('.typing-user').textContent = `${userName} is typing`;
-        }
-    }
-
-    /**
-     * Hide typing indicator
-     */
-    hideTypingIndicator() {
-        const indicator = document.querySelector('.typing-indicator');
-        if (indicator) {
-            indicator.remove();
-        }
-    }
-
-    /**
-     * Show in-app notification
-     */
-    showInAppNotification(data) {
-        // Create notification element
-        const notification = document.createElement('div');
-        notification.className = 'message-notification';
-        notification.innerHTML = `
-            <div class="notification-content">
-                <div class="notification-title">${data.title}</div>
-                <div class="notification-message">${data.message}</div>
-            </div>
-            <button class="notification-close">&times;</button>
-        `;
-        
-        // Add to page
-        document.body.appendChild(notification);
-        
-        // Auto remove after 5 seconds
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
-            }
-        }, 5000);
-        
-        // Close on click
-        notification.querySelector('.notification-close').onclick = () => {
-            notification.parentNode.removeChild(notification);
-        };
-    }
-
-    /**
-     * Update connection status indicator
-     */
-    updateConnectionStatus(status) {
-        const indicators = document.querySelectorAll('.connection-status');
-        indicators.forEach(indicator => {
-            indicator.className = `connection-status status-${status}`;
-            indicator.textContent = status === 'connected' ? 'Connected' : 'Connecting...';
-        });
-    }
-
-    /**
-     * Cleanup resources
-     */
-    cleanup() {
-        if (this.pollInterval) {
-            clearInterval(this.pollInterval);
-            this.pollInterval = null;
-        }
-        
-        // Leave current conversation room
-        if (this.currentConversationId) {
-            this.leaveConversation(this.currentConversationId);
-        }
-        
-        // Disconnect WebSocket
-        if (this.socket) {
-            this.socket.disconnect();
-            this.socket = null;
-        }
-        
-        this.isInitialized = false;
-        this.isConnected = false;
+    } catch (error) {
+        console.error('Failed to initialize messaging', error);
+        showErrorMessage('Failed to load messaging system. Please refresh the page.');
     }
 }
 
-// Export for global usage
-window.MessagingSystem = MessagingSystem;
+// Initialize doctor messaging
+async function initializeDoctorMessaging() {
+    await loadConversations();
+}
+
+// Initialize patient messaging
+async function initializePatientMessaging() {
+    try {
+        // Get doctor ID from URL params or fetch from appointment
+        const urlParams = new URLSearchParams(window.location.search);
+        const doctorId = urlParams.get('doctor_id');
+        const appointmentId = urlParams.get('appointment_id');
+        
+        if (doctorId) {
+            await loadDoctorInfo(doctorId);
+            await startOrGetConversation(doctorId, appointmentId);
+        } else {
+            // If no doctor specified, load recent conversations
+            await loadRecentConversations();
+        }
+    } catch (error) {
+        console.error('Failed to initialize patient messaging:', error);
+        showError('Failed to initialize messaging. Please refresh the page.');
+    }
+}
+
+// Load doctor info (for patients)
+async function loadDoctorInfo(doctorId) {
+    try {
+        const response = await fetch(`/api/users/doctors/${doctorId}`, {
+            credentials: 'include'
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            const doctorInfo = data.data;
+            updateDoctorDisplay(doctorInfo);
+        }
+    } catch (error) {
+        console.error('Failed to load doctor info:', error);
+    }
+}
+
+// Update doctor display (for patients)
+function updateDoctorDisplay(doctorInfo) {
+    if (!doctorInfo) return;
+    
+    const doctorNameEl = document.getElementById('doctorName');
+    if (doctorNameEl) {
+        doctorNameEl.textContent = doctorInfo.full_name || 'Doctor';
+    }
+}
+
+// Start or get conversation (for patients)
+async function startOrGetConversation(doctorId, appointmentId = null) {
+    try {
+        const body = {
+            recipient_id: doctorId
+        };
+        
+        if (appointmentId) {
+            body.appointment_id = appointmentId;
+        }
+        
+        const response = await fetch('/api/messages/conversations', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            currentConversationId = data.data.id;
+            currentRecipientId = doctorId;
+            await loadMessages();
+        }
+    } catch (error) {
+        console.error('Failed to start conversation:', error);
+        showError('Failed to start conversation with doctor.');
+    }
+}
+
+// Load recent conversations (for patients)
+async function loadRecentConversations() {
+    try {
+        const response = await fetch('/api/messages/conversations', {
+            credentials: 'include'
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            if (data.data.conversations && data.data.conversations.length > 0) {
+                // Load the first conversation
+                const firstConv = data.data.conversations[0];
+                currentConversationId = firstConv.id;
+                
+                // Set recipient based on user type
+                if (userType === 'patient') {
+                    currentRecipientId = firstConv.participants.doctor.id;
+                } else {
+                    currentRecipientId = firstConv.participants.patient.id;
+                }
+                
+                await loadMessages();
+            }
+        }
+    } catch (error) {
+        console.error('Failed to load conversations:', error);
+    }
+}
+
+// Load all conversations
+async function loadConversations() {
+    try {
+        const response = await fetch('/api/messages/conversations', {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        conversations = data.data.conversations || [];
+        
+        if (userType === 'doctor') {
+            displayDoctorConversations(conversations);
+        } else {
+            displayPatientConversations(conversations);
+        }
+    } catch (error) {
+        console.error('Failed to load conversations', error);
+        showErrorMessage('Failed to load conversations. Please refresh the page.');
+    }
+}
+
+// Display conversations for doctors
+function displayDoctorConversations(conversationList) {
+    const patientList = document.getElementById('patientList');
+    
+    if (!conversationList || conversationList.length === 0) {
+        patientList.innerHTML = `
+            <div class="text-center text-muted py-5" id="no-conversations">
+                <i class="bi bi-people fs-1"></i>
+                <p class="mt-2">No conversations yet</p>
+                <small>Patients will appear here when they message you</small>
+            </div>
+        `;
+        return;
+    }
+
+    patientList.innerHTML = '';
+    
+    conversationList.forEach((conversation, index) => {
+        const patient = conversation.participants.patient;
+        const patientItem = document.createElement('div');
+        patientItem.className = `patient-item ${index === 0 ? 'active' : ''}`;
+        patientItem.setAttribute('data-conversation', conversation.id);
+        patientItem.onclick = () => selectConversation(conversation.id, patient.id, patient.name);
+        
+        const lastMessage = conversation.last_message_content || 'No messages yet';
+        const lastMessageTime = conversation.last_message_at ? formatTimestamp(conversation.last_message_at) : '';
+        
+        patientItem.innerHTML = `
+            <div class="d-flex align-items-start">
+                <div class="patient-avatar me-3">
+                    <i class="bi bi-person-circle"></i>
+                </div>
+                <div class="patient-info flex-grow-1">
+                    <h6 class="patient-name">${patient.name}</h6>
+                    <p class="last-message text-muted">${lastMessage}</p>
+                    <small class="text-muted">${lastMessageTime}</small>
+                </div>
+                ${conversation.unread_count > 0 ? 
+                    `<div class="message-badge">${conversation.unread_count > 99 ? '99+' : conversation.unread_count}</div>` : ''
+                }
+            </div>
+        `;
+        
+        patientList.appendChild(patientItem);
+    });
+    
+    // Select first conversation if available
+    if (conversationList.length > 0) {
+        const firstConv = conversationList[0];
+        const patient = firstConv.participants.patient;
+        selectConversation(firstConv.id, patient.id, patient.name);
+    }
+}
+
+// Display conversations for patients (if multiple doctors)
+function displayPatientConversations(conversationList) {
+    // For now, patients typically have one conversation with their doctor
+    // This can be expanded if patients can message multiple doctors
+    if (conversationList.length > 0) {
+        const firstConv = conversationList[0];
+        const doctor = firstConv.participants.doctor;
+        currentConversationId = firstConv.id;
+        currentRecipientId = doctor.id;
+        updateDoctorDisplay(doctor);
+        loadMessages();
+    }
+}
+
+// Select conversation
+async function selectConversation(conversationId, recipientId, recipientName) {
+    try {
+        currentConversationId = conversationId;
+        currentRecipientId = recipientId;
+        currentRecipientName = recipientName;
+        
+        // Update UI based on user type
+        if (userType === 'doctor') {
+            // Update patient selection UI
+            document.querySelectorAll('.patient-item').forEach(item => item.classList.remove('active'));
+            const selectedItem = document.querySelector(`[data-conversation="${conversationId}"]`);
+            if (selectedItem) {
+                selectedItem.classList.add('active');
+            }
+            
+            // Update chat header
+            document.getElementById('selectedPatientName').textContent = recipientName;
+            document.getElementById('selectedPatientInfo').textContent = `Patient ID: ${recipientId} | Active conversation`;
+            
+            // Enable action buttons
+            const viewRecordBtn = document.getElementById('viewRecordBtn');
+            const scheduleBtn = document.getElementById('scheduleBtn');
+            const messageInputArea = document.getElementById('messageInputArea');
+            
+            if (viewRecordBtn) viewRecordBtn.disabled = false;
+            if (scheduleBtn) scheduleBtn.disabled = false;
+            if (messageInputArea) messageInputArea.style.display = 'block';
+        }
+        
+        // Load messages for this conversation
+        await loadMessages();
+        
+        // Mark conversation as read
+        await markConversationAsRead(conversationId);
+        
+        if (typeof Logger !== 'undefined') {
+            Logger.info('Selected conversation', { conversationId, recipientId });
+        }
+    } catch (error) {
+        console.error('Failed to select conversation', error);
+        showErrorMessage('Failed to load messages');
+    }
+}
+
+// Load messages for current conversation
+async function loadMessages() {
+    if (!currentConversationId) return;
+
+    try {
+        const response = await fetch(`/api/messages/conversations/${currentConversationId}`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        displayMessages(data.data.messages || []);
+    } catch (error) {
+        console.error('Failed to load messages', error);
+        showErrorMessage('Failed to load messages');
+    }
+}
+
+// Display messages in chat
+function displayMessages(messages) {
+    const chatContainer = document.getElementById('chatMessages');
+    
+    if (!messages || messages.length === 0) {
+        chatContainer.innerHTML = `
+            <div class="text-center text-muted py-5" id="no-messages">
+                <i class="bi bi-chat-dots fs-1"></i>
+                <p class="mt-2">No messages yet. Start a conversation.</p>
+            </div>
+        `;
+        return;
+    }
+
+    chatContainer.innerHTML = messages.map(msg => {
+        const isSender = msg.sender_id === userId;
+        const messageClass = isSender ? 
+            (userType === 'doctor' ? 'doctor-message' : 'patient-message') : 
+            (userType === 'doctor' ? 'patient-message' : 'doctor-message');
+        const time = formatTimestamp(msg.created_at);
+        
+        return `
+            <div class="message ${messageClass}">
+                <div class="message-content">
+                    <p>${msg.content}</p>
+                    <small class="message-time">${time}</small>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    // Scroll to bottom
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+// Send message
+async function sendMessage() {
+    const input = document.getElementById('messageInput');
+    const content = input.value.trim();
+    
+    if (!content || !currentConversationId) return;
+
+    try {
+        const response = await fetch(`/api/messages/conversations/${currentConversationId}/messages`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                content: content,
+                message_type: 'text'
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        // Clear input
+        input.value = '';
+        
+        // Add message to display
+        addMessageToDisplay(data.data);
+        
+    } catch (error) {
+        console.error('Failed to send message', error);
+        showErrorMessage('Failed to send message. Please try again.');
+    }
+}
+
+// Add new message to display
+function addMessageToDisplay(message) {
+    const chatContainer = document.getElementById('chatMessages');
+    
+    // Remove no messages placeholder if exists
+    const noMessages = document.getElementById('no-messages');
+    if (noMessages) {
+        noMessages.remove();
+    }
+    
+    const isSender = message.sender_id === userId;
+    const messageClass = isSender ? 
+        (userType === 'doctor' ? 'doctor-message' : 'patient-message') : 
+        (userType === 'doctor' ? 'patient-message' : 'doctor-message');
+    const time = formatTimestamp(message.created_at || new Date());
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${messageClass}`;
+    messageDiv.innerHTML = `
+        <div class="message-content">
+            <p>${message.content}</p>
+            <small class="message-time">${time}</small>
+        </div>
+    `;
+    
+    chatContainer.appendChild(messageDiv);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+// Mark conversation as read
+async function markConversationAsRead(conversationId) {
+    try {
+        // Check if endpoint exists for marking as read
+        await fetch(`/api/messages/conversations/${conversationId}/read`, {
+            method: 'PUT',
+            credentials: 'include'
+        });
+    } catch (error) {
+        console.error('Failed to mark conversation as read', error);
+    }
+}
+
+// Initialize WebSocket
+function initializeWebSocket() {
+    if (typeof io === 'undefined') {
+        console.warn('Socket.IO not available, using polling fallback');
+        // Fallback to polling
+        setInterval(() => {
+            if (currentConversationId) {
+                loadMessages();
+            }
+        }, 5000);
+        return;
+    }
+    
+    socket = io({
+        autoConnect: true,
+        reconnection: true
+    });
+    
+    socket.on('connect', () => {
+        console.log('WebSocket connected');
+        if (currentConversationId) {
+            socket.emit('join_conversation', { conversation_id: currentConversationId });
+        }
+    });
+    
+    socket.on('new_message', (data) => {
+        if (data.conversation_id === currentConversationId) {
+            addMessageToDisplay(data.message);
+        }
+        // Update conversation list for doctors
+        if (userType === 'doctor') {
+            loadConversations();
+        }
+    });
+    
+    socket.on('disconnect', () => {
+        console.log('WebSocket disconnected');
+    });
+}
+
+// Handle key press for message input
+function handleKeyPress(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+    }
+}
+
+// Filter conversations (doctors only)
+function filterConversations(filter) {
+    // Update active filter button
+    document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    let filteredConversations;
+    switch(filter) {
+        case 'unread':
+            filteredConversations = conversations.filter(conv => conv.unread_count > 0);
+            break;
+        case 'urgent':
+            filteredConversations = conversations.filter(conv => conv.is_urgent);
+            break;
+        default:
+            filteredConversations = conversations;
+    }
+    
+    displayDoctorConversations(filteredConversations);
+}
+
+// Search patients (doctors only)
+function searchPatients() {
+    const searchTerm = document.getElementById('patientSearch').value.toLowerCase();
+    const patientItems = document.querySelectorAll('.patient-item');
+    
+    patientItems.forEach(item => {
+        const patientName = item.querySelector('.patient-name').textContent.toLowerCase();
+        item.style.display = patientName.includes(searchTerm) ? 'block' : 'none';
+    });
+}
+
+// Template functions
+function insertTemplate() {
+    const templates = userType === 'doctor' ? [
+        "Thank you for your message. I'll review your concern and get back to you shortly.",
+        "Please take the medication as prescribed and let me know if you experience any side effects.",
+        "Your test results look good. Continue with your current treatment plan.",
+        "I recommend scheduling a follow-up appointment to monitor your progress.",
+        "Please come to the clinic if symptoms worsen or you have any urgent concerns."
+    ] : [
+        "Thank you for the prescription. When should I take it?",
+        "I'm feeling better after following your advice.",
+        "I have some questions about my treatment.",
+        "Can we schedule a follow-up appointment?",
+        "I'm experiencing some side effects from the medication."
+    ];
+    
+    const template = templates[Math.floor(Math.random() * templates.length)];
+    document.getElementById('messageInput').value = template;
+}
+
+function insertCommonMessage() {
+    insertTemplate(); // Alias for patients
+}
+
+function selectCommonMessage(msg) {
+    document.getElementById('messageInput').value = msg;
+}
+
+function attachFile() {
+    alert('File attachment feature coming soon');
+}
+
+function attachImage() {
+    attachFile(); // Alias for patients
+}
+
+function insertPrescription() {
+    if (userType !== 'doctor') return;
+    
+    const prescriptionTemplate = `📋 PRESCRIPTION
+
+Medication: [Medication Name]
+Dosage: [Amount]
+Frequency: [Times per day]
+Duration: [Treatment period]
+
+Instructions: [Special instructions]
+
+Please take this to your pharmacy.`;
+    
+    document.getElementById('messageInput').value = prescriptionTemplate;
+}
+
+// Action functions
+function viewPatientRecord() {
+    if (currentRecipientId && userType === 'doctor') {
+        window.open(`../ehr.html?patient_id=${currentRecipientId}`, '_blank');
+    }
+}
+
+function scheduleFollowUp() {
+    if (currentRecipientId && userType === 'doctor') {
+        window.open(`../../appointments/book-appointment.html?patient_id=${currentRecipientId}`, '_blank');
+    }
+}
+
+function requestAppointment() {
+    if (userType === 'patient') {
+        window.open(`../../appointments/book-appointment.html?doctor_id=${currentRecipientId}`, '_blank');
+    }
+}
+
+function requestPrescriptionRefill() {
+    const message = "I would like to request a refill for my prescription.";
+    document.getElementById('messageInput').value = message;
+}
+
+function viewMedicalHistory() {
+    if (userType === 'patient') {
+        window.open(`../medical-history.html`, '_blank');
+    }
+}
+
+function startVideoCall() {
+    alert('Video call feature coming soon');
+}
+
+function requestUrgentConsultation() {
+    const message = "URGENT: I need an urgent consultation regarding my condition.";
+    document.getElementById('messageInput').value = message;
+}
+
+// Utility functions
+function formatTimestamp(timestamp) {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 1) {
+        return 'Today ' + date.toLocaleTimeString('en-US', { 
+            hour: 'numeric', 
+            minute: '2-digit',
+            hour12: true 
+        });
+    } else if (diffDays === 2) {
+        return 'Yesterday ' + date.toLocaleTimeString('en-US', { 
+            hour: 'numeric', 
+            minute: '2-digit',
+            hour12: true 
+        });
+    } else {
+        return date.toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric' 
+        });
+    }
+}
+
+function showError(message) {
+    showErrorMessage(message);
+}
+
+function showErrorMessage(message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-danger alert-dismissible fade show position-fixed';
+    alertDiv.style.top = '20px';
+    alertDiv.style.right = '20px';
+    alertDiv.style.zIndex = '9999';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+// Profile and settings functions
+function showProfile() {
+    sessionStorage.setItem('sahatak_show_profile_on_load', 'true');
+    window.location.href = userType === 'doctor' ? 
+        '../../dashboard/doctor.html' : 
+        '../../dashboard/patient.html';
+}
+
+function showSettings() {
+    sessionStorage.setItem('sahatak_show_settings_on_load', 'true');
+    window.location.href = userType === 'doctor' ? 
+        '../../dashboard/doctor.html' : 
+        '../../dashboard/patient.html';
+}
+
+function logout() {
+    if (typeof AuthGuard !== 'undefined') {
+        AuthGuard.logout();
+    } else {
+        localStorage.clear();
+        window.location.href = '/';
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', async function() {
+    if (typeof AuthGuard !== 'undefined') {
+        const requiredUserType = document.body.getAttribute('data-protect');
+        if (requiredUserType) {
+            AuthGuard.protectPage(requiredUserType);
+        }
+    }
+    
+    // Initialize messaging system
+    await initializeMessaging();
+});

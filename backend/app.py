@@ -72,7 +72,7 @@ CORS(app,
          'https://hmb104.github.io',
          'https://hello-50.github.io'
      ],
-     allow_headers=['Content-Type', 'Authorization', 'Accept-Language', 'X-Requested-With'],
+     allow_headers=['Content-Type', 'Authorization', 'Accept-Language', 'X-Requested-With', 'x-timestamp'],
      methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
      supports_credentials=True,
      max_age=3600)
