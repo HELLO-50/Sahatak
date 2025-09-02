@@ -295,6 +295,10 @@ def login():
         if validate_email(login_identifier):
             auth_logger.info(f"Looking for user with email: {login_identifier.lower()}")
             try:
+                # Test database connection
+                total_users = User.query.count()
+                auth_logger.info(f"Total users in database: {total_users}")
+                
                 user = User.query.filter_by(email=login_identifier.lower()).first()
                 auth_logger.info(f"User found: {user is not None}")
                 if user:
