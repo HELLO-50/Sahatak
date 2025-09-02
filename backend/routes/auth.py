@@ -274,9 +274,9 @@ def register():
 def login():
     """Login user with email or phone"""
     try:
-        app_logger.info(f"Login attempt received from {request.remote_addr}")
+        auth_logger.info(f"Login attempt received from {request.remote_addr}")
         data = request.get_json()
-        app_logger.info(f"Login data: {data}")
+        auth_logger.info(f"Login data: {data}")
         
         # Validate required fields
         login_identifier = data.get('login_identifier', '').strip()  # Can be email or phone
@@ -309,9 +309,9 @@ def login():
         
         # Debug logging
         if not user:
-            app_logger.error(f"Login failed: User not found for {login_identifier}")
+            auth_logger.error(f"Login failed: User not found for {login_identifier}")
         elif not user.check_password(password):
-            app_logger.error(f"Login failed: Password check failed for user {user.id} ({user.email})")
+            auth_logger.error(f"Login failed: Password check failed for user {user.id} ({user.email})")
         
         if not user or not user.check_password(password):
             return APIResponse.unauthorized(
