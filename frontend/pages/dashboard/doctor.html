@@ -37,7 +37,7 @@
                                 <i class="bi bi-person-badge"></i>
                             </div>
                             <div class="user-details">
-                                <h5 class="mb-1" id="user-name">Dr. Sarah Ahmed</h5>
+                                <h5 class="mb-1" id="user-name">Dr. Name</h5>
                                 <span class="badge bg-warning text-dark" id="verification-status">Unverified</span>
                             </div>
                             <!-- Vertical Action Buttons -->
@@ -124,45 +124,8 @@
                                     <i class="bi bi-calendar-day me-2"></i>
                                     Today's Schedule
                                 </h5>
-                                <div class="appointment-card">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div>
-                                            <div class="appointment-time">9:00 AM - 9:30 AM</div>
-                                            <div class="appointment-doctor">Ahmed Mohamed - 28 years</div>
-                                            <div class="appointment-type">Cardiology - Regular checkup</div>
-                                        </div>
-                                        <span class="status-badge status-active">Active Now</span>
-                                    </div>
-                                    <div class="mt-2">
-                                        <button class="btn btn-medical btn-sm me-2">
-                                            <i class="bi bi-camera-video me-1"></i>
-                                            <span id="start-consultation">Start Consultation</span>
-                                        </button>
-                                        <button class="btn btn-outline-medical btn-sm">
-                                            <i class="bi bi-file-person me-1"></i>
-                                            <span id="view-file">View File</span>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="appointment-card">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div>
-                                            <div class="appointment-time">10:00 AM - 10:30 AM</div>
-                                            <div class="appointment-doctor">Fatima Ali - 35 years</div>
-                                            <div class="appointment-type">General consultation - New symptoms</div>
-                                        </div>
-                                        <span class="status-badge status-pending">Upcoming</span>
-                                    </div>
-                                </div>
-                                <div class="appointment-card">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div>
-                                            <div class="appointment-time">11:00 AM - 11:30 AM</div>
-                                            <div class="appointment-doctor">Mohamed Hassan - 42 years</div>
-                                            <div class="appointment-type">Follow-up treatment - Blood pressure</div>
-                                        </div>
-                                        <span class="status-badge status-pending">Upcoming</span>
-                                    </div>
+                                <div id="appointments-container">
+                                    <!-- Appointments will be loaded dynamically -->
                                 </div>
                                 <div class="text-center mt-3">
                                     <button class="btn btn-outline-medical" onclick="viewFullSchedule()">
@@ -180,41 +143,8 @@
                                     <i class="bi bi-graph-up me-2"></i>
                                     Quick Statistics
                                 </h5>
-                                <div class="activity-item">
-                                    <div class="activity-icon">
-                                        <i class="bi bi-calendar-day"></i>
-                                    </div>
-                                    <div class="activity-content">
-                                        <div class="activity-title" id="stat-appointments-today">Today's Appointments</div>
-                                        <div class="activity-time">8 appointments</div>
-                                    </div>
-                                </div>
-                                <div class="activity-item">
-                                    <div class="activity-icon">
-                                        <i class="bi bi-check-circle"></i>
-                                    </div>
-                                    <div class="activity-content">
-                                        <div class="activity-title" id="stat-consultations">Completed Consultations</div>
-                                        <div class="activity-time">156 consultations</div>
-                                    </div>
-                                </div>
-                                <div class="activity-item">
-                                    <div class="activity-icon">
-                                        <i class="bi bi-star-fill"></i>
-                                    </div>
-                                    <div class="activity-content">
-                                        <div class="activity-title" id="stat-rating">Doctor Rating</div>
-                                        <div class="activity-time">4.8/5.0</div>
-                                    </div>
-                                </div>
-                                <div class="activity-item">
-                                    <div class="activity-icon">
-                                        <i class="bi bi-people"></i>
-                                    </div>
-                                    <div class="activity-content">
-                                        <div class="activity-title" id="new-patients-week">New patients this week</div>
-                                        <div class="activity-time">5 patients</div>
-                                    </div>
+                                <div id="doctor-stats-container">
+                                    <!-- Doctor statistics will be loaded dynamically -->
                                 </div>
                             </div>
                         </div>
@@ -229,31 +159,8 @@
                                     <i class="bi bi-hourglass-split me-2"></i>
                                     Patients Waiting for Response
                                 </h5>
-                                <div class="appointment-card">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <div class="appointment-doctor">Saad Al-Ahmad</div>
-                                            <div class="appointment-type">Urgent question - Chest pain</div>
-                                            <div class="text-muted small">15 minutes ago</div>
-                                        </div>
-                                        <button class="btn btn-medical btn-sm">
-                                            <i class="bi bi-reply"></i>
-                                            <span id="reply">Reply</span>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="appointment-card">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <div class="appointment-doctor">Nour Khalid</div>
-                                            <div class="appointment-type">Question about prescription</div>
-                                            <div class="text-muted small">45 minutes ago</div>
-                                        </div>
-                                        <button class="btn btn-medical btn-sm">
-                                            <i class="bi bi-reply"></i>
-                                            <span id="reply-2">Reply</span>
-                                        </button>
-                                    </div>
+                                <div id="waiting-patients-container">
+                                    <!-- Waiting patients will be loaded dynamically -->
                                 </div>
                                 <div class="text-center mt-3">
                                     <button class="btn btn-outline-medical" onclick="viewAllMessages()">
@@ -271,32 +178,8 @@
                                     <i class="bi bi-activity me-2"></i>
                                     Recent Activity
                                 </h5>
-                                <div class="activity-item">
-                                    <div class="activity-icon">
-                                        <i class="bi bi-prescription2"></i>
-                                    </div>
-                                    <div class="activity-content">
-                                        <div class="activity-title">New prescription for Ahmed Mohamed</div>
-                                        <div class="activity-time">30 minutes ago</div>
-                                    </div>
-                                </div>
-                                <div class="activity-item">
-                                    <div class="activity-icon">
-                                        <i class="bi bi-chat-square-text"></i>
-                                    </div>
-                                    <div class="activity-content">
-                                        <div class="activity-title">New message from Fatima Ali</div>
-                                        <div class="activity-time">1 hour ago</div>
-                                    </div>
-                                </div>
-                                <div class="activity-item">
-                                    <div class="activity-icon">
-                                        <i class="bi bi-file-earmark-medical"></i>
-                                    </div>
-                                    <div class="activity-content">
-                                        <div class="activity-title">New medical report uploaded</div>
-                                        <div class="activity-time">2 hours ago</div>
-                                    </div>
+                                <div id="recent-activity-container">
+                                    <!-- Recent activity will be loaded dynamically -->
                                 </div>
                                 <div class="text-center mt-3">
                                     <button class="btn btn-outline-medical" onclick="viewAllActivity()">
@@ -799,6 +682,9 @@
     <!-- Dashboard Translations -->
     <script src="../../assets/js/components/dashboard-translations.js"></script>
     
+    <!-- Dashboard JavaScript -->
+    <script src="../../assets/js/components/dashboard.js"></script>
+    
     <!-- Doctor Dashboard JavaScript -->
     <script>
         // Doctor dashboard specific functions
@@ -1156,29 +1042,6 @@
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('Doctor dashboard initializing...');
             await DashboardTranslations.initializeDashboard('doctor');
-            
-            // Load user data and update verification status
-            const user = JSON.parse(localStorage.getItem('sahatak_doctor_data') || '{}');
-            updateVerificationStatus(user);
-            
-            // Add file upload event listeners
-            document.getElementById('profileLicenseDoc')?.addEventListener('change', (e) => handleProfileFileUpload(e, 'license-upload-status'));
-            document.getElementById('profileDegreeDoc')?.addEventListener('change', (e) => handleProfileFileUpload(e, 'degree-upload-status'));
-            document.getElementById('profileIdDoc')?.addEventListener('change', (e) => handleProfileFileUpload(e, 'id-upload-status'));
-            document.getElementById('profileOtherDocs')?.addEventListener('change', (e) => handleProfileFileUpload(e, 'other-upload-status'));
-            
-            // Check if we should show profile or settings (when redirected from other pages)
-            if (sessionStorage.getItem('sahatak_show_profile_on_load') === 'true') {
-                sessionStorage.removeItem('sahatak_show_profile_on_load');
-                setTimeout(() => {
-                    showProfile();
-                }, 500);
-            } else if (sessionStorage.getItem('sahatak_show_settings_on_load') === 'true') {
-                sessionStorage.removeItem('sahatak_show_settings_on_load');
-                setTimeout(() => {
-                    showSettings();
-                }, 500);
-            }
         });
     </script>
 </body>
