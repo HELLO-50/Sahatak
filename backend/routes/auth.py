@@ -294,7 +294,7 @@ def login():
             user = User.query.filter_by(email=login_identifier.lower()).first()
         
         # If not found by email, try to find by phone
-        if not user and validate_phone(login_identifier):
+        if not user and validate_phone(login_identifier)['valid']:
             # Search in patient profiles
             patient_user = User.query.join(Patient).filter(Patient.phone == login_identifier).first()
             if patient_user:
