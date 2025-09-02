@@ -75,6 +75,7 @@ CORS(app,
      allow_headers=['Content-Type', 'Authorization', 'Accept-Language', 'X-Requested-With', 'x-timestamp'],
      methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
      supports_credentials=True,
+     expose_headers=['Set-Cookie'],
      max_age=3600)
 
 # Import models after db initialization
