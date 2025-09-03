@@ -880,10 +880,9 @@
         }
 
         function showVerificationRequiredModal() {
-            // Create a simple alert for now - could be enhanced with a proper modal
-            const currentLang = LanguageManager.getLanguage() || 'en';
-            const message = currentLang === 'ar' ? 
-                'يجب التحقق من حسابك أولاً للوصول إلى هذه الميزة. يرجى إكمال ملفك الشخصي وانتظار موافقة الإدارة.' :
+            // Use translation system for verification required message
+            const t = LanguageManager.getTranslations();
+            const message = t?.dashboard?.doctor?.verification_notice?.verification_required_action ||
                 'Your account must be verified first to access this feature. Please complete your profile and wait for admin approval.';
             
             alert(message);

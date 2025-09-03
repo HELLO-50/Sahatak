@@ -741,6 +741,12 @@
         "verified": "Verified",
         "unverified": "Unverified"
       },
+      "verification_notice": {
+        "title": "Account Verification Required",
+        "message": "Your doctor account needs to be verified before you can access patient consultations and manage appointments. Please complete your profile and wait for admin approval.",
+        "complete_profile": "Complete Profile",
+        "verification_required_action": "Your account must be verified first to access this feature. Please complete your profile and wait for admin approval."
+      },
       "profile": {
         "title": "Doctor Profile",
         "close": "Close",
