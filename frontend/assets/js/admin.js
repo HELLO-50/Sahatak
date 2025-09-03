@@ -885,7 +885,7 @@ const AdminDashboard = {
     async loadAdminUsers() {
         try {
             console.log('Loading admin users...');
-            const response = await this.makeRequest('/admin/users?user_type=admin');
+            const response = await AdminAuth.makeRequest('/admin/users?user_type=admin');
             const data = await response.json();
             
             console.log('Admin users data received:', data);
@@ -977,7 +977,7 @@ const AdminDashboard = {
         }
 
         try {
-            const response = await this.makeRequest(`/admin/users/${adminId}/change-password`, {
+            const response = await AdminAuth.makeRequest(`/admin/users/${adminId}/change-password`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ new_password: newPassword })
@@ -1002,7 +1002,7 @@ const AdminDashboard = {
         }
 
         try {
-            const response = await this.makeRequest(`/admin/users/${adminId}`, {
+            const response = await AdminAuth.makeRequest(`/admin/users/${adminId}`, {
                 method: 'DELETE'
             });
             const data = await response.json();
@@ -1022,7 +1022,7 @@ const AdminDashboard = {
     // Toggle admin status (activate/deactivate)
     async toggleAdminStatus(adminId) {
         try {
-            const response = await this.makeRequest(`/admin/users/${adminId}/toggle-status`, {
+            const response = await AdminAuth.makeRequest(`/admin/users/${adminId}/toggle-status`, {
                 method: 'PUT'
             });
             const data = await response.json();
