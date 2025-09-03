@@ -70,7 +70,7 @@
                                 <i class="bi bi-person-badge"></i>
                             </div>
                             <div class="user-details">
-                                <h5 class="mb-1" id="user-name">Dr. Sarah Ahmed</h5>
+                                <h5 class="mb-1" id="user-name">Loading...</h5>
                                 <span class="badge bg-success" id="verification-status">Verified</span>
                             </div>
                             <!-- Vertical Action Buttons -->
@@ -850,7 +850,7 @@
             const user = AuthGuard.getCurrentUser();
             if (user) {
                 // Update user name in header
-                document.getElementById('user-name').textContent = user.full_name || 'Dr. Name';
+                document.getElementById('user-name').textContent = user.full_name || 'Doctor';
                 
                 // Update verification status from database
                 updateVerificationStatus(user);
