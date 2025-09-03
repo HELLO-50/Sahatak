@@ -44,14 +44,6 @@
                             </div>
                             <!-- Vertical Action Buttons -->
                             <div class="action-buttons">
-                                <button class="btn btn-action" onclick="showProfile()" title="Profile">
-                                    <i class="bi bi-person"></i>
-                                    <span id="btn-profile">Profile</span>
-                                </button>
-                                <button class="btn btn-action" onclick="showSettings()" title="Settings">
-                                    <i class="bi bi-gear"></i>
-                                    <span id="btn-settings">Settings</span>
-                                </button>
                                 <button class="btn btn-action btn-logout" onclick="AuthGuard.logout()" title="Logout">
                                     <i class="bi bi-box-arrow-right"></i>
                                     <span id="btn-logout">Logout</span>
@@ -488,16 +480,6 @@
             // Implement unblock logic
         }
         
-        // Profile and Settings handlers
-        function showProfile() {
-            alert('Profile functionality will be implemented. Please use the main dashboard for now.');
-            window.location.href = '../../dashboard/doctor.html';
-        }
-        
-        function showSettings() {
-            alert('Settings functionality will be implemented. Please use the main dashboard for now.');
-            window.location.href = '../../dashboard/doctor.html';
-        }
         
         // Update verification status from database
         function updateVerificationStatus(user) {

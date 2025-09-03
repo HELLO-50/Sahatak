@@ -42,15 +42,7 @@
                                 <span class="badge bg-success" id="verification-status">Verified</span>
                             </div>
                             <div class="action-buttons">
-                                <button class="btn btn-action" onclick="showProfile()" title="Profile">
-                                    <i class="bi bi-person"></i>
-                                    <span>Profile</span>
-                                </button>
-                                <button class="btn btn-action" onclick="showSettings()" title="Settings">
-                                    <i class="bi bi-gear"></i>
-                                    <span>Settings</span>
-                                </button>
-                                <button class="btn btn-action btn-logout" onclick="logout()" title="Logout">
+                                <button class="btn btn-action btn-logout" onclick="AuthGuard.logout()" title="Logout">
                                     <i class="bi bi-box-arrow-right"></i>
                                     <span>Logout</span>
                                 </button>
@@ -197,16 +189,6 @@
             }
         }
         
-        // Profile and Settings handlers
-        function showProfile() {
-            alert('Profile functionality will be implemented. Please use the main dashboard for now.');
-            window.location.href = '../../dashboard/doctor.html';
-        }
-        
-        function showSettings() {
-            alert('Settings functionality will be implemented. Please use the main dashboard for now.');
-            window.location.href = '../../dashboard/doctor.html';
-        }
         
         // Initialize page with user data
         document.addEventListener('DOMContentLoaded', function() {
