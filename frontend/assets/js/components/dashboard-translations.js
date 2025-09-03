@@ -156,6 +156,13 @@ const DashboardTranslations = {
         this.updateElementText('btn-settings', doctor.buttons?.settings || doctor.dropdown?.settings);
         this.updateElementText('btn-logout', doctor.buttons?.logout || doctor.dropdown?.logout);
         
+        // Verification Notice
+        if (doctor.verification_notice) {
+            this.updateElementText('notice-title', doctor.verification_notice.title);
+            this.updateElementText('notice-message', doctor.verification_notice.message);
+            this.updateElementText('complete-profile', doctor.verification_notice.complete_profile);
+        }
+        
         // Dropdown menu (legacy)
         this.updateElementText('dropdown-profile', doctor.dropdown?.profile);
         this.updateElementText('dropdown-settings', doctor.dropdown?.settings);
