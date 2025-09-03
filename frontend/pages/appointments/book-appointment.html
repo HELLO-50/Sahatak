@@ -497,24 +497,53 @@
                 }
                 
                 // Load user name if available - try multiple data sources
+                console.log('Loading user data...');
+                
                 // First try AuthGuard for real-time data
                 const authUser = AuthGuard.getCurrentUser();
+                console.log('AuthGuard user:', authUser);
+                
                 if (authUser && authUser.full_name) {
+                    console.log('Using AuthGuard full_name:', authUser.full_name);
                     document.getElementById('user-name').textContent = authUser.full_name;
+                } else if (authUser && authUser.name) {
+                    // Try 'name' field as alternative
+                    console.log('Using AuthGuard name:', authUser.name);
+                    document.getElementById('user-name').textContent = authUser.name;
                 } else {
-                    // Fallback to localStorage data
-                    const userData = JSON.parse(localStorage.getItem('sahatak_user_data') || '{}');
-                    if (userData.full_name) {
-                        document.getElementById('user-name').textContent = userData.full_name;
-                    } else {
-                        // Try patient-specific localStorage key
-                        const patientData = JSON.parse(localStorage.getItem('sahatak_patient_data') || '{}');
-                        if (patientData.full_name) {
-                            document.getElementById('user-name').textContent = patientData.full_name;
-                        } else {
-                            // Default fallback
-                            document.getElementById('user-name').textContent = 'Patient';
+                    // Try different localStorage keys used across the system
+                    const localStorageKeys = [
+                        'sahatak_user_data',
+                        'sahatak_patient_data', 
+                        'userData',
+                        'user',
+                        'currentUser'
+                    ];
+                    
+                    let userName = null;
+                    for (const key of localStorageKeys) {
+                        try {
+                            const data = JSON.parse(localStorage.getItem(key) || '{}');
+                            console.log(`Checking localStorage key '${key}':`, data);
+                            if (data.full_name) {
+                                userName = data.full_name;
+                                console.log(`Found full_name in ${key}:`, userName);
+                                break;
+                            } else if (data.name) {
+                                userName = data.name;
+                                console.log(`Found name in ${key}:`, userName);
+                                break;
+                            }
+                        } catch (e) {
+                            // Skip invalid JSON
                         }
+                    }
+                    
+                    if (userName) {
+                        document.getElementById('user-name').textContent = userName;
+                    } else {
+                        console.log('No user data found, using default');
+                        document.getElementById('user-name').textContent = 'Patient';
                     }
                 }
                 
