@@ -75,15 +75,7 @@
                             </div>
                             <!-- Vertical Action Buttons -->
                             <div class="action-buttons">
-                                <button class="btn btn-action" onclick="showProfile()" title="Profile">
-                                    <i class="bi bi-person"></i>
-                                    <span id="btn-profile">Profile</span>
-                                </button>
-                                <button class="btn btn-action" onclick="showSettings()" title="Settings">
-                                    <i class="bi bi-gear"></i>
-                                    <span id="btn-settings">Settings</span>
-                                </button>
-                                <button class="btn btn-action btn-logout" onclick="logout()" title="Logout">
+                                <button class="btn btn-action btn-logout" onclick="AuthGuard.logout()" title="Logout">
                                     <i class="bi bi-box-arrow-right"></i>
                                     <span id="btn-logout">Logout</span>
                                 </button>
@@ -925,54 +917,6 @@
             });
         });
         
-        // Profile and settings functions - standardized across all doctor pages
-        function showProfile() {
-            // Check if we're on the main dashboard page
-            if (window.location.pathname.includes('dashboard/doctor.html')) {
-                // On dashboard - show profile section directly
-                const profileSection = document.getElementById('profile-section');
-                const settingsSection = document.getElementById('settings-section');
-                
-                if (profileSection && settingsSection) {
-                    settingsSection.style.display = 'none';
-                    profileSection.style.display = profileSection.style.display === 'none' ? 'block' : 'none';
-                    
-                    if (profileSection.style.display === 'block') {
-                        profileSection.scrollIntoView({ behavior: 'smooth' });
-                        loadUserProfile();
-                    }
-                    return;
-                }
-            }
-            
-            // On other pages - redirect to dashboard and show profile
-            sessionStorage.setItem('sahatak_show_profile_on_load', 'true');
-            window.location.href = '../../dashboard/doctor.html';
-        }
-        
-        function showSettings() {
-            // Check if we're on the main dashboard page
-            if (window.location.pathname.includes('dashboard/doctor.html')) {
-                // On dashboard - show settings section directly
-                const settingsSection = document.getElementById('settings-section');
-                const profileSection = document.getElementById('profile-section');
-                
-                if (settingsSection && profileSection) {
-                    profileSection.style.display = 'none';
-                    settingsSection.style.display = settingsSection.style.display === 'none' ? 'block' : 'none';
-                    
-                    if (settingsSection.style.display === 'block') {
-                        settingsSection.scrollIntoView({ behavior: 'smooth' });
-                        loadUserSettings();
-                    }
-                    return;
-                }
-            }
-            
-            // On other pages - redirect to dashboard and show settings
-            sessionStorage.setItem('sahatak_show_settings_on_load', 'true');
-            window.location.href = '../../dashboard/doctor.html';
-        }
         
         // Logout function
         function logout() {
