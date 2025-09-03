@@ -11,9 +11,51 @@ const AppointmentBooking = {
     // Initialize the booking system
     async init() {
         this.initCalendarWidget();
+        await this.loadSpecialties();
         this.loadDoctors();
         this.setupEventListeners();
         this.setMinDate();
+    },
+
+    // Load specialties from API and populate dropdown
+    async loadSpecialties() {
+        try {
+            const response = await ApiHelper.makeRequest('/users/specialties');
+            
+            if (response.success && response.data) {
+                const specialties = response.data.specialties || response.data || [];
+                this.populateSpecialtiesDropdown(specialties);
+            }
+        } catch (error) {
+            console.error('Error loading specialties:', error);
+            // Fallback to basic specialties if API fails
+            this.populateSpecialtiesDropdown([
+                'Internal Medicine',
+                'Pediatrics', 
+                'Cardiology',
+                'Dermatology',
+                'Orthopedics',
+                'Psychiatry',
+                'Gynecology',
+                'Neurology'
+            ]);
+        }
+    },
+
+    // Populate specialties dropdown
+    populateSpecialtiesDropdown(specialties) {
+        const dropdown = document.getElementById('specialty-filter');
+        if (!dropdown) return;
+
+        // Keep the "All Specialties" option and add the loaded specialties
+        dropdown.innerHTML = '<option value="">All Specialties</option>';
+        
+        specialties.forEach(specialty => {
+            const option = document.createElement('option');
+            option.value = specialty;
+            option.textContent = specialty;
+            dropdown.appendChild(option);
+        });
     },
 
 
@@ -91,7 +133,11 @@ const AppointmentBooking = {
             }
         } catch (error) {
             console.error('Error loading doctors:', error);
-            this.showError('خطأ في الاتصال بالخادم');
+            const currentLang = LanguageManager.getLanguage() || 'en';
+            const errorMsg = currentLang === 'ar' ? 
+                'عذراً، لا يمكن تحميل قائمة الأطباء حالياً. يرجى المحاولة لاحقاً.' :
+                'Sorry, cannot load doctors list currently. Please try again later.';
+            this.showError(errorMsg);
         }
     },
 
@@ -421,6 +467,16 @@ const AppointmentBooking = {
 
         } catch (error) {
             console.error('Error confirming booking:', error);
+            
+            // Check if this is an API connection error (e.g., on GitHub Pages)
+            if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                const currentLang = LanguageManager.getLanguage() || 'en';
+                const errorMsg = currentLang === 'ar' ? 
+                    'عذراً، لا يمكن حجز المواعيد حالياً. الخدمة تتطلب اتصال بالخادم.' :
+                    'Sorry, appointment booking is not available currently. This service requires server connection.';
+                this.showError(errorMsg);
+                return;
+            }
             
             // Handle specific API errors
             if (error.message.includes('blocked')) {
