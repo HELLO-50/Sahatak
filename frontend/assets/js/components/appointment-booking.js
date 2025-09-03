@@ -165,7 +165,7 @@ const AppointmentBooking = {
                                 <i class="bi bi-person-circle display-6 text-primary"></i>
                             </div>
                             <div>
-                                <h5 class="card-title mb-1">Dr. ${doctor.user ? doctor.user.full_name : doctor.full_name}</h5>
+                                <h5 class="card-title mb-1">${this.formatDoctorName(doctor.user ? doctor.user.full_name : doctor.full_name)}</h5>
                                 <p class="text-muted small mb-0">${this.getSpecialtyDisplayName(doctor.specialty)}</p>
                                 <div class="rating mt-1">
                                     ${this.renderStars(doctor.rating || 4.5)}
@@ -374,7 +374,7 @@ const AppointmentBooking = {
                     <div class="row">
                         <div class="col-sm-6 mb-3">
                             <strong>Doctor:</strong><br>
-                            Dr. ${doctor.user ? doctor.user.full_name : doctor.full_name}
+                            ${this.formatDoctorName(doctor.user ? doctor.user.full_name : doctor.full_name)}
                         </div>
                         <div class="col-sm-6 mb-3">
                             <strong>Specialty:</strong><br>
@@ -590,6 +590,18 @@ const AppointmentBooking = {
     },
 
     // Helper functions
+    formatDoctorName(fullName) {
+        if (!fullName) return 'Unknown Doctor';
+        
+        // If the name already starts with "Dr." or "Doctor", don't add another prefix
+        if (fullName.toLowerCase().startsWith('dr.') || fullName.toLowerCase().startsWith('doctor ')) {
+            return fullName;
+        }
+        
+        // Otherwise, add "Dr." prefix
+        return `Dr. ${fullName}`;
+    },
+
     getSpecialtyDisplayName(specialty) {
         const specialties = {
             cardiology: 'Cardiology',
