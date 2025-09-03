@@ -17,30 +17,57 @@ appointments_bp = Blueprint('appointments', __name__)
 def get_available_doctors():
     """Get list of available doctors for appointment booking"""
     try:
-        # For now, return a simple test response to see if basic endpoint works
+        # Get query parameters
+        specialty = request.args.get('specialty')
+        page = int(request.args.get('page', 1))
+        per_page = min(int(request.args.get('per_page', 20)), 100)
+        
+        # Base query: verified and active doctors
+        query = Doctor.query.filter_by(is_verified=True).join(User, Doctor.user_id == User.id).filter_by(is_active=True)
+        
+        # Filter by specialty if provided
+        if specialty:
+            query = query.filter(Doctor.specialty.ilike(f'%{specialty}%'))
+        
+        # Get paginated results
+        paginated_doctors = query.order_by(Doctor.id.desc()).paginate(
+            page=page, per_page=per_page, error_out=False
+        )
+        
+        # Format doctor data
+        doctors_data = []
+        for doctor in paginated_doctors.items:
+            try:
+                doctor_data = {
+                    'id': doctor.id,
+                    'user': {
+                        'full_name': doctor.user.full_name
+                    },
+                    'specialty': doctor.specialty,
+                    'years_of_experience': doctor.years_of_experience,
+                    'consultation_fee': doctor.consultation_fee,
+                    'is_volunteer': doctor.consultation_fee == 0,
+                    'is_verified': doctor.is_verified,
+                    'rating': 4.5  # Default rating since we may not have this column
+                }
+                doctors_data.append(doctor_data)
+            except Exception as doc_error:
+                app_logger.error(f"Error formatting doctor {doctor.id}: {str(doc_error)}")
+                continue
+        
         return APIResponse.success(
             data={
-                'doctors': [
-                    {
-                        'id': 1,
-                        'name': 'Test Doctor',
-                        'specialty': 'Internal Medicine',
-                        'experience_years': 5,
-                        'consultation_fee': 100,
-                        'is_volunteer': False,
-                        'is_verified': True
-                    }
-                ],
+                'doctors': doctors_data,
                 'pagination': {
-                    'page': 1,
-                    'per_page': 20,
-                    'total': 1,
-                    'pages': 1,
-                    'has_next': False,
-                    'has_prev': False
+                    'page': page,
+                    'per_page': per_page,
+                    'total': paginated_doctors.total,
+                    'pages': paginated_doctors.pages,
+                    'has_next': paginated_doctors.has_next,
+                    'has_prev': paginated_doctors.has_prev
                 }
             },
-            message='Test doctors retrieved successfully'
+            message='Available doctors retrieved successfully'
         )
         
     except Exception as e:
