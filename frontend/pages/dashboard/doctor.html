@@ -23,6 +23,52 @@
     <link rel="stylesheet" href="../../assets/css/main.css">
     <!-- Dashboard CSS -->
     <link rel="stylesheet" href="../../assets/css/components/dashboard.css">
+    <style>
+        /* Unverified doctor states */
+        .unverified-disabled {
+            opacity: 0.5;
+            cursor: not-allowed !important;
+            pointer-events: none;
+        }
+        
+        .verification-overlay {
+            position: relative;
+        }
+        
+        .verification-overlay::after {
+            content: "🔒 Verification Required";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #dc3545;
+            border: 1px solid #dc3545;
+            z-index: 10;
+            display: none;
+        }
+        
+        .unverified-disabled.verification-overlay::after {
+            display: block;
+        }
+        
+        .verification-notice {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .verification-notice .notice-icon {
+            color: #856404;
+            font-size: 24px;
+        }
+    </style>
 </head>
 <body data-protect="doctor">
     <div class="dashboard-container">
@@ -80,13 +126,35 @@
                 </div>
             </div>
 
+            <!-- Verification Notice (Hidden by default, shown for unverified doctors) -->
+            <div id="verification-notice" class="row" style="display: none;">
+                <div class="col-12">
+                    <div class="verification-notice">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-shield-exclamation notice-icon me-3"></i>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1 text-warning-emphasis" id="notice-title">Account Verification Required</h6>
+                                <p class="mb-0 text-muted" id="notice-message">
+                                    Your doctor account needs to be verified before you can access patient consultations and manage appointments. 
+                                    Please complete your profile and wait for admin approval.
+                                </p>
+                            </div>
+                            <button class="btn btn-outline-warning btn-sm" onclick="showProfile()">
+                                <i class="bi bi-person-check me-1"></i>
+                                <span id="complete-profile">Complete Profile</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="row">
                 <!-- Main Content -->
                 <div class="col-12">
                     <!-- Quick Actions -->
                     <div class="row mb-4">
                         <div class="col-lg-4 col-md-6 mb-3">
-                            <div class="dashboard-card quick-action-card" onclick="openCommunicationHub()">
+                            <div id="communication-card" class="dashboard-card quick-action-card verification-overlay" onclick="handleVerifiedAction('openCommunicationHub')">
                                 <div class="quick-action-icon">
                                     <i class="bi bi-chat-dots"></i>
                                 </div>
@@ -95,7 +163,7 @@
                             </div>
                         </div>
                         <div class="col-lg-4 col-md-6 mb-3">
-                            <div class="dashboard-card quick-action-card" onclick="reviewRecords()">
+                            <div id="records-card" class="dashboard-card quick-action-card verification-overlay" onclick="handleVerifiedAction('reviewRecords')">
                                 <div class="quick-action-icon">
                                     <i class="bi bi-file-medical"></i>
                                 </div>
@@ -104,7 +172,7 @@
                             </div>
                         </div>
                         <div class="col-lg-4 col-md-6 mb-3">
-                            <div class="dashboard-card quick-action-card" onclick="manageAvailability()">
+                            <div id="availability-card" class="dashboard-card quick-action-card verification-overlay" onclick="handleVerifiedAction('manageAvailability')">
                                 <div class="quick-action-icon">
                                     <i class="bi bi-calendar-week"></i>
                                 </div>
@@ -119,7 +187,7 @@
                     <div class="row">
                         <!-- Today's Schedule -->
                         <div class="col-lg-6 mb-4">
-                            <div class="dashboard-card">
+                            <div id="schedule-card" class="dashboard-card verification-overlay">
                                 <h5 id="schedule-title">
                                     <i class="bi bi-calendar-day me-2"></i>
                                     Today's Schedule
@@ -128,7 +196,7 @@
                                     <!-- Appointments will be loaded dynamically -->
                                 </div>
                                 <div class="text-center mt-3">
-                                    <button class="btn btn-outline-medical" onclick="viewFullSchedule()">
+                                    <button class="btn btn-outline-medical" onclick="handleVerifiedAction('viewFullSchedule')">
                                         <span id="view-full-schedule">View Full Schedule</span>
                                         <i class="bi bi-arrow-right ms-1"></i>
                                     </button>
@@ -138,7 +206,7 @@
 
                         <!-- Quick Statistics -->
                         <div class="col-lg-6 mb-4">
-                            <div class="dashboard-card">
+                            <div id="stats-card" class="dashboard-card verification-overlay">
                                 <h5 id="quick-stats-title">
                                     <i class="bi bi-graph-up me-2"></i>
                                     Quick Statistics
@@ -154,7 +222,7 @@
                     <div class="row">
                         <!-- Waiting Patients -->
                         <div class="col-lg-6 mb-4">
-                            <div class="dashboard-card">
+                            <div id="waiting-card" class="dashboard-card verification-overlay">
                                 <h5 id="waiting-title">
                                     <i class="bi bi-hourglass-split me-2"></i>
                                     Patients Waiting for Response
@@ -163,7 +231,7 @@
                                     <!-- Waiting patients will be loaded dynamically -->
                                 </div>
                                 <div class="text-center mt-3">
-                                    <button class="btn btn-outline-medical" onclick="viewAllMessages()">
+                                    <button class="btn btn-outline-medical" onclick="handleVerifiedAction('viewAllMessages')">
                                         <span id="view-all-messages">View All Messages</span>
                                         <i class="bi bi-arrow-right ms-1"></i>
                                     </button>
@@ -173,7 +241,7 @@
 
                         <!-- Recent Activity -->
                         <div class="col-lg-6 mb-4">
-                            <div class="dashboard-card">
+                            <div id="activity-card" class="dashboard-card verification-overlay">
                                 <h5 id="activity-title">
                                     <i class="bi bi-activity me-2"></i>
                                     Recent Activity
@@ -182,7 +250,7 @@
                                     <!-- Recent activity will be loaded dynamically -->
                                 </div>
                                 <div class="text-center mt-3">
-                                    <button class="btn btn-outline-medical" onclick="viewAllActivity()">
+                                    <button class="btn btn-outline-medical" onclick="handleVerifiedAction('viewAllActivity')">
                                         <span id="view-all-activity">View All Activities</span>
                                         <i class="bi bi-arrow-right ms-1"></i>
                                     </button>
@@ -734,15 +802,83 @@
 
         function updateVerificationStatus(user) {
             const statusElement = document.getElementById('verification-status');
-            const isVerified = user.verification_status === 'verified';
+            const isVerified = user.is_verified === true || user.verification_status === 'verified';
             
             if (isVerified) {
                 statusElement.textContent = 'Verified';
                 statusElement.className = 'badge bg-success';
+                // Enable all dashboard functionality
+                enableDashboardActions();
             } else {
                 statusElement.textContent = 'Unverified';
                 statusElement.className = 'badge bg-warning text-dark';
+                // Disable dashboard functionality and show notice
+                disableDashboardActions();
             }
+        }
+
+        function enableDashboardActions() {
+            // Hide verification notice
+            document.getElementById('verification-notice').style.display = 'none';
+            
+            // Enable all action cards
+            const actionCards = [
+                'communication-card', 'records-card', 'availability-card',
+                'schedule-card', 'stats-card', 'waiting-card', 'activity-card'
+            ];
+            
+            actionCards.forEach(cardId => {
+                const card = document.getElementById(cardId);
+                if (card) {
+                    card.classList.remove('unverified-disabled');
+                }
+            });
+        }
+
+        function disableDashboardActions() {
+            // Show verification notice
+            document.getElementById('verification-notice').style.display = 'block';
+            
+            // Disable all action cards
+            const actionCards = [
+                'communication-card', 'records-card', 'availability-card',
+                'schedule-card', 'stats-card', 'waiting-card', 'activity-card'
+            ];
+            
+            actionCards.forEach(cardId => {
+                const card = document.getElementById(cardId);
+                if (card) {
+                    card.classList.add('unverified-disabled');
+                }
+            });
+        }
+
+        function handleVerifiedAction(actionFunction) {
+            const user = AuthGuard.getCurrentUser();
+            const isVerified = user && (user.is_verified === true || user.verification_status === 'verified');
+            
+            if (!isVerified) {
+                // Show verification required message
+                showVerificationRequiredModal();
+                return;
+            }
+            
+            // Execute the action if verified
+            if (typeof window[actionFunction] === 'function') {
+                window[actionFunction]();
+            } else {
+                console.warn(`Function ${actionFunction} not found`);
+            }
+        }
+
+        function showVerificationRequiredModal() {
+            // Create a simple alert for now - could be enhanced with a proper modal
+            const currentLang = LanguageManager.getLanguage() || 'en';
+            const message = currentLang === 'ar' ? 
+                'يجب التحقق من حسابك أولاً للوصول إلى هذه الميزة. يرجى إكمال ملفك الشخصي وانتظار موافقة الإدارة.' :
+                'Your account must be verified first to access this feature. Please complete your profile and wait for admin approval.';
+            
+            alert(message);
         }
 
         function loadUserProfile() {
@@ -1054,10 +1190,40 @@
             } else {
                 // Keep showing "Loading..." if user data is not available
                 console.log('User data not available yet');
+                // For unverified doctors or users without data, disable actions
+                disableDashboardActions();
             }
             
-            // Initialize dashboard data loading
-            if (window.Dashboard && Dashboard.initialize) {
+            // Try to get fresh user data from API
+            try {
+                const response = await ApiHelper.makeRequest('/users/profile');
+                if (response.success && response.user) {
+                    const apiUser = response.user;
+                    
+                    // Update display elements
+                    if (apiUser.full_name) {
+                        document.getElementById('user-name').textContent = apiUser.full_name;
+                    }
+                    
+                    // Update verification status with fresh data
+                    updateVerificationStatus(apiUser);
+                    
+                    // Update localStorage for consistency
+                    localStorage.setItem('currentUser', JSON.stringify(apiUser));
+                }
+            } catch (error) {
+                console.log('Could not fetch fresh user data:', error);
+                // If API call fails, still disable actions for safety
+                if (!user || (!user.is_verified && user.verification_status !== 'verified')) {
+                    disableDashboardActions();
+                }
+            }
+            
+            // Initialize dashboard data loading only if verified
+            const finalUser = AuthGuard.getCurrentUser();
+            const isVerified = finalUser && (finalUser.is_verified === true || finalUser.verification_status === 'verified');
+            
+            if (isVerified && window.Dashboard && Dashboard.initialize) {
                 await Dashboard.initialize();
             }
         });
