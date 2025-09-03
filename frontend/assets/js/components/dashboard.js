@@ -252,7 +252,7 @@ const Dashboard = {
         container.innerHTML = `
             <div class="text-center py-4">
                 <i class="bi bi-calendar-x fs-1 text-muted"></i>
-                <p class="mt-2">No upcoming appointments</p>
+                <p class="mt-2" id="no-upcoming-appointments">No upcoming appointments</p>
                 ${isPatient ? `<button class="btn btn-primary btn-sm" onclick="bookAppointment()">
                     Book Appointment
                 </button>` : ''}
@@ -371,7 +371,7 @@ const Dashboard = {
         container.innerHTML = `
             <div class="text-center py-4">
                 <i class="bi bi-prescription fs-1 text-muted"></i>
-                <p class="mt-2">No active prescriptions</p>
+                <p class="mt-2" id="no-active-prescriptions">No active prescriptions</p>
             </div>
         `;
     },
@@ -405,7 +405,7 @@ const Dashboard = {
         // Add title
         const title = document.createElement('h5');
         title.className = 'mb-3';
-        title.innerHTML = '<i class="bi bi-heart-pulse me-2"></i>Health Summary';
+        title.innerHTML = '<i class="bi bi-heart-pulse me-2"></i><span id="health-summary-title">Health Summary</span>';
         container.appendChild(title);
         
         // Create metrics grid
@@ -594,7 +594,7 @@ const Dashboard = {
         container.innerHTML = `
             <div class="text-center py-4">
                 <i class="bi bi-file-medical fs-1 text-muted"></i>
-                <p class="mt-2">No medical records available</p>
+                <p class="mt-2" id="no-medical-records">No medical records available</p>
             </div>
         `;
     },

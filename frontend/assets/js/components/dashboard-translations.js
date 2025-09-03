@@ -78,6 +78,11 @@ const DashboardTranslations = {
         this.updateElementText('blood-sugar', patient.health_summary.blood_sugar);
         this.updateElementText('weight', patient.health_summary.weight);
         
+        // No data messages
+        this.updateElementText('no-upcoming-appointments', patient.no_data.no_appointments);
+        this.updateElementText('no-active-prescriptions', patient.no_data.no_prescriptions);
+        this.updateElementText('no-medical-records', patient.no_data.no_records);
+        
         // Profile and Settings
         console.log('🔸 About to update patient profile and settings');
         console.log('🔸 patient.profile exists:', !!patient.profile);
