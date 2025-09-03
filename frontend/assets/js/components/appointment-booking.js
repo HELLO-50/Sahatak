@@ -585,10 +585,8 @@ const AppointmentBooking = {
 
     // Filter doctors by specialty
     filterDoctorsBySpecialty(specialty) {
-        // Re-render doctors with filter
-        this.renderDoctorsList(this.doctors.filter(doctor => 
-            !specialty || doctor.specialty.toLowerCase().includes(specialty.toLowerCase())
-        ));
+        // Just reload doctors with the specialty filter - let backend handle filtering
+        this.loadDoctors();
     },
 
     // Helper functions

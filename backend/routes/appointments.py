@@ -23,14 +23,14 @@ def get_available_doctors():
         per_page = min(int(request.args.get('per_page', 20)), 100)  # Max 100 per page
         
         # Base query: verified and active doctors
-        query = Doctor.query.filter_by(is_verified=True).join(User).filter_by(is_active=True)
+        query = Doctor.query.filter_by(is_verified=True).join(User, Doctor.user_id == User.id).filter_by(is_active=True)
         
         # Filter by specialty if provided
         if specialty:
             query = query.filter(Doctor.specialty.ilike(f'%{specialty}%'))
         
-        # Pagination
-        paginated_doctors = query.order_by(Doctor.rating.desc(), Doctor.total_reviews.desc()).paginate(
+        # Pagination - simple ordering by id to avoid missing column issues
+        paginated_doctors = query.order_by(Doctor.id.desc()).paginate(
             page=page,
             per_page=per_page,
             error_out=False
@@ -39,12 +39,19 @@ def get_available_doctors():
         # Format doctor data
         doctors_data = []
         for doctor in paginated_doctors.items:
-            doctor_data = doctor.to_dict()
-            # Add user information
-            doctor_data['user'] = {
-                'full_name': doctor.user.full_name,
-                'email': doctor.user.email if doctor.user.email else None,
-                'language_preference': doctor.user.language_preference
+            doctor_data = {
+                'id': doctor.id,
+                'doctor_id': doctor.doctor_id,
+                'specialty': doctor.specialty,
+                'years_of_experience': doctor.years_of_experience,
+                'consultation_fee': doctor.consultation_fee,
+                'is_volunteer': doctor.consultation_fee == 0,
+                'is_verified': doctor.is_verified,
+                'user': {
+                    'full_name': doctor.user.full_name,
+                    'email': doctor.user.email if doctor.user.email else None,
+                    'language_preference': doctor.user.language_preference
+                }
             }
             doctors_data.append(doctor_data)
         

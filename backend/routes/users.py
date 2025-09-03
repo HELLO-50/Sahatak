@@ -153,7 +153,7 @@ def get_doctors():
         participation_type = request.args.get('participation_type')  # New filter
         
         # Build query
-        query = Doctor.query.filter_by(is_verified=True).join(User).filter_by(is_active=True)
+        query = Doctor.query.filter_by(is_verified=True).join(User, Doctor.user_id == User.id).filter_by(is_active=True)
         
         # Filter by specialty if provided
         if specialty:
@@ -217,7 +217,7 @@ def get_doctors():
 def get_doctor_details(doctor_id):
     """Get detailed information about a specific doctor"""
     try:
-        doctor = Doctor.query.filter_by(id=doctor_id, is_verified=True).join(User).filter_by(is_active=True).first()
+        doctor = Doctor.query.filter_by(id=doctor_id, is_verified=True).join(User, Doctor.user_id == User.id).filter_by(is_active=True).first()
         
         if not doctor:
             return not_found_response("Doctor")
@@ -250,7 +250,7 @@ def get_specialties():
     """Get available medical specialties"""
     try:
         # Get unique specialties from active, verified doctors
-        specialties = db.session.query(Doctor.specialty).join(User).filter(
+        specialties = db.session.query(Doctor.specialty).join(User, Doctor.user_id == User.id).filter(
             Doctor.is_verified == True,
             User.is_active == True
         ).distinct().all()
