@@ -27,8 +27,8 @@ async function initializeMessaging() {
         
         initializeWebSocket();
         
-        if (typeof Logger !== 'undefined') {
-            Logger.info(`${userType} messaging initialized`);
+        if (typeof SahatakLogger !== 'undefined' && SahatakLogger.info) {
+            SahatakLogger.info(`${userType} messaging initialized`);
         }
     } catch (error) {
         console.error('Failed to initialize messaging', error);
