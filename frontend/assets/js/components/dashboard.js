@@ -1165,18 +1165,8 @@ const Dashboard = {
     }
 };
 
-// Initialize dashboard when page loads
-document.addEventListener('DOMContentLoaded', async function() {
-    // Check if we're on a dashboard page
-    if (document.querySelector('.dashboard-container')) {
-        // Wait for API helper to be ready
-        if (typeof ApiHelper !== 'undefined') {
-            await Dashboard.initialize();
-        } else {
-            console.error('ApiHelper not loaded');
-        }
-    }
-});
+// Dashboard initialization is now handled by DashboardTranslations.initializeDashboard()
+// to ensure proper sequencing with translation loading
 
 // Export functions for global use
 window.Dashboard = Dashboard;
