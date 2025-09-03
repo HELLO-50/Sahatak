@@ -1097,13 +1097,13 @@ const AdminDashboard = {
     async loadAdminUsers() {
         try {
             console.log('Loading admin users...');
-            const response = await AdminAuth.makeRequest('/admin/users?user_type=admin');
+            const response = await AdminAuth.apiRequest('/admin/users?user_type=admin');
             const data = await response.json();
             
             console.log('Admin users data received:', data);
             
-            if (data.success && data.users) {
-                this.displayAdminUsersTable(data.users);
+            if (data.success && data.data && data.data.users) {
+                this.displayAdminUsersTable(data.data.users);
             } else {
                 throw new Error(data.message || 'Failed to load admin users');
             }
