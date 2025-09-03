@@ -1159,6 +1159,8 @@
                         // Load section-specific data
                         if (targetId === 'settings') {
                             AdminDashboard.loadAdminUsers();
+                        } else if (targetId === 'verification') {
+                            AdminDashboard.loadPendingVerifications();
                         }
                     }
                 });

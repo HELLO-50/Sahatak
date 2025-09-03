@@ -498,7 +498,7 @@ def get_user_details(user_id):
             status_code=500
         )
 
-@admin_bp.route('/users/<int:user_id>/toggle-status', methods=['POST'])
+@admin_bp.route('/users/<int:user_id>/toggle-status', methods=['POST', 'PUT'])
 @admin_required
 def toggle_user_status(user_id):
     """Ahmed: Toggle user active status"""
@@ -558,6 +558,122 @@ def toggle_user_status(user_id):
         app_logger.error(f"Admin toggle user status error: {str(e)}")
         return APIResponse.error(
             message="Failed to update user status",
+            status_code=500
+        )
+
+@admin_bp.route('/users/<int:user_id>/change-password', methods=['PUT'])
+@admin_required
+def change_user_password(user_id):
+    """Change user password (admin only)"""
+    try:
+        user = User.query.get_or_404(user_id)
+        
+        if not user:
+            return APIResponse.error(
+                message="User not found",
+                status_code=404,
+                error_code="USER_NOT_FOUND"
+            )
+        
+        data = request.get_json()
+        if not data or 'new_password' not in data:
+            return APIResponse.error(
+                message="New password is required",
+                status_code=400,
+                error_code="MISSING_PASSWORD"
+            )
+        
+        new_password = data['new_password'].strip()
+        if len(new_password) < 6:
+            return APIResponse.error(
+                message="Password must be at least 6 characters long",
+                status_code=400,
+                error_code="PASSWORD_TOO_SHORT"
+            )
+        
+        # Update password using the model's method
+        user.set_password(new_password)
+        user.updated_at = datetime.utcnow()
+        db.session.commit()
+        
+        # Log admin action
+        log_user_action(
+            current_user.id,
+            'admin_change_user_password',
+            {
+                'target_user_id': user_id,
+                'target_user_email': user.email,
+                'admin_email': current_user.email
+            }
+        )
+        
+        return APIResponse.success(
+            data={'user_id': user_id},
+            message="Password changed successfully"
+        )
+        
+    except Exception as e:
+        db.session.rollback()
+        app_logger.error(f"Admin change password error: {str(e)}")
+        return APIResponse.error(
+            message="Failed to change password",
+            status_code=500
+        )
+
+@admin_bp.route('/users/<int:user_id>', methods=['DELETE'])
+@admin_required
+def delete_user(user_id):
+    """Delete user (admin only) - Use with extreme caution"""
+    try:
+        user = User.query.get_or_404(user_id)
+        
+        if not user:
+            return APIResponse.error(
+                message="User not found",
+                status_code=404,
+                error_code="USER_NOT_FOUND"
+            )
+        
+        # Prevent admin from deleting themselves
+        if user.id == current_user.id:
+            return APIResponse.error(
+                message="Cannot delete your own account",
+                status_code=400,
+                error_code="CANNOT_DELETE_SELF"
+            )
+        
+        # Store user info for logging before deletion
+        deleted_user_info = {
+            'user_id': user.id,
+            'email': user.email,
+            'full_name': user.full_name,
+            'user_type': user.user_type
+        }
+        
+        # Delete user (this will cascade to related records)
+        db.session.delete(user)
+        db.session.commit()
+        
+        # Log admin action
+        log_user_action(
+            current_user.id,
+            'admin_delete_user',
+            {
+                'deleted_user': deleted_user_info,
+                'admin_email': current_user.email
+            }
+        )
+        
+        return APIResponse.success(
+            data={'deleted_user_id': user_id},
+            message=f"User {deleted_user_info['full_name']} deleted successfully"
+        )
+        
+    except Exception as e:
+        db.session.rollback()
+        app_logger.error(f"Admin delete user error: {str(e)}")
+        return APIResponse.error(
+            message="Failed to delete user",
             status_code=500
         )
 

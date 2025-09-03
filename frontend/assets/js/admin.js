@@ -1043,6 +1043,150 @@ const AdminDashboard = {
     viewAdminDetails(adminId) {
         // For now, just show a simple alert - can be enhanced with a modal later
         alert(`Admin details for ID: ${adminId}\n(This can be enhanced with a detailed modal)`);
+    },
+
+    // Load pending doctor verifications
+    async loadPendingVerifications() {
+        try {
+            console.log('Loading pending verifications...');
+            const response = await AdminAuth.makeRequest('/admin/doctors/pending-verification');
+            const data = await response.json();
+            
+            console.log('Pending verifications data received:', data);
+            
+            if (data.success && data.data && data.data.pending_doctors) {
+                this.displayPendingVerifications(data.data.pending_doctors);
+            } else {
+                throw new Error(data.message || 'Failed to load pending verifications');
+            }
+        } catch (error) {
+            console.error('Failed to load pending verifications:', error);
+            this.showNotification('Failed to load pending verifications', 'error');
+        }
+    },
+
+    // Display pending verifications in table
+    displayPendingVerifications(pendingDoctors) {
+        const tbody = document.getElementById('pending-verifications');
+        if (!tbody) return;
+        
+        if (!pendingDoctors || pendingDoctors.length === 0) {
+            tbody.innerHTML = `
+                <div class="col-12 text-center py-4">
+                    <i class="bi bi-check-circle text-muted fs-1"></i>
+                    <p class="text-muted mt-2">No doctors pending verification</p>
+                </div>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = pendingDoctors.map(doctor => `
+            <div class="verification-card mb-3">
+                <div class="card">
+                    <div class="row g-0 align-items-center p-3">
+                        <div class="col-md-8">
+                            <h6 class="mb-1">${doctor.name || 'Unknown Doctor'}</h6>
+                            <p class="text-muted mb-1">
+                                <i class="bi bi-envelope me-1"></i>${doctor.email || 'No email'} | 
+                                <i class="bi bi-stethoscope me-1"></i>${doctor.specialty || 'No specialty'} | 
+                                <i class="bi bi-award me-1"></i>${doctor.years_of_experience || 0} years experience
+                            </p>
+                            <p class="text-muted mb-1">
+                                <i class="bi bi-card-text me-1"></i>License: ${doctor.license_number || 'Not specified'}
+                            </p>
+                            <p class="text-muted small mb-0">
+                                <i class="bi bi-clock me-1"></i>Submitted: 
+                                <span class="text-muted">${this.formatDate(doctor.submitted_at)}</span>
+                                | <span class="badge bg-info">${doctor.days_waiting} days waiting</span>
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="d-flex flex-column gap-2">
+                                <button class="btn btn-success btn-sm" onclick="AdminDashboard.approveDoctor(${doctor.id})" title="Approve">
+                                    <i class="bi bi-check me-1"></i>Approve
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="AdminDashboard.rejectDoctor(${doctor.id})" title="Reject">
+                                    <i class="bi bi-x me-1"></i>Reject
+                                </button>
+                                <button class="btn btn-outline-info btn-sm" onclick="AdminDashboard.viewDoctorDetails(${doctor.id})" title="View Details">
+                                    <i class="bi bi-eye me-1"></i>Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    // Helper to format date
+    formatDate(dateString) {
+        try {
+            return new Date(dateString).toLocaleDateString();
+        } catch {
+            return 'Unknown';
+        }
+    },
+
+    // Approve doctor
+    async approveDoctor(doctorId) {
+        if (!confirm('Are you sure you want to approve this doctor?')) return;
+
+        try {
+            const response = await AdminAuth.makeRequest(`/admin/doctors/${doctorId}/verify`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    approved: true,
+                    notes: 'Approved by admin'
+                })
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                this.showNotification('Doctor approved successfully', 'success');
+                this.loadPendingVerifications(); // Refresh the list
+            } else {
+                throw new Error(data.message || 'Failed to approve doctor');
+            }
+        } catch (error) {
+            console.error('Approve doctor error:', error);
+            this.showNotification('Failed to approve doctor', 'error');
+        }
+    },
+
+    // Reject doctor
+    async rejectDoctor(doctorId) {
+        const reason = prompt('Enter reason for rejection (optional):');
+        if (reason === null) return; // User cancelled
+
+        try {
+            const response = await AdminAuth.makeRequest(`/admin/doctors/${doctorId}/verify`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    approved: false,
+                    notes: reason || 'Rejected by admin'
+                })
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                this.showNotification('Doctor rejected successfully', 'success');
+                this.loadPendingVerifications(); // Refresh the list
+            } else {
+                throw new Error(data.message || 'Failed to reject doctor');
+            }
+        } catch (error) {
+            console.error('Reject doctor error:', error);
+            this.showNotification('Failed to reject doctor', 'error');
+        }
+    },
+
+    // View doctor details
+    viewDoctorDetails(doctorId) {
+        // For now, just show a simple alert - can be enhanced with a modal later
+        alert(`Doctor verification details for ID: ${doctorId}\n(This can be enhanced with a detailed modal)`);
     }
 };
 
