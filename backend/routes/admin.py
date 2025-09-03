@@ -292,6 +292,10 @@ def get_users():
             joinedload(User.doctor_profile)
         )
         
+        # Exclude admin users from User Management unless specifically requested
+        if user_type != 'admin':
+            query = query.filter(User.user_type != 'admin')
+        
         # Log total count before filters
         total_before_filters = query.count()
         app_logger.info(f"Total users before filters: {total_before_filters}")
