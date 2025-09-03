@@ -249,22 +249,18 @@ def get_doctor_details(doctor_id):
 def get_specialties():
     """Get available medical specialties"""
     try:
-        # For now, return test specialties to see if basic endpoint works
-        test_specialties = [
-            'Internal Medicine',
-            'Pediatrics',
-            'Cardiology',
-            'Dermatology',
-            'Orthopedics',
-            'Psychiatry',
-            'Gynecology',
-            'Neurology'
-        ]
+        # Get unique specialties from active, verified doctors
+        specialties = db.session.query(Doctor.specialty).join(User, Doctor.user_id == User.id).filter(
+            Doctor.is_verified == True,
+            User.is_active == True
+        ).distinct().all()
+        
+        specialty_list = [specialty[0] for specialty in specialties if specialty[0]]
         
         return jsonify({
             'success': True,
             'data': {
-                'specialties': test_specialties
+                'specialties': specialty_list
             }
         }), 200
         
