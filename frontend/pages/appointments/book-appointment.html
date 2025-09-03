@@ -39,7 +39,7 @@
                                 <i class="bi bi-person-fill"></i>
                             </div>
                             <div class="user-details">
-                                <h5 class="mb-1" id="user-name">Patient</h5>
+                                <h5 class="mb-1" id="user-name">Loading...</h5>
                             </div>
                             <!-- Vertical Action Buttons -->
                             <div class="action-buttons">
@@ -496,10 +496,26 @@
                     langBtn.textContent = currentLang === 'ar' ? 'English' : 'العربية';
                 }
                 
-                // Load user name if available
-                const userData = JSON.parse(localStorage.getItem('sahatak_user_data') || '{}');
-                if (userData.full_name) {
-                    document.getElementById('user-name').textContent = userData.full_name;
+                // Load user name if available - try multiple data sources
+                // First try AuthGuard for real-time data
+                const authUser = AuthGuard.getCurrentUser();
+                if (authUser && authUser.full_name) {
+                    document.getElementById('user-name').textContent = authUser.full_name;
+                } else {
+                    // Fallback to localStorage data
+                    const userData = JSON.parse(localStorage.getItem('sahatak_user_data') || '{}');
+                    if (userData.full_name) {
+                        document.getElementById('user-name').textContent = userData.full_name;
+                    } else {
+                        // Try patient-specific localStorage key
+                        const patientData = JSON.parse(localStorage.getItem('sahatak_patient_data') || '{}');
+                        if (patientData.full_name) {
+                            document.getElementById('user-name').textContent = patientData.full_name;
+                        } else {
+                            // Default fallback
+                            document.getElementById('user-name').textContent = 'Patient';
+                        }
+                    }
                 }
                 
                 // Initialize appointment booking system
