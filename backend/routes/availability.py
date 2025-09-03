@@ -54,18 +54,19 @@ def update_doctor_schedule():
         if current_user.user_type != 'doctor':
             return APIResponse.forbidden(message='Only doctors can access this endpoint')
         
-        # Use database transaction with row-level locking to prevent concurrent updates
-        db.session.begin()
+        # Check if doctor profile exists before starting transaction
+        if not current_user.doctor_profile:
+            app_logger.error(f"User {current_user.id} does not have a doctor profile")
+            return APIResponse.not_found(message='Doctor profile not found')
         
         # Lock the doctor record to prevent concurrent schedule updates
         doctor = Doctor.query.filter_by(id=current_user.doctor_profile.id).with_for_update().first()
         if not doctor:
-            db.session.rollback()
+            app_logger.error(f"Doctor profile {current_user.doctor_profile.id} not found in database")
             return APIResponse.not_found(message='Doctor profile not found')
         
         data = request.get_json()
         if not data or 'schedule' not in data:
-            db.session.rollback()
             return APIResponse.validation_error(
                 field='schedule',
                 message='Schedule data is required'
@@ -84,7 +85,6 @@ def update_doctor_schedule():
                     
                     # Validate required fields
                     if not isinstance(day_schedule, dict):
-                        db.session.rollback()
                         return APIResponse.validation_error(
                             field=f'schedule.{day}',
                             message=f'Invalid format for {day} schedule'
@@ -96,7 +96,6 @@ def update_doctor_schedule():
                     enabled = day_schedule.get('enabled', True)
                     
                     if not validate_time(start_time)['valid'] or not validate_time(end_time)['valid']:
-                        db.session.rollback()
                         return APIResponse.validation_error(
                             field=f'schedule.{day}',
                             message=f'Invalid time format for {day}. Use HH:MM format'
@@ -107,7 +106,6 @@ def update_doctor_schedule():
                     end_datetime = datetime.strptime(end_time, '%H:%M')
                     
                     if end_datetime <= start_datetime:
-                        db.session.rollback()
                         return APIResponse.validation_error(
                             field=f'schedule.{day}',
                             message=f'End time must be after start time for {day}'
@@ -149,7 +147,8 @@ def update_doctor_schedule():
         except Exception as schedule_error:
             db.session.rollback()
             app_logger.error(f"Error updating doctor schedule: {str(schedule_error)}")
-            return APIResponse.server_error(message='Failed to update schedule')
+            app_logger.error(f"Schedule data received: {schedule}")
+            return APIResponse.internal_error(message=f'Failed to update schedule: {str(schedule_error)}')
         
         # Log the action
         log_user_action(
