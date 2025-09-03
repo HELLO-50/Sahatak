@@ -491,9 +491,34 @@
             // Implement unblock logic
         }
         
+        // Update verification status from database
+        function updateVerificationStatus(user) {
+            const statusElement = document.getElementById('verification-status');
+            const isVerified = user.verification_status === 'verified';
+            
+            if (isVerified) {
+                statusElement.textContent = 'Verified';
+                statusElement.className = 'badge bg-success';
+            } else {
+                statusElement.textContent = 'Unverified';
+                statusElement.className = 'badge bg-warning text-dark';
+            }
+        }
+        
         // Initialize availability management when page loads
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('Availability management page initializing...');
+            
+            // Load and update user data including verification status
+            const user = AuthGuard.getCurrentUser();
+            if (user) {
+                // Update user name in header
+                document.getElementById('user-name').textContent = user.full_name || 'Dr. Name';
+                
+                // Update verification status from database
+                updateVerificationStatus(user);
+            }
+            
             await DashboardTranslations.initializeDashboard('availability');
             
             // Initialize AvailabilityManager if it exists
