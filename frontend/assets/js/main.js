@@ -647,7 +647,8 @@ const ApiHelper = {
         try {
             window.SahatakLogger?.debug(`API Request: ${method} ${endpoint}`, {
                 headers: requestOptions.headers,
-                body: options.body ? JSON.parse(options.body) : null
+                body: options.body ? JSON.parse(options.body) : null,
+                cookies: document.cookie // Debug: log current cookies
             });
 
             const response = await fetch(`${this.baseUrl}${endpoint}`, requestOptions);
@@ -846,13 +847,19 @@ async function handleLogin(event) {
             localStorage.setItem('sahatak_user_email', response.data.user.email);
             localStorage.setItem('sahatak_user_id', response.data.user.id);
             localStorage.setItem('sahatak_user_name', response.data.user.full_name);
+            
+            // Debug: Check if session cookie was set
+            console.log('Login successful, checking cookies:', document.cookie);
+            console.log('User data stored:', response.data.user);
         } else {
             console.error('Invalid response structure:', response);
         }
         
-        // Redirect to dashboard
-        const userType = response.data.user.user_type;
-        redirectToDashboard(userType);
+        // Small delay to ensure session is established before redirect
+        setTimeout(() => {
+            const userType = response.data.user.user_type;
+            redirectToDashboard(userType);
+        }, 500);
         
     } catch (error) {
         console.error('Login error:', error);
