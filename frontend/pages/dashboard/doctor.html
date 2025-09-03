@@ -801,17 +801,25 @@
         }
 
         function updateVerificationStatus(user) {
+            console.log('updateVerificationStatus called with user:', user);
+            console.log('user.is_verified:', user.is_verified);
+            console.log('user.verification_status:', user.verification_status);
+            
             const statusElement = document.getElementById('verification-status');
             const isVerified = user.is_verified === true || user.verification_status === 'verified';
+            
+            console.log('Calculated isVerified:', isVerified);
             
             if (isVerified) {
                 statusElement.textContent = 'Verified';
                 statusElement.className = 'badge bg-success';
+                console.log('Setting status to Verified');
                 // Enable all dashboard functionality
                 enableDashboardActions();
             } else {
                 statusElement.textContent = 'Unverified';
                 statusElement.className = 'badge bg-warning text-dark';
+                console.log('Setting status to Unverified');
                 // Disable dashboard functionality and show notice
                 disableDashboardActions();
             }
@@ -1194,9 +1202,9 @@
                 disableDashboardActions();
             }
             
-            // Try to get fresh user data from API
+            // Try to get fresh user data from API with cache-busting
             try {
-                const response = await ApiHelper.makeRequest('/users/profile');
+                const response = await ApiHelper.makeRequest('/users/profile?t=' + Date.now());
                 if (response.success && response.user) {
                     const apiUser = response.user;
                     
@@ -1204,6 +1212,19 @@
                     if (apiUser.full_name) {
                         document.getElementById('user-name').textContent = apiUser.full_name;
                     }
+                    
+                    // Check doctor profile for verification status
+                    let isVerified = false;
+                    if (apiUser.profile && apiUser.profile.is_verified !== undefined) {
+                        // Use profile verification status if available
+                        isVerified = apiUser.profile.is_verified === true;
+                        apiUser.is_verified = isVerified; // Set on user object for consistency
+                    } else if (apiUser.is_verified !== undefined) {
+                        // Fallback to user-level verification
+                        isVerified = apiUser.is_verified === true;
+                    }
+                    
+                    console.log('Fresh API data - is_verified:', isVerified, 'API User:', apiUser);
                     
                     // Update verification status with fresh data
                     updateVerificationStatus(apiUser);
