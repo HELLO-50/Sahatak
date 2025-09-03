@@ -715,21 +715,17 @@
         
         // Initialize page with user data
         document.addEventListener('DOMContentLoaded', function() {
-            // Try to get user data from localStorage first (like doctor.html does)
-            const user = JSON.parse(localStorage.getItem('sahatak_doctor_data') || '{}');
-            
-            if (user.full_name) {
-                // Update user name in header with actual name from database
-                document.getElementById('user-name').textContent = user.full_name;
-                
-                // Update verification status from database
-                updateVerificationStatus(user);
+            // Use AuthGuard first for real user data
+            const authUser = AuthGuard.getCurrentUser();
+            if (authUser && authUser.full_name) {
+                document.getElementById('user-name').textContent = authUser.full_name;
+                updateVerificationStatus(authUser);
             } else {
-                // Fallback to AuthGuard
-                const authUser = AuthGuard.getCurrentUser();
-                if (authUser && authUser.full_name) {
-                    document.getElementById('user-name').textContent = authUser.full_name;
-                    updateVerificationStatus(authUser);
+                // Fallback to localStorage only if AuthGuard fails
+                const user = JSON.parse(localStorage.getItem('sahatak_doctor_data') || '{}');
+                if (user.full_name) {
+                    document.getElementById('user-name').textContent = user.full_name;
+                    updateVerificationStatus(user);
                 } else {
                     // Show default values if no user data available
                     document.getElementById('user-name').textContent = 'Doctor';
