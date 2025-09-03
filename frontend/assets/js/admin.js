@@ -479,7 +479,7 @@ const AdminDashboard = {
                 <td>${new Date(user.created_at).toLocaleDateString()}</td>
                 <td>
                     <div class="dropdown">
-                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Actions
                         </button>
                         <ul class="dropdown-menu">
@@ -492,6 +492,14 @@ const AdminDashboard = {
                 </td>
             </tr>
         `).join('');
+        
+        // Initialize Bootstrap dropdowns for dynamically created content
+        setTimeout(() => {
+            const dropdowns = tbody.querySelectorAll('[data-bs-toggle="dropdown"]');
+            dropdowns.forEach(dropdown => {
+                new bootstrap.Dropdown(dropdown);
+            });
+        }, 100);
     },
     
     // Update users pagination
