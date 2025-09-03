@@ -619,6 +619,11 @@
         "normal": "Normal",
         "ideal": "Ideal"
       },
+      "no_data": {
+        "no_appointments": "No upcoming appointments",
+        "no_prescriptions": "No active prescriptions",
+        "no_records": "No medical records available"
+      },
       "profile": {
         "title": "Patient Profile",
         "close": "Close",

@@ -619,6 +619,11 @@
         "normal": "طبيعي",
         "ideal": "مثالي"
       },
+      "no_data": {
+        "no_appointments": "لا توجد مواعيد قادمة",
+        "no_prescriptions": "لا توجد وصفات طبية نشطة",
+        "no_records": "لا توجد سجلات طبية متاحة"
+      },
       "profile": {
         "title": "ملف المريض الشخصي",
         "close": "إغلاق",
