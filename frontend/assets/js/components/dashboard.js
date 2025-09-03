@@ -25,9 +25,9 @@ const Dashboard = {
         try {
             console.log('Initializing dashboard with real data...');
             
-            // Get user type from auth guard or local storage
-            const userData = JSON.parse(localStorage.getItem('sahatak_user') || '{}');
-            this.userType = userData.user_type || 'patient';
+            // Get user type from local storage (stored separately)
+            this.userType = localStorage.getItem('sahatak_user_type') || 'patient';
+            console.log('User type from localStorage:', this.userType);
             
             // Load user profile first
             await this.loadUserProfile();
