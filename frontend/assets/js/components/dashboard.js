@@ -70,11 +70,21 @@ const Dashboard = {
      * Initialize doctor-specific dashboard
      */
     async initializeDoctorDashboard() {
-        await Promise.all([
-            this.loadAppointments(),
-            this.loadPatients(),
-            this.loadDoctorStats()
-        ]);
+        try {
+            await Promise.all([
+                this.loadAppointments(),
+                this.loadPatients(),
+                this.loadDoctorStats(),
+                this.loadWaitingPatients(),
+                this.loadRecentActivity()
+            ]);
+            
+            // Update doctor statistics after loading data
+            this.updateDoctorStatistics();
+        } catch (error) {
+            console.error('Error initializing doctor dashboard:', error);
+            this.showError('Failed to load some dashboard data');
+        }
     },
 
     /**
@@ -593,11 +603,20 @@ const Dashboard = {
             const response = await ApiHelper.makeRequest('/appointments/patients');
             
             if (response.data) {
-                this.cache.patients = response.data;
-                this.displayPatients(response.data);
+                // Ensure data is always an array
+                const patients = Array.isArray(response.data) ? response.data : 
+                               (response.data.patients && Array.isArray(response.data.patients)) ? response.data.patients : [];
+                
+                this.cache.patients = patients;
+                this.displayPatients(patients);
+            } else {
+                this.cache.patients = [];
+                this.displayNoPatients();
             }
         } catch (error) {
             console.error('Error loading patients:', error);
+            this.cache.patients = [];
+            this.displayNoPatients();
         }
     },
 
@@ -608,8 +627,93 @@ const Dashboard = {
         const container = document.getElementById('patients-container');
         if (!container) return;
         
-        // Implementation for doctor's patient list
-        // This would show recent patients, upcoming consultations, etc.
+        // Ensure patients is an array
+        const patientsArray = Array.isArray(patients) ? patients : [];
+        
+        if (!patientsArray || patientsArray.length === 0) {
+            this.displayNoPatients();
+            return;
+        }
+        
+        container.innerHTML = '';
+        
+        // Add title
+        const title = document.createElement('h5');
+        title.className = 'mb-3';
+        title.innerHTML = '<i class="bi bi-people me-2"></i>Recent Patients';
+        container.appendChild(title);
+        
+        // Create patients list
+        const list = document.createElement('div');
+        list.className = 'patients-list';
+        
+        // Display recent patients
+        patientsArray.slice(0, 3).forEach(patient => {
+            if (patient && patient.id) {
+                const patientCard = this.createPatientCard(patient);
+                list.appendChild(patientCard);
+            }
+        });
+        
+        container.appendChild(list);
+        
+        // Add view all button if more than 3
+        if (patientsArray.length > 3) {
+            const viewAllBtn = document.createElement('button');
+            viewAllBtn.className = 'btn btn-outline-primary btn-sm w-100 mt-3';
+            viewAllBtn.textContent = `View All ${patientsArray.length} Patients`;
+            viewAllBtn.onclick = () => window.location.href = '../medical/doctor/patient-list.html';
+            container.appendChild(viewAllBtn);
+        }
+    },
+
+    /**
+     * Create patient card element
+     */
+    createPatientCard(patient) {
+        const card = document.createElement('div');
+        card.className = 'patient-item mb-3 p-3 border rounded';
+        
+        const lastAppointment = patient.last_appointment_date ? 
+            new Date(patient.last_appointment_date).toLocaleDateString() : 'No recent appointment';
+        
+        card.innerHTML = `
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h6 class="mb-1">${patient.full_name || 'Patient'}</h6>
+                    <p class="text-muted small mb-1">ID: ${patient.patient_id || patient.id}</p>
+                    <p class="mb-0 small">
+                        <i class="bi bi-calendar me-1"></i>Last visit: ${lastAppointment}
+                    </p>
+                    ${patient.age ? `<p class="text-muted small mt-1 mb-0">Age: ${patient.age}</p>` : ''}
+                </div>
+                <div class="text-end">
+                    <button class="btn btn-outline-primary btn-sm" onclick="viewPatientRecord('${patient.id}')">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        return card;
+    },
+
+    /**
+     * Display no patients message
+     */
+    displayNoPatients() {
+        const container = document.getElementById('patients-container');
+        if (!container) return;
+        
+        container.innerHTML = `
+            <div class="text-center py-4">
+                <i class="bi bi-people fs-1 text-muted"></i>
+                <p class="mt-2">No patients yet</p>
+                <button class="btn btn-primary btn-sm" onclick="openCommunicationHub()">
+                    <i class="bi bi-plus me-1"></i>Get Started
+                </button>
+            </div>
+        `;
     },
 
     /**
@@ -622,9 +726,14 @@ const Dashboard = {
             if (response.data) {
                 this.cache.stats = response.data;
                 this.displayDoctorStats(response.data);
+            } else {
+                this.cache.stats = {};
+                this.displayDoctorStats({});
             }
         } catch (error) {
             console.error('Error loading stats:', error);
+            this.cache.stats = {};
+            this.displayDoctorStats({});
         }
     },
 
@@ -802,6 +911,257 @@ const Dashboard = {
         if (appointmentsEl) appointmentsEl.textContent = appointmentsCount;
         if (prescriptionsEl) prescriptionsEl.textContent = prescriptionsCount;
         if (recordsEl) recordsEl.textContent = recordsCount;
+    },
+
+    /**
+     * Update doctor dashboard statistics
+     */
+    updateDoctorStatistics() {
+        if (this.userType !== 'doctor') return;
+        
+        // Update appointment count - ensure appointments is an array
+        const appointments = Array.isArray(this.cache.appointments) ? this.cache.appointments : [];
+        const todayAppointments = appointments.filter(apt => {
+            if (!apt || !apt.appointment_date) return false;
+            const aptDate = new Date(apt.appointment_date);
+            const today = new Date();
+            return aptDate.toDateString() === today.toDateString() && apt.status === 'scheduled';
+        }).length;
+        
+        // Update patients count - ensure patients is an array
+        const patients = Array.isArray(this.cache.patients) ? this.cache.patients : [];
+        const totalPatients = patients.length;
+        
+        // Update stats from backend if available
+        const stats = this.cache.stats || {};
+        
+        // Update DOM elements for doctor dashboard
+        const todayAppointmentsEl = document.getElementById('appointments-today');
+        const totalPatientsEl = document.getElementById('total-patients');
+        const completedConsultationsEl = document.getElementById('consultations-completed');
+        
+        if (todayAppointmentsEl) todayAppointmentsEl.textContent = stats.appointments_today || todayAppointments;
+        if (totalPatientsEl) totalPatientsEl.textContent = stats.total_patients || totalPatients;
+        if (completedConsultationsEl) completedConsultationsEl.textContent = stats.consultations_completed || 0;
+    },
+
+    /**
+     * Load waiting patients (doctor only)
+     */
+    async loadWaitingPatients() {
+        try {
+            const response = await ApiHelper.makeRequest('/appointments/waiting');
+            
+            if (response.data) {
+                // Ensure data is always an array
+                const waitingPatients = Array.isArray(response.data) ? response.data : 
+                                      (response.data.patients && Array.isArray(response.data.patients)) ? response.data.patients : [];
+                
+                this.displayWaitingPatients(waitingPatients);
+            } else {
+                this.displayWaitingPatients([]);
+            }
+        } catch (error) {
+            console.error('Error loading waiting patients:', error);
+            this.displayWaitingPatients([]);
+        }
+    },
+
+    /**
+     * Display waiting patients
+     */
+    displayWaitingPatients(patients) {
+        const container = document.getElementById('waiting-patients-container');
+        if (!container) return;
+        
+        // Ensure patients is an array
+        const patientsArray = Array.isArray(patients) ? patients : [];
+        
+        if (!patientsArray || patientsArray.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-4">
+                    <i class="bi bi-check-circle fs-1 text-success"></i>
+                    <p class="mt-2">No patients waiting</p>
+                    <p class="text-muted small">All caught up!</p>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = '';
+        
+        // Create waiting patients list
+        const list = document.createElement('div');
+        list.className = 'waiting-patients-list';
+        
+        patientsArray.slice(0, 3).forEach(patient => {
+            if (patient && patient.id) {
+                const patientCard = this.createWaitingPatientCard(patient);
+                list.appendChild(patientCard);
+            }
+        });
+        
+        container.appendChild(list);
+    },
+
+    /**
+     * Create waiting patient card
+     */
+    createWaitingPatientCard(patient) {
+        const card = document.createElement('div');
+        card.className = 'waiting-patient-item mb-3 p-3 border rounded border-warning';
+        
+        const waitTime = patient.waiting_since ? 
+            this.calculateWaitTime(patient.waiting_since) : 'Unknown';
+        
+        card.innerHTML = `
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h6 class="mb-1">${patient.full_name || 'Patient'}</h6>
+                    <p class="text-muted small mb-1">${patient.message_type || 'General inquiry'}</p>
+                    <p class="mb-0 small text-warning">
+                        <i class="bi bi-clock me-1"></i>Waiting: ${waitTime}
+                    </p>
+                </div>
+                <div class="text-end">
+                    <button class="btn btn-warning btn-sm" onclick="respondToPatient('${patient.id}')">
+                        <i class="bi bi-reply"></i> Respond
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        return card;
+    },
+
+    /**
+     * Calculate wait time from timestamp
+     */
+    calculateWaitTime(timestamp) {
+        const now = new Date();
+        const waitingSince = new Date(timestamp);
+        const diffMs = now - waitingSince;
+        const diffMinutes = Math.floor(diffMs / (1000 * 60));
+        
+        if (diffMinutes < 60) {
+            return `${diffMinutes}m`;
+        } else if (diffMinutes < 1440) {
+            return `${Math.floor(diffMinutes / 60)}h`;
+        } else {
+            return `${Math.floor(diffMinutes / 1440)}d`;
+        }
+    },
+
+    /**
+     * Load recent activity (doctor only)
+     */
+    async loadRecentActivity() {
+        try {
+            const response = await ApiHelper.makeRequest('/appointments/activity');
+            
+            if (response.data) {
+                // Ensure data is always an array
+                const activities = Array.isArray(response.data) ? response.data : 
+                                 (response.data.activities && Array.isArray(response.data.activities)) ? response.data.activities : [];
+                
+                this.displayRecentActivity(activities);
+            } else {
+                this.displayRecentActivity([]);
+            }
+        } catch (error) {
+            console.error('Error loading recent activity:', error);
+            this.displayRecentActivity([]);
+        }
+    },
+
+    /**
+     * Display recent activity
+     */
+    displayRecentActivity(activities) {
+        const container = document.getElementById('recent-activity-container');
+        if (!container) return;
+        
+        // Ensure activities is an array
+        const activitiesArray = Array.isArray(activities) ? activities : [];
+        
+        if (!activitiesArray || activitiesArray.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-4">
+                    <i class="bi bi-activity fs-1 text-muted"></i>
+                    <p class="mt-2">No recent activity</p>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = '';
+        
+        // Create activity list
+        const list = document.createElement('div');
+        list.className = 'activity-list';
+        
+        activitiesArray.slice(0, 5).forEach(activity => {
+            if (activity && activity.id) {
+                const activityItem = this.createActivityItem(activity);
+                list.appendChild(activityItem);
+            }
+        });
+        
+        container.appendChild(list);
+    },
+
+    /**
+     * Create activity item
+     */
+    createActivityItem(activity) {
+        const item = document.createElement('div');
+        item.className = 'activity-item mb-2 p-2 border-start border-3 border-primary';
+        
+        const timeAgo = activity.created_at ? 
+            this.calculateTimeAgo(activity.created_at) : 'Recently';
+        
+        const activityIcon = this.getActivityIcon(activity.type);
+        
+        item.innerHTML = `
+            <div class="d-flex align-items-start">
+                <i class="${activityIcon} me-2 mt-1"></i>
+                <div class="flex-grow-1">
+                    <p class="mb-1 small">${activity.description || 'Activity occurred'}</p>
+                    <p class="mb-0 text-muted smaller">${timeAgo}</p>
+                </div>
+            </div>
+        `;
+        
+        return item;
+    },
+
+    /**
+     * Get icon for activity type
+     */
+    getActivityIcon(type) {
+        const iconMap = {
+            'appointment': 'bi bi-calendar-check text-primary',
+            'prescription': 'bi bi-prescription2 text-success',
+            'message': 'bi bi-chat-dots text-info',
+            'consultation': 'bi bi-camera-video text-warning',
+            'default': 'bi bi-circle-fill text-secondary'
+        };
+        return iconMap[type] || iconMap.default;
+    },
+
+    /**
+     * Calculate time ago from timestamp
+     */
+    calculateTimeAgo(timestamp) {
+        const now = new Date();
+        const past = new Date(timestamp);
+        const diffMs = now - past;
+        const diffMinutes = Math.floor(diffMs / (1000 * 60));
+        
+        if (diffMinutes < 1) return 'Just now';
+        if (diffMinutes < 60) return `${diffMinutes}m ago`;
+        if (diffMinutes < 1440) return `${Math.floor(diffMinutes / 60)}h ago`;
+        return `${Math.floor(diffMinutes / 1440)}d ago`;
     }
 };
 
@@ -826,4 +1186,30 @@ window.resetSettings = () => {
     if (confirm('Are you sure you want to reload settings?')) {
         Dashboard.loadUserSettings();
     }
+};
+
+// Doctor dashboard specific global functions
+window.viewPatientRecord = (patientId) => {
+    console.log('Viewing patient record:', patientId);
+    window.location.href = `../medical/doctor/patient-record.html?id=${patientId}`;
+};
+
+window.respondToPatient = (patientId) => {
+    console.log('Responding to patient:', patientId);
+    window.location.href = `../medical/doctor/comm-hub.html?patient=${patientId}`;
+};
+
+window.bookAppointment = () => {
+    console.log('Book appointment clicked');
+    window.location.href = '../appointments/book-appointment.html';
+};
+
+window.updateMedicalHistory = () => {
+    console.log('Update medical history clicked');
+    window.location.href = '../medical/medical-history.html';
+};
+
+window.viewRecords = () => {
+    console.log('View records clicked');
+    window.location.href = '../medical/medical-records.html';
 };

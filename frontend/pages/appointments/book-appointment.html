@@ -3,49 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>حجز موعد | صحتك</title>
+    <title id="page-title-head">Book Appointment - Sahatak</title>
     
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%230d47a1' d='m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523.942-.661 2.27.067 3.71L8 15.5l6.533-8.737c.728-1.44.59-2.768.067-3.71C13.486.878 10.4.28 8.717 2.01L8 2.748z'/></svg>">
+    
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    
+    <!-- Bootstrap Icons CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
-    <!-- Arabic Font -->
+    <!-- Arabic Font - Noto Sans Arabic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Custom CSS - using main.css first, then component-specific -->
+    <!-- Main CSS -->
     <link rel="stylesheet" href="../../assets/css/main.css">
+    <!-- Dashboard CSS -->
+    <link rel="stylesheet" href="../../assets/css/components/dashboard.css">
+    <!-- Appointments CSS -->
     <link rel="stylesheet" href="../../assets/css/components/appointments.css">
 </head>
-<body>
-    <!-- Header -->
-    <nav class="navbar navbar-expand-lg bg-primary navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="../../index.html">
-                <i class="bi bi-heart-pulse me-2"></i>
-                صحتك | Sahatak
-            </a>
-            <button class="btn btn-outline-light" onclick="goBack()">
-                <i class="bi bi-arrow-right me-1"></i>
-                العودة
-            </button>
-        </div>
-    </nav>
-
-    <div class="container my-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <!-- Page Header -->
-                <div class="text-center mb-5">
-                    <h1 class="display-6 mb-3">
-                        <i class="bi bi-calendar-plus text-primary me-3"></i>
-                        <span id="page-title">حجز موعد جديد</span>
-                    </h1>
-                    <p class="lead text-muted" id="page-subtitle">اختر الطبيب والوقت المناسب لك</p>
+<body data-protect="patient">
+    <div class="dashboard-container">
+        <div class="container-fluid">
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <div class="row align-items-center">
+                    <!-- Profile Section - Left (Right in RTL) -->
+                    <div class="col-lg-4">
+                        <div class="profile-section">
+                            <div class="user-avatar">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <div class="user-details">
+                                <h5 class="mb-1" id="user-name">Patient</h5>
+                            </div>
+                            <!-- Vertical Action Buttons -->
+                            <div class="action-buttons">
+                                <button class="btn btn-action" onclick="goBackToDashboard()" title="Back to Dashboard">
+                                    <i class="bi bi-arrow-left"></i>
+                                    <span id="btn-back">Back to Dashboard</span>
+                                </button>
+                                <button class="btn btn-action btn-logout" onclick="AuthGuard.logout()" title="Logout">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                    <span id="btn-logout">Logout</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Page Title - Center -->
+                    <div class="col-lg-4 text-center">
+                        <h1 class="dashboard-title" id="page-title">Book Appointment</h1>
+                        <p class="dashboard-subtitle" id="page-subtitle">Schedule a consultation with our doctors</p>
+                    </div>
+                    
+                    <!-- Language Selector - Right (Left in RTL) -->
+                    <div class="col-lg-4 text-end">
+                        <button class="btn btn-outline-medical btn-sm" onclick="showLanguageSelector()">
+                            <i class="bi bi-globe me-1"></i>
+                            <span id="current-lang">English</span>
+                        </button>
+                    </div>
                 </div>
+            </div>
 
-                <!-- Booking Steps -->
-                <div class="card shadow-lg border-0">
-                    <div class="card-body p-4">
+            <!-- Main Content -->
+            <div class="row">
+                <div class="col-12">
+                    <!-- Appointment Booking Form -->
+                    <div class="row justify-content-center">
+                        <div class="col-lg-10">
+                            <!-- Booking Steps Card -->
+                            <div class="dashboard-card">
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-calendar-plus me-2 text-primary"></i>
+                                        <span id="booking-title">Book New Appointment</span>
+                                    </h5>
+                                </div>
                         <!-- Step Indicator -->
                         <div class="row mb-4">
                             <div class="col-12">
@@ -54,13 +93,13 @@
                                 </div>
                                 <div class="row mt-2">
                                     <div class="col-4 text-center">
-                                        <small class="text-primary fw-bold" id="step1-text">1. اختيار الطبيب</small>
+                                        <small class="text-primary fw-bold" id="step1-text">1. Choose Doctor</small>
                                     </div>
                                     <div class="col-4 text-center">
-                                        <small class="text-muted" id="step2-text">2. اختيار الوقت</small>
+                                        <small class="text-muted" id="step2-text">2. Select Time</small>
                                     </div>
                                     <div class="col-4 text-center">
-                                        <small class="text-muted" id="step3-text">3. تأكيد الموعد</small>
+                                        <small class="text-muted" id="step3-text">3. Confirm Booking</small>
                                     </div>
                                 </div>
                             </div>
@@ -70,15 +109,15 @@
                         <div id="step1" class="booking-step">
                             <h4 class="mb-4">
                                 <i class="bi bi-person-badge text-primary me-2"></i>
-                                <span id="choose-doctor-label">اختر الطبيب المناسب</span>
+                                <span id="choose-doctor-label">Choose Your Doctor</span>
                             </h4>
 
                             <!-- Specialty Filter -->
                             <div class="row mb-4">
                                 <div class="col-md-6">
-                                    <label for="specialty-filter" class="form-label" id="specialty-label">التخصص</label>
+                                    <label for="specialty-filter" class="form-label" id="specialty-label">Specialty</label>
                                     <select class="form-select" id="specialty-filter">
-                                        <option value="">جميع التخصصات</option>
+                                        <option value="">All Specialties</option>
                                     </select>
                                 </div>
                             </div>
@@ -87,9 +126,9 @@
                             <div id="doctors-list" class="row">
                                 <div class="col-12 text-center py-5">
                                     <div class="spinner-border text-primary" role="status">
-                                        <span class="visually-hidden">جاري التحميل...</span>
+                                        <span class="visually-hidden">Loading...</span>
                                     </div>
-                                    <p class="mt-3 text-muted" id="loading-text">جاري تحميل قائمة الأطباء...</p>
+                                    <p class="mt-3 text-muted" id="loading-text">Loading doctors list...</p>
                                 </div>
                             </div>
                         </div>
@@ -98,29 +137,29 @@
                         <div id="step2" class="booking-step d-none">
                             <h4 class="mb-4">
                                 <i class="bi bi-clock text-primary me-2"></i>
-                                <span id="date-time-label">اختر التاريخ والوقت</span>
+                                <span id="date-time-label">Select Date & Time</span>
                             </h4>
 
                             <div class="row">
                                 <div class="col-md-6 mb-4">
-                                    <label for="appointment-date" class="form-label" id="date-label">التاريخ</label>
+                                    <label for="appointment-date" class="form-label" id="date-label">Date</label>
                                     <input type="date" class="form-control" id="appointment-date">
                                     <!-- Calendar Widget -->
                                     <div id="calendar-widget-container" class="mt-3 d-none d-md-block"></div>
                                 </div>
                                 <div class="col-md-6 mb-4">
-                                    <label for="appointment-type" class="form-label" id="consultation-type-label">نوع الاستشارة</label>
+                                    <label for="appointment-type" class="form-label" id="consultation-type-label">Consultation Type</label>
                                     <select class="form-select" id="appointment-type">
-                                        <option value="video">مكالمة فيديو</option>
-                                        <option value="audio">مكالمة صوتية</option>
-                                        <option value="chat">محادثة نصية</option>
+                                        <option value="video">Video Call</option>
+                                        <option value="audio">Audio Call</option>
+                                        <option value="chat">Text Chat</option>
                                     </select>
                                 </div>
                             </div>
 
                             <!-- Available Time Slots -->
                             <div id="time-slots-container" class="mb-4">
-                                <h6 class="mb-3" id="available-times-label">الأوقات المتاحة</h6>
+                                <h6 class="mb-3" id="available-times-label">Available Times</h6>
                                 <div id="time-slots" class="d-flex flex-wrap gap-2">
                                     <!-- Time slots will be populated here -->
                                 </div>
@@ -129,8 +168,8 @@
                             <!-- Reason for Visit -->
                             <div class="row">
                                 <div class="col-12 mb-3">
-                                    <label for="reason-visit" class="form-label" id="reason-visit-label">سبب الزيارة</label>
-                                    <textarea class="form-control" id="reason-visit" rows="3" placeholder="اكتب سبب زيارتك للطبيب..."></textarea>
+                                    <label for="reason-visit" class="form-label" id="reason-visit-label">Reason for Visit</label>
+                                    <textarea class="form-control" id="reason-visit" rows="3" placeholder="Describe your medical concern or reason for consultation..."></textarea>
                                 </div>
                             </div>
                         </div>
@@ -139,7 +178,7 @@
                         <div id="step3" class="booking-step d-none">
                             <h4 class="mb-4">
                                 <i class="bi bi-check-circle text-primary me-2"></i>
-                                <span id="confirm-appointment-label">تأكيد الموعد</span>
+                                <span id="confirm-appointment-label">Confirm Appointment</span>
                             </h4>
 
                             <div id="appointment-summary" class="border rounded p-4 bg-light mb-4">
@@ -149,7 +188,7 @@
                             <div class="form-check mb-4">
                                 <input class="form-check-input" type="checkbox" id="terms-agreement">
                                 <label class="form-check-label" for="terms-agreement" id="terms-label">
-                                    أوافق على <a href="../common/about.html" class="text-primary">شروط الاستخدام</a> و <a href="../common/about.html" class="text-primary">سياسة الخصوصية</a>
+                                    I agree to the <a href="../common/about.html" class="text-primary">Terms of Service</a> and <a href="../common/about.html" class="text-primary">Privacy Policy</a>
                                 </label>
                             </div>
                         </div>
@@ -157,19 +196,21 @@
                         <!-- Navigation Buttons -->
                         <div class="d-flex justify-content-between mt-4">
                             <button type="button" class="btn btn-outline-secondary" id="prev-btn" style="display: none;">
-                                <i class="bi bi-arrow-right me-1"></i>
-                                <span id="prev-btn-text">السابق</span>
+                                <i class="bi bi-arrow-left me-1"></i>
+                                <span id="prev-btn-text">Previous</span>
                             </button>
                             
                             <div class="ms-auto">
                                 <button type="button" class="btn btn-primary" id="next-btn">
-                                    <span id="next-btn-text">التالي</span>
-                                    <i class="bi bi-arrow-left ms-1"></i>
+                                    <span id="next-btn-text">Next</span>
+                                    <i class="bi bi-arrow-right ms-1"></i>
                                 </button>
                                 <button type="button" class="btn btn-success d-none" id="confirm-btn">
                                     <i class="bi bi-calendar-check me-1"></i>
-                                    <span id="confirm-btn-text">تأكيد الحجز</span>
+                                    <span id="confirm-btn-text">Confirm Booking</span>
                                 </button>
+                            </div>
+                        </div>
                             </div>
                         </div>
                     </div>
@@ -185,50 +226,292 @@
                 <div class="modal-header border-0">
                     <h5 class="modal-title">
                         <i class="bi bi-check-circle-fill text-success me-2"></i>
-                        <span id="success-title">تم الحجز بنجاح</span>
+                        <span id="success-title">Appointment Booked Successfully</span>
                     </h5>
                 </div>
                 <div class="modal-body text-center">
-                    <p class="mb-3" id="success-message">تم حجز موعدك بنجاح!</p>
-                    <p class="text-muted small" id="success-email">سيتم إرسال تفاصيل الموعد إلى بريدك الإلكتروني</p>
+                    <p class="mb-3" id="success-message">Your appointment has been booked successfully!</p>
+                    <p class="text-muted small" id="success-email">Appointment details will be sent to your email</p>
                 </div>
                 <div class="modal-footer border-0 justify-content-center">
                     <button type="button" class="btn btn-primary" onclick="goToAppointments()">
-                        <span id="view-appointments-btn">عرض مواعيدي</span>
+                        <span id="view-appointments-btn">View My Appointments</span>
                     </button>
                     <button type="button" class="btn btn-outline-secondary" onclick="goToDashboard()">
-                        <span id="back-home-btn">العودة للرئيسية</span>
+                        <span id="back-home-btn">Back to Dashboard</span>
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3">
+        <div class="container">
+            <div class="row g-3">
+                <!-- Brand & Description -->
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="mb-3">
+                        <i class="bi bi-heart-pulse me-2 text-primary"></i>
+                        <span id="footer-brand">Sahatak</span>
+                    </h5>
+                    <div class="d-flex gap-3 social-links">
+                        <a href="https://facebook.com/sahatak" target="_blank" rel="noopener"><i class="bi bi-facebook fs-5"></i></a>
+                        <a href="https://twitter.com/sahatak" target="_blank" rel="noopener"><i class="bi bi-twitter fs-5"></i></a>
+                        <a href="https://instagram.com/sahatak" target="_blank" rel="noopener"><i class="bi bi-instagram fs-5"></i></a>
+                        <a href="https://linkedin.com/company/sahatak" target="_blank" rel="noopener"><i class="bi bi-linkedin fs-5"></i></a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="mb-3" id="footer-links-title">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="../common/about.html" class="text-muted text-decoration-none" id="footer-about">About Platform</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="../common/services.html" class="text-muted text-decoration-none" id="footer-services">Services</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="mb-3" id="footer-support-title">Support & Help</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="../common/support.html" class="text-muted text-decoration-none" id="footer-help">Help Center</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="../common/contact-us.html" class="text-muted text-decoration-none" id="footer-contact">Contact Us</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Emergency Contact -->
+                <div class="col-lg-3 col-md-6 emergency-section">
+                    <p class="mb-2 text-danger fw-bold" id="footer-emergency-text">
+                        For medical emergencies
+                    </p>
+                    <p class="mb-3 text-danger fw-bold fs-6" id="footer-emergency-action">
+                        <i class="bi bi-hospital me-2"></i>
+                        Go to nearest ER hospital
+                    </p>
+                    <p class="mb-0 text-muted small" id="footer-emergency-note">
+                        For non-urgent consultations use the platform
+                    </p>
+                </div>
+            </div>
+
+            <!-- Bottom Bar -->
+            <hr class="my-3">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="mb-0 fw-bold" id="footer-copyright">
+                        © 2025 Sahatak. All rights reserved.
+                    </p>
+                    <p class="mb-0 text-muted small mt-1" id="footer-medical-disclaimer">
+                        This platform does not replace visiting a doctor in emergency cases
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JavaScript CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     
-    <!-- Custom JS - following main.js pattern: main.js first, then components -->
+    <!-- Authentication Guard (must load first) -->
+    <script src="../../assets/js/components/auth-guard.js"></script>
+    
+    <!-- Main JavaScript -->
     <script src="../../assets/js/main.js"></script>
+    
+    <!-- Dashboard Translations -->
+    <script src="../../assets/js/components/dashboard-translations.js"></script>
+    
+    <!-- Component Scripts -->
     <script src="../../assets/js/components/calendar-widget.js"></script>
     <script src="../../assets/js/components/appointment-booking.js"></script>
     
     <script>
-        // Initialize booking system when page loads - following main.js patterns
-        document.addEventListener('DOMContentLoaded', async function() {
-            await AppointmentBooking.init();
-        });
-
-        function goBack() {
-            window.history.back();
+        // Dashboard and appointment booking specific functions
+        function goBackToDashboard() {
+            console.log('Back to dashboard clicked');
+            window.location.href = '../dashboard/patient.html';
         }
 
         function goToAppointments() {
+            console.log('View appointments clicked');
             window.location.href = 'appointment-list.html';
         }
 
         function goToDashboard() {
+            console.log('Back to dashboard clicked');
             window.location.href = '../dashboard/patient.html';
         }
+
+
+        // Translation system for appointments
+        const AppointmentTranslations = {
+            updateAppointmentTranslations(lang = 'ar') {
+                // Use translations from LanguageManager instead of loading separately
+                const translations = LanguageManager.translations;
+                if (!translations || !translations[lang]) {
+                    console.warn(`No translations found for language: ${lang}`);
+                    return;
+                }
+                
+                const t = translations[lang];
+                
+                // Update page title
+                document.title = `${t.appointments.book_title} - ${t.app_name}`;
+                
+                // Update header elements
+                this.updateElement('page-title', t.appointments.book_title);
+                this.updateElement('page-subtitle', t.appointments.book_subtitle);
+                // Note: current-lang is updated separately in showLanguageSelector function
+                
+                // Update navigation buttons
+                this.updateElement('btn-back', t.dashboard.patient.nav.home);
+                this.updateElement('btn-logout', t.dashboard.patient.logout);
+                
+                // Update booking steps
+                this.updateElement('booking-title', t.appointments.book_title);
+                this.updateElement('step1-text', t.appointments.step_select_doctor);
+                this.updateElement('step2-text', t.appointments.step_select_time);
+                this.updateElement('step3-text', t.appointments.step_confirm);
+                
+                // Update Step 1: Doctor Selection
+                this.updateElement('choose-doctor-label', t.appointments.choose_doctor);
+                this.updateElement('specialty-label', t.appointments.specialty);
+                this.updateElement('all-specialties-option', t.appointments.all_specialties);
+                this.updateElement('loading-text', t.appointments.loading);
+                
+                // Update Step 2: Time Selection
+                this.updateElement('date-time-label', t.appointments.date_time);
+                this.updateElement('date-label', t.appointments.date);
+                this.updateElement('consultation-type-label', t.appointments.consultation_type);
+                this.updateElement('video-call-option', t.appointments.video_call);
+                this.updateElement('audio-call-option', t.appointments.audio_call);
+                this.updateElement('text-chat-option', t.appointments.text_chat);
+                this.updateElement('available-times-label', t.appointments.available_times);
+                this.updateElement('reason-visit-label', t.appointments.reason_visit);
+                
+                // Update placeholder
+                const reasonTextarea = document.getElementById('reason-visit');
+                if (reasonTextarea) {
+                    reasonTextarea.placeholder = t.appointments.reason_placeholder;
+                }
+                
+                // Update Step 3: Confirmation
+                this.updateElement('confirm-appointment-label', t.appointments.confirm_appointment);
+                this.updateElement('terms-label', t.appointments.terms_agree);
+                
+                // Update navigation buttons
+                this.updateElement('prev-btn-text', t.appointments.previous);
+                this.updateElement('next-btn-text', t.appointments.next);
+                this.updateElement('confirm-btn-text', t.appointments.confirm_booking);
+                
+                // Update success modal
+                this.updateElement('success-title', t.appointments.success_title);
+                this.updateElement('success-message', t.appointments.success_message);
+                this.updateElement('success-email', t.appointments.success_email);
+                this.updateElement('view-appointments-btn', t.appointments.view_appointments);
+                this.updateElement('back-home-btn', t.appointments.back_home);
+                
+                // Update footer
+                this.updateElement('footer-brand', t.app_name);
+                this.updateElement('footer-links-title', t.footer.links_title);
+                this.updateElement('footer-about', t.footer.about);
+                this.updateElement('footer-services', t.footer.services);
+                this.updateElement('footer-support-title', t.footer.support_title);
+                this.updateElement('footer-help', t.footer.help);
+                this.updateElement('footer-contact', t.footer.contact);
+                this.updateElement('footer-emergency-text', t.footer.emergency_text);
+                this.updateElement('footer-emergency-action', t.footer.emergency_action);
+                this.updateElement('footer-emergency-note', t.footer.emergency_note);
+                this.updateElement('footer-copyright', t.footer.copyright);
+                this.updateElement('footer-medical-disclaimer', t.footer.medical_disclaimer);
+            },
+            
+            updateElement(elementId, text) {
+                const element = document.getElementById(elementId);
+                if (element && text) {
+                    element.textContent = text;
+                }
+            }
+        };
+
+        function showLanguageSelector() {
+            console.log('Language selector clicked');
+            
+            // Toggle between Arabic and English
+            const currentLang = LanguageManager.getLanguage() || 'ar';
+            const newLang = currentLang === 'ar' ? 'en' : 'ar';
+            
+            // Change language
+            LanguageManager.setLanguage(newLang);
+            LanguageManager.applyLanguage(newLang);
+            
+            // Update appointment translations
+            if (typeof AppointmentTranslations !== 'undefined') {
+                AppointmentTranslations.updateAppointmentTranslations(newLang);
+            }
+            
+            // Update the language button text to show the opposite language (the one you can switch TO)
+            const langBtn = document.getElementById('current-lang');
+            if (langBtn) {
+                langBtn.textContent = newLang === 'ar' ? 'English' : 'العربية';
+            }
+        }
+
+        // Initialize booking system when page loads
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('Book appointment page initializing...');
+            
+            try {
+                // Load LanguageManager translations first
+                if (typeof LanguageManager !== 'undefined') {
+                    await LanguageManager.loadTranslations();
+                }
+                
+                // Initialize language system
+                const currentLang = LanguageManager?.getLanguage() || localStorage.getItem('sahatak_language') || 'ar';
+                
+                // Apply language settings using LanguageManager
+                if (typeof LanguageManager !== 'undefined') {
+                    LanguageManager.applyLanguage(currentLang);
+                }
+                
+                // Apply appointment-specific translations
+                if (typeof AppointmentTranslations !== 'undefined') {
+                    AppointmentTranslations.updateAppointmentTranslations(currentLang);
+                }
+                
+                // Set initial language button text to show the opposite language (the one you can switch TO)
+                const langBtn = document.getElementById('current-lang');
+                if (langBtn) {
+                    langBtn.textContent = currentLang === 'ar' ? 'English' : 'العربية';
+                }
+                
+                // Load user name if available
+                const userData = JSON.parse(localStorage.getItem('sahatak_user_data') || '{}');
+                if (userData.full_name) {
+                    document.getElementById('user-name').textContent = userData.full_name;
+                }
+                
+                // Initialize appointment booking system
+                if (typeof AppointmentBooking !== 'undefined') {
+                    await AppointmentBooking.init();
+                } else {
+                    console.error('AppointmentBooking not loaded');
+                }
+            } catch (error) {
+                console.error('Error during initialization:', error);
+            }
+        });
     </script>
 </body>
 </html>

@@ -10,92 +10,17 @@ const AppointmentBooking = {
     
     // Initialize the booking system
     async init() {
-        // Ensure translations are loaded first
-        if (!LanguageManager.translations || !LanguageManager.translations.ar) {
-            await LanguageManager.loadTranslations();
-        }
-        
-        // Update UI with translations
-        this.updateUITranslations();
         this.initCalendarWidget();
         this.loadDoctors();
         this.setupEventListeners();
         this.setMinDate();
     },
 
-    // Update UI with current language translations
-    updateUITranslations() {
-        const lang = LanguageManager.getLanguage() || 'ar';
-        const t = LanguageManager.translations[lang];
-        if (!t || !t.appointments) return;
 
-        // Update page title and main headings
-        this.updateElementText('page-title', t.appointments.book_title);
-        this.updateElementText('page-subtitle', t.appointments.book_subtitle);
-        
-        // Update step indicators
-        this.updateElementText('step1-text', t.appointments.step_select_doctor);
-        this.updateElementText('step2-text', t.appointments.step_select_time);
-        this.updateElementText('step3-text', t.appointments.step_confirm);
-        
-        // Update form labels
-        this.updateElementText('choose-doctor-label', t.appointments.choose_doctor);
-        this.updateElementText('specialty-label', t.appointments.specialty);
-        this.updateElementText('date-time-label', t.appointments.date_time);
-        this.updateElementText('date-label', t.appointments.date);
-        this.updateElementText('consultation-type-label', t.appointments.consultation_type);
-        this.updateElementText('available-times-label', t.appointments.available_times);
-        this.updateElementText('reason-visit-label', t.appointments.reason_visit);
-        this.updateElementText('confirm-appointment-label', t.appointments.confirm_appointment);
-        
-        // Update buttons
-        this.updateElementText('prev-btn-text', t.appointments.previous);
-        this.updateElementText('next-btn-text', t.appointments.next);
-        this.updateElementText('confirm-btn-text', t.appointments.confirm_booking);
-        
-        // Update specialty options
-        this.updateSpecialtyOptions(lang);
-        
-        // Update consultation type options
-        this.updateConsultationTypeOptions(lang);
-    },
 
-    // Helper function to update element text
-    updateElementText(elementId, text) {
-        const element = document.getElementById(elementId);
-        if (element && text) {
-            element.textContent = text;
-        }
-    },
 
-    // Update specialty select options
-    updateSpecialtyOptions(lang) {
-        const specialtySelect = document.getElementById('specialty-filter');
-        const t = LanguageManager.translations[lang];
-        if (!specialtySelect || !t) return;
 
-        specialtySelect.innerHTML = `
-            <option value="">${t.appointments.all_specialties}</option>
-            <option value="cardiology">${lang === 'ar' ? 'أمراض القلب' : 'Cardiology'}</option>
-            <option value="pediatrics">${lang === 'ar' ? 'طب الأطفال' : 'Pediatrics'}</option>
-            <option value="dermatology">${lang === 'ar' ? 'الأمراض الجلدية' : 'Dermatology'}</option>
-            <option value="internal">${lang === 'ar' ? 'الطب الباطني' : 'Internal Medicine'}</option>
-            <option value="general">${lang === 'ar' ? 'طب عام' : 'General Medicine'}</option>
-        `;
-    },
 
-    // Update consultation type options
-    updateConsultationTypeOptions(lang) {
-        const typeSelect = document.getElementById('appointment-type');
-        const t = LanguageManager.translations[lang];
-        if (!typeSelect || !t) return;
-
-        typeSelect.innerHTML = `
-            <option value="video">${t.appointments.video_call}</option>
-            <option value="audio">${t.appointments.audio_call}</option>
-            <option value="chat">${t.appointments.text_chat}</option>
-        `;
-    },
 
     // Setup event listeners
     setupEventListeners() {
@@ -178,7 +103,7 @@ const AppointmentBooking = {
             container.innerHTML = `
                 <div class="col-12 text-center py-5">
                     <i class="bi bi-person-x display-4 text-muted mb-3"></i>
-                    <p class="text-muted">لا يوجد أطباء متاحون في هذا التخصص</p>
+                    <p class="text-muted">No doctors available in this specialty</p>
                 </div>
             `;
             return;
@@ -194,27 +119,27 @@ const AppointmentBooking = {
                                 <i class="bi bi-person-circle display-6 text-primary"></i>
                             </div>
                             <div>
-                                <h5 class="card-title mb-1">د. ${doctor.user ? doctor.user.full_name : doctor.full_name}</h5>
-                                <p class="text-muted small mb-0">${this.getSpecialtyArabic(doctor.specialty)}</p>
+                                <h5 class="card-title mb-1">Dr. ${doctor.user ? doctor.user.full_name : doctor.full_name}</h5>
+                                <p class="text-muted small mb-0">${this.getSpecialtyDisplayName(doctor.specialty)}</p>
                                 <div class="rating mt-1">
                                     ${this.renderStars(doctor.rating || 4.5)}
-                                    <small class="text-muted">(${doctor.total_reviews || 0} تقييم)</small>
+                                    <small class="text-muted">(${doctor.total_reviews || 0} reviews)</small>
                                 </div>
                             </div>
                         </div>
                         
                         <div class="row text-center">
                             <div class="col-4">
-                                <small class="text-muted d-block">الخبرة</small>
-                                <strong>${doctor.years_of_experience} سنة</strong>
+                                <small class="text-muted d-block">Experience</small>
+                                <strong>${doctor.years_of_experience || 0} years</strong>
                             </div>
                             <div class="col-4">
-                                <small class="text-muted d-block">الأجر</small>
-                                <strong>${doctor.consultation_fee ? doctor.consultation_fee + ' ج.س' : 'مجاني'}</strong>
+                                <small class="text-muted d-block">Fee</small>
+                                <strong>${doctor.consultation_fee ? doctor.consultation_fee + ' SDG' : 'Free'}</strong>
                             </div>
                             <div class="col-4">
-                                <small class="text-muted d-block">الحالة</small>
-                                <span class="badge bg-success">متاح</span>
+                                <small class="text-muted d-block">Status</small>
+                                <span class="badge bg-success">Available</span>
                             </div>
                         </div>
                         
@@ -402,28 +327,28 @@ const AppointmentBooking = {
             const summaryHtml = `
                     <div class="row">
                         <div class="col-sm-6 mb-3">
-                            <strong>الطبيب:</strong><br>
-                            د. ${doctor.user ? doctor.user.full_name : doctor.full_name}
+                            <strong>Doctor:</strong><br>
+                            Dr. ${doctor.user ? doctor.user.full_name : doctor.full_name}
                         </div>
                         <div class="col-sm-6 mb-3">
-                            <strong>التخصص:</strong><br>
-                            ${this.getSpecialtyArabic(doctor.specialty)}
+                            <strong>Specialty:</strong><br>
+                            ${this.getSpecialtyDisplayName(doctor.specialty)}
                         </div>
                         <div class="col-sm-6 mb-3">
-                            <strong>التاريخ:</strong><br>
-                            ${date.toLocaleDateString('ar-SA')}
+                            <strong>Date:</strong><br>
+                            ${date.toLocaleDateString()}
                         </div>
                         <div class="col-sm-6 mb-3">
-                            <strong>الوقت:</strong><br>
+                            <strong>Time:</strong><br>
                             ${this.selectedDateTime.displayTime}
                         </div>
                         <div class="col-sm-6 mb-3">
-                            <strong>نوع الاستشارة:</strong><br>
-                            ${this.getAppointmentTypeArabic(this.selectedType)}
+                            <strong>Consultation Type:</strong><br>
+                            ${this.getAppointmentTypeDisplayName(this.selectedType)}
                         </div>
                         <div class="col-sm-6 mb-3">
-                            <strong>الأجر:</strong><br>
-                            ${doctor.consultation_fee ? doctor.consultation_fee + ' ج.س' : 'مجاني'}
+                            <strong>Fee:</strong><br>
+                            ${doctor.consultation_fee ? doctor.consultation_fee + ' SDG' : 'Free'}
                         </div>
                     </div>
                 `;
@@ -611,24 +536,24 @@ const AppointmentBooking = {
     },
 
     // Helper functions
-    getSpecialtyArabic(specialty) {
+    getSpecialtyDisplayName(specialty) {
         const specialties = {
-            cardiology: 'أمراض القلب',
-            pediatrics: 'طب الأطفال',
-            dermatology: 'الأمراض الجلدية',
-            internal: 'الطب الباطني',
-            psychiatry: 'الطب النفسي',
-            orthopedics: 'العظام',
-            general: 'طب عام'
+            cardiology: 'Cardiology',
+            pediatrics: 'Pediatrics',
+            dermatology: 'Dermatology',
+            internal: 'Internal Medicine',
+            psychiatry: 'Psychiatry',
+            orthopedics: 'Orthopedics',
+            general: 'General Medicine'
         };
         return specialties[specialty] || specialty;
     },
 
-    getAppointmentTypeArabic(type) {
+    getAppointmentTypeDisplayName(type) {
         const types = {
-            video: 'مكالمة فيديو',
-            audio: 'مكالمة صوتية',
-            chat: 'محادثة نصية'
+            video: 'Video Call',
+            audio: 'Audio Call',
+            chat: 'Text Chat'
         };
         return types[type] || type;
     },
