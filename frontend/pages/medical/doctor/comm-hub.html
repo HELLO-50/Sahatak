@@ -210,16 +210,27 @@
         
         // Initialize page with user data
         document.addEventListener('DOMContentLoaded', function() {
-            const user = AuthGuard.getCurrentUser();
-            if (user && user.full_name) {
-                // Update user name in header only if we have the actual name
+            // Try to get user data from localStorage first (like doctor.html does)
+            const user = JSON.parse(localStorage.getItem('sahatak_doctor_data') || '{}');
+            
+            if (user.full_name) {
+                // Update user name in header with actual name from database
                 document.getElementById('user-name').textContent = user.full_name;
                 
                 // Update verification status from database
                 updateVerificationStatus(user);
             } else {
-                // Keep showing "Loading..." if user data is not available
-                console.log('User data not available yet');
+                // Fallback to AuthGuard
+                const authUser = AuthGuard.getCurrentUser();
+                if (authUser && authUser.full_name) {
+                    document.getElementById('user-name').textContent = authUser.full_name;
+                    updateVerificationStatus(authUser);
+                } else {
+                    // Show default values if no user data available
+                    document.getElementById('user-name').textContent = 'Doctor';
+                    document.getElementById('verification-status').textContent = 'Unverified';
+                    document.getElementById('verification-status').className = 'badge bg-warning text-dark';
+                }
             }
         });
     </script>
