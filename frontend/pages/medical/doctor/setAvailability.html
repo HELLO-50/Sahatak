@@ -40,13 +40,10 @@
                             </div>
                             <div class="user-details">
                                 <h5 class="mb-1" id="user-name">Loading...</h5>
+                                <span class="badge bg-warning text-dark" id="verification-status">Unverified</span>
                             </div>
                             <!-- Vertical Action Buttons -->
                             <div class="action-buttons">
-                                <button class="btn btn-action" onclick="goBack()" title="Back to Dashboard">
-                                    <i class="bi bi-arrow-left"></i>
-                                    <span id="btn-back">Back</span>
-                                </button>
                                 <button class="btn btn-action" onclick="showProfile()" title="Profile">
                                     <i class="bi bi-person"></i>
                                     <span id="btn-profile">Profile</span>
@@ -491,6 +488,17 @@
             // Implement unblock logic
         }
         
+        // Profile and Settings handlers
+        function showProfile() {
+            alert('Profile functionality will be implemented. Please use the main dashboard for now.');
+            window.location.href = '../../dashboard/doctor.html';
+        }
+        
+        function showSettings() {
+            alert('Settings functionality will be implemented. Please use the main dashboard for now.');
+            window.location.href = '../../dashboard/doctor.html';
+        }
+        
         // Update verification status from database
         function updateVerificationStatus(user) {
             const statusElement = document.getElementById('verification-status');
@@ -511,12 +519,15 @@
             
             // Load and update user data including verification status
             const user = AuthGuard.getCurrentUser();
-            if (user) {
-                // Update user name in header
-                document.getElementById('user-name').textContent = user.full_name || 'Doctor';
+            if (user && user.full_name) {
+                // Update user name in header only if we have the actual name
+                document.getElementById('user-name').textContent = user.full_name;
                 
                 // Update verification status from database
                 updateVerificationStatus(user);
+            } else {
+                // Keep showing "Loading..." if user data is not available
+                console.log('User data not available yet');
             }
             
             await DashboardTranslations.initializeDashboard('availability');

@@ -848,12 +848,15 @@
             
             // Load and update user data including verification status
             const user = AuthGuard.getCurrentUser();
-            if (user) {
-                // Update user name in header
-                document.getElementById('user-name').textContent = user.full_name || 'Doctor';
+            if (user && user.full_name) {
+                // Update user name in header only if we have the actual name
+                document.getElementById('user-name').textContent = user.full_name;
                 
                 // Update verification status from database
                 updateVerificationStatus(user);
+            } else {
+                // Keep showing "Loading..." if user data is not available
+                console.log('User data not available yet');
             }
             
             // Protect page with auth guard
