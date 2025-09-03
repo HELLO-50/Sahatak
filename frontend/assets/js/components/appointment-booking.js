@@ -500,61 +500,6 @@ const AppointmentBooking = {
         }
     },
 
-    // Setup event listeners
-    setupEventListeners() {
-        // Navigation buttons
-        const prevBtn = document.getElementById('prev-btn');
-        const nextBtn = document.getElementById('next-btn');
-        const confirmBtn = document.getElementById('confirm-btn');
-
-        if (nextBtn) {
-            nextBtn.addEventListener('click', () => {
-                if (this.currentStep < this.maxSteps) {
-                    if (this.validateCurrentStep()) {
-                        this.nextStep();
-                    }
-                }
-            });
-        }
-
-        if (prevBtn) {
-            prevBtn.addEventListener('click', () => {
-                if (this.currentStep > 1) {
-                    this.previousStep();
-                }
-            });
-        }
-
-        if (confirmBtn) {
-            confirmBtn.addEventListener('click', () => {
-                this.confirmBooking();
-            });
-        }
-
-        // Specialty filter
-        const specialtyFilter = document.getElementById('specialty-filter');
-        if (specialtyFilter) {
-            specialtyFilter.addEventListener('change', (e) => {
-                this.filterDoctorsBySpecialty(e.target.value);
-            });
-        }
-
-        // Appointment type change
-        const appointmentType = document.getElementById('appointment-type');
-        if (appointmentType) {
-            appointmentType.addEventListener('change', (e) => {
-                this.selectedType = e.target.value;
-            });
-        }
-
-        // Date input change
-        const appointmentDate = document.getElementById('appointment-date');
-        if (appointmentDate) {
-            appointmentDate.addEventListener('change', (e) => {
-                this.loadTimeSlots(e.target.value);
-            });
-        }
-    },
 
     // Validate current step
     validateCurrentStep() {
