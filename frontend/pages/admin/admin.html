@@ -1156,6 +1156,11 @@
                     const targetSection = document.getElementById(targetId);
                     if (targetSection) {
                         targetSection.classList.add('active');
+                        
+                        // Load section-specific data
+                        if (targetId === 'settings') {
+                            AdminDashboard.loadAdminUsers();
+                        }
                     }
                 });
             });
