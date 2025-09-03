@@ -300,30 +300,21 @@ const AdminAPI = {
 
     // Doctor Verification APIs
     async getPendingVerifications() {
-        return this.makeRequest('/doctor-verification/admin/pending');
+        return this.makeRequest('/admin/doctors/pending-verification');
     },
 
     async getDoctorVerificationDetails(doctorId) {
-        return this.makeRequest(`/doctor-verification/admin/review/${doctorId}`);
+        return this.makeRequest(`/admin/doctors/${doctorId}`);
     },
 
     async verifyDoctor(doctorId, approved, notes = '') {
-        if (approved) {
-            return this.makeRequest(`/doctor-verification/admin/approve/${doctorId}`, {
-                method: 'POST',
-                body: JSON.stringify({
-                    notes: notes || 'Verification approved by admin'
-                })
-            });
-        } else {
-            return this.makeRequest(`/doctor-verification/admin/reject/${doctorId}`, {
-                method: 'POST',
-                body: JSON.stringify({
-                    reason: notes || 'Verification rejected',
-                    notes: notes || 'Verification rejected by admin'
-                })
-            });
-        }
+        return this.makeRequest(`/admin/doctors/${doctorId}/verify`, {
+            method: 'POST',
+            body: JSON.stringify({
+                approved: approved,
+                notes: notes || (approved ? 'Verification approved by admin' : 'Verification rejected by admin')
+            })
+        });
     },
 
     async addDoctorManually(doctorData) {
@@ -848,7 +839,7 @@ const DoctorVerification = {
             }
             
             const response = await AdminAPI.getPendingVerifications();
-            const doctors = response.data?.doctors || response.doctors || [];
+            const doctors = response.data?.pending_doctors || response.pending_doctors || [];
             this.renderPendingList(doctors);
             
             // Update pending count
@@ -939,13 +930,13 @@ const DoctorVerification = {
                         </div>
                         <div class="col-md-2 text-end">
                             <div class="d-flex flex-column gap-2">
-                                <button class="btn btn-success btn-sm" onclick="DoctorVerification.approveDoctor(${doctor.doctor_id})" title="اعتماد">
+                                <button class="btn btn-success btn-sm" onclick="DoctorVerification.approveDoctor(${doctor.id})" title="اعتماد">
                                     <i class="bi bi-check me-1"></i>اعتماد
                                 </button>
-                                <button class="btn btn-danger btn-sm" onclick="DoctorVerification.rejectDoctor(${doctor.doctor_id})" title="رفض">
+                                <button class="btn btn-danger btn-sm" onclick="DoctorVerification.rejectDoctor(${doctor.id})" title="رفض">
                                     <i class="bi bi-x me-1"></i>رفض
                                 </button>
-                                <button class="btn btn-outline-info btn-sm" onclick="DoctorVerification.viewDetails(${doctor.doctor_id})" title="عرض التفاصيل">
+                                <button class="btn btn-outline-info btn-sm" onclick="DoctorVerification.viewDetails(${doctor.id})" title="عرض التفاصيل">
                                     <i class="bi bi-eye me-1"></i>تفاصيل
                                 </button>
                             </div>
