@@ -599,6 +599,15 @@ const DashboardTranslations = {
             this.updateFooter(t);
         }
         
+        // Initialize dashboard data loading
+        if (typeof Dashboard !== 'undefined' && Dashboard.initialize) {
+            try {
+                await Dashboard.initialize();
+            } catch (error) {
+                console.error('Error initializing dashboard data:', error);
+            }
+        }
+        
         console.log(`${dashboardType} dashboard initialized with language: ${savedLanguage}`);
     },
 
