@@ -17,61 +17,36 @@ appointments_bp = Blueprint('appointments', __name__)
 def get_available_doctors():
     """Get list of available doctors for appointment booking"""
     try:
-        # Get query parameters
-        specialty = request.args.get('specialty')
-        page = int(request.args.get('page', 1))
-        per_page = min(int(request.args.get('per_page', 20)), 100)  # Max 100 per page
-        
-        # Base query: verified and active doctors
-        query = Doctor.query.filter_by(is_verified=True).join(User, Doctor.user_id == User.id).filter_by(is_active=True)
-        
-        # Filter by specialty if provided
-        if specialty:
-            query = query.filter(Doctor.specialty.ilike(f'%{specialty}%'))
-        
-        # Pagination - simple ordering by id to avoid missing column issues
-        paginated_doctors = query.order_by(Doctor.id.desc()).paginate(
-            page=page,
-            per_page=per_page,
-            error_out=False
-        )
-        
-        # Format doctor data
-        doctors_data = []
-        for doctor in paginated_doctors.items:
-            doctor_data = {
-                'id': doctor.id,
-                'doctor_id': doctor.doctor_id,
-                'specialty': doctor.specialty,
-                'years_of_experience': doctor.years_of_experience,
-                'consultation_fee': doctor.consultation_fee,
-                'is_volunteer': doctor.consultation_fee == 0,
-                'is_verified': doctor.is_verified,
-                'user': {
-                    'full_name': doctor.user.full_name,
-                    'email': doctor.user.email if doctor.user.email else None,
-                    'language_preference': doctor.user.language_preference
-                }
-            }
-            doctors_data.append(doctor_data)
-        
+        # For now, return a simple test response to see if basic endpoint works
         return APIResponse.success(
             data={
-                'doctors': doctors_data,
+                'doctors': [
+                    {
+                        'id': 1,
+                        'name': 'Test Doctor',
+                        'specialty': 'Internal Medicine',
+                        'experience_years': 5,
+                        'consultation_fee': 100,
+                        'is_volunteer': False,
+                        'is_verified': True
+                    }
+                ],
                 'pagination': {
-                    'page': page,
-                    'per_page': per_page,
-                    'total': paginated_doctors.total,
-                    'pages': paginated_doctors.pages,
-                    'has_next': paginated_doctors.has_next,
-                    'has_prev': paginated_doctors.has_prev
+                    'page': 1,
+                    'per_page': 20,
+                    'total': 1,
+                    'pages': 1,
+                    'has_next': False,
+                    'has_prev': False
                 }
             },
-            message='Available doctors retrieved successfully'
+            message='Test doctors retrieved successfully'
         )
         
     except Exception as e:
+        import traceback
         app_logger.error(f"Get available doctors error: {str(e)}")
+        app_logger.error(f"Full traceback: {traceback.format_exc()}")
         return APIResponse.internal_error(message='Failed to get available doctors')
 
 @appointments_bp.route('/', methods=['GET'])
