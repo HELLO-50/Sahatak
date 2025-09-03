@@ -636,7 +636,7 @@ const DashboardTranslations = {
     // Update country dropdown options
     updateCountryOptions() {
         const lang = localStorage.getItem('sahatak_language') || 'ar';
-        const translations = this.translations[lang];
+        const translations = LanguageManager.translations[lang];
         
         if (!translations?.country_options) return;
         
