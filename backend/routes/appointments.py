@@ -559,3 +559,201 @@ def reschedule_appointment(appointment_id):
         db.session.rollback()
         app_logger.error(f"Reschedule appointment error: {str(e)}")
         return APIResponse.internal_error(message='Failed to reschedule appointment')
+
+
+@appointments_bp.route('/patients', methods=['GET'])
+@api_login_required
+def get_doctor_patients():
+    """Get list of patients for a doctor"""
+    try:
+        # Check if the current user is a doctor
+        if current_user.user_type != 'doctor':
+            return APIResponse.forbidden(message='Only doctors can access patient list')
+        
+        # Get doctor record
+        doctor = Doctor.query.filter_by(user_id=current_user.id).first()
+        if not doctor:
+            return APIResponse.not_found(message='Doctor profile not found')
+        
+        # Get unique patients from appointments
+        patients_query = db.session.query(Patient).join(
+            Appointment, Patient.id == Appointment.patient_id
+        ).filter(
+            Appointment.doctor_id == doctor.id,
+            Appointment.status.in_(['completed', 'scheduled', 'confirmed'])
+        ).distinct()
+        
+        patients = patients_query.all()
+        
+        # Format patient data
+        patients_data = []
+        for patient in patients:
+            # Get last appointment date for this patient with this doctor
+            last_appointment = Appointment.query.filter_by(
+                doctor_id=doctor.id,
+                patient_id=patient.id
+            ).order_by(Appointment.appointment_date.desc()).first()
+            
+            patient_data = {
+                'id': patient.id,
+                'patient_id': patient.patient_id,
+                'full_name': patient.user.full_name if patient.user else 'Unknown',
+                'age': patient.calculate_age() if hasattr(patient, 'calculate_age') else None,
+                'last_appointment_date': last_appointment.appointment_date.isoformat() if last_appointment else None
+            }
+            patients_data.append(patient_data)
+        
+        return APIResponse.success(
+            data=patients_data,
+            message='Patients retrieved successfully'
+        )
+        
+    except Exception as e:
+        app_logger.error(f"Error getting doctor patients: {str(e)}")
+        return APIResponse.internal_error(message='Failed to retrieve patients')
+
+
+@appointments_bp.route('/stats', methods=['GET'])
+@api_login_required
+def get_doctor_stats():
+    """Get statistics for doctor dashboard"""
+    try:
+        # Check if the current user is a doctor
+        if current_user.user_type != 'doctor':
+            return APIResponse.forbidden(message='Only doctors can access statistics')
+        
+        # Get doctor record
+        doctor = Doctor.query.filter_by(user_id=current_user.id).first()
+        if not doctor:
+            return APIResponse.not_found(message='Doctor profile not found')
+        
+        # Calculate statistics
+        today = datetime.now().date()
+        
+        # Total unique patients
+        total_patients = db.session.query(Patient).join(
+            Appointment, Patient.id == Appointment.patient_id
+        ).filter(
+            Appointment.doctor_id == doctor.id,
+            Appointment.status.in_(['completed', 'scheduled', 'confirmed'])
+        ).distinct().count()
+        
+        # Appointments today
+        appointments_today = Appointment.query.filter(
+            Appointment.doctor_id == doctor.id,
+            db.func.date(Appointment.appointment_date) == today,
+            Appointment.status.in_(['scheduled', 'confirmed', 'in_progress'])
+        ).count()
+        
+        # Total consultations completed
+        consultations_completed = Appointment.query.filter(
+            Appointment.doctor_id == doctor.id,
+            Appointment.status == 'completed'
+        ).count()
+        
+        stats = {
+            'total_patients': total_patients,
+            'appointments_today': appointments_today,
+            'consultations_completed': consultations_completed
+        }
+        
+        return APIResponse.success(
+            data=stats,
+            message='Statistics retrieved successfully'
+        )
+        
+    except Exception as e:
+        app_logger.error(f"Error getting doctor stats: {str(e)}")
+        return APIResponse.internal_error(message='Failed to retrieve statistics')
+
+
+@appointments_bp.route('/waiting', methods=['GET'])
+@api_login_required
+def get_waiting_patients():
+    """Get list of waiting patients for today"""
+    try:
+        # Check if the current user is a doctor
+        if current_user.user_type != 'doctor':
+            return APIResponse.forbidden(message='Only doctors can access waiting patients')
+        
+        # Get doctor record
+        doctor = Doctor.query.filter_by(user_id=current_user.id).first()
+        if not doctor:
+            return APIResponse.not_found(message='Doctor profile not found')
+        
+        # Get today's appointments that are scheduled or confirmed
+        today = datetime.now().date()
+        waiting_appointments = Appointment.query.filter(
+            Appointment.doctor_id == doctor.id,
+            db.func.date(Appointment.appointment_date) == today,
+            Appointment.status.in_(['scheduled', 'confirmed'])
+        ).order_by(Appointment.appointment_date).all()
+        
+        # Format waiting patients data
+        waiting_patients = []
+        for appointment in waiting_appointments:
+            patient = appointment.patient
+            patient_data = {
+                'id': appointment.id,
+                'patient_id': patient.patient_id,
+                'full_name': patient.user.full_name if patient.user else 'Unknown',
+                'appointment_time': appointment.appointment_date.strftime('%H:%M'),
+                'appointment_type': appointment.appointment_type,
+                'status': appointment.status
+            }
+            waiting_patients.append(patient_data)
+        
+        return APIResponse.success(
+            data=waiting_patients,
+            message='Waiting patients retrieved successfully'
+        )
+        
+    except Exception as e:
+        app_logger.error(f"Error getting waiting patients: {str(e)}")
+        return APIResponse.internal_error(message='Failed to retrieve waiting patients')
+
+
+@appointments_bp.route('/activity', methods=['GET'])
+@api_login_required
+def get_recent_activity():
+    """Get recent activity for doctor dashboard"""
+    try:
+        # Check if the current user is a doctor
+        if current_user.user_type != 'doctor':
+            return APIResponse.forbidden(message='Only doctors can access activity')
+        
+        # Get doctor record
+        doctor = Doctor.query.filter_by(user_id=current_user.id).first()
+        if not doctor:
+            return APIResponse.not_found(message='Doctor profile not found')
+        
+        # Get recent appointments (last 7 days)
+        seven_days_ago = datetime.now() - timedelta(days=7)
+        recent_appointments = Appointment.query.filter(
+            Appointment.doctor_id == doctor.id,
+            Appointment.updated_at >= seven_days_ago
+        ).order_by(Appointment.updated_at.desc()).limit(10).all()
+        
+        # Format activity data
+        activity = []
+        for appointment in recent_appointments:
+            patient = appointment.patient
+            activity_item = {
+                'id': appointment.id,
+                'type': 'appointment',
+                'patient_name': patient.user.full_name if patient.user else 'Unknown',
+                'appointment_date': appointment.appointment_date.isoformat(),
+                'status': appointment.status,
+                'appointment_type': appointment.appointment_type,
+                'updated_at': appointment.updated_at.isoformat()
+            }
+            activity.append(activity_item)
+        
+        return APIResponse.success(
+            data=activity,
+            message='Recent activity retrieved successfully'
+        )
+        
+    except Exception as e:
+        app_logger.error(f"Error getting recent activity: {str(e)}")
+        return APIResponse.internal_error(message='Failed to retrieve recent activity')
