@@ -879,6 +879,79 @@ const AdminDashboard = {
                 }
             }
         });
+    },
+
+    // Load admin users for the settings section
+    async loadAdminUsers() {
+        try {
+            console.log('Loading admin users...');
+            const response = await this.makeRequest('/admin/users?user_type=admin');
+            const data = await response.json();
+            
+            console.log('Admin users data received:', data);
+            
+            if (data.success && data.users) {
+                this.displayAdminUsersTable(data.users);
+            } else {
+                throw new Error(data.message || 'Failed to load admin users');
+            }
+        } catch (error) {
+            console.error('Failed to load admin users:', error);
+            this.showNotification('Failed to load admin users', 'error');
+        }
+    },
+
+    // Display admin users in table
+    displayAdminUsersTable(adminUsers) {
+        const tbody = document.getElementById('admin-users-table');
+        if (!tbody) return;
+        
+        if (!adminUsers || adminUsers.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center py-4">
+                        <i class="bi bi-person-x text-muted fs-1"></i>
+                        <p class="text-muted mt-2">No admin users found</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = adminUsers.map(admin => `
+            <tr>
+                <td>${admin.full_name || 'N/A'}</td>
+                <td>${admin.email}</td>
+                <td>${admin.phone || 'N/A'}</td>
+                <td>
+                    <span class="badge bg-${admin.is_active ? 'success' : 'secondary'}">
+                        ${admin.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-outline-info" onclick="AdminDashboard.viewAdminDetails(${admin.id})" title="View Details">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                    ${admin.id !== this.getCurrentUserId() ? `
+                        <button class="btn btn-sm btn-outline-${admin.is_active ? 'warning' : 'success'}" 
+                                onclick="AdminDashboard.toggleAdminStatus(${admin.id})" 
+                                title="${admin.is_active ? 'Deactivate' : 'Activate'}">
+                            <i class="bi bi-${admin.is_active ? 'person-dash' : 'person-check'}"></i>
+                        </button>
+                    ` : ''}
+                </td>
+            </tr>
+        `).join('');
+    },
+
+    // Get current user ID to prevent self-deactivation
+    getCurrentUserId() {
+        try {
+            const userData = JSON.parse(localStorage.getItem('adminUserData') || '{}');
+            return userData.id || null;
+        } catch {
+            return null;
+        }
     }
 };
 
