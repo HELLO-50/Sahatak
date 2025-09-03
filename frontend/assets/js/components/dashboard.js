@@ -245,13 +245,17 @@ const Dashboard = {
         const container = document.getElementById('appointments-container');
         if (!container) return;
         
+        // Check if current user is a patient to show book appointment button
+        const currentUser = AuthGuard.getCurrentUser();
+        const isPatient = currentUser && currentUser.user_type === 'patient';
+        
         container.innerHTML = `
             <div class="text-center py-4">
                 <i class="bi bi-calendar-x fs-1 text-muted"></i>
                 <p class="mt-2">No upcoming appointments</p>
-                <button class="btn btn-primary btn-sm" onclick="bookAppointment()">
+                ${isPatient ? `<button class="btn btn-primary btn-sm" onclick="bookAppointment()">
                     Book Appointment
-                </button>
+                </button>` : ''}
             </div>
         `;
     },

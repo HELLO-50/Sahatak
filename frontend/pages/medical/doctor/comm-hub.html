@@ -181,5 +181,33 @@
     <script src="../../../assets/js/components/auth-guard.js"></script>
     <script src="../../../assets/js/components/logger.js"></script>
     <script src="../../../assets/js/components/messaging.js"></script>
+    
+    <script>
+        // Update verification status from database
+        function updateVerificationStatus(user) {
+            const statusElement = document.getElementById('verification-status');
+            const isVerified = user.verification_status === 'verified';
+            
+            if (isVerified) {
+                statusElement.textContent = 'Verified';
+                statusElement.className = 'badge bg-success';
+            } else {
+                statusElement.textContent = 'Unverified';
+                statusElement.className = 'badge bg-warning text-dark';
+            }
+        }
+        
+        // Initialize page with user data
+        document.addEventListener('DOMContentLoaded', function() {
+            const user = AuthGuard.getCurrentUser();
+            if (user) {
+                // Update user name in header
+                document.getElementById('user-name').textContent = user.full_name || 'Dr. Name';
+                
+                // Update verification status from database
+                updateVerificationStatus(user);
+            }
+        });
+    </script>
 </body>
 </html>
