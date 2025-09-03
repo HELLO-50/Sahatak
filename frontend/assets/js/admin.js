@@ -929,14 +929,20 @@ const AdminDashboard = {
                     </span>
                 </td>
                 <td>
-                    <button class="btn btn-sm btn-outline-info" onclick="AdminDashboard.viewAdminDetails(${admin.id})" title="View Details">
+                    <button class="btn btn-sm btn-outline-info me-1" onclick="AdminDashboard.viewAdminDetails(${admin.id})" title="View Details">
                         <i class="bi bi-eye"></i>
                     </button>
+                    <button class="btn btn-sm btn-outline-secondary me-1" onclick="AdminDashboard.changeAdminPassword(${admin.id}, '${admin.full_name}')" title="Change Password">
+                        <i class="bi bi-key"></i>
+                    </button>
                     ${admin.id !== this.getCurrentUserId() ? `
-                        <button class="btn btn-sm btn-outline-${admin.is_active ? 'warning' : 'success'}" 
+                        <button class="btn btn-sm btn-outline-${admin.is_active ? 'warning' : 'success'} me-1" 
                                 onclick="AdminDashboard.toggleAdminStatus(${admin.id})" 
                                 title="${admin.is_active ? 'Deactivate' : 'Activate'}">
                             <i class="bi bi-${admin.is_active ? 'person-dash' : 'person-check'}"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="AdminDashboard.deleteAdmin(${admin.id})" title="Delete Admin">
+                            <i class="bi bi-trash"></i>
                         </button>
                     ` : ''}
                 </td>
@@ -952,6 +958,91 @@ const AdminDashboard = {
         } catch {
             return null;
         }
+    },
+
+    // Change admin password
+    async changeAdminPassword(adminId, adminName) {
+        const newPassword = prompt(`Enter new password for ${adminName}:`);
+        if (!newPassword) return;
+        
+        if (newPassword.length < 6) {
+            alert('Password must be at least 6 characters long');
+            return;
+        }
+
+        const confirmPassword = prompt('Confirm new password:');
+        if (newPassword !== confirmPassword) {
+            alert('Passwords do not match');
+            return;
+        }
+
+        try {
+            const response = await this.makeRequest(`/admin/users/${adminId}/change-password`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ new_password: newPassword })
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                this.showNotification(`Password changed successfully for ${adminName}`, 'success');
+            } else {
+                throw new Error(data.message || 'Failed to change password');
+            }
+        } catch (error) {
+            console.error('Change password error:', error);
+            this.showNotification('Failed to change password', 'error');
+        }
+    },
+
+    // Delete admin
+    async deleteAdmin(adminId) {
+        if (!confirm('Are you sure you want to delete this admin? This action cannot be undone.')) {
+            return;
+        }
+
+        try {
+            const response = await this.makeRequest(`/admin/users/${adminId}`, {
+                method: 'DELETE'
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                this.showNotification('Admin deleted successfully', 'success');
+                this.loadAdminUsers(); // Refresh the list
+            } else {
+                throw new Error(data.message || 'Failed to delete admin');
+            }
+        } catch (error) {
+            console.error('Delete admin error:', error);
+            this.showNotification('Failed to delete admin', 'error');
+        }
+    },
+
+    // Toggle admin status (activate/deactivate)
+    async toggleAdminStatus(adminId) {
+        try {
+            const response = await this.makeRequest(`/admin/users/${adminId}/toggle-status`, {
+                method: 'PUT'
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                this.showNotification('Admin status updated successfully', 'success');
+                this.loadAdminUsers(); // Refresh the list
+            } else {
+                throw new Error(data.message || 'Failed to update admin status');
+            }
+        } catch (error) {
+            console.error('Toggle status error:', error);
+            this.showNotification('Failed to update admin status', 'error');
+        }
+    },
+
+    // View admin details
+    viewAdminDetails(adminId) {
+        // For now, just show a simple alert - can be enhanced with a modal later
+        alert(`Admin details for ID: ${adminId}\n(This can be enhanced with a detailed modal)`);
     }
 };
 
