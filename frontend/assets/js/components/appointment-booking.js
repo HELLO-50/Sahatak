@@ -593,8 +593,11 @@ const AppointmentBooking = {
     formatDoctorName(fullName) {
         if (!fullName) return 'Unknown Doctor';
         
-        // If the name already starts with "Dr." or "Doctor", don't add another prefix
-        if (fullName.toLowerCase().startsWith('dr.') || fullName.toLowerCase().startsWith('doctor ')) {
+        // If the name already starts with "Dr.", "Doctor", or Arabic "د." prefix, don't add another prefix
+        if (fullName.toLowerCase().startsWith('dr.') || 
+            fullName.toLowerCase().startsWith('doctor ') ||
+            fullName.startsWith('د.') ||
+            fullName.startsWith('دكتور ')) {
             return fullName;
         }
         
