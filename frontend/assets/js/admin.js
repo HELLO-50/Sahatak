@@ -427,11 +427,11 @@ const AdminDashboard = {
             
             console.log('Users data received:', data); // Debug log
             
-            if (data.success && data.users) {
-                this.displayUsersTable(data.users);
+            if (data.success && data.data) {
+                this.displayUsersTable(data.data.users);
                 // Update pagination if needed
-                if (data.pagination) {
-                    this.updateUsersPagination(data.pagination);
+                if (data.data.pagination) {
+                    this.updateUsersPagination(data.data.pagination);
                 }
             } else {
                 console.error('Invalid users response:', data);
