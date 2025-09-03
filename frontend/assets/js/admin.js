@@ -478,15 +478,17 @@ const AdminDashboard = {
                 </td>
                 <td>${new Date(user.created_at).toLocaleDateString()}</td>
                 <td>
-                    <button class="btn btn-sm btn-primary me-1" onclick="AdminDashboard.viewUser(${user.id})" title="View">
-                        <i class="bi bi-eye"></i>
-                    </button>
-                    <button class="btn btn-sm btn-warning me-1" onclick="AdminDashboard.editUser(${user.id})" title="Edit">
-                        <i class="bi bi-pencil"></i>
-                    </button>
-                    <button class="btn btn-sm btn-${user.is_active ? 'danger' : 'success'}" onclick="AdminDashboard.toggleUserStatus(${user.id})" title="${user.is_active ? 'Deactivate' : 'Activate'}">
-                        <i class="bi bi-${user.is_active ? 'x-circle' : 'check-circle'}"></i>
-                    </button>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            Actions
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="AdminDashboard.viewUser(${user.id}, '${user.full_name || user.email}')"><i class="bi bi-eye me-2"></i>View</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="AdminDashboard.changeUserPassword(${user.id}, '${user.full_name || user.email}')"><i class="bi bi-key me-2"></i>Change Password</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="AdminDashboard.toggleUserStatus(${user.id})"><i class="bi bi-${user.is_active ? 'x-circle' : 'check-circle'} me-2"></i>${user.is_active ? 'Deactivate' : 'Activate'}</a></li>
+                            ${user.user_type !== 'admin' ? `<li><hr class="dropdown-divider"></li><li><a class="dropdown-item text-danger" href="#" onclick="AdminDashboard.deleteUser(${user.id}, '${user.full_name || user.email}')"><i class="bi bi-trash me-2"></i>Delete</a></li>` : ''}
+                        </ul>
+                    </div>
                 </td>
             </tr>
         `).join('');
@@ -571,15 +573,225 @@ const AdminDashboard = {
     },
     
     // View user details
-    viewUser(userId) {
-        console.log('View user:', userId);
-        // Implement view user modal
+    async viewUser(userId, userName) {
+        try {
+            const response = await AdminAuth.apiRequest(`/admin/users/${userId}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                const user = data.user;
+                const modalHtml = `
+                    <div class="modal fade" id="viewUserModal" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">User Details - ${user.full_name || user.email}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-sm-4 fw-bold">Full Name:</div>
+                                        <div class="col-sm-8">${user.full_name || 'N/A'}</div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-sm-4 fw-bold">Email:</div>
+                                        <div class="col-sm-8">${user.email}</div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-sm-4 fw-bold">Phone:</div>
+                                        <div class="col-sm-8">${user.phone || 'N/A'}</div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-sm-4 fw-bold">User Type:</div>
+                                        <div class="col-sm-8">
+                                            <span class="badge bg-${user.user_type === 'admin' ? 'danger' : user.user_type === 'doctor' ? 'info' : 'primary'}">
+                                                ${user.user_type}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-sm-4 fw-bold">Status:</div>
+                                        <div class="col-sm-8">
+                                            <span class="badge bg-${user.is_active ? 'success' : 'secondary'}">
+                                                ${user.is_active ? 'Active' : 'Inactive'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-sm-4 fw-bold">Registration Date:</div>
+                                        <div class="col-sm-8">${new Date(user.created_at).toLocaleDateString()}</div>
+                                    </div>
+                                    ${user.profile ? `
+                                        <hr>
+                                        <h6>Profile Information:</h6>
+                                        ${user.profile.date_of_birth ? `<div class="row mt-2">
+                                            <div class="col-sm-4 fw-bold">Date of Birth:</div>
+                                            <div class="col-sm-8">${user.profile.date_of_birth}</div>
+                                        </div>` : ''}
+                                        ${user.profile.age ? `<div class="row mt-2">
+                                            <div class="col-sm-4 fw-bold">Age:</div>
+                                            <div class="col-sm-8">${user.profile.age}</div>
+                                        </div>` : ''}
+                                        ${user.profile.gender ? `<div class="row mt-2">
+                                            <div class="col-sm-4 fw-bold">Gender:</div>
+                                            <div class="col-sm-8">${user.profile.gender}</div>
+                                        </div>` : ''}
+                                        ${user.profile.specialization ? `<div class="row mt-2">
+                                            <div class="col-sm-4 fw-bold">Specialization:</div>
+                                            <div class="col-sm-8">${user.profile.specialization}</div>
+                                        </div>` : ''}
+                                        ${user.profile.license_number ? `<div class="row mt-2">
+                                            <div class="col-sm-4 fw-bold">License Number:</div>
+                                            <div class="col-sm-8">${user.profile.license_number}</div>
+                                        </div>` : ''}
+                                    ` : ''}
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Remove existing modal if present
+                const existingModal = document.getElementById('viewUserModal');
+                if (existingModal) {
+                    existingModal.remove();
+                }
+                
+                // Add modal to body
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+                
+                // Show modal
+                const modal = new bootstrap.Modal(document.getElementById('viewUserModal'));
+                modal.show();
+                
+                // Clean up modal after hide
+                document.getElementById('viewUserModal').addEventListener('hidden.bs.modal', function () {
+                    this.remove();
+                });
+                
+            } else {
+                this.showNotification(data.message || 'Failed to load user details', 'error');
+            }
+        } catch (error) {
+            console.error('View user error:', error);
+            this.showNotification('Failed to load user details', 'error');
+        }
     },
     
-    // Edit user
-    editUser(userId) {
-        console.log('Edit user:', userId);
-        // Implement edit user modal
+    // Change user password
+    async changeUserPassword(userId, userName) {
+        const modalHtml = `
+            <div class="modal fade" id="changeUserPasswordModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Change Password - ${userName}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form id="changeUserPasswordForm">
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="newUserPassword" class="form-label">New Password</label>
+                                    <input type="password" class="form-control" id="newUserPassword" required minlength="6">
+                                    <div class="form-text">Password must be at least 6 characters long.</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="confirmUserPassword" class="form-label">Confirm Password</label>
+                                    <input type="password" class="form-control" id="confirmUserPassword" required minlength="6">
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Change Password</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Remove existing modal if present
+        const existingModal = document.getElementById('changeUserPasswordModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        // Add modal to body
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('changeUserPasswordModal'));
+        modal.show();
+        
+        // Handle form submission
+        document.getElementById('changeUserPasswordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const newPassword = document.getElementById('newUserPassword').value;
+            const confirmPassword = document.getElementById('confirmUserPassword').value;
+            
+            if (newPassword !== confirmPassword) {
+                this.showNotification('Passwords do not match', 'error');
+                return;
+            }
+            
+            try {
+                const response = await AdminAuth.apiRequest(`/admin/users/${userId}/change-password`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        new_password: newPassword
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    this.showNotification('Password changed successfully', 'success');
+                    modal.hide();
+                } else {
+                    this.showNotification(data.message || 'Failed to change password', 'error');
+                }
+            } catch (error) {
+                console.error('Change user password error:', error);
+                this.showNotification('Failed to change password', 'error');
+            }
+        });
+        
+        // Clean up modal after hide
+        document.getElementById('changeUserPasswordModal').addEventListener('hidden.bs.modal', function () {
+            this.remove();
+        });
+    },
+    
+    // Delete user
+    async deleteUser(userId, userName) {
+        if (!confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
+            return;
+        }
+        
+        try {
+            const response = await AdminAuth.apiRequest(`/admin/users/${userId}`, {
+                method: 'DELETE'
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                this.showNotification('User deleted successfully', 'success');
+                // Reload users data
+                this.loadUsersData();
+            } else {
+                this.showNotification(data.message || 'Failed to delete user', 'error');
+            }
+        } catch (error) {
+            console.error('Delete user error:', error);
+            this.showNotification('Failed to delete user', 'error');
+        }
     },
     
     // Toggle user status

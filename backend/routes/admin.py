@@ -353,7 +353,7 @@ def get_users():
             elif user.user_type == 'patient' and user.patient_profile:
                 user_info['phone'] = user.patient_profile.phone  # Get phone from patient profile
                 user_info['patient_info'] = {
-                    'date_of_birth': user.patient_profile.date_of_birth.isoformat() if user.patient_profile.date_of_birth else None,
+                    'age': user.patient_profile.age,
                     'gender': user.patient_profile.gender,
                     'emergency_contact': user.patient_profile.emergency_contact
                 }
