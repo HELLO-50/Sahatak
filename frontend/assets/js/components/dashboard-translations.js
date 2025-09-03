@@ -584,6 +584,8 @@ const DashboardTranslations = {
             this.updateRecordsDashboard(savedLanguage);
         } else if (dashboardType === 'availability') {
             this.updateAvailabilityDashboard(savedLanguage);
+        } else if (dashboardType === 'appointments') {
+            this.updateAppointmentsDashboard(savedLanguage);
         }
         
         // Update user name from localStorage (admin doesn't need this)
