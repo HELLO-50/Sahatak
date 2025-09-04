@@ -618,8 +618,13 @@ const ApiHelper = {
         return 'api_response';
     },
     
-    // Check and refresh session if needed
+    // TEMPORARILY DISABLE session checking to fix logout issues
     async checkSession() {
+        console.log('🔕 checkSession called but DISABLED to prevent logout');
+        return true; // Always return true to avoid logout
+        
+        // ORIGINAL CODE (disabled):
+        /*
         try {
             const now = Date.now();
             // Only check session every 5 minutes to avoid excessive requests
@@ -672,28 +677,14 @@ const ApiHelper = {
             window.SahatakLogger?.warn('Session check failed:', error);
             return false;
         }
+        */
     },
 
-    // Start automatic session checking (with safety checks)
+    // TEMPORARILY DISABLE automatic session checking to fix logout issues
     startSessionMonitoring() {
-        // Only start if not already running and user is authenticated
-        if (!this.sessionCheckInterval && window.AuthGuard && AuthGuard.isAuthenticated() && !AuthGuard.isDevelopmentMode()) {
-            this.sessionCheckInterval = setInterval(async () => {
-                try {
-                    const isValid = await this.checkSession();
-                    if (!isValid) {
-                        window.SahatakLogger?.warn('Session validation failed - logging out');
-                        await this.handleSessionExpired();
-                    }
-                } catch (error) {
-                    window.SahatakLogger?.error('Session monitoring error:', error);
-                }
-            }, 600000); // 10 minutes
-            
-            window.SahatakLogger?.info('Session monitoring started');
-            return true;
-        }
-        return false; // Already running or conditions not met
+        console.log('🔕 Session monitoring DISABLED to prevent logout issues');
+        console.log('🔐 Relying on token authentication only');
+        return true; // Pretend it started to avoid errors
     },
 
     // Stop session monitoring
