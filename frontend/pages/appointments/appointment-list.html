@@ -1,79 +1,131 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مواعيدي | صحتك</title>
+    <title id="page-title-head">My Appointments - Sahatak</title>
     
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%230d47a1' d='m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523.942-.661 2.27.067 3.71L8 15.5l6.533-8.737c.728-1.44.59-2.768.067-3.71C13.486.878 10.4.28 8.717 2.01L8 2.748z'/></svg>">
+    
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    
+    <!-- Bootstrap Icons CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
-    <!-- Arabic Font -->
+    <!-- Arabic Font - Noto Sans Arabic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Custom CSS - following established patterns -->
+    <!-- Main CSS -->
     <link rel="stylesheet" href="../../assets/css/main.css">
+    <!-- Dashboard CSS -->
+    <link rel="stylesheet" href="../../assets/css/components/dashboard.css">
+    <!-- Appointments CSS -->
     <link rel="stylesheet" href="../../assets/css/components/appointments.css">
 </head>
-<body>
-    <!-- Header -->
-    <nav class="navbar navbar-expand-lg bg-primary navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="../../index.html">
-                <i class="bi bi-heart-pulse me-2"></i>
-                صحتك | Sahatak
-            </a>
-            <div>
-                <button class="btn btn-success me-2" onclick="bookNewAppointment()">
-                    <i class="bi bi-plus me-1"></i>
-                    حجز موعد جديد
-                </button>
-                <button class="btn btn-outline-light" onclick="goToDashboard()">
-                    <i class="bi bi-house me-1"></i>
-                    الرئيسية
-                </button>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container my-5">
-        <!-- Page Header -->
-        <div class="text-center mb-5">
-            <h1 class="display-6 mb-3">
-                <i class="bi bi-calendar-event text-primary me-3"></i>
-                مواعيدي
-            </h1>
-            <p class="lead text-muted">عرض وإدارة مواعيدك الطبية</p>
-        </div>
-
-        <!-- Filter Tabs -->
-        <div class="card shadow-sm mb-4">
-            <div class="card-body">
-                <ul class="nav nav-pills justify-content-center" id="appointment-tabs">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="javascript:void(0)" data-filter="all">جميع المواعيد</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="javascript:void(0)" data-filter="upcoming">المواعيد القادمة</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="javascript:void(0)" data-filter="completed">المواعيد المكتملة</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="javascript:void(0)" data-filter="cancelled">المواعيد المُلغاة</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- Appointments List -->
-        <div id="appointments-container">
-            <div class="text-center py-5">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">جاري التحميل...</span>
+<body data-protect="patient">
+    <div class="dashboard-container">
+        <div class="container-fluid">
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <div class="row align-items-center">
+                    <!-- Profile Section - Left (Right in RTL) -->
+                    <div class="col-lg-4">
+                        <div class="profile-section">
+                            <div class="user-avatar">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <div class="user-details">
+                                <h5 class="mb-1" id="user-name">Loading...</h5>
+                            </div>
+                            <!-- Vertical Action Buttons -->
+                            <div class="action-buttons">
+                                <button class="btn btn-action" onclick="goBackToDashboard()" title="Back to Dashboard">
+                                    <i class="bi bi-arrow-left"></i>
+                                    <span id="btn-back">Back to Dashboard</span>
+                                </button>
+                                <button class="btn btn-action btn-logout" onclick="AuthGuard.logout()" title="Logout">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                    <span id="btn-logout">Logout</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Page Title - Center -->
+                    <div class="col-lg-4 text-center">
+                        <h1 class="dashboard-title" id="page-title">My Appointments</h1>
+                        <p class="dashboard-subtitle" id="page-subtitle">Manage and view your medical appointments</p>
+                    </div>
+                    
+                    <!-- Controls - Right (Left in RTL) -->
+                    <div class="col-lg-4 text-end">
+                        <div class="dashboard-controls">
+                            <button class="btn btn-medical btn-sm me-2" onclick="bookNewAppointment()">
+                                <i class="bi bi-plus me-1"></i>
+                                <span id="btn-new-appointment">Book New</span>
+                            </button>
+                            <button class="btn btn-outline-medical btn-sm" onclick="showLanguageSelector()">
+                                <i class="bi bi-globe me-1"></i>
+                                <span id="current-lang">English</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <p class="mt-3 text-muted">جاري تحميل مواعيدك...</p>
+            </div>
+
+            <!-- Main Content -->
+            <div class="row">
+                <div class="col-12">
+                    <!-- Filter Tabs -->
+                    <div class="dashboard-card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-funnel me-2 text-primary"></i>
+                                <span id="filter-title">Filter Appointments</span>
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="nav nav-pills justify-content-center" id="appointment-tabs">
+                                <li class="nav-item">
+                                    <a class="nav-link active" href="javascript:void(0)" data-filter="all" id="tab-all">All Appointments</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="javascript:void(0)" data-filter="upcoming" id="tab-upcoming">Upcoming</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="javascript:void(0)" data-filter="completed" id="tab-completed">Completed</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="javascript:void(0)" data-filter="cancelled" id="tab-cancelled">Cancelled</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Appointments List -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-calendar-event me-2 text-primary"></i>
+                                <span id="appointments-title">Your Appointments</span>
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="appointments-container">
+                                <div class="text-center py-5">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden" id="loading-text">Loading...</span>
+                                    </div>
+                                    <p class="mt-3 text-muted" id="loading-appointments">Loading your appointments...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -83,7 +135,10 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">تفاصيل الموعد</h5>
+                    <h5 class="modal-title">
+                        <i class="bi bi-calendar-event me-2"></i>
+                        <span id="modal-appointment-details">Appointment Details</span>
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" id="appointment-details">
@@ -92,13 +147,13 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-warning d-none me-2" id="reschedule-btn">
                         <i class="bi bi-calendar-event me-1"></i>
-                        إعادة جدولة
+                        <span id="btn-reschedule">Reschedule</span>
                     </button>
-                    <button type="button" class="btn btn-danger d-none" id="cancel-btn">
+                    <button type="button" class="btn btn-danger d-none me-2" id="cancel-btn">
                         <i class="bi bi-x-circle me-1"></i>
-                        إلغاء الموعد
+                        <span id="btn-cancel">Cancel</span>
                     </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btn-close">Close</button>
                 </div>
             </div>
         </div>
@@ -111,22 +166,23 @@
                 <div class="modal-header">
                     <h5 class="modal-title text-danger">
                         <i class="bi bi-exclamation-triangle me-2"></i>
-                        <span id="cancel-modal-title">تأكيد الإلغاء</span>
+                        <span id="cancel-modal-title">Confirm Cancellation</span>
                     </h5>
                 </div>
                 <div class="modal-body">
-                    <p id="cancel-modal-message">هل أنت متأكد من رغبتك في إلغاء هذا الموعد؟</p>
+                    <p id="cancel-modal-message">Are you sure you want to cancel this appointment?</p>
                     <div class="mb-3">
-                        <label for="cancellation-reason" class="form-label" id="cancellation-reason-label">سبب الإلغاء (اختياري)</label>
-                        <textarea class="form-control" id="cancellation-reason" rows="3" placeholder="اكتب سبب إلغاء الموعد..."></textarea>
+                        <label for="cancellation-reason" class="form-label" id="cancellation-reason-label">Reason for cancellation (optional)</label>
+                        <textarea class="form-control" id="cancellation-reason" rows="3" 
+                                placeholder="" data-placeholder-key="cancellation-reason-placeholder"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger" onclick="confirmCancellation()">
                         <i class="bi bi-check me-1"></i>
-                        <span id="confirm-cancel-btn">نعم، إلغاء الموعد</span>
+                        <span id="confirm-cancel-btn">Yes, Cancel Appointment</span>
                     </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="keep-appointment-btn">لا، الاحتفاظ بالموعد</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="keep-appointment-btn">Keep Appointment</button>
                 </div>
             </div>
         </div>
@@ -139,16 +195,16 @@
                 <div class="modal-header">
                     <h5 class="modal-title">
                         <i class="bi bi-calendar-event text-primary me-2"></i>
-                        <span id="reschedule-modal-title">إعادة جدولة الموعد</span>
+                        <span id="reschedule-modal-title">Reschedule Appointment</span>
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p id="reschedule-modal-subtitle">اختر التاريخ والوقت الجديد</p>
+                    <p id="reschedule-modal-subtitle">Select new date and time</p>
                     
                     <!-- Current appointment info -->
                     <div class="alert alert-info mb-4">
-                        <h6 class="mb-2">الموعد الحالي:</h6>
+                        <h6 class="mb-2" id="current-appointment-label">Current Appointment:</h6>
                         <div id="current-appointment-info">
                             <!-- Will be populated by JavaScript -->
                         </div>
@@ -157,14 +213,14 @@
                     <!-- New date selection -->
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <label for="new-appointment-date" class="form-label" id="new-date-label">التاريخ الجديد</label>
+                            <label for="new-appointment-date" class="form-label" id="new-date-label">New Date</label>
                             <input type="date" class="form-control" id="new-appointment-date">
                         </div>
                     </div>
                     
                     <!-- Available time slots -->
                     <div id="reschedule-time-slots-container" class="mb-4">
-                        <h6 class="mb-3" id="new-time-label">الأوقات المتاحة</h6>
+                        <h6 class="mb-3" id="new-time-label">Available Times</h6>
                         <div id="reschedule-time-slots" class="d-flex flex-wrap gap-2">
                             <!-- Time slots will be populated here -->
                         </div>
@@ -172,533 +228,909 @@
                     
                     <!-- Reschedule reason -->
                     <div class="mb-3">
-                        <label for="reschedule-reason" class="form-label" id="reschedule-reason-label">سبب إعادة الجدولة (اختياري)</label>
-                        <textarea class="form-control" id="reschedule-reason" rows="3" placeholder="اكتب سبب إعادة جدولة الموعد..."></textarea>
+                        <label for="reschedule-reason" class="form-label" id="reschedule-reason-label">Reason for rescheduling (optional)</label>
+                        <textarea class="form-control" id="reschedule-reason" rows="3" 
+                                placeholder="" data-placeholder-key="reschedule-reason-placeholder"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" onclick="confirmReschedule()" id="confirm-reschedule" disabled>
                         <i class="bi bi-calendar-check me-1"></i>
-                        <span id="confirm-reschedule-btn">تأكيد إعادة الجدولة</span>
+                        <span id="confirm-reschedule-btn">Confirm Reschedule</span>
                     </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3">
+        <div class="container">
+            <div class="row g-3">
+                <!-- Brand & Description -->
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="mb-3">
+                        <i class="bi bi-heart-pulse me-2 text-primary"></i>
+                        <span id="footer-brand">Sahatak</span>
+                    </h5>
+                    <div class="d-flex gap-3 social-links">
+                        <a href="https://facebook.com/sahatak" target="_blank" rel="noopener"><i class="bi bi-facebook fs-5"></i></a>
+                        <a href="https://twitter.com/sahatak" target="_blank" rel="noopener"><i class="bi bi-twitter fs-5"></i></a>
+                        <a href="https://instagram.com/sahatak" target="_blank" rel="noopener"><i class="bi bi-instagram fs-5"></i></a>
+                        <a href="https://linkedin.com/company/sahatak" target="_blank" rel="noopener"><i class="bi bi-linkedin fs-5"></i></a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="mb-3" id="footer-links-title">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="../common/about.html" class="text-muted text-decoration-none" id="footer-about">About Platform</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="../common/services.html" class="text-muted text-decoration-none" id="footer-services">Services</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="mb-3" id="footer-support-title">Support & Help</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="../common/support.html" class="text-muted text-decoration-none" id="footer-help">Help Center</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="../common/contact-us.html" class="text-muted text-decoration-none" id="footer-contact">Contact Us</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Emergency Contact -->
+                <div class="col-lg-3 col-md-6 emergency-section">
+                    <p class="mb-2 text-danger fw-bold" id="footer-emergency-text">
+                        For medical emergencies
+                    </p>
+                    <p class="mb-3 text-danger fw-bold fs-6" id="footer-emergency-action">
+                        <i class="bi bi-hospital me-2"></i>
+                        Go to nearest ER hospital
+                    </p>
+                    <p class="mb-0 text-muted small" id="footer-emergency-note">
+                        For non-urgent consultations use the platform
+                    </p>
+                </div>
+            </div>
+
+            <!-- Bottom Bar -->
+            <hr class="my-3">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="mb-0 fw-bold" id="footer-copyright">
+                        © 2025 Sahatak. All rights reserved.
+                    </p>
+                    <p class="mb-0 text-muted small mt-1" id="footer-medical-disclaimer">
+                        This platform does not replace visiting a doctor in emergency cases
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JavaScript CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     
-    <!-- Custom JS - following established patterns -->
+    <!-- Authentication Guard (must load first) -->
+    <script src="../../assets/js/components/auth-guard.js"></script>
+    <script src="../../assets/js/components/auth-storage.js"></script>
+    
+    <!-- Main JavaScript -->
     <script src="../../assets/js/main.js"></script>
     
+    <!-- Dashboard Translations -->
+    <script src="../../assets/js/components/dashboard-translations.js"></script>
+    
     <script>
-        let currentAppointmentId = null;
-        let currentAppointment = null;
-        let currentFilter = 'all';
-        let appointments = [];
-        let selectedNewDateTime = null;
+        // Appointment List Management - following main.js patterns
+        const AppointmentList = {
+            currentAppointmentId: null,
+            currentAppointment: null,
+            currentFilter: 'all',
+            appointments: [],
+            selectedNewDateTime: null,
 
-        // Initialize when page loads - following main.js patterns
-        document.addEventListener('DOMContentLoaded', async function() {
-            // Ensure translations are loaded
-            if (!LanguageManager.translations || !LanguageManager.translations.ar) {
-                await LanguageManager.loadTranslations();
-            }
-            
-            updateUITranslations();
-            loadAppointments();
-            setupEventListeners();
-        });
-
-        // Update UI with translations - following established patterns
-        function updateUITranslations() {
-            const lang = LanguageManager.getLanguage() || 'ar';
-            const t = LanguageManager.translations[lang];
-            if (!t || !t.appointments) return;
-
-            // Update modal titles and buttons
-            updateElementText('cancel-modal-title', t.appointments.cancel_confirm_title);
-            updateElementText('cancel-modal-message', t.appointments.cancel_confirm_message);
-            updateElementText('cancellation-reason-label', t.appointments.cancellation_reason);
-            updateElementText('confirm-cancel-btn', t.appointments.confirm_cancel);
-            updateElementText('keep-appointment-btn', t.appointments.keep_appointment);
-            
-            updateElementText('reschedule-modal-title', t.appointments.reschedule_title);
-            updateElementText('reschedule-modal-subtitle', t.appointments.select_new_time);
-            updateElementText('new-date-label', t.appointments.new_date);
-            updateElementText('new-time-label', t.appointments.new_time);
-            updateElementText('reschedule-reason-label', t.appointments.reschedule_reason);
-            updateElementText('confirm-reschedule-btn', t.appointments.confirm_reschedule);
-            
-            // Update placeholders
-            const cancellationTextarea = document.getElementById('cancellation-reason');
-            if (cancellationTextarea) {
-                cancellationTextarea.placeholder = t.appointments.cancellation_reason_placeholder;
-            }
-            
-            const rescheduleTextarea = document.getElementById('reschedule-reason');
-            if (rescheduleTextarea) {
-                rescheduleTextarea.placeholder = t.appointments.reschedule_reason_placeholder;
-            }
-        }
-
-        // Helper function following main.js patterns
-        function updateElementText(elementId, text) {
-            const element = document.getElementById(elementId);
-            if (element && text) {
-                element.textContent = text;
-            }
-        }
-
-        // Setup event listeners
-        function setupEventListeners() {
-            // Tab filters
-            document.querySelectorAll('#appointment-tabs .nav-link').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    // Update active tab
-                    document.querySelectorAll('#appointment-tabs .nav-link').forEach(l => l.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // Filter appointments
-                    currentFilter = this.getAttribute('data-filter');
-                    renderAppointments();
-                });
-            });
-
-            // Date change for reschedule
-            document.getElementById('new-appointment-date').addEventListener('change', loadRescheduleTimeSlots);
-            
-            // Set minimum date to today for reschedule
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('new-appointment-date').min = today;
-        }
-
-        // Load appointments from API
-        async function loadAppointments() {
-            try {
-                const response = await ApiHelper.makeRequest('/appointments/');
+            // Initialize when page loads - following main.js patterns
+            async init() {
+                console.log('AppointmentList initializing...');
                 
-                if (response.success) {
-                    appointments = response.data.appointments;
-                    renderAppointments();
+                // Load user name if available
+                this.loadUserName();
+                
+                // Initialize language and translations
+                await this.initializeLanguageSystem();
+                
+                // Load appointments and setup
+                await this.loadAppointments();
+                this.setupEventListeners();
+                
+                console.log('AppointmentList initialized successfully');
+            },
+
+            // Load user name following patient.html pattern
+            loadUserName() {
+                console.log('Loading user data...');
+                
+                // First try AuthGuard for real-time data
+                const authUser = AuthGuard.getCurrentUser();
+                console.log('AuthGuard user:', authUser);
+                
+                if (authUser && (authUser.full_name || authUser.fullName)) {
+                    const name = authUser.full_name || authUser.fullName;
+                    console.log('Using AuthGuard full_name/fullName:', name);
+                    document.getElementById('user-name').textContent = name;
+                } else if (authUser && authUser.name) {
+                    console.log('Using AuthGuard name:', authUser.name);
+                    document.getElementById('user-name').textContent = authUser.name;
                 } else {
-                    showError('فشل في تحميل المواعيد');
-                }
-            } catch (error) {
-                console.error('Error loading appointments:', error);
-                showError('خطأ في الاتصال بالخادم');
-            }
-        }
-
-        // Render appointments based on current filter
-        function renderAppointments() {
-            const container = document.getElementById('appointments-container');
-            
-            // Filter appointments
-            let filteredAppointments = appointments;
-            
-            switch (currentFilter) {
-                case 'upcoming':
-                    filteredAppointments = appointments.filter(apt => 
-                        ['scheduled', 'confirmed'].includes(apt.status) && 
-                        new Date(apt.appointment_date) > new Date()
-                    );
-                    break;
-                case 'completed':
-                    filteredAppointments = appointments.filter(apt => apt.status === 'completed');
-                    break;
-                case 'cancelled':
-                    filteredAppointments = appointments.filter(apt => apt.status === 'cancelled');
-                    break;
-            }
-
-            if (filteredAppointments.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-5">
-                        <i class="bi bi-calendar-x display-4 text-muted mb-3"></i>
-                        <h5 class="text-muted mb-3">لا توجد مواعيد</h5>
-                        <p class="text-muted mb-4">لم يتم العثور على مواعيد في هذه الفئة</p>
-                        <button class="btn btn-primary" onclick="bookNewAppointment()">
-                            <i class="bi bi-plus me-1"></i>
-                            احجز موعدك الأول
-                        </button>
-                    </div>
-                `;
-                return;
-            }
-
-            const appointmentsHtml = filteredAppointments.map(appointment => {
-                const date = new Date(appointment.appointment_date);
-                const statusClass = getStatusClass(appointment.status);
-                const statusText = getStatusArabic(appointment.status);
-                const typeText = getAppointmentTypeArabic(appointment.appointment_type);
-                const canModify = ['scheduled', 'confirmed'].includes(appointment.status) && 
-                                 new Date(appointment.appointment_date) > new Date(Date.now() + 60*60*1000); // 1 hour from now
-                
-                return `
-                    <div class="card mb-3 appointment-card">
-                        <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col-md-8">
-                                    <div class="d-flex align-items-center mb-2">
-                                        <i class="bi bi-person-badge text-primary me-2 fs-5"></i>
-                                        <h6 class="mb-0">د. ${appointment.doctor_name || 'غير متوفر'}</h6>
-                                    </div>
-                                    
-                                    <div class="row text-muted small">
-                                        <div class="col-sm-6 mb-2">
-                                            <i class="bi bi-calendar me-1"></i>
-                                            ${date.toLocaleDateString('ar-SA')} - ${date.toLocaleTimeString('ar-SA', {hour: '2-digit', minute: '2-digit'})}
-                                        </div>
-                                        <div class="col-sm-6 mb-2">
-                                            <i class="bi bi-camera-video me-1"></i>
-                                            ${typeText}
-                                        </div>
-                                        ${appointment.reason_for_visit ? `
-                                            <div class="col-12">
-                                                <i class="bi bi-chat-dots me-1"></i>
-                                                ${appointment.reason_for_visit}
-                                            </div>
-                                        ` : ''}
-                                    </div>
-                                </div>
-                                
-                                <div class="col-md-4 text-end">
-                                    <div class="mb-3">
-                                        <span class="badge ${statusClass} fs-6">${statusText}</span>
-                                    </div>
-                                    
-                                    <div class="btn-group-vertical btn-group-sm">
-                                        <button class="btn btn-outline-primary btn-sm" onclick="viewAppointment(${appointment.id})">
-                                            <i class="bi bi-eye me-1"></i>
-                                            التفاصيل
-                                        </button>
-                                        ${canModify ? `
-                                            <button class="btn btn-outline-warning btn-sm" onclick="rescheduleAppointment(${appointment.id})">
-                                                <i class="bi bi-calendar-event me-1"></i>
-                                                إعادة جدولة
-                                            </button>
-                                            <button class="btn btn-outline-danger btn-sm" onclick="cancelAppointment(${appointment.id})">
-                                                <i class="bi bi-x-circle me-1"></i>
-                                                إلغاء
-                                            </button>
-                                        ` : ''}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            container.innerHTML = appointmentsHtml;
-        }
-
-        // View appointment details
-        async function viewAppointment(appointmentId) {
-            try {
-                const response = await ApiHelper.makeRequest(`/appointments/${appointmentId}`);
-                
-                if (response.success) {
-                    currentAppointment = response.data.appointment;
-                    const appointment = currentAppointment;
-                    const date = new Date(appointment.appointment_date);
+                    console.log('No AuthGuard data available, checking localStorage directly');
                     
-                    const detailsHtml = `
-                        <div class="row">
-                            <div class="col-sm-6 mb-3">
-                                <strong>الطبيب:</strong><br>
-                                د. ${appointment.doctor_name || 'غير متوفر'}
-                            </div>
-                            <div class="col-sm-6 mb-3">
-                                <strong>التاريخ والوقت:</strong><br>
-                                ${date.toLocaleDateString('ar-SA')} - ${date.toLocaleTimeString('ar-SA', {hour: '2-digit', minute: '2-digit'})}
-                            </div>
-                            <div class="col-sm-6 mb-3">
-                                <strong>نوع الاستشارة:</strong><br>
-                                ${getAppointmentTypeArabic(appointment.appointment_type)}
-                            </div>
-                            <div class="col-sm-6 mb-3">
-                                <strong>حالة الموعد:</strong><br>
-                                <span class="badge ${getStatusClass(appointment.status)}">${getStatusArabic(appointment.status)}</span>
-                            </div>
-                            ${appointment.reason_for_visit ? `
-                                <div class="col-12 mb-3">
-                                    <strong>سبب الزيارة:</strong><br>
-                                    ${appointment.reason_for_visit}
-                                </div>
-                            ` : ''}
-                            ${appointment.symptoms ? `
-                                <div class="col-12 mb-3">
-                                    <strong>الأعراض:</strong><br>
-                                    ${appointment.symptoms}
-                                </div>
-                            ` : ''}
-                            ${appointment.diagnosis ? `
-                                <div class="col-12 mb-3">
-                                    <strong>التشخيص:</strong><br>
-                                    ${appointment.diagnosis}
-                                </div>
-                            ` : ''}
-                            ${appointment.prescription ? `
-                                <div class="col-12 mb-3">
-                                    <strong>الوصفة الطبية:</strong><br>
-                                    ${appointment.prescription}
-                                </div>
-                            ` : ''}
-                            ${appointment.notes ? `
-                                <div class="col-12 mb-3">
-                                    <strong>ملاحظات:</strong><br>
-                                    ${appointment.notes}
-                                </div>
-                            ` : ''}
-                        </div>
-                    `;
+                    // Check current user type to avoid cross-contamination
+                    const userType = localStorage.getItem('sahatak_user_type');
+                    console.log('Current user type:', userType);
                     
-                    document.getElementById('appointment-details').innerHTML = detailsHtml;
+                    let userName = null;
                     
-                    // Show/hide action buttons based on status
-                    const canModify = ['scheduled', 'confirmed'].includes(appointment.status) && 
-                                     new Date(appointment.appointment_date) > new Date(Date.now() + 60*60*1000);
-                    
-                    const cancelBtn = document.getElementById('cancel-btn');
-                    const rescheduleBtn = document.getElementById('reschedule-btn');
-                    
-                    if (canModify) {
-                        cancelBtn.classList.remove('d-none');
-                        rescheduleBtn.classList.remove('d-none');
-                        cancelBtn.onclick = () => cancelAppointment(appointment.id);
-                        rescheduleBtn.onclick = () => rescheduleAppointment(appointment.id);
-                    } else {
-                        cancelBtn.classList.add('d-none');
-                        rescheduleBtn.classList.add('d-none');
+                    // Only check patient-specific data for patient users
+                    if (userType === 'patient') {
+                        try {
+                            const patientData = JSON.parse(localStorage.getItem('sahatak_patient_data') || '{}');
+                            if (patientData.full_name) {
+                                userName = patientData.full_name;
+                                console.log('Found patient full_name:', userName);
+                            }
+                        } catch (e) {
+                            console.log('Error parsing patient data:', e);
+                        }
+                        
+                        // Fallback to user name from localStorage
+                        if (!userName) {
+                            userName = localStorage.getItem('sahatak_user_name');
+                            console.log('Using sahatak_user_name:', userName);
+                        }
                     }
                     
-                    const modal = new bootstrap.Modal(document.getElementById('appointment-modal'));
-                    modal.show();
-                } else {
-                    showError('فشل في تحميل تفاصيل الموعد');
+                    if (userName) {
+                        document.getElementById('user-name').textContent = userName;
+                    } else {
+                        console.log('No user data found, using default');
+                        document.getElementById('user-name').textContent = 'Patient';
+                    }
                 }
-            } catch (error) {
-                console.error('Error loading appointment details:', error);
-                showError('خطأ في تحميل تفاصيل الموعد');
-            }
-        }
+            },
 
-        // Cancel appointment
-        function cancelAppointment(appointmentId) {
-            currentAppointmentId = appointmentId;
-            document.getElementById('cancellation-reason').value = '';
-            const cancelModal = new bootstrap.Modal(document.getElementById('cancel-modal'));
-            cancelModal.show();
-        }
+            // Initialize language system following main.js patterns
+            async initializeLanguageSystem() {
+                try {
+                    // Load LanguageManager translations first
+                    if (typeof LanguageManager !== 'undefined') {
+                        await LanguageManager.loadTranslations();
+                    }
+                    
+                    // Initialize language system
+                    const currentLang = LanguageManager?.getLanguage() || localStorage.getItem('sahatak_language') || 'en';
+                    
+                    // Apply language settings using LanguageManager
+                    if (typeof LanguageManager !== 'undefined') {
+                        LanguageManager.applyLanguage(currentLang);
+                    }
+                    
+                    // Apply appointment-specific translations
+                    this.updateAppointmentTranslations(currentLang);
+                    
+                    // Set initial language button text
+                    const langBtn = document.getElementById('current-lang');
+                    if (langBtn) {
+                        langBtn.textContent = currentLang === 'ar' ? 'العربية' : 'English';
+                    }
+                } catch (error) {
+                    console.error('Error initializing language system:', error);
+                }
+            },
 
-        // Reschedule appointment
-        function rescheduleAppointment(appointmentId) {
-            currentAppointmentId = appointmentId;
-            currentAppointment = appointments.find(apt => apt.id === appointmentId);
+            // Update UI with translations - following established patterns
+            updateAppointmentTranslations(lang = 'en') {
+                const translations = LanguageManager.translations;
+                if (!translations || !translations[lang]) {
+                    console.warn(`No translations found for language: ${lang}`);
+                    return;
+                }
+                
+                const t = translations[lang];
+                
+                // Update page title
+                document.title = `${t.appointments?.my_appointments || 'My Appointments'} - ${t.app_name}`;
+                
+                // Update header elements
+                this.updateElement('page-title', t.appointments?.my_appointments || 'My Appointments');
+                this.updateElement('page-subtitle', t.appointments?.manage_subtitle || 'Manage and view your medical appointments');
+                
+                // Update navigation buttons
+                this.updateElement('btn-back', t.dashboard?.patient?.nav?.home || 'Back to Dashboard');
+                this.updateElement('btn-logout', t.dashboard?.patient?.logout || 'Logout');
+                this.updateElement('btn-new-appointment', t.appointments?.book_new || 'Book New');
+                
+                // Update filter tabs
+                this.updateElement('filter-title', t.appointments?.filter_title || 'Filter Appointments');
+                this.updateElement('tab-all', t.appointments?.tab_all || 'All Appointments');
+                this.updateElement('tab-upcoming', t.appointments?.tab_upcoming || 'Upcoming');
+                this.updateElement('tab-completed', t.appointments?.tab_completed || 'Completed');
+                this.updateElement('tab-cancelled', t.appointments?.tab_cancelled || 'Cancelled');
+                
+                // Update main content
+                this.updateElement('appointments-title', t.appointments?.your_appointments || 'Your Appointments');
+                this.updateElement('loading-text', t.common?.loading || 'Loading...');
+                this.updateElement('loading-appointments', t.appointments?.loading_appointments || 'Loading your appointments...');
+                
+                // Update modals
+                this.updateElement('modal-appointment-details', t.appointments?.appointment_details || 'Appointment Details');
+                this.updateElement('btn-reschedule', t.appointments?.reschedule || 'Reschedule');
+                this.updateElement('btn-cancel', t.appointments?.cancel || 'Cancel');
+                this.updateElement('btn-close', t.common?.close || 'Close');
+                
+                // Update cancel modal
+                this.updateElement('cancel-modal-title', t.appointments?.cancel_confirm_title || 'Confirm Cancellation');
+                this.updateElement('cancel-modal-message', t.appointments?.cancel_confirm_message || 'Are you sure you want to cancel this appointment?');
+                this.updateElement('cancellation-reason-label', t.appointments?.cancellation_reason || 'Reason for cancellation (optional)');
+                this.updateElement('confirm-cancel-btn', t.appointments?.confirm_cancel || 'Yes, Cancel Appointment');
+                this.updateElement('keep-appointment-btn', t.appointments?.keep_appointment || 'Keep Appointment');
+                
+                // Update reschedule modal
+                this.updateElement('reschedule-modal-title', t.appointments?.reschedule_title || 'Reschedule Appointment');
+                this.updateElement('reschedule-modal-subtitle', t.appointments?.select_new_time || 'Select new date and time');
+                this.updateElement('current-appointment-label', t.appointments?.current_appointment || 'Current Appointment:');
+                this.updateElement('new-date-label', t.appointments?.new_date || 'New Date');
+                this.updateElement('new-time-label', t.appointments?.new_time || 'Available Times');
+                this.updateElement('reschedule-reason-label', t.appointments?.reschedule_reason || 'Reason for rescheduling (optional)');
+                this.updateElement('confirm-reschedule-btn', t.appointments?.confirm_reschedule || 'Confirm Reschedule');
+                
+                // Update placeholders
+                const cancellationTextarea = document.getElementById('cancellation-reason');
+                if (cancellationTextarea) {
+                    cancellationTextarea.placeholder = t.appointments?.cancellation_reason_placeholder || 'Enter reason for cancellation...';
+                }
+                
+                const rescheduleTextarea = document.getElementById('reschedule-reason');
+                if (rescheduleTextarea) {
+                    rescheduleTextarea.placeholder = t.appointments?.reschedule_reason_placeholder || 'Enter reason for rescheduling...';
+                }
+                
+                // Update footer
+                this.updateElement('footer-brand', t.app_name);
+                this.updateElement('footer-links-title', t.footer?.links_title || 'Quick Links');
+                this.updateElement('footer-about', t.footer?.about || 'About Platform');
+                this.updateElement('footer-services', t.footer?.services || 'Services');
+                this.updateElement('footer-support-title', t.footer?.support_title || 'Support & Help');
+                this.updateElement('footer-help', t.footer?.help || 'Help Center');
+                this.updateElement('footer-contact', t.footer?.contact || 'Contact Us');
+                this.updateElement('footer-emergency-text', t.footer?.emergency_text || 'For medical emergencies');
+                this.updateElement('footer-emergency-action', t.footer?.emergency_action || 'Go to nearest ER hospital');
+                this.updateElement('footer-emergency-note', t.footer?.emergency_note || 'For non-urgent consultations use the platform');
+                this.updateElement('footer-copyright', t.footer?.copyright || '© 2025 Sahatak. All rights reserved.');
+                this.updateElement('footer-medical-disclaimer', t.footer?.medical_disclaimer || 'This platform does not replace visiting a doctor in emergency cases');
+            },
             
-            if (currentAppointment) {
-                // Show current appointment info
-                const date = new Date(currentAppointment.appointment_date);
-                document.getElementById('current-appointment-info').innerHTML = `
-                    <strong>التاريخ:</strong> ${date.toLocaleDateString('ar-SA')}<br>
-                    <strong>الوقت:</strong> ${date.toLocaleTimeString('ar-SA', {hour: '2-digit', minute: '2-digit'})}<br>
-                    <strong>الطبيب:</strong> د. ${currentAppointment.doctor_name || 'غير متوفر'}
+            updateElement(elementId, text) {
+                const element = document.getElementById(elementId);
+                if (element && text) {
+                    element.textContent = text;
+                }
+            },
+
+            // Setup event listeners
+            setupEventListeners() {
+                // Tab filters
+                document.querySelectorAll('#appointment-tabs .nav-link').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        
+                        // Update active tab
+                        document.querySelectorAll('#appointment-tabs .nav-link').forEach(l => l.classList.remove('active'));
+                        link.classList.add('active');
+                        
+                        // Filter appointments
+                        this.currentFilter = link.getAttribute('data-filter');
+                        this.renderAppointments();
+                    });
+                });
+
+                // Date change for reschedule
+                const newDateInput = document.getElementById('new-appointment-date');
+                if (newDateInput) {
+                    newDateInput.addEventListener('change', () => this.loadRescheduleTimeSlots());
+                    
+                    // Set minimum date to today for reschedule
+                    const today = new Date().toISOString().split('T')[0];
+                    newDateInput.min = today;
+                }
+            },
+
+            // Load appointments from API
+            async loadAppointments() {
+                try {
+                    const response = await ApiHelper.makeRequest('/appointments/');
+                    
+                    if (response.success) {
+                        this.appointments = response.data.appointments;
+                        this.renderAppointments();
+                    } else {
+                        const currentLang = LanguageManager.getLanguage() || 'en';
+                        const errorMsg = currentLang === 'ar' ? 'فشل في تحميل المواعيد' : 'Failed to load appointments';
+                        this.showError(errorMsg);
+                    }
+                } catch (error) {
+                    console.error('Error loading appointments:', error);
+                    const currentLang = LanguageManager.getLanguage() || 'en';
+                    const errorMsg = currentLang === 'ar' ? 'خطأ في الاتصال بالخادم' : 'Error connecting to server';
+                    this.showError(errorMsg);
+                }
+            },
+
+            // Render appointments based on current filter
+            renderAppointments() {
+                const container = document.getElementById('appointments-container');
+                
+                // Filter appointments
+                let filteredAppointments = this.appointments;
+                
+                switch (this.currentFilter) {
+                    case 'upcoming':
+                        filteredAppointments = this.appointments.filter(apt => 
+                            ['scheduled', 'confirmed'].includes(apt.status) && 
+                            new Date(apt.appointment_date) > new Date()
+                        );
+                        break;
+                    case 'completed':
+                        filteredAppointments = this.appointments.filter(apt => apt.status === 'completed');
+                        break;
+                    case 'cancelled':
+                        filteredAppointments = this.appointments.filter(apt => apt.status === 'cancelled');
+                        break;
+                }
+
+                if (filteredAppointments.length === 0) {
+                    const currentLang = LanguageManager.getLanguage() || 'en';
+                    const noAppointmentsText = currentLang === 'ar' ? 'لا توجد مواعيد' : 'No appointments found';
+                    const noAppointmentsDesc = currentLang === 'ar' ? 'لم يتم العثور على مواعيد في هذه الفئة' : 'No appointments found in this category';
+                    const bookFirstText = currentLang === 'ar' ? 'احجز موعدك الأول' : 'Book your first appointment';
+                    
+                    container.innerHTML = `
+                        <div class="text-center py-5">
+                            <i class="bi bi-calendar-x display-4 text-muted mb-3"></i>
+                            <h5 class="text-muted mb-3">${noAppointmentsText}</h5>
+                            <p class="text-muted mb-4">${noAppointmentsDesc}</p>
+                            <button class="btn btn-medical" onclick="AppointmentList.bookNewAppointment()">
+                                <i class="bi bi-plus me-1"></i>
+                                ${bookFirstText}
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const appointmentsHtml = filteredAppointments.map(appointment => {
+                    const date = new Date(appointment.appointment_date);
+                    const statusClass = this.getStatusClass(appointment.status);
+                    const statusText = this.getStatusText(appointment.status);
+                    const typeText = this.getAppointmentTypeText(appointment.appointment_type);
+                    const canModify = ['scheduled', 'confirmed'].includes(appointment.status) && 
+                                     new Date(appointment.appointment_date) > new Date(Date.now() + 60*60*1000); // 1 hour from now
+                    
+                    const currentLang = LanguageManager.getLanguage() || 'en';
+                    const detailsText = currentLang === 'ar' ? 'التفاصيل' : 'Details';
+                    const rescheduleText = currentLang === 'ar' ? 'إعادة جدولة' : 'Reschedule';
+                    const cancelText = currentLang === 'ar' ? 'إلغاء' : 'Cancel';
+                    
+                    return `
+                        <div class="card mb-3 appointment-card">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="bi bi-person-badge text-primary me-2 fs-5"></i>
+                                            <h6 class="mb-0">Dr. ${appointment.doctor_name || 'Unknown'}</h6>
+                                        </div>
+                                        
+                                        <div class="row text-muted small">
+                                            <div class="col-sm-6 mb-2">
+                                                <i class="bi bi-calendar me-1"></i>
+                                                ${date.toLocaleDateString()} - ${date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
+                                            </div>
+                                            <div class="col-sm-6 mb-2">
+                                                <i class="bi bi-camera-video me-1"></i>
+                                                ${typeText}
+                                            </div>
+                                            ${appointment.reason_for_visit ? `
+                                                <div class="col-12">
+                                                    <i class="bi bi-chat-dots me-1"></i>
+                                                    ${appointment.reason_for_visit}
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-4 text-end">
+                                        <div class="mb-3">
+                                            <span class="badge ${statusClass} fs-6">${statusText}</span>
+                                        </div>
+                                        
+                                        <div class="btn-group-vertical btn-group-sm">
+                                            <button class="btn btn-outline-primary btn-sm" onclick="AppointmentList.viewAppointment(${appointment.id})">
+                                                <i class="bi bi-eye me-1"></i>
+                                                ${detailsText}
+                                            </button>
+                                            ${canModify ? `
+                                                <button class="btn btn-outline-warning btn-sm" onclick="AppointmentList.rescheduleAppointment(${appointment.id})">
+                                                    <i class="bi bi-calendar-event me-1"></i>
+                                                    ${rescheduleText}
+                                                </button>
+                                                <button class="btn btn-outline-danger btn-sm" onclick="AppointmentList.cancelAppointment(${appointment.id})">
+                                                    <i class="bi bi-x-circle me-1"></i>
+                                                    ${cancelText}
+                                                </button>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                container.innerHTML = appointmentsHtml;
+            },
+
+            // View appointment details
+            async viewAppointment(appointmentId) {
+                try {
+                    const response = await ApiHelper.makeRequest(`/appointments/${appointmentId}`);
+                    
+                    if (response.success) {
+                        this.currentAppointment = response.data.appointment;
+                        const appointment = this.currentAppointment;
+                        const date = new Date(appointment.appointment_date);
+                        
+                        const currentLang = LanguageManager.getLanguage() || 'en';
+                        const doctorLabel = currentLang === 'ar' ? 'الطبيب:' : 'Doctor:';
+                        const dateTimeLabel = currentLang === 'ar' ? 'التاريخ والوقت:' : 'Date & Time:';
+                        const typeLabel = currentLang === 'ar' ? 'نوع الاستشارة:' : 'Consultation Type:';
+                        const statusLabel = currentLang === 'ar' ? 'حالة الموعد:' : 'Status:';
+                        const reasonLabel = currentLang === 'ar' ? 'سبب الزيارة:' : 'Reason for Visit:';
+                        const symptomsLabel = currentLang === 'ar' ? 'الأعراض:' : 'Symptoms:';
+                        const diagnosisLabel = currentLang === 'ar' ? 'التشخيص:' : 'Diagnosis:';
+                        const prescriptionLabel = currentLang === 'ar' ? 'الوصفة الطبية:' : 'Prescription:';
+                        const notesLabel = currentLang === 'ar' ? 'ملاحظات:' : 'Notes:';
+                        
+                        const detailsHtml = `
+                            <div class="row">
+                                <div class="col-sm-6 mb-3">
+                                    <strong>${doctorLabel}</strong><br>
+                                    Dr. ${appointment.doctor_name || 'Unknown'}
+                                </div>
+                                <div class="col-sm-6 mb-3">
+                                    <strong>${dateTimeLabel}</strong><br>
+                                    ${date.toLocaleDateString()} - ${date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
+                                </div>
+                                <div class="col-sm-6 mb-3">
+                                    <strong>${typeLabel}</strong><br>
+                                    ${this.getAppointmentTypeText(appointment.appointment_type)}
+                                </div>
+                                <div class="col-sm-6 mb-3">
+                                    <strong>${statusLabel}</strong><br>
+                                    <span class="badge ${this.getStatusClass(appointment.status)}">${this.getStatusText(appointment.status)}</span>
+                                </div>
+                                ${appointment.reason_for_visit ? `
+                                    <div class="col-12 mb-3">
+                                        <strong>${reasonLabel}</strong><br>
+                                        ${appointment.reason_for_visit}
+                                    </div>
+                                ` : ''}
+                                ${appointment.symptoms ? `
+                                    <div class="col-12 mb-3">
+                                        <strong>${symptomsLabel}</strong><br>
+                                        ${appointment.symptoms}
+                                    </div>
+                                ` : ''}
+                                ${appointment.diagnosis ? `
+                                    <div class="col-12 mb-3">
+                                        <strong>${diagnosisLabel}</strong><br>
+                                        ${appointment.diagnosis}
+                                    </div>
+                                ` : ''}
+                                ${appointment.prescription ? `
+                                    <div class="col-12 mb-3">
+                                        <strong>${prescriptionLabel}</strong><br>
+                                        ${appointment.prescription}
+                                    </div>
+                                ` : ''}
+                                ${appointment.notes ? `
+                                    <div class="col-12 mb-3">
+                                        <strong>${notesLabel}</strong><br>
+                                        ${appointment.notes}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `;
+                        
+                        document.getElementById('appointment-details').innerHTML = detailsHtml;
+                        
+                        // Show/hide action buttons based on status
+                        const canModify = ['scheduled', 'confirmed'].includes(appointment.status) && 
+                                         new Date(appointment.appointment_date) > new Date(Date.now() + 60*60*1000);
+                        
+                        const cancelBtn = document.getElementById('cancel-btn');
+                        const rescheduleBtn = document.getElementById('reschedule-btn');
+                        
+                        if (canModify) {
+                            cancelBtn.classList.remove('d-none');
+                            rescheduleBtn.classList.remove('d-none');
+                            cancelBtn.onclick = () => this.cancelAppointment(appointment.id);
+                            rescheduleBtn.onclick = () => this.rescheduleAppointment(appointment.id);
+                        } else {
+                            cancelBtn.classList.add('d-none');
+                            rescheduleBtn.classList.add('d-none');
+                        }
+                        
+                        const modal = new bootstrap.Modal(document.getElementById('appointment-modal'));
+                        modal.show();
+                    } else {
+                        const currentLang = LanguageManager.getLanguage() || 'en';
+                        const errorMsg = currentLang === 'ar' ? 'فشل في تحميل تفاصيل الموعد' : 'Failed to load appointment details';
+                        this.showError(errorMsg);
+                    }
+                } catch (error) {
+                    console.error('Error loading appointment details:', error);
+                    const currentLang = LanguageManager.getLanguage() || 'en';
+                    const errorMsg = currentLang === 'ar' ? 'خطأ في تحميل تفاصيل الموعد' : 'Error loading appointment details';
+                    this.showError(errorMsg);
+                }
+            },
+
+            // Cancel appointment
+            cancelAppointment(appointmentId) {
+                this.currentAppointmentId = appointmentId;
+                document.getElementById('cancellation-reason').value = '';
+                const cancelModal = new bootstrap.Modal(document.getElementById('cancel-modal'));
+                cancelModal.show();
+            },
+
+            // Reschedule appointment
+            rescheduleAppointment(appointmentId) {
+                this.currentAppointmentId = appointmentId;
+                this.currentAppointment = this.appointments.find(apt => apt.id === appointmentId);
+                
+                if (this.currentAppointment) {
+                    // Show current appointment info
+                    const date = new Date(this.currentAppointment.appointment_date);
+                    const currentLang = LanguageManager.getLanguage() || 'en';
+                    const dateLabel = currentLang === 'ar' ? 'التاريخ:' : 'Date:';
+                    const timeLabel = currentLang === 'ar' ? 'الوقت:' : 'Time:';
+                    const doctorLabel = currentLang === 'ar' ? 'الطبيب:' : 'Doctor:';
+                    
+                    document.getElementById('current-appointment-info').innerHTML = `
+                        <strong>${dateLabel}</strong> ${date.toLocaleDateString()}<br>
+                        <strong>${timeLabel}</strong> ${date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}<br>
+                        <strong>${doctorLabel}</strong> Dr. ${this.currentAppointment.doctor_name || 'Unknown'}
+                    `;
+                    
+                    // Reset form
+                    document.getElementById('new-appointment-date').value = '';
+                    document.getElementById('reschedule-reason').value = '';
+                    document.getElementById('reschedule-time-slots').innerHTML = '';
+                    document.getElementById('confirm-reschedule').disabled = true;
+                    this.selectedNewDateTime = null;
+                    
+                    const rescheduleModal = new bootstrap.Modal(document.getElementById('reschedule-modal'));
+                    rescheduleModal.show();
+                }
+            },
+
+            // Load available time slots for reschedule
+            async loadRescheduleTimeSlots() {
+                if (!this.currentAppointment) return;
+                
+                const date = document.getElementById('new-appointment-date').value;
+                if (!date) return;
+
+                try {
+                    const response = await ApiHelper.makeRequest(
+                        `/appointments/doctors/${this.currentAppointment.doctor_id}/availability?date=${date}`
+                    );
+                    
+                    if (response.success) {
+                        this.renderRescheduleTimeSlots(response.data.available_slots);
+                    } else {
+                        const currentLang = LanguageManager.getLanguage() || 'en';
+                        const errorMsg = currentLang === 'ar' ? 'فشل في تحميل الأوقات المتاحة' : 'Failed to load available times';
+                        this.showError(errorMsg);
+                    }
+                } catch (error) {
+                    console.error('Error loading time slots:', error);
+                    const currentLang = LanguageManager.getLanguage() || 'en';
+                    const errorMsg = currentLang === 'ar' ? 'خطأ في تحميل الأوقات المتاحة' : 'Error loading available times';
+                    this.showError(errorMsg);
+                }
+            },
+
+            // Render time slots for reschedule
+            renderRescheduleTimeSlots(slots) {
+                const container = document.getElementById('reschedule-time-slots');
+                
+                if (slots.length === 0) {
+                    const currentLang = LanguageManager.getLanguage() || 'en';
+                    const noSlotsMessage = currentLang === 'ar' ? 
+                        'لا توجد أوقات متاحة في هذا اليوم' : 
+                        'No time slots available for this day';
+                    container.innerHTML = `<p class="text-muted">${noSlotsMessage}</p>`;
+                    return;
+                }
+
+                const slotsHtml = slots.map(slot => `
+                    <button type="button" 
+                            class="btn btn-outline-primary time-slot ${!slot.available ? 'disabled' : ''}"
+                            data-time="${slot.datetime}"
+                            onclick="AppointmentList.selectRescheduleTimeSlot('${slot.datetime}', '${slot.start}')"
+                            ${!slot.available ? 'disabled' : ''}>
+                        ${slot.start}
+                    </button>
+                `).join('');
+
+                container.innerHTML = slotsHtml;
+            },
+
+            // Select time slot for reschedule
+            selectRescheduleTimeSlot(datetime, displayTime) {
+                // Remove previous selection
+                document.querySelectorAll('#reschedule-time-slots .time-slot').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                // Add selection to clicked button
+                event.target.classList.add('active');
+                
+                // Store selected time
+                this.selectedNewDateTime = datetime;
+                
+                // Enable confirm button
+                document.getElementById('confirm-reschedule').disabled = false;
+            },
+
+            // Confirm cancellation
+            async confirmCancellation() {
+                if (!this.currentAppointmentId) return;
+
+                try {
+                    const reason = document.getElementById('cancellation-reason').value;
+                    const response = await ApiHelper.makeRequest(`/appointments/${this.currentAppointmentId}/cancel`, {
+                        method: 'PUT',
+                        body: JSON.stringify({ cancellation_reason: reason })
+                    });
+
+                    if (response.success) {
+                        // Close modals
+                        bootstrap.Modal.getInstance(document.getElementById('cancel-modal')).hide();
+                        const appointmentModal = bootstrap.Modal.getInstance(document.getElementById('appointment-modal'));
+                        if (appointmentModal) appointmentModal.hide();
+                        
+                        // Reload appointments
+                        await this.loadAppointments();
+                        
+                        const currentLang = LanguageManager.getLanguage() || 'en';
+                        const successMsg = currentLang === 'ar' ? 'تم إلغاء الموعد بنجاح' : 'Appointment cancelled successfully';
+                        this.showSuccess(successMsg);
+                    } else {
+                        this.showError(response.message || 'Failed to cancel appointment');
+                    }
+                } catch (error) {
+                    console.error('Error cancelling appointment:', error);
+                    const currentLang = LanguageManager.getLanguage() || 'en';
+                    const errorMsg = currentLang === 'ar' ? 'خطأ في إلغاء الموعد' : 'Error cancelling appointment';
+                    this.showError(errorMsg);
+                }
+            },
+
+            // Confirm reschedule
+            async confirmReschedule() {
+                if (!this.currentAppointmentId || !this.selectedNewDateTime) return;
+
+                try {
+                    const reason = document.getElementById('reschedule-reason').value;
+                    const response = await ApiHelper.makeRequest(`/appointments/${this.currentAppointmentId}/reschedule`, {
+                        method: 'PUT',
+                        body: JSON.stringify({ 
+                            new_appointment_date: this.selectedNewDateTime,
+                            reschedule_reason: reason 
+                        })
+                    });
+
+                    if (response.success) {
+                        // Close modals
+                        bootstrap.Modal.getInstance(document.getElementById('reschedule-modal')).hide();
+                        const appointmentModal = bootstrap.Modal.getInstance(document.getElementById('appointment-modal'));
+                        if (appointmentModal) appointmentModal.hide();
+                        
+                        // Reload appointments
+                        await this.loadAppointments();
+                        
+                        const currentLang = LanguageManager.getLanguage() || 'en';
+                        const successMsg = currentLang === 'ar' ? 'تم إعادة جدولة الموعد بنجاح' : 'Appointment rescheduled successfully';
+                        this.showSuccess(successMsg);
+                    } else {
+                        this.showError(response.message || 'Failed to reschedule appointment');
+                    }
+                } catch (error) {
+                    console.error('Error rescheduling appointment:', error);
+                    const currentLang = LanguageManager.getLanguage() || 'en';
+                    const errorMsg = currentLang === 'ar' ? 'خطأ في إعادة جدولة الموعد' : 'Error rescheduling appointment';
+                    this.showError(errorMsg);
+                }
+            },
+
+            // Helper functions
+            getStatusClass(status) {
+                const classes = {
+                    scheduled: 'bg-info',
+                    confirmed: 'bg-success',
+                    in_progress: 'bg-primary',
+                    completed: 'bg-secondary',
+                    cancelled: 'bg-danger',
+                    no_show: 'bg-warning'
+                };
+                return classes[status] || 'bg-secondary';
+            },
+
+            getStatusText(status) {
+                const currentLang = LanguageManager.getLanguage() || 'en';
+                if (currentLang === 'ar') {
+                    const statusesAr = {
+                        scheduled: 'مجدول',
+                        confirmed: 'مؤكد',
+                        in_progress: 'جاري',
+                        completed: 'مكتمل',
+                        cancelled: 'مُلغى',
+                        no_show: 'لم يحضر'
+                    };
+                    return statusesAr[status] || status;
+                } else {
+                    const statusesEn = {
+                        scheduled: 'Scheduled',
+                        confirmed: 'Confirmed',
+                        in_progress: 'In Progress',
+                        completed: 'Completed',
+                        cancelled: 'Cancelled',
+                        no_show: 'No Show'
+                    };
+                    return statusesEn[status] || status;
+                }
+            },
+
+            getAppointmentTypeText(type) {
+                const currentLang = LanguageManager.getLanguage() || 'en';
+                if (currentLang === 'ar') {
+                    const typesAr = {
+                        video: 'مكالمة فيديو',
+                        audio: 'مكالمة صوتية',
+                        chat: 'محادثة نصية'
+                    };
+                    return typesAr[type] || type;
+                } else {
+                    const typesEn = {
+                        video: 'Video Call',
+                        audio: 'Audio Call',
+                        chat: 'Text Chat'
+                    };
+                    return typesEn[type] || type;
+                }
+            },
+
+            showError(message) {
+                // Enhanced error display with toast-like notification
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'alert alert-danger alert-dismissible fade show position-fixed';
+                errorDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+                errorDiv.innerHTML = `
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 `;
                 
-                // Reset form
-                document.getElementById('new-appointment-date').value = '';
-                document.getElementById('reschedule-reason').value = '';
-                document.getElementById('reschedule-time-slots').innerHTML = '';
-                document.getElementById('confirm-reschedule').disabled = true;
-                selectedNewDateTime = null;
+                document.body.appendChild(errorDiv);
                 
-                const rescheduleModal = new bootstrap.Modal(document.getElementById('reschedule-modal'));
-                rescheduleModal.show();
-            }
-        }
+                // Auto-remove after 5 seconds
+                setTimeout(() => {
+                    if (errorDiv.parentNode) {
+                        errorDiv.remove();
+                    }
+                }, 5000);
+            },
 
-        // Load available time slots for reschedule
-        async function loadRescheduleTimeSlots() {
-            if (!currentAppointment) return;
-            
-            const date = document.getElementById('new-appointment-date').value;
-            if (!date) return;
-
-            try {
-                const response = await ApiHelper.makeRequest(
-                    `/appointments/doctors/${currentAppointment.doctor_id}/availability?date=${date}`
-                );
+            showSuccess(message) {
+                // Enhanced success display with toast-like notification
+                const successDiv = document.createElement('div');
+                successDiv.className = 'alert alert-success alert-dismissible fade show position-fixed';
+                successDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+                successDiv.innerHTML = `
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
                 
-                if (response.success) {
-                    renderRescheduleTimeSlots(response.data.available_slots);
-                } else {
-                    showError('فشل في تحميل الأوقات المتاحة');
-                }
-            } catch (error) {
-                console.error('Error loading time slots:', error);
-                showError('خطأ في تحميل الأوقات المتاحة');
+                document.body.appendChild(successDiv);
+                
+                // Auto-remove after 3 seconds
+                setTimeout(() => {
+                    if (successDiv.parentNode) {
+                        successDiv.remove();
+                    }
+                }, 3000);
+            },
+
+            bookNewAppointment() {
+                window.location.href = 'book-appointment.html';
             }
-        }
+        };
 
-        // Render time slots for reschedule
-        function renderRescheduleTimeSlots(slots) {
-            const container = document.getElementById('reschedule-time-slots');
-            
-            if (slots.length === 0) {
-                container.innerHTML = '<p class="text-muted">لا توجد أوقات متاحة في هذا اليوم</p>';
-                return;
-            }
-
-            const slotsHtml = slots.map(slot => `
-                <button type="button" 
-                        class="btn btn-outline-primary time-slot ${!slot.available ? 'disabled' : ''}"
-                        data-time="${slot.datetime}"
-                        onclick="selectRescheduleTimeSlot('${slot.datetime}', '${slot.start}')"
-                        ${!slot.available ? 'disabled' : ''}>
-                    ${slot.start}
-                </button>
-            `).join('');
-
-            container.innerHTML = slotsHtml;
-        }
-
-        // Select time slot for reschedule
-        function selectRescheduleTimeSlot(datetime, displayTime) {
-            // Remove previous selection
-            document.querySelectorAll('#reschedule-time-slots .time-slot').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Add selection to clicked button
-            event.target.classList.add('active');
-            
-            // Store selected time
-            selectedNewDateTime = datetime;
-            
-            // Enable confirm button
-            document.getElementById('confirm-reschedule').disabled = false;
-        }
-
-        // Confirm cancellation
-        async function confirmCancellation() {
-            if (!currentAppointmentId) return;
-
-            try {
-                const reason = document.getElementById('cancellation-reason').value;
-                const response = await ApiHelper.makeRequest(`/appointments/${currentAppointmentId}/cancel`, {
-                    method: 'PUT',
-                    body: JSON.stringify({ cancellation_reason: reason })
-                });
-
-                if (response.success) {
-                    // Close modals
-                    bootstrap.Modal.getInstance(document.getElementById('cancel-modal')).hide();
-                    const appointmentModal = bootstrap.Modal.getInstance(document.getElementById('appointment-modal'));
-                    if (appointmentModal) appointmentModal.hide();
-                    
-                    // Reload appointments
-                    loadAppointments();
-                    
-                    showSuccess('تم إلغاء الموعد بنجاح');
-                } else {
-                    showError(response.message || 'فشل في إلغاء الموعد');
-                }
-            } catch (error) {
-                console.error('Error cancelling appointment:', error);
-                showError('خطأ في إلغاء الموعد');
-            }
-        }
-
-        // Confirm reschedule
-        async function confirmReschedule() {
-            if (!currentAppointmentId || !selectedNewDateTime) return;
-
-            try {
-                const reason = document.getElementById('reschedule-reason').value;
-                const response = await ApiHelper.makeRequest(`/appointments/${currentAppointmentId}/reschedule`, {
-                    method: 'PUT',
-                    body: JSON.stringify({ 
-                        new_appointment_date: selectedNewDateTime,
-                        reschedule_reason: reason 
-                    })
-                });
-
-                if (response.success) {
-                    // Close modals
-                    bootstrap.Modal.getInstance(document.getElementById('reschedule-modal')).hide();
-                    const appointmentModal = bootstrap.Modal.getInstance(document.getElementById('appointment-modal'));
-                    if (appointmentModal) appointmentModal.hide();
-                    
-                    // Reload appointments
-                    loadAppointments();
-                    
-                    showSuccess('تم إعادة جدولة الموعد بنجاح');
-                } else {
-                    showError(response.message || 'فشل في إعادة جدولة الموعد');
-                }
-            } catch (error) {
-                console.error('Error rescheduling appointment:', error);
-                showError('خطأ في إعادة جدولة الموعد');
-            }
-        }
-
-        // Helper functions
-        function getStatusClass(status) {
-            const classes = {
-                scheduled: 'bg-info',
-                confirmed: 'bg-success',
-                in_progress: 'bg-primary',
-                completed: 'bg-secondary',
-                cancelled: 'bg-danger',
-                no_show: 'bg-warning'
-            };
-            return classes[status] || 'bg-secondary';
-        }
-
-        function getStatusArabic(status) {
-            const statuses = {
-                scheduled: 'مجدول',
-                confirmed: 'مؤكد',
-                in_progress: 'جاري',
-                completed: 'مكتمل',
-                cancelled: 'مُلغى',
-                no_show: 'لم يحضر'
-            };
-            return statuses[status] || status;
-        }
-
-        function getAppointmentTypeArabic(type) {
-            const types = {
-                video: 'مكالمة فيديو',
-                audio: 'مكالمة صوتية',
-                chat: 'محادثة نصية'
-            };
-            return types[type] || type;
-        }
-
-        function showError(message) {
-            // Simple error display - enhance with better UI following main.js patterns  
-            // TODO: Replace with proper toast/modal notification
-        }
-
-        function showSuccess(message) {
-            // Simple success display - enhance with better UI following main.js patterns
-            // TODO: Replace with proper toast/modal notification
+        // Global functions for navigation
+        function goBackToDashboard() {
+            window.location.href = '../dashboard/patient.html';
         }
 
         function bookNewAppointment() {
-            window.location.href = 'book-appointment.html';
+            AppointmentList.bookNewAppointment();
         }
 
-        function goToDashboard() {
-            window.location.href = '../dashboard/patient.html';
+        function confirmCancellation() {
+            AppointmentList.confirmCancellation();
         }
+
+        function confirmReschedule() {
+            AppointmentList.confirmReschedule();
+        }
+
+        function showLanguageSelector() {
+            console.log('Language selector clicked');
+            
+            // Toggle between Arabic and English
+            const currentLang = LanguageManager.getLanguage() || 'en';
+            const newLang = currentLang === 'ar' ? 'en' : 'ar';
+            
+            // Change language
+            LanguageManager.setLanguage(newLang);
+            LanguageManager.applyLanguage(newLang);
+            
+            // Update appointment translations
+            AppointmentList.updateAppointmentTranslations(newLang);
+            
+            // Update the language button text
+            const langBtn = document.getElementById('current-lang');
+            if (langBtn) {
+                langBtn.textContent = newLang === 'ar' ? 'العربية' : 'English';
+            }
+            
+            // Re-render appointments with new language
+            AppointmentList.renderAppointments();
+        }
+
+        // Initialize appointment list when page loads
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('Appointment list page initializing...');
+            
+            try {
+                await AppointmentList.init();
+            } catch (error) {
+                console.error('Error during appointment list initialization:', error);
+            }
+        });
     </script>
 </body>
 </html>

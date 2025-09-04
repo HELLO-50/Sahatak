@@ -804,9 +804,112 @@
         // logout function is now defined globally in main.js
         
         // Initialize patient dashboard on page load
+        // Load dashboard statistics from API
+        async function loadDashboardStats() {
+            console.log('Loading dashboard statistics...');
+            
+            try {
+                // Load appointments to count scheduled ones
+                const appointmentsResponse = await ApiHelper.makeRequest('/appointments/');
+                
+                if (appointmentsResponse.success) {
+                    const appointments = appointmentsResponse.data.appointments;
+                    
+                    // Count scheduled/confirmed appointments (upcoming)
+                    const scheduledCount = appointments.filter(apt => 
+                        ['scheduled', 'confirmed'].includes(apt.status) && 
+                        new Date(apt.appointment_date) > new Date()
+                    ).length;
+                    
+                    // Update appointment counter
+                    document.getElementById('stat-appointments-count').textContent = scheduledCount;
+                    
+                    console.log(`Updated appointment counter: ${scheduledCount}`);
+                } else {
+                    console.warn('Failed to load appointments for stats:', appointmentsResponse.message);
+                    document.getElementById('stat-appointments-count').textContent = '0';
+                }
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+                document.getElementById('stat-appointments-count').textContent = '-';
+            }
+            
+            try {
+                // Load prescriptions count from API
+                const prescriptionsResponse = await ApiHelper.makeRequest('/prescriptions/');
+                
+                if (prescriptionsResponse.success) {
+                    const prescriptions = prescriptionsResponse.data.prescriptions || [];
+                    
+                    // Count active prescriptions
+                    const activeCount = prescriptions.filter(prescription => 
+                        prescription.status === 'active'
+                    ).length;
+                    
+                    document.getElementById('stat-prescriptions-count').textContent = activeCount;
+                    console.log(`Updated prescriptions counter: ${activeCount}`);
+                } else {
+                    console.warn('Failed to load prescriptions for stats:', prescriptionsResponse.message);
+                    document.getElementById('stat-prescriptions-count').textContent = '0';
+                }
+            } catch (error) {
+                console.error('Error loading prescriptions stats:', error);
+                document.getElementById('stat-prescriptions-count').textContent = '-';
+            }
+            
+            try {
+                // Load medical history/reports count from API
+                const currentUser = AuthGuard.getCurrentUser();
+                if (currentUser && currentUser.id) {
+                    const historyResponse = await ApiHelper.makeRequest(`/medical-history/patient/${currentUser.id}`);
+                    
+                    if (historyResponse.success) {
+                        const historyData = historyResponse.data;
+                        
+                        // Count medical reports/records (appointments with diagnosis, lab results, etc.)
+                        let reportCount = 0;
+                        if (historyData.appointments) {
+                            reportCount += historyData.appointments.filter(apt => 
+                                apt.diagnosis || apt.prescription || apt.notes
+                            ).length;
+                        }
+                        if (historyData.vital_signs) {
+                            reportCount += historyData.vital_signs.length;
+                        }
+                        if (historyData.lab_results) {
+                            reportCount += historyData.lab_results.length;
+                        }
+                        
+                        document.getElementById('stat-reports-count').textContent = reportCount;
+                        console.log(`Updated medical reports counter: ${reportCount}`);
+                    } else {
+                        console.warn('Failed to load medical history for stats:', historyResponse.message);
+                        document.getElementById('stat-reports-count').textContent = '0';
+                    }
+                } else {
+                    console.warn('No current user found for medical history stats');
+                    document.getElementById('stat-reports-count').textContent = '0';
+                }
+            } catch (error) {
+                console.error('Error loading medical reports stats:', error);
+                document.getElementById('stat-reports-count').textContent = '-';
+            }
+        }
+        
+        // Refresh dashboard statistics - can be called from other pages
+        window.refreshDashboardStats = function() {
+            console.log('Refreshing dashboard statistics...');
+            loadDashboardStats();
+        };
+
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('Patient dashboard initializing...');
             await DashboardTranslations.initializeDashboard('patient');
+            
+            // Load dashboard statistics after translations are loaded
+            setTimeout(() => {
+                loadDashboardStats();
+            }, 1000); // Small delay to ensure API is ready
         });
     </script>
 </body>

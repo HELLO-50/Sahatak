@@ -483,6 +483,12 @@ const AppointmentBooking = {
             if (response.success) {
                 this.showSuccess('تم حجز الموعد بنجاح!');
                 
+                // Refresh dashboard statistics if function exists
+                if (typeof window.refreshDashboardStats === 'function') {
+                    window.refreshDashboardStats();
+                    console.log('Dashboard statistics refreshed after appointment booking');
+                }
+                
                 // Show success modal
                 const modal = new bootstrap.Modal(document.getElementById('success-modal'));
                 modal.show();
