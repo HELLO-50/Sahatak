@@ -88,28 +88,41 @@ const Dashboard = {
     },
 
     /**
-     * Load user profile from backend
+     * Load user profile from backend with retry mechanism
      */
-    async loadUserProfile() {
-        try {
-            const response = await ApiHelper.makeRequest('/users/profile');
-            
-            if (response.data) {
-                this.cache.user = response.data;
+    async loadUserProfile(retries = 3, delay = 1000) {
+        for (let attempt = 1; attempt <= retries; attempt++) {
+            try {
+                console.log(`Loading user profile (attempt ${attempt}/${retries})...`);
+                const response = await ApiHelper.makeRequest('/users/profile');
                 
-                // Update profile display
-                const userName = document.getElementById('user-name');
-                if (userName) {
-                    userName.textContent = response.data.full_name || 'User';
+                if (response.data) {
+                    this.cache.user = response.data;
+                    
+                    // Update profile display
+                    const userName = document.getElementById('user-name');
+                    if (userName) {
+                        userName.textContent = response.data.full_name || 'User';
+                    }
+                    
+                    // Store for quick access but don't rely on it for auth
+                    localStorage.setItem('sahatak_user_data', JSON.stringify(response.data));
+                    
+                    console.log('User profile loaded:', response.data);
+                    return; // Success, exit function
                 }
+            } catch (error) {
+                console.error(`Error loading profile (attempt ${attempt}/${retries}):`, error);
                 
-                // Store for quick access
-                localStorage.setItem('sahatak_user_data', JSON.stringify(response.data));
-                
-                console.log('User profile loaded:', response.data);
+                if (attempt < retries) {
+                    console.log(`Retrying in ${delay}ms...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 1.5; // Exponential backoff
+                } else {
+                    // Final attempt failed
+                    throw error;
+                }
             }
-        } catch (error) {
-            console.error('Error loading profile:', error);
         }
     },
 
