@@ -40,9 +40,10 @@ class Config:
     NAME_MIN_LENGTH = int(os.getenv('NAME_MIN_LENGTH', 2))
     NAME_MAX_LENGTH = int(os.getenv('NAME_MAX_LENGTH', 100))
     
-    # Session settings
-    SESSION_TIMEOUT_MINUTES = int(os.getenv('SESSION_TIMEOUT_MINUTES', 15))
-    AUTO_LOGOUT_WARNING_MINUTES = int(os.getenv('AUTO_LOGOUT_WARNING_MINUTES', 2))
+    # Session settings - extended timeout for better user experience
+    SESSION_TIMEOUT_MINUTES = int(os.getenv('SESSION_TIMEOUT_MINUTES', 60))  # Extended to 1 hour
+    AUTO_LOGOUT_WARNING_MINUTES = int(os.getenv('AUTO_LOGOUT_WARNING_MINUTES', 5))
+    PERMANENT_SESSION_LIFETIME = timedelta(hours=int(os.getenv('SESSION_TIMEOUT_MINUTES', 60)) // 60 or 1)
     SESSION_COOKIE_SECURE = False  # Allow HTTP during development
     SESSION_COOKIE_HTTPONLY = False  # Allow JavaScript access
     SESSION_COOKIE_SAMESITE = None   # Allow cross-origin

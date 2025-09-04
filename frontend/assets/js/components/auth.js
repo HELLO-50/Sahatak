@@ -304,16 +304,20 @@ function showLogin() {
 // Login handling function
 // handleLogin function removed - using the real implementation from main.js
 
-// Logout function
+// Logout function - using centralized AuthGuard logout
 function logout() {
     console.log('User logout');
     
-    // Clear user session data
-    localStorage.removeItem('sahatak_user');
-    localStorage.removeItem('sahatak_token');
-    
-    // Redirect to language selection
-    AuthManager.showLanguageSelection();
+    // Use centralized logout method
+    if (window.AuthGuard && typeof AuthGuard.logout === 'function') {
+        AuthGuard.logout();
+    } else {
+        // Fallback for basic logout
+        console.warn('AuthGuard not available, using fallback logout');
+        localStorage.removeItem('sahatak_user');
+        localStorage.removeItem('sahatak_token');
+        AuthManager.showLanguageSelection();
+    }
 }
 
 // Initialize auth system when DOM is loaded

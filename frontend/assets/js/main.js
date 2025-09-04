@@ -578,6 +578,8 @@ function initializeBootstrapComponents() {
 const ApiHelper = {
     // Update this to your deployed backend URL
     baseUrl: 'https://sahatak.pythonanywhere.com/api', // Your PythonAnywhere backend URL
+    sessionCheckInterval: null,
+    lastSessionCheck: null,
     
     // Cacheable endpoints (GET requests that can be cached)
     cacheableEndpoints: [
@@ -616,6 +618,81 @@ const ApiHelper = {
         return 'api_response';
     },
     
+    // Check and refresh session if needed
+    async checkSession() {
+        try {
+            const now = Date.now();
+            // Only check session every 5 minutes to avoid excessive requests
+            if (this.lastSessionCheck && (now - this.lastSessionCheck) < 300000) {
+                return true;
+            }
+            
+            const response = await fetch(`${this.baseUrl}/auth/me`, {
+                method: 'GET',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            this.lastSessionCheck = now;
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    // Update local user data if needed
+                    if (data.data && data.data.user) {
+                        localStorage.setItem('sahatak_user_data', JSON.stringify(data.data.user));
+                    }
+                    return true;
+                }
+            }
+            
+            return false;
+        } catch (error) {
+            window.SahatakLogger?.warn('Session check failed:', error);
+            return false;
+        }
+    },
+
+    // Start automatic session checking (with safety checks)
+    startSessionMonitoring() {
+        // Only start if not already running and user is authenticated
+        if (!this.sessionCheckInterval && window.AuthGuard && AuthGuard.isAuthenticated() && !AuthGuard.isDevelopmentMode()) {
+            this.sessionCheckInterval = setInterval(async () => {
+                try {
+                    const isValid = await this.checkSession();
+                    if (!isValid) {
+                        window.SahatakLogger?.warn('Session validation failed - logging out');
+                        await this.handleSessionExpired();
+                    }
+                } catch (error) {
+                    window.SahatakLogger?.error('Session monitoring error:', error);
+                }
+            }, 600000); // 10 minutes
+            
+            window.SahatakLogger?.info('Session monitoring started');
+            return true;
+        }
+        return false; // Already running or conditions not met
+    },
+
+    // Stop session monitoring
+    stopSessionMonitoring() {
+        if (this.sessionCheckInterval) {
+            clearInterval(this.sessionCheckInterval);
+            this.sessionCheckInterval = null;
+            window.SahatakLogger?.info('Session monitoring stopped');
+            return true;
+        }
+        return false; // Was not running
+    },
+
+    // Check if session monitoring is active
+    isSessionMonitoringActive() {
+        return this.sessionCheckInterval !== null;
+    },
+
     // Make API call with caching, logging, and proper credentials
     async makeRequest(endpoint, options = {}) {
         const startTime = Date.now();
@@ -645,6 +722,21 @@ const ApiHelper = {
         const requestOptions = { ...defaultOptions, ...options };
         
         try {
+            // For non-login endpoints, check session validity first (but not for /auth/me to avoid circular calls)
+            const isLoginEndpoint = endpoint.includes('/auth/login') || endpoint.includes('/auth/register') || endpoint.includes('/auth/me');
+            if (!isLoginEndpoint && window.AuthGuard && !AuthGuard.isDevelopmentMode() && AuthGuard.isAuthenticated()) {
+                const sessionValid = await this.checkSession();
+                if (!sessionValid) {
+                    window.SahatakLogger?.warn('Session invalid before API call - auto logging out');
+                    await this.handleSessionExpired();
+                    throw new ApiError(
+                        'Your session has expired. Please log in again.',
+                        401,
+                        'SESSION_EXPIRED'
+                    );
+                }
+            }
+            
             window.SahatakLogger?.debug(`API Request: ${method} ${endpoint}`, {
                 headers: requestOptions.headers,
                 body: options.body ? JSON.parse(options.body) : null,
@@ -760,11 +852,22 @@ const ApiHelper = {
      */
     async handleSessionExpired() {
         try {
-            // Clear all local storage data
-            localStorage.removeItem('sahatak_user');
-            localStorage.removeItem('sahatak_user_data');
-            localStorage.removeItem('sahatak_preferences');
-            sessionStorage.clear();
+            // Stop session monitoring
+            this.stopSessionMonitoring();
+            
+            // Use centralized auth clearing method
+            if (window.AuthGuard && typeof AuthGuard.clearAuth === 'function') {
+                AuthGuard.clearAuth();
+            } else {
+                // Fallback manual cleanup
+                const keysToRemove = [
+                    'sahatak_user', 'sahatak_user_data', 'sahatak_user_id',
+                    'sahatak_user_type', 'sahatak_user_email', 'sahatak_user_name',
+                    'sahatak_doctor_data', 'sahatak_preferences', 'sahatak_return_url'
+                ];
+                keysToRemove.forEach(key => localStorage.removeItem(key));
+                sessionStorage.clear();
+            }
             
             // Show user-friendly message
             window.SahatakLogger?.warn('Session expired - clearing data and redirecting to login');
@@ -854,6 +957,8 @@ async function handleLogin(event) {
         } else {
             console.error('Invalid response structure:', response);
         }
+        
+        // Session monitoring will be started by SessionManager after redirect
         
         // Small delay to ensure session is established before redirect
         setTimeout(() => {

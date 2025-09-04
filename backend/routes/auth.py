@@ -27,6 +27,33 @@ def api_login_required(f):
 
 auth_bp = Blueprint('auth', __name__)
 
+@auth_bp.route('/me', methods=['GET'])
+@api_login_required
+def get_current_user():
+    """Get current authenticated user data - used for session validation"""
+    try:
+        # Update last activity to extend session
+        current_user.last_login = datetime.datetime.utcnow()
+        db.session.commit()
+        
+        # Prepare response with user data and profile
+        user_data = current_user.to_dict()
+        profile = current_user.get_profile()
+        if profile:
+            user_data['profile'] = profile.to_dict()
+        
+        return APIResponse.success(
+            data={'user': user_data},
+            message='User data retrieved successfully'
+        )
+        
+    except Exception as e:
+        auth_logger.error(f"Error getting current user: {str(e)}")
+        return APIResponse.error(
+            message='Failed to get user data',
+            status_code=500
+        )
+
 @auth_bp.route('/register', methods=['POST'])
 def register():
     """Register a new user (patient or doctor)"""
