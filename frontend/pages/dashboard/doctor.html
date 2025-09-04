@@ -1214,6 +1214,110 @@
                         apt.status === 'completed'
                     ).length;
                     
+                    // Get upcoming appointments for display
+                    const upcomingAppointments = appointments.filter(apt => 
+                        ['scheduled', 'confirmed'].includes(apt.status) && 
+                        new Date(apt.appointment_date) > new Date()
+                    ).sort((a, b) => new Date(a.appointment_date) - new Date(b.appointment_date));
+                    
+                    // Update appointments list
+                    const appointmentsContainer = document.getElementById('appointments-container');
+                    if (appointmentsContainer) {
+                        if (upcomingAppointments.length > 0) {
+                            appointmentsContainer.innerHTML = upcomingAppointments.slice(0, 3).map(apt => {
+                                const appointmentDate = new Date(apt.appointment_date);
+                                const dateStr = appointmentDate.toLocaleDateString('en-US', { 
+                                    weekday: 'short', 
+                                    month: 'short', 
+                                    day: 'numeric' 
+                                });
+                                const timeStr = appointmentDate.toLocaleTimeString('en-US', { 
+                                    hour: 'numeric', 
+                                    minute: '2-digit',
+                                    hour12: true 
+                                });
+                                
+                                return `
+                                    <div class="appointment-item d-flex justify-content-between align-items-center p-2 mb-2 bg-light rounded">
+                                        <div>
+                                            <div style="color: black;"><strong>${apt.patient_name || 'Unknown Patient'}</strong></div>
+                                            ${apt.patient_age ? `<span class="text-muted ms-2">Age ${apt.patient_age}</span>` : ''}
+                                            <div class="text-muted small">
+                                                <i class="bi bi-camera-video me-1"></i>${apt.appointment_type}
+                                            </div>
+                                            ${apt.reason_for_visit ? `<div class="text-muted small">${apt.reason_for_visit}</div>` : ''}
+                                            <div class="small" style="color: darkgreen;">
+                                                <i class="bi bi-calendar me-1"></i>${dateStr} ${timeStr}
+                                            </div>
+                                        </div>
+                                        <span class="badge bg-primary">${apt.status}</span>
+                                    </div>
+                                `;
+                            }).join('');
+                        } else {
+                            appointmentsContainer.innerHTML = '<p class="text-muted text-center py-3">No upcoming appointments</p>';
+                        }
+                    }
+                    
+                    // Update Recent Activity
+                    const activityContainer = document.getElementById('recent-activity-container');
+                    if (activityContainer) {
+                        // Create activity entries from recent appointments
+                        const recentActivities = [];
+                        
+                        // Add recently scheduled appointments
+                        const recentScheduled = appointments.filter(apt => 
+                            apt.status === 'scheduled' && 
+                            new Date() - new Date(apt.created_at || apt.appointment_date) < 7 * 24 * 60 * 60 * 1000 // Last 7 days
+                        ).slice(0, 2);
+                        
+                        recentScheduled.forEach(apt => {
+                            const createdDate = new Date(apt.created_at || apt.appointment_date);
+                            recentActivities.push({
+                                type: 'appointment_scheduled',
+                                message: `New appointment scheduled with ${apt.patient_name || 'Patient'}`,
+                                date: createdDate,
+                                icon: 'bi-calendar-plus'
+                            });
+                        });
+                        
+                        // Add recently completed appointments
+                        const recentCompleted = appointments.filter(apt => 
+                            apt.status === 'completed' && 
+                            new Date() - new Date(apt.updated_at || apt.appointment_date) < 7 * 24 * 60 * 60 * 1000 // Last 7 days
+                        ).slice(0, 2);
+                        
+                        recentCompleted.forEach(apt => {
+                            const completedDate = new Date(apt.updated_at || apt.appointment_date);
+                            recentActivities.push({
+                                type: 'appointment_completed',
+                                message: `Consultation completed with ${apt.patient_name || 'Patient'}`,
+                                date: completedDate,
+                                icon: 'bi-check-circle'
+                            });
+                        });
+                        
+                        // Sort by date (most recent first)
+                        recentActivities.sort((a, b) => b.date - a.date);
+                        
+                        if (recentActivities.length > 0) {
+                            activityContainer.innerHTML = recentActivities.slice(0, 3).map(activity => {
+                                const timeAgo = getTimeAgo(activity.date);
+                                return `
+                                    <div class="activity-item d-flex align-items-start p-2 mb-2 bg-light rounded">
+                                        <i class="bi ${activity.icon} text-primary me-3 mt-1"></i>
+                                        <div>
+                                            <div style="color: black;">${activity.message}</div>
+                                            <small class="text-muted">${timeAgo}</small>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('');
+                        } else {
+                            activityContainer.innerHTML = '<p class="text-muted text-center py-3">No recent activity</p>';
+                        }
+                    }
+                    
                     // Update statistics in the doctor-stats-container
                     const statsContainer = document.getElementById('doctor-stats-container');
                     if (statsContainer) {
@@ -1288,6 +1392,21 @@
                     `;
                 }
             }
+        }
+        
+        // Helper function to get relative time
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMins / 60);
+            const diffDays = Math.floor(diffHours / 24);
+
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins} minutes ago`;
+            if (diffHours < 24) return `${diffHours} hours ago`;
+            if (diffDays < 7) return `${diffDays} days ago`;
+            return date.toLocaleDateString();
         }
         
         // Refresh doctor dashboard statistics - can be called from other pages
