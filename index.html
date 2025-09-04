@@ -587,12 +587,18 @@
             const loginForm = document.getElementById('loginForm');
             if (loginForm) {
                 console.log('Login form found, adding event listener');
-                if (typeof handleLogin === 'function') {
-                    loginForm.addEventListener('submit', handleLogin);
-                    console.log('handleLogin event listener added successfully');
-                } else {
-                    console.error('handleLogin function not found!');
-                }
+                // Use a more robust approach to wait for functions to load
+                setTimeout(() => {
+                    if (typeof window.handleLogin === 'function') {
+                        loginForm.addEventListener('submit', window.handleLogin);
+                        console.log('handleLogin event listener added successfully');
+                    } else if (typeof handleLogin === 'function') {
+                        loginForm.addEventListener('submit', handleLogin);
+                        console.log('handleLogin event listener added successfully');
+                    } else {
+                        console.error('handleLogin function not found!');
+                    }
+                }, 100); // Small delay to ensure scripts are loaded
             } else {
                 console.error('Login form not found!');
             }
