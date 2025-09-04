@@ -153,7 +153,7 @@ def create_appointment():
             )
         
         # Validate doctor exists and is verified
-        doctor = Doctor.query.filter_by(id=data['doctor_id'], is_verified=True).join(User).filter_by(is_active=True).first()
+        doctor = Doctor.query.filter_by(id=data['doctor_id'], is_verified=True).join(User, Doctor.user_id == User.id).filter(User.is_active == True).first()
         if not doctor:
             return APIResponse.validation_error(
                 field='doctor_id',
@@ -312,7 +312,7 @@ def get_doctor_availability(doctor_id):
     """Get available time slots for a specific doctor"""
     try:
         # Validate doctor exists and is active
-        doctor = Doctor.query.filter_by(id=doctor_id, is_verified=True).join(User).filter_by(is_active=True).first()
+        doctor = Doctor.query.filter_by(id=doctor_id, is_verified=True).join(User, Doctor.user_id == User.id).filter(User.is_active == True).first()
         if not doctor:
             return APIResponse.not_found(message='Doctor not found')
         

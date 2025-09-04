@@ -1469,7 +1469,7 @@ def get_dashboard_analytics():
         total_doctors = Doctor.query.count()
         verified_doctors = Doctor.query.filter_by(is_verified=True).count()
         
-        active_doctors = Doctor.query.join(User).filter(
+        active_doctors = Doctor.query.join(User, Doctor.user_id == User.id).filter(
             and_(
                 Doctor.is_verified == True,
                 User.is_active == True,

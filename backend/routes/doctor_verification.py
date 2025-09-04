@@ -310,7 +310,7 @@ def get_pending_verifications():
         per_page = min(request.args.get('per_page', 20, type=int), 100)
         
         # Query pending verifications
-        query = Doctor.query.join(User).filter(
+        query = Doctor.query.join(User, Doctor.user_id == User.id).filter(
             Doctor.verification_status.in_(['submitted', 'under_review'])
         ).order_by(Doctor.verification_submitted_at.asc())
         
