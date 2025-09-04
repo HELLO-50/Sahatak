@@ -20,7 +20,12 @@ def api_login_required(f):
     """
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        # Debug logging
+        from flask import session
+        auth_logger.info(f"API auth check - User authenticated: {current_user.is_authenticated}, Session keys: {list(session.keys()) if session else 'No session'}")
+        
         if not current_user.is_authenticated:
+            auth_logger.warning(f"Unauthorized access attempt to {request.endpoint}")
             return APIResponse.unauthorized(message='Authentication required')
         return f(*args, **kwargs)
     return decorated_function
@@ -32,6 +37,9 @@ auth_bp = Blueprint('auth', __name__)
 def get_current_user():
     """Get current authenticated user data - used for session validation"""
     try:
+        # Debug logging
+        auth_logger.info(f"Session check for user ID: {current_user.id}, authenticated: {current_user.is_authenticated}")
+        
         # Update last activity to extend session
         current_user.last_login = datetime.datetime.utcnow()
         db.session.commit()

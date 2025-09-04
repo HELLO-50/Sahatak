@@ -31,6 +31,16 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', app.config['SECRET_KEY'])
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', app.config['SQLALCHEMY_DATABASE_URI'])
 app.config['FRONTEND_URL'] = os.getenv('FRONTEND_URL', 'https://hello-50.github.io/Sahatak')
 
+# Explicit session cookie configuration for cross-origin support
+app.config['SESSION_COOKIE_SECURE'] = False  # Allow HTTP for development/testing
+app.config['SESSION_COOKIE_HTTPONLY'] = False  # Allow JavaScript access
+app.config['SESSION_COOKIE_SAMESITE'] = None  # Allow cross-origin requests
+app.config['SESSION_COOKIE_DOMAIN'] = None  # Don't restrict domain
+app.config['REMEMBER_COOKIE_SECURE'] = False
+app.config['REMEMBER_COOKIE_HTTPONLY'] = False
+app.config['REMEMBER_COOKIE_SAMESITE'] = None
+app.config['REMEMBER_COOKIE_DOMAIN'] = None
+
 # Setup logging first (before other imports)
 from utils.logging_config import SahatakLogger
 SahatakLogger.setup_logging(app, log_level=os.getenv('LOG_LEVEL', 'INFO'))
