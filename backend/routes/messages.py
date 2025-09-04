@@ -1,5 +1,5 @@
 from flask import Blueprint, request, current_app, jsonify
-from flask_login import login_required, current_user
+from flask_login import current_user
 from sqlalchemy import or_, and_, desc, text
 from datetime import datetime, timedelta
 from models import db, Conversation, Message, MessageAttachment, User, Patient, Doctor
@@ -9,17 +9,19 @@ from utils.logging_config import app_logger, log_user_action
 from utils.db_optimize import cached_query, invalidate_user_cache
 from services.websocket_service import emit_new_message, emit_message_status_update, emit_notification
 from routes.notifications import queue_notification
+from routes.auth import api_login_required
 
 messages_bp = Blueprint('messages', __name__)
 
 
 @messages_bp.route('/conversations', methods=['GET'])
-@login_required
+@api_login_required
 def get_conversations():
     """Get user's conversations"""
     try:
         page = int(request.args.get('page', 1))
         per_page = min(int(request.args.get('per_page', 20)), 50)  # Max 50 per page
+        
         
         # Get conversations based on user type
         if current_user.user_type == 'patient':
@@ -67,10 +69,11 @@ def get_conversations():
 
 
 @messages_bp.route('/conversations/<int:conversation_id>', methods=['GET'])
-@login_required
+@api_login_required
 def get_conversation_details(conversation_id):
     """Get conversation details with messages"""
     try:
+            
         page = int(request.args.get('page', 1))
         per_page = min(int(request.args.get('per_page', 50)), 100)  # Max 100 messages per page
         
@@ -128,7 +131,7 @@ def get_conversation_details(conversation_id):
 
 
 @messages_bp.route('/conversations', methods=['POST'])
-@login_required
+@api_login_required
 def start_conversation():
     """Start a new conversation"""
     try:
@@ -197,7 +200,7 @@ def start_conversation():
 
 
 @messages_bp.route('/conversations/<int:conversation_id>/messages', methods=['POST'])
-@login_required
+@api_login_required
 def send_message(conversation_id):
     """Send a message in a conversation"""
     try:
@@ -301,7 +304,7 @@ def send_message(conversation_id):
 
 
 @messages_bp.route('/messages/<int:message_id>/read', methods=['PUT'])
-@login_required
+@api_login_required
 def mark_message_read(message_id):
     """Mark a specific message as read"""
     try:
@@ -334,7 +337,7 @@ def mark_message_read(message_id):
 
 
 @messages_bp.route('/messages/search', methods=['GET'])
-@login_required
+@api_login_required
 def search_messages():
     """Search messages"""
     try:
@@ -398,7 +401,7 @@ def search_messages():
 
 
 @messages_bp.route('/messages/unread-count', methods=['GET'])
-@login_required
+@api_login_required
 def get_unread_count():
     """Get unread message count for current user"""
     try:
@@ -444,7 +447,7 @@ def get_unread_count():
 
 
 @messages_bp.route('/conversations/<int:conversation_id>/archive', methods=['PUT'])
-@login_required
+@api_login_required
 def archive_conversation(conversation_id):
     """Archive a conversation"""
     try:
@@ -485,7 +488,7 @@ def archive_conversation(conversation_id):
 
 
 @messages_bp.route('/quick-templates', methods=['GET'])
-@login_required
+@api_login_required
 def get_quick_templates():
     """Get quick message templates based on user type"""
     try:
@@ -557,7 +560,7 @@ def get_quick_templates():
 
 
 @messages_bp.route('/conversations/appointment/<int:appointment_id>', methods=['POST'])
-@login_required
+@api_login_required
 def create_appointment_conversation(appointment_id):
     """Create or get conversation for a specific appointment"""
     try:
