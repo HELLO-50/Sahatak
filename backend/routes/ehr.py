@@ -127,14 +127,41 @@ def get_patient_ehr(patient_id):
         
         patient = Patient.query.get_or_404(patient_id)
         
-        # Get comprehensive medical data
+        # Get comprehensive medical data - safely handle missing tables
         ehr_data = {
             'patient_info': patient.to_dict(),
-            'diagnoses': [d.to_dict() for d in patient.diagnoses],
-            'vital_signs': [v.to_dict() for v in patient.vital_signs[-10:]],  # Last 10 records
-            'appointments': [a.to_dict() for a in patient.appointments.order_by(desc(Appointment.appointment_date)).limit(10).all()],
-            'medical_history_updates': [u.to_dict() for u in patient.medical_history_updates[-5:]]  # Last 5 updates
         }
+        
+        # Safely get diagnoses if table exists
+        try:
+            ehr_data['diagnoses'] = [d.to_dict() for d in patient.diagnoses]
+        except Exception as e:
+            app_logger.warning(f"Diagnoses table not found: {str(e)}")
+            ehr_data['diagnoses'] = []
+        
+        # Safely get vital signs if table exists
+        try:
+            vital_signs_query = patient.vital_signs.order_by(desc(VitalSigns.recorded_at)).limit(10)
+            ehr_data['vital_signs'] = [v.to_dict() for v in vital_signs_query.all()]
+        except Exception as e:
+            app_logger.warning(f"Vital signs table not found: {str(e)}")
+            ehr_data['vital_signs'] = []
+        
+        # Get appointments
+        try:
+            appointments_query = patient.appointments.order_by(desc(Appointment.appointment_date)).limit(10)
+            ehr_data['appointments'] = [a.to_dict() for a in appointments_query.all()]
+        except Exception as e:
+            app_logger.warning(f"Error fetching appointments: {str(e)}")
+            ehr_data['appointments'] = []
+        
+        # Safely get medical history updates if table exists
+        try:
+            medical_history_query = patient.medical_history_updates.limit(5)
+            ehr_data['medical_history_updates'] = [u.to_dict() for u in medical_history_query.all()]
+        except Exception as e:
+            app_logger.warning(f"Medical history updates table not found: {str(e)}")
+            ehr_data['medical_history_updates'] = []
         
         app_logger.info(f"EHR accessed for patient {patient_id} by user {current_user.id}")
         
