@@ -630,11 +630,17 @@ const ApiHelper = {
             // Use makeRequest to ensure token is included in headers
             // But bypass the session check in makeRequest to avoid circular calls
             const token = localStorage.getItem('sahatak_access_token');
+            console.log('🎫 checkSession - Token available:', !!token);
+            console.log('🎫 Token first 20 chars:', token ? token.substring(0, 20) : 'NO TOKEN');
+            
             const headers = {
                 'Content-Type': 'application/json'
             };
             if (token) {
                 headers['Authorization'] = `Bearer ${token}`;
+                console.log('💫 checkSession - Authorization header set');
+            } else {
+                console.log('🚨 checkSession - NO TOKEN AVAILABLE!');
             }
             
             const response = await fetch(`${this.baseUrl}/auth/me`, {
@@ -743,23 +749,10 @@ const ApiHelper = {
         const requestOptions = { ...defaultOptions, ...options };
         
         try {
-            // For non-login endpoints, check session validity first (but not for /auth/me to avoid circular calls)
-            // Only check session for critical endpoints, not for initial profile loading
+            // TEMPORARILY DISABLE aggressive session checking to debug logout issue
+            // TODO: Re-enable once logout issue is resolved
             const isLoginEndpoint = endpoint.includes('/auth/login') || endpoint.includes('/auth/register') || endpoint.includes('/auth/me');
-            const isCriticalEndpoint = endpoint.includes('/appointments') || endpoint.includes('/prescriptions');
-            
-            if (!isLoginEndpoint && isCriticalEndpoint && window.AuthGuard && !AuthGuard.isDevelopmentMode() && AuthGuard.isAuthenticated()) {
-                const sessionValid = await this.checkSession();
-                if (!sessionValid) {
-                    window.SahatakLogger?.warn('Session invalid before API call - auto logging out');
-                    await this.handleSessionExpired();
-                    throw new ApiError(
-                        'Your session has expired. Please log in again.',
-                        401,
-                        'SESSION_EXPIRED'
-                    );
-                }
-            }
+            console.log('🔍 API call to:', endpoint, 'isLoginEndpoint:', isLoginEndpoint);
             
             // Debug: Log request details
             const cookieString = document.cookie;
@@ -793,6 +786,7 @@ const ApiHelper = {
             
             // Check for session invalidation (but not during login attempts) - reuse the variable from above
             if (!isLoginEndpoint && (response.status === 401 || (response.status === 302 && response.url.includes('/auth/login')))) {
+                console.log('🚨 Got 401/302 response for', endpoint, 'Status:', response.status);
                 window.SahatakLogger?.warn('Session expired or invalid - auto logging out');
                 await this.handleSessionExpired();
                 throw new ApiError(
@@ -888,6 +882,9 @@ const ApiHelper = {
      */
     async handleSessionExpired() {
         try {
+            console.log('🚨 handleSessionExpired called - logging out user');
+            console.trace('Session expiry call stack:');
+            
             // Stop session monitoring
             this.stopSessionMonitoring();
             
