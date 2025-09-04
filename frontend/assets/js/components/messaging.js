@@ -100,7 +100,7 @@ async function startOrGetConversation(doctorId, appointmentId = null) {
             body.appointment_id = appointmentId;
         }
         
-        const response = await fetch('/api/messages/conversations', {
+        const response = await fetch('https://sahatak.pythonanywhere.com/api/messages/conversations', {
             method: 'POST',
             credentials: 'include',
             headers: {
@@ -124,7 +124,7 @@ async function startOrGetConversation(doctorId, appointmentId = null) {
 // Load recent conversations (for patients)
 async function loadRecentConversations() {
     try {
-        const response = await fetch('/api/messages/conversations', {
+        const response = await fetch('https://sahatak.pythonanywhere.com/api/messages/conversations', {
             credentials: 'include'
         });
         
@@ -153,7 +153,7 @@ async function loadRecentConversations() {
 // Load all conversations
 async function loadConversations() {
     try {
-        const response = await fetch('/api/messages/conversations', {
+        const response = await fetch('https://sahatak.pythonanywhere.com/api/messages/conversations', {
             method: 'GET',
             credentials: 'include',
             headers: {
@@ -297,7 +297,7 @@ async function loadMessages() {
     if (!currentConversationId) return;
 
     try {
-        const response = await fetch(`/api/messages/conversations/${currentConversationId}`, {
+        const response = await fetch(`https://sahatak.pythonanywhere.com/api/messages/conversations/${currentConversationId}`, {
             method: 'GET',
             credentials: 'include',
             headers: {
@@ -360,7 +360,7 @@ async function sendMessage() {
     if (!content || !currentConversationId) return;
 
     try {
-        const response = await fetch(`/api/messages/conversations/${currentConversationId}/messages`, {
+        const response = await fetch(`https://sahatak.pythonanywhere.com/api/messages/conversations/${currentConversationId}/messages`, {
             method: 'POST',
             credentials: 'include',
             headers: {
@@ -423,7 +423,7 @@ function addMessageToDisplay(message) {
 async function markConversationAsRead(conversationId) {
     try {
         // Check if endpoint exists for marking as read
-        await fetch(`/api/messages/conversations/${conversationId}/read`, {
+        await fetch(`https://sahatak.pythonanywhere.com/api/messages/conversations/${conversationId}/read`, {
             method: 'PUT',
             credentials: 'include'
         });
@@ -445,7 +445,7 @@ function initializeWebSocket() {
         return;
     }
     
-    socket = io({
+    socket = io('https://sahatak.pythonanywhere.com', {
         autoConnect: true,
         reconnection: true
     });
