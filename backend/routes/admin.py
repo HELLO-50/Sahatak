@@ -718,7 +718,7 @@ def get_pending_verifications():
                 Doctor.is_verified == False,
                 User.is_active == True
             )
-        ).join(User).order_by(Doctor.created_at.asc())
+        ).join(User, Doctor.user_id == User.id).order_by(Doctor.created_at.asc())
         
         pending_pagination = pending_query.paginate(
             page=page,
