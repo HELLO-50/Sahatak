@@ -202,7 +202,7 @@ class AuthGuard {
      * Clear authentication data (logout)
      */
     static clearAuth() {
-        // Clear all possible sahatak localStorage keys
+        // Clear all possible sahatak localStorage keys including JWT token
         const keysToRemove = [
             'sahatak_user_id',
             'sahatak_user_type', 
@@ -212,6 +212,7 @@ class AuthGuard {
             'sahatak_doctor_data',
             'sahatak_user',
             'sahatak_token',
+            'sahatak_access_token',  // JWT token
             'sahatak_preferences',
             'sahatak_return_url'
         ];

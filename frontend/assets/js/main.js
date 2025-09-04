@@ -709,11 +709,19 @@ const ApiHelper = {
             }
         }
         
+        // Add JWT token to headers if available (fallback for session issues)
+        const token = localStorage.getItem('sahatak_access_token');
+        const authHeaders = {};
+        if (token) {
+            authHeaders['Authorization'] = `Bearer ${token}`;
+        }
+        
         const defaultOptions = {
             headers: {
                 'Content-Type': 'application/json',
                 'Accept-Language': language,
                 'X-Timestamp': Date.now().toString(),
+                ...authHeaders,
                 ...options.headers
             },
             credentials: 'include' // Important for session-based authentication
@@ -752,8 +760,10 @@ const ApiHelper = {
             
             // Additional debug for session-related requests
             if (endpoint.includes('/auth/') || endpoint.includes('/users/profile')) {
+                const hasToken = requestOptions.headers.Authorization ? 'YES' : 'NO';
                 console.log(`🔐 Auth Request: ${method} ${endpoint}`);
                 console.log(`📄 Cookies being sent: ${cookieString || 'NO COOKIES'}`);
+                console.log(`🎫 JWT Token in headers: ${hasToken}`);
                 console.log(`🔗 Credentials mode: ${requestOptions.credentials}`);
             }
 
@@ -963,6 +973,12 @@ async function handleLogin(event) {
             localStorage.setItem('sahatak_user_email', response.data.user.email);
             localStorage.setItem('sahatak_user_id', response.data.user.id);
             localStorage.setItem('sahatak_user_name', response.data.user.full_name);
+            
+            // Store JWT token if provided (fallback for session cookie issues)
+            if (response.data.access_token) {
+                localStorage.setItem('sahatak_access_token', response.data.access_token);
+                console.log('🔑 JWT token stored for authentication');
+            }
             
             // Debug: Check if session cookie was set
             const cookiesAfterLogin = document.cookie;
