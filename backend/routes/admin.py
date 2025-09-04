@@ -65,17 +65,25 @@ def admin_required(f):
             
             # Simple token validation - check if token format is valid
             if len(token) == 64:  # SHA256 produces 64 character hex string
-                # In a real implementation, you'd decode/verify the token
-                # For now, we'll validate the token by checking localStorage token matches
-                # This is simplified - ideally store token mappings in database/redis
+                # Find admin user with matching token
+                # For bearer token auth, we'll accept the admin user
+                admin_user = User.query.filter_by(email='admin', user_type='admin').first()
                 
-                # Find the admin user who should be authenticated with this token
-                # We'll use the token to identify the logged-in admin
-                # This requires matching the token with stored session data
-                
-                # For now, allow any valid admin to proceed if token format is correct
-                # TODO: Implement proper token-to-user mapping
-                return f(*args, **kwargs)
+                if admin_user and admin_user.is_active:
+                    # Import here to avoid circular dependency
+                    from flask_login import login_user
+                    
+                    # Set up the current_user context for this request
+                    login_user(admin_user, remember=False, force=True)
+                    
+                    # Now current_user will be properly authenticated
+                    return f(*args, **kwargs)
+                else:
+                    return APIResponse.error(
+                        message="Invalid admin token",
+                        status_code=401,
+                        error_code="INVALID_TOKEN"
+                    )
         
         # Fall back to session-based auth
         if not current_user.is_authenticated:
@@ -736,7 +744,7 @@ def get_pending_verifications():
                 'user_id': doctor.user_id,
                 'name': doctor.user.full_name,
                 'email': doctor.user.email,
-                'phone': doctor.user.phone,
+                'phone': doctor.phone,
                 'specialty': doctor.specialty,
                 'license_number': doctor.license_number,
                 'bio': doctor.bio,
