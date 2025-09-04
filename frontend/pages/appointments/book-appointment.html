@@ -324,6 +324,7 @@
     
     <!-- Authentication Guard (must load first) -->
     <script src="../../assets/js/components/auth-guard.js"></script>
+    <script src="../../assets/js/components/auth-storage.js"></script>
     
     <!-- Main JavaScript -->
     <script src="../../assets/js/main.js"></script>
@@ -511,31 +512,40 @@
                     console.log('Using AuthGuard name:', authUser.name);
                     document.getElementById('user-name').textContent = authUser.name;
                 } else {
-                    // Try different localStorage keys used across the system
-                    const localStorageKeys = [
-                        'sahatak_user_data',
-                        'sahatak_patient_data', 
-                        'userData',
-                        'user',
-                        'currentUser'
-                    ];
+                    console.log('No AuthGuard data available, checking localStorage directly');
+                    
+                    // First check if we have centralized auth data
+                    if (window.AuthStorage && AuthStorage.isAuthenticated()) {
+                        const authData = AuthStorage.getAuthData();
+                        if (authData && authData.name) {
+                            document.getElementById('user-name').textContent = authData.name;
+                            console.log('Using AuthStorage name:', authData.name);
+                            return;
+                        }
+                    }
+                    
+                    // Check current user type to avoid cross-contamination
+                    const userType = localStorage.getItem('sahatak_user_type');
+                    console.log('Current user type:', userType);
                     
                     let userName = null;
-                    for (const key of localStorageKeys) {
+                    
+                    // Only check patient-specific data for patient users
+                    if (userType === 'patient') {
                         try {
-                            const data = JSON.parse(localStorage.getItem(key) || '{}');
-                            console.log(`Checking localStorage key '${key}':`, data);
-                            if (data.full_name) {
-                                userName = data.full_name;
-                                console.log(`Found full_name in ${key}:`, userName);
-                                break;
-                            } else if (data.name) {
-                                userName = data.name;
-                                console.log(`Found name in ${key}:`, userName);
-                                break;
+                            const patientData = JSON.parse(localStorage.getItem('sahatak_patient_data') || '{}');
+                            if (patientData.full_name) {
+                                userName = patientData.full_name;
+                                console.log('Found patient full_name:', userName);
                             }
                         } catch (e) {
-                            // Skip invalid JSON
+                            console.log('Error parsing patient data:', e);
+                        }
+                        
+                        // Fallback to user name from localStorage
+                        if (!userName) {
+                            userName = localStorage.getItem('sahatak_user_name');
+                            console.log('Using sahatak_user_name:', userName);
                         }
                     }
                     
