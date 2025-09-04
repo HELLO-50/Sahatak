@@ -1153,18 +1153,22 @@ const AdminDashboard = {
                     <button class="btn btn-sm btn-outline-info me-1" onclick="AdminDashboard.viewAdminDetails(${admin.id})" title="View Details">
                         <i class="bi bi-eye"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-secondary me-1" onclick="AdminDashboard.changeAdminPassword(${admin.id}, '${admin.full_name}')" title="Change Password">
-                        <i class="bi bi-key"></i>
-                    </button>
+                    ${admin.email !== 'admin' ? `
+                        <button class="btn btn-sm btn-outline-secondary me-1" onclick="AdminDashboard.changeAdminPassword(${admin.id}, '${admin.full_name}')" title="Change Password">
+                            <i class="bi bi-key"></i>
+                        </button>
+                    ` : ''}
                     ${admin.id !== this.getCurrentUserId() ? `
-                        <button class="btn btn-sm btn-outline-${admin.is_active ? 'warning' : 'success'} me-1" 
-                                onclick="AdminDashboard.toggleAdminStatus(${admin.id})" 
-                                title="${admin.is_active ? 'Deactivate' : 'Activate'}">
-                            <i class="bi bi-${admin.is_active ? 'person-dash' : 'person-check'}"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="AdminDashboard.deleteAdmin(${admin.id})" title="Delete Admin">
-                            <i class="bi bi-trash"></i>
-                        </button>
+                        ${admin.email !== 'admin' ? `
+                            <button class="btn btn-sm btn-outline-${admin.is_active ? 'warning' : 'success'} me-1" 
+                                    onclick="AdminDashboard.toggleAdminStatus(${admin.id})" 
+                                    title="${admin.is_active ? 'Deactivate' : 'Activate'}">
+                                <i class="bi bi-${admin.is_active ? 'person-dash' : 'person-check'}"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="AdminDashboard.deleteAdmin(${admin.id})" title="Delete Admin">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        ` : '<span class="badge bg-warning">Master Admin</span>'}
                     ` : ''}
                 </td>
             </tr>
