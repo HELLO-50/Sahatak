@@ -72,7 +72,7 @@ app_logger.info("WebSocket service initialized")
 from utils.db_optimize import init_db_optimization
 init_db_optimization(app)
 
-# Configure CORS
+# Configure CORS with more permissive settings for cross-origin cookies
 CORS(app, 
      origins=[
          'http://localhost:3000', 
@@ -80,7 +80,9 @@ CORS(app,
          'http://localhost:8000', 
          'http://127.0.0.1:8000',
          'https://hmb104.github.io',
-         'https://hello-50.github.io'
+         'https://hello-50.github.io',
+         'https://hello-50.github.io/Sahatak',
+         'https://hmb104.github.io/Sahatak'
      ],
      allow_headers=['Content-Type', 'Authorization', 'Accept-Language', 'X-Requested-With', 'x-timestamp'],
      methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
