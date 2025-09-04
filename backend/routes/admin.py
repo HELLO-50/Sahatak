@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, current_app, make_response
-from flask_login import login_required, current_user
+from flask_login import current_user
 from functools import wraps
 import hashlib
 from models import db, User, Patient, Doctor, Appointment
@@ -63,27 +63,56 @@ def admin_required(f):
         if auth_header and auth_header.startswith('Bearer '):
             token = auth_header.split(' ')[1]
             
-            # Simple token validation - check if token format is valid
-            if len(token) == 64:  # SHA256 produces 64 character hex string
-                # Find admin user with matching token
-                # For bearer token auth, we'll accept the admin user
-                admin_user = User.query.filter_by(email='admin', user_type='admin').first()
+            # Try JWT validation first
+            try:
+                from utils.jwt_helper import JWTHelper
+                payload = JWTHelper.decode_token(token)
                 
-                if admin_user and admin_user.is_active:
-                    # Import here to avoid circular dependency
-                    from flask_login import login_user
+                if payload and payload.get('user_type') == 'admin':
+                    user_id = payload.get('user_id')
+                    admin_user = User.query.filter_by(id=user_id, user_type='admin').first()
                     
-                    # Set up the current_user context for this request
-                    login_user(admin_user, remember=False, force=True)
+                    if admin_user and admin_user.is_active:
+                        from flask_login import login_user
+                        login_user(admin_user, remember=False, force=True)
+                        app_logger.info(f"Admin JWT auth successful for user {user_id}")
+                        return f(*args, **kwargs)
+                        
+            except ImportError:
+                # Fallback to base64 token validation
+                try:
+                    import base64
+                    import json
                     
-                    # Now current_user will be properly authenticated
-                    return f(*args, **kwargs)
-                else:
-                    return APIResponse.error(
-                        message="Invalid admin token",
-                        status_code=401,
-                        error_code="INVALID_TOKEN"
-                    )
+                    token_json = base64.b64decode(token.encode()).decode()
+                    payload = json.loads(token_json)
+                    
+                    # Check token expiration
+                    exp_time = payload.get('exp', 0)
+                    current_time = int(datetime.utcnow().timestamp())
+                    
+                    if exp_time >= current_time and payload.get('user_type') == 'admin':
+                        user_id = payload.get('user_id')
+                        admin_user = User.query.filter_by(id=user_id, user_type='admin').first()
+                        
+                        if admin_user and admin_user.is_active:
+                            from flask_login import login_user
+                            login_user(admin_user, remember=False, force=True)
+                            app_logger.info(f"Admin fallback auth successful for user {user_id}")
+                            return f(*args, **kwargs)
+                            
+                except Exception as e:
+                    app_logger.error(f"Admin fallback token validation error: {str(e)}")
+                    
+            except Exception as e:
+                app_logger.error(f"Admin JWT validation error: {str(e)}")
+            
+            # If we get here, token validation failed
+            return APIResponse.error(
+                message="Invalid admin token",
+                status_code=401,
+                error_code="INVALID_TOKEN"
+            )
         
         # Fall back to session-based auth
         if not current_user.is_authenticated:
