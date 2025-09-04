@@ -355,6 +355,13 @@ def get_doctor_availability(doctor_id):
             )
         
         day_schedule = available_hours[day_name]
+        
+        # Check if the day is enabled
+        if not day_schedule.get('enabled', True):
+            return APIResponse.success(
+                data={'available_slots': []},
+                message=f'Doctor is not available on {day_name.capitalize()}'
+            )
         start_time = datetime.strptime(day_schedule['start'], '%H:%M').time()
         end_time = datetime.strptime(day_schedule['end'], '%H:%M').time()
         
