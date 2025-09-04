@@ -230,7 +230,9 @@ const AvailabilityManager = {
                 errorDiv.className = 'invalid-feedback';
                 endInput.insertAdjacentElement('afterend', errorDiv);
             }
-            errorDiv.textContent = 'وقت النهاية يجب أن يكون بعد وقت البداية';
+            const lang = LanguageManager.getLanguage() || 'ar';
+            const errorMsg = lang === 'ar' ? 'وقت النهاية يجب أن يكون بعد وقت البداية' : 'End time must be after start time';
+            errorDiv.textContent = errorMsg;
         } else {
             const endInput = document.querySelector(`.end-time-input[data-day="${dayKey}"]`);
             endInput.classList.remove('is-invalid');
@@ -260,14 +262,18 @@ const AvailabilityManager = {
             });
             
             if (hasErrors) {
-                this.showAlert('error', 'يرجى تصحيح الأخطاء في الأوقات المحددة');
+                const lang = LanguageManager.getLanguage() || 'ar';
+                const errorMsg = lang === 'ar' ? 'يرجى تصحيح الأخطاء في الأوقات المحددة' : 'Please correct the errors in the specified times';
+                this.showAlert('error', errorMsg);
                 return;
             }
             
             // Show loading state
             const saveBtn = document.getElementById('save-schedule-btn');
             const originalText = saveBtn.innerHTML;
-            saveBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>جاري الحفظ...';
+            const lang = LanguageManager.getLanguage() || 'ar';
+            const savingText = lang === 'ar' ? 'جاري الحفظ...' : 'Saving...';
+            saveBtn.innerHTML = `<i class="bi bi-hourglass-split me-1"></i>${savingText}`;
             saveBtn.disabled = true;
             
             const response = await ApiHelper.makeRequest('/availability/schedule', {
@@ -278,7 +284,9 @@ const AvailabilityManager = {
             });
             
             if (response.success) {
-                this.showAlert('success', 'تم حفظ الجدول الأسبوعي بنجاح');
+                const lang = LanguageManager.getLanguage() || 'ar';
+                const successMsg = lang === 'ar' ? 'تم حفظ الجدول الأسبوعي بنجاح' : 'Weekly schedule saved successfully';
+                this.showAlert('success', successMsg);
                 // Reload calendar data to reflect changes
                 await this.loadCalendarData();
             } else {
@@ -286,11 +294,15 @@ const AvailabilityManager = {
             }
         } catch (error) {
             console.error('Error saving schedule:', error);
-            this.showAlert('error', 'فشل في حفظ الجدول الأسبوعي');
+            const lang = LanguageManager.getLanguage() || 'ar';
+            const errorMsg = lang === 'ar' ? 'فشل في حفظ الجدول الأسبوعي' : 'Failed to save weekly schedule';
+            this.showAlert('error', errorMsg);
         } finally {
             // Reset button state
             const saveBtn = document.getElementById('save-schedule-btn');
-            saveBtn.innerHTML = '<i class="bi bi-check-circle me-1"></i>حفظ الجدول';
+            const lang = LanguageManager.getLanguage() || 'ar';
+            const saveText = lang === 'ar' ? 'حفظ الجدول' : 'Save Schedule';
+            saveBtn.innerHTML = `<i class="bi bi-check-circle me-1"></i>${saveText}`;
             saveBtn.disabled = false;
         }
     },
