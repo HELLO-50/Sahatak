@@ -52,6 +52,7 @@ async function initializeMessaging() {
 // Initialize doctor messaging
 async function initializeDoctorMessaging() {
     await loadConversations();
+    await loadDoctorPatients(); // Load available patients for new conversations
 }
 
 // Initialize patient messaging
@@ -185,60 +186,6 @@ async function loadConversations() {
     }
 }
 
-// Display conversations for doctors
-function displayDoctorConversations(conversationList) {
-    const patientList = document.getElementById('patientList');
-    
-    if (!conversationList || conversationList.length === 0) {
-        patientList.innerHTML = `
-            <div class="text-center text-muted py-5" id="no-conversations">
-                <i class="bi bi-people fs-1"></i>
-                <p class="mt-2">No conversations yet</p>
-                <small>Patients will appear here when they message you</small>
-            </div>
-        `;
-        return;
-    }
-
-    patientList.innerHTML = '';
-    
-    conversationList.forEach((conversation, index) => {
-        const patient = conversation.participants.patient;
-        const patientItem = document.createElement('div');
-        patientItem.className = `patient-item ${index === 0 ? 'active' : ''}`;
-        patientItem.setAttribute('data-conversation', conversation.id);
-        patientItem.onclick = () => selectConversation(conversation.id, patient.id, patient.name);
-        
-        const lastMessage = conversation.last_message_content || 'No messages yet';
-        const lastMessageTime = conversation.last_message_at ? formatTimestamp(conversation.last_message_at) : '';
-        
-        patientItem.innerHTML = `
-            <div class="d-flex align-items-start">
-                <div class="patient-avatar me-3">
-                    <i class="bi bi-person-circle"></i>
-                </div>
-                <div class="patient-info flex-grow-1">
-                    <h6 class="patient-name">${patient.name}</h6>
-                    <p class="last-message text-muted">${lastMessage}</p>
-                    <small class="text-muted">${lastMessageTime}</small>
-                </div>
-                ${conversation.unread_count > 0 ? 
-                    `<div class="message-badge">${conversation.unread_count > 99 ? '99+' : conversation.unread_count}</div>` : ''
-                }
-            </div>
-        `;
-        
-        patientList.appendChild(patientItem);
-    });
-    
-    // Select first conversation if available
-    if (conversationList.length > 0) {
-        const firstConv = conversationList[0];
-        const patient = firstConv.participants.patient;
-        selectConversation(firstConv.id, patient.id, patient.name);
-    }
-}
-
 // Display conversations for patients (if multiple doctors)
 function displayPatientConversations(conversationList) {
     // For now, patients typically have one conversation with their doctor
@@ -250,6 +197,244 @@ function displayPatientConversations(conversationList) {
         currentRecipientId = doctor.id;
         updateDoctorDisplay(doctor);
         loadMessages();
+    }
+}
+
+// Load doctor's patients for starting new conversations
+let availablePatients = [];
+
+async function loadDoctorPatients() {
+    try {
+        // Get doctor's appointments to find patients
+        const response = await ApiHelper.makeRequest('/appointments/');
+        
+        if (response.success) {
+            const appointments = response.data.appointments;
+            
+            // Extract unique patients from appointments
+            const patientsMap = new Map();
+            
+            appointments.forEach(appointment => {
+                if (appointment.patient_id && appointment.patient_name) {
+                    if (!patientsMap.has(appointment.patient_id)) {
+                        patientsMap.set(appointment.patient_id, {
+                            id: appointment.patient_id,
+                            name: appointment.patient_name,
+                            lastAppointment: appointment.appointment_date,
+                            appointmentType: appointment.appointment_type,
+                            status: appointment.status
+                        });
+                    }
+                }
+            });
+            
+            availablePatients = Array.from(patientsMap.values());
+            console.log('Available patients for messaging:', availablePatients);
+        }
+    } catch (error) {
+        console.error('Failed to load doctor patients:', error);
+        availablePatients = [];
+    }
+}
+
+// Enhanced display for doctor conversations with available patients
+function displayDoctorConversations(conversationList) {
+    const patientList = document.getElementById('patientList');
+    
+    // Clear the patient list
+    patientList.innerHTML = '';
+    
+    // Add "Start New Conversation" header if there are available patients
+    if (availablePatients.length > 0) {
+        const newConversationSection = document.createElement('div');
+        newConversationSection.className = 'mb-3';
+        newConversationSection.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted fw-bold">START NEW CONVERSATION</small>
+                <button class="btn btn-sm btn-outline-primary" onclick="toggleNewConversationView()">
+                    <i class="bi bi-plus-circle me-1"></i>New Message
+                </button>
+            </div>
+            <div id="newConversationView" style="display: none;" class="border rounded p-2 mb-3">
+                <div class="mb-2">
+                    <small class="text-muted">Select a patient to start messaging:</small>
+                </div>
+                <div id="availablePatientsList"></div>
+            </div>
+        `;
+        patientList.appendChild(newConversationSection);
+        
+        // Populate available patients
+        displayAvailablePatients();
+    }
+    
+    // Add existing conversations section
+    if (conversationList && conversationList.length > 0) {
+        const conversationsSection = document.createElement('div');
+        conversationsSection.innerHTML = `
+            <div class="mb-2">
+                <small class="text-muted fw-bold">EXISTING CONVERSATIONS</small>
+            </div>
+        `;
+        patientList.appendChild(conversationsSection);
+        
+        // Add existing conversations
+        conversationList.forEach((conversation, index) => {
+            const patient = conversation.participants.patient;
+            const patientItem = document.createElement('div');
+            patientItem.className = `patient-item ${index === 0 ? 'active' : ''}`;
+            patientItem.setAttribute('data-conversation', conversation.id);
+            patientItem.onclick = () => selectConversation(conversation.id, patient.id, patient.name);
+            
+            const lastMessage = conversation.last_message_content || 'No messages yet';
+            const lastMessageTime = conversation.last_message_at ? formatTimestamp(conversation.last_message_at) : '';
+            
+            patientItem.innerHTML = `
+                <div class="d-flex align-items-start">
+                    <div class="patient-avatar me-3">
+                        <i class="bi bi-person-circle"></i>
+                    </div>
+                    <div class="patient-info flex-grow-1">
+                        <h6 class="patient-name">${patient.name}</h6>
+                        <p class="last-message text-muted">${lastMessage}</p>
+                        <small class="text-muted">${lastMessageTime}</small>
+                    </div>
+                    ${conversation.unread_count > 0 ? 
+                        `<div class="message-badge">${conversation.unread_count > 99 ? '99+' : conversation.unread_count}</div>` : ''
+                    }
+                </div>
+            `;
+            
+            patientList.appendChild(patientItem);
+        });
+        
+        // Select first conversation if available
+        const firstConv = conversationList[0];
+        const patient = firstConv.participants.patient;
+        selectConversation(firstConv.id, patient.id, patient.name);
+    } else if (availablePatients.length === 0) {
+        // Show empty state only if no conversations and no patients
+        patientList.innerHTML = `
+            <div class="text-center text-muted py-5" id="no-conversations">
+                <i class="bi bi-people fs-1"></i>
+                <p class="mt-2">No patients available</p>
+                <small>Patients will appear here when you have appointments with them</small>
+            </div>
+        `;
+    }
+}
+
+// Display available patients for new conversations
+function displayAvailablePatients() {
+    const availablePatientsContainer = document.getElementById('availablePatientsList');
+    if (!availablePatientsContainer) return;
+    
+    availablePatientsContainer.innerHTML = '';
+    
+    availablePatients.forEach(patient => {
+        const patientItem = document.createElement('div');
+        patientItem.className = 'patient-item available-patient';
+        patientItem.onclick = () => startNewConversation(patient.id, patient.name);
+        
+        const appointmentDate = new Date(patient.lastAppointment).toLocaleDateString();
+        
+        patientItem.innerHTML = `
+            <div class="d-flex align-items-start">
+                <div class="patient-avatar me-3">
+                    <i class="bi bi-person-circle text-success"></i>
+                </div>
+                <div class="patient-info flex-grow-1">
+                    <h6 class="patient-name">${patient.name}</h6>
+                    <small class="text-muted">Last appointment: ${appointmentDate}</small>
+                    <span class="badge bg-success-subtle text-success ms-2">${patient.status}</span>
+                </div>
+                <div>
+                    <i class="bi bi-chat-dots text-primary"></i>
+                </div>
+            </div>
+        `;
+        
+        availablePatientsContainer.appendChild(patientItem);
+    });
+}
+
+// Toggle new conversation view
+function toggleNewConversationView() {
+    const newConversationView = document.getElementById('newConversationView');
+    if (newConversationView.style.display === 'none') {
+        newConversationView.style.display = 'block';
+    } else {
+        newConversationView.style.display = 'none';
+    }
+}
+
+// Start a new conversation with a patient
+async function startNewConversation(patientId, patientName) {
+    try {
+        // Check if conversation already exists
+        const existingConv = conversations.find(conv => 
+            conv.participants.patient && conv.participants.patient.id === patientId
+        );
+        
+        if (existingConv) {
+            // Select existing conversation
+            selectConversation(existingConv.id, patientId, patientName);
+            toggleNewConversationView(); // Hide the new conversation view
+            return;
+        }
+        
+        // Create a new conversation
+        const response = await ApiHelper.makeRequest('/messages/conversations', {
+            method: 'POST',
+            data: {
+                recipient_id: patientId,
+                recipient_type: 'patient'
+            }
+        });
+        
+        if (response.success) {
+            const newConversation = response.data.conversation;
+            currentConversationId = newConversation.id;
+            currentRecipientId = patientId;
+            currentRecipientName = patientName;
+            
+            // Update the display
+            document.getElementById('selectedPatientName').textContent = patientName;
+            document.getElementById('selectedPatientInfo').textContent = 'Ready to start conversation';
+            
+            // Enable message input and buttons
+            const messageInputArea = document.getElementById('messageInputArea');
+            const viewRecordBtn = document.getElementById('viewRecordBtn');
+            const scheduleBtn = document.getElementById('scheduleBtn');
+            
+            if (messageInputArea) messageInputArea.style.display = 'block';
+            if (viewRecordBtn) viewRecordBtn.disabled = false;
+            if (scheduleBtn) scheduleBtn.disabled = false;
+            
+            // Clear and show empty chat
+            const chatMessages = document.getElementById('chatMessages');
+            if (chatMessages) {
+                chatMessages.innerHTML = `
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-chat-dots fs-1"></i>
+                        <p class="mt-2">Start your conversation with ${patientName}</p>
+                        <small>Send your first message below</small>
+                    </div>
+                `;
+            }
+            toggleNewConversationView(); // Hide the new conversation view
+            
+            // Refresh conversations to include the new one
+            await loadConversations();
+            
+            console.log('New conversation started with:', patientName);
+        } else {
+            throw new Error(response.message || 'Failed to create conversation');
+        }
+        
+    } catch (error) {
+        console.error('Failed to start new conversation:', error);
+        showErrorMessage('Failed to start conversation. Please try again.');
     }
 }
 

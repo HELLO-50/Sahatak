@@ -317,3 +317,36 @@
         padding: 0 15px;
     }
 }
+
+/* New Conversation Styles */
+.available-patient {
+    border-left: 3px solid #28a745 !important;
+    background-color: #f8fff9;
+}
+
+.available-patient:hover {
+    background-color: #e8f5e8 !important;
+}
+
+.available-patient .patient-avatar i {
+    color: #28a745;
+}
+
+#newConversationView {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+#newConversationView .patient-item {
+    background-color: white;
+    margin-bottom: 2px;
+    border-radius: 6px;
+}
+
+.patient-list small.fw-bold {
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
