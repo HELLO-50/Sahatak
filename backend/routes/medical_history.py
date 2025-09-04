@@ -1,5 +1,6 @@
 from flask import Blueprint, request
-from flask_login import login_required, current_user
+from flask_login import current_user
+from routes.auth import api_login_required
 from datetime import datetime
 from typing import Dict, Any
 
@@ -11,7 +12,7 @@ from utils.logging_config import app_logger
 medical_history_bp = Blueprint('medical_history', __name__, url_prefix='/medical-history')
 
 @medical_history_bp.route('/patient/<int:patient_id>', methods=['GET'])
-@login_required
+@api_login_required
 def get_patient_medical_history(patient_id):
     """
     Get patient's complete medical history
@@ -70,7 +71,7 @@ def get_patient_medical_history(patient_id):
         return error_response("Failed to retrieve medical history", 500)
 
 @medical_history_bp.route('/complete', methods=['POST'])
-@login_required
+@api_login_required
 def complete_medical_history():
     """
     Complete medical history during initial registration or update
@@ -160,7 +161,7 @@ def complete_medical_history():
         return error_response("Failed to complete medical history", 500)
 
 @medical_history_bp.route('/update', methods=['PUT'])
-@login_required
+@api_login_required
 def update_medical_history():
     """
     Update medical history (patients or doctors during appointments)
@@ -277,7 +278,7 @@ def update_medical_history():
         return error_response("Failed to update medical history", 500)
 
 @medical_history_bp.route('/check-completion', methods=['GET'])
-@login_required
+@api_login_required
 def check_medical_history_completion():
     """
     Check if patient's medical history is completed
@@ -324,7 +325,7 @@ def check_medical_history_completion():
         return error_response("Failed to check medical history completion", 500)
 
 @medical_history_bp.route('/updates/<int:patient_id>', methods=['GET'])
-@login_required
+@api_login_required
 def get_medical_history_updates(patient_id):
     """
     Get medical history update audit trail
@@ -390,7 +391,7 @@ def get_medical_history_updates(patient_id):
         return error_response("Failed to retrieve medical history updates", 500)
 
 @medical_history_bp.route('/appointment-prompt/<int:appointment_id>', methods=['GET'])
-@login_required
+@api_login_required
 def get_appointment_history_prompt(appointment_id):
     """
     Get medical history status and prompts for appointment

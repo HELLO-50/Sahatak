@@ -1,5 +1,6 @@
 from flask import Blueprint, request, current_app
-from flask_login import login_required, current_user
+from flask_login import current_user
+from routes.auth import api_login_required
 from models import db, Doctor, User, Appointment
 from datetime import datetime as dt, timedelta, time
 from sqlalchemy import and_, or_
@@ -10,7 +11,7 @@ from utils.logging_config import app_logger, log_user_action
 availability_bp = Blueprint('availability', __name__)
 
 @availability_bp.route('/schedule', methods=['GET'])
-@login_required
+@api_login_required
 def get_doctor_schedule():
     """Get doctor's weekly availability schedule"""
     try:
@@ -47,7 +48,7 @@ def get_doctor_schedule():
         return APIResponse.internal_error(message='Failed to get doctor schedule')
 
 @availability_bp.route('/schedule', methods=['PUT'])
-@login_required
+@api_login_required
 def update_doctor_schedule():
     """Update doctor's weekly availability schedule with locking to prevent concurrent updates"""
     try:
@@ -179,7 +180,7 @@ def update_doctor_schedule():
         return APIResponse.internal_error(message='Failed to update doctor schedule')
 
 @availability_bp.route('/calendar', methods=['GET'])
-@login_required
+@api_login_required
 def get_availability_calendar():
     """Get doctor's availability calendar for a date range"""
     try:
@@ -307,7 +308,7 @@ def get_availability_calendar():
         return APIResponse.internal_error(message='Failed to get availability calendar')
 
 @availability_bp.route('/block-time', methods=['POST'])
-@login_required
+@api_login_required
 def block_time_slot():
     """Block a specific time slot"""
     try:
@@ -411,7 +412,7 @@ def block_time_slot():
         return APIResponse.internal_error(message='Failed to block time slot')
 
 @availability_bp.route('/unblock-time/<int:block_id>', methods=['DELETE'])
-@login_required
+@api_login_required
 def unblock_time_slot(block_id):
     """Unblock a previously blocked time slot"""
     try:

@@ -71,7 +71,7 @@ def get_prescriptions():
         return error_response("Failed to retrieve prescriptions", 500)
 
 @prescriptions_bp.route('/<int:prescription_id>', methods=['GET'])
-@login_required
+@api_login_required
 def get_prescription_details(prescription_id):
     """
     Get detailed prescription information
@@ -109,7 +109,7 @@ def get_prescription_details(prescription_id):
         return error_response("Failed to retrieve prescription details", 500)
 
 @prescriptions_bp.route('/', methods=['POST'])
-@login_required
+@api_login_required
 def create_prescription():
     """
     Create a new prescription (doctors only)
@@ -191,7 +191,7 @@ def create_prescription():
         return error_response("Failed to create prescription", 500)
 
 @prescriptions_bp.route('/<int:prescription_id>', methods=['PUT'])
-@login_required
+@api_login_required
 def update_prescription(prescription_id):
     """
     Update prescription details (doctors only for their own prescriptions)
@@ -274,7 +274,7 @@ def update_prescription(prescription_id):
         return error_response("Failed to update prescription", 500)
 
 @prescriptions_bp.route('/<int:prescription_id>/status', methods=['PUT'])
-@login_required
+@api_login_required
 def update_prescription_status(prescription_id):
     """
     Update prescription status (doctors and patients can update certain statuses)
@@ -334,7 +334,7 @@ def update_prescription_status(prescription_id):
         return error_response("Failed to update prescription status", 500)
 
 @prescriptions_bp.route('/patient/<int:patient_id>', methods=['GET'])
-@login_required
+@api_login_required
 def get_patient_prescriptions(patient_id):
     """
     Get prescriptions for a specific patient (doctors only)
@@ -374,7 +374,7 @@ def get_patient_prescriptions(patient_id):
         return error_response("Failed to retrieve patient prescriptions", 500)
 
 @prescriptions_bp.route('/stats', methods=['GET'])
-@login_required
+@api_login_required
 def get_prescription_stats():
     """
     Get prescription statistics for the user

@@ -30,7 +30,7 @@ def get_profile():
         return APIResponse.internal_error(message='Failed to get profile')
 
 @users_bp.route('/profile', methods=['PUT'])
-@login_required
+@api_login_required
 def update_profile():
     """Update user profile"""
     try:
@@ -272,7 +272,7 @@ def get_specialties():
         }), 500
 
 @users_bp.route('/deactivate', methods=['POST'])
-@login_required
+@api_login_required
 def deactivate_account():
     """Deactivate user account"""
     try:

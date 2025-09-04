@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
-from flask_login import login_required, current_user
+from flask_login import current_user
+from routes.auth import api_login_required
 from datetime import datetime
 from decimal import Decimal
 
@@ -20,7 +21,7 @@ user_settings_bp = Blueprint('user_settings', __name__)
 # =============================================================================
 
 @user_settings_bp.route('/doctor/participation', methods=['GET'])
-@login_required
+@api_login_required
 def get_doctor_participation_settings():
     """
     Get doctor's current participation settings
@@ -53,7 +54,7 @@ def get_doctor_participation_settings():
         return error_response("Failed to get participation settings", 500)
 
 @user_settings_bp.route('/doctor/participation', methods=['PUT'])
-@login_required
+@api_login_required
 def update_doctor_participation_settings():
     """
     Update doctor's participation type and consultation fee
@@ -136,7 +137,7 @@ def update_doctor_participation_settings():
         return error_response("Failed to update participation settings", 500)
 
 @user_settings_bp.route('/doctor/switch-to-volunteer', methods=['POST'])
-@login_required
+@api_login_required
 def switch_to_volunteer():
     """
     Switch doctor to volunteer participation type
@@ -178,7 +179,7 @@ def switch_to_volunteer():
         return error_response("Failed to switch to volunteer participation", 500)
 
 @user_settings_bp.route('/doctor/switch-to-paid', methods=['POST'])
-@login_required
+@api_login_required
 def switch_to_paid():
     """
     Switch doctor to paid participation type with consultation fee
@@ -231,7 +232,7 @@ def switch_to_paid():
         return error_response("Failed to switch to paid participation", 500)
 
 @user_settings_bp.route('/doctor/notification-settings', methods=['PUT'])
-@login_required
+@api_login_required
 def update_doctor_notification_settings():
     """
     Update doctor's notification preferences
@@ -282,7 +283,7 @@ def update_doctor_notification_settings():
 # =============================================================================
 
 @user_settings_bp.route('/patient/preferences', methods=['GET'])
-@login_required
+@api_login_required
 def get_patient_preferences():
     """
     Get patient's current preferences and settings
@@ -314,7 +315,7 @@ def get_patient_preferences():
         return error_response("Failed to get patient preferences", 500)
 
 @user_settings_bp.route('/patient/preferences', methods=['PUT'])
-@login_required
+@api_login_required
 def update_patient_preferences():
     """
     Update patient's preferences and settings
@@ -373,7 +374,7 @@ def update_patient_preferences():
 # =============================================================================
 
 @user_settings_bp.route('/profile', methods=['GET'])
-@login_required
+@api_login_required
 def get_user_profile():
     """
     Get user's general profile information
@@ -400,7 +401,7 @@ def get_user_profile():
         return error_response("Failed to get user profile", 500)
 
 @user_settings_bp.route('/language', methods=['PUT'])
-@login_required
+@api_login_required
 def update_language_preference():
     """
     Update user's language preference
@@ -431,7 +432,7 @@ def update_language_preference():
         return error_response("Failed to update language preference", 500)
 
 @user_settings_bp.route('/password', methods=['PUT'])
-@login_required
+@api_login_required
 def change_password():
     """
     Change user's password
@@ -471,7 +472,7 @@ def change_password():
 # =============================================================================
 
 @user_settings_bp.route('/summary', methods=['GET'])
-@login_required
+@api_login_required
 def get_settings_summary():
     """
     Get a summary of all user settings and preferences

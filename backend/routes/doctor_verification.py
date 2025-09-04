@@ -1,5 +1,6 @@
 from flask import Blueprint, request
-from flask_login import login_required, current_user
+from flask_login import current_user
+from routes.auth import api_login_required
 from datetime import datetime
 from models import db, Doctor, DoctorVerificationLog, User
 from utils.responses import success_response, error_response, validation_error_response, not_found_response, forbidden_response
@@ -20,7 +21,7 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @doctor_verification_bp.route('/status', methods=['GET'])
-@login_required
+@api_login_required
 def get_verification_status():
     """
     Get current verification status for logged-in doctor
@@ -56,7 +57,7 @@ def get_verification_status():
         return error_response("Failed to get verification status", 500)
 
 @doctor_verification_bp.route('/complete-profile', methods=['POST'])
-@login_required
+@api_login_required
 def complete_profile():
     """
     Complete doctor profile for verification
@@ -142,7 +143,7 @@ def complete_profile():
         return error_response("Failed to complete profile", 500)
 
 @doctor_verification_bp.route('/submit-for-verification', methods=['POST'])
-@login_required
+@api_login_required
 def submit_for_verification():
     """
     Submit doctor profile for admin verification
@@ -203,7 +204,7 @@ def submit_for_verification():
         return error_response("Failed to submit for verification", 500)
 
 @doctor_verification_bp.route('/upload-document', methods=['POST'])
-@login_required
+@api_login_required
 def upload_document():
     """
     Upload verification documents
@@ -295,7 +296,7 @@ def upload_document():
 # Admin endpoints for verification management
 
 @doctor_verification_bp.route('/admin/pending', methods=['GET'])
-@login_required
+@api_login_required
 def get_pending_verifications():
     """
     Get list of doctors pending verification (admin only)
@@ -351,7 +352,7 @@ def get_pending_verifications():
         return error_response("Failed to get pending verifications", 500)
 
 @doctor_verification_bp.route('/admin/review/<int:doctor_id>', methods=['GET'])
-@login_required
+@api_login_required
 def get_doctor_verification_details(doctor_id):
     """
     Get detailed doctor information for verification review (admin only)
@@ -390,7 +391,7 @@ def get_doctor_verification_details(doctor_id):
         return error_response("Failed to get verification details", 500)
 
 @doctor_verification_bp.route('/admin/approve/<int:doctor_id>', methods=['POST'])
-@login_required
+@api_login_required
 def approve_doctor(doctor_id):
     """
     Approve doctor verification (admin only)
@@ -442,7 +443,7 @@ def approve_doctor(doctor_id):
         return error_response("Failed to approve doctor", 500)
 
 @doctor_verification_bp.route('/admin/reject/<int:doctor_id>', methods=['POST'])
-@login_required
+@api_login_required
 def reject_doctor(doctor_id):
     """
     Reject doctor verification (admin only)
