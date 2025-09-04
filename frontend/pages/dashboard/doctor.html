@@ -1236,6 +1236,7 @@
                     
                     // Update localStorage for consistency
                     localStorage.setItem('currentUser', JSON.stringify(apiUser));
+                    localStorage.setItem('sahatak_doctor_data', JSON.stringify(apiUser));
                 }
             } catch (error) {
                 console.log('Could not fetch fresh user data:', error);
