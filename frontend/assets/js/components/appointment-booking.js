@@ -10,6 +10,10 @@ const AppointmentBooking = {
     
     // Initialize the booking system
     async init() {
+        console.log('AppointmentBooking.init() called');
+        console.log('ApiHelper available:', typeof ApiHelper !== 'undefined');
+        console.log('AuthGuard available:', typeof AuthGuard !== 'undefined');
+        
         this.initCalendarWidget();
         await this.loadSpecialties();
         this.loadDoctors();
@@ -116,36 +120,69 @@ const AppointmentBooking = {
     // Load doctors list
     async loadDoctors() {
         try {
+            console.log('Starting loadDoctors...');
             const specialty = document.getElementById('specialty-filter').value;
             const params = specialty ? `?specialty=${specialty}` : '';
+            console.log('Making API request to:', `/appointments/doctors${params}`);
+            console.log('ApiHelper baseUrl:', ApiHelper?.baseUrl);
             
             const response = await ApiHelper.makeRequest(`/appointments/doctors${params}`);
+            console.log('API response received:', response);
             
             if (response.success) {
                 this.doctors = response.data.doctors || response.doctors || [];
+                console.log('Doctors loaded:', this.doctors);
                 this.renderDoctors(this.doctors);
                 // Load doctor availability for calendar if doctor is selected
                 if (this.selectedDoctor) {
                     this.updateDoctorAvailability();
                 }
             } else {
+                console.log('API response not successful:', response);
                 this.showError('فشل في تحميل قائمة الأطباء');
             }
         } catch (error) {
             console.error('Error loading doctors:', error);
+            console.error('Error stack:', error.stack);
+            console.error('Error details:', {
+                name: error.name,
+                message: error.message,
+                cause: error.cause
+            });
+            
             const currentLang = LanguageManager.getLanguage() || 'en';
             const errorMsg = currentLang === 'ar' ? 
                 'عذراً، لا يمكن تحميل قائمة الأطباء حالياً. يرجى المحاولة لاحقاً.' :
                 'Sorry, cannot load doctors list currently. Please try again later.';
             this.showError(errorMsg);
+            
+            // Also update the doctors list to show error state instead of loading
+            const container = document.getElementById('doctors-list');
+            if (container) {
+                container.innerHTML = `
+                    <div class="col-12 text-center py-5">
+                        <i class="bi bi-exclamation-triangle display-4 text-danger mb-3"></i>
+                        <p class="text-danger">Error loading doctors</p>
+                        <button class="btn btn-primary" onclick="AppointmentBooking.loadDoctors()">Try Again</button>
+                    </div>
+                `;
+            }
         }
     },
 
     // Render doctors list
     renderDoctors(doctors) {
+        console.log('renderDoctors called with:', doctors);
         const container = document.getElementById('doctors-list');
+        console.log('Container found:', container);
+        
+        if (!container) {
+            console.error('doctors-list container not found!');
+            return;
+        }
         
         if (doctors.length === 0) {
+            console.log('No doctors to render');
             container.innerHTML = `
                 <div class="col-12 text-center py-5">
                     <i class="bi bi-person-x display-4 text-muted mb-3"></i>
