@@ -504,9 +504,10 @@
                 const authUser = AuthGuard.getCurrentUser();
                 console.log('AuthGuard user:', authUser);
                 
-                if (authUser && authUser.full_name) {
-                    console.log('Using AuthGuard full_name:', authUser.full_name);
-                    document.getElementById('user-name').textContent = authUser.full_name;
+                if (authUser && (authUser.full_name || authUser.fullName)) {
+                    const name = authUser.full_name || authUser.fullName;
+                    console.log('Using AuthGuard full_name/fullName:', name);
+                    document.getElementById('user-name').textContent = name;
                 } else if (authUser && authUser.name) {
                     // Try 'name' field as alternative
                     console.log('Using AuthGuard name:', authUser.name);
@@ -558,8 +559,12 @@
                 }
                 
                 // Initialize appointment booking system
+                console.log('About to check AppointmentBooking...');
+                console.log('typeof AppointmentBooking:', typeof AppointmentBooking);
                 if (typeof AppointmentBooking !== 'undefined') {
+                    console.log('AppointmentBooking found, calling init...');
                     await AppointmentBooking.init();
+                    console.log('AppointmentBooking.init completed');
                 } else {
                     console.error('AppointmentBooking not loaded');
                 }
