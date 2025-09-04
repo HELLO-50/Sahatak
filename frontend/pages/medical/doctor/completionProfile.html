@@ -699,19 +699,7 @@
             }
         });
         
-        // Update verification status from database
-        function updateVerificationStatus(user) {
-            const statusElement = document.getElementById('verification-status');
-            const isVerified = user.verification_status === 'verified';
-            
-            if (isVerified) {
-                statusElement.textContent = 'Verified';
-                statusElement.className = 'badge bg-success';
-            } else {
-                statusElement.textContent = 'Unverified';
-                statusElement.className = 'badge bg-warning text-dark';
-            }
-        }
+        // Use global updateVerificationStatus function from dashboard.js
         
         // Initialize page with user data
         document.addEventListener('DOMContentLoaded', function() {
