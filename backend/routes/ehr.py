@@ -1,5 +1,6 @@
 from flask import Blueprint, request
-from flask_login import login_required, current_user
+from flask_login import current_user
+from routes.auth import api_login_required
 from datetime import datetime, timedelta
 from sqlalchemy import and_, or_, desc
 
@@ -11,7 +12,7 @@ from utils.logging_config import app_logger, log_user_action
 ehr_bp = Blueprint('ehr', __name__)
 
 @ehr_bp.route('/patients/search', methods=['GET'])
-@login_required
+@api_login_required
 def search_patients():
     """Search for patients by name, ID, or phone number"""
     try:
@@ -94,7 +95,7 @@ def search_patients():
         return APIResponse.internal_error(message='Failed to search patients')
 
 @ehr_bp.route('/patient/<int:patient_id>', methods=['GET'])
-@login_required
+@api_login_required
 def get_patient_ehr(patient_id):
     """Get comprehensive EHR for a patient"""
     try:
@@ -148,7 +149,7 @@ def get_patient_ehr(patient_id):
         return APIResponse.internal_error(message='Failed to retrieve patient EHR')
 
 @ehr_bp.route('/diagnoses', methods=['POST'])
-@login_required
+@api_login_required
 def create_diagnosis():
     """Create a new diagnosis (doctors only)"""
     try:
@@ -275,7 +276,7 @@ def create_diagnosis():
         return APIResponse.internal_error(message='Failed to create diagnosis')
 
 @ehr_bp.route('/diagnoses/<int:diagnosis_id>', methods=['PUT'])
-@login_required
+@api_login_required
 def update_diagnosis(diagnosis_id):
     """Update a diagnosis (doctors only)"""
     try:
@@ -342,7 +343,7 @@ def update_diagnosis(diagnosis_id):
         return APIResponse.internal_error(message='Failed to update diagnosis')
 
 @ehr_bp.route('/vital-signs', methods=['POST'])
-@login_required
+@api_login_required
 def record_vital_signs():
     """Record vital signs (doctors or patients)"""
     try:
@@ -455,7 +456,7 @@ def record_vital_signs():
         return APIResponse.internal_error(message='Failed to record vital signs')
 
 @ehr_bp.route('/vital-signs/patient/<int:patient_id>', methods=['GET'])
-@login_required
+@api_login_required
 def get_patient_vital_signs(patient_id):
     """Get patient's vital signs history"""
     try:
@@ -494,7 +495,7 @@ def get_patient_vital_signs(patient_id):
         return APIResponse.internal_error(message='Failed to retrieve vital signs')
 
 @ehr_bp.route('/diagnoses/patient/<int:patient_id>', methods=['GET'])
-@login_required
+@api_login_required
 def get_patient_diagnoses(patient_id):
     """Get patient's diagnosis history"""
     try:

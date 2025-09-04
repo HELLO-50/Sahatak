@@ -51,7 +51,7 @@ def get_medical_records():
         return error_response("Failed to get medical records", 500)
 
 @medical_bp.route('/prescriptions', methods=['GET'])
-@login_required
+@api_login_required
 def get_prescriptions():
     """
     Get user's prescriptions - redirects to prescriptions endpoint

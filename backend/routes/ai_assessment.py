@@ -1,10 +1,11 @@
 from flask import Blueprint, request, jsonify, current_app
-from flask_login import login_required, current_user
+from flask_login import current_user
+from routes.auth import api_login_required
 
 ai_bp = Blueprint("ai", __name__)
 
 @ai_bp.route("/assessment", methods=["POST"])
-@login_required
+@api_login_required
 def ai_assessment():
     """AI-powered health assessment"""
     try:

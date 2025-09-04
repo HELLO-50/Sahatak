@@ -1,5 +1,5 @@
 from flask import Blueprint, request, current_app
-from flask_login import login_required, current_user
+from flask_login import current_user
 from models import db, Appointment, Doctor, Patient, User
 from datetime import datetime, timedelta
 from sqlalchemy import and_, or_
@@ -99,7 +99,7 @@ def get_appointments():
         return APIResponse.internal_error(message='Failed to get appointments')
 
 @appointments_bp.route('/', methods=['POST'])
-@login_required
+@api_login_required
 def create_appointment():
     """Create new appointment (patients only)"""
     from utils.validators import validate_json_payload, validate_id_parameter, validate_enum_field, handle_api_errors
@@ -285,7 +285,7 @@ def create_appointment():
         return APIResponse.internal_error(message='Failed to create appointment')
 
 @appointments_bp.route('/<int:appointment_id>', methods=['GET'])
-@login_required
+@api_login_required
 def get_appointment(appointment_id):
     """Get specific appointment details"""
     try:
@@ -307,7 +307,7 @@ def get_appointment(appointment_id):
         return APIResponse.internal_error(message='Failed to get appointment')
 
 @appointments_bp.route('/doctors/<int:doctor_id>/availability', methods=['GET'])
-@login_required
+@api_login_required
 def get_doctor_availability(doctor_id):
     """Get available time slots for a specific doctor"""
     try:
@@ -406,7 +406,7 @@ def get_doctor_availability(doctor_id):
         return APIResponse.internal_error(message='Failed to get doctor availability')
 
 @appointments_bp.route('/<int:appointment_id>/cancel', methods=['PUT'])
-@login_required
+@api_login_required
 def cancel_appointment(appointment_id):
     """Cancel an appointment (patients only)"""
     try:
@@ -470,7 +470,7 @@ def cancel_appointment(appointment_id):
         return APIResponse.internal_error(message='Failed to cancel appointment')
 
 @appointments_bp.route('/<int:appointment_id>/reschedule', methods=['PUT'])
-@login_required
+@api_login_required
 def reschedule_appointment(appointment_id):
     """Reschedule an appointment (patients only)"""
     try:

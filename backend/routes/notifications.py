@@ -1,5 +1,6 @@
 from flask import Blueprint, request, current_app
-from flask_login import login_required, current_user
+from flask_login import current_user
+from routes.auth import api_login_required
 from models import db, Patient, Doctor, User
 from utils.responses import success_response, error_response
 from utils.validators import validate_json_data
@@ -10,7 +11,7 @@ from services.email_service import EmailService
 notifications_bp = Blueprint('notifications', __name__, url_prefix='/notifications')
 
 @notifications_bp.route('/preferences', methods=['GET'])
-@login_required
+@api_login_required
 def get_notification_preferences():
     """Get user's notification preferences"""
     try:
@@ -42,7 +43,7 @@ def get_notification_preferences():
         return error_response('Failed to get notification preferences', 500)
 
 @notifications_bp.route('/preferences', methods=['PUT'])
-@login_required
+@api_login_required
 def update_notification_preferences():
     """Update user's notification preferences"""
     try:
@@ -123,7 +124,7 @@ def update_notification_preferences():
         return error_response('Failed to update notification preferences', 500)
 
 @notifications_bp.route('/test/registration', methods=['POST'])
-@login_required
+@api_login_required
 def test_registration_notification():
     """Test registration confirmation notification (development/testing only)"""
     try:
@@ -160,7 +161,7 @@ def test_registration_notification():
         return error_response('Failed to send test notification', 500)
 
 @notifications_bp.route('/test/appointment', methods=['POST'])
-@login_required
+@api_login_required
 def test_appointment_notification():
     """Test appointment notification (development/testing only)"""
     try:
@@ -216,7 +217,7 @@ def test_appointment_notification():
         return error_response('Failed to send test notification', 500)
 
 @notifications_bp.route('/settings/defaults', methods=['GET'])
-@login_required
+@api_login_required
 def get_default_settings():
     """Get default notification settings for user type"""
     try:

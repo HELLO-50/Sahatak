@@ -568,7 +568,7 @@ def login():
         )
 
 @auth_bp.route('/logout', methods=['POST'])
-@login_required
+@api_login_required
 def logout():
     """Logout current user and clear session"""
     try:
@@ -598,7 +598,7 @@ def logout():
 
 
 @auth_bp.route('/change-password', methods=['POST'])
-@login_required
+@api_login_required
 def change_password():
     """Change user password"""
     try:
@@ -645,7 +645,7 @@ def change_password():
         }), 500
 
 @auth_bp.route('/update-language', methods=['POST'])
-@login_required
+@api_login_required
 def update_language():
     """Update user language preference"""
     try:
