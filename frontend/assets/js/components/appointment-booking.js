@@ -444,7 +444,11 @@ const AppointmentBooking = {
             // Check terms agreement
             const termsCheckbox = document.getElementById('terms-agreement');
             if (!termsCheckbox || !termsCheckbox.checked) {
-                this.showError('يرجى الموافقة على شروط الاستخدام');
+                const currentLang = LanguageManager.getLanguage() || 'ar';
+                const termsError = currentLang === 'ar' ? 
+                    'يرجى الموافقة على شروط الاستخدام' : 
+                    'Please agree to the terms and conditions';
+                this.showError(termsError);
                 return;
             }
 
@@ -505,13 +509,29 @@ const AppointmentBooking = {
                 return;
             }
             
+            // Handle server errors (500, etc.)
+            if (error.message.includes('Failed to create appointment') || error.message.includes('Internal Server Error')) {
+                const currentLang = LanguageManager.getLanguage() || 'ar';
+                const errorMsg = currentLang === 'ar' ? 
+                    'حدث خطأ في الخادم أثناء حجز الموعد. يرجى المحاولة مرة أخرى أو الاتصال بالدعم الفني.' :
+                    'A server error occurred while booking the appointment. Please try again or contact technical support.';
+                this.showError(errorMsg);
+                return;
+            }
+            
             // Handle specific API errors
             if (error.message.includes('blocked')) {
-                this.showError('هذا الوقت محجوب من قبل الطبيب');
+                const currentLang = LanguageManager.getLanguage() || 'ar';
+                const errorMsg = currentLang === 'ar' ? 'هذا الوقت محجوب من قبل الطبيب' : 'This time slot is blocked by the doctor';
+                this.showError(errorMsg);
             } else if (error.message.includes('booked')) {
-                this.showError('هذا الوقت محجوز مسبقاً');
+                const currentLang = LanguageManager.getLanguage() || 'ar';
+                const errorMsg = currentLang === 'ar' ? 'هذا الوقت محجوز مسبقاً' : 'This time slot is already booked';
+                this.showError(errorMsg);
             } else {
-                this.showError(error.message || 'خطأ في تأكيد الحجز');
+                const currentLang = LanguageManager.getLanguage() || 'ar';
+                const defaultError = currentLang === 'ar' ? 'خطأ في تأكيد الحجز' : 'Error confirming booking';
+                this.showError(error.message || defaultError);
             }
             
             // Go back to time selection to choose different slot
@@ -548,7 +568,11 @@ const AppointmentBooking = {
             case 3:
                 const termsCheckbox = document.getElementById('terms-agreement');
                 if (!termsCheckbox || !termsCheckbox.checked) {
-                    this.showError('يرجى الموافقة على شروط الاستخدام');
+                    const currentLang = LanguageManager.getLanguage() || 'ar';
+                    const termsError = currentLang === 'ar' ? 
+                        'يرجى الموافقة على شروط الاستخدام' : 
+                        'Please agree to the terms and conditions';
+                    this.showError(termsError);
                     return false;
                 }
                 return true;
