@@ -1929,10 +1929,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (userType === 'doctor' && document.getElementById('verification-status')) {
             console.log('🔸 Auto-updating doctor verification status on page load');
             const doctorData = JSON.parse(localStorage.getItem('sahatak_doctor_data') || '{}');
-            if (window.updateVerificationStatus) {
+            if (typeof window.updateVerificationStatus === 'function') {
                 window.updateVerificationStatus(doctorData);
             } else {
                 // Fallback if global function not loaded
+                console.log('🔸 Using fallback verification updater');
                 updateDoctorVerificationDisplay(doctorData);
             }
         }
