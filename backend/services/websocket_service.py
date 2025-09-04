@@ -4,11 +4,11 @@ Handles Socket.IO events for patient-doctor communication
 """
 
 from flask_socketio import SocketIO, emit, join_room, leave_room, disconnect
-from flask_login import current_user
 from flask import request
 from datetime import datetime
 import json
 from utils.logging_config import app_logger
+from models import User
 
 # Global SocketIO instance
 socketio = None
@@ -16,6 +16,59 @@ socketio = None
 active_connections = {}
 # Typing indicators tracking
 typing_users = {}
+
+def authenticate_websocket_user(token):
+    """Authenticate WebSocket user using JWT token"""
+    if not token:
+        return None
+    
+    try:
+        # Try JWT authentication first
+        from utils.jwt_helper import JWTHelper
+        payload = JWTHelper.decode_token(token)
+        
+        if payload:
+            user_id = payload.get('user_id')
+            if user_id:
+                user = User.query.get(user_id)
+                if user and user.is_active:
+                    app_logger.info(f"WebSocket JWT auth successful for user {user.id}")
+                    return user
+                    
+    except ImportError:
+        # Fallback to base64 token
+        try:
+            import base64
+            import json
+            
+            token_json = base64.b64decode(token.encode()).decode()
+            payload = json.loads(token_json)
+            
+            exp_time = payload.get('exp', 0)
+            current_time = int(datetime.utcnow().timestamp())
+            
+            if exp_time >= current_time:
+                user_id = payload.get('user_id')
+                if user_id:
+                    user = User.query.get(user_id)
+                    if user and user.is_active:
+                        app_logger.info(f"WebSocket fallback auth successful for user {user.id}")
+                        return user
+                        
+        except Exception as e:
+            app_logger.error(f"WebSocket fallback auth error: {str(e)}")
+            
+    except Exception as e:
+        app_logger.error(f"WebSocket JWT auth error: {str(e)}")
+    
+    return None
+
+def get_websocket_user():
+    """Get the authenticated user for current WebSocket session"""
+    connection = active_connections.get(request.sid)
+    if connection:
+        return connection.get('user')
+    return None
 
 def init_socketio(app):
     """Initialize SocketIO with Flask app"""
@@ -41,29 +94,37 @@ def register_connection_handlers():
     """Register connection-related Socket.IO event handlers"""
     
     @socketio.on('connect')
-    def handle_connect():
-        if not current_user.is_authenticated:
+    def handle_connect(auth):
+        # Get token from auth data
+        token = None
+        if auth and isinstance(auth, dict):
+            token = auth.get('token')
+        
+        # Authenticate user using token
+        user = authenticate_websocket_user(token)
+        if not user:
             app_logger.warning(f"Unauthorized WebSocket connection attempt from {request.sid}")
             disconnect()
             return False
         
         # Track connection
         active_connections[request.sid] = {
-            'user_id': current_user.id,
-            'user_type': current_user.user_type,
-            'connected_at': datetime.utcnow().isoformat()
+            'user_id': user.id,
+            'user_type': user.user_type,
+            'connected_at': datetime.utcnow().isoformat(),
+            'user': user  # Store user object for other handlers
         }
         
         # Join user to their personal room
-        personal_room = f"user_{current_user.id}"
+        personal_room = f"user_{user.id}"
         join_room(personal_room)
         
-        app_logger.info(f"User {current_user.id} connected via WebSocket (sid: {request.sid})")
+        app_logger.info(f"User {user.id} connected via WebSocket (sid: {request.sid})")
         
         # Emit connection success
         emit('connection_status', {
             'status': 'connected',
-            'user_id': current_user.id,
+            'user_id': user.id,
             'timestamp': datetime.utcnow().isoformat()
         })
         
@@ -91,7 +152,8 @@ def register_message_handlers():
     
     @socketio.on('join_conversation')
     def handle_join_conversation(data):
-        if not current_user.is_authenticated:
+        current_user = get_websocket_user()
+        if not current_user:
             return
         
         conversation_id = data.get('conversation_id')
@@ -115,7 +177,8 @@ def register_message_handlers():
     
     @socketio.on('leave_conversation')
     def handle_leave_conversation(data):
-        if not current_user.is_authenticated:
+        current_user = get_websocket_user()
+        if not current_user:
             return
         
         conversation_id = data.get('conversation_id')
@@ -143,7 +206,8 @@ def register_typing_handlers():
     
     @socketio.on('typing_start')
     def handle_typing_start(data):
-        if not current_user.is_authenticated:
+        current_user = get_websocket_user()
+        if not current_user:
             return
         
         conversation_id = data.get('conversation_id')
@@ -170,7 +234,8 @@ def register_typing_handlers():
     
     @socketio.on('typing_stop')
     def handle_typing_stop(data):
-        if not current_user.is_authenticated:
+        current_user = get_websocket_user()
+        if not current_user:
             return
         
         conversation_id = data.get('conversation_id')
