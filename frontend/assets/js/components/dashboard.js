@@ -1207,3 +1207,57 @@ window.viewRecords = () => {
     console.log('View records clicked');
     window.location.href = '../medical/medical-records.html';
 };
+
+// Global verification status updater - can be used across all doctor pages
+window.updateVerificationStatus = (user) => {
+    const statusElement = document.getElementById('verification-status');
+    if (!statusElement) return;
+    
+    const isVerified = user && (user.is_verified === true || user.verification_status === 'verified');
+    
+    if (isVerified) {
+        statusElement.textContent = 'Verified';
+        statusElement.className = 'badge bg-success';
+        // Enable dashboard actions
+        if (typeof enableDashboardActions === 'function') {
+            enableDashboardActions();
+        }
+    } else {
+        statusElement.textContent = 'Unverified';
+        statusElement.className = 'badge bg-warning text-dark';
+        // Disable dashboard actions
+        if (typeof disableDashboardActions === 'function') {
+            disableDashboardActions();
+        }
+    }
+    
+    return isVerified;
+};
+
+// Global verification check for actions - ensures user is verified before allowing actions
+window.handleVerifiedAction = (actionFunction) => {
+    // Get user data from localStorage which contains verification status
+    const user = JSON.parse(localStorage.getItem('sahatak_doctor_data') || '{}');
+    const isVerified = user && (user.is_verified === true || user.verification_status === 'verified');
+    
+    if (!isVerified) {
+        // Show verification required message
+        const currentLang = LanguageManager ? (LanguageManager.getLanguage() || 'ar') : 'ar';
+        const message = LanguageManager 
+            ? (LanguageManager.getTranslation(currentLang, 'dashboard.doctor.verification_notice.verification_required_action') || 
+               'Your account must be verified first to access this feature. Please complete your profile and wait for admin approval.')
+            : 'Your account must be verified first to access this feature. Please complete your profile and wait for admin approval.';
+        
+        alert(message);
+        return false;
+    }
+    
+    // Execute the action if verified
+    if (typeof window[actionFunction] === 'function') {
+        window[actionFunction]();
+        return true;
+    } else {
+        console.warn(`Function ${actionFunction} not found`);
+        return false;
+    }
+};
