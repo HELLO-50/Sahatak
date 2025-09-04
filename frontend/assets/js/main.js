@@ -1923,6 +1923,21 @@ document.addEventListener('DOMContentLoaded', function() {
     // Skip form attachment - handled by index.html to avoid conflicts
     console.log('Main.js DOMContentLoaded - form attachment handled by index.html');
     
+    // Auto-update doctor verification status on all pages
+    setTimeout(() => {
+        const userType = localStorage.getItem('sahatak_user_type');
+        if (userType === 'doctor' && document.getElementById('verification-status')) {
+            console.log('🔸 Auto-updating doctor verification status on page load');
+            const doctorData = JSON.parse(localStorage.getItem('sahatak_doctor_data') || '{}');
+            if (window.updateVerificationStatus) {
+                window.updateVerificationStatus(doctorData);
+            } else {
+                // Fallback if global function not loaded
+                updateDoctorVerificationDisplay(doctorData);
+            }
+        }
+    }, 500); // Small delay to ensure page elements are loaded
+    
     // Event listeners disabled - using forms.js versions instead
     // const patientForm = document.getElementById('patientRegisterForm');
     // if (patientForm) {
@@ -1936,3 +1951,21 @@ document.addEventListener('DOMContentLoaded', function() {
     //     console.log('Doctor registration form event listener attached');
     // }
 });
+
+// Fallback verification display updater for doctor pages
+function updateDoctorVerificationDisplay(user) {
+    const statusElement = document.getElementById('verification-status');
+    if (!statusElement) return;
+    
+    const isVerified = user && (user.is_verified === true || user.verification_status === 'verified');
+    
+    if (isVerified) {
+        statusElement.textContent = 'Verified';
+        statusElement.className = 'badge bg-success';
+    } else {
+        statusElement.textContent = 'Unverified';
+        statusElement.className = 'badge bg-warning text-dark';
+    }
+    
+    console.log('🔸 Verification status updated:', isVerified ? 'Verified' : 'Unverified');
+}

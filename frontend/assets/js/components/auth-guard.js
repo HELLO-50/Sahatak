@@ -210,11 +210,15 @@ class AuthGuard {
             'sahatak_user_name',
             'sahatak_user_data',
             'sahatak_doctor_data',
+            'sahatak_patient_data',
             'sahatak_user',
             'sahatak_token',
             'sahatak_access_token',  // JWT token
             'sahatak_preferences',
-            'sahatak_return_url'
+            'sahatak_return_url',
+            'currentUser',  // Clear conflicting user data
+            'userData',
+            'user'
         ];
         
         keysToRemove.forEach(key => {
