@@ -2,7 +2,7 @@ from flask import Blueprint, request, current_app
 from flask_login import current_user
 from routes.auth import api_login_required
 from models import db, Doctor, User, Appointment
-from datetime import datetime as dt, timedelta, time
+from datetime import datetime, datetime as dt, timedelta, time
 from sqlalchemy import and_, or_
 from utils.responses import APIResponse, ErrorCodes
 from utils.validators import validate_date, validate_time
@@ -94,7 +94,8 @@ def update_doctor_schedule():
                     # Validate time format
                     start_time = day_schedule.get('start', '09:00')
                     end_time = day_schedule.get('end', '17:00')
-                    enabled = day_schedule.get('enabled', True)
+                    # Handle both 'enabled' and 'available' properties for backward compatibility
+                    enabled = day_schedule.get('enabled', day_schedule.get('available', True))
                     
                     if not validate_time(start_time)['valid'] or not validate_time(end_time)['valid']:
                         return APIResponse.validation_error(
