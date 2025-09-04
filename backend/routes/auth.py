@@ -22,6 +22,7 @@ def api_login_required(f):
     def decorated_function(*args, **kwargs):
         # Debug logging
         from flask import session
+        auth_logger.info(f"🔐 api_login_required called for {request.endpoint}")
         auth_logger.info(f"API auth check - User authenticated: {current_user.is_authenticated}, Session keys: {list(session.keys()) if session else 'No session'}")
         
         # First try session-based authentication
@@ -31,7 +32,7 @@ def api_login_required(f):
         # Fallback to token authentication
         token = None
         auth_header = request.headers.get('Authorization')
-        auth_logger.info(f"Auth header: {auth_header[:50] if auth_header else 'None'}...")
+        auth_logger.info(f"🔑 Auth header: {auth_header[:50] if auth_header else 'None'}...")
         
         if auth_header and auth_header.startswith('Bearer '):
             token = auth_header[7:]  # Remove 'Bearer ' prefix
