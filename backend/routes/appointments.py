@@ -201,10 +201,7 @@ def create_appointment():
         
         # Use database transaction with SELECT FOR UPDATE to prevent race conditions
         try:
-            # Begin transaction with row-level locking
-            db.session.begin()
-            
-            # Lock and check availability atomically
+            # Lock and check availability atomically (Flask-SQLAlchemy manages transactions automatically)
             existing_appointment = Appointment.query.filter(
                 and_(
                     Appointment.doctor_id == data['doctor_id'],
@@ -256,7 +253,7 @@ def create_appointment():
         except Exception as e:
             db.session.rollback()
             app_logger.error(f"Error creating appointment: {str(e)}")
-            return APIResponse.server_error(message='Failed to create appointment')
+            return APIResponse.internal_error(message='Failed to create appointment')
         
         # Log successful appointment creation
         log_user_action(
