@@ -536,24 +536,44 @@ def login():
             response_data['verification_status'] = profile.verification_status
             response_data['profile_completed'] = profile.profile_completed
         
-        # Generate a simple access token for admin users
-        # This is a temporary solution for cross-origin admin access
+        # Generate proper JWT token for admin users for cross-origin access
         if user.user_type == 'admin':
             try:
-                token_data = {
-                    'user_id': str(user.id),  # Convert to string for JSON serialization
+                from utils.jwt_helper import JWTHelper
+                admin_data = {
+                    'user_id': user.id,
                     'email': user.email,
-                    'user_type': 'admin',
-                    'exp': (datetime.datetime.utcnow() + timedelta(hours=24)).isoformat()
+                    'user_type': 'admin'
                 }
-                # Simple token generation (not JWT, but works for our needs)
-                token_string = json.dumps(token_data) + current_app.config.get('SECRET_KEY', 'default-secret')
-                token = hashlib.sha256(token_string.encode()).hexdigest()
-                response_data['access_token'] = token
-                # Store token in memory or cache for validation later
-                # For now, we'll rely on session for non-admin and token for admin
+                token = JWTHelper.generate_token(admin_data, expires_in=24)
+                if token:
+                    response_data['access_token'] = token
+                    auth_logger.info(f"Generated JWT token for admin user {user.id}")
+                else:
+                    auth_logger.error("Failed to generate JWT token for admin")
+                    
+            except ImportError:
+                # Fallback to base64 encoding if JWT not available
+                try:
+                    import base64
+                    import json
+                    
+                    token_data = {
+                        'user_id': user.id,
+                        'email': user.email,
+                        'user_type': 'admin',
+                        'exp': int((datetime.datetime.utcnow() + timedelta(hours=24)).timestamp())
+                    }
+                    token_json = json.dumps(token_data)
+                    token = base64.b64encode(token_json.encode()).decode()
+                    response_data['access_token'] = token
+                    auth_logger.info(f"Generated fallback token for admin user {user.id}")
+                    
+                except Exception as e:
+                    auth_logger.error(f"Fallback token generation error: {str(e)}")
+                    
             except Exception as e:
-                auth_logger.error(f"Token generation error: {str(e)}")
+                auth_logger.error(f"Admin token generation error: {str(e)}")
                 # Continue without token if generation fails
         
         return APIResponse.success(
