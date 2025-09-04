@@ -1,7 +1,7 @@
 from flask import Blueprint, request, current_app
 from flask_login import login_required, current_user
 from models import db, Doctor, User, Appointment
-from datetime import datetime, timedelta, time
+from datetime import datetime as dt, timedelta, time
 from sqlalchemy import and_, or_
 from utils.responses import APIResponse, ErrorCodes
 from utils.validators import validate_date, validate_time
@@ -102,8 +102,8 @@ def update_doctor_schedule():
                         )
                     
                     # Validate that end time is after start time
-                    start_datetime = datetime.strptime(start_time, '%H:%M')
-                    end_datetime = datetime.strptime(end_time, '%H:%M')
+                    start_datetime = dt.strptime(start_time, '%H:%M')
+                    end_datetime = dt.strptime(end_time, '%H:%M')
                     
                     if end_datetime <= start_datetime:
                         return APIResponse.validation_error(
@@ -127,7 +127,7 @@ def update_doctor_schedule():
             # Update doctor's schedule
             old_schedule = doctor.available_hours
             doctor.available_hours = validated_schedule
-            doctor.updated_at = datetime.utcnow()
+            doctor.updated_at = dt.utcnow()
             db.session.commit()
             
             # Log schedule changes for audit trail
@@ -196,11 +196,11 @@ def get_availability_calendar():
         
         # Default to current week if not provided
         if not start_date_str:
-            today = datetime.now().date()
+            today = dt.now().date()
             start_date = today - timedelta(days=today.weekday())  # Monday of current week
         else:
             try:
-                start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+                start_date = dt.strptime(start_date_str, '%Y-%m-%d').date()
             except ValueError:
                 return APIResponse.validation_error(
                     field='start_date',
@@ -211,7 +211,7 @@ def get_availability_calendar():
             end_date = start_date + timedelta(days=6)  # Sunday of current week
         else:
             try:
-                end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+                end_date = dt.strptime(end_date_str, '%Y-%m-%d').date()
             except ValueError:
                 return APIResponse.validation_error(
                     field='end_date',
@@ -235,8 +235,8 @@ def get_availability_calendar():
         schedule = doctor.available_hours or {}
         
         # Get existing appointments in the date range
-        start_datetime = datetime.combine(start_date, time.min)
-        end_datetime = datetime.combine(end_date + timedelta(days=1), time.min)
+        start_datetime = dt.combine(start_date, time.min)
+        end_datetime = dt.combine(end_date + timedelta(days=1), time.min)
         
         appointments = Appointment.query.filter(
             and_(
@@ -331,9 +331,9 @@ def block_time_slot():
         
         # Parse and validate date/time
         try:
-            block_date = datetime.strptime(data['date'], '%Y-%m-%d').date()
-            start_time = datetime.strptime(data['start_time'], '%H:%M').time()
-            end_time = datetime.strptime(data['end_time'], '%H:%M').time()
+            block_date = dt.strptime(data['date'], '%Y-%m-%d').date()
+            start_time = dt.strptime(data['start_time'], '%H:%M').time()
+            end_time = dt.strptime(data['end_time'], '%H:%M').time()
         except ValueError as e:
             return APIResponse.validation_error(
                 message='Invalid date or time format'
@@ -346,8 +346,8 @@ def block_time_slot():
             )
         
         # Check if time slots are already booked
-        start_datetime = datetime.combine(block_date, start_time)
-        end_datetime = datetime.combine(block_date, end_time)
+        start_datetime = dt.combine(block_date, start_time)
+        end_datetime = dt.combine(block_date, end_time)
         
         existing_appointments = Appointment.query.filter(
             and_(
@@ -474,8 +474,8 @@ def generate_time_slots(start_time, end_time, booked_times, slot_duration=30):
     
     try:
         # Parse times
-        start = datetime.strptime(start_time, '%H:%M')
-        end = datetime.strptime(end_time, '%H:%M')
+        start = dt.strptime(start_time, '%H:%M')
+        end = dt.strptime(end_time, '%H:%M')
         
         # Generate slots
         current_time = start
