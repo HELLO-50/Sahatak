@@ -2,12 +2,21 @@
 class AuthGuard {
     
     /**
-     * Check if we're in development mode (localhost)
-     * @returns {boolean} True if in development mode
+     * Check if we're in development mode
+     * @returns {boolean} True if in development mode AND explicitly enabled
      */
     static isDevelopmentMode() {
+        // Only enable dev mode if BOTH conditions are met:
+        // 1. Running on localhost/local IP
+        // 2. Dev mode explicitly enabled via URL param or localStorage
         const hostname = window.location.hostname;
-        return hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname === '';
+        const isLocalHost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname === '';
+        
+        // Check for explicit dev mode flag (prevents accidental bypass in production)
+        const urlParams = new URLSearchParams(window.location.search);
+        const devModeEnabled = urlParams.get('dev') === 'true' || localStorage.getItem('dev_mode') === 'true';
+        
+        return isLocalHost && devModeEnabled;
     }
     
     /**
@@ -15,12 +24,18 @@ class AuthGuard {
      * @returns {boolean} True if authenticated, false otherwise
      */
     static isAuthenticated() {
-        // Bypass authentication in development mode
+        // Development mode bypass only if explicitly enabled
         if (this.isDevelopmentMode()) {
-            console.log('Development mode: bypassing authentication');
+            console.log('🔓 Development mode: authentication bypassed (dev flag enabled)');
             return true;
         }
         
+        // Use centralized AuthStorage if available
+        if (window.AuthStorage) {
+            return AuthStorage.isAuthenticated();
+        }
+        
+        // Fallback to legacy method for backward compatibility
         const userId = localStorage.getItem('sahatak_user_id');
         const userType = localStorage.getItem('sahatak_user_type');
         const userEmail = localStorage.getItem('sahatak_user_email');
@@ -202,33 +217,34 @@ class AuthGuard {
      * Clear authentication data (logout)
      */
     static clearAuth() {
-        // Clear all possible sahatak localStorage keys including JWT token
-        const keysToRemove = [
-            'sahatak_user_id',
-            'sahatak_user_type', 
-            'sahatak_user_email',
-            'sahatak_user_name',
-            'sahatak_user_data',
-            'sahatak_doctor_data',
-            'sahatak_patient_data',
-            'sahatak_user',
-            'sahatak_token',
-            'sahatak_access_token',  // JWT token
-            'sahatak_preferences',
-            'sahatak_return_url',
-            'currentUser',  // Clear conflicting user data
-            'userData',
-            'user'
-        ];
+        // Use centralized AuthStorage if available
+        if (window.AuthStorage) {
+            AuthStorage.clearAuth();
+        } else {
+            // Fallback: Clear only auth-specific keys
+            const authOnlyKeys = [
+                'sahatak_user_id',
+                'sahatak_user_type', 
+                'sahatak_user_email',
+                'sahatak_user_name',
+                'sahatak_user_data',
+                'sahatak_doctor_data',
+                'sahatak_patient_data',
+                'sahatak_user',
+                'sahatak_token',
+                'sahatak_access_token',
+                'sahatak_return_url'
+            ];
+            
+            authOnlyKeys.forEach(key => {
+                localStorage.removeItem(key);
+            });
+        }
         
-        keysToRemove.forEach(key => {
-            localStorage.removeItem(key);
-        });
-        
-        // Clear session storage
+        // Clear session storage (auth-related only)
         sessionStorage.clear();
         
-        console.log('All authentication data cleared');
+        console.log('Authentication data cleared');
     }
     
     /**

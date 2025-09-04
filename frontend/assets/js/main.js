@@ -1006,24 +1006,31 @@ async function handleLogin(event) {
         });
         
         
-        // Store user session data
+        // Store user session data using centralized AuthStorage
         if (response.data && response.data.user) {
-            localStorage.setItem('sahatak_user_type', response.data.user.user_type);
-            localStorage.setItem('sahatak_user_email', response.data.user.email);
-            localStorage.setItem('sahatak_user_id', response.data.user.id);
-            localStorage.setItem('sahatak_user_name', response.data.user.full_name);
-            
-            // Store JWT token if provided (fallback for session cookie issues)
-            console.log('🔍 Login response data:', response.data);
-            console.log('🔍 Response keys:', Object.keys(response.data));
-            console.log('🔍 Has access_token key:', 'access_token' in response.data);
-            if (response.data.access_token) {
-                localStorage.setItem('sahatak_access_token', response.data.access_token);
-                console.log('🔑 JWT token stored for authentication:', response.data.access_token.substring(0, 20));
-                console.log('✅ Token storage confirmed:', !!localStorage.getItem('sahatak_access_token'));
+            // Use new centralized storage if available
+            if (window.AuthStorage) {
+                const authData = {
+                    id: response.data.user.id,
+                    user_type: response.data.user.user_type,
+                    email: response.data.user.email,
+                    full_name: response.data.user.full_name,
+                    access_token: response.data.access_token,
+                    profile: response.data.user.profile
+                };
+                AuthStorage.setAuthData(authData);
+                console.log('✅ Auth data stored using AuthStorage');
             } else {
-                console.log('🚨 NO ACCESS TOKEN in login response!');
-                console.log('🚨 Available response data keys:', Object.keys(response.data || {}));
+                // Fallback to legacy storage
+                localStorage.setItem('sahatak_user_type', response.data.user.user_type);
+                localStorage.setItem('sahatak_user_email', response.data.user.email);
+                localStorage.setItem('sahatak_user_id', response.data.user.id);
+                localStorage.setItem('sahatak_user_name', response.data.user.full_name);
+                
+                if (response.data.access_token) {
+                    localStorage.setItem('sahatak_access_token', response.data.access_token);
+                }
+                console.log('⚠️ Auth data stored using legacy method');
             }
             
             // Debug: Check if session cookie was set
