@@ -40,41 +40,52 @@ def api_login_required(f):
         
         if token:
             try:
-                import base64
-                import json
+                # Try proper JWT decoding first
+                from utils.jwt_helper import JWTHelper
+                payload = JWTHelper.decode_token(token)
                 
-                # Decode simple token
-                token_json = base64.b64decode(token.encode()).decode()
-                payload = json.loads(token_json)
-                
-                auth_logger.info(f"Token decoded successfully, payload: {payload}")
-                
-                # Check if token is expired
-                exp_time = payload.get('exp', 0)
-                current_time = int(datetime.datetime.utcnow().timestamp())
-                auth_logger.info(f"Token exp: {exp_time}, current: {current_time}, expired: {exp_time < current_time}")
-                
-                if exp_time < current_time:
-                    auth_logger.warning("Session token expired")
-                else:
+                if payload:
+                    auth_logger.info(f"JWT decoded successfully for user {payload.get('user_id')}")
+                    
                     # Load user from token
                     user_id = payload.get('user_id')
-                    auth_logger.info(f"Looking up user ID: {user_id}")
                     user = User.query.get(user_id)
                     
                     if user and user.is_active:
-                        auth_logger.info(f"Token auth successful for user {user.id}")
-                        # Set current user context (temporarily)
+                        auth_logger.info(f"JWT auth successful for user {user.id}")
                         from flask_login import login_user
                         login_user(user, remember=False)
                         return f(*args, **kwargs)
                     else:
-                        auth_logger.warning(f"Token auth failed - user not found or inactive: {user_id}")
+                        auth_logger.warning(f"JWT auth failed - user not found or inactive: {user_id}")
                         
+            except ImportError:
+                # Fallback to simple base64 token if PyJWT not available
+                try:
+                    import base64
+                    import json
+                    
+                    token_json = base64.b64decode(token.encode()).decode()
+                    payload = json.loads(token_json)
+                    
+                    exp_time = payload.get('exp', 0)
+                    current_time = int(datetime.datetime.utcnow().timestamp())
+                    
+                    if exp_time >= current_time:
+                        user_id = payload.get('user_id')
+                        user = User.query.get(user_id)
+                        
+                        if user and user.is_active:
+                            auth_logger.info(f"Fallback token auth successful for user {user.id}")
+                            from flask_login import login_user
+                            login_user(user, remember=False)
+                            return f(*args, **kwargs)
+                            
+                except Exception as e:
+                    auth_logger.error(f"Fallback token auth error: {str(e)}")
+                    
             except Exception as e:
                 auth_logger.error(f"Token auth error: {str(e)}")
-                import traceback
-                auth_logger.error(f"Token auth traceback: {traceback.format_exc()}")
         
         auth_logger.warning(f"Unauthorized access attempt to {request.endpoint}")
         return APIResponse.unauthorized(message='Authentication required')
@@ -444,14 +455,33 @@ def login():
         auth_logger.info(f"Session ID: {session.get('_id', 'No session ID')}")
         auth_logger.info(f"User in session: {session.get('_user_id', 'No user in session')}")
         
-        # Generate simple session token as fallback for cross-origin issues
+        # Generate secure JWT token for authentication
         token = None
         try:
+            from utils.jwt_helper import JWTHelper
+            
+            # Create token data
+            token_data = {
+                'user_id': user.id,
+                'user_type': user.user_type,
+                'email': user.email
+            }
+            
+            # Generate secure JWT token
+            token = JWTHelper.generate_token(token_data, expires_in=24)
+            
+            if token:
+                auth_logger.info(f"Secure JWT token generated for user {user.id}")
+            else:
+                auth_logger.warning(f"JWT generation returned None for user {user.id}")
+            
+        except ImportError:
+            # Fallback if PyJWT not installed
+            auth_logger.warning("PyJWT not available, using fallback token")
             import base64
             import json
             from datetime import timedelta
             
-            # Create a simple encoded token (not secure, but works for cross-origin)
             token_data = {
                 'user_id': user.id,
                 'user_type': user.user_type,
@@ -460,10 +490,8 @@ def login():
                 'iat': int(datetime.datetime.utcnow().timestamp())
             }
             
-            # Simple base64 encoding (not secure but functional)
             token_json = json.dumps(token_data)
             token = base64.b64encode(token_json.encode()).decode()
-            auth_logger.info(f"Simple session token generated for user {user.id}")
             
         except Exception as e:
             auth_logger.error(f"Token generation failed: {str(e)}")
