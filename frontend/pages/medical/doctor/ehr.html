@@ -70,14 +70,14 @@
                                 <i class="bi bi-person-badge"></i>
                             </div>
                             <div class="user-details">
-                                <h5 class="mb-1" id="user-name">Loading...</h5>
-                                <span class="badge bg-success" id="verification-status">Verified</span>
+                                <h5 class="mb-1" id="user-name" data-translate="ehr.loading">Loading...</h5>
+                                <span class="badge bg-success" id="verification-status" data-translate="ehr.verified">Verified</span>
                             </div>
                             <!-- Vertical Action Buttons -->
                             <div class="action-buttons">
                                 <button class="btn btn-action btn-logout" onclick="AuthGuard.logout()" title="Logout">
                                     <i class="bi bi-box-arrow-right"></i>
-                                    <span id="btn-logout">Logout</span>
+                                    <span id="btn-logout" data-translate="ehr.logout">Logout</span>
                                 </button>
                             </div>
                         </div>
@@ -85,8 +85,8 @@
                     
                     <!-- Dashboard Title - Center -->
                     <div class="col-lg-4 text-center">
-                        <h1 class="dashboard-title" id="dashboard-title">Electronic Health Record</h1>
-                        <p class="dashboard-subtitle" id="dashboard-subtitle">Patient Medical Records Management</p>
+                        <h1 class="dashboard-title" id="dashboard-title" data-translate="ehr.title">Electronic Health Record</h1>
+                        <p class="dashboard-subtitle" id="dashboard-subtitle" data-translate="ehr.subtitle">Patient Medical Records Management</p>
                     </div>
                     
                     <!-- Controls - Right -->
@@ -94,10 +94,10 @@
                         <div class="dashboard-controls">
                             <button class="btn btn-outline-medical btn-sm me-2" onclick="window.location.href='../../dashboard/doctor.html'">
                                 <i class="bi bi-arrow-left me-1"></i>
-                                <span>Back to Dashboard</span>
+                                <span data-translate="ehr.back_to_dashboard">Back to Dashboard</span>
                             </button>
                             <button class="btn btn-medical btn-sm" onclick="addNewDiagnosis()">
-                                <i class="bi bi-plus-circle me-1"></i>New Diagnosis
+                                <i class="bi bi-plus-circle me-1"></i><span data-translate="ehr.new_diagnosis">New Diagnosis</span>
                             </button>
                         </div>
                     </div>
@@ -111,9 +111,9 @@
                         <div class="card-body py-4">
                             <div class="text-center mb-4">
                                 <h4 class="text-dark fw-bold mb-2">
-                                    <i class="bi bi-search me-2 text-primary"></i>Search for Patient
+                                    <i class="bi bi-search me-2 text-primary"></i><span data-translate="ehr.search_patient">Search for Patient</span>
                                 </h4>
-                                <p class="text-muted mb-0">Enter patient name or ID to access their medical record</p>
+                                <p class="text-muted mb-0" data-translate="ehr.search_description">Enter patient name or ID to access their medical record</p>
                             </div>
                             
                             <form id="patient-search-form" onsubmit="searchPatient(event)">
@@ -126,6 +126,7 @@
                                                         <i class="bi bi-person"></i>
                                                     </span>
                                                     <input type="text" class="form-control" id="patient-search-input" 
+                                                           data-translate-placeholder="ehr.search_placeholder"
                                                            placeholder="Enter patient name or ID" 
                                                            required autocomplete="off">
                                                 </div>
@@ -196,8 +197,8 @@
                         <div class="quick-action-icon">
                             <i class="bi bi-clock-history"></i>
                         </div>
-                        <h6>Medical Timeline</h6>
-                        <p class="text-muted small">View chronological medical history</p>
+                        <h6 data-translate="ehr.medical_timeline">Medical Timeline</h6>
+                        <p class="text-muted small" data-translate="ehr.medical_timeline_desc">View chronological medical history</p>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-3">
@@ -205,8 +206,8 @@
                         <div class="quick-action-icon">
                             <i class="bi bi-calendar-plus"></i>
                         </div>
-                        <h6>Schedule Appointment</h6>
-                        <p class="text-muted small">Schedule new patient appointment</p>
+                        <h6 data-translate="ehr.schedule_appointment">Schedule Appointment</h6>
+                        <p class="text-muted small" data-translate="ehr.schedule_appointment_desc">Schedule new patient appointment</p>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-3">
@@ -214,8 +215,8 @@
                         <div class="quick-action-icon">
                             <i class="bi bi-prescription2"></i>
                         </div>
-                        <h6>New Prescription</h6>
-                        <p class="text-muted small">Create new medication prescription</p>
+                        <h6 data-translate="ehr.new_prescription">New Prescription</h6>
+                        <p class="text-muted small" data-translate="ehr.new_prescription_desc">Create new medication prescription</p>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-3">
@@ -223,8 +224,8 @@
                         <div class="quick-action-icon">
                             <i class="bi bi-activity"></i>
                         </div>
-                        <h6>Vital Signs</h6>
-                        <p class="text-muted small">Record vital sign readings</p>
+                        <h6 data-translate="ehr.vital_signs">Vital Signs</h6>
+                        <p class="text-muted small" data-translate="ehr.vital_signs_desc">Record vital sign readings</p>
                     </div>
                 </div>
             </div>
@@ -248,15 +249,15 @@
                         <div class="col-md-6">
                             <div class="search-filters">
                                 <select class="form-select" id="search-date-from">
-                                    <option value="">From Date</option>
+                                    <option value="" data-translate="ehr.from_date">From Date</option>
                                 </select>
                                 <select class="form-select" id="search-date-to">
-                                    <option value="">To Date</option>
+                                    <option value="" data-translate="ehr.to_date">To Date</option>
                                 </select>
                                 <select class="form-select" id="search-diagnosis-status">
-                                    <option value="">All Diagnoses</option>
-                                    <option value="active">Active Only</option>
-                                    <option value="resolved">Resolved Only</option>
+                                    <option value="" data-translate="ehr.all_diagnoses">All Diagnoses</option>
+                                    <option value="active" data-translate="ehr.active_only">Active Only</option>
+                                    <option value="resolved" data-translate="ehr.resolved_only">Resolved Only</option>
                                 </select>
                             </div>
                         </div>
@@ -354,13 +355,13 @@
                                     <div class="row mb-4">
                                         <div class="col-md-6 mb-3">
                                             <div class="vitals-chart-container">
-                                                <h6 class="text-center">Blood Pressure</h6>
+                                                <h6 class="text-center" data-translate="ehr.blood_pressure">Blood Pressure</h6>
                                                 <canvas id="bloodPressureChart"></canvas>
                                             </div>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <div class="vitals-chart-container">
-                                                <h6 class="text-center">Heart Rate</h6>
+                                                <h6 class="text-center" data-translate="ehr.heart_rate">Heart Rate</h6>
                                                 <canvas id="heartRateChart"></canvas>
                                             </div>
                                         </div>
@@ -444,29 +445,29 @@
 
                         <div class="row">
                             <div class="col-md-4 mb-3">
-                                <label for="dosage_form" class="form-label">Form</label>
+                                <label for="dosage_form" class="form-label" data-translate="ehr.form">Form</label>
                                 <select class="form-select" id="dosage_form">
-                                    <option value="">Select Form</option>
-                                    <option value="tablet">Tablet</option>
-                                    <option value="capsule">Capsule</option>
-                                    <option value="syrup">Syrup</option>
-                                    <option value="injection">Injection</option>
-                                    <option value="cream">Cream</option>
-                                    <option value="drops">Drops</option>
-                                    <option value="inhaler">Inhaler</option>
+                                    <option value="" data-translate="ehr.select_form">Select Form</option>
+                                    <option value="tablet" data-translate="ehr.tablet">Tablet</option>
+                                    <option value="capsule" data-translate="ehr.capsule">Capsule</option>
+                                    <option value="syrup" data-translate="ehr.syrup">Syrup</option>
+                                    <option value="injection" data-translate="ehr.injection">Injection</option>
+                                    <option value="cream" data-translate="ehr.cream">Cream</option>
+                                    <option value="drops" data-translate="ehr.drops">Drops</option>
+                                    <option value="inhaler" data-translate="ehr.inhaler">Inhaler</option>
                                 </select>
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label for="frequency" class="form-label">Frequency *</label>
                                 <select class="form-select" id="frequency" required>
-                                    <option value="">Select Frequency</option>
-                                    <option value="once_daily">Once Daily</option>
-                                    <option value="twice_daily">Twice Daily</option>
-                                    <option value="three_times_daily">Three Times Daily</option>
-                                    <option value="four_times_daily">Four Times Daily</option>
-                                    <option value="as_needed">As Needed</option>
-                                    <option value="weekly">Weekly</option>
-                                    <option value="other">Other</option>
+                                    <option value="" data-translate="ehr.select_frequency">Select Frequency</option>
+                                    <option value="once_daily" data-translate="ehr.once_daily">Once Daily</option>
+                                    <option value="twice_daily" data-translate="ehr.twice_daily">Twice Daily</option>
+                                    <option value="three_times_daily" data-translate="ehr.three_times_daily">Three Times Daily</option>
+                                    <option value="four_times_daily" data-translate="ehr.four_times_daily">Four Times Daily</option>
+                                    <option value="as_needed" data-translate="ehr.as_needed">As Needed</option>
+                                    <option value="weekly" data-translate="ehr.weekly">Weekly</option>
+                                    <option value="other" data-translate="ehr.other">Other</option>
                                 </select>
                             </div>
                             <div class="col-md-4 mb-3">
@@ -477,27 +478,27 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="timing" class="form-label">Timing</label>
+                                <label for="timing" class="form-label" data-translate="ehr.timing">Timing</label>
                                 <select class="form-select" id="timing">
-                                    <option value="">Select Timing</option>
-                                    <option value="before_meals">Before Meals</option>
-                                    <option value="after_meals">After Meals</option>
-                                    <option value="with_meals">With Meals</option>
-                                    <option value="empty_stomach">Empty Stomach</option>
-                                    <option value="bedtime">At Bedtime</option>
-                                    <option value="morning">Morning</option>
-                                    <option value="evening">Evening</option>
+                                    <option value="" data-translate="ehr.select_timing">Select Timing</option>
+                                    <option value="before_meals" data-translate="ehr.before_meals">Before Meals</option>
+                                    <option value="after_meals" data-translate="ehr.after_meals">After Meals</option>
+                                    <option value="with_meals" data-translate="ehr.with_meals">With Meals</option>
+                                    <option value="empty_stomach" data-translate="ehr.empty_stomach">Empty Stomach</option>
+                                    <option value="bedtime" data-translate="ehr.bedtime">At Bedtime</option>
+                                    <option value="morning" data-translate="ehr.morning">Morning</option>
+                                    <option value="evening" data-translate="ehr.evening">Evening</option>
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="quantity" class="form-label">Quantity</label>
+                                <label for="quantity" class="form-label" data-translate="ehr.quantity">Quantity</label>
                                 <input type="number" class="form-control" id="quantity" min="1">
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label for="prescription_instructions" class="form-label">Instructions</label>
-                            <textarea class="form-control" id="prescription_instructions" rows="3" placeholder="Additional instructions for the patient"></textarea>
+                            <label for="prescription_instructions" class="form-label" data-translate="ehr.instructions">Instructions</label>
+                            <textarea class="form-control" id="prescription_instructions" rows="3" data-translate-placeholder="ehr.instructions_placeholder" placeholder="Additional instructions for the patient"></textarea>
                         </div>
 
                         <div class="row">
@@ -521,11 +522,11 @@
 
                         <div class="mb-3">
                             <label for="prescription_notes" class="form-label">Doctor's Notes</label>
-                            <textarea class="form-control" id="prescription_notes" rows="2" placeholder="Internal notes for medical record"></textarea>
+                            <textarea class="form-control" id="prescription_notes" rows="2" data-translate-placeholder="ehr.notes_placeholder" placeholder="Internal notes for medical record"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-translate="ehr.cancel">Cancel</button>
                         <button type="submit" class="btn btn-primary" id="save-prescription-btn">
                             <i class="bi bi-check-circle me-1"></i>Save Prescription
                         </button>
@@ -562,13 +563,13 @@
                             <div class="col-md-6 mb-3">
                                 <label for="appointment_type" class="form-label">Appointment Type *</label>
                                 <select class="form-select" id="appointment_type" required>
-                                    <option value="">Select Type</option>
+                                    <option value="" data-translate="ehr.select_type">Select Type</option>
                                     <option value="follow_up">Follow-up</option>
-                                    <option value="consultation">Consultation</option>
+                                    <option value="consultation" data-translate="ehr.consultation">Consultation</option>
                                     <option value="check_up">Regular Check-up</option>
-                                    <option value="procedure">Procedure</option>
-                                    <option value="emergency">Emergency</option>
-                                    <option value="video_call">Video Call</option>
+                                    <option value="procedure" data-translate="ehr.procedure">Procedure</option>
+                                    <option value="emergency" data-translate="ehr.emergency">Emergency</option>
+                                    <option value="video_call" data-translate="ehr.video_call">Video Call</option>
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
@@ -585,31 +586,31 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="appointment_priority" class="form-label">Priority</label>
+                                <label for="appointment_priority" class="form-label" data-translate="ehr.priority">Priority</label>
                                 <select class="form-select" id="appointment_priority">
-                                    <option value="routine">Routine</option>
-                                    <option value="urgent">Urgent</option>
-                                    <option value="emergency">Emergency</option>
+                                    <option value="routine" data-translate="ehr.routine">Routine</option>
+                                    <option value="urgent" data-translate="ehr.urgent">Urgent</option>
+                                    <option value="emergency" data-translate="ehr.emergency">Emergency</option>
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="appointment_status" class="form-label">Status</label>
+                                <label for="appointment_status" class="form-label" data-translate="ehr.status">Status</label>
                                 <select class="form-select" id="appointment_status">
-                                    <option value="scheduled" selected>Scheduled</option>
-                                    <option value="confirmed">Confirmed</option>
-                                    <option value="pending">Pending</option>
+                                    <option value="scheduled" selected data-translate="ehr.scheduled">Scheduled</option>
+                                    <option value="confirmed" data-translate="ehr.confirmed">Confirmed</option>
+                                    <option value="pending" data-translate="ehr.pending">Pending</option>
                                 </select>
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label for="appointment_reason" class="form-label">Reason for Visit</label>
-                            <textarea class="form-control" id="appointment_reason" rows="2" placeholder="Brief description of the reason for this appointment"></textarea>
+                            <label for="appointment_reason" class="form-label" data-translate="ehr.reason_for_visit">Reason for Visit</label>
+                            <textarea class="form-control" id="appointment_reason" rows="2" data-translate-placeholder="ehr.reason_placeholder" placeholder="Brief description of the reason for this appointment"></textarea>
                         </div>
 
                         <div class="mb-3">
-                            <label for="appointment_location" class="form-label">Location</label>
-                            <input type="text" class="form-control" id="appointment_location" placeholder="Clinic address or video call link">
+                            <label for="appointment_location" class="form-label" data-translate="ehr.location">Location</label>
+                            <input type="text" class="form-control" id="appointment_location" data-translate-placeholder="ehr.location_placeholder" placeholder="Clinic address or video call link">
                         </div>
 
                         <div class="row">
@@ -633,11 +634,11 @@
 
                         <div class="mb-3">
                             <label for="appointment_notes" class="form-label">Doctor's Notes</label>
-                            <textarea class="form-control" id="appointment_notes" rows="2" placeholder="Internal notes for this appointment"></textarea>
+                            <textarea class="form-control" id="appointment_notes" rows="2" data-translate-placeholder="ehr.appointment_notes_placeholder" placeholder="Internal notes for this appointment"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-translate="ehr.cancel">Cancel</button>
                         <button type="submit" class="btn btn-primary" id="save-appointment-btn">
                             <i class="bi bi-check-circle me-1"></i>Schedule Appointment
                         </button>
@@ -685,7 +686,7 @@
                                 <label for="status" class="form-label">Diagnosis Status</label>
                                 <select class="form-select" id="status">
                                     <option value="provisional">Provisional</option>
-                                    <option value="confirmed">Confirmed</option>
+                                    <option value="confirmed" data-translate="ehr.confirmed">Confirmed</option>
                                     <option value="differential">Differential</option>
                                     <option value="rule_out">Rule Out</option>
                                 </select>
@@ -723,7 +724,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-translate="ehr.cancel">Cancel</button>
                         <button type="submit" class="btn btn-primary" id="save-diagnosis-btn">
                             <i class="bi bi-check-circle me-1"></i>Save Diagnosis
                         </button>
@@ -801,7 +802,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-translate="ehr.cancel">Cancel</button>
                         <button type="submit" class="btn btn-primary" id="save-vitals-btn">
                             <i class="bi bi-check-circle me-1"></i>Save Readings
                         </button>
@@ -986,7 +987,7 @@
                                     <h6 class="mb-1">
                                         <i class="bi bi-person-circle me-2 text-primary"></i>
                                         ${patient.name}
-                                        ${patient.has_history ? '<span class="badge bg-success ms-2">History</span>' : '<span class="badge bg-secondary ms-2">New</span>'}
+                                        ${patient.has_history ? '<span class="badge bg-success ms-2" data-translate="ehr.history">History</span>' : '<span class="badge bg-secondary ms-2" data-translate="ehr.new">New</span>'}
                                     </h6>
                                     <div class="text-muted small">
                                         ${patient.medical_id ? `<span class="me-3"><i class="bi bi-card-text me-1"></i>ID: ${patient.medical_id}</span>` : ''}
@@ -1141,5 +1142,15 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        // Initialize EHR page translations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize translation system for EHR page
+            if (typeof LanguageManager !== 'undefined') {
+                LanguageManager.initializeTranslations();
+            }
+        });
+    </script>
 </body>
 </html>
