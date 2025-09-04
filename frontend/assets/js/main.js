@@ -723,8 +723,11 @@ const ApiHelper = {
         
         try {
             // For non-login endpoints, check session validity first (but not for /auth/me to avoid circular calls)
+            // Only check session for critical endpoints, not for initial profile loading
             const isLoginEndpoint = endpoint.includes('/auth/login') || endpoint.includes('/auth/register') || endpoint.includes('/auth/me');
-            if (!isLoginEndpoint && window.AuthGuard && !AuthGuard.isDevelopmentMode() && AuthGuard.isAuthenticated()) {
+            const isCriticalEndpoint = endpoint.includes('/appointments') || endpoint.includes('/prescriptions');
+            
+            if (!isLoginEndpoint && isCriticalEndpoint && window.AuthGuard && !AuthGuard.isDevelopmentMode() && AuthGuard.isAuthenticated()) {
                 const sessionValid = await this.checkSession();
                 if (!sessionValid) {
                     window.SahatakLogger?.warn('Session invalid before API call - auto logging out');
