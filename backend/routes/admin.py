@@ -524,6 +524,14 @@ def toggle_user_status(user_id):
                 error_code="CANNOT_MODIFY_SELF"
             )
         
+        # Prevent deactivation of master admin user
+        if user.email == 'admin':
+            return APIResponse.error(
+                message="Cannot modify master admin user status",
+                status_code=400,
+                error_code="CANNOT_MODIFY_MASTER_ADMIN"
+            )
+        
         old_status = user.is_active
         user.is_active = not user.is_active
         user.updated_at = datetime.utcnow()
@@ -644,6 +652,14 @@ def delete_user(user_id):
                 message="Cannot delete your own account",
                 status_code=400,
                 error_code="CANNOT_DELETE_SELF"
+            )
+        
+        # Prevent deletion of master admin user
+        if user.email == 'admin':
+            return APIResponse.error(
+                message="Cannot delete master admin user",
+                status_code=400,
+                error_code="CANNOT_DELETE_MASTER_ADMIN"
             )
         
         # Store user info for logging before deletion
