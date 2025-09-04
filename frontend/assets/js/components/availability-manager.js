@@ -45,7 +45,8 @@ const AvailabilityManager = {
             const response = await ApiHelper.makeRequest('/availability/schedule');
             
             if (response.success) {
-                this.currentSchedule = response.data.schedule;
+                // Ensure schedule data has proper structure
+                this.currentSchedule = this.normalizeScheduleData(response.data.schedule);
                 this.renderWeeklySchedule();
             } else {
                 throw new Error(response.message);
@@ -57,6 +58,25 @@ const AvailabilityManager = {
             this.showAlert('error', errorMsg);
             this.renderDefaultSchedule();
         }
+    },
+    
+    // Normalize schedule data to ensure proper format
+    normalizeScheduleData(schedule) {
+        const defaultDay = { enabled: false, start: '09:00', end: '17:00' };
+        const daysOrder = ['saturday', 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+        
+        const normalized = {};
+        
+        daysOrder.forEach(day => {
+            const dayData = schedule && schedule[day] ? schedule[day] : defaultDay;
+            normalized[day] = {
+                enabled: dayData.enabled || false,
+                start: dayData.start || '09:00',
+                end: dayData.end || '17:00'
+            };
+        });
+        
+        return normalized;
     },
     
     // Render weekly schedule form
@@ -91,6 +111,10 @@ const AvailabilityManager = {
             const daySchedule = this.currentSchedule[dayKey] || { enabled: false, start: '09:00', end: '17:00' };
             const isEnabled = daySchedule.enabled;
             
+            // Ensure start and end times are properly formatted
+            const startTime = daySchedule.start || '09:00';
+            const endTime = daySchedule.end || '17:00';
+            
             html += `
                 <div class="schedule-day ${isEnabled ? 'enabled' : 'disabled'}" data-day="${dayKey}">
                     <div class="day-header">
@@ -104,13 +128,13 @@ const AvailabilityManager = {
                         <div class="time-input-group">
                             <label>${fromLabel}</label>
                             <input type="time" class="form-control start-time-input" 
-                                   data-day="${dayKey}" value="${daySchedule.start}" 
+                                   data-day="${dayKey}" value="${startTime}" 
                                    ${!isEnabled ? 'disabled' : ''}>
                         </div>
                         <div class="time-input-group">
                             <label>${toLabel}</label>
                             <input type="time" class="form-control end-time-input" 
-                                   data-day="${dayKey}" value="${daySchedule.end}"
+                                   data-day="${dayKey}" value="${endTime}"
                                    ${!isEnabled ? 'disabled' : ''}>
                         </div>
                     </div>
