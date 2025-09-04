@@ -1188,6 +1188,114 @@
             statusElement.innerHTML = `<small class="text-success"><i class="bi bi-check-circle me-1"></i>${file.name} selected</small>`;
         }
 
+        // Load dashboard statistics from API
+        async function loadDoctorDashboardStats() {
+            console.log('Loading doctor dashboard statistics...');
+            
+            try {
+                // Load appointments to count scheduled ones
+                const appointmentsResponse = await ApiHelper.makeRequest('/appointments/');
+                
+                if (appointmentsResponse.success) {
+                    const appointments = appointmentsResponse.data.appointments;
+                    
+                    // Count scheduled/confirmed appointments (upcoming)
+                    const scheduledCount = appointments.filter(apt => 
+                        ['scheduled', 'confirmed'].includes(apt.status) && 
+                        new Date(apt.appointment_date) > new Date()
+                    ).length;
+                    
+                    // Count total patients (unique patient IDs from appointments)
+                    const uniquePatientIds = [...new Set(appointments.map(apt => apt.patient_id))];
+                    const totalPatients = uniquePatientIds.length;
+                    
+                    // Count completed appointments for consultation count
+                    const completedCount = appointments.filter(apt => 
+                        apt.status === 'completed'
+                    ).length;
+                    
+                    // Update statistics in the doctor-stats-container
+                    const statsContainer = document.getElementById('doctor-stats-container');
+                    if (statsContainer) {
+                        const currentLang = LanguageManager.getLanguage() || 'en';
+                        
+                        statsContainer.innerHTML = `
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <div class="stat-item">
+                                        <h3 class="stat-number text-primary">${scheduledCount}</h3>
+                                        <p class="stat-label">${currentLang === 'ar' ? 'المواعيد القادمة' : 'Upcoming'}</p>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="stat-item">
+                                        <h3 class="stat-number text-success">${totalPatients}</h3>
+                                        <p class="stat-label">${currentLang === 'ar' ? 'المرضى' : 'Patients'}</p>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="stat-item">
+                                        <h3 class="stat-number text-info">${completedCount}</h3>
+                                        <p class="stat-label">${currentLang === 'ar' ? 'الاستشارات' : 'Consultations'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    console.log(`Updated doctor stats - Upcoming: ${scheduledCount}, Patients: ${totalPatients}, Consultations: ${completedCount}`);
+                } else {
+                    console.warn('Failed to load appointments for stats:', appointmentsResponse.message);
+                    // Set default values
+                    const statsContainer = document.getElementById('doctor-stats-container');
+                    if (statsContainer) {
+                        const currentLang = LanguageManager.getLanguage() || 'en';
+                        statsContainer.innerHTML = `
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <div class="stat-item">
+                                        <h3 class="stat-number text-primary">0</h3>
+                                        <p class="stat-label">${currentLang === 'ar' ? 'المواعيد القادمة' : 'Upcoming'}</p>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="stat-item">
+                                        <h3 class="stat-number text-success">0</h3>
+                                        <p class="stat-label">${currentLang === 'ar' ? 'المرضى' : 'Patients'}</p>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="stat-item">
+                                        <h3 class="stat-number text-info">0</h3>
+                                        <p class="stat-label">${currentLang === 'ar' ? 'الاستشارات' : 'Consultations'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading doctor dashboard stats:', error);
+                // Set error state
+                const statsContainer = document.getElementById('doctor-stats-container');
+                if (statsContainer) {
+                    const currentLang = LanguageManager.getLanguage() || 'en';
+                    const errorMsg = currentLang === 'ar' ? 'خطأ في تحميل الإحصائيات' : 'Error loading statistics';
+                    statsContainer.innerHTML = `
+                        <div class="text-center">
+                            <p class="text-muted">${errorMsg}</p>
+                        </div>
+                    `;
+                }
+            }
+        }
+        
+        // Refresh doctor dashboard statistics - can be called from other pages
+        window.refreshDoctorDashboardStats = function() {
+            console.log('Refreshing doctor dashboard statistics...');
+            loadDoctorDashboardStats();
+        };
+
         // Initialize doctor dashboard on page load
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('Doctor dashboard initializing...');
@@ -1254,6 +1362,11 @@
             if (isVerified && window.Dashboard && Dashboard.initialize) {
                 await Dashboard.initialize();
             }
+            
+            // Load dashboard statistics after translations are loaded
+            setTimeout(() => {
+                loadDoctorDashboardStats();
+            }, 1000); // Small delay to ensure API is ready
         });
     </script>
 </body>

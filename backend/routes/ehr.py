@@ -33,7 +33,7 @@ def search_patients():
         
         limit = min(int(request.args.get('limit', 10)), 50)  # Max 50 results
         
-        # Search patients by name, phone, or ID
+        # Search patients by name or phone
         search_pattern = f'%{query}%'
         
         # Join with User table to get basic user info and search by name
@@ -42,8 +42,7 @@ def search_patients():
         ).filter(
             or_(
                 User.full_name.ilike(search_pattern),
-                Patient.phone.ilike(search_pattern),
-                Patient.medical_id.ilike(search_pattern)
+                Patient.phone.ilike(search_pattern)
             )
         ).limit(limit).all()
         
@@ -65,7 +64,7 @@ def search_patients():
             search_results.append({
                 'id': patient.id,
                 'name': user.full_name,
-                'medical_id': patient.medical_id,
+                'patient_id': f'PAT-{patient.id:06d}',  # Generate a display ID from patient ID
                 'age': patient.age,
                 'phone': patient.phone,
                 'gender': patient.gender,
