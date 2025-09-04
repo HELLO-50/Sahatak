@@ -89,8 +89,27 @@ def get_appointments():
         else:
             return APIResponse.validation_error(message='Invalid user type')
         
+        # Add patient and doctor names to each appointment
+        appointments_data = []
+        for appointment in appointments:
+            apt_dict = appointment.to_dict()
+            
+            # Add doctor name
+            if appointment.doctor and appointment.doctor.user:
+                apt_dict['doctor_name'] = appointment.doctor.user.full_name
+            else:
+                apt_dict['doctor_name'] = 'Unknown Doctor'
+            
+            # Add patient name
+            if appointment.patient and appointment.patient.user:
+                apt_dict['patient_name'] = appointment.patient.user.full_name
+            else:
+                apt_dict['patient_name'] = 'Unknown Patient' if appointment.patient_id else 'Blocked Slot'
+            
+            appointments_data.append(apt_dict)
+        
         return APIResponse.success(
-            data={'appointments': [appointment.to_dict() for appointment in appointments]},
+            data={'appointments': appointments_data},
             message='Appointments retrieved successfully'
         )
         
@@ -609,9 +628,11 @@ def get_doctor_patients():
             
             patient_data = {
                 'id': patient.id,
-                'patient_id': patient.patient_id,
+                'patient_id': f'PAT-{patient.id:06d}',  # Generate display ID like PAT-000001
                 'full_name': patient.user.full_name if patient.user else 'Unknown',
-                'age': patient.calculate_age() if hasattr(patient, 'calculate_age') else None,
+                'age': patient.age if patient.age else None,
+                'phone': patient.phone if patient.phone else None,
+                'gender': patient.gender if patient.gender else None,
                 'last_appointment_date': last_appointment.appointment_date.isoformat() if last_appointment else None
             }
             patients_data.append(patient_data)

@@ -359,7 +359,8 @@ def block_time_slot():
                 Appointment.doctor_id == doctor.id,
                 Appointment.appointment_date >= start_datetime,
                 Appointment.appointment_date < end_datetime,
-                Appointment.status.in_(['scheduled', 'confirmed', 'in_progress'])
+                Appointment.status.in_(['scheduled', 'confirmed', 'in_progress']),
+                Appointment.patient_id.isnot(None)  # Exclude blocked slots (which have null patient_id)
             )
         ).first()
         
@@ -369,14 +370,15 @@ def block_time_slot():
             )
         
         # Create blocking appointment (internal appointment)
+        # Use 'video' type and 'cancelled' status for blocked slots if 'blocked' enum values aren't available
         blocking_appointment = Appointment(
             patient_id=None,  # No patient for blocked slots
             doctor_id=doctor.id,
             appointment_date=start_datetime,
-            appointment_type='blocked',  # Custom type for blocked slots
-            status='blocked',  # Custom status for blocked slots
+            appointment_type='video',  # Use existing enum value
+            status='cancelled',  # Use existing enum value to represent blocked
             reason_for_visit='Time blocked by doctor',
-            notes=data.get('reason', 'Doctor unavailable')
+            notes=f"BLOCKED: {data.get('reason', 'Doctor unavailable')}"
         )
         
         db.session.add(blocking_appointment)
@@ -427,12 +429,14 @@ def unblock_time_slot(block_id):
         if not doctor:
             return APIResponse.not_found(message='Doctor profile not found')
         
-        # Find the blocked appointment
+        # Find the blocked appointment (using cancelled status and null patient_id to identify blocked slots)
         blocked_appointment = Appointment.query.filter(
             and_(
                 Appointment.id == block_id,
                 Appointment.doctor_id == doctor.id,
-                Appointment.status == 'blocked'
+                Appointment.status == 'cancelled',
+                Appointment.patient_id.is_(None),
+                Appointment.notes.like('BLOCKED:%')
             )
         ).first()
         
