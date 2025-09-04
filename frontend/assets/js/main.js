@@ -976,9 +976,12 @@ async function handleLogin(event) {
             localStorage.setItem('sahatak_user_name', response.data.user.full_name);
             
             // Store JWT token if provided (fallback for session cookie issues)
+            console.log('🔍 Login response data:', response.data);
             if (response.data.access_token) {
                 localStorage.setItem('sahatak_access_token', response.data.access_token);
-                console.log('🔑 JWT token stored for authentication');
+                console.log('🔑 JWT token stored for authentication:', response.data.access_token.substring(0, 20));
+            } else {
+                console.log('🚨 NO ACCESS TOKEN in login response!');
             }
             
             // Debug: Check if session cookie was set
