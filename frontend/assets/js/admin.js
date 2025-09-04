@@ -1148,6 +1148,7 @@ const AdminDashboard = {
                         ${admin.is_active ? 'Active' : 'Inactive'}
                     </span>
                 </td>
+                <td>${new Date(admin.created_at).toLocaleDateString()}</td>
                 <td>
                     <button class="btn btn-sm btn-outline-info me-1" onclick="AdminDashboard.viewAdminDetails(${admin.id})" title="View Details">
                         <i class="bi bi-eye"></i>
@@ -1197,7 +1198,7 @@ const AdminDashboard = {
         }
 
         try {
-            const response = await AdminAuth.makeRequest(`/admin/users/${adminId}/change-password`, {
+            const response = await AdminAuth.apiRequest(`/admin/users/${adminId}/change-password`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ new_password: newPassword })
@@ -1222,7 +1223,7 @@ const AdminDashboard = {
         }
 
         try {
-            const response = await AdminAuth.makeRequest(`/admin/users/${adminId}`, {
+            const response = await AdminAuth.apiRequest(`/admin/users/${adminId}`, {
                 method: 'DELETE'
             });
             const data = await response.json();
@@ -1242,7 +1243,7 @@ const AdminDashboard = {
     // Toggle admin status (activate/deactivate)
     async toggleAdminStatus(adminId) {
         try {
-            const response = await AdminAuth.makeRequest(`/admin/users/${adminId}/toggle-status`, {
+            const response = await AdminAuth.apiRequest(`/admin/users/${adminId}/toggle-status`, {
                 method: 'PUT'
             });
             const data = await response.json();
@@ -1269,7 +1270,7 @@ const AdminDashboard = {
     async loadPendingVerifications() {
         try {
             console.log('Loading pending verifications...');
-            const response = await AdminAuth.makeRequest('/admin/doctors/pending-verification');
+            const response = await AdminAuth.apiRequest('/admin/doctors/pending-verification');
             const data = await response.json();
             
             console.log('Pending verifications data received:', data);
@@ -1353,7 +1354,7 @@ const AdminDashboard = {
         if (!confirm('Are you sure you want to approve this doctor?')) return;
 
         try {
-            const response = await AdminAuth.makeRequest(`/admin/doctors/${doctorId}/verify`, {
+            const response = await AdminAuth.apiRequest(`/admin/doctors/${doctorId}/verify`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
@@ -1381,7 +1382,7 @@ const AdminDashboard = {
         if (reason === null) return; // User cancelled
 
         try {
-            const response = await AdminAuth.makeRequest(`/admin/doctors/${doctorId}/verify`, {
+            const response = await AdminAuth.apiRequest(`/admin/doctors/${doctorId}/verify`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
