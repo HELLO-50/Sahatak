@@ -754,8 +754,7 @@ const ApiHelper = {
                 window.SahatakLogger?.warn(`Slow API request: ${method} ${endpoint} took ${duration}ms`);
             }
             
-            // Check for session invalidation (but not during login attempts)
-            const isLoginEndpoint = endpoint.includes('/auth/login') || endpoint.includes('/auth/register');
+            // Check for session invalidation (but not during login attempts) - reuse the variable from above
             if (!isLoginEndpoint && (response.status === 401 || (response.status === 302 && response.url.includes('/auth/login')))) {
                 window.SahatakLogger?.warn('Session expired or invalid - auto logging out');
                 await this.handleSessionExpired();
@@ -1864,12 +1863,12 @@ const NotificationsAPI = {
 };
 
 // Set up form event listeners when DOM is ready
+// Export functions to window for global access
+window.handleLogin = handleLogin;
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Only attach form event listeners if the forms exist (not on dashboard pages)
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-        loginForm.addEventListener('submit', handleLogin);
-    }
+    // Skip form attachment - handled by index.html to avoid conflicts
+    console.log('Main.js DOMContentLoaded - form attachment handled by index.html');
     
     // Event listeners disabled - using forms.js versions instead
     // const patientForm = document.getElementById('patientRegisterForm');
