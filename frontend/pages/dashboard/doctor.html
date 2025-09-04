@@ -862,7 +862,8 @@
         }
 
         function handleVerifiedAction(actionFunction) {
-            const user = AuthGuard.getCurrentUser();
+            // Get user data from localStorage which contains verification status
+            const user = JSON.parse(localStorage.getItem('sahatak_doctor_data') || '{}');
             const isVerified = user && (user.is_verified === true || user.verification_status === 'verified');
             
             if (!isVerified) {
