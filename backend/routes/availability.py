@@ -150,6 +150,9 @@ def update_doctor_schedule():
             db.session.rollback()
             app_logger.error(f"Error updating doctor schedule: {str(schedule_error)}")
             app_logger.error(f"Schedule data received: {schedule}")
+            # Log the full traceback to find the exact source of the datetime error
+            import traceback
+            app_logger.error(f"Full traceback: {traceback.format_exc()}")
             return APIResponse.internal_error(message=f'Failed to update schedule: {str(schedule_error)}')
         
         # Log the action
