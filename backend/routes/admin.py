@@ -720,12 +720,7 @@ def get_pending_verifications():
         # Query unverified doctors with user details
         pending_query = Doctor.query.options(
             joinedload(Doctor.user)
-        ).filter(
-            and_(
-                Doctor.is_verified == False,
-                User.is_active == True
-            )
-        ).join(User, Doctor.user_id == User.id).order_by(Doctor.created_at.asc())
+        ).filter(Doctor.is_verified == False).order_by(Doctor.created_at.asc())
         
         pending_pagination = pending_query.paginate(
             page=page,
