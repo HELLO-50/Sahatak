@@ -1016,6 +1016,329 @@
             resultsContainer.classList.remove('d-none');
         }
         
+        // EHR Manager for loading and displaying patient data
+        const EHRManager = {
+            currentPatientId: null,
+            patientData: null,
+
+            async init(patientId) {
+                console.log('EHRManager initializing for patient:', patientId);
+                this.currentPatientId = patientId;
+                
+                // Show loading state
+                this.showLoadingState();
+                
+                try {
+                    // Load patient EHR data from API
+                    await this.loadPatientEHR(patientId);
+                    
+                    // Render all EHR sections
+                    this.renderPatientInfo();
+                    this.renderMedicalHistory();
+                    this.renderAppointmentHistory();
+                    this.renderVitalSigns();
+                    this.renderPrescriptions();
+                    this.renderAllTabs();
+                    
+                } catch (error) {
+                    console.error('Error loading patient EHR:', error);
+                    this.showErrorState(error.message);
+                }
+            },
+
+            showLoadingState() {
+                // Show loading spinners in each tab
+                const tabs = ['overview', 'history', 'vitals', 'prescriptions'];
+                tabs.forEach(tab => {
+                    const content = document.getElementById(`${tab}-content`);
+                    if (content) {
+                        content.innerHTML = `
+                            <div class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2 text-muted">Loading patient data...</p>
+                            </div>
+                        `;
+                    }
+                });
+            },
+
+            async loadPatientEHR(patientId) {
+                const response = await ApiHelper.makeRequest(`/ehr/patient/${patientId}`);
+                
+                if (response.success) {
+                    this.patientData = response.data;
+                    console.log('Patient EHR data loaded:', this.patientData);
+                } else {
+                    throw new Error(response.message || 'Failed to load patient EHR data');
+                }
+            },
+
+            renderPatientInfo() {
+                const patient = this.patientData.patient_info;
+                const overviewContent = document.getElementById('overview-content');
+                
+                if (overviewContent && patient) {
+                    overviewContent.innerHTML = `
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <h6 class="mb-0"><i class="bi bi-person me-2"></i>Personal Information</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <strong>Full Name:</strong><br>
+                                            ${patient.name || 'N/A'}
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong>Age:</strong><br>
+                                            ${patient.age || 'N/A'} years
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong>Gender:</strong><br>
+                                            ${patient.gender ? patient.gender.charAt(0).toUpperCase() + patient.gender.slice(1) : 'N/A'}
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong>Phone:</strong><br>
+                                            ${patient.phone || 'N/A'}
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong>Blood Type:</strong><br>
+                                            ${patient.blood_type || 'N/A'}
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong>Emergency Contact:</strong><br>
+                                            ${patient.emergency_contact || 'N/A'}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <h6 class="mb-0"><i class="bi bi-heart-pulse me-2"></i>Medical Summary</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <strong>Chronic Conditions:</strong><br>
+                                            ${patient.chronic_conditions || 'None reported'}
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong>Allergies:</strong><br>
+                                            ${patient.allergies || 'None reported'}
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong>Current Medications:</strong><br>
+                                            ${patient.current_medications || 'None reported'}
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong>Total Appointments:</strong><br>
+                                            ${this.patientData.appointments ? this.patientData.appointments.length : 0}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+
+            renderMedicalHistory() {
+                const historyContent = document.getElementById('history-content');
+                const appointments = this.patientData.appointments || [];
+                
+                if (historyContent) {
+                    if (appointments.length === 0) {
+                        historyContent.innerHTML = `
+                            <div class="text-center py-4">
+                                <i class="bi bi-calendar-x display-6 text-muted mb-3"></i>
+                                <h6 class="text-muted">No medical history available</h6>
+                                <p class="text-muted">No previous appointments or medical records found.</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    const appointmentsHtml = appointments.map(apt => {
+                        const date = new Date(apt.appointment_date);
+                        return `
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-8">
+                                            <h6 class="mb-1">
+                                                <i class="bi bi-calendar-event me-2 text-primary"></i>
+                                                ${date.toLocaleDateString()} - ${date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
+                                            </h6>
+                                            <p class="mb-1"><strong>Type:</strong> ${apt.appointment_type || 'General Consultation'}</p>
+                                            ${apt.reason_for_visit ? `<p class="mb-1"><strong>Reason:</strong> ${apt.reason_for_visit}</p>` : ''}
+                                            ${apt.diagnosis ? `<p class="mb-1"><strong>Diagnosis:</strong> ${apt.diagnosis}</p>` : ''}
+                                            ${apt.notes ? `<p class="mb-1"><strong>Notes:</strong> ${apt.notes}</p>` : ''}
+                                        </div>
+                                        <div class="col-md-4 text-end">
+                                            <span class="badge ${this.getStatusBadgeClass(apt.status)} mb-2">${apt.status}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    historyContent.innerHTML = appointmentsHtml;
+                }
+            },
+
+            renderAppointmentHistory() {
+                // This can be the same as medical history for now
+                this.renderMedicalHistory();
+            },
+
+            renderVitalSigns() {
+                const vitalsContent = document.getElementById('vitals-content');
+                const vitals = this.patientData.vital_signs || [];
+                
+                if (vitalsContent) {
+                    if (vitals.length === 0) {
+                        vitalsContent.innerHTML = `
+                            <div class="text-center py-4">
+                                <i class="bi bi-heart-pulse display-6 text-muted mb-3"></i>
+                                <h6 class="text-muted">No vital signs recorded</h6>
+                                <p class="text-muted">No vital signs measurements found in the medical record.</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    const vitalsHtml = vitals.map(vital => {
+                        const date = new Date(vital.recorded_at);
+                        return `
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h6 class="mb-3">
+                                        <i class="bi bi-calendar-date me-2 text-primary"></i>
+                                        ${date.toLocaleDateString()} - ${date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <strong>Blood Pressure:</strong><br>
+                                            ${vital.systolic_bp && vital.diastolic_bp ? `${vital.systolic_bp}/${vital.diastolic_bp} mmHg` : 'N/A'}
+                                        </div>
+                                        <div class="col-md-3">
+                                            <strong>Heart Rate:</strong><br>
+                                            ${vital.heart_rate ? `${vital.heart_rate} bpm` : 'N/A'}
+                                        </div>
+                                        <div class="col-md-3">
+                                            <strong>Temperature:</strong><br>
+                                            ${vital.temperature ? `${vital.temperature}°C` : 'N/A'}
+                                        </div>
+                                        <div class="col-md-3">
+                                            <strong>Weight:</strong><br>
+                                            ${vital.weight ? `${vital.weight} kg` : 'N/A'}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    vitalsContent.innerHTML = vitalsHtml;
+                }
+            },
+
+            renderPrescriptions() {
+                const prescriptionsContent = document.getElementById('prescriptions-content');
+                const prescriptions = this.patientData.prescriptions || [];
+                
+                if (prescriptionsContent) {
+                    if (prescriptions.length === 0) {
+                        prescriptionsContent.innerHTML = `
+                            <div class="text-center py-4">
+                                <i class="bi bi-prescription display-6 text-muted mb-3"></i>
+                                <h6 class="text-muted">No prescriptions found</h6>
+                                <p class="text-muted">No prescriptions have been issued to this patient.</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    const prescriptionsHtml = prescriptions.map(rx => {
+                        const date = new Date(rx.created_at);
+                        return `
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-8">
+                                            <h6 class="mb-1">
+                                                <i class="bi bi-prescription2 me-2 text-primary"></i>
+                                                ${rx.medication_name}
+                                            </h6>
+                                            <p class="mb-1"><strong>Dosage:</strong> ${rx.dosage}</p>
+                                            <p class="mb-1"><strong>Frequency:</strong> ${rx.frequency}</p>
+                                            <p class="mb-1"><strong>Duration:</strong> ${rx.duration}</p>
+                                            <p class="mb-1"><strong>Prescribed:</strong> ${date.toLocaleDateString()}</p>
+                                            ${rx.instructions ? `<p class="mb-1"><strong>Instructions:</strong> ${rx.instructions}</p>` : ''}
+                                        </div>
+                                        <div class="col-md-4 text-end">
+                                            <span class="badge ${this.getPrescriptionStatusClass(rx.status)} mb-2">${rx.status}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    prescriptionsContent.innerHTML = prescriptionsHtml;
+                }
+            },
+
+            renderAllTabs() {
+                // This method can be used to refresh all tabs
+                console.log('All EHR tabs rendered for patient:', this.currentPatientId);
+            },
+
+            getStatusBadgeClass(status) {
+                const classes = {
+                    'scheduled': 'bg-info',
+                    'confirmed': 'bg-success',
+                    'completed': 'bg-secondary',
+                    'cancelled': 'bg-danger',
+                    'no_show': 'bg-warning'
+                };
+                return classes[status] || 'bg-secondary';
+            },
+
+            getPrescriptionStatusClass(status) {
+                const classes = {
+                    'active': 'bg-success',
+                    'completed': 'bg-secondary',
+                    'cancelled': 'bg-danger'
+                };
+                return classes[status] || 'bg-secondary';
+            },
+
+            showErrorState(message) {
+                const tabs = ['overview', 'history', 'vitals', 'prescriptions'];
+                tabs.forEach(tab => {
+                    const content = document.getElementById(`${tab}-content`);
+                    if (content) {
+                        content.innerHTML = `
+                            <div class="text-center py-4">
+                                <i class="bi bi-exclamation-triangle display-6 text-danger mb-3"></i>
+                                <h6 class="text-danger">Error Loading Patient Data</h6>
+                                <p class="text-muted">${message}</p>
+                                <button class="btn btn-outline-primary btn-sm" onclick="EHRManager.init(${this.currentPatientId})">
+                                    <i class="bi bi-arrow-clockwise me-1"></i>
+                                    Retry
+                                </button>
+                            </div>
+                        `;
+                    }
+                });
+            }
+        };
+
         function selectPatient(patientId, patientName, patientAge) {
             // Update selected patient info
             document.getElementById('selected-patient-info').textContent = patientName;
