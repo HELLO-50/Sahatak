@@ -258,8 +258,8 @@
         
         <form id="loginForm">
             <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" class="form-control" placeholder="admin@sahatak.com" required>
+                <label for="email">Email or Username</label>
+                <input type="text" id="email" class="form-control" placeholder="admin or admin@sahatak.com" required>
             </div>
             
             <div class="form-group">
@@ -340,7 +340,7 @@
             
             // Validate inputs
             if (!email || !password) {
-                showAlert('Please enter both email and password');
+                showAlert('Please enter email/username and password');
                 return;
             }
             
@@ -356,7 +356,7 @@
                     window.location.href = './admin.html';
                 }, 1000);
             } else {
-                showAlert(result.error || 'Invalid email or password');
+                showAlert(result.error || 'Invalid credentials');
                 loginBtn.disabled = false;
                 loginBtn.textContent = 'Sign In';
             }
