@@ -881,8 +881,8 @@
 
         function showVerificationRequiredModal() {
             // Use translation system for verification required message
-            const t = LanguageManager.getTranslations();
-            const message = t?.dashboard?.doctor?.verification_notice?.verification_required_action ||
+            const currentLang = LanguageManager.getLanguage() || 'ar';
+            const message = LanguageManager.getTranslation(currentLang, 'dashboard.doctor.verification_notice.verification_required_action') ||
                 'Your account must be verified first to access this feature. Please complete your profile and wait for admin approval.';
             
             alert(message);
