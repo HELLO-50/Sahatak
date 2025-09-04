@@ -627,12 +627,20 @@ const ApiHelper = {
                 return true;
             }
             
+            // Use makeRequest to ensure token is included in headers
+            // But bypass the session check in makeRequest to avoid circular calls
+            const token = localStorage.getItem('sahatak_access_token');
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
             const response = await fetch(`${this.baseUrl}/auth/me`, {
                 method: 'GET',
                 credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+                headers: headers
             });
             
             this.lastSessionCheck = now;
@@ -650,6 +658,11 @@ const ApiHelper = {
             
             return false;
         } catch (error) {
+            // If it's a 401 error, the session is expired
+            if (error.statusCode === 401) {
+                window.SahatakLogger?.warn('Session check failed - token expired or invalid');
+                return false;
+            }
             window.SahatakLogger?.warn('Session check failed:', error);
             return false;
         }
