@@ -337,8 +337,8 @@ def login():
                 message='Account is deactivated. Please contact support.'
             )
         
-        # Check if email verification is required  
-        if user.email and not user.is_verified:
+        # Check if email verification is required (skip for master admin)
+        if user.email and not user.is_verified and user.email != 'admin':
             return APIResponse.error(
                 message="Please verify your email address before logging in. Check your email for verification link.",
                 status_code=401,
