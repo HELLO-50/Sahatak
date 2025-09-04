@@ -618,34 +618,29 @@ const ApiHelper = {
         return 'api_response';
     },
     
-    // TEMPORARILY DISABLE session checking to fix logout issues
+    // Check session with improved error handling to prevent logout loops
     async checkSession() {
-        console.log('🔕 checkSession called but DISABLED to prevent logout');
-        return true; // Always return true to avoid logout
-        
-        // ORIGINAL CODE (disabled):
-        /*
         try {
             const now = Date.now();
-            // Only check session every 5 minutes to avoid excessive requests
-            if (this.lastSessionCheck && (now - this.lastSessionCheck) < 300000) {
+            // Only check session every 10 minutes to avoid excessive requests
+            if (this.lastSessionCheck && (now - this.lastSessionCheck) < 600000) {
                 return true;
             }
             
-            // Use makeRequest to ensure token is included in headers
-            // But bypass the session check in makeRequest to avoid circular calls
+            // Don't check session if user is not authenticated locally
+            if (!AuthGuard || !AuthGuard.isAuthenticated()) {
+                console.log('🔍 checkSession: User not authenticated locally, skipping');
+                return false;
+            }
+            
             const token = localStorage.getItem('sahatak_access_token');
             console.log('🎫 checkSession - Token available:', !!token);
-            console.log('🎫 Token first 20 chars:', token ? token.substring(0, 20) : 'NO TOKEN');
             
             const headers = {
                 'Content-Type': 'application/json'
             };
             if (token) {
                 headers['Authorization'] = `Bearer ${token}`;
-                console.log('💫 checkSession - Authorization header set');
-            } else {
-                console.log('🚨 checkSession - NO TOKEN AVAILABLE!');
             }
             
             const response = await fetch(`${this.baseUrl}/auth/me`, {
@@ -663,28 +658,51 @@ const ApiHelper = {
                     if (data.data && data.data.user) {
                         localStorage.setItem('sahatak_user_data', JSON.stringify(data.data.user));
                     }
+                    console.log('✅ Session check passed');
                     return true;
                 }
             }
             
-            return false;
-        } catch (error) {
-            // If it's a 401 error, the session is expired
-            if (error.statusCode === 401) {
-                window.SahatakLogger?.warn('Session check failed - token expired or invalid');
+            // Only consider it a real failure if we get a definitive 401
+            if (response.status === 401) {
+                console.log('❌ Session check failed: 401 Unauthorized');
                 return false;
             }
-            window.SahatakLogger?.warn('Session check failed:', error);
-            return false;
+            
+            // For other errors (network, 500, etc.), assume session is still valid
+            console.log('⚠️ Session check inconclusive, assuming valid');
+            return true;
+            
+        } catch (error) {
+            // Network errors should not trigger logout
+            console.log('⚠️ Session check error (network/other):', error.message);
+            // Return true to avoid logout on network issues
+            return true;
         }
-        */
     },
 
-    // TEMPORARILY DISABLE automatic session checking to fix logout issues
+    // Start automatic session checking with improved safeguards
     startSessionMonitoring() {
-        console.log('🔕 Session monitoring DISABLED to prevent logout issues');
-        console.log('🔐 Relying on token authentication only');
-        return true; // Pretend it started to avoid errors
+        // Only start if not already running and user is authenticated
+        if (!this.sessionCheckInterval && window.AuthGuard && AuthGuard.isAuthenticated() && !AuthGuard.isDevelopmentMode()) {
+            this.sessionCheckInterval = setInterval(async () => {
+                try {
+                    const isValid = await this.checkSession();
+                    if (!isValid) {
+                        console.log('⚠️ Session validation failed - initiating logout');
+                        await this.handleSessionExpired();
+                    }
+                } catch (error) {
+                    console.log('⚠️ Session monitoring error:', error.message);
+                    // Don't logout on monitoring errors - could be network issues
+                }
+            }, 1200000); // Check every 20 minutes (longer interval to reduce load)
+            
+            console.log('✅ Session monitoring started (20-minute intervals)');
+            return true;
+        }
+        console.log('🔍 Session monitoring not started - conditions not met');
+        return false; // Already running or conditions not met
     },
 
     // Stop session monitoring
@@ -782,8 +800,11 @@ const ApiHelper = {
                 window.SahatakLogger?.warn(`Slow API request: ${method} ${endpoint} took ${duration}ms`);
             }
             
-            // Check for session invalidation (but not during login attempts) - reuse the variable from above
-            if (!isLoginEndpoint && (response.status === 401 || (response.status === 302 && response.url.includes('/auth/login')))) {
+            // Check for session invalidation (but not during login attempts or messaging calls)
+            const isMessagingEndpoint = endpoint.includes('/messages') || endpoint.includes('/conversations');
+            const shouldTriggerLogout = !isLoginEndpoint && !isMessagingEndpoint && (response.status === 401 || (response.status === 302 && response.url.includes('/auth/login')));
+            
+            if (shouldTriggerLogout) {
                 console.log('🚨 Got 401/302 response for', endpoint, 'Status:', response.status);
                 window.SahatakLogger?.warn('Session expired or invalid - auto logging out');
                 await this.handleSessionExpired();
@@ -798,10 +819,13 @@ const ApiHelper = {
             
             // Handle standardized API response format
             if (data.success === false) {
-                // Handle authentication errors
-                if (data.status_code === 401) {
+                // Handle authentication errors (but not for messaging endpoints)
+                if (data.status_code === 401 && !isMessagingEndpoint) {
+                    console.log('🚨 API response 401 for non-messaging endpoint:', endpoint);
                     window.SahatakLogger?.warn('Authentication failed - auto logging out');
                     await this.handleSessionExpired();
+                } else if (data.status_code === 401 && isMessagingEndpoint) {
+                    console.log('🔸 Messaging 401 ignored to prevent logout loop');
                 }
                 
                 const error = new ApiError(data.message, data.status_code, data.error_code, data.field);
@@ -911,14 +935,21 @@ const ApiHelper = {
             
             // Small delay to show the message
             setTimeout(() => {
-                // Always redirect to index.html to properly handle auth
-                window.location.href = 'https://hello-50.github.io/Sahatak/index.html';
+                // Redirect to index.html using dynamic path resolution
+                if (window.AuthGuard && typeof AuthGuard.redirectToLogin === 'function') {
+                    AuthGuard.redirectToLogin();
+                } else {
+                    // Fallback - dynamic redirect to index.html
+                    const rootPath = window.location.origin + window.location.pathname.substring(0, window.location.pathname.indexOf('/pages/') + 1);
+                    window.location.href = rootPath + 'index.html';
+                }
             }, 1500);
             
         } catch (error) {
             window.SahatakLogger?.error('Error handling session expiration', error);
-            // Fallback - redirect to index page
-            window.location.href = 'https://hello-50.github.io/Sahatak/index.html';
+            // Fallback - dynamic redirect to index page
+            const rootPath = window.location.origin + '/';
+            window.location.href = rootPath + 'index.html';
         }
     }
 };
@@ -1058,302 +1089,9 @@ async function handleLogin(event) {
     }
 }
 
-// Handle patient registration form submission
-// DISABLED - Using forms.js version instead
-async function handlePatientRegister_OLD(event) {
-    event.preventDefault();
-    
-    const submitBtn = document.getElementById('patient-register-submit');
-    const spinner = document.getElementById('patient-register-spinner');
-    const icon = document.getElementById('patient-register-icon');
-    const errorAlert = document.getElementById('patient-register-error-alert');
-    const successAlert = document.getElementById('patient-register-success-alert');
-    
-    // Clear previous errors
-    clearFormErrors('patientRegisterForm');
-    errorAlert.classList.add('d-none');
-    successAlert.classList.add('d-none');
-    
-    // Show loading state
-    spinner.classList.remove('d-none');
-    icon.classList.add('d-none');
-    submitBtn.disabled = true;
-    
-    try {
-        const email = document.getElementById('patientEmail').value.trim();
-        // Get language with multiple fallback methods - ensure never null/undefined
-        const storedLanguage = localStorage.getItem('sahatak_language');
-        const documentLanguage = document.documentElement.lang;
-        const directionLanguage = document.documentElement.dir === 'rtl' ? 'ar' : 'en';
-        
-        // Ensure we always have a valid language (never null/undefined)
-        let userLanguage = 'ar'; // Start with safe default
-        
-        if (storedLanguage === 'ar' || storedLanguage === 'en') {
-            userLanguage = storedLanguage;
-        } else if (documentLanguage === 'ar' || documentLanguage === 'en') {
-            userLanguage = documentLanguage;
-        } else if (directionLanguage === 'ar' || directionLanguage === 'en') {
-            userLanguage = directionLanguage;
-        }
-        
-        // Double-check we have a valid value before sending
-        if (userLanguage !== 'ar' && userLanguage !== 'en') {
-            userLanguage = 'ar';
-        }
-        
-        
-        const formData = {
-            full_name: document.getElementById('patientFullName').value.trim(),
-            phone: document.getElementById('patientPhone').value.trim(),
-            age: parseInt(document.getElementById('patientAge').value),
-            gender: document.getElementById('patientGender').value,
-            password: document.getElementById('patientPassword').value,
-            user_type: 'patient',
-            language_preference: userLanguage || 'en'  // Ensure never undefined
-        };
-        
-        // Ensure language_preference is always present and valid
-        if (!formData.language_preference || (formData.language_preference !== 'ar' && formData.language_preference !== 'en')) {
-            formData.language_preference = 'en'; // Default to English for testing
-        }
-        
-        // Add email only if provided
-        if (email) {
-            formData.email = email;
-        }
-        
-        // Basic client-side validation
-        if (!formData.full_name || !formData.phone || !formData.age || !formData.gender || !formData.password) {
-            throw new Error('All required fields must be filled');
-        }
-        
-        
-        // Make API call to registration endpoint
-        const response = await ApiHelper.makeRequest('/auth/register', {
-            method: 'POST',
-            body: JSON.stringify(formData)
-        });
-        
-        
-        // Clear form
-        document.getElementById('patientRegisterForm').reset();
-        
-        // Check if email verification is required based on backend response
-        const lang = LanguageManager.getLanguage() || 'ar';
-        const requiresVerification = response.data.requires_email_verification;
-        
-        
-        if (requiresVerification) {
-            // Email verification required - show verification message
-            const emailVerificationMessage = lang === 'ar' 
-                ? 'تم إنشاء حسابك بنجاح! يرجى فحص بريدك الإلكتروني لتأكيد حسابك قبل تسجيل الدخول.'
-                : 'Account created successfully! Please check your email to verify your account before logging in.';
-            showFormSuccess(successAlert, emailVerificationMessage);
-            
-            // Don't redirect - user needs to verify email first
-        } else {
-            // No email verification needed - auto-login
-            const successMessage = lang === 'ar' 
-                ? 'تم إنشاء حسابك بنجاح! يمكنك الآن تسجيل الدخول.'
-                : 'Account created successfully! You can now login.';
-            showFormSuccess(successAlert, successMessage);
-            
-            // Redirect to login after success
-            setTimeout(() => {
-                showLogin();
-            }, 2000);
-        }
-        
-    } catch (error) {
-        console.error('Patient registration error:', error);
-        const lang = LanguageManager.getLanguage() || 'ar';
-        const t = LanguageManager.translations[lang];
-        
-        let errorMessage = t.validation?.registration_failed || 'Registration failed. Please try again.';
-        
-        // Handle specific API errors
-        if (error instanceof ApiError) {
-            errorMessage = error.message;
-            
-            // Show field-specific error if available
-            if (error.field) {
-                // Map backend field names to frontend field names
-                const fieldMap = {
-                    'full_name': 'patientFullName',
-                    'email': 'patientEmail',
-                    'phone': 'patientPhone',
-                    'age': 'patientAge',
-                    'gender': 'patientGender',
-                    'password': 'patientPassword'
-                };
-                
-                const frontendField = fieldMap[error.field] || error.field;
-                showFieldError(frontendField, error.message);
-                return;
-            }
-        } else if (error.message) {
-            errorMessage = error.message;
-        }
-        
-        showFormError(errorAlert, errorMessage);
-    } finally {
-        // Hide loading state
-        spinner.classList.add('d-none');
-        icon.classList.remove('d-none');
-        submitBtn.disabled = false;
-    }
-}
 
 // Handle doctor registration form submission
 // DISABLED - Using forms.js version instead  
-async function handleDoctorRegister_OLD(event) {
-    event.preventDefault();
-    
-    const submitBtn = document.getElementById('doctor-register-submit');
-    const spinner = document.getElementById('doctor-register-spinner');
-    const icon = document.getElementById('doctor-register-icon');
-    const errorAlert = document.getElementById('doctor-register-error-alert');
-    const successAlert = document.getElementById('doctor-register-success-alert');
-    
-    // Clear previous errors
-    clearFormErrors('doctorRegisterForm');
-    errorAlert.classList.add('d-none');
-    successAlert.classList.add('d-none');
-    
-    // Show loading state
-    spinner.classList.remove('d-none');
-    icon.classList.add('d-none');
-    submitBtn.disabled = true;
-    
-    try {
-        const email = document.getElementById('doctorEmail').value.trim();
-        // Get language with multiple fallback methods - ensure never null/undefined
-        const storedLanguage = localStorage.getItem('sahatak_language');
-        const documentLanguage = document.documentElement.lang;
-        const directionLanguage = document.documentElement.dir === 'rtl' ? 'ar' : 'en';
-        
-        // Ensure we always have a valid language (never null/undefined)
-        let userLanguage = 'ar'; // Start with safe default
-        
-        if (storedLanguage === 'ar' || storedLanguage === 'en') {
-            userLanguage = storedLanguage;
-        } else if (documentLanguage === 'ar' || documentLanguage === 'en') {
-            userLanguage = documentLanguage;
-        } else if (directionLanguage === 'ar' || directionLanguage === 'en') {
-            userLanguage = directionLanguage;
-        }
-        
-        // Double-check we have a valid value before sending
-        if (userLanguage !== 'ar' && userLanguage !== 'en') {
-            userLanguage = 'ar';
-        }
-        
-        
-        const formData = {
-            full_name: document.getElementById('doctorFullName').value.trim(),
-            phone: document.getElementById('doctorPhone').value.trim(),
-            license_number: document.getElementById('doctorLicense').value.trim(),
-            specialty: document.getElementById('doctorSpecialty').value,
-            years_of_experience: parseInt(document.getElementById('doctorExperience').value),
-            password: document.getElementById('doctorPassword').value,
-            user_type: 'doctor',
-            language_preference: userLanguage || 'en'  // Ensure never undefined
-        };
-        
-        // Ensure language_preference is always present and valid
-        if (!formData.language_preference || (formData.language_preference !== 'ar' && formData.language_preference !== 'en')) {
-            formData.language_preference = 'en'; // Default to English for testing
-        }
-        
-        // Add email only if provided
-        if (email) {
-            formData.email = email;
-        }
-        
-        // Basic client-side validation
-        if (!formData.full_name || !formData.phone || !formData.license_number || !formData.specialty || 
-            !formData.years_of_experience || !formData.password) {
-            throw new Error('All required fields must be filled');
-        }
-        
-        
-        // Make API call to registration endpoint
-        const response = await ApiHelper.makeRequest('/auth/register', {
-            method: 'POST',
-            body: JSON.stringify(formData)
-        });
-        
-        
-        // Clear form
-        document.getElementById('doctorRegisterForm').reset();
-        
-        // Check if email verification is required based on backend response
-        const lang = LanguageManager.getLanguage() || 'ar';
-        const requiresVerification = response.data.requires_email_verification;
-        
-        
-        if (requiresVerification) {
-            // Email verification required - show verification message
-            const emailVerificationMessage = lang === 'ar' 
-                ? 'تم إنشاء حسابك بنجاح! يرجى فحص بريدك الإلكتروني لتأكيد حسابك قبل تسجيل الدخول.'
-                : 'Account created successfully! Please check your email to verify your account before logging in.';
-            showFormSuccess(successAlert, emailVerificationMessage);
-            
-            // Don't redirect - user needs to verify email first
-        } else {
-            // No email verification needed - auto-login
-            const successMessage = lang === 'ar' 
-                ? 'تم إنشاء حسابك بنجاح! يمكنك الآن تسجيل الدخول.'
-                : 'Account created successfully! You can now login.';
-            showFormSuccess(successAlert, successMessage);
-            
-            // Redirect to login after success
-            setTimeout(() => {
-                showLogin();
-            }, 2000);
-        }
-        
-    } catch (error) {
-        console.error('Doctor registration error:', error);
-        const lang = LanguageManager.getLanguage() || 'ar';
-        const t = LanguageManager.translations[lang];
-        
-        let errorMessage = t.validation?.registration_failed || 'Registration failed. Please try again.';
-        
-        // Handle specific API errors
-        if (error instanceof ApiError) {
-            errorMessage = error.message;
-            
-            // Show field-specific error if available
-            if (error.field) {
-                // Map backend field names to frontend field names
-                const fieldMap = {
-                    'full_name': 'doctorFullName',
-                    'email': 'doctorEmail',
-                    'phone': 'doctorPhone',
-                    'license_number': 'doctorLicense',
-                    'specialty': 'doctorSpecialty',
-                    'years_of_experience': 'doctorExperience',
-                    'password': 'doctorPassword'
-                };
-                
-                const frontendField = fieldMap[error.field] || error.field;
-                showFieldError(frontendField, error.message);
-                return;
-            }
-        } else if (error.message) {
-            errorMessage = error.message;
-        }
-        
-        showFormError(errorAlert, errorMessage);
-    } finally {
-        // Hide loading state
-        spinner.classList.add('d-none');
-        icon.classList.remove('d-none');
-        submitBtn.disabled = false;
-    }
-}
 
 // Validate registration form using ValidationManager
 function validateRegistrationForm(data) {
