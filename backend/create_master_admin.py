@@ -2,17 +2,17 @@
 """
 Script to create master admin user for Sahatak platform
 """
-import os
 import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 from werkzeug.security import generate_password_hash
+import app
 from models import db, User
-from app import create_app
 
 def create_master_admin():
     """Create the master admin user that cannot be deleted"""
-    app = create_app()
-    
-    with app.app_context():
+    with app.app.app_context():
         # Check if master admin already exists
         existing_admin = User.query.filter_by(email='admin').first()
         
