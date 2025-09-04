@@ -10,10 +10,6 @@ const AppointmentBooking = {
     
     // Initialize the booking system
     async init() {
-        console.log('AppointmentBooking.init() called');
-        console.log('ApiHelper available:', typeof ApiHelper !== 'undefined');
-        console.log('AuthGuard available:', typeof AuthGuard !== 'undefined');
-        
         this.initCalendarWidget();
         await this.loadSpecialties();
         this.loadDoctors();
@@ -120,36 +116,23 @@ const AppointmentBooking = {
     // Load doctors list
     async loadDoctors() {
         try {
-            console.log('Starting loadDoctors...');
             const specialty = document.getElementById('specialty-filter').value;
             const params = specialty ? `?specialty=${specialty}` : '';
-            console.log('Making API request to:', `/appointments/doctors${params}`);
-            console.log('ApiHelper baseUrl:', ApiHelper?.baseUrl);
             
             const response = await ApiHelper.makeRequest(`/appointments/doctors${params}`);
-            console.log('API response received:', response);
             
             if (response.success) {
                 this.doctors = response.data.doctors || response.doctors || [];
-                console.log('Doctors loaded:', this.doctors);
                 this.renderDoctors(this.doctors);
                 // Load doctor availability for calendar if doctor is selected
                 if (this.selectedDoctor) {
                     this.updateDoctorAvailability();
                 }
             } else {
-                console.log('API response not successful:', response);
                 this.showError('فشل في تحميل قائمة الأطباء');
             }
         } catch (error) {
             console.error('Error loading doctors:', error);
-            console.error('Error stack:', error.stack);
-            console.error('Error details:', {
-                name: error.name,
-                message: error.message,
-                cause: error.cause
-            });
-            
             const currentLang = LanguageManager.getLanguage() || 'en';
             const errorMsg = currentLang === 'ar' ? 
                 'عذراً، لا يمكن تحميل قائمة الأطباء حالياً. يرجى المحاولة لاحقاً.' :
@@ -283,7 +266,11 @@ const AppointmentBooking = {
         const container = document.getElementById('time-slots');
         
         if (slots.length === 0) {
-            container.innerHTML = '<p class="text-muted">لا توجد أوقات متاحة في هذا اليوم</p>';
+            const currentLang = LanguageManager.getLanguage() || 'ar';
+            const noSlotsMessage = currentLang === 'ar' ? 
+                'لا توجد أوقات متاحة في هذا اليوم' : 
+                'No time slots available for this day';
+            container.innerHTML = `<p class="text-muted">${noSlotsMessage}</p>`;
             return;
         }
 
@@ -461,13 +448,11 @@ const AppointmentBooking = {
                 return;
             }
 
-            // Prepare booking data
+            // Prepare booking data - only include fields the API expects
             const bookingData = {
                 doctor_id: this.selectedDoctor.id,
                 appointment_date: this.selectedDateTime.datetime,
-                appointment_type: this.selectedType,
-                reason_for_visit: document.getElementById('reason-visit')?.value || '',
-                symptoms: '' // Can be expanded
+                appointment_type: this.selectedType
             };
 
             // Validate future date
@@ -480,7 +465,9 @@ const AppointmentBooking = {
             // Show loading state
             const confirmBtn = document.getElementById('confirm-btn');
             const originalText = confirmBtn.innerHTML;
-            confirmBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>جاري الحجز...';
+            const currentLang = LanguageManager.getLanguage() || 'ar';
+            const bookingText = currentLang === 'ar' ? 'جاري الحجز...' : 'Booking...';
+            confirmBtn.innerHTML = `<i class="bi bi-hourglass-split me-1"></i>${bookingText}`;
             confirmBtn.disabled = true;
 
             // Submit booking
@@ -500,7 +487,7 @@ const AppointmentBooking = {
                 this.currentStep = 1;
                 this.selectedDoctor = null;
                 this.selectedDateTime = null;
-                this.renderStep();
+                this.updateStepDisplay();
             } else {
                 throw new Error(response.message || 'فشل في حجز الموعد');
             }
@@ -529,12 +516,14 @@ const AppointmentBooking = {
             
             // Go back to time selection to choose different slot
             this.currentStep = 2;
-            this.renderStep();
+            this.updateStepDisplay();
         } finally {
             // Reset button state
             const confirmBtn = document.getElementById('confirm-btn');
             if (confirmBtn) {
-                confirmBtn.innerHTML = '<i class="bi bi-calendar-check me-1"></i>تأكيد الحجز';
+                const currentLang = LanguageManager.getLanguage() || 'ar';
+                const confirmText = currentLang === 'ar' ? 'تأكيد الحجز' : 'Confirm Booking';
+                confirmBtn.innerHTML = `<i class="bi bi-calendar-check me-1"></i>${confirmText}`;
                 confirmBtn.disabled = false;
             }
         }
