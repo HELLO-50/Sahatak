@@ -469,27 +469,6 @@ def logout():
             message='Logout failed. Please try again.'
         )
 
-@auth_bp.route('/me', methods=['GET'])
-@login_required
-def get_current_user():
-    """Get current user information"""
-    try:
-        user_data = current_user.to_dict()
-        profile = current_user.get_profile()
-        if profile:
-            user_data['profile'] = profile.to_dict()
-        
-        return jsonify({
-            'success': True,
-            'user': user_data
-        }), 200
-        
-    except Exception as e:
-        current_app.logger.error(f"Get current user error: {str(e)}")
-        return jsonify({
-            'success': False,
-            'message': 'Failed to get user information'
-        }), 500
 
 @auth_bp.route('/change-password', methods=['POST'])
 @login_required
