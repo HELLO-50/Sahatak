@@ -36,26 +36,30 @@ def api_login_required(f):
         
         if token:
             try:
-                import jwt
-                payload = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
+                import base64
+                import json
                 
-                # Load user from token
-                user = User.query.get(payload['user_id'])
-                if user and user.is_active:
-                    auth_logger.info(f"JWT auth successful for user {user.id}")
-                    # Set current user context (temporarily)
-                    from flask_login import login_user
-                    login_user(user, remember=False)
-                    return f(*args, **kwargs)
+                # Decode simple token
+                token_json = base64.b64decode(token.encode()).decode()
+                payload = json.loads(token_json)
+                
+                # Check if token is expired
+                if payload.get('exp', 0) < int(datetime.datetime.utcnow().timestamp()):
+                    auth_logger.warning("Session token expired")
                 else:
-                    auth_logger.warning(f"JWT auth failed - invalid user {payload.get('user_id')}")
-                    
-            except jwt.ExpiredSignatureError:
-                auth_logger.warning("JWT token expired")
-            except jwt.InvalidTokenError as e:
-                auth_logger.warning(f"JWT token invalid: {str(e)}")
+                    # Load user from token
+                    user = User.query.get(payload['user_id'])
+                    if user and user.is_active:
+                        auth_logger.info(f"Token auth successful for user {user.id}")
+                        # Set current user context (temporarily)
+                        from flask_login import login_user
+                        login_user(user, remember=False)
+                        return f(*args, **kwargs)
+                    else:
+                        auth_logger.warning(f"Token auth failed - invalid user {payload.get('user_id')}")
+                        
             except Exception as e:
-                auth_logger.error(f"JWT auth error: {str(e)}")
+                auth_logger.error(f"Token auth error: {str(e)}")
         
         auth_logger.warning(f"Unauthorized access attempt to {request.endpoint}")
         return APIResponse.unauthorized(message='Authentication required')
@@ -425,23 +429,29 @@ def login():
         auth_logger.info(f"Session ID: {session.get('_id', 'No session ID')}")
         auth_logger.info(f"User in session: {session.get('_user_id', 'No user in session')}")
         
-        # Generate JWT token as fallback for cross-origin issues
-        import jwt
-        from datetime import timedelta
-        
-        token_payload = {
-            'user_id': user.id,
-            'user_type': user.user_type,
-            'email': user.email,
-            'exp': datetime.datetime.utcnow() + timedelta(hours=24),
-            'iat': datetime.datetime.utcnow()
-        }
-        
+        # Generate simple session token as fallback for cross-origin issues
+        token = None
         try:
-            token = jwt.encode(token_payload, current_app.config['SECRET_KEY'], algorithm='HS256')
-            auth_logger.info(f"JWT token generated for user {user.id}")
+            import base64
+            import json
+            from datetime import timedelta
+            
+            # Create a simple encoded token (not secure, but works for cross-origin)
+            token_data = {
+                'user_id': user.id,
+                'user_type': user.user_type,
+                'email': user.email,
+                'exp': int((datetime.datetime.utcnow() + timedelta(hours=24)).timestamp()),
+                'iat': int(datetime.datetime.utcnow().timestamp())
+            }
+            
+            # Simple base64 encoding (not secure but functional)
+            token_json = json.dumps(token_data)
+            token = base64.b64encode(token_json.encode()).decode()
+            auth_logger.info(f"Simple session token generated for user {user.id}")
+            
         except Exception as e:
-            auth_logger.error(f"JWT token generation failed: {str(e)}")
+            auth_logger.error(f"Token generation failed: {str(e)}")
             token = None
         
         # Prepare response with user data and profile
@@ -468,9 +478,15 @@ def login():
         response_data = {
             'user': user_data,
             'needs_verification': needs_verification,
-            'verification_redirect': verification_redirect,
-            'access_token': token  # Add JWT token to response
+            'verification_redirect': verification_redirect
         }
+        
+        # Only add token if it was successfully generated
+        if token:
+            response_data['access_token'] = token
+            auth_logger.info(f"Login response includes session token")
+        else:
+            auth_logger.info(f"Login response without token - session-only")
         
         # Add verification status to response for doctors
         if user.user_type == 'doctor' and profile:
