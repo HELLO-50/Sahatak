@@ -15,8 +15,8 @@ import re
 
 def api_login_required(f):
     """
-    Custom login_required decorator that returns JSON responses instead of redirects
-    This prevents CORS issues with cross-origin requests
+    Custom login_required decorator that supports both session and JWT authentication
+    This handles cross-origin authentication issues
     """
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -24,10 +24,41 @@ def api_login_required(f):
         from flask import session
         auth_logger.info(f"API auth check - User authenticated: {current_user.is_authenticated}, Session keys: {list(session.keys()) if session else 'No session'}")
         
-        if not current_user.is_authenticated:
-            auth_logger.warning(f"Unauthorized access attempt to {request.endpoint}")
-            return APIResponse.unauthorized(message='Authentication required')
-        return f(*args, **kwargs)
+        # First try session-based authentication
+        if current_user.is_authenticated:
+            return f(*args, **kwargs)
+        
+        # Fallback to JWT token authentication
+        token = None
+        auth_header = request.headers.get('Authorization')
+        if auth_header and auth_header.startswith('Bearer '):
+            token = auth_header[7:]  # Remove 'Bearer ' prefix
+        
+        if token:
+            try:
+                import jwt
+                payload = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
+                
+                # Load user from token
+                user = User.query.get(payload['user_id'])
+                if user and user.is_active:
+                    auth_logger.info(f"JWT auth successful for user {user.id}")
+                    # Set current user context (temporarily)
+                    from flask_login import login_user
+                    login_user(user, remember=False)
+                    return f(*args, **kwargs)
+                else:
+                    auth_logger.warning(f"JWT auth failed - invalid user {payload.get('user_id')}")
+                    
+            except jwt.ExpiredSignatureError:
+                auth_logger.warning("JWT token expired")
+            except jwt.InvalidTokenError as e:
+                auth_logger.warning(f"JWT token invalid: {str(e)}")
+            except Exception as e:
+                auth_logger.error(f"JWT auth error: {str(e)}")
+        
+        auth_logger.warning(f"Unauthorized access attempt to {request.endpoint}")
+        return APIResponse.unauthorized(message='Authentication required')
     return decorated_function
 
 auth_bp = Blueprint('auth', __name__)
@@ -394,6 +425,25 @@ def login():
         auth_logger.info(f"Session ID: {session.get('_id', 'No session ID')}")
         auth_logger.info(f"User in session: {session.get('_user_id', 'No user in session')}")
         
+        # Generate JWT token as fallback for cross-origin issues
+        import jwt
+        from datetime import timedelta
+        
+        token_payload = {
+            'user_id': user.id,
+            'user_type': user.user_type,
+            'email': user.email,
+            'exp': datetime.datetime.utcnow() + timedelta(hours=24),
+            'iat': datetime.datetime.utcnow()
+        }
+        
+        try:
+            token = jwt.encode(token_payload, current_app.config['SECRET_KEY'], algorithm='HS256')
+            auth_logger.info(f"JWT token generated for user {user.id}")
+        except Exception as e:
+            auth_logger.error(f"JWT token generation failed: {str(e)}")
+            token = None
+        
         # Prepare response with user data and profile
         user_data = user.to_dict()
         profile = user.get_profile()
@@ -418,7 +468,8 @@ def login():
         response_data = {
             'user': user_data,
             'needs_verification': needs_verification,
-            'verification_redirect': verification_redirect
+            'verification_redirect': verification_redirect,
+            'access_token': token  # Add JWT token to response
         }
         
         # Add verification status to response for doctors
