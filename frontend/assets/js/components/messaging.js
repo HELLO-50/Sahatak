@@ -674,7 +674,14 @@ function logout() {
     if (typeof AuthGuard !== 'undefined') {
         AuthGuard.logout();
     } else {
-        localStorage.clear();
+        // Fallback - only clear sahatak-related data
+        console.warn('AuthGuard not available, using fallback logout');
+        const keysToRemove = [
+            'sahatak_user', 'sahatak_user_data', 'sahatak_user_id',
+            'sahatak_user_type', 'sahatak_user_email', 'sahatak_user_name',
+            'sahatak_doctor_data', 'sahatak_preferences', 'sahatak_return_url'
+        ];
+        keysToRemove.forEach(key => localStorage.removeItem(key));
         window.location.href = '/';
     }
 }

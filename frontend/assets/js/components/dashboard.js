@@ -25,6 +25,8 @@ const Dashboard = {
         try {
             console.log('Initializing dashboard with real data...');
             
+            // Session monitoring will be handled by SessionManager component
+            
             // Get user type from localStorage (stored during login)
             this.userType = localStorage.getItem('sahatak_user_type') || 'patient';
             console.log('Dashboard userType detected:', this.userType);
@@ -113,6 +115,12 @@ const Dashboard = {
                 }
             } catch (error) {
                 console.error(`Error loading profile (attempt ${attempt}/${retries}):`, error);
+                
+                // If it's a session expiry error, don't retry - redirect to login immediately
+                if (error.statusCode === 401) {
+                    console.log('Session expired during profile loading, redirecting to login');
+                    throw error; // Let the error bubble up to trigger logout
+                }
                 
                 if (attempt < retries) {
                     console.log(`Retrying in ${delay}ms...`);

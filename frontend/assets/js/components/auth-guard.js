@@ -202,11 +202,28 @@ class AuthGuard {
      * Clear authentication data (logout)
      */
     static clearAuth() {
-        localStorage.removeItem('sahatak_user_id');
-        localStorage.removeItem('sahatak_user_type');
-        localStorage.removeItem('sahatak_user_email');
-        localStorage.removeItem('sahatak_user_name');
-        localStorage.removeItem('sahatak_return_url');
+        // Clear all possible sahatak localStorage keys
+        const keysToRemove = [
+            'sahatak_user_id',
+            'sahatak_user_type', 
+            'sahatak_user_email',
+            'sahatak_user_name',
+            'sahatak_user_data',
+            'sahatak_doctor_data',
+            'sahatak_user',
+            'sahatak_token',
+            'sahatak_preferences',
+            'sahatak_return_url'
+        ];
+        
+        keysToRemove.forEach(key => {
+            localStorage.removeItem(key);
+        });
+        
+        // Clear session storage
+        sessionStorage.clear();
+        
+        console.log('All authentication data cleared');
     }
     
     /**
