@@ -15,9 +15,22 @@ let userId = null;
 // Initialize messaging based on user type
 async function initializeMessaging() {
     try {
-        // Get user info
-        userType = localStorage.getItem('sahatak_user_type');
-        userId = parseInt(localStorage.getItem('sahatak_user_id'));
+        // Get user info using AuthStorage if available, fallback to legacy
+        if (window.AuthStorage && AuthStorage.isAuthenticated()) {
+            const authData = AuthStorage.getAuthData();
+            userType = authData.type;
+            userId = parseInt(authData.id);
+        } else {
+            // Fallback to legacy localStorage
+            userType = localStorage.getItem('sahatak_user_type');
+            userId = parseInt(localStorage.getItem('sahatak_user_id'));
+        }
+        
+        // Ensure we have valid auth data
+        if (!userType || !userId) {
+            console.warn('Messaging: No valid authentication data found, skipping initialization');
+            return;
+        }
         
         if (userType === 'doctor') {
             await initializeDoctorMessaging();
@@ -406,23 +419,44 @@ async function markConversationAsRead(conversationId) {
     }
 }
 
-// Initialize WebSocket
+// Initialize WebSocket with authentication and fallback
 function initializeWebSocket() {
     if (typeof io === 'undefined') {
         console.warn('Socket.IO not available, using polling fallback');
-        // Fallback to polling
-        setInterval(() => {
-            if (currentConversationId) {
-                loadMessages();
-            }
-        }, 5000);
+        setupPollingFallback();
         return;
     }
     
-    socket = io('https://sahatak.pythonanywhere.com', {
-        autoConnect: true,
-        reconnection: true
-    });
+    // Get authentication token for WebSocket
+    let authToken = null;
+    if (window.AuthStorage && AuthStorage.isAuthenticated()) {
+        const authData = AuthStorage.getAuthData();
+        authToken = authData.token;
+    } else {
+        authToken = localStorage.getItem('sahatak_access_token');
+    }
+    
+    if (!authToken) {
+        console.warn('No auth token available for WebSocket, using polling fallback');
+        setupPollingFallback();
+        return;
+    }
+    
+    try {
+        socket = io('https://sahatak.pythonanywhere.com', {
+            autoConnect: true,
+            reconnection: true,
+            reconnectionAttempts: 3,
+            timeout: 10000,
+            auth: {
+                token: authToken
+            }
+        });
+    } catch (error) {
+        console.warn('WebSocket initialization failed, using polling fallback:', error);
+        setupPollingFallback();
+        return;
+    }
     
     socket.on('connect', () => {
         console.log('WebSocket connected');
@@ -444,6 +478,27 @@ function initializeWebSocket() {
     socket.on('disconnect', () => {
         console.log('WebSocket disconnected');
     });
+    
+    socket.on('connect_error', (error) => {
+        console.warn('WebSocket connection error:', error);
+        // Fallback to polling if WebSocket fails
+        socket.disconnect();
+        setupPollingFallback();
+    });
+    
+    socket.on('error', (error) => {
+        console.warn('WebSocket error:', error);
+    });
+}
+
+// Setup polling fallback for messaging when WebSocket fails
+function setupPollingFallback() {
+    console.log('Setting up polling fallback for messaging');
+    setInterval(() => {
+        if (currentConversationId && document.visibilityState === 'visible') {
+            loadMessages();
+        }
+    }, 5000); // Poll every 5 seconds when tab is visible
 }
 
 // Handle key press for message input
@@ -669,6 +724,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
     
-    // Initialize messaging system
-    await initializeMessaging();
+    // Initialize messaging system with delay to ensure auth is ready
+    setTimeout(async () => {
+        await initializeMessaging();
+    }, 1000); // 1 second delay to ensure authentication is fully established
 });
