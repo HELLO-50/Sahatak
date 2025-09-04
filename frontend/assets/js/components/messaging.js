@@ -477,6 +477,13 @@ function initializeWebSocket() {
     
     socket.on('disconnect', () => {
         console.log('WebSocket disconnected');
+        // Set up polling fallback if WebSocket keeps disconnecting
+        setTimeout(() => {
+            if (!socket.connected) {
+                console.log('WebSocket connection lost, switching to polling fallback');
+                setupPollingFallback();
+            }
+        }, 3000);
     });
     
     socket.on('connect_error', (error) => {
@@ -492,9 +499,17 @@ function initializeWebSocket() {
 }
 
 // Setup polling fallback for messaging when WebSocket fails
+let pollingInterval = null;
+
 function setupPollingFallback() {
     console.log('Setting up polling fallback for messaging');
-    setInterval(() => {
+    
+    // Prevent duplicate polling intervals
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+    }
+    
+    pollingInterval = setInterval(() => {
         if (currentConversationId && document.visibilityState === 'visible') {
             loadMessages();
         }
