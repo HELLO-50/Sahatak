@@ -381,9 +381,18 @@ def login():
             )
         
         # Login user and update last login
-        login_user(user, remember=data.get('remember_me', False))
+        remember_me = data.get('remember_me', False)
+        auth_logger.info(f"Attempting to login user {user.id} with remember_me={remember_me}")
+        
+        login_user(user, remember=remember_me)
         user.last_login = datetime.datetime.utcnow()
         db.session.commit()
+        
+        # Debug: Check if session was created
+        from flask import session
+        auth_logger.info(f"Login successful - Session keys after login: {list(session.keys())}, User authenticated: {current_user.is_authenticated}")
+        auth_logger.info(f"Session ID: {session.get('_id', 'No session ID')}")
+        auth_logger.info(f"User in session: {session.get('_user_id', 'No user in session')}")
         
         # Prepare response with user data and profile
         user_data = user.to_dict()

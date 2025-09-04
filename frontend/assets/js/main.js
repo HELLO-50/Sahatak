@@ -740,11 +740,22 @@ const ApiHelper = {
                 }
             }
             
+            // Debug: Log request details
+            const cookieString = document.cookie;
             window.SahatakLogger?.debug(`API Request: ${method} ${endpoint}`, {
                 headers: requestOptions.headers,
                 body: options.body ? JSON.parse(options.body) : null,
-                cookies: document.cookie // Debug: log current cookies
+                cookies: cookieString,
+                hasCookies: cookieString.length > 0,
+                sessionCookie: cookieString.includes('session')
             });
+            
+            // Additional debug for session-related requests
+            if (endpoint.includes('/auth/') || endpoint.includes('/users/profile')) {
+                console.log(`🔐 Auth Request: ${method} ${endpoint}`);
+                console.log(`📄 Cookies being sent: ${cookieString || 'NO COOKIES'}`);
+                console.log(`🔗 Credentials mode: ${requestOptions.credentials}`);
+            }
 
             const response = await fetch(`${this.baseUrl}${endpoint}`, requestOptions);
             const duration = Date.now() - startTime;
@@ -954,8 +965,16 @@ async function handleLogin(event) {
             localStorage.setItem('sahatak_user_name', response.data.user.full_name);
             
             // Debug: Check if session cookie was set
-            console.log('Login successful, checking cookies:', document.cookie);
-            console.log('User data stored:', response.data.user);
+            const cookiesAfterLogin = document.cookie;
+            console.log('🍪 Login successful, checking cookies:', cookiesAfterLogin);
+            console.log('📝 User data stored:', response.data.user);
+            console.log('🔄 Has session cookie:', cookiesAfterLogin.includes('session') || cookiesAfterLogin.includes('Session'));
+            
+            // Wait a moment for cookies to be fully set
+            setTimeout(() => {
+                const finalCookies = document.cookie;
+                console.log('🍪 Final cookies check after delay:', finalCookies);
+            }, 500);
         } else {
             console.error('Invalid response structure:', response);
         }
