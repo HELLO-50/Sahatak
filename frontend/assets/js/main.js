@@ -721,9 +721,16 @@ const ApiHelper = {
         
         // Add JWT token to headers if available (fallback for session issues)
         const token = localStorage.getItem('sahatak_access_token');
+        console.log('🎫 Token available for API call:', !!token);
+        console.log('🎫 Token preview:', token ? token.substring(0, 30) + '...' : 'NO TOKEN');
+        console.log('🧹 All localStorage keys:', Object.keys(localStorage).filter(k => k.includes('sahatak')));
+        
         const authHeaders = {};
         if (token) {
             authHeaders['Authorization'] = `Bearer ${token}`;
+            console.log('🔑 Added Authorization header to request');
+        } else {
+            console.log('🚨 NO TOKEN - This will likely result in 401 error');
         }
         
         const defaultOptions = {
@@ -977,11 +984,15 @@ async function handleLogin(event) {
             
             // Store JWT token if provided (fallback for session cookie issues)
             console.log('🔍 Login response data:', response.data);
+            console.log('🔍 Response keys:', Object.keys(response.data));
+            console.log('🔍 Has access_token key:', 'access_token' in response.data);
             if (response.data.access_token) {
                 localStorage.setItem('sahatak_access_token', response.data.access_token);
                 console.log('🔑 JWT token stored for authentication:', response.data.access_token.substring(0, 20));
+                console.log('✅ Token storage confirmed:', !!localStorage.getItem('sahatak_access_token'));
             } else {
                 console.log('🚨 NO ACCESS TOKEN in login response!');
+                console.log('🚨 Available response data keys:', Object.keys(response.data || {}));
             }
             
             // Debug: Check if session cookie was set
