@@ -753,8 +753,8 @@ def get_pending_verifications():
                 'days_waiting': (datetime.utcnow() - doctor.created_at).days,
                 'documents_submitted': {
                     'license_document': bool(doctor.license_document_path),
-                    'cv_document': bool(doctor.cv_document_path),
-                    'profile_photo': bool(doctor.profile_photo_path)
+                    'degree_document': bool(doctor.degree_document_path),
+                    'id_document': bool(doctor.id_document_path)
                 }
             }
             doctors_data.append(doctors_info)

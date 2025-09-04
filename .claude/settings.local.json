@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Read(/C:\\Users\\t0230293\\Desktop\\Sahatak\\backend/**)"
+      "Read(/C:\\Users\\t0230293\\Desktop\\Sahatak\\backend\\routes/**)",
+      "Read(/C:\\Users\\t0230293\\Desktop\\Sahatak\\backend\\routes/**)"
     ],
     "deny": [],
     "ask": []
