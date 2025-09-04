@@ -496,7 +496,13 @@
                 document.getElementById('user-name').textContent = user.full_name;
                 
                 // Update verification status from database
-                updateVerificationStatus(user);
+                if (typeof updateVerificationStatus === 'function') {
+                    updateVerificationStatus(user);
+                } else if (typeof updateDoctorVerificationDisplay === 'function') {
+                    updateDoctorVerificationDisplay(user);
+                } else {
+                    console.log('🔸 No verification updater available');
+                }
             } else {
                 // Fallback to AuthGuard
                 const authUser = AuthGuard.getCurrentUser();

@@ -157,7 +157,18 @@ async function loadConversations() {
         }
     } catch (error) {
         console.error('Failed to load conversations', error);
-        showErrorMessage('Failed to load conversations. Please refresh the page.');
+        // Prevent messaging errors from triggering session expiry
+        if (error.statusCode !== 401 && !error.message?.includes('401')) {
+            showErrorMessage('Failed to load conversations. Please refresh the page.');
+        } else {
+            console.log('🔸 Messaging: Ignoring 401 error to prevent logout loop');
+            // Show empty state instead of causing logout
+            if (userType === 'doctor') {
+                displayDoctorConversations([]);
+            } else {
+                displayPatientConversations([]);
+            }
+        }
     }
 }
 
