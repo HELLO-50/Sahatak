@@ -100,18 +100,10 @@ async function startOrGetConversation(doctorId, appointmentId = null) {
             body.appointment_id = appointmentId;
         }
         
-        const response = await fetch('https://sahatak.pythonanywhere.com/api/messages/conversations', {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(body)
-        });
+        const response = await ApiHelper.makeRequest('/messages/conversations', 'POST', body);
         
-        if (response.ok) {
-            const data = await response.json();
-            currentConversationId = data.data.id;
+        if (response.success) {
+            currentConversationId = response.data.id;
             currentRecipientId = doctorId;
             await loadMessages();
         }
@@ -124,15 +116,12 @@ async function startOrGetConversation(doctorId, appointmentId = null) {
 // Load recent conversations (for patients)
 async function loadRecentConversations() {
     try {
-        const response = await fetch('https://sahatak.pythonanywhere.com/api/messages/conversations', {
-            credentials: 'include'
-        });
+        const response = await ApiHelper.makeRequest('/messages/conversations');
         
-        if (response.ok) {
-            const data = await response.json();
-            if (data.data.conversations && data.data.conversations.length > 0) {
+        if (response.success) {
+            if (response.data.conversations && response.data.conversations.length > 0) {
                 // Load the first conversation
-                const firstConv = data.data.conversations[0];
+                const firstConv = response.data.conversations[0];
                 currentConversationId = firstConv.id;
                 
                 // Set recipient based on user type
@@ -153,20 +142,13 @@ async function loadRecentConversations() {
 // Load all conversations
 async function loadConversations() {
     try {
-        const response = await fetch('https://sahatak.pythonanywhere.com/api/messages/conversations', {
-            method: 'GET',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
+        const response = await ApiHelper.makeRequest('/messages/conversations');
 
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
+        if (!response.success) {
+            throw new Error(`API Error: ${response.message}`);
         }
 
-        const data = await response.json();
-        conversations = data.data.conversations || [];
+        conversations = response.data.conversations || [];
         
         if (userType === 'doctor') {
             displayDoctorConversations(conversations);
@@ -297,20 +279,13 @@ async function loadMessages() {
     if (!currentConversationId) return;
 
     try {
-        const response = await fetch(`https://sahatak.pythonanywhere.com/api/messages/conversations/${currentConversationId}`, {
-            method: 'GET',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
+        const response = await ApiHelper.makeRequest(`/messages/conversations/${currentConversationId}`);
 
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
+        if (!response.success) {
+            throw new Error(`API Error: ${response.message}`);
         }
 
-        const data = await response.json();
-        displayMessages(data.data.messages || []);
+        displayMessages(response.data.messages || []);
     } catch (error) {
         console.error('Failed to load messages', error);
         showErrorMessage('Failed to load messages');
@@ -360,29 +335,20 @@ async function sendMessage() {
     if (!content || !currentConversationId) return;
 
     try {
-        const response = await fetch(`https://sahatak.pythonanywhere.com/api/messages/conversations/${currentConversationId}/messages`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                content: content,
-                message_type: 'text'
-            })
+        const response = await ApiHelper.makeRequest(`/messages/conversations/${currentConversationId}/messages`, 'POST', {
+            content: content,
+            message_type: 'text'
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
+        if (!response.success) {
+            throw new Error(`API Error: ${response.message}`);
         }
-
-        const data = await response.json();
         
         // Clear input
         input.value = '';
         
         // Add message to display
-        addMessageToDisplay(data.data);
+        addMessageToDisplay(response.data);
         
     } catch (error) {
         console.error('Failed to send message', error);
@@ -423,10 +389,7 @@ function addMessageToDisplay(message) {
 async function markConversationAsRead(conversationId) {
     try {
         // Check if endpoint exists for marking as read
-        await fetch(`https://sahatak.pythonanywhere.com/api/messages/conversations/${conversationId}/read`, {
-            method: 'PUT',
-            credentials: 'include'
-        });
+        await ApiHelper.makeRequest(`/messages/conversations/${conversationId}/read`, 'PUT');
     } catch (error) {
         console.error('Failed to mark conversation as read', error);
     }
