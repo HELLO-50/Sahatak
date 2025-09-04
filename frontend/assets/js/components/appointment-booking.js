@@ -267,11 +267,14 @@ const AppointmentBooking = {
     selectTimeSlot(datetime, displayTime) {
         // Remove previous selection
         document.querySelectorAll('.time-slot').forEach(btn => {
-            btn.classList.remove('active');
+            btn.classList.remove('active', 'selected');
         });
         
-        // Add selection to clicked button
-        event.target.classList.add('active');
+        // Find and highlight the clicked button
+        const clickedButton = document.querySelector(`.time-slot[data-time="${datetime}"]`);
+        if (clickedButton) {
+            clickedButton.classList.add('active', 'selected');
+        }
         
         // Store selected time
         this.selectedDateTime = {
