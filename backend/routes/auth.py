@@ -306,9 +306,13 @@ def login():
         # Find user by email or phone
         user = None
         
-        # Try to find by email first
+        # Try to find by email first (including 'admin' as special case)
         if validate_email(login_identifier):
-            user = User.query.filter_by(email=login_identifier.lower()).first()
+            # For 'admin' username, search by exact match
+            if login_identifier.lower() == 'admin':
+                user = User.query.filter_by(email='admin').first()
+            else:
+                user = User.query.filter_by(email=login_identifier.lower()).first()
         
         # If not found by email, try to find by phone
         if not user and validate_phone(login_identifier)['valid']:
