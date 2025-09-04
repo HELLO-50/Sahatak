@@ -81,6 +81,8 @@ const ValidationManager = {
     // Core validation methods - matching backend logic
     validateEmail(email) {
         if (!email || typeof email !== 'string') return false;
+        // Allow special case for master admin user
+        if (email.trim() === 'admin') return true;
         return this.patterns.email.test(email.trim());
     },
 
