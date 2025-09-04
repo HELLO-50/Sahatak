@@ -28,11 +28,14 @@ def api_login_required(f):
         if current_user.is_authenticated:
             return f(*args, **kwargs)
         
-        # Fallback to JWT token authentication
+        # Fallback to token authentication
         token = None
         auth_header = request.headers.get('Authorization')
+        auth_logger.info(f"Auth header: {auth_header[:50] if auth_header else 'None'}...")
+        
         if auth_header and auth_header.startswith('Bearer '):
             token = auth_header[7:]  # Remove 'Bearer ' prefix
+            auth_logger.info(f"Extracted token (first 20 chars): {token[:20]}...")
         
         if token:
             try:
@@ -43,12 +46,21 @@ def api_login_required(f):
                 token_json = base64.b64decode(token.encode()).decode()
                 payload = json.loads(token_json)
                 
+                auth_logger.info(f"Token decoded successfully, payload: {payload}")
+                
                 # Check if token is expired
-                if payload.get('exp', 0) < int(datetime.datetime.utcnow().timestamp()):
+                exp_time = payload.get('exp', 0)
+                current_time = int(datetime.datetime.utcnow().timestamp())
+                auth_logger.info(f"Token exp: {exp_time}, current: {current_time}, expired: {exp_time < current_time}")
+                
+                if exp_time < current_time:
                     auth_logger.warning("Session token expired")
                 else:
                     # Load user from token
-                    user = User.query.get(payload['user_id'])
+                    user_id = payload.get('user_id')
+                    auth_logger.info(f"Looking up user ID: {user_id}")
+                    user = User.query.get(user_id)
+                    
                     if user and user.is_active:
                         auth_logger.info(f"Token auth successful for user {user.id}")
                         # Set current user context (temporarily)
@@ -56,10 +68,12 @@ def api_login_required(f):
                         login_user(user, remember=False)
                         return f(*args, **kwargs)
                     else:
-                        auth_logger.warning(f"Token auth failed - invalid user {payload.get('user_id')}")
+                        auth_logger.warning(f"Token auth failed - user not found or inactive: {user_id}")
                         
             except Exception as e:
                 auth_logger.error(f"Token auth error: {str(e)}")
+                import traceback
+                auth_logger.error(f"Token auth traceback: {traceback.format_exc()}")
         
         auth_logger.warning(f"Unauthorized access attempt to {request.endpoint}")
         return APIResponse.unauthorized(message='Authentication required')
