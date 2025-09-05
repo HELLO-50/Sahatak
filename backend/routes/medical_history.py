@@ -52,12 +52,12 @@ def get_patient_medical_history(patient_id):
         elif current_user.user_type == 'doctor':
             # Doctor can access if they have an appointment with this patient
             has_appointment = Appointment.query.filter_by(
-                patient_id=patient_id,
+                patient_id=patient.id,  # Use the resolved patient.id, not the passed patient_id
                 doctor_id=user_profile.id
             ).first()
             if has_appointment:
                 can_access = True
-                app_logger.debug(f"Doctor access granted: doctor {user_profile.id} has appointment with patient {patient_id}")
+                app_logger.debug(f"Doctor access granted: doctor {user_profile.id} has appointment with patient {patient.id}")
         
         if not can_access:
             app_logger.warning(f"User {current_user.id} (type: {current_user.user_type}, profile_id: {user_profile.id}) denied access to medical history of patient {patient_id}")
@@ -69,7 +69,7 @@ def get_patient_medical_history(patient_id):
         # Get history updates for audit trail (if doctor or own records)
         history_updates = []
         if current_user.user_type == 'doctor' or (current_user.user_type == 'patient' and patient.id == user_profile.id):
-            updates = MedicalHistoryUpdate.query.filter_by(patient_id=patient_id).order_by(
+            updates = MedicalHistoryUpdate.query.filter_by(patient_id=patient.id).order_by(
                 MedicalHistoryUpdate.created_at.desc()
             ).limit(10).all()
             history_updates = [update.to_dict() for update in updates]
