@@ -941,8 +941,14 @@
                     document.getElementById('stat-reports-count').textContent = '0';
                 }
             } catch (error) {
-                console.error('Error loading medical reports stats:', error);
-                document.getElementById('stat-reports-count').textContent = '-';
+                // For 403 errors (new users), show 0 instead of error
+                if (error.statusCode === 403) {
+                    console.log('Medical history not accessible yet (new user) - showing 0');
+                    document.getElementById('stat-reports-count').textContent = '0';
+                } else {
+                    console.error('Error loading medical reports stats:', error);
+                    document.getElementById('stat-reports-count').textContent = '0';
+                }
             }
         }
         

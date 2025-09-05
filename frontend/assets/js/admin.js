@@ -49,8 +49,10 @@ const AdminAuth = {
         const token = this.getToken();
         if (!token) return false;
         
-        // For now, just check if token exists and is valid format
-        return token && token.length === 64; // Our tokens are 64 character hex strings
+        // JWT tokens are variable length (typically 100+ chars)
+        // Base64 tokens are also variable length
+        // Just check if token exists and has reasonable length
+        return token && token.length > 20;
     },
     
     // Login function
