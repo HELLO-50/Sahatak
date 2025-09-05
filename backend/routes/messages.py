@@ -25,6 +25,11 @@ def get_conversations():
         
         # Get conversations based on user type
         if current_user.user_type == 'patient':
+            if not current_user.patient_profile:
+                return APIResponse.validation_error(
+                    field='user_profile',
+                    message='Patient profile not found. Please contact support.'
+                )
             conversations = Conversation.query.filter_by(
                 patient_id=current_user.patient_profile.id,
                 status='active'
@@ -32,6 +37,11 @@ def get_conversations():
                 page=page, per_page=per_page, error_out=False
             )
         elif current_user.user_type == 'doctor':
+            if not current_user.doctor_profile:
+                return APIResponse.validation_error(
+                    field='user_profile',
+                    message='Doctor profile not found. Please complete your doctor registration.'
+                )
             conversations = Conversation.query.filter_by(
                 doctor_id=current_user.doctor_profile.id,
                 status='active'
