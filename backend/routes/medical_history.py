@@ -4,7 +4,7 @@ from routes.auth import api_login_required
 from datetime import datetime
 from typing import Dict, Any
 
-from models import db, Patient, Doctor, MedicalHistoryUpdate, Appointment
+from models import db, User, Patient, Doctor, MedicalHistoryUpdate, Appointment
 from utils.responses import success_response, error_response, validation_error_response, not_found_response, forbidden_response, ErrorCodes
 from utils.validators import validate_medical_history_data, validate_blood_type, validate_history_update_type, validate_json_data, sanitize_input
 from utils.logging_config import app_logger
@@ -18,9 +18,21 @@ def get_patient_medical_history(patient_id):
     Get patient's complete medical history
     Patients can access their own, doctors can access their patients during appointments
     Following established patterns from appointments.py and prescriptions.py
+    
+    NOTE: patient_id can be either the Patient table ID or User table ID
+    The system will automatically resolve to the correct patient profile
     """
     try:
+        # First try to get patient by patient table ID
         patient = Patient.query.get(patient_id)
+        
+        # If not found, try to get patient by user ID (common case from frontend)
+        if not patient:
+            user = User.query.get(patient_id)
+            if user and user.user_type == 'patient' and user.patient_profile:
+                patient = user.patient_profile
+                app_logger.debug(f"Resolved user ID {patient_id} to patient profile ID {patient.id}")
+        
         if not patient:
             return not_found_response("Patient", patient_id)
         
@@ -28,10 +40,15 @@ def get_patient_medical_history(patient_id):
         can_access = False
         user_profile = current_user.get_profile()
         if not user_profile:
+            app_logger.error(f"No user profile found for user {current_user.id} (type: {current_user.user_type})")
             return not_found_response("User profile")
+        
+        # Debug logging for access control
+        app_logger.debug(f"Access check: user_id={current_user.id}, user_type={current_user.user_type}, profile_id={user_profile.id}, requested_patient_id={patient_id}")
         
         if current_user.user_type == 'patient' and patient.id == user_profile.id:
             can_access = True
+            app_logger.debug(f"Patient access granted: patient {patient.id} accessing own records")
         elif current_user.user_type == 'doctor':
             # Doctor can access if they have an appointment with this patient
             has_appointment = Appointment.query.filter_by(
@@ -40,9 +57,10 @@ def get_patient_medical_history(patient_id):
             ).first()
             if has_appointment:
                 can_access = True
+                app_logger.debug(f"Doctor access granted: doctor {user_profile.id} has appointment with patient {patient_id}")
         
         if not can_access:
-            app_logger.warning(f"User {current_user.id} denied access to medical history of patient {patient_id}")
+            app_logger.warning(f"User {current_user.id} (type: {current_user.user_type}, profile_id: {user_profile.id}) denied access to medical history of patient {patient_id}")
             return forbidden_response("Access denied to this patient's medical history")
         
         # Get complete medical history
@@ -332,7 +350,16 @@ def get_medical_history_updates(patient_id):
     Following established patterns with pagination
     """
     try:
+        # First try to get patient by patient table ID
         patient = Patient.query.get(patient_id)
+        
+        # If not found, try to get patient by user ID (common case from frontend)
+        if not patient:
+            user = User.query.get(patient_id)
+            if user and user.user_type == 'patient' and user.patient_profile:
+                patient = user.patient_profile
+                app_logger.debug(f"Resolved user ID {patient_id} to patient profile ID {patient.id}")
+        
         if not patient:
             return not_found_response("Patient", patient_id)
         

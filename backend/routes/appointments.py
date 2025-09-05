@@ -8,6 +8,7 @@ from utils.responses import APIResponse, ErrorCodes
 from utils.validators import validate_date, validate_appointment_type, validate_text_field_length
 from utils.logging_config import app_logger, log_user_action
 from utils.db_optimize import OptimizedQueries, QueryOptimizer, invalidate_appointment_cache, cached_query
+from services.email_service import send_appointment_confirmation
 from routes.auth import api_login_required
 
 appointments_bp = Blueprint('appointments', __name__)
@@ -288,6 +289,35 @@ def create_appointment():
         )
         
         app_logger.info(f"Appointment created: ID {appointment.id} by patient {current_user.id}")
+        
+        # Send appointment confirmation email using templates
+        try:
+            patient_email = current_user.email
+            patient_language = getattr(current_user, 'language', 'ar')  # Default to Arabic
+            
+            # Get appointment data and add related information for template
+            appointment_dict = appointment.to_dict()
+            appointment_dict.update({
+                'doctor_name': doctor.user.full_name,
+                'patient_name': current_user.full_name,
+                'appointment_date': appointment_date.strftime('%Y-%m-%d'),
+                'appointment_time': appointment_date.strftime('%H:%M')
+            })
+            
+            email_sent = send_appointment_confirmation(
+                recipient_email=patient_email,
+                appointment_data=appointment_dict,
+                language=patient_language
+            )
+            
+            if email_sent:
+                app_logger.info(f"Appointment confirmation email sent to {patient_email}")
+            else:
+                app_logger.warning(f"Failed to send appointment confirmation email to {patient_email}")
+                
+        except Exception as e:
+            app_logger.error(f"Error sending appointment confirmation email: {str(e)}")
+            # Don't fail the appointment creation if email fails
         
         return APIResponse.success(
             data={'appointment': appointment.to_dict()},
