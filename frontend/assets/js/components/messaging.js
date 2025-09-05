@@ -131,13 +131,18 @@ function displayPatientDoctors(doctorsList) {
         return;
     }
     
-    // Show the most recent doctor (first in list)
+    // Show the most recent doctor (first in list) and start conversation
     const primaryDoctor = doctorsList[0];
     updateDoctorDisplay({
         full_name: primaryDoctor.name,
         specialty: primaryDoctor.specialty,
         id: primaryDoctor.id
     });
+    
+    // Automatically start conversation with primary doctor
+    currentRecipientId = primaryDoctor.id;
+    currentRecipientName = primaryDoctor.name;
+    startOrGetConversation(primaryDoctor.id);
     
     // If there are multiple doctors, show selection interface
     if (doctorsList.length > 1) {
@@ -174,7 +179,7 @@ function displayPatientDoctors(doctorsList) {
 }
 
 // Select a specific doctor for messaging (for patients)
-function selectDoctor(doctorId) {
+async function selectDoctor(doctorId) {
     if (!doctorId || !availableDoctors) return;
     
     const selectedDoctor = availableDoctors.find(doctor => doctor.id == doctorId);
@@ -184,6 +189,14 @@ function selectDoctor(doctorId) {
             specialty: selectedDoctor.specialty,
             id: selectedDoctor.id
         });
+        
+        // Set current recipient for messaging
+        currentRecipientId = selectedDoctor.id;
+        currentRecipientName = selectedDoctor.name;
+        
+        // Start or get conversation with this doctor
+        await startOrGetConversation(selectedDoctor.id);
+        
         console.log('Selected doctor for messaging:', selectedDoctor.name);
     }
 }
@@ -248,16 +261,25 @@ async function startOrGetConversation(doctorId, appointmentId = null) {
             body.appointment_id = appointmentId;
         }
         
-        const response = await ApiHelper.makeRequest('/messages/conversations', 'POST', body);
+        console.log('Starting conversation with doctor ID:', doctorId);
+        
+        const response = await ApiHelper.makeRequest('/messages/conversations', {
+            method: 'POST',
+            body: JSON.stringify(body)
+        });
         
         if (response.success) {
             currentConversationId = response.data.id;
             currentRecipientId = doctorId;
+            console.log('Conversation started/found, ID:', currentConversationId);
             await loadMessages();
+        } else {
+            console.error('Failed to start conversation:', response.message);
+            showErrorMessage('Failed to start conversation: ' + response.message);
         }
     } catch (error) {
         console.error('Failed to start conversation:', error);
-        showError('Failed to start conversation with doctor.');
+        showErrorMessage('Failed to start conversation with doctor.');
     }
 }
 
@@ -739,7 +761,25 @@ async function sendMessage() {
     const input = document.getElementById('messageInput');
     const content = input.value.trim();
     
-    if (!content || !currentConversationId) return;
+    if (!content) {
+        console.warn('No message content to send');
+        return;
+    }
+    
+    if (!currentConversationId) {
+        console.error('No conversation ID available for sending message');
+        if (currentRecipientId) {
+            console.log('Attempting to start conversation first...');
+            await startOrGetConversation(currentRecipientId);
+            if (!currentConversationId) {
+                showErrorMessage('Unable to start conversation. Please try again.');
+                return;
+            }
+        } else {
+            showErrorMessage('Please select a doctor to message first.');
+            return;
+        }
+    }
 
     try {
         const response = await ApiHelper.makeRequest(`/messages/conversations/${currentConversationId}/messages`, {
