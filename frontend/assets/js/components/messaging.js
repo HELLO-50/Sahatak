@@ -72,7 +72,8 @@ async function initializePatientMessaging() {
             await loadDoctorInfo(doctorId);
             await startOrGetConversation(doctorId, appointmentId);
         } else {
-            // If no doctor specified, load recent conversations
+            // Load patient's doctors and conversations
+            await loadPatientDoctors();
             await loadRecentConversations();
         }
     } catch (error) {
