@@ -154,9 +154,9 @@ def register():
             )
         
         # Check if phone already exists
-        existing_user_phone = User.query.join(Patient).filter(Patient.phone == data['phone']).first()
+        existing_user_phone = User.query.join(Patient, User.id == Patient.user_id).filter(Patient.phone == data['phone']).first()
         if not existing_user_phone:
-            existing_user_phone = User.query.join(Doctor).filter(Doctor.phone == data['phone']).first()
+            existing_user_phone = User.query.join(Doctor, User.id == Doctor.user_id).filter(Doctor.phone == data['phone']).first()
         if existing_user_phone:
             auth_logger.warning(f"Registration attempt with existing phone: {data['phone']}")
             return APIResponse.conflict(
@@ -413,12 +413,12 @@ def login():
         # If not found by email, try to find by phone
         if not user and validate_phone(login_identifier)['valid']:
             # Search in patient profiles
-            patient_user = User.query.join(Patient).filter(Patient.phone == login_identifier).first()
+            patient_user = User.query.join(Patient, User.id == Patient.user_id).filter(Patient.phone == login_identifier).first()
             if patient_user:
                 user = patient_user
             else:
                 # Search in doctor profiles
-                doctor_user = User.query.join(Doctor).filter(Doctor.phone == login_identifier).first()
+                doctor_user = User.query.join(Doctor, User.id == Doctor.user_id).filter(Doctor.phone == login_identifier).first()
                 if doctor_user:
                     user = doctor_user
         
