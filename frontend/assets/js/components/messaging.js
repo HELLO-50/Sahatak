@@ -8,7 +8,6 @@ let currentConversationId = null;
 let currentRecipientId = null;
 let currentRecipientName = null;
 let conversations = [];
-let socket = null;
 let userType = null;
 let userId = null;
 
@@ -38,7 +37,8 @@ async function initializeMessaging() {
             await initializePatientMessaging();
         }
         
-        initializeWebSocket();
+        // Skip WebSocket initialization - use HTTP polling only
+        setupPollingFallback();
         
         if (typeof SahatakLogger !== 'undefined' && SahatakLogger.info) {
             SahatakLogger.info(`${userType} messaging initialized`);
@@ -82,6 +82,112 @@ async function initializePatientMessaging() {
     }
 }
 
+// Load patient's doctors from appointments
+let availableDoctors = [];
+
+async function loadPatientDoctors() {
+    try {
+        // Get patient's appointments to find doctors
+        const response = await ApiHelper.makeRequest('/appointments/');
+        
+        if (response.success) {
+            const appointments = response.data.appointments;
+            
+            // Extract unique doctors from appointments
+            const doctorsMap = new Map();
+            
+            appointments.forEach(appointment => {
+                if (appointment.doctor_id && appointment.doctor_name) {
+                    if (!doctorsMap.has(appointment.doctor_id)) {
+                        doctorsMap.set(appointment.doctor_id, {
+                            id: appointment.doctor_id,
+                            name: appointment.doctor_name,
+                            lastAppointment: appointment.appointment_date,
+                            appointmentType: appointment.appointment_type,
+                            status: appointment.status,
+                            specialty: appointment.doctor_specialty || 'Specialist'
+                        });
+                    }
+                }
+            });
+            
+            availableDoctors = Array.from(doctorsMap.values());
+            console.log('Available doctors for messaging:', availableDoctors);
+            
+            // Update UI with doctors
+            displayPatientDoctors(availableDoctors);
+        }
+    } catch (error) {
+        console.error('Failed to load patient doctors:', error);
+        availableDoctors = [];
+    }
+}
+
+// Display available doctors for patient
+function displayPatientDoctors(doctorsList) {
+    if (!doctorsList || doctorsList.length === 0) {
+        // Show default "Your Doctor" if no doctors found
+        updateDoctorDisplay({ full_name: 'Your Doctor', specialty: 'Specialist' });
+        return;
+    }
+    
+    // Show the most recent doctor (first in list)
+    const primaryDoctor = doctorsList[0];
+    updateDoctorDisplay({
+        full_name: primaryDoctor.name,
+        specialty: primaryDoctor.specialty,
+        id: primaryDoctor.id
+    });
+    
+    // If there are multiple doctors, show selection interface
+    if (doctorsList.length > 1) {
+        const doctorSelection = document.getElementById('doctorSelection');
+        const doctorSelect = document.getElementById('doctorSelect');
+        
+        if (doctorSelection && doctorSelect) {
+            // Clear existing options (keep the first default option)
+            doctorSelect.innerHTML = '<option value="">Choose a doctor to message</option>';
+            
+            // Add doctors to dropdown
+            doctorsList.forEach(doctor => {
+                const option = document.createElement('option');
+                option.value = doctor.id;
+                option.textContent = `${doctor.name} - ${doctor.specialty}`;
+                if (doctor.id === primaryDoctor.id) {
+                    option.selected = true;
+                }
+                doctorSelect.appendChild(option);
+            });
+            
+            // Show the selection dropdown
+            doctorSelection.style.display = 'block';
+            
+            console.log(`Patient has ${doctorsList.length} doctors available for messaging`);
+        }
+    } else {
+        // Hide selection if only one doctor
+        const doctorSelection = document.getElementById('doctorSelection');
+        if (doctorSelection) {
+            doctorSelection.style.display = 'none';
+        }
+    }
+}
+
+// Select a specific doctor for messaging (for patients)
+function selectDoctor(doctorId) {
+    if (!doctorId || !availableDoctors) return;
+    
+    const selectedDoctor = availableDoctors.find(doctor => doctor.id == doctorId);
+    if (selectedDoctor) {
+        updateDoctorDisplay({
+            full_name: selectedDoctor.name,
+            specialty: selectedDoctor.specialty,
+            id: selectedDoctor.id
+        });
+        console.log('Selected doctor for messaging:', selectedDoctor.name);
+    }
+}
+
 // Load doctor info (for patients)
 async function loadDoctorInfo(doctorId) {
     try {
@@ -103,9 +209,31 @@ async function loadDoctorInfo(doctorId) {
 function updateDoctorDisplay(doctorInfo) {
     if (!doctorInfo) return;
     
+    // Update doctor info section
     const doctorNameEl = document.getElementById('doctorName');
     if (doctorNameEl) {
         doctorNameEl.textContent = doctorInfo.full_name || 'Doctor';
+    }
+    
+    // Update chat header
+    const chatDoctorNameEl = document.getElementById('chat-doctor-name');
+    if (chatDoctorNameEl) {
+        chatDoctorNameEl.textContent = doctorInfo.full_name || 'Doctor';
+    }
+    
+    // Update specialty if available
+    const specialtyEl = document.getElementById('doctorSpecialty');
+    if (specialtyEl && doctorInfo.specialty) {
+        specialtyEl.textContent = doctorInfo.specialty;
+    }
+    
+    // Store doctor info for messaging
+    if (doctorInfo.id) {
+        currentRecipientId = doctorInfo.id;
+        currentRecipientName = doctorInfo.full_name;
+        
+        // Try to start conversation with this doctor
+        startOrGetConversation(doctorInfo.id);
     }
 }
 
@@ -162,13 +290,29 @@ async function loadRecentConversations() {
 // Load all conversations
 async function loadConversations() {
     try {
+        // Add debug logging for the API call
+        if (typeof SahatakLogger !== 'undefined' && SahatakLogger.debug) {
+            SahatakLogger.debug('Loading conversations for user type:', userType);
+        }
+        
         const response = await ApiHelper.makeRequest('/messages/conversations');
 
         if (!response.success) {
+            // Check if it's a profile validation error
+            if (response.field === 'user_profile') {
+                console.warn('User profile issue:', response.message);
+                showErrorMessage(response.message || 'Profile setup required. Please complete your registration.');
+                return;
+            }
             throw new Error(`API Error: ${response.message}`);
         }
 
         conversations = response.data.conversations || [];
+        
+        // Debug log the loaded conversations
+        if (typeof SahatakLogger !== 'undefined' && SahatakLogger.debug) {
+            SahatakLogger.debug(`Loaded ${conversations.length} conversations`);
+        }
         
         if (userType === 'doctor') {
             displayDoctorConversations(conversations);
@@ -177,17 +321,22 @@ async function loadConversations() {
         }
     } catch (error) {
         console.error('Failed to load conversations', error);
-        // Prevent messaging errors from triggering session expiry
-        if (error.statusCode !== 401 && !error.message?.includes('401')) {
-            showErrorMessage('Failed to load conversations. Please refresh the page.');
-        } else {
-            console.log('🔸 Messaging: Ignoring 401 error to prevent logout loop');
+        
+        // Enhanced error handling for different error types
+        if (error.name === 'TypeError' && error.message.includes('NetworkError')) {
+            // Specific handling for network errors
+            console.error('Network error detected in conversations API');
+            showErrorMessage('Network connection issue. Please check your internet connection and try again.');
+        } else if (error.statusCode === 401 || error.message?.includes('401')) {
+            console.log('🔸 Messaging: Authentication issue detected');
             // Show empty state instead of causing logout
             if (userType === 'doctor') {
                 displayDoctorConversations([]);
             } else {
                 displayPatientConversations([]);
             }
+        } else {
+            showErrorMessage('Failed to load conversations. Please refresh the page.');
         }
     }
 }
@@ -593,9 +742,12 @@ async function sendMessage() {
     if (!content || !currentConversationId) return;
 
     try {
-        const response = await ApiHelper.makeRequest(`/messages/conversations/${currentConversationId}/messages`, 'POST', {
-            content: content,
-            message_type: 'text'
+        const response = await ApiHelper.makeRequest(`/messages/conversations/${currentConversationId}/messages`, {
+            method: 'POST',
+            body: JSON.stringify({
+                content: content,
+                message_type: 'text'
+            })
         });
 
         if (!response.success) {
@@ -605,8 +757,13 @@ async function sendMessage() {
         // Clear input
         input.value = '';
         
-        // Add message to display
+        // Add message to display immediately
         addMessageToDisplay(response.data);
+        
+        // Refresh the full message list to ensure consistency
+        setTimeout(() => {
+            loadMessages();
+        }, 500);
         
     } catch (error) {
         console.error('Failed to send message', error);
@@ -653,102 +810,59 @@ async function markConversationAsRead(conversationId) {
     }
 }
 
-// Initialize WebSocket with authentication and fallback
+// WebSocket functionality disabled - using HTTP polling only for better proxy compatibility
+/*
 function initializeWebSocket() {
-    if (typeof io === 'undefined') {
-        console.warn('Socket.IO not available, using polling fallback');
-        setupPollingFallback();
-        return;
-    }
-    
-    // Get authentication token for WebSocket
-    let authToken = null;
-    if (window.AuthStorage && AuthStorage.isAuthenticated()) {
-        const authData = AuthStorage.getAuthData();
-        authToken = authData.token;
-    } else {
-        authToken = localStorage.getItem('sahatak_access_token');
-    }
-    
-    if (!authToken) {
-        console.warn('No auth token available for WebSocket, using polling fallback');
-        setupPollingFallback();
-        return;
-    }
-    
-    try {
-        socket = io('https://sahatak.pythonanywhere.com', {
-            autoConnect: true,
-            reconnection: true,
-            reconnectionAttempts: 3,
-            timeout: 10000,
-            auth: {
-                token: authToken
-            }
-        });
-    } catch (error) {
-        console.warn('WebSocket initialization failed, using polling fallback:', error);
-        setupPollingFallback();
-        return;
-    }
-    
-    socket.on('connect', () => {
-        console.log('WebSocket connected');
-        if (currentConversationId) {
-            socket.emit('join_conversation', { conversation_id: currentConversationId });
-        }
-    });
-    
-    socket.on('new_message', (data) => {
-        if (data.conversation_id === currentConversationId) {
-            addMessageToDisplay(data.message);
-        }
-        // Update conversation list for doctors
-        if (userType === 'doctor') {
-            loadConversations();
-        }
-    });
-    
-    socket.on('disconnect', () => {
-        console.log('WebSocket disconnected');
-        // Set up polling fallback if WebSocket keeps disconnecting
-        setTimeout(() => {
-            if (!socket.connected) {
-                console.log('WebSocket connection lost, switching to polling fallback');
-                setupPollingFallback();
-            }
-        }, 3000);
-    });
-    
-    socket.on('connect_error', (error) => {
-        console.warn('WebSocket connection error:', error);
-        // Fallback to polling if WebSocket fails
-        socket.disconnect();
-        setupPollingFallback();
-    });
-    
-    socket.on('error', (error) => {
-        console.warn('WebSocket error:', error);
-    });
+    // This function has been disabled to avoid proxy/firewall issues
+    // The messaging system now uses HTTP polling exclusively
+    console.log('WebSocket disabled - using HTTP polling for messaging');
+    setupPollingFallback();
 }
+*/
 
-// Setup polling fallback for messaging when WebSocket fails
+// Setup HTTP polling for messaging (primary communication method)
 let pollingInterval = null;
 
 function setupPollingFallback() {
-    console.log('Setting up polling fallback for messaging');
+    console.log('Setting up HTTP polling for messaging');
     
     // Prevent duplicate polling intervals
     if (pollingInterval) {
         clearInterval(pollingInterval);
     }
     
-    pollingInterval = setInterval(() => {
-        if (currentConversationId && document.visibilityState === 'visible') {
-            loadMessages();
+    // Poll for new messages more frequently since this is the primary method
+    pollingInterval = setInterval(async () => {
+        if (document.visibilityState === 'visible') {
+            // Check for new messages in current conversation
+            if (currentConversationId) {
+                await loadMessages();
+            }
+            
+            // For doctors, also check for new conversations periodically
+            if (userType === 'doctor') {
+                // Only refresh conversation list every 30 seconds to avoid excessive API calls
+                const now = Date.now();
+                if (!lastConversationRefresh || (now - lastConversationRefresh) > 30000) {
+                    await loadConversations();
+                    lastConversationRefresh = now;
+                }
+            }
         }
-    }, 5000); // Poll every 5 seconds when tab is visible
+    }, 3000); // Poll every 3 seconds when tab is visible
+    
+    // Handle page visibility change
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            // Refresh immediately when page becomes visible
+            if (currentConversationId) {
+                loadMessages();
+            }
+        }
+    });
 }
+
+let lastConversationRefresh = null;
 
 // Handle key press for message input
 function handleKeyPress(event) {
