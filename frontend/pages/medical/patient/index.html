@@ -386,6 +386,56 @@
             try {
                 const activities = [];
 
+                // Add appointment activities
+                try {
+                    const appointmentsResponse = await ApiHelper.makeRequest('/appointments/');
+                    if (appointmentsResponse.success) {
+                        const appointments = appointmentsResponse.data.appointments || [];
+                        
+                        // Add recently scheduled appointments
+                        appointments.filter(apt => 
+                            new Date() - new Date(apt.created_at || apt.appointment_date) < 7 * 24 * 60 * 60 * 1000 // Last 7 days
+                        ).forEach(apt => {
+                            const createdDate = new Date(apt.created_at || apt.appointment_date);
+                            const appointmentDate = new Date(apt.appointment_date);
+                            
+                            activities.push({
+                                type: 'appointment_scheduled',
+                                date: createdDate,
+                                title: 'New Appointment Scheduled',
+                                description: `Appointment with ${apt.doctor_name || 'Doctor'} on ${appointmentDate.toLocaleDateString('en-US', { 
+                                    weekday: 'short', 
+                                    month: 'short', 
+                                    day: 'numeric',
+                                    hour: 'numeric',
+                                    minute: '2-digit'
+                                })}`,
+                                icon: 'bi-calendar-plus',
+                                color: 'text-primary'
+                            });
+                        });
+                        
+                        // Add recently completed appointments
+                        appointments.filter(apt => 
+                            apt.status === 'completed' &&
+                            new Date() - new Date(apt.updated_at || apt.appointment_date) < 7 * 24 * 60 * 60 * 1000 // Last 7 days
+                        ).forEach(apt => {
+                            const completedDate = new Date(apt.updated_at || apt.appointment_date);
+                            
+                            activities.push({
+                                type: 'appointment_completed',
+                                date: completedDate,
+                                title: 'Consultation Completed',
+                                description: `Consultation completed with ${apt.doctor_name || 'Doctor'}`,
+                                icon: 'bi-check-circle',
+                                color: 'text-success'
+                            });
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error loading appointments for activity:', error);
+                }
+
                 // Add medical history updates
                 if (medicalData && medicalData.historyUpdates) {
                     medicalData.historyUpdates.forEach(update => {

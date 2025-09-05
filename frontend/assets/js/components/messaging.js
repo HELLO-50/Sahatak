@@ -53,6 +53,11 @@ async function initializeMessaging() {
 async function initializeDoctorMessaging() {
     await loadConversations();
     await loadDoctorPatients(); // Load available patients for new conversations
+    
+    // If no conversations are loaded, ensure we're in default state
+    if (!conversations || conversations.length === 0) {
+        resetToDefaultState();
+    }
 }
 
 // Initialize patient messaging
@@ -309,11 +314,19 @@ function displayDoctorConversations(conversationList) {
         });
         
         // Select first conversation if available
-        const firstConv = conversationList[0];
-        const patient = firstConv.participants.patient;
-        selectConversation(firstConv.id, patient.id, patient.name);
-    } else if (availablePatients.length === 0) {
-        // Show empty state only if no conversations and no patients
+        if (conversationList.length > 0) {
+            const firstConv = conversationList[0];
+            const patient = firstConv.participants.patient;
+            selectConversation(firstConv.id, patient.id, patient.name);
+        } else {
+            // If no conversations, reset to default state
+            resetToDefaultState();
+        }
+    }
+    
+    // Handle case with no conversations and no available patients
+    if (availablePatients.length === 0 && (!conversationList || conversationList.length === 0)) {
+        // Completely empty state - no patients and no conversations
         patientList.innerHTML = `
             <div class="text-center text-muted py-5" id="no-conversations">
                 <i class="bi bi-people fs-1"></i>
@@ -321,6 +334,9 @@ function displayDoctorConversations(conversationList) {
                 <small>Patients will appear here when you have appointments with them</small>
             </div>
         `;
+    } else if ((!conversationList || conversationList.length === 0) && availablePatients.length > 0) {
+        // Has available patients but no existing conversations - ensure default state is set
+        resetToDefaultState();
     }
 }
 
@@ -366,6 +382,38 @@ function toggleNewConversationView() {
     } else {
         newConversationView.style.display = 'none';
     }
+}
+
+// Reset to default state when no conversation is selected
+function resetToDefaultState() {
+    // Reset selected patient display
+    document.getElementById('selectedPatientName').textContent = 'Select a patient';
+    document.getElementById('selectedPatientInfo').textContent = 'Choose a patient to start messaging';
+    
+    // Disable action buttons
+    const viewRecordBtn = document.getElementById('viewRecordBtn');
+    const scheduleBtn = document.getElementById('scheduleBtn');
+    const messageInputArea = document.getElementById('messageInputArea');
+    
+    if (viewRecordBtn) viewRecordBtn.disabled = true;
+    if (scheduleBtn) scheduleBtn.disabled = true;
+    if (messageInputArea) messageInputArea.style.display = 'none';
+    
+    // Clear chat messages and show default message
+    const chatMessages = document.getElementById('chatMessages');
+    if (chatMessages) {
+        chatMessages.innerHTML = `
+            <div class="text-center text-muted py-5" id="no-messages">
+                <i class="bi bi-chat-dots fs-1"></i>
+                <p class="mt-2">Select a patient to view conversation</p>
+            </div>
+        `;
+    }
+    
+    // Clear global conversation variables
+    currentConversationId = null;
+    currentRecipientId = null;
+    currentRecipientName = null;
 }
 
 // Start a new conversation with a patient
