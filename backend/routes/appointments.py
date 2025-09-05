@@ -292,28 +292,32 @@ def create_appointment():
         
         # Send appointment confirmation email using templates
         try:
-            patient_email = current_user.email
-            patient_language = getattr(current_user, 'language', 'ar')  # Default to Arabic
+            patient_email = current_user.email if hasattr(current_user, 'email') else None
+            patient_language = getattr(current_user, 'language_preference', 'ar')  # Default to Arabic
             
-            # Get appointment data and add related information for template
-            appointment_dict = appointment.to_dict()
-            appointment_dict.update({
-                'doctor_name': doctor.user.full_name,
-                'patient_name': current_user.full_name,
-                'appointment_date': appointment_date.strftime('%Y-%m-%d'),
-                'appointment_time': appointment_date.strftime('%H:%M')
-            })
-            
-            email_sent = send_appointment_confirmation(
-                recipient_email=patient_email,
-                appointment_data=appointment_dict,
-                language=patient_language
-            )
-            
-            if email_sent:
-                app_logger.info(f"Appointment confirmation email sent to {patient_email}")
+            # Only send email if patient has an email address
+            if patient_email:
+                # Get appointment data and add related information for template
+                appointment_dict = appointment.to_dict()
+                appointment_dict.update({
+                    'doctor_name': doctor.user.full_name,
+                    'patient_name': current_user.full_name,
+                    'appointment_date': appointment_date.strftime('%Y-%m-%d'),
+                    'appointment_time': appointment_date.strftime('%H:%M')
+                })
+                
+                email_sent = send_appointment_confirmation(
+                    recipient_email=patient_email,
+                    appointment_data=appointment_dict,
+                    language=patient_language
+                )
+                
+                if email_sent:
+                    app_logger.info(f"Appointment confirmation email sent to {patient_email}")
+                else:
+                    app_logger.warning(f"Failed to send appointment confirmation email to {patient_email}")
             else:
-                app_logger.warning(f"Failed to send appointment confirmation email to {patient_email}")
+                app_logger.info("No email address available for patient, skipping confirmation email")
                 
         except Exception as e:
             app_logger.error(f"Error sending appointment confirmation email: {str(e)}")

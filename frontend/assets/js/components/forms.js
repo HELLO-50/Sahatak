@@ -350,7 +350,16 @@ async function handlePatientRegister(event) {
         },
         (error) => {
             FormManager.setFormLoading(formId, false);
-            FormManager.showAlert('patient-register-error-alert', error);
+            
+            // Check if error is field-specific (like duplicate phone/email)
+            if (error.field === 'phone') {
+                ValidationManager.showFieldError('patientPhone', error.message || 'Phone number already registered');
+            } else if (error.field === 'email') {
+                ValidationManager.showFieldError('patientEmail', error.message || 'Email already registered');
+            }
+            
+            // Always show the general error message too
+            FormManager.showAlert('patient-register-error-alert', error.message || error);
         }
     );
     
@@ -482,7 +491,18 @@ function handleDoctorRegister(event) {
         },
         (error) => {
             FormManager.setFormLoading(formId, false);
-            FormManager.showAlert('doctor-register-error-alert', error);
+            
+            // Check if error is field-specific (like duplicate phone/email/license)
+            if (error.field === 'phone') {
+                ValidationManager.showFieldError('doctorPhone', error.message || 'Phone number already registered');
+            } else if (error.field === 'email') {
+                ValidationManager.showFieldError('doctorEmail', error.message || 'Email already registered');
+            } else if (error.field === 'license_number') {
+                ValidationManager.showFieldError('doctorLicense', error.message || 'License number already registered');
+            }
+            
+            // Always show the general error message too
+            FormManager.showAlert('doctor-register-error-alert', error.message || error);
         }
     );
     
