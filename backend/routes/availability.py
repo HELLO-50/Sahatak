@@ -370,19 +370,42 @@ def block_time_slot():
             )
         
         # Create blocking appointment (internal appointment)
-        # Use 'video' type and 'cancelled' status for blocked slots if 'blocked' enum values aren't available
-        blocking_appointment = Appointment(
-            patient_id=None,  # No patient for blocked slots
-            doctor_id=doctor.id,
-            appointment_date=start_datetime,
-            appointment_type='video',  # Use existing enum value
-            status='cancelled',  # Use existing enum value to represent blocked
-            reason_for_visit='Time blocked by doctor',
-            notes=f"BLOCKED: {data.get('reason', 'Doctor unavailable')}"
-        )
-        
-        db.session.add(blocking_appointment)
-        db.session.commit()
+        try:
+            blocking_appointment = Appointment(
+                patient_id=None,  # No patient for blocked slots
+                doctor_id=doctor.id,
+                appointment_date=start_datetime,
+                appointment_type='blocked',  # Use blocked type
+                status='blocked',  # Use blocked status
+                reason_for_visit='Time blocked by doctor',
+                notes=data.get('reason', 'Doctor unavailable')
+            )
+            
+            db.session.add(blocking_appointment)
+            db.session.commit()
+        except Exception as db_error:
+            db.session.rollback()
+            app_logger.error(f"Database error creating blocked appointment: {str(db_error)}")
+            
+            # Try fallback approach if 'blocked' enum values don't exist in database
+            try:
+                blocking_appointment = Appointment(
+                    patient_id=None,  # No patient for blocked slots
+                    doctor_id=doctor.id,
+                    appointment_date=start_datetime,
+                    appointment_type='video',  # Fallback to existing enum
+                    status='cancelled',  # Fallback to existing enum
+                    reason_for_visit='Time blocked by doctor',
+                    notes=f"BLOCKED_SLOT: {data.get('reason', 'Doctor unavailable')}"
+                )
+                
+                db.session.add(blocking_appointment)
+                db.session.commit()
+                app_logger.info("Used fallback approach for blocked appointment")
+            except Exception as fallback_error:
+                db.session.rollback()
+                app_logger.error(f"Fallback approach also failed: {str(fallback_error)}")
+                return APIResponse.internal_error(message='Failed to block time slot due to database constraints')
         
         # Log the action
         log_user_action(
@@ -429,14 +452,19 @@ def unblock_time_slot(block_id):
         if not doctor:
             return APIResponse.not_found(message='Doctor profile not found')
         
-        # Find the blocked appointment (using cancelled status and null patient_id to identify blocked slots)
+        # Find the blocked appointment - try both approaches
         blocked_appointment = Appointment.query.filter(
             and_(
                 Appointment.id == block_id,
                 Appointment.doctor_id == doctor.id,
-                Appointment.status == 'cancelled',
-                Appointment.patient_id.is_(None),
-                Appointment.notes.like('BLOCKED:%')
+                or_(
+                    Appointment.status == 'blocked',  # Proper blocked status
+                    and_(  # Fallback: cancelled status with null patient and BLOCKED_SLOT in notes
+                        Appointment.status == 'cancelled',
+                        Appointment.patient_id.is_(None),
+                        Appointment.notes.like('BLOCKED_SLOT:%')
+                    )
+                )
             )
         ).first()
         

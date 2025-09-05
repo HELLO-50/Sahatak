@@ -815,16 +815,66 @@
                 if (appointmentsResponse.success) {
                     const appointments = appointmentsResponse.data.appointments;
                     
-                    // Count scheduled/confirmed appointments (upcoming)
-                    const scheduledCount = appointments.filter(apt => 
+                    // Get upcoming appointments for display
+                    const upcomingAppointments = appointments.filter(apt => 
                         ['scheduled', 'confirmed'].includes(apt.status) && 
                         new Date(apt.appointment_date) > new Date()
-                    ).length;
+                    ).sort((a, b) => new Date(a.appointment_date) - new Date(b.appointment_date));
                     
                     // Update appointment counter
-                    document.getElementById('stat-appointments-count').textContent = scheduledCount;
+                    document.getElementById('stat-appointments-count').textContent = upcomingAppointments.length;
                     
-                    console.log(`Updated appointment counter: ${scheduledCount}`);
+                    // Update appointments list with matching color scheme from doctor.html
+                    const appointmentsContainer = document.getElementById('appointments-container');
+                    if (appointmentsContainer) {
+                        if (upcomingAppointments.length > 0) {
+                            appointmentsContainer.innerHTML = `
+                                <h5 class="mb-3">
+                                    <i class="bi bi-calendar-day me-2"></i>
+                                    Upcoming Appointments
+                                </h5>
+                                ${upcomingAppointments.slice(0, 3).map(apt => {
+                                    const appointmentDate = new Date(apt.appointment_date);
+                                    const dateStr = appointmentDate.toLocaleDateString('en-US', { 
+                                        weekday: 'short', 
+                                        month: 'short', 
+                                        day: 'numeric' 
+                                    });
+                                    const timeStr = appointmentDate.toLocaleTimeString('en-US', { 
+                                        hour: 'numeric', 
+                                        minute: '2-digit',
+                                        hour12: true 
+                                    });
+                                    
+                                    return `
+                                        <div class="appointment-item d-flex justify-content-between align-items-center p-2 mb-2 bg-light rounded">
+                                            <div>
+                                                <div style="color: black;"><strong>${apt.doctor_name || 'Unknown Doctor'}</strong></div>
+                                                <div class="text-muted small">
+                                                    <i class="bi bi-camera-video me-1"></i>${apt.appointment_type}
+                                                </div>
+                                                ${apt.reason_for_visit ? `<div class="text-muted small">${apt.reason_for_visit}</div>` : ''}
+                                                <div class="small" style="color: darkgreen;">
+                                                    <i class="bi bi-calendar me-1"></i>${dateStr} ${timeStr}
+                                                </div>
+                                            </div>
+                                            <span class="badge bg-primary">${apt.status}</span>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            `;
+                        } else {
+                            appointmentsContainer.innerHTML = `
+                                <h5 class="mb-3">
+                                    <i class="bi bi-calendar-day me-2"></i>
+                                    Upcoming Appointments
+                                </h5>
+                                <p class="text-muted text-center py-3">No upcoming appointments</p>
+                            `;
+                        }
+                    }
+                    
+                    console.log(`Updated appointment counter: ${upcomingAppointments.length}`);
                 } else {
                     console.warn('Failed to load appointments for stats:', appointmentsResponse.message);
                     document.getElementById('stat-appointments-count').textContent = '0';
