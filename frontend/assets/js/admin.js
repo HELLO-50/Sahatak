@@ -480,28 +480,23 @@ const AdminDashboard = {
                 </td>
                 <td>${new Date(user.created_at).toLocaleDateString()}</td>
                 <td>
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Actions
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-sm btn-outline-info" onclick="AdminDashboard.viewUser(${user.id}, '${user.full_name || user.email}')" title="View Details">
+                            <i class="bi bi-eye"></i>
                         </button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#" onclick="AdminDashboard.viewUser(${user.id}, '${user.full_name || user.email}')"><i class="bi bi-eye me-2"></i>View</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="AdminDashboard.changeUserPassword(${user.id}, '${user.full_name || user.email}')"><i class="bi bi-key me-2"></i>Change Password</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="AdminDashboard.toggleUserStatus(${user.id})"><i class="bi bi-${user.is_active ? 'x-circle' : 'check-circle'} me-2"></i>${user.is_active ? 'Deactivate' : 'Activate'}</a></li>
-                            ${user.user_type !== 'admin' ? `<li><hr class="dropdown-divider"></li><li><a class="dropdown-item text-danger" href="#" onclick="AdminDashboard.deleteUser(${user.id}, '${user.full_name || user.email}')"><i class="bi bi-trash me-2"></i>Delete</a></li>` : ''}
-                        </ul>
+                        <button class="btn btn-sm btn-outline-warning" onclick="AdminDashboard.changeUserPassword(${user.id}, '${user.full_name || user.email}')" title="Change Password">
+                            <i class="bi bi-key"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-${user.is_active ? 'danger' : 'success'}" onclick="AdminDashboard.toggleUserStatus(${user.id})" title="${user.is_active ? 'Deactivate' : 'Activate'}">
+                            <i class="bi bi-${user.is_active ? 'x-circle' : 'check-circle'}"></i>
+                        </button>
+                        ${user.user_type !== 'admin' ? `<button class="btn btn-sm btn-outline-danger" onclick="AdminDashboard.deleteUser(${user.id}, '${user.full_name || user.email}')" title="Delete User">
+                            <i class="bi bi-trash"></i>
+                        </button>` : ''}
                     </div>
                 </td>
             </tr>
         `).join('');
-        
-        // Initialize Bootstrap dropdowns for dynamically created content
-        setTimeout(() => {
-            const dropdowns = tbody.querySelectorAll('[data-bs-toggle="dropdown"]');
-            dropdowns.forEach(dropdown => {
-                new bootstrap.Dropdown(dropdown);
-            });
-        }, 100);
     },
     
     // Update users pagination
