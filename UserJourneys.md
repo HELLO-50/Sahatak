@@ -73,24 +73,76 @@ Appointment Booking
 ```
 
 #### Step 4: Consultation Experience
+
+**For Video Consultations:**
 ```
-Consultation Day
+Video Consultation Day
+├── Receive appointment reminder with video link
+├── Pre-consultation Setup (15 minutes before)
+│   ├── Click "Join Video Consultation" from dashboard
+│   ├── Browser compatibility check
+│   │   ├── Check WebRTC support
+│   │   ├── Verify browser version
+│   │   └── Display compatibility status
+│   ├── Network quality assessment
+│   │   ├── Test network latency
+│   │   ├── Check bandwidth availability
+│   │   └── Show connection quality indicator
+│   ├── Device testing and setup
+│   │   ├── Camera preview and device selection
+│   │   ├── Microphone testing with audio levels
+│   │   ├── Speaker selection and test
+│   │   ├── Option to enable audio-only mode
+│   │   └── Device permissions confirmation
+│   ├── System readiness confirmation
+│   └── Wait in pre-join screen until ready
+├── Join Video Session
+│   ├── Wait for doctor to start the session
+│   ├── Receive "Doctor is starting the call" notification
+│   ├── Enter Jitsi meeting room automatically
+│   ├── See doctor's video and establish connection
+│   └── Begin consultation conversation
+├── During Video Consultation
+│   ├── Doctor reviews medical history
+│   ├── Face-to-face discussion of symptoms
+│   ├── Visual examination (as possible via video)
+│   ├── Doctor shares screen for medical reports
+│   ├── Real-time medical advice and guidance
+│   ├── Connection quality monitoring throughout
+│   ├── Automatic fallback to audio if video fails
+│   └── Doctor takes consultation notes
+├── End of Video Session
+│   ├── Doctor ends the video session
+│   ├── Automatic session cleanup
+│   ├── Return to post-consultation screen
+│   └── Session summary and duration displayed
+└── → Post-consultation actions
+```
+
+**For Traditional Consultations:**
+```
+Traditional Consultation Day
 ├── Receive appointment reminder
-├── Join consultation (virtual/in-person)
+├── Join consultation (audio/chat)
 ├── Doctor reviews medical history
 ├── Discuss symptoms and concerns
-├── Receive medical examination
+├── Receive medical advice
 ├── Get diagnosis and treatment plan
 ├── Receive prescription (if needed)
 ├── Consultation completed
 └── → Post-consultation actions
+```
 
-After Consultation
+**Common Post-Consultation Experience:**
+```
+After Any Consultation
 ├── Download prescription PDF
 ├── Access updated medical records
+├── View consultation notes and summary
 ├── Send follow-up questions to doctor
-├── Rate and review the consultation
+├── Rate and review the consultation experience
 ├── Schedule follow-up appointment (if needed)
+├── Set reminders for medication or treatments
 └── → Ongoing healthcare relationship
 ```
 
@@ -173,14 +225,32 @@ First Appointment Request
 ├── Send confirmation to patient
 └── → Prepare for consultation
 
-First Consultation
+First Video Consultation Experience
 ├── Review patient's medical background
-├── Conduct medical consultation
-├── Add diagnosis and treatment notes
-├── Prescribe medications (if needed)
-├── Complete appointment documentation
-├── Send prescription to patient
-├── First consultation completed
+├── Start video consultation session
+│   ├── Click "Start Video Consultation" 
+│   ├── System generates secure Jitsi room
+│   ├── Doctor enters as moderator
+│   ├── Patient receives join notification
+│   ├── Patient joins video session
+│   └── Video connection established
+├── Conduct video medical consultation
+│   ├── Face-to-face patient interaction
+│   ├── Visual examination and assessment
+│   ├── Discuss symptoms and medical history
+│   ├── Share screen for medical reports/images
+│   ├── Use moderator controls as needed
+│   ├── Monitor connection quality throughout
+│   └── Take real-time consultation notes
+├── End video session and documentation
+│   ├── End video call for all participants
+│   ├── Session automatically logs duration
+│   ├── Add diagnosis and treatment notes
+│   ├── Prescribe medications (if needed)
+│   ├── Complete appointment documentation
+│   ├── Send prescription to patient
+│   └── Mark appointment as completed
+├── First video consultation completed
 └── → Build ongoing patient relationship
 ```
 
@@ -326,6 +396,109 @@ Multiple Patient Care
 - Video consultation: HD quality with < 2 second delay
 - Mobile responsiveness: 100% feature parity
 - Offline capability: View medical records without internet
+
+---
+
+## Video Consultation Complete User Journey
+
+### Patient-Doctor Video Consultation (Complete Flow)
+
+**Scenario**: Patient has a scheduled video appointment and both parties are using the video consultation feature for the first time.
+
+```
+Complete Video Consultation Journey
+├── Pre-Appointment Phase
+│   ├── Patient books video appointment 
+│   ├── Doctor confirms appointment
+│   ├── Both receive email confirmation with video details
+│   └── System schedules video session creation
+├── 15 Minutes Before Appointment
+│   ├── Patient Side:
+│   │   ├── Receives reminder notification
+│   │   ├── Clicks "Join Video Consultation" from dashboard
+│   │   ├── Pre-consultation system checks begin
+│   │   ├── Browser compatibility verified
+│   │   ├── Network quality tested (latency, bandwidth)
+│   │   ├── Camera and microphone permissions requested
+│   │   ├── Device enumeration and selection
+│   │   ├── Local video preview started
+│   │   ├── Audio level testing with feedback
+│   │   ├── Option to enable audio-only mode
+│   │   ├── All systems marked as ready
+│   │   └── Waits in pre-join screen
+│   ├── Doctor Side:
+│   │   ├── Reviews patient medical history
+│   │   ├── Prepares consultation notes
+│   │   └── Ready to start session
+├── Appointment Time
+│   ├── Doctor clicks "Start Video Consultation"
+│   ├── System generates unique secure room (sahatak-12345-abcd1234)
+│   ├── JWT token created (if configured)
+│   ├── Doctor enters Jitsi room as moderator
+│   ├── Patient receives "Doctor is starting the call" notification
+│   ├── Patient automatically joins Jitsi room
+│   ├── Video connection established between both parties
+│   ├── Connection quality indicators shown to both
+│   └── Consultation begins
+├── During Video Consultation
+│   ├── Face-to-face medical consultation
+│   ├── Doctor uses moderator privileges
+│   │   ├── Controls recording (if consented)
+│   │   ├── Shares screen for medical reports
+│   │   ├── Can mute/unmute if needed
+│   │   └── Monitors session quality
+│   ├── Patient can toggle own camera/microphone
+│   ├── Real-time connection quality monitoring
+│   ├── Automatic fallback to audio if video fails
+│   ├── Doctor takes consultation notes in parallel
+│   ├── Medical discussion and visual examination
+│   ├── Prescription and treatment planning
+│   └── Session duration tracked
+├── End of Consultation
+│   ├── Doctor clicks "End Consultation" 
+│   ├── Video session terminated for all participants
+│   ├── Session statistics logged (duration, quality, participants)
+│   ├── Automatic cleanup of video resources
+│   ├── Appointment marked as completed
+│   ├── Patient sees post-consultation screen with summary
+│   └── Both return to their respective dashboards
+├── Post-Consultation Actions
+│   ├── Doctor completes appointment documentation
+│   ├── Prescription sent to patient (if applicable)
+│   ├── Patient downloads prescription and notes
+│   ├── Both can rate the consultation experience
+│   ├── Follow-up appointment scheduled if needed
+│   └── Medical records updated with consultation details
+```
+
+### Technical Error Handling Scenarios
+
+```
+Video Consultation Error Recovery
+├── Network Connection Issues
+│   ├── Poor network quality detected
+│   ├── System suggests audio-only mode
+│   ├── Automatic quality adjustment
+│   ├── Connection retry attempts
+│   └── Manual refresh option provided
+├── Browser Compatibility Issues
+│   ├── WebRTC not supported warning
+│   ├── Browser update suggestion
+│   ├── Alternative browser recommendations
+│   └── Fallback to audio/chat consultation
+├── Device Permission Issues
+│   ├── Camera/microphone access denied
+│   ├── Clear instructions for enabling permissions
+│   ├── Browser-specific guidance provided
+│   ├── Audio-only alternative offered
+│   └── Technical support contact information
+├── Session Interruption Recovery
+│   ├── Automatic reconnection attempts
+│   ├── "Connection lost" notification
+│   ├── Rejoin session capability
+│   ├── Doctor can restart session if needed
+│   └── Session state preservation where possible
+```
 
 ---
 

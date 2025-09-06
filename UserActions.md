@@ -116,6 +116,13 @@ Appointments Management
 │   └── Receive confirmation email
 ├── Appointment Actions
 │   ├── View Details
+│   ├── Join Video Consultation (for video appointments)
+│   │   ├── Pre-consultation device setup
+│   │   ├── System compatibility check
+│   │   ├── Camera and microphone test
+│   │   ├── Network quality assessment
+│   │   ├── Join waiting room
+│   │   └── Enter consultation when doctor starts
 │   ├── Reschedule (if allowed)
 │   ├── Cancel
 │   └── Rate & Review (after completion)
@@ -320,7 +327,18 @@ Appointments Management
 │   └── Cancelled appointments
 ├── Appointment Actions
 │   ├── View patient details
-│   ├── Start consultation
+│   ├── Start Video Consultation (for video appointments)
+│   │   ├── Review patient medical history
+│   │   ├── Initialize video session
+│   │   ├── Generate secure room link
+│   │   ├── Wait for patient to join
+│   │   ├── Control session as moderator
+│   │   │   ├── Mute/unmute participants
+│   │   │   ├── Share screen for medical reports
+│   │   │   ├── Monitor connection quality
+│   │   │   └── Record session (with consent)
+│   │   └── End consultation session
+│   ├── Start consultation (non-video)
 │   ├── Add diagnosis
 │   ├── Prescribe medication
 │   ├── Schedule follow-up
@@ -333,6 +351,112 @@ Appointments Management
 │   ├── Add notes
 │   ├── Upload documents
 │   └── Send prescription
+```
+
+### Video Consultation Workflow
+
+**Patient Video Consultation Flow:**
+```
+Video Consultation - Patient Side
+├── Navigate to appointment
+├── Click "Join Video Consultation" button
+├── Pre-consultation Setup
+│   ├── System Compatibility Check
+│   │   ├── Browser compatibility validation
+│   │   ├── Network quality assessment
+│   │   ├── Camera/microphone permissions
+│   │   └── Device enumeration
+│   ├── Device Testing
+│   │   ├── Camera preview and selection
+│   │   ├── Microphone test with audio levels
+│   │   ├── Speaker test and selection
+│   │   └── Audio-only fallback option
+│   ├── Pre-join Screen
+│   │   ├── Review system check results
+│   │   ├── Configure device settings
+│   │   ├── Enable/disable audio-only mode
+│   │   └── Wait for system readiness
+├── Join Session
+│   ├── Wait for doctor to start session
+│   ├── Enter Jitsi meeting room
+│   ├── Connect with secure room name
+│   └── Participate as regular attendee
+├── During Consultation
+│   ├── Communicate with doctor
+│   ├── Toggle camera/microphone as needed
+│   ├── Use chat if needed
+│   ├── Switch devices if necessary
+│   └── Monitor connection quality
+├── End Session
+│   ├── Doctor ends the session
+│   ├── Automatic session cleanup
+│   ├── View post-consultation screen
+│   └── Return to appointment details
+```
+
+**Doctor Video Consultation Flow:**
+```
+Video Consultation - Doctor Side
+├── View today's appointments
+├── Select video appointment
+├── Review patient medical history
+├── Click "Start Video Consultation"
+├── Session Initialization
+│   ├── Generate unique room name
+│   ├── Create JWT token (if configured)
+│   ├── Set moderator privileges
+│   ├── Initialize Jitsi session
+│   └── Mark appointment as in_progress
+├── Wait for Patient
+│   ├── Share session link with patient
+│   ├── Monitor session status
+│   ├── Patient joins automatically
+│   └── Begin consultation
+├── During Consultation
+│   ├── Control session as moderator
+│   │   ├── Mute/unmute participants
+│   │   ├── End call for everyone
+│   │   ├── Remove disruptive users
+│   │   └── Control recording
+│   ├── Use consultation tools
+│   │   ├── Share screen for reports
+│   │   ├── Access patient files
+│   │   ├── Take consultation notes
+│   │   └── Monitor session quality
+│   ├── Medical consultation activities
+│   │   ├── Discuss symptoms
+│   │   ├── Visual examination
+│   │   ├── Provide diagnosis
+│   │   └── Explain treatment plan
+├── End Session
+│   ├── Click "End Consultation"
+│   ├── Session cleanup and logging
+│   ├── Mark appointment as completed
+│   ├── Add consultation notes
+│   └── Send prescription if needed
+```
+
+**Technical Session Management:**
+```
+Video Session Management
+├── Session Creation
+│   ├── Generate unique room name (sahatak-{id}-{hash})
+│   ├── Set session timing validation (15min buffer)
+│   ├── Configure Jitsi with custom settings
+│   ├── Apply security settings (no recording by default)
+│   └── Log session initiation
+├── Session Monitoring
+│   ├── Track participant join/leave events
+│   ├── Monitor connection quality
+│   ├── Log session duration
+│   ├── Handle reconnection attempts
+│   └── Manage session timeouts
+├── Session Cleanup
+│   ├── End Jitsi meeting room
+│   ├── Update appointment status
+│   ├── Log session completion
+│   ├── Calculate session duration
+│   └── Free system resources
 ```
 
 ### Patients Management Flow

@@ -46,11 +46,17 @@ Sahatak (صحتك - "Your Health") is a comprehensive telemedicine platform desi
 **Epic: Virtual Healthcare Delivery**
 
 - **As a patient**, I want to join video consultations easily so that I can speak with my doctor face-to-face.
+- **As a patient**, I want to test my camera and microphone before joining a consultation so that I ensure everything works properly.
+- **As a patient**, I want the system to check my browser compatibility automatically so that I know if video calls will work.
+- **As a patient**, I want to see network quality indicators so that I can ensure a stable connection for my consultation.
+- **As a patient**, I want to use audio-only mode if my video isn't working so that I can still have my consultation.
+- **As a patient**, I want to join a consultation when the doctor starts the session so that I don't wait unnecessarily.
 - **As a patient**, I want reliable audio quality during calls so that I can communicate clearly with my doctor.
 - **As a patient**, I want to share symptoms via text or voice in Arabic/English so that I can describe my condition naturally.
 - **As a patient**, I want to receive prescriptions digitally so that I have immediate access to my medication list.
 - **As a patient**, I want to ask follow-up questions after consultations so that I can clarify any concerns.
 - **As a patient**, I want consultation summaries and notes so that I can reference the doctor's advice later.
+- **As a patient**, I want the video session to automatically end when the consultation is complete so that my privacy is protected.
 
 ### AI-Powered Features
 
@@ -102,12 +108,18 @@ Sahatak (صحتك - "Your Health") is a comprehensive telemedicine platform desi
 **Epic: Clinical Care Delivery**
 
 - **As a doctor**, I want to review patient medical history before consultations so that I can provide informed care.
+- **As a doctor**, I want to start video consultations for my scheduled appointments so that I can control when the session begins.
 - **As a doctor**, I want to conduct video/audio consultations so that I can examine and communicate with patients remotely.
+- **As a doctor**, I want to have moderator privileges in video calls so that I can control the session (mute, end call, etc.).
+- **As a doctor**, I want to share my screen during consultations so that I can show medical reports or educational materials to patients.
+- **As a doctor**, I want to see connection quality indicators so that I can adjust the consultation if there are technical issues.
+- **As a doctor**, I want to monitor session duration so that I can manage my time effectively.
 - **As a doctor**, I want to take notes during consultations so that I can document the visit properly.
 - **As a doctor**, I want to write digital prescriptions so that patients receive their medications promptly.
 - **As a doctor**, I want to schedule follow-up appointments so that I can monitor patient progress.
 - **As a doctor**, I want to send post-consultation summaries so that patients have clear care instructions.
 - **As a doctor**, I want to communicate with patients between appointments so that I can answer urgent questions.
+- **As a doctor**, I want to end video sessions when consultations are complete so that I can mark appointments as finished.
 
 ### Practice Analytics
 
@@ -117,6 +129,33 @@ Sahatak (صحتك - "Your Health") is a comprehensive telemedicine platform desi
 - **As a doctor**, I want to track my consultation statistics so that I can understand my practice patterns.
 - **As a doctor**, I want to see my earnings (for paid consultations) so that I can manage my finances.
 - **As a doctor**, I want to monitor my volunteer hours so that I can track my community service contributions.
+
+### Video Consultation System
+
+**Epic: Advanced Telemedicine Features**
+
+**Patient Video Consultation Stories:**
+- **As a patient**, I want the video consultation page to load quickly so that I don't keep my doctor waiting.
+- **As a patient**, I want clear indicators showing when the doctor has joined the call so that I know when to start speaking.
+- **As a patient**, I want to switch between camera and microphone settings during the call so that I can optimize my setup.
+- **As a patient**, I want to see a post-consultation screen with next steps so that I know what to do after the call ends.
+- **As a patient**, I want the system to remember my device preferences for future consultations so that setup is faster next time.
+- **As a patient**, I want to receive audio/video quality feedback so that I can improve my setup for better consultations.
+
+**Doctor Video Consultation Stories:**
+- **As a doctor**, I want to see a waiting room view showing which patients are ready to join so that I can manage multiple consultations efficiently.
+- **As a doctor**, I want to access patient files during the video call so that I can reference medical history while speaking.
+- **As a doctor**, I want to invite specialists to join video consultations so that I can provide collaborative care.
+- **As a doctor**, I want session analytics (duration, quality, participant info) so that I can track consultation effectiveness.
+- **As a doctor**, I want to control session recording settings so that I can document important medical discussions with proper consent.
+
+**System Administration Stories:**
+- **As a system administrator**, I want video sessions to be secure and HIPAA-compliant so that patient privacy is protected.
+- **As a system administrator**, I want the ability to configure Jitsi server settings so that I can optimize performance.
+- **As a system administrator**, I want session logging and monitoring so that I can troubleshoot issues and ensure quality.
+- **As a system administrator**, I want automatic session cleanup so that resources are managed efficiently.
+- **As a system administrator**, I want to set maximum session durations so that server resources are not overused.
+- **As a system administrator**, I want to monitor concurrent video sessions so that I can scale infrastructure as needed.
 
 ---
 
