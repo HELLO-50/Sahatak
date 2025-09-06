@@ -63,7 +63,7 @@ def admin_required(f):
         if auth_header and auth_header.startswith('Bearer '):
             token = auth_header.split(' ')[1]
             
-            # Try JWT validation first
+            # JWT token validation
             try:
                 from utils.jwt_helper import JWTHelper
                 payload = JWTHelper.decode_token(token)
@@ -79,31 +79,7 @@ def admin_required(f):
                         return f(*args, **kwargs)
                         
             except ImportError:
-                # Fallback to base64 token validation
-                try:
-                    import base64
-                    import json
-                    
-                    token_json = base64.b64decode(token.encode()).decode()
-                    payload = json.loads(token_json)
-                    
-                    # Check token expiration
-                    exp_time = payload.get('exp', 0)
-                    current_time = int(datetime.utcnow().timestamp())
-                    
-                    if exp_time >= current_time and payload.get('user_type') == 'admin':
-                        user_id = payload.get('user_id')
-                        admin_user = User.query.filter_by(id=user_id, user_type='admin').first()
-                        
-                        if admin_user and admin_user.is_active:
-                            from flask_login import login_user
-                            login_user(admin_user, remember=False, force=True)
-                            app_logger.info(f"Admin fallback auth successful for user {user_id}")
-                            return f(*args, **kwargs)
-                            
-                except Exception as e:
-                    app_logger.error(f"Admin fallback token validation error: {str(e)}")
-                    
+                app_logger.error("JWT helper not available - admin authentication requires JWT")
             except Exception as e:
                 app_logger.error(f"Admin JWT validation error: {str(e)}")
             
