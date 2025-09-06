@@ -766,7 +766,7 @@ def get_waiting_patients():
             
             patient_data = {
                 'id': appointment.id,
-                'patient_id': patient.patient_id if patient.patient_id else 'Unknown',
+                'patient_id': patient.id,  # Patient model uses 'id', not 'patient_id'
                 'full_name': patient.user.full_name if patient and patient.user and patient.user.full_name else 'Unknown Patient',
                 'appointment_time': appointment.appointment_date.strftime('%H:%M'),
                 'appointment_type': appointment.appointment_type,
@@ -780,8 +780,10 @@ def get_waiting_patients():
         )
         
     except Exception as e:
+        import traceback
         app_logger.error(f"Error getting waiting patients: {str(e)}")
-        return APIResponse.internal_error(message='Failed to retrieve waiting patients')
+        app_logger.error(f"Traceback: {traceback.format_exc()}")
+        return APIResponse.internal_error(message=f'Failed to retrieve waiting patients: {str(e)}')
 
 
 @appointments_bp.route('/activity', methods=['GET'])
