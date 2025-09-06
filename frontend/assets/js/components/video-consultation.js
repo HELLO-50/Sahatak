@@ -5,6 +5,12 @@ const VideoConsultation = {
     jitsiApi: null,
     sessionData: null,
     connectionCheckInterval: null,
+    systemChecks: {
+        browser: false,
+        network: false,
+        permissions: false
+    },
+    audioOnlyMode: false,
     
     // Initialize video consultation
     async init(appointmentId) {
@@ -54,6 +60,44 @@ const VideoConsultation = {
             <div class="pre-join-screen">
                 <h3 class="mb-4">${isArabic ? 'الاستعداد للاستشارة' : 'Preparing for Consultation'}</h3>
                 
+                <!-- System Check Results -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <div id="browser-check">
+                                    <i class="bi bi-browser-chrome fs-1 mb-2"></i>
+                                    <h6>${isArabic ? 'متصفح الويب' : 'Browser'}</h6>
+                                    <div class="spinner-border spinner-border-sm" role="status"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <div id="network-check">
+                                    <i class="bi bi-wifi fs-1 mb-2"></i>
+                                    <h6>${isArabic ? 'جودة الشبكة' : 'Network Quality'}</h6>
+                                    <div class="spinner-border spinner-border-sm" role="status"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <div id="permissions-check">
+                                    <i class="bi bi-shield-check fs-1 mb-2"></i>
+                                    <h6>${isArabic ? 'الأذونات' : 'Permissions'}</h6>
+                                    <div class="spinner-border spinner-border-sm" role="status"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Device Setup -->
                 <div class="device-check mb-4">
                     <div class="row">
                         <div class="col-md-6">
@@ -61,8 +105,14 @@ const VideoConsultation = {
                                 <div class="card-body text-center">
                                     <i class="bi bi-camera-video fs-1 mb-2"></i>
                                     <h5>${isArabic ? 'الكاميرا' : 'Camera'}</h5>
-                                    <video id="local-preview" autoplay muted class="w-100 mb-2" style="max-height: 200px;"></video>
-                                    <select id="camera-select" class="form-select"></select>
+                                    <video id="local-preview" autoplay muted class="w-100 mb-2" style="max-height: 200px; border-radius: 8px;"></video>
+                                    <select id="camera-select" class="form-select mb-2"></select>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="audio-only-mode">
+                                        <label class="form-check-label" for="audio-only-mode">
+                                            ${isArabic ? 'صوت فقط' : 'Audio Only'}
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -75,35 +125,231 @@ const VideoConsultation = {
                                         <div class="progress">
                                             <div id="audio-level" class="progress-bar bg-success" style="width: 0%"></div>
                                         </div>
+                                        <small class="text-muted">${isArabic ? 'تحدث لاختبار الصوت' : 'Speak to test audio'}</small>
                                     </div>
-                                    <select id="mic-select" class="form-select"></select>
+                                    <select id="mic-select" class="form-select mb-2"></select>
+                                    <select id="speaker-select" class="form-select">
+                                        <option value="">${isArabic ? 'اختر مكبر الصوت' : 'Select Speaker'}</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 
+                <!-- Control Buttons -->
                 <div class="text-center">
+                    <button id="refresh-check-btn" class="btn btn-outline-secondary me-2">
+                        <i class="bi bi-arrow-clockwise"></i> ${isArabic ? 'إعادة فحص' : 'Refresh Check'}
+                    </button>
                     <button id="test-devices-btn" class="btn btn-secondary me-2">
                         <i class="bi bi-gear"></i> ${isArabic ? 'اختبار الأجهزة' : 'Test Devices'}
                     </button>
-                    <button id="join-call-btn" class="btn btn-primary btn-lg">
+                    <button id="join-call-btn" class="btn btn-primary btn-lg" disabled>
                         <i class="bi bi-camera-video"></i> ${isArabic ? 'بدء الاستشارة' : 'Start Consultation'}
                     </button>
                 </div>
                 
-                <div class="alert alert-info mt-3">
-                    <i class="bi bi-info-circle"></i>
-                    ${isArabic ? 
-                        'تأكد من أن الكاميرا والميكروفون يعملان بشكل صحيح قبل البدء' : 
-                        'Please ensure your camera and microphone are working properly before starting'}
+                <!-- Status Messages -->
+                <div id="pre-join-messages" class="mt-3">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        ${isArabic ? 
+                            'جاري فحص النظام والأجهزة...' : 
+                            'Checking system and devices...'}
+                    </div>
                 </div>
             </div>
         `;
         
-        // Start device enumeration
+        // Start system checks
+        this.runSystemChecks();
+    },
+    
+    // Run comprehensive system checks
+    async runSystemChecks() {
+        const checks = [
+            this.checkBrowserCompatibility(),
+            this.checkNetworkQuality(),
+            this.checkPermissions()
+        ];
+        
+        // Run all checks in parallel
+        await Promise.all(checks);
+        
+        // After system checks, setup devices
         this.enumerateDevices();
         this.startLocalPreview();
+        
+        // Enable join button if all checks pass
+        this.updateJoinButtonState();
+    },
+    
+    // Check browser compatibility
+    async checkBrowserCompatibility() {
+        const browserCheck = document.getElementById('browser-check');
+        if (!browserCheck) return;
+        
+        try {
+            // Check WebRTC support
+            const hasWebRTC = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+            
+            // Check browser type and version
+            const userAgent = navigator.userAgent;
+            let browserName = 'Unknown';
+            let isSupported = false;
+            
+            if (userAgent.includes('Chrome')) {
+                browserName = 'Chrome';
+                isSupported = true;
+            } else if (userAgent.includes('Firefox')) {
+                browserName = 'Firefox';
+                isSupported = true;
+            } else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) {
+                browserName = 'Safari';
+                isSupported = true;
+            } else if (userAgent.includes('Edge')) {
+                browserName = 'Edge';
+                isSupported = true;
+            }
+            
+            const currentLang = LanguageManager.getLanguage() || 'en';
+            const isArabic = currentLang === 'ar';
+            
+            if (hasWebRTC && isSupported) {
+                browserCheck.innerHTML = `
+                    <i class="bi bi-check-circle-fill text-success fs-1 mb-2"></i>
+                    <h6>${isArabic ? 'متصفح الويب' : 'Browser'}</h6>
+                    <small class="text-success">${browserName} ✓</small>
+                `;
+                this.systemChecks.browser = true;
+            } else {
+                browserCheck.innerHTML = `
+                    <i class="bi bi-x-circle-fill text-danger fs-1 mb-2"></i>
+                    <h6>${isArabic ? 'متصفح الويب' : 'Browser'}</h6>
+                    <small class="text-danger">${isArabic ? 'غير مدعوم' : 'Not Supported'}</small>
+                `;
+                this.systemChecks.browser = false;
+                this.showWarning(isArabic ? 
+                    'المتصفح الحالي قد لا يدعم مكالمات الفيديو بشكل كامل' :
+                    'Current browser may not fully support video calls'
+                );
+            }
+        } catch (error) {
+            console.error('Browser check error:', error);
+            this.systemChecks.browser = false;
+        }
+    },
+    
+    // Check network quality
+    async checkNetworkQuality() {
+        const networkCheck = document.getElementById('network-check');
+        if (!networkCheck) return;
+        
+        try {
+            const startTime = performance.now();
+            
+            // Test network speed with a small image
+            const testImage = new Image();
+            testImage.src = 'https://meet.jit.si/images/watermark.svg?' + Math.random();
+            
+            await new Promise((resolve, reject) => {
+                testImage.onload = resolve;
+                testImage.onerror = reject;
+                setTimeout(reject, 5000); // 5 second timeout
+            });
+            
+            const endTime = performance.now();
+            const latency = endTime - startTime;
+            
+            const currentLang = LanguageManager.getLanguage() || 'en';
+            const isArabic = currentLang === 'ar';
+            
+            let qualityText = '';
+            let qualityClass = '';
+            
+            if (latency < 200) {
+                qualityText = isArabic ? 'ممتازة' : 'Excellent';
+                qualityClass = 'text-success';
+                this.systemChecks.network = true;
+            } else if (latency < 500) {
+                qualityText = isArabic ? 'جيدة' : 'Good';
+                qualityClass = 'text-info';
+                this.systemChecks.network = true;
+            } else if (latency < 1000) {
+                qualityText = isArabic ? 'متوسطة' : 'Fair';
+                qualityClass = 'text-warning';
+                this.systemChecks.network = true;
+            } else {
+                qualityText = isArabic ? 'ضعيفة' : 'Poor';
+                qualityClass = 'text-danger';
+                this.systemChecks.network = false;
+            }
+            
+            networkCheck.innerHTML = `
+                <i class="bi bi-wifi fs-1 mb-2 ${qualityClass}"></i>
+                <h6>${isArabic ? 'جودة الشبكة' : 'Network Quality'}</h6>
+                <small class="${qualityClass}">${qualityText}</small>
+                <div><small class="text-muted">${Math.round(latency)}ms</small></div>
+            `;
+            
+        } catch (error) {
+            console.error('Network check error:', error);
+            const currentLang = LanguageManager.getLanguage() || 'en';
+            const isArabic = currentLang === 'ar';
+            
+            networkCheck.innerHTML = `
+                <i class="bi bi-wifi-off text-warning fs-1 mb-2"></i>
+                <h6>${isArabic ? 'جودة الشبكة' : 'Network Quality'}</h6>
+                <small class="text-warning">${isArabic ? 'غير معروف' : 'Unknown'}</small>
+            `;
+            this.systemChecks.network = true; // Don't block on network check failure
+        }
+    },
+    
+    // Check permissions
+    async checkPermissions() {
+        const permissionsCheck = document.getElementById('permissions-check');
+        if (!permissionsCheck) return;
+        
+        try {
+            // Request camera and microphone permissions
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: true, 
+                audio: true 
+            });
+            
+            const currentLang = LanguageManager.getLanguage() || 'en';
+            const isArabic = currentLang === 'ar';
+            
+            permissionsCheck.innerHTML = `
+                <i class="bi bi-check-circle-fill text-success fs-1 mb-2"></i>
+                <h6>${isArabic ? 'الأذونات' : 'Permissions'}</h6>
+                <small class="text-success">${isArabic ? 'تم منحها' : 'Granted'}</small>
+            `;
+            
+            this.systemChecks.permissions = true;
+            
+            // Stop the test stream
+            stream.getTracks().forEach(track => track.stop());
+            
+        } catch (error) {
+            console.error('Permissions check error:', error);
+            const currentLang = LanguageManager.getLanguage() || 'en';
+            const isArabic = currentLang === 'ar';
+            
+            permissionsCheck.innerHTML = `
+                <i class="bi bi-x-circle-fill text-danger fs-1 mb-2"></i>
+                <h6>${isArabic ? 'الأذونات' : 'Permissions'}</h6>
+                <small class="text-danger">${isArabic ? 'مرفوضة' : 'Denied'}</small>
+            `;
+            
+            this.systemChecks.permissions = false;
+            this.showError(isArabic ?
+                'يجب السماح بالوصول للكاميرا والميكروفون لبدء المكالمة' :
+                'Camera and microphone access required to start the call'
+            );
+        }
     },
     
     // Enumerate available devices
@@ -524,6 +770,85 @@ const VideoConsultation = {
             window.showNotification(message, type);
         } else {
             console.log(`[${type}] ${message}`);
+        }
+    },
+    
+    // Show warning message
+    showWarning(message) {
+        const messagesDiv = document.getElementById('pre-join-messages');
+        if (messagesDiv) {
+            messagesDiv.innerHTML = `
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i> ${message}
+                </div>
+            `;
+        }
+    },
+    
+    // Update join button state
+    updateJoinButtonState() {
+        const joinBtn = document.getElementById('join-call-btn');
+        const messagesDiv = document.getElementById('pre-join-messages');
+        
+        if (!joinBtn || !messagesDiv) return;
+        
+        const currentLang = LanguageManager.getLanguage() || 'en';
+        const isArabic = currentLang === 'ar';
+        
+        // Check if all critical checks pass
+        const canJoin = this.systemChecks.browser && this.systemChecks.permissions;
+        
+        if (canJoin) {
+            joinBtn.disabled = false;
+            joinBtn.className = 'btn btn-primary btn-lg';
+            
+            messagesDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle"></i>
+                    ${isArabic ? 
+                        'النظام جاهز! يمكنك الآن بدء الاستشارة' : 
+                        'System ready! You can now start the consultation'}
+                </div>
+            `;
+        } else {
+            joinBtn.disabled = true;
+            joinBtn.className = 'btn btn-secondary btn-lg';
+            
+            const issues = [];
+            if (!this.systemChecks.browser) issues.push(isArabic ? 'المتصفح' : 'Browser');
+            if (!this.systemChecks.permissions) issues.push(isArabic ? 'الأذونات' : 'Permissions');
+            
+            messagesDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    ${isArabic ? 
+                        `مشاكل في: ${issues.join(', ')}` : 
+                        `Issues with: ${issues.join(', ')}`}
+                </div>
+            `;
+        }
+        
+        // Check audio-only mode
+        const audioOnlyCheck = document.getElementById('audio-only-mode');
+        if (audioOnlyCheck) {
+            audioOnlyCheck.addEventListener('change', (e) => {
+                this.audioOnlyMode = e.target.checked;
+                const video = document.getElementById('local-preview');
+                if (video) {
+                    video.style.display = this.audioOnlyMode ? 'none' : 'block';
+                }
+                
+                // Update join button text
+                const joinBtn = document.getElementById('join-call-btn');
+                if (joinBtn) {
+                    const icon = this.audioOnlyMode ? 'bi-telephone' : 'bi-camera-video';
+                    const text = this.audioOnlyMode ? 
+                        (isArabic ? 'بدء المكالمة الصوتية' : 'Start Audio Call') :
+                        (isArabic ? 'بدء الاستشارة' : 'Start Consultation');
+                    
+                    joinBtn.innerHTML = `<i class="${icon}"></i> ${text}`;
+                }
+            });
         }
     },
     

@@ -789,6 +789,95 @@ const AppointmentBooking = {
                 successDiv.remove();
             }
         }, 3000);
+    },
+
+    // VIDEO CONSULTATION METHODS
+    
+    // Launch video consultation for an appointment
+    launchVideoConsultation(appointmentId) {
+        if (!appointmentId) {
+            console.error('No appointment ID provided');
+            return;
+        }
+        
+        const videoUrl = `/pages/appointments/video-consultation.html?appointmentId=${appointmentId}`;
+        
+        // Open in same window to replace current page
+        window.location.href = videoUrl;
+    },
+    
+    // Check if appointment can start video session
+    async checkVideoSessionStatus(appointmentId) {
+        try {
+            const response = await ApiHelper.makeRequest(
+                `/appointments/${appointmentId}/video/status`,
+                'GET'
+            );
+            
+            return response.data || {};
+        } catch (error) {
+            console.error('Error checking video session status:', error);
+            return {};
+        }
+    },
+    
+    // Generate video consultation button HTML
+    generateVideoButton(appointment) {
+        const userType = AuthStorage.getUserType();
+        const currentLang = LanguageManager.getLanguage() || 'en';
+        const isArabic = currentLang === 'ar';
+        
+        // Only show for video appointments
+        if (appointment.appointment_type !== 'video') {
+            return '';
+        }
+        
+        // Check appointment status
+        const canStart = appointment.status === 'scheduled' || appointment.status === 'confirmed';
+        const isInProgress = appointment.status === 'in_progress';
+        
+        if (!canStart && !isInProgress) {
+            return '';
+        }
+        
+        // Different buttons for doctors vs patients
+        let buttonText = '';
+        let buttonClass = 'btn-success';
+        let buttonIcon = 'bi-camera-video';
+        let isDisabled = false;
+        
+        if (userType === 'doctor') {
+            if (isInProgress && appointment.session_status === 'waiting') {
+                buttonText = isArabic ? 'انضم للاستشارة' : 'Join Consultation';
+                buttonClass = 'btn-primary';
+            } else if (canStart) {
+                buttonText = isArabic ? 'بدء الاستشارة' : 'Start Consultation';
+                buttonClass = 'btn-success';
+            } else {
+                buttonText = isArabic ? 'انضم للاستشارة' : 'Join Consultation';
+                buttonClass = 'btn-primary';
+            }
+        } else {
+            // Patient
+            if (isInProgress) {
+                buttonText = isArabic ? 'انضم للاستشارة' : 'Join Consultation';
+                buttonClass = 'btn-primary';
+            } else {
+                buttonText = isArabic ? 'انتظار الطبيب' : 'Waiting for Doctor';
+                buttonClass = 'btn-secondary';
+                buttonIcon = 'bi-clock';
+                isDisabled = true;
+            }
+        }
+        
+        return `
+            <button class="btn ${buttonClass}" 
+                    onclick="AppointmentBooking.launchVideoConsultation(${appointment.id})"
+                    title="${buttonText}"
+                    ${isDisabled ? 'disabled' : ''}>
+                <i class="bi ${buttonIcon}"></i> ${buttonText}
+            </button>
+        `;
     }
 };
 
