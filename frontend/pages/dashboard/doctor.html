@@ -23,6 +23,8 @@
     <link rel="stylesheet" href="../../assets/css/main.css">
     <!-- Dashboard CSS -->
     <link rel="stylesheet" href="../../assets/css/components/dashboard.css">
+    <!-- Video Consultation Dashboard CSS -->
+    <link rel="stylesheet" href="../../assets/css/components/video-consultation-dashboard.css">
     <style>
         /* Unverified doctor states */
         .unverified-disabled {
@@ -754,6 +756,9 @@
     <!-- Dashboard JavaScript -->
     <script src="../../assets/js/components/dashboard.js"></script>
     
+    <!-- Video Consultation Dashboard JavaScript -->
+    <script src="../../assets/js/components/video-consultation-dashboard.js"></script>
+    
     <!-- Doctor Dashboard JavaScript -->
     <script>
         // Doctor dashboard specific functions
@@ -1237,20 +1242,31 @@
                                     hour12: true 
                                 });
                                 
+                                // Generate video consultation button if applicable
+                                const videoButton = VideoConsultationDashboard.generateVideoConsultationButton(apt);
+                                const isVideoAppointment = apt.appointment_type === 'video';
+                                
                                 return `
-                                    <div class="appointment-item d-flex justify-content-between align-items-center p-2 mb-2 bg-light rounded">
-                                        <div>
+                                    <div class="appointment-item appointment-card ${isVideoAppointment ? 'video-appointment' : ''} d-flex justify-content-between align-items-center p-3 mb-2 bg-light rounded" data-appointment-id="${apt.id}">
+                                        <div class="flex-grow-1">
                                             <div style="color: black;"><strong>${apt.patient_name || 'Unknown Patient'}</strong></div>
                                             ${apt.patient_age ? `<span class="text-muted ms-2">Age ${apt.patient_age}</span>` : ''}
                                             <div class="text-muted small">
-                                                <i class="bi bi-camera-video me-1"></i>${apt.appointment_type}
+                                                <i class="bi bi-${apt.appointment_type === 'video' ? 'camera-video' : apt.appointment_type === 'audio' ? 'telephone' : 'chat-dots'} me-1"></i>${apt.appointment_type}
                                             </div>
                                             ${apt.reason_for_visit ? `<div class="text-muted small">${apt.reason_for_visit}</div>` : ''}
                                             <div class="small" style="color: darkgreen;">
                                                 <i class="bi bi-calendar me-1"></i>${dateStr} ${timeStr}
                                             </div>
+                                            ${videoButton ? `
+                                                <div class="video-consultation-actions">
+                                                    ${videoButton}
+                                                </div>
+                                            ` : ''}
                                         </div>
-                                        <span class="badge bg-primary">${apt.status}</span>
+                                        <div class="d-flex flex-column align-items-end gap-2">
+                                            <span class="badge bg-primary">${apt.status}</span>
+                                        </div>
                                     </div>
                                 `;
                             }).join('');

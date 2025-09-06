@@ -23,6 +23,8 @@
     <link rel="stylesheet" href="../../assets/css/main.css">
     <!-- Dashboard CSS -->
     <link rel="stylesheet" href="../../assets/css/components/dashboard.css">
+    <!-- Video Consultation Dashboard CSS -->
+    <link rel="stylesheet" href="../../assets/css/components/video-consultation-dashboard.css">
 </head>
 <body data-protect="patient">
     <div class="dashboard-container">
@@ -564,6 +566,9 @@
     <!-- Dashboard Data Handler -->
     <script src="../../assets/js/components/dashboard.js"></script>
     
+    <!-- Video Consultation Dashboard JavaScript -->
+    <script src="../../assets/js/components/video-consultation-dashboard.js"></script>
+    
     <!-- Dashboard JavaScript -->
     <script>
         // Dashboard specific functions
@@ -846,19 +851,28 @@
                                         hour12: true 
                                     });
                                     
+                                    // Add video consultation class if video appointment
+                                    const videoClass = apt.appointment_type === 'video' ? 'appointment-card video-appointment' : 'appointment-card';
+                                    
+                                    // Generate video consultation button if applicable
+                                    const videoButton = VideoConsultationDashboard.generateVideoConsultationButton(apt);
+                                    
                                     return `
-                                        <div class="appointment-item d-flex justify-content-between align-items-center p-2 mb-2 bg-light rounded">
-                                            <div>
-                                                <div style="color: black;"><strong>${apt.doctor_name || 'Unknown Doctor'}</strong></div>
-                                                <div class="text-muted small">
-                                                    <i class="bi bi-camera-video me-1"></i>${apt.appointment_type}
+                                        <div class="${videoClass}" data-appointment-id="${apt.id}">
+                                            <div class="appointment-item d-flex justify-content-between align-items-center p-2 mb-2 bg-light rounded">
+                                                <div>
+                                                    <div style="color: black;"><strong>${apt.doctor_name || 'Unknown Doctor'}</strong></div>
+                                                    <div class="text-muted small">
+                                                        <i class="bi ${apt.appointment_type === 'video' ? 'bi-camera-video' : 'bi-calendar-check'} me-1"></i>${apt.appointment_type}
+                                                    </div>
+                                                    ${apt.reason_for_visit ? `<div class="text-muted small">${apt.reason_for_visit}</div>` : ''}
+                                                    <div class="small" style="color: darkgreen;">
+                                                        <i class="bi bi-calendar me-1"></i>${dateStr} ${timeStr}
+                                                    </div>
+                                                    ${videoButton ? `<div class="mt-2">${videoButton}</div>` : ''}
                                                 </div>
-                                                ${apt.reason_for_visit ? `<div class="text-muted small">${apt.reason_for_visit}</div>` : ''}
-                                                <div class="small" style="color: darkgreen;">
-                                                    <i class="bi bi-calendar me-1"></i>${dateStr} ${timeStr}
-                                                </div>
+                                                <span class="badge bg-primary">${apt.status}</span>
                                             </div>
-                                            <span class="badge bg-primary">${apt.status}</span>
                                         </div>
                                     `;
                                 }).join('')}

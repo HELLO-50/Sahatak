@@ -1,0 +1,269 @@
+/* Video Consultation Dashboard Styles - Matching dashboard.css theme */
+
+/* Using existing dashboard CSS variables */
+:root {
+    --video-btn-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    --video-btn-hover-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Video Consultation Buttons - Following dashboard button patterns */
+.video-consultation-btn {
+    border: none;
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 140px;
+    justify-content: center;
+    box-shadow: var(--video-btn-shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+.video-consultation-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--video-btn-hover-shadow);
+    text-decoration: none;
+}
+
+.video-consultation-btn:active {
+    transform: translateY(-1px);
+    transition: transform 0.1s;
+}
+
+/* Button States - Using dashboard color scheme */
+.video-consultation-btn.btn-start-video {
+    background: linear-gradient(135deg, var(--medical-green), #10b981);
+    color: white;
+    border: 2px solid transparent;
+}
+
+.video-consultation-btn.btn-start-video:hover {
+    background: linear-gradient(135deg, #047857, var(--medical-green));
+    color: white;
+}
+
+.video-consultation-btn.btn-join-video {
+    background: linear-gradient(135deg, var(--medical-blue), var(--medical-teal));
+    color: white;
+    border: 2px solid transparent;
+}
+
+.video-consultation-btn.btn-join-video:hover {
+    background: linear-gradient(135deg, #1d4ed8, var(--medical-blue));
+    color: white;
+}
+
+.video-consultation-btn.btn-waiting {
+    background: var(--secondary-color);
+    color: white;
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.video-consultation-btn.btn-waiting:hover {
+    transform: none;
+    box-shadow: var(--video-btn-shadow);
+    background: var(--secondary-color);
+    color: white;
+}
+
+.video-consultation-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.video-consultation-btn:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* Session Status Indicators - Matching dashboard theme */
+.session-status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 8px;
+    box-shadow: var(--video-btn-shadow);
+}
+
+.session-status-waiting {
+    background: linear-gradient(135deg, #fef3c7, #fbbf24);
+    color: #92400e;
+    border: 1px solid #f59e0b;
+}
+
+.session-status-connecting {
+    background: linear-gradient(135deg, #dbeafe, var(--info-color));
+    color: #1e40af;
+    border: 1px solid var(--medical-teal);
+}
+
+.session-status-active {
+    background: linear-gradient(135deg, #dcfce7, var(--medical-green));
+    color: #166534;
+    border: 1px solid var(--success-color);
+}
+
+.session-status-ended {
+    background: linear-gradient(135deg, #fecaca, var(--danger-color));
+    color: #991b1b;
+    border: 1px solid #ef4444;
+}
+
+/* Appointment Card Video Enhancements - Following dashboard card patterns */
+.appointment-card.video-appointment {
+    border-left: 4px solid var(--medical-blue);
+    position: relative;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    box-shadow: var(--card-shadow);
+}
+
+.appointment-card.video-appointment::before {
+    content: "📹";
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 20px;
+    opacity: 0.8;
+}
+
+.appointment-card.video-appointment.rtl::before {
+    right: auto;
+    left: 15px;
+}
+
+.appointment-card.video-appointment:hover {
+    box-shadow: var(--hover-shadow);
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+}
+
+/* Video Consultation Actions Area - Matching dashboard layout patterns */
+.video-consultation-actions {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 2px solid var(--soft-gray);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.video-session-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 13px;
+    color: var(--medical-blue);
+    font-weight: 500;
+}
+
+.video-session-duration {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.connection-quality-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+}
+
+.connection-quality-excellent { color: #28a745; }
+.connection-quality-good { color: #17a2b8; }
+.connection-quality-fair { color: #ffc107; }
+.connection-quality-poor { color: #dc3545; }
+
+/* Loading States */
+.video-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.video-loading .spinner-border {
+    width: 16px;
+    height: 16px;
+    border-width: 2px;
+}
+
+/* Pre-consultation Check Indicators */
+.pre-consultation-checks {
+    display: flex;
+    gap: 8px;
+    margin: 8px 0;
+}
+
+.check-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 6px;
+}
+
+.check-indicator.check-passed {
+    background: #d4edda;
+    color: #155724;
+}
+
+.check-indicator.check-failed {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.check-indicator.check-warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 576px) {
+    .video-consultation-btn {
+        font-size: 13px;
+        padding: 6px 12px;
+        min-width: 120px;
+    }
+    
+    .video-consultation-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .video-session-info {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .pre-consultation-checks {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
+/* RTL Support */
+.rtl .video-consultation-actions {
+    direction: rtl;
+}
+
+.rtl .video-session-info {
+    direction: rtl;
+}
+
+.rtl .pre-consultation-checks {
+    direction: rtl;
+}

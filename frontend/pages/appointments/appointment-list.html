@@ -25,6 +25,8 @@
     <link rel="stylesheet" href="../../assets/css/components/dashboard.css">
     <!-- Appointments CSS -->
     <link rel="stylesheet" href="../../assets/css/components/appointments.css">
+    <!-- Video Consultation Dashboard CSS -->
+    <link rel="stylesheet" href="../../assets/css/components/video-consultation-dashboard.css">
 </head>
 <body data-protect="patient">
     <div class="dashboard-container">
@@ -341,6 +343,9 @@
     <!-- Dashboard Translations -->
     <script src="../../assets/js/components/dashboard-translations.js"></script>
     
+    <!-- Video Consultation Dashboard JavaScript -->
+    <script src="../../assets/js/components/video-consultation-dashboard.js"></script>
+    
     <script>
         // Appointment List Management - following main.js patterns
         const AppointmentList = {
@@ -641,8 +646,14 @@
                     const rescheduleText = currentLang === 'ar' ? 'إعادة جدولة' : 'Reschedule';
                     const cancelText = currentLang === 'ar' ? 'إلغاء' : 'Cancel';
                     
+                    // Add video consultation classes and button if applicable
+                    const cardClasses = appointment.appointment_type === 'video' ? 
+                        'card mb-3 appointment-card video-appointment' : 
+                        'card mb-3 appointment-card';
+                    const videoButton = VideoConsultationDashboard.generateVideoConsultationButton(appointment);
+                    
                     return `
-                        <div class="card mb-3 appointment-card">
+                        <div class="${cardClasses}" data-appointment-id="${appointment.id}">
                             <div class="card-body">
                                 <div class="row align-items-center">
                                     <div class="col-md-8">
@@ -657,7 +668,7 @@
                                                 ${date.toLocaleDateString()} - ${date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
                                             </div>
                                             <div class="col-sm-6 mb-2">
-                                                <i class="bi bi-camera-video me-1"></i>
+                                                <i class="bi ${appointment.appointment_type === 'video' ? 'bi-camera-video' : 'bi-calendar-check'} me-1"></i>
                                                 ${typeText}
                                             </div>
                                             ${appointment.reason_for_visit ? `
@@ -667,6 +678,12 @@
                                                 </div>
                                             ` : ''}
                                         </div>
+                                        
+                                        ${videoButton ? `
+                                            <div class="video-consultation-actions mt-3">
+                                                ${videoButton}
+                                            </div>
+                                        ` : ''}
                                     </div>
                                     
                                     <div class="col-md-4 text-end">
