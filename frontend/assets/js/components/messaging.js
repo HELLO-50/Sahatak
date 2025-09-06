@@ -289,27 +289,25 @@ async function loadRecentConversations() {
         const response = await ApiHelper.makeRequest('/messages/conversations');
         
         if (response.success) {
-            console.log('🔍 Conversations API response:', response.data);
             if (response.data.conversations && response.data.conversations.length > 0) {
                 // Load the first conversation
                 const firstConv = response.data.conversations[0];
-                console.log('📋 First conversation structure:', firstConv);
                 currentConversationId = firstConv.id;
                 
-                // Set recipient based on user type with null checks
+                // Set recipient based on user type using direct IDs
                 if (userType === 'patient') {
-                    if (firstConv.participants && firstConv.participants.doctor) {
-                        currentRecipientId = firstConv.participants.doctor.id;
+                    if (firstConv.doctor_id) {
+                        currentRecipientId = firstConv.doctor_id;
                     } else {
-                        console.warn('Doctor information not available in conversation participants');
-                        return; // Exit if no doctor info
+                        console.warn('Doctor ID not available in conversation');
+                        return; // Exit if no doctor ID
                     }
                 } else {
-                    if (firstConv.participants && firstConv.participants.patient) {
-                        currentRecipientId = firstConv.participants.patient.id;
+                    if (firstConv.patient_id) {
+                        currentRecipientId = firstConv.patient_id;
                     } else {
-                        console.warn('Patient information not available in conversation participants');
-                        return; // Exit if no patient info
+                        console.warn('Patient ID not available in conversation');
+                        return; // Exit if no patient ID
                     }
                 }
                 
@@ -381,14 +379,18 @@ function displayPatientConversations(conversationList) {
     // This can be expanded if patients can message multiple doctors
     if (conversationList.length > 0) {
         const firstConv = conversationList[0];
-        if (firstConv.participants && firstConv.participants.doctor) {
-            const doctor = firstConv.participants.doctor;
+        if (firstConv.doctor_id) {
             currentConversationId = firstConv.id;
-            currentRecipientId = doctor.id;
+            currentRecipientId = firstConv.doctor_id;
+            // Create doctor object with available data
+            const doctor = {
+                id: firstConv.doctor_id,
+                name: firstConv.doctor_name || 'Doctor'
+            };
             updateDoctorDisplay(doctor);
             loadMessages();
         } else {
-            console.warn('Doctor information not available in conversation participants');
+            console.warn('Doctor ID not available in conversation');
             showErrorMessage('Unable to load conversation. Doctor information is missing.');
         }
     }
@@ -474,11 +476,14 @@ function displayDoctorConversations(conversationList) {
         
         // Add existing conversations
         conversationList.forEach((conversation, index) => {
-            if (!conversation.participants || !conversation.participants.patient) {
-                console.warn('Patient information not available in conversation:', conversation.id);
+            if (!conversation.patient_id) {
+                console.warn('Patient ID not available in conversation:', conversation.id);
                 return; // Skip this conversation
             }
-            const patient = conversation.participants.patient;
+            const patient = {
+                id: conversation.patient_id,
+                name: conversation.patient_name || 'Patient'
+            };
             const patientItem = document.createElement('div');
             patientItem.className = `patient-item ${index === 0 ? 'active' : ''}`;
             patientItem.setAttribute('data-conversation', conversation.id);
@@ -509,11 +514,14 @@ function displayDoctorConversations(conversationList) {
         // Select first conversation if available
         if (conversationList.length > 0) {
             const firstConv = conversationList[0];
-            if (firstConv.participants && firstConv.participants.patient) {
-                const patient = firstConv.participants.patient;
+            if (firstConv.patient_id) {
+                const patient = {
+                    id: firstConv.patient_id,
+                    name: firstConv.patient_name || 'Patient'
+                };
                 selectConversation(firstConv.id, patient.id, patient.name);
             } else {
-                console.warn('Patient information not available in first conversation');
+                console.warn('Patient ID not available in first conversation');
             }
         } else {
             // If no conversations, reset to default state
@@ -618,7 +626,7 @@ async function startNewConversation(patientId, patientName) {
     try {
         // Check if conversation already exists
         const existingConv = conversations.find(conv => 
-            conv.participants && conv.participants.patient && conv.participants.patient.id === patientId
+            conv.patient_id === patientId
         );
         
         if (existingConv) {
