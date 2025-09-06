@@ -434,10 +434,7 @@ def get_users():
 def get_user_details(user_id):
     """Get user details for admin view"""
     try:
-        user = User.query.options(
-            joinedload(User.patient_profile),
-            joinedload(User.doctor_profile)
-        ).get(user_id)
+        user = User.query.get(user_id)
         
         if not user:
             return APIResponse.error(
@@ -446,13 +443,13 @@ def get_user_details(user_id):
                 error_code="USER_NOT_FOUND"
             )
         
-        # Format comprehensive user data (admin access to personal info) 
+        # Format user account data (only User table fields)
         user_data = {
             'id': user.id,
             'email': user.email,
             'full_name': user.full_name,
-            'phone': None,  # Will be populated from profile
             'user_type': user.user_type,
+            'language_preference': user.language_preference,
             'is_active': user.is_active,
             'is_verified': user.is_verified,
             'registration_date': user.created_at.isoformat(),
@@ -465,61 +462,10 @@ def get_user_details(user_id):
             'last_login_readable': user.last_login.strftime('%Y-%m-%d %H:%M:%S UTC') if user.last_login else 'Never',
             'session_expires_at': user.session_expires_at.isoformat() if user.session_expires_at else None,
             'is_online': user.is_online,
-            'last_seen_at': user.last_seen_at.isoformat() if user.last_seen_at else None
+            'last_seen_at': user.last_seen_at.isoformat() if user.last_seen_at else None,
+            'last_activity_at': user.last_activity_at.isoformat() if user.last_activity_at else None,
+            'auto_logout_warnings_sent': user.auto_logout_warnings_sent
         }
-        
-        # Add type-specific detailed information (admin has access to personal info)
-        if user.user_type == 'doctor' and user.doctor_profile:
-            user_data['phone'] = user.doctor_profile.phone
-            user_data['doctor_details'] = {
-                'specialty': user.doctor_profile.specialty,
-                'license_number': user.doctor_profile.license_number,
-                'years_of_experience': user.doctor_profile.years_of_experience,
-                'bio': user.doctor_profile.bio,
-                'consultation_fee': float(user.doctor_profile.consultation_fee) if user.doctor_profile.consultation_fee else None,
-                'is_verified': user.doctor_profile.is_verified,
-                'verification_date': user.doctor_profile.verification_date.isoformat() if user.doctor_profile.verification_date else None,
-                'verification_notes': user.doctor_profile.verification_notes,
-                'rating': float(user.doctor_profile.rating) if user.doctor_profile.rating else None,
-                'total_consultations': user.doctor_profile.total_consultations,
-                'available_days': user.doctor_profile.available_days,
-                'available_time_start': user.doctor_profile.available_time_start.isoformat() if user.doctor_profile.available_time_start else None,
-                'available_time_end': user.doctor_profile.available_time_end.isoformat() if user.doctor_profile.available_time_end else None
-            }
-        elif user.user_type == 'patient' and user.patient_profile:
-            user_data['phone'] = user.patient_profile.phone
-            user_data['patient_details'] = {
-                'age': user.patient_profile.age,
-                'date_of_birth': user.patient_profile.date_of_birth.isoformat() if user.patient_profile.date_of_birth else None,
-                'gender': user.patient_profile.gender,
-                'blood_type': user.patient_profile.blood_type,
-                'height_cm': user.patient_profile.height_cm,
-                'weight_kg': user.patient_profile.weight_kg,
-                'emergency_contact': user.patient_profile.emergency_contact,
-                'emergency_phone': user.patient_profile.emergency_phone,
-                'address': user.patient_profile.address,
-                'city': user.patient_profile.city,
-                'total_appointments': user.patient_profile.total_appointments
-            }
-        
-        # Get recent activity (last 10 appointments)
-        recent_appointments = []
-        if user.user_type == 'patient' and user.patient_profile:
-            recent_appointments = Appointment.query.filter_by(
-                patient_id=user.patient_profile.id
-            ).order_by(Appointment.created_at.desc()).limit(10).all()
-        elif user.user_type == 'doctor' and user.doctor_profile:
-            recent_appointments = Appointment.query.filter_by(
-                doctor_id=user.doctor_profile.id
-            ).order_by(Appointment.created_at.desc()).limit(10).all()
-        
-        user_data['recent_activity'] = [{
-            'id': apt.id,
-            'date': apt.appointment_date.isoformat(),
-            'status': apt.status,
-            'type': 'appointment',
-            'with_user': apt.doctor.user.full_name if user.user_type == 'patient' else apt.patient.user.full_name
-        } for apt in recent_appointments]
         
         log_user_action(
             current_user.id,
