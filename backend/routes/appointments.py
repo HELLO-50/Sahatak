@@ -761,10 +761,13 @@ def get_waiting_patients():
         waiting_patients = []
         for appointment in waiting_appointments:
             patient = appointment.patient
+            if not patient:
+                continue  # Skip appointments without patient data
+            
             patient_data = {
                 'id': appointment.id,
-                'patient_id': patient.patient_id,
-                'full_name': patient.user.full_name if patient.user else 'Unknown',
+                'patient_id': patient.patient_id if patient.patient_id else 'Unknown',
+                'full_name': patient.user.full_name if patient and patient.user and patient.user.full_name else 'Unknown Patient',
                 'appointment_time': appointment.appointment_date.strftime('%H:%M'),
                 'appointment_type': appointment.appointment_type,
                 'status': appointment.status
