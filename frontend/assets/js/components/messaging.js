@@ -289,9 +289,11 @@ async function loadRecentConversations() {
         const response = await ApiHelper.makeRequest('/messages/conversations');
         
         if (response.success) {
+            console.log('🔍 Conversations API response:', response.data);
             if (response.data.conversations && response.data.conversations.length > 0) {
                 // Load the first conversation
                 const firstConv = response.data.conversations[0];
+                console.log('📋 First conversation structure:', firstConv);
                 currentConversationId = firstConv.id;
                 
                 // Set recipient based on user type with null checks
