@@ -421,9 +421,20 @@ const AdminDashboard = {
         }
     },
     
+    // Current filter state
+    currentUserFilters: {
+        page: 1,
+        per_page: 20,
+        user_type: '',
+        is_active: '',
+        search: ''
+    },
+
     // Load users data
     async loadUsersData() {
         try {
+            // Reset to first page when loading fresh data
+            this.currentUserFilters.page = 1;
             const response = await AdminAuth.apiRequest('/admin/users?page=1&per_page=20');
             const data = await response.json();
             
@@ -439,6 +450,10 @@ const AdminDashboard = {
                 console.error('Invalid users response:', data);
                 this.displayUsersTable([]);
             }
+            
+            // Setup filter event listeners if not already done
+            this.setupUserFilters();
+            
         } catch (error) {
             console.error('Failed to load users:', error);
             this.showNotification('Failed to load users: ' + error.message, 'error');
@@ -534,24 +549,113 @@ const AdminDashboard = {
     
     // Load specific users page
     async loadUsersPage(page = 1) {
+        this.currentUserFilters.page = page;
+        await this.loadFilteredUsers();
+    },
+    
+    // Load users with current filters
+    async loadFilteredUsers() {
         try {
-            const response = await AdminAuth.apiRequest(`/admin/users?page=${page}&per_page=20`);
+            // Build query parameters
+            const params = new URLSearchParams();
+            params.append('page', this.currentUserFilters.page);
+            params.append('per_page', this.currentUserFilters.per_page);
+            
+            if (this.currentUserFilters.user_type) {
+                params.append('user_type', this.currentUserFilters.user_type);
+            }
+            
+            if (this.currentUserFilters.is_active !== '') {
+                params.append('is_active', this.currentUserFilters.is_active);
+            }
+            
+            if (this.currentUserFilters.search) {
+                params.append('search', this.currentUserFilters.search);
+            }
+            
+            const response = await AdminAuth.apiRequest(`/admin/users?${params.toString()}`);
             const data = await response.json();
             
-            if (data.success && data.users) {
-                this.displayUsersTable(data.users);
-                this.updateUsersPagination(data.pagination);
+            console.log('Filtered users data:', data); // Debug log
+            
+            if (data.success && data.data) {
+                this.displayUsersTable(data.data.users);
+                if (data.data.pagination) {
+                    this.updateUsersPagination(data.data.pagination);
+                }
+            } else {
+                console.error('Invalid filtered users response:', data);
+                this.displayUsersTable([]);
             }
         } catch (error) {
-            console.error('Failed to load users page:', error);
-            this.showNotification('Failed to load users', 'error');
+            console.error('Failed to load filtered users:', error);
+            this.showNotification('Failed to load users: ' + error.message, 'error');
+            this.displayUsersTable([]);
         }
     },
     
+    // Setup user filters event listeners
+    setupUserFilters() {
+        // Avoid setting up multiple times
+        if (this.filtersSetup) return;
+        this.filtersSetup = true;
+        
+        // User type filters
+        document.querySelectorAll('.user-filter-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // Update active button
+                document.querySelectorAll('.user-filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Update filter
+                const filter = btn.getAttribute('data-filter');
+                this.currentUserFilters.user_type = filter === 'all' ? '' : filter;
+                this.currentUserFilters.page = 1; // Reset to first page
+                
+                this.loadFilteredUsers();
+            });
+        });
+        
+        // Status filters
+        document.querySelectorAll('.status-filter-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // Update active button
+                document.querySelectorAll('.status-filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Update filter
+                const status = btn.getAttribute('data-status');
+                this.currentUserFilters.is_active = status;
+                this.currentUserFilters.page = 1; // Reset to first page
+                
+                this.loadFilteredUsers();
+            });
+        });
+        
+        // Search input
+        const searchInput = document.getElementById('user-search');
+        if (searchInput) {
+            let searchTimeout;
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    this.currentUserFilters.search = e.target.value.trim();
+                    this.currentUserFilters.page = 1; // Reset to first page
+                    this.loadFilteredUsers();
+                }, 500); // Debounce search
+            });
+        }
+    },
+
     // Handle search
     handleSearch(query) {
-        // Implement search logic based on current section
-        console.log('Searching for:', query);
+        this.currentUserFilters.search = query;
+        this.currentUserFilters.page = 1;
+        this.loadFilteredUsers();
     },
     
     // Setup auto refresh
@@ -788,8 +892,8 @@ const AdminDashboard = {
             
             if (data.success) {
                 this.showNotification('User deleted successfully', 'success');
-                // Reload users data
-                this.loadUsersData();
+                // Reload users data with current filters
+                this.loadFilteredUsers();
             } else {
                 this.showNotification(data.message || 'Failed to delete user', 'error');
             }
@@ -813,8 +917,8 @@ const AdminDashboard = {
             
             if (data.success) {
                 this.showNotification('User status updated successfully', 'success');
-                // Reload users data
-                this.loadUsersData();
+                // Reload users data with current filters
+                this.loadFilteredUsers();
             } else {
                 this.showNotification(data.message || 'Failed to update user status', 'error');
             }
