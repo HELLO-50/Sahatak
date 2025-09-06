@@ -688,7 +688,7 @@ const AdminDashboard = {
             const data = await response.json();
             
             if (data.success) {
-                const user = data.user;
+                const user = data.data.user;
                 const modalHtml = `
                     <div class="modal fade" id="viewUserModal" tabindex="-1">
                         <div class="modal-dialog">

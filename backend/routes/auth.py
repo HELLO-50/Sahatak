@@ -476,8 +476,17 @@ def login():
                 auth_logger.warning(f"JWT generation returned None for user {user.id}")
             
         except ImportError:
-            # Fallback if PyJWT not installed
-            auth_logger.warning("PyJWT not available, using fallback token")
+            # Force PyJWT requirement for admin users
+            auth_logger.error("PyJWT not available")
+            if user.user_type == 'admin':
+                return APIResponse.error(
+                    message="Admin authentication requires PyJWT. Please contact system administrator.",
+                    status_code=500,
+                    error_code="JWT_REQUIRED"
+                )
+            
+            # Fallback for non-admin users only
+            auth_logger.warning("PyJWT not available, using fallback token for non-admin user")
             import base64
             import json
             from datetime import timedelta
@@ -536,45 +545,14 @@ def login():
             response_data['verification_status'] = profile.verification_status
             response_data['profile_completed'] = profile.profile_completed
         
-        # Generate proper JWT token for admin users for cross-origin access
-        if user.user_type == 'admin':
-            try:
-                from utils.jwt_helper import JWTHelper
-                admin_data = {
-                    'user_id': user.id,
-                    'email': user.email,
-                    'user_type': 'admin'
-                }
-                token = JWTHelper.generate_token(admin_data, expires_in=24)
-                if token:
-                    response_data['access_token'] = token
-                    auth_logger.info(f"Generated JWT token for admin user {user.id}")
-                else:
-                    auth_logger.error("Failed to generate JWT token for admin")
-                    
-            except ImportError:
-                # Fallback to base64 encoding if JWT not available
-                try:
-                    import base64
-                    import json
-                    
-                    token_data = {
-                        'user_id': user.id,
-                        'email': user.email,
-                        'user_type': 'admin',
-                        'exp': int((datetime.datetime.utcnow() + timedelta(hours=24)).timestamp())
-                    }
-                    token_json = json.dumps(token_data)
-                    token = base64.b64encode(token_json.encode()).decode()
-                    response_data['access_token'] = token
-                    auth_logger.info(f"Generated fallback token for admin user {user.id}")
-                    
-                except Exception as e:
-                    auth_logger.error(f"Fallback token generation error: {str(e)}")
-                    
-            except Exception as e:
-                auth_logger.error(f"Admin token generation error: {str(e)}")
-                # Continue without token if generation fails
+        # Admin users should have already received JWT token above
+        if user.user_type == 'admin' and 'access_token' not in response_data:
+            auth_logger.error(f"Admin user {user.id} login completed but no token was generated")
+            return APIResponse.error(
+                message="Admin authentication failed - token generation error",
+                status_code=500,
+                error_code="TOKEN_GENERATION_FAILED"
+            )
         
         return APIResponse.success(
             data=response_data,
