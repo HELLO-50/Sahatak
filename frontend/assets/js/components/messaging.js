@@ -294,11 +294,21 @@ async function loadRecentConversations() {
                 const firstConv = response.data.conversations[0];
                 currentConversationId = firstConv.id;
                 
-                // Set recipient based on user type
+                // Set recipient based on user type with null checks
                 if (userType === 'patient') {
-                    currentRecipientId = firstConv.participants.doctor.id;
+                    if (firstConv.participants && firstConv.participants.doctor) {
+                        currentRecipientId = firstConv.participants.doctor.id;
+                    } else {
+                        console.warn('Doctor information not available in conversation participants');
+                        return; // Exit if no doctor info
+                    }
                 } else {
-                    currentRecipientId = firstConv.participants.patient.id;
+                    if (firstConv.participants && firstConv.participants.patient) {
+                        currentRecipientId = firstConv.participants.patient.id;
+                    } else {
+                        console.warn('Patient information not available in conversation participants');
+                        return; // Exit if no patient info
+                    }
                 }
                 
                 await loadMessages();
@@ -369,11 +379,16 @@ function displayPatientConversations(conversationList) {
     // This can be expanded if patients can message multiple doctors
     if (conversationList.length > 0) {
         const firstConv = conversationList[0];
-        const doctor = firstConv.participants.doctor;
-        currentConversationId = firstConv.id;
-        currentRecipientId = doctor.id;
-        updateDoctorDisplay(doctor);
-        loadMessages();
+        if (firstConv.participants && firstConv.participants.doctor) {
+            const doctor = firstConv.participants.doctor;
+            currentConversationId = firstConv.id;
+            currentRecipientId = doctor.id;
+            updateDoctorDisplay(doctor);
+            loadMessages();
+        } else {
+            console.warn('Doctor information not available in conversation participants');
+            showErrorMessage('Unable to load conversation. Doctor information is missing.');
+        }
     }
 }
 
@@ -457,6 +472,10 @@ function displayDoctorConversations(conversationList) {
         
         // Add existing conversations
         conversationList.forEach((conversation, index) => {
+            if (!conversation.participants || !conversation.participants.patient) {
+                console.warn('Patient information not available in conversation:', conversation.id);
+                return; // Skip this conversation
+            }
             const patient = conversation.participants.patient;
             const patientItem = document.createElement('div');
             patientItem.className = `patient-item ${index === 0 ? 'active' : ''}`;
@@ -488,8 +507,12 @@ function displayDoctorConversations(conversationList) {
         // Select first conversation if available
         if (conversationList.length > 0) {
             const firstConv = conversationList[0];
-            const patient = firstConv.participants.patient;
-            selectConversation(firstConv.id, patient.id, patient.name);
+            if (firstConv.participants && firstConv.participants.patient) {
+                const patient = firstConv.participants.patient;
+                selectConversation(firstConv.id, patient.id, patient.name);
+            } else {
+                console.warn('Patient information not available in first conversation');
+            }
         } else {
             // If no conversations, reset to default state
             resetToDefaultState();
@@ -593,7 +616,7 @@ async function startNewConversation(patientId, patientName) {
     try {
         // Check if conversation already exists
         const existingConv = conversations.find(conv => 
-            conv.participants.patient && conv.participants.patient.id === patientId
+            conv.participants && conv.participants.patient && conv.participants.patient.id === patientId
         );
         
         if (existingConv) {
