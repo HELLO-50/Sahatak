@@ -983,6 +983,207 @@ const AdminDashboard = {
         }
     },
     
+    // Load appointments data
+    async loadAppointmentsData() {
+        try {
+            const response = await AdminAuth.apiRequest('/admin/appointments?page=1&per_page=20');
+            const data = await response.json();
+            
+            if (data.success && data.data) {
+                this.displayAppointmentsTable(data.data.appointments);
+                // Update pagination if needed
+                if (data.data.pagination) {
+                    this.updateAppointmentsPagination(data.data.pagination);
+                }
+            } else {
+                console.error('Invalid appointments response:', data);
+                this.displayAppointmentsTable([]);
+            }
+            
+            // Setup filter event listeners if not already done
+            this.setupAppointmentFilters();
+            
+        } catch (error) {
+            console.error('Failed to load appointments:', error);
+            this.showNotification('Failed to load appointments: ' + error.message, 'error');
+            this.displayAppointmentsTable([]);
+        }
+    },
+    
+    // Display appointments table
+    displayAppointmentsTable(appointments) {
+        const tbody = document.getElementById('appointments-table-body');
+        if (!tbody) return;
+        
+        if (!appointments || appointments.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center py-4">
+                        <p class="text-muted">No appointments found</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        tbody.innerHTML = appointments.map(appointment => `
+            <tr>
+                <td>
+                    <strong>${appointment.patient.name}</strong><br>
+                    <small class="text-muted">${appointment.patient.email}</small>
+                </td>
+                <td>
+                    <strong>Dr. ${appointment.doctor.name}</strong><br>
+                    <small class="text-muted">${appointment.doctor.specialty}</small>
+                </td>
+                <td>
+                    <div>${appointment.appointment_date_readable}</div>
+                    <small class="text-muted">${appointment.appointment_type}</small>
+                </td>
+                <td>
+                    <span class="badge ${this.getStatusBadgeClass(appointment.status)}">${appointment.status}</span>
+                </td>
+                <td>
+                    <div class="btn-group btn-group-sm">
+                        ${appointment.can_cancel ? `
+                            <button class="btn btn-warning" onclick="AdminDashboard.cancelAppointment(${appointment.id})" title="Cancel Appointment">
+                                <i class="bi bi-x-circle"></i>
+                            </button>
+                        ` : ''}
+                        ${appointment.can_delete ? `
+                            <button class="btn btn-danger" onclick="AdminDashboard.deleteAppointment(${appointment.id})" title="Delete Appointment">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        ` : ''}
+                        <button class="btn btn-info" onclick="AdminDashboard.viewAppointment(${appointment.id})" title="View Details">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    },
+    
+    // Setup appointment filters
+    setupAppointmentFilters() {
+        // Filter buttons
+        const filterButtons = document.querySelectorAll('.appointment-filter-btn');
+        filterButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                // Remove active class from all buttons
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                // Add active class to clicked button
+                e.target.classList.add('active');
+                
+                // Load appointments with filter
+                const filter = e.target.dataset.filter;
+                this.loadAppointmentsWithFilter(filter);
+            });
+        });
+    },
+    
+    // Load appointments with filter
+    async loadAppointmentsWithFilter(status) {
+        try {
+            const url = status === 'all' ? '/admin/appointments' : `/admin/appointments?status=${status}`;
+            const response = await AdminAuth.apiRequest(url);
+            const data = await response.json();
+            
+            if (data.success && data.data) {
+                this.displayAppointmentsTable(data.data.appointments);
+            } else {
+                console.error('Invalid appointments response:', data);
+                this.displayAppointmentsTable([]);
+            }
+            
+        } catch (error) {
+            console.error('Failed to filter appointments:', error);
+            this.showNotification('Failed to filter appointments: ' + error.message, 'error');
+        }
+    },
+    
+    // Cancel appointment
+    async cancelAppointment(appointmentId) {
+        const reason = prompt('Enter cancellation reason (optional):') || 'Cancelled by admin';
+        
+        if (!confirm(`Cancel this appointment? Reason: ${reason}`)) {
+            return;
+        }
+        
+        try {
+            const response = await AdminAuth.apiRequest(`/admin/appointments/${appointmentId}/cancel`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reason })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                this.showNotification('Appointment cancelled successfully', 'success');
+                this.loadAppointmentsData(); // Refresh table
+            } else {
+                throw new Error(data.message || 'Failed to cancel appointment');
+            }
+            
+        } catch (error) {
+            console.error('Failed to cancel appointment:', error);
+            this.showNotification('Failed to cancel appointment: ' + error.message, 'error');
+        }
+    },
+    
+    // Delete appointment
+    async deleteAppointment(appointmentId) {
+        if (!confirm('Delete this appointment permanently? This action cannot be undone.')) {
+            return;
+        }
+        
+        try {
+            const response = await AdminAuth.apiRequest(`/admin/appointments/${appointmentId}`, {
+                method: 'DELETE'
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                this.showNotification('Appointment deleted successfully', 'success');
+                this.loadAppointmentsData(); // Refresh table
+            } else {
+                throw new Error(data.message || 'Failed to delete appointment');
+            }
+            
+        } catch (error) {
+            console.error('Failed to delete appointment:', error);
+            this.showNotification('Failed to delete appointment: ' + error.message, 'error');
+        }
+    },
+    
+    // View appointment details
+    viewAppointment(appointmentId) {
+        // For now, just show an alert. You can implement a modal later
+        this.showNotification(`View appointment ${appointmentId} - Details modal can be implemented here`, 'info');
+    },
+    
+    // Get status badge class
+    getStatusBadgeClass(status) {
+        const badgeClasses = {
+            'scheduled': 'bg-primary',
+            'confirmed': 'bg-success',
+            'in_progress': 'bg-warning',
+            'completed': 'bg-success',
+            'cancelled': 'bg-danger',
+            'no_show': 'bg-secondary'
+        };
+        return badgeClasses[status] || 'bg-secondary';
+    },
+    
+    // Update appointments pagination
+    updateAppointmentsPagination(pagination) {
+        // This function can be implemented similar to updateUsersPagination
+        // For now, just log the pagination info
+        console.log('Appointments pagination:', pagination);
+    },
+    
     // Load admin users
     async loadAdminUsers() {
         try {

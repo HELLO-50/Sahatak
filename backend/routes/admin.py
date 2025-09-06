@@ -459,8 +459,8 @@ def get_user_details(user_id):
     """Get user details for admin view"""
     try:
         user = User.query.options(
-            joinedload(User.patient),
-            joinedload(User.doctor)
+            joinedload(User.patient_profile),
+            joinedload(User.doctor_profile)
         ).get(user_id)
         
         if not user:
@@ -470,56 +470,71 @@ def get_user_details(user_id):
                 error_code="USER_NOT_FOUND"
             )
         
-        # Format comprehensive user data (exclude medical records) 
+        # Format comprehensive user data (admin access to personal info) 
         user_data = {
             'id': user.id,
             'email': user.email,
             'full_name': user.full_name,
-            'phone': user.phone,
+            'phone': None,  # Will be populated from profile
             'user_type': user.user_type,
             'is_active': user.is_active,
             'is_verified': user.is_verified,
+            'registration_date': user.created_at.isoformat(),
+            'registration_date_readable': user.created_at.strftime('%Y-%m-%d %H:%M:%S UTC'),
+            'account_status': 'Active' if user.is_active else 'Inactive',
+            'email_verified': 'Yes' if user.is_verified else 'No',
             'created_at': user.created_at.isoformat(),
             'updated_at': user.updated_at.isoformat(),
             'last_login': user.last_login.isoformat() if user.last_login else None,
-            'locked_until': user.locked_until.isoformat() if user.locked_until else None
+            'last_login_readable': user.last_login.strftime('%Y-%m-%d %H:%M:%S UTC') if user.last_login else 'Never',
+            'locked_until': user.locked_until.isoformat() if user.locked_until else None,
+            'account_locked': 'Yes' if user.locked_until and user.locked_until > datetime.utcnow() else 'No'
         }
-          # Add type-specific detailed information
-        if user.user_type == 'doctor' and user.doctor:
+        
+        # Add type-specific detailed information (admin has access to personal info)
+        if user.user_type == 'doctor' and user.doctor_profile:
+            user_data['phone'] = user.doctor_profile.phone
             user_data['doctor_details'] = {
-                'specialty': user.doctor.specialty,
-                'license_number': user.doctor.license_number,
-                'years_of_experience': user.doctor.years_of_experience,
-                'bio': user.doctor.bio,
-                'consultation_fee': float(user.doctor.consultation_fee) if user.doctor.consultation_fee else None,
-                'is_verified': user.doctor.is_verified,
-                'verification_date': user.doctor.verification_date.isoformat() if user.doctor.verification_date else None,
-                'verification_notes': user.doctor.verification_notes,
-                'rating': float(user.doctor.rating) if user.doctor.rating else None,
-                'total_consultations': user.doctor.total_consultations,
-                'available_days': user.doctor.available_days,
-                'available_time_start': user.doctor.available_time_start.isoformat() if user.doctor.available_time_start else None,
-                'available_time_end': user.doctor.available_time_end.isoformat() if user.doctor.available_time_end else None
+                'specialty': user.doctor_profile.specialty,
+                'license_number': user.doctor_profile.license_number,
+                'years_of_experience': user.doctor_profile.years_of_experience,
+                'bio': user.doctor_profile.bio,
+                'consultation_fee': float(user.doctor_profile.consultation_fee) if user.doctor_profile.consultation_fee else None,
+                'is_verified': user.doctor_profile.is_verified,
+                'verification_date': user.doctor_profile.verification_date.isoformat() if user.doctor_profile.verification_date else None,
+                'verification_notes': user.doctor_profile.verification_notes,
+                'rating': float(user.doctor_profile.rating) if user.doctor_profile.rating else None,
+                'total_consultations': user.doctor_profile.total_consultations,
+                'available_days': user.doctor_profile.available_days,
+                'available_time_start': user.doctor_profile.available_time_start.isoformat() if user.doctor_profile.available_time_start else None,
+                'available_time_end': user.doctor_profile.available_time_end.isoformat() if user.doctor_profile.available_time_end else None
             }
-        elif user.user_type == 'patient' and user.patient:
+        elif user.user_type == 'patient' and user.patient_profile:
+            user_data['phone'] = user.patient_profile.phone
             user_data['patient_details'] = {
-                'date_of_birth': user.patient.date_of_birth.isoformat() if user.patient.date_of_birth else None,
-                'gender': user.patient.gender,
-                'blood_type': user.patient.blood_type,
-                'height_cm': user.patient.height_cm,
-                'weight_kg': user.patient.weight_kg,
-                'emergency_contact': user.patient.emergency_contact,
-                'emergency_phone': user.patient.emergency_phone,
-                'address': user.patient.address,
-                'city': user.patient.city,
-                'total_appointments': user.patient.total_appointments
+                'age': user.patient_profile.age,
+                'date_of_birth': user.patient_profile.date_of_birth.isoformat() if user.patient_profile.date_of_birth else None,
+                'gender': user.patient_profile.gender,
+                'blood_type': user.patient_profile.blood_type,
+                'height_cm': user.patient_profile.height_cm,
+                'weight_kg': user.patient_profile.weight_kg,
+                'emergency_contact': user.patient_profile.emergency_contact,
+                'emergency_phone': user.patient_profile.emergency_phone,
+                'address': user.patient_profile.address,
+                'city': user.patient_profile.city,
+                'total_appointments': user.patient_profile.total_appointments
             }
         
         # Get recent activity (last 10 appointments)
-        recent_appointments = Appointment.query.filter_by(
-            patient_id=user_id if user.user_type == 'patient' else None,
-            doctor_id=user_id if user.user_type == 'doctor' else None
-        ).order_by(Appointment.created_at.desc()).limit(10).all()
+        recent_appointments = []
+        if user.user_type == 'patient' and user.patient_profile:
+            recent_appointments = Appointment.query.filter_by(
+                patient_id=user.patient_profile.id
+            ).order_by(Appointment.created_at.desc()).limit(10).all()
+        elif user.user_type == 'doctor' and user.doctor_profile:
+            recent_appointments = Appointment.query.filter_by(
+                doctor_id=user.doctor_profile.id
+            ).order_by(Appointment.created_at.desc()).limit(10).all()
         
         user_data['recent_activity'] = [{
             'id': apt.id,
@@ -738,6 +753,311 @@ def delete_user(user_id):
         app_logger.error(f"Admin delete user error: {str(e)}")
         return APIResponse.error(
             message="Failed to delete user",
+            status_code=500
+        )
+
+# =============================================================================
+# APPOINTMENT MANAGEMENT ENDPOINTS
+# =============================================================================
+
+@admin_bp.route('/appointments', methods=['GET'])
+@admin_required
+def get_appointments():
+    """Get paginated list of appointments with filtering for admin"""
+    try:
+        # Get pagination parameters
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 20, type=int)
+        
+        # Get filter parameters
+        status_filter = request.args.get('status')  # all, upcoming, today, completed, cancelled
+        patient_search = request.args.get('patient_search')
+        doctor_search = request.args.get('doctor_search')
+        date_from = request.args.get('date_from')
+        date_to = request.args.get('date_to')
+        
+        page, per_page = validate_pagination_params(page, per_page)
+        
+        # Build base query with all necessary joins
+        query = Appointment.query.options(
+            joinedload(Appointment.patient).joinedload(Patient.user),
+            joinedload(Appointment.doctor).joinedload(Doctor.user)
+        )
+        
+        # Apply status filters
+        if status_filter and status_filter != 'all':
+            if status_filter == 'upcoming':
+                query = query.filter(
+                    and_(
+                        Appointment.appointment_date > datetime.utcnow(),
+                        Appointment.status == 'scheduled'
+                    )
+                )
+            elif status_filter == 'today':
+                today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+                today_end = today_start + timedelta(days=1)
+                query = query.filter(
+                    and_(
+                        Appointment.appointment_date >= today_start,
+                        Appointment.appointment_date < today_end
+                    )
+                )
+            else:
+                # completed, cancelled, etc.
+                query = query.filter(Appointment.status == status_filter)
+        
+        # Apply search filters
+        if patient_search:
+            query = query.join(Patient).join(User, Patient.user_id == User.id).filter(
+                or_(
+                    User.full_name.ilike(f'%{patient_search}%'),
+                    User.email.ilike(f'%{patient_search}%')
+                )
+            )
+        
+        if doctor_search:
+            query = query.join(Doctor).join(User, Doctor.user_id == User.id).filter(
+                or_(
+                    User.full_name.ilike(f'%{doctor_search}%'),
+                    User.email.ilike(f'%{doctor_search}%')
+                )
+            )
+        
+        # Apply date filters
+        if date_from:
+            try:
+                date_from_obj = datetime.fromisoformat(date_from.replace('Z', '+00:00'))
+                query = query.filter(Appointment.appointment_date >= date_from_obj)
+            except ValueError:
+                pass
+        
+        if date_to:
+            try:
+                date_to_obj = datetime.fromisoformat(date_to.replace('Z', '+00:00'))
+                query = query.filter(Appointment.appointment_date <= date_to_obj)
+            except ValueError:
+                pass
+        
+        # Apply pagination
+        appointments_pagination = query.order_by(Appointment.created_at.desc()).paginate(
+            page=page,
+            per_page=per_page,
+            error_out=False
+        )
+        
+        # Format appointment data
+        appointments_data = []
+        for appointment in appointments_pagination.items:
+            appointment_info = {
+                'id': appointment.id,
+                'patient': {
+                    'id': appointment.patient.id,
+                    'name': appointment.patient.user.full_name,
+                    'email': appointment.patient.user.email,
+                    'phone': appointment.patient.phone
+                },
+                'doctor': {
+                    'id': appointment.doctor.id,
+                    'name': appointment.doctor.user.full_name,
+                    'email': appointment.doctor.user.email,
+                    'specialty': appointment.doctor.specialty
+                },
+                'appointment_date': appointment.appointment_date.isoformat(),
+                'appointment_date_readable': appointment.appointment_date.strftime('%Y-%m-%d %H:%M'),
+                'status': appointment.status,
+                'appointment_type': appointment.appointment_type,
+                'notes': appointment.notes,
+                'created_at': appointment.created_at.isoformat(),
+                'created_at_readable': appointment.created_at.strftime('%Y-%m-%d %H:%M'),
+                'can_cancel': appointment.status in ['scheduled', 'confirmed'],
+                'can_delete': appointment.status in ['cancelled', 'completed']
+            }
+            appointments_data.append(appointment_info)
+        
+        # Log admin action
+        log_user_action(
+            current_user.id,
+            'admin_view_appointments',
+            {
+                'page': page,
+                'per_page': per_page,
+                'total_results': appointments_pagination.total,
+                'filters': {
+                    'status': status_filter,
+                    'patient_search': bool(patient_search),
+                    'doctor_search': bool(doctor_search),
+                    'date_range': bool(date_from or date_to)
+                }
+            }
+        )
+        
+        return APIResponse.success(
+            data={
+                'appointments': appointments_data,
+                'pagination': {
+                    'page': appointments_pagination.page,
+                    'pages': appointments_pagination.pages,
+                    'per_page': appointments_pagination.per_page,
+                    'total': appointments_pagination.total,
+                    'has_next': appointments_pagination.has_next,
+                    'has_prev': appointments_pagination.has_prev
+                }
+            },
+            message="Appointments retrieved successfully"
+        )
+        
+    except Exception as e:
+        app_logger.error(f"Admin get appointments error: {str(e)}")
+        return APIResponse.error(
+            message="Failed to retrieve appointments",
+            status_code=500
+        )
+
+@admin_bp.route('/appointments/<int:appointment_id>/cancel', methods=['PUT'])
+@admin_required
+def cancel_appointment(appointment_id):
+    """Cancel an appointment (admin only)"""
+    try:
+        appointment = Appointment.query.options(
+            joinedload(Appointment.patient).joinedload(Patient.user),
+            joinedload(Appointment.doctor).joinedload(Doctor.user)
+        ).get(appointment_id)
+        
+        if not appointment:
+            return APIResponse.error(
+                message="Appointment not found",
+                status_code=404,
+                error_code="APPOINTMENT_NOT_FOUND"
+            )
+        
+        # Check if appointment can be cancelled
+        if appointment.status not in ['scheduled', 'confirmed']:
+            return APIResponse.error(
+                message="Appointment cannot be cancelled",
+                status_code=400,
+                error_code="APPOINTMENT_NOT_CANCELLABLE"
+            )
+        
+        # Get cancellation reason
+        data = request.get_json() or {}
+        cancel_reason = data.get('reason', 'Cancelled by admin').strip()
+        
+        # Update appointment status
+        old_status = appointment.status
+        appointment.status = 'cancelled'
+        appointment.notes = f"{appointment.notes or ''}\n[ADMIN CANCELLED: {cancel_reason}]".strip()
+        appointment.updated_at = datetime.utcnow()
+        
+        db.session.commit()
+        
+        # Send notifications to patient and doctor
+        queue_notification(
+            user_id=appointment.patient.user_id,
+            title="Appointment Cancelled",
+            message=f"Your appointment with Dr. {appointment.doctor.user.full_name} on {appointment.appointment_date.strftime('%Y-%m-%d %H:%M')} has been cancelled by admin. Reason: {cancel_reason}",
+            notification_type='warning',
+            send_email=True
+        )
+        
+        queue_notification(
+            user_id=appointment.doctor.user_id,
+            title="Appointment Cancelled", 
+            message=f"Your appointment with {appointment.patient.user.full_name} on {appointment.appointment_date.strftime('%Y-%m-%d %H:%M')} has been cancelled by admin. Reason: {cancel_reason}",
+            notification_type='info',
+            send_email=True
+        )
+        
+        # Log admin action
+        log_user_action(
+            current_user.id,
+            'admin_cancel_appointment',
+            {
+                'appointment_id': appointment_id,
+                'patient_name': appointment.patient.user.full_name,
+                'doctor_name': appointment.doctor.user.full_name,
+                'appointment_date': appointment.appointment_date.isoformat(),
+                'old_status': old_status,
+                'cancel_reason': cancel_reason
+            }
+        )
+        
+        return APIResponse.success(
+            data={
+                'appointment_id': appointment_id,
+                'new_status': 'cancelled',
+                'updated_at': appointment.updated_at.isoformat()
+            },
+            message="Appointment cancelled successfully"
+        )
+        
+    except Exception as e:
+        db.session.rollback()
+        app_logger.error(f"Admin cancel appointment error: {str(e)}")
+        return APIResponse.error(
+            message="Failed to cancel appointment",
+            status_code=500
+        )
+
+@admin_bp.route('/appointments/<int:appointment_id>', methods=['DELETE'])
+@admin_required
+def delete_appointment(appointment_id):
+    """Delete an appointment (admin only) - Use with extreme caution"""
+    try:
+        appointment = Appointment.query.options(
+            joinedload(Appointment.patient).joinedload(Patient.user),
+            joinedload(Appointment.doctor).joinedload(Doctor.user)
+        ).get(appointment_id)
+        
+        if not appointment:
+            return APIResponse.error(
+                message="Appointment not found",
+                status_code=404,
+                error_code="APPOINTMENT_NOT_FOUND"
+            )
+        
+        # Only allow deletion of cancelled or completed appointments
+        if appointment.status not in ['cancelled', 'completed']:
+            return APIResponse.error(
+                message="Only cancelled or completed appointments can be deleted",
+                status_code=400,
+                error_code="APPOINTMENT_NOT_DELETABLE"
+            )
+        
+        # Store appointment info for logging
+        appointment_info = {
+            'id': appointment.id,
+            'patient_name': appointment.patient.user.full_name,
+            'patient_email': appointment.patient.user.email,
+            'doctor_name': appointment.doctor.user.full_name,
+            'doctor_email': appointment.doctor.user.email,
+            'appointment_date': appointment.appointment_date.isoformat(),
+            'status': appointment.status
+        }
+        
+        # Delete the appointment
+        db.session.delete(appointment)
+        db.session.commit()
+        
+        # Log admin action
+        log_user_action(
+            current_user.id,
+            'admin_delete_appointment',
+            {
+                'deleted_appointment': appointment_info,
+                'admin_email': current_user.email
+            }
+        )
+        
+        return APIResponse.success(
+            data={'deleted_appointment_id': appointment_id},
+            message=f"Appointment deleted successfully"
+        )
+        
+    except Exception as e:
+        db.session.rollback()
+        app_logger.error(f"Admin delete appointment error: {str(e)}")
+        return APIResponse.error(
+            message="Failed to delete appointment",
             status_code=500
         )
 
