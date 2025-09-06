@@ -127,7 +127,7 @@ const VideoConsultationDashboard = {
             return '';
         }
         
-        const userType = AuthStorage?.getUserType();
+        const userType = AuthGuard?.getCurrentUser()?.user_type || localStorage.getItem('sahatak_user_type');
         const currentLang = LanguageManager?.getLanguage() || 'en';
         const isArabic = currentLang === 'ar';
         
