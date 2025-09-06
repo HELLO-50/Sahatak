@@ -825,3 +825,309 @@ def get_recent_activity():
     except Exception as e:
         app_logger.error(f"Error getting recent activity: {str(e)}")
         return APIResponse.internal_error(message='Failed to retrieve recent activity')
+
+
+# ============================================================================
+# VIDEO CONSULTATION ENDPOINTS
+# ============================================================================
+
+@appointments_bp.route('/<int:appointment_id>/video/start', methods=['POST'])
+@api_login_required
+def start_video_session(appointment_id):
+    """Start a video consultation session (doctors only)"""
+    try:
+        # Only doctors can start sessions
+        if current_user.user_type != 'doctor':
+            return APIResponse.forbidden(message='Only doctors can start video sessions')
+        
+        # Get appointment with eager loading
+        appointment = Appointment.query.options(
+            joinedload(Appointment.doctor),
+            joinedload(Appointment.patient)
+        ).filter_by(id=appointment_id).first()
+        
+        if not appointment:
+            return APIResponse.not_found(message='Appointment not found')
+        
+        # Verify doctor owns this appointment
+        if appointment.doctor.user_id != current_user.id:
+            return APIResponse.forbidden(message='You are not authorized for this appointment')
+        
+        # Check appointment status
+        if appointment.status not in ['scheduled', 'confirmed']:
+            return APIResponse.validation_error(
+                message=f'Cannot start video session for {appointment.status} appointment'
+            )
+        
+        # Validate session timing
+        from services.video_conf_service import VideoConferenceService
+        is_valid, timing_message = VideoConferenceService.validate_session_timing(
+            appointment.appointment_date,
+            current_app.config.get('JITSI_SESSION_BUFFER_MINUTES', 15)
+        )
+        
+        if not is_valid:
+            return APIResponse.validation_error(message=timing_message)
+        
+        # Generate room name if not exists
+        if not appointment.session_id:
+            appointment.session_id = VideoConferenceService.generate_room_name(appointment_id)
+        
+        # Generate JWT token for doctor (moderator)
+        jwt_token = VideoConferenceService.generate_jwt_token(
+            room_name=appointment.session_id,
+            user_id=current_user.id,
+            user_name=current_user.full_name,
+            user_email=current_user.email,
+            is_moderator=True,
+            app_id=current_app.config.get('JITSI_APP_ID'),
+            app_secret=current_app.config.get('JITSI_APP_SECRET')
+        )
+        
+        # Get Jitsi configuration
+        config = VideoConferenceService.get_jitsi_config(
+            language=current_user.language_preference or 'en'
+        )
+        interface_config = VideoConferenceService.get_interface_config()
+        
+        # Update appointment session status
+        appointment.session_status = 'waiting'
+        appointment.status = 'in_progress'
+        appointment.session_started_at = datetime.utcnow()
+        
+        db.session.commit()
+        
+        # Log session event
+        VideoConferenceService.log_session_event(
+            appointment_id=appointment_id,
+            event_type='start',
+            user_id=current_user.id,
+            details={'room_name': appointment.session_id}
+        )
+        
+        # Format response
+        response = VideoConferenceService.format_session_response(
+            room_name=appointment.session_id,
+            jwt_token=jwt_token,
+            jitsi_domain=current_app.config.get('JITSI_DOMAIN', 'meet.jit.si'),
+            participant_role='moderator',
+            config=config,
+            interface_config=interface_config
+        )
+        
+        return APIResponse.success(
+            data=response,
+            message='Video session started successfully'
+        )
+        
+    except Exception as e:
+        db.session.rollback()
+        app_logger.error(f"Start video session error: {str(e)}")
+        return APIResponse.internal_error(message='Failed to start video session')
+
+
+@appointments_bp.route('/<int:appointment_id>/video/join', methods=['POST'])
+@api_login_required
+def join_video_session(appointment_id):
+    """Join a video consultation session (patients and doctors)"""
+    try:
+        # Get appointment
+        appointment = Appointment.query.options(
+            joinedload(Appointment.doctor),
+            joinedload(Appointment.patient)
+        ).filter_by(id=appointment_id).first()
+        
+        if not appointment:
+            return APIResponse.not_found(message='Appointment not found')
+        
+        # Verify user is participant in this appointment
+        is_doctor = (current_user.user_type == 'doctor' and 
+                    appointment.doctor.user_id == current_user.id)
+        is_patient = (current_user.user_type == 'patient' and 
+                     appointment.patient.user_id == current_user.id)
+        
+        if not (is_doctor or is_patient):
+            return APIResponse.forbidden(message='You are not authorized for this appointment')
+        
+        # Check if session is active
+        if not appointment.session_id:
+            return APIResponse.validation_error(message='Video session has not been started yet')
+        
+        if appointment.session_status in ['ended', 'failed']:
+            return APIResponse.validation_error(message='Video session has ended')
+        
+        # Validate session timing
+        from services.video_conf_service import VideoConferenceService
+        is_valid, timing_message = VideoConferenceService.validate_session_timing(
+            appointment.appointment_date,
+            current_app.config.get('JITSI_SESSION_BUFFER_MINUTES', 15)
+        )
+        
+        if not is_valid:
+            return APIResponse.validation_error(message=timing_message)
+        
+        # Generate JWT token
+        jwt_token = VideoConferenceService.generate_jwt_token(
+            room_name=appointment.session_id,
+            user_id=current_user.id,
+            user_name=current_user.full_name,
+            user_email=current_user.email,
+            is_moderator=is_doctor,  # Doctors are moderators
+            app_id=current_app.config.get('JITSI_APP_ID'),
+            app_secret=current_app.config.get('JITSI_APP_SECRET')
+        )
+        
+        # Get Jitsi configuration
+        config = VideoConferenceService.get_jitsi_config(
+            language=current_user.language_preference or 'en'
+        )
+        interface_config = VideoConferenceService.get_interface_config()
+        
+        # Update session status if needed
+        if appointment.session_status == 'waiting':
+            appointment.session_status = 'connecting'
+        
+        db.session.commit()
+        
+        # Log session event
+        VideoConferenceService.log_session_event(
+            appointment_id=appointment_id,
+            event_type='join',
+            user_id=current_user.id,
+            details={'user_type': current_user.user_type}
+        )
+        
+        # Format response
+        participant_role = 'moderator' if is_doctor else 'participant'
+        response = VideoConferenceService.format_session_response(
+            room_name=appointment.session_id,
+            jwt_token=jwt_token,
+            jitsi_domain=current_app.config.get('JITSI_DOMAIN', 'meet.jit.si'),
+            participant_role=participant_role,
+            config=config,
+            interface_config=interface_config
+        )
+        
+        return APIResponse.success(
+            data=response,
+            message='Joined video session successfully'
+        )
+        
+    except Exception as e:
+        db.session.rollback()
+        app_logger.error(f"Join video session error: {str(e)}")
+        return APIResponse.internal_error(message='Failed to join video session')
+
+
+@appointments_bp.route('/<int:appointment_id>/video/end', methods=['POST'])
+@api_login_required
+def end_video_session(appointment_id):
+    """End a video consultation session"""
+    try:
+        # Get appointment
+        appointment = Appointment.query.options(
+            joinedload(Appointment.doctor),
+            joinedload(Appointment.patient)
+        ).filter_by(id=appointment_id).first()
+        
+        if not appointment:
+            return APIResponse.not_found(message='Appointment not found')
+        
+        # Verify user is participant
+        is_doctor = (current_user.user_type == 'doctor' and 
+                    appointment.doctor.user_id == current_user.id)
+        is_patient = (current_user.user_type == 'patient' and 
+                     appointment.patient.user_id == current_user.id)
+        
+        if not (is_doctor or is_patient):
+            return APIResponse.forbidden(message='You are not authorized for this appointment')
+        
+        # Calculate session duration if started
+        session_duration = None
+        if appointment.session_started_at:
+            duration_delta = datetime.utcnow() - appointment.session_started_at
+            session_duration = int(duration_delta.total_seconds())
+        
+        # Update appointment
+        appointment.session_status = 'ended'
+        appointment.session_ended_at = datetime.utcnow()
+        appointment.session_duration = session_duration
+        
+        # Only doctors can mark appointment as completed
+        if is_doctor:
+            appointment.status = 'completed'
+        
+        db.session.commit()
+        
+        # Log session event
+        from services.video_conf_service import VideoConferenceService
+        VideoConferenceService.log_session_event(
+            appointment_id=appointment_id,
+            event_type='end',
+            user_id=current_user.id,
+            details={
+                'user_type': current_user.user_type,
+                'session_duration': session_duration
+            }
+        )
+        
+        return APIResponse.success(
+            data={
+                'session_duration': session_duration,
+                'session_ended_at': appointment.session_ended_at.isoformat()
+            },
+            message='Video session ended successfully'
+        )
+        
+    except Exception as e:
+        db.session.rollback()
+        app_logger.error(f"End video session error: {str(e)}")
+        return APIResponse.internal_error(message='Failed to end video session')
+
+
+@appointments_bp.route('/<int:appointment_id>/video/status', methods=['GET'])
+@api_login_required
+def get_video_session_status(appointment_id):
+    """Get current video session status"""
+    try:
+        # Get appointment
+        appointment = Appointment.query.filter_by(id=appointment_id).first()
+        
+        if not appointment:
+            return APIResponse.not_found(message='Appointment not found')
+        
+        # Verify user is participant
+        is_authorized = False
+        if current_user.user_type == 'doctor':
+            doctor = Doctor.query.filter_by(user_id=current_user.id).first()
+            is_authorized = doctor and appointment.doctor_id == doctor.id
+        elif current_user.user_type == 'patient':
+            patient = Patient.query.filter_by(user_id=current_user.id).first()
+            is_authorized = patient and appointment.patient_id == patient.id
+        
+        if not is_authorized:
+            return APIResponse.forbidden(message='You are not authorized for this appointment')
+        
+        # Check if session can be started
+        from services.video_conf_service import VideoConferenceService
+        can_start, timing_message = VideoConferenceService.validate_session_timing(
+            appointment.appointment_date,
+            current_app.config.get('JITSI_SESSION_BUFFER_MINUTES', 15)
+        )
+        
+        return APIResponse.success(
+            data={
+                'session_id': appointment.session_id,
+                'session_status': appointment.session_status,
+                'appointment_status': appointment.status,
+                'can_start': can_start,
+                'timing_message': timing_message,
+                'session_started_at': appointment.session_started_at.isoformat() if appointment.session_started_at else None,
+                'session_duration': appointment.session_duration
+            },
+            message='Session status retrieved successfully'
+        )
+        
+    except Exception as e:
+        app_logger.error(f"Get video session status error: {str(e)}")
+        return APIResponse.internal_error(message='Failed to get session status')

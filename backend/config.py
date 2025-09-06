@@ -64,6 +64,14 @@ class Config:
     # Medical settings
     MAX_VITAL_SIGNS_PER_REQUEST = int(os.getenv('MAX_VITAL_SIGNS_PER_REQUEST', 10))
     MAX_PRESCRIPTIONS_PER_REQUEST = int(os.getenv('MAX_PRESCRIPTIONS_PER_REQUEST', 20))
+    
+    # Jitsi Video Conference Settings
+    JITSI_DOMAIN = os.getenv('JITSI_DOMAIN', 'meet.jit.si')  # Public Jitsi server by default
+    JITSI_APP_ID = os.getenv('JITSI_APP_ID', None)  # Optional for public server
+    JITSI_APP_SECRET = os.getenv('JITSI_APP_SECRET', None)  # Optional for public server
+    JITSI_ENABLE_RECORDING = os.getenv('JITSI_ENABLE_RECORDING', 'false').lower() == 'true'  # Disabled by default
+    JITSI_SESSION_BUFFER_MINUTES = int(os.getenv('JITSI_SESSION_BUFFER_MINUTES', 15))  # Minutes before appointment
+    JITSI_SESSION_MAX_DURATION_HOURS = int(os.getenv('JITSI_SESSION_MAX_DURATION_HOURS', 2))  # Maximum session duration
 
 class DevelopmentConfig(Config):
     """Development configuration"""
