@@ -487,8 +487,9 @@ def get_user_details(user_id):
             'updated_at': user.updated_at.isoformat(),
             'last_login': user.last_login.isoformat() if user.last_login else None,
             'last_login_readable': user.last_login.strftime('%Y-%m-%d %H:%M:%S UTC') if user.last_login else 'Never',
-            'locked_until': getattr(user, 'locked_until', None),
-            'account_locked': 'Yes' if getattr(user, 'locked_until', None) and getattr(user, 'locked_until', None) > datetime.utcnow() else 'No'
+            'session_expires_at': user.session_expires_at.isoformat() if user.session_expires_at else None,
+            'is_online': user.is_online,
+            'last_seen_at': user.last_seen_at.isoformat() if user.last_seen_at else None
         }
         
         # Add type-specific detailed information (admin has access to personal info)
