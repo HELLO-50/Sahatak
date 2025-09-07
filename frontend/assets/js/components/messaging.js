@@ -322,12 +322,15 @@ async function loadRecentConversations() {
 // Load all conversations
 async function loadConversations() {
     try {
+        console.log('🔍 loadConversations called for user type:', userType);
+        
         // Add debug logging for the API call
         if (typeof SahatakLogger !== 'undefined' && SahatakLogger.debug) {
             SahatakLogger.debug('Loading conversations for user type:', userType);
         }
         
         const response = await ApiHelper.makeRequest('/messages/conversations');
+        console.log('💬 Conversations API response:', response);
 
         if (!response.success) {
             // Check if it's a profile validation error
@@ -738,16 +741,23 @@ async function selectConversation(conversationId, recipientId, recipientName) {
 
 // Load messages for current conversation
 async function loadMessages() {
-    if (!currentConversationId) return;
+    console.log('🔍 loadMessages called with conversationId:', currentConversationId);
+    if (!currentConversationId) {
+        console.warn('⚠️ No currentConversationId, cannot load messages');
+        return;
+    }
 
     try {
         const response = await ApiHelper.makeRequest(`/messages/conversations/${currentConversationId}`);
+        console.log('💬 Messages API response:', response);
 
         if (!response.success) {
             throw new Error(`API Error: ${response.message}`);
         }
 
-        displayMessages(response.data.messages || []);
+        const messages = response.data.messages || [];
+        console.log(`📨 Received ${messages.length} messages:`, messages);
+        displayMessages(messages);
     } catch (error) {
         console.error('Failed to load messages', error);
         showErrorMessage('Failed to load messages');
