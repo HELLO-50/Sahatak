@@ -146,6 +146,8 @@ def start_conversation():
     """Start a new conversation"""
     try:
         data = request.get_json()
+        app_logger.info(f"Start conversation request data: {data}")
+        app_logger.info(f"Current user: {current_user.user_type} (ID: {current_user.id})")
         
         # Validate required fields
         if not data.get('recipient_id'):
@@ -155,13 +157,30 @@ def start_conversation():
             )
         
         recipient_id = data['recipient_id']
+        recipient_type = data.get('recipient_type', 'user')  # Can be 'user' or 'patient'
         subject = data.get('subject', 'Medical Consultation')
         appointment_id = data.get('appointment_id')
         
-        # Validate recipient exists and is the opposite user type
-        recipient = User.query.get(recipient_id)
-        if not recipient:
-            return APIResponse.not_found(message='Recipient not found')
+        # Handle different recipient ID types
+        if current_user.user_type == 'doctor' and recipient_type == 'patient':
+            # Doctor starting conversation with patient - recipient_id is patient profile ID
+            app_logger.info(f"Doctor initiating conversation with patient profile ID: {recipient_id}")
+            from backend.models import Patient
+            patient = Patient.query.get(recipient_id)
+            if not patient:
+                app_logger.error(f"Patient not found with profile ID: {recipient_id}")
+                return APIResponse.not_found(message='Patient not found')
+            recipient = patient.user
+            if not recipient:
+                app_logger.error(f"Patient user not found for patient profile ID: {recipient_id}")
+                return APIResponse.not_found(message='Patient user not found')
+            app_logger.info(f"Found patient user: {recipient.email} (ID: {recipient.id})")
+        else:
+            # Standard case - recipient_id is user ID
+            recipient = User.query.get(recipient_id)
+            if not recipient:
+                app_logger.error(f"Recipient not found with user ID: {recipient_id}")
+                return APIResponse.not_found(message='Recipient not found')
         
         # Determine patient and doctor IDs
         if current_user.user_type == 'patient':
@@ -199,13 +218,18 @@ def start_conversation():
             request
         )
         
+        conversation_data = conversation.to_dict(include_messages=False)
+        app_logger.info(f"Conversation created successfully: {conversation_data}")
+        
         return APIResponse.success(
-            data=conversation.to_dict(include_messages=False),
+            data={'conversation': conversation_data},
             message='Conversation started successfully'
         )
         
     except Exception as e:
+        import traceback
         app_logger.error(f"Start conversation error: {str(e)}")
+        app_logger.error(f"Traceback: {traceback.format_exc()}")
         return APIResponse.internal_error(message='Failed to start conversation')
 
 
