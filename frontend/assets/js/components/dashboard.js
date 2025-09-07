@@ -174,12 +174,19 @@ const Dashboard = {
             return;
         }
         
-        // Filter upcoming appointments
+        // Debug: log all appointments
+        console.log('📅 All appointments:', appointmentsArray);
+        
+        // Filter upcoming appointments - include both scheduled and confirmed
         const upcoming = appointmentsArray.filter(apt => {
             if (!apt || !apt.appointment_date) return false;
             const aptDate = new Date(apt.appointment_date);
-            return aptDate >= new Date() && apt.status === 'scheduled';
+            const isUpcoming = aptDate >= new Date() && ['scheduled', 'confirmed'].includes(apt.status);
+            console.log(`📅 Appointment ${apt.id}: ${apt.appointment_date}, status: ${apt.status}, upcoming: ${isUpcoming}`);
+            return isUpcoming;
         }).sort((a, b) => new Date(a.appointment_date) - new Date(b.appointment_date));
+        
+        console.log('📅 Filtered upcoming appointments:', upcoming);
         
         if (upcoming.length === 0) {
             this.displayNoAppointments();
