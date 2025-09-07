@@ -70,7 +70,7 @@ const VideoConsultationDashboard = {
             
             if (response.success) {
                 // Navigate to video consultation page
-                const videoUrl = `/pages/appointments/video-consultation.html?appointmentId=${appointmentId}`;
+                const videoUrl = `../../pages/appointments/video-consultation.html?appointmentId=${appointmentId}`;
                 window.location.href = videoUrl;
             } else {
                 throw new Error(response.message || 'Failed to start video consultation');
@@ -90,7 +90,7 @@ const VideoConsultationDashboard = {
             
             if (response.success) {
                 // Navigate to video consultation page
-                const videoUrl = `/pages/appointments/video-consultation.html?appointmentId=${appointmentId}`;
+                const videoUrl = `../../pages/appointments/video-consultation.html?appointmentId=${appointmentId}`;
                 window.location.href = videoUrl;
             } else {
                 throw new Error(response.message || 'Failed to join video consultation');

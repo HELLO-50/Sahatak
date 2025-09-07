@@ -800,7 +800,7 @@ const AppointmentBooking = {
             return;
         }
         
-        const videoUrl = `/pages/appointments/video-consultation.html?appointmentId=${appointmentId}`;
+        const videoUrl = `../../pages/appointments/video-consultation.html?appointmentId=${appointmentId}`;
         
         // Open in same window to replace current page
         window.location.href = videoUrl;
