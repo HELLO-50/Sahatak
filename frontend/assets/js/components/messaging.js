@@ -404,21 +404,33 @@ let availablePatients = [];
 
 async function loadDoctorPatients() {
     try {
+        console.log('🔍 loadDoctorPatients called');
         // Get doctor's appointments to find patients
         const response = await ApiHelper.makeRequest('/appointments/');
+        console.log('👥 Doctor appointments response:', response);
         
         if (response.success) {
-            const appointments = response.data.appointments;
+            const appointments = response.data || response.data.appointments || [];
+            console.log('📋 Processing appointments for patients:', appointments);
             
             // Extract unique patients from appointments
             const patientsMap = new Map();
             
             appointments.forEach(appointment => {
-                if (appointment.patient_id && appointment.patient_name) {
-                    if (!patientsMap.has(appointment.patient_id)) {
-                        patientsMap.set(appointment.patient_id, {
-                            id: appointment.patient_id,
-                            name: appointment.patient_name,
+                console.log('🔍 Processing appointment:', appointment);
+                // Handle different possible structures for patient data
+                const patientId = appointment.patient_id;
+                const patientName = appointment.patient_name || 
+                                  (appointment.patient && appointment.patient.name) ||
+                                  (appointment.patient && appointment.patient.user && appointment.patient.user.full_name) ||
+                                  'Unknown Patient';
+                
+                if (patientId) {
+                    if (!patientsMap.has(patientId)) {
+                        console.log(`👤 Adding patient: ${patientName} (ID: ${patientId})`);
+                        patientsMap.set(patientId, {
+                            id: patientId,
+                            name: patientName,
                             lastAppointment: appointment.appointment_date,
                             appointmentType: appointment.appointment_type,
                             status: appointment.status
@@ -428,7 +440,7 @@ async function loadDoctorPatients() {
             });
             
             availablePatients = Array.from(patientsMap.values());
-            console.log('Available patients for messaging:', availablePatients);
+            console.log('👥 Available patients for messaging:', availablePatients);
         }
     } catch (error) {
         console.error('Failed to load doctor patients:', error);
