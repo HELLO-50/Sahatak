@@ -868,8 +868,8 @@ def start_video_session(appointment_id):
         if appointment.doctor.user_id != current_user.id:
             return APIResponse.forbidden(message='You are not authorized for this appointment')
         
-        # Check appointment status
-        if appointment.status not in ['scheduled', 'confirmed']:
+        # Check appointment status - allow in_progress for rejoining sessions
+        if appointment.status not in ['scheduled', 'confirmed', 'in_progress']:
             return APIResponse.validation_error(
                 field='status',
                 message=f'Cannot start video session for {appointment.status} appointment'
@@ -901,8 +901,9 @@ def start_video_session(appointment_id):
         
         # Update appointment session status
         appointment.session_status = 'waiting'
-        appointment.status = 'in_progress'
-        appointment.session_started_at = datetime.utcnow()
+        if appointment.status != 'in_progress':
+            appointment.status = 'in_progress'
+            appointment.session_started_at = datetime.utcnow()
         
         db.session.commit()
         
