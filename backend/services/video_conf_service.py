@@ -230,7 +230,11 @@ class VideoConferenceService:
         
         if now < session_start:
             minutes_until = int((session_start - now).total_seconds() / 60)
-            return False, f"Session can be started {minutes_until} minutes before appointment"
+            if minutes_until > 60:
+                hours_until = minutes_until / 60
+                return False, f"Session can only be started {buffer_minutes} minutes before appointment. Please wait {hours_until:.1f} hours"
+            else:
+                return False, f"Session can only be started {buffer_minutes} minutes before appointment. Please wait {minutes_until} minutes"
         
         if now > session_end:
             return False, "Session window has expired"

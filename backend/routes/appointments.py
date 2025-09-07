@@ -875,15 +875,8 @@ def start_video_session(appointment_id):
                 message=f'Cannot start video session for {appointment.status} appointment'
             )
         
-        # Validate session timing
+        # Doctors can start sessions anytime - no timing validation needed
         from services.video_conf_service import VideoConferenceService
-        is_valid, timing_message = VideoConferenceService.validate_session_timing(
-            appointment.appointment_date,
-            current_app.config.get('JITSI_SESSION_BUFFER_MINUTES', 15)
-        )
-        
-        if not is_valid:
-            return APIResponse.validation_error(field='timing', message=timing_message)
         
         # Generate room name if not exists
         if not appointment.session_id:
