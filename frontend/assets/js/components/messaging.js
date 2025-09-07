@@ -410,8 +410,24 @@ async function loadDoctorPatients() {
         console.log('👥 Doctor appointments response:', response);
         
         if (response.success) {
-            const appointments = response.data.appointments || response.data || [];
-            console.log('📋 Processing appointments for patients:', appointments);
+            console.log('🔍 Full response.data structure:', response.data);
+            console.log('🔍 response.data.appointments type:', typeof response.data.appointments);
+            console.log('🔍 Array.isArray(response.data.appointments):', Array.isArray(response.data.appointments));
+            
+            let appointments = [];
+            if (Array.isArray(response.data.appointments)) {
+                appointments = response.data.appointments;
+            } else if (Array.isArray(response.data)) {
+                appointments = response.data;
+            }
+            
+            console.log('📋 Final appointments array:', appointments);
+            console.log('📋 Appointments length:', appointments.length);
+            
+            if (!Array.isArray(appointments)) {
+                console.error('❌ appointments is not an array:', appointments);
+                return;
+            }
             
             // Extract unique patients from appointments
             const patientsMap = new Map();
