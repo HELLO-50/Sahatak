@@ -140,15 +140,18 @@ const Dashboard = {
     async loadAppointments() {
         try {
             const response = await ApiHelper.makeRequest('/appointments/');
+            console.log('🔍 Full appointments API response:', response);
             
             if (response.data) {
                 // Ensure data is always an array
                 const appointments = Array.isArray(response.data) ? response.data : 
                                    (response.data.appointments && Array.isArray(response.data.appointments)) ? response.data.appointments : [];
                 
+                console.log('📋 Processed appointments array:', appointments);
                 this.cache.appointments = appointments;
                 this.displayAppointments(appointments);
             } else {
+                console.log('⚠️ No appointments data in response');
                 this.cache.appointments = [];
                 this.displayNoAppointments();
             }
