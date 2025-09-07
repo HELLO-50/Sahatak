@@ -183,13 +183,17 @@ const Dashboard = {
         // Debug: log all appointments
         console.log('📅 All appointments:', appointmentsArray);
         
-        // Filter upcoming appointments - include both scheduled and confirmed
+        // Filter relevant appointments - include recent and future appointments
         const upcoming = appointmentsArray.filter(apt => {
             if (!apt || !apt.appointment_date) return false;
             const aptDate = new Date(apt.appointment_date);
-            const isUpcoming = aptDate >= new Date() && ['scheduled', 'confirmed'].includes(apt.status);
-            console.log(`📅 Appointment ${apt.id}: ${apt.appointment_date}, status: ${apt.status}, upcoming: ${isUpcoming}`);
-            return isUpcoming;
+            const now = new Date();
+            const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000); // 24 hours ago
+            
+            // Include appointments from yesterday onwards if they're scheduled/confirmed
+            const isRelevant = aptDate >= yesterday && ['scheduled', 'confirmed'].includes(apt.status);
+            console.log(`📅 Appointment ${apt.id}: ${apt.appointment_date}, status: ${apt.status}, relevant: ${isRelevant}, yesterday: ${yesterday.toISOString()}`);
+            return isRelevant;
         }).sort((a, b) => new Date(a.appointment_date) - new Date(b.appointment_date));
         
         console.log('📅 Filtered upcoming appointments:', upcoming);
