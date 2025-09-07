@@ -189,7 +189,15 @@ const Dashboard = {
         console.log('📅 Filtered upcoming appointments:', upcoming);
         
         if (upcoming.length === 0) {
-            this.displayNoAppointments();
+            // Enhanced debug info
+            const debugInfo = `
+                <div class="debug-info">
+                    <p>Total appointments received: ${appointmentsArray.length}</p>
+                    <p>Appointment statuses: ${appointmentsArray.map(apt => apt.status).join(', ')}</p>
+                    <p>Appointment dates: ${appointmentsArray.map(apt => apt.appointment_date).join(', ')}</p>
+                </div>
+            `;
+            this.displayNoAppointments(debugInfo);
             return;
         }
         
@@ -269,7 +277,7 @@ const Dashboard = {
     /**
      * Display no appointments message
      */
-    displayNoAppointments() {
+    displayNoAppointments(debugInfo = '') {
         const container = document.getElementById('appointments-container');
         if (!container) return;
         
@@ -281,6 +289,7 @@ const Dashboard = {
             <div class="text-center py-4">
                 <i class="bi bi-calendar-x fs-1 text-muted"></i>
                 <p class="mt-2" id="no-upcoming-appointments">No upcoming appointments</p>
+                ${debugInfo}
                 ${isPatient ? `<button class="btn btn-primary btn-sm" onclick="bookAppointment()">
                     Book Appointment
                 </button>` : ''}
