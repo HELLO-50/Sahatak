@@ -762,12 +762,9 @@ async function selectConversation(conversationId, recipientId, recipientName) {
         // Load messages for this conversation
         await loadMessages();
         
-        // Mark conversation as read
-        await markConversationAsRead(conversationId);
+        // Messages are automatically marked as read when loading conversation details
         
-        if (typeof Logger !== 'undefined') {
-            Logger.info('Selected conversation', { conversationId, recipientId });
-        }
+        console.log('Selected conversation', { conversationId, recipientId });
     } catch (error) {
         console.error('Failed to select conversation', error);
         showErrorMessage('Failed to load messages');
@@ -918,15 +915,16 @@ function addMessageToDisplay(message) {
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-// Mark conversation as read
-async function markConversationAsRead(conversationId) {
-    try {
-        // Check if endpoint exists for marking as read
-        await ApiHelper.makeRequest(`/messages/conversations/${conversationId}/read`, 'PUT');
-    } catch (error) {
-        console.error('Failed to mark conversation as read', error);
-    }
-}
+// Mark conversation as read - NOT NEEDED
+// Messages are automatically marked as read when fetching conversation details
+// async function markConversationAsRead(conversationId) {
+//     try {
+//         // Check if endpoint exists for marking as read
+//         await ApiHelper.makeRequest(`/messages/conversations/${conversationId}/read`, 'PUT');
+//     } catch (error) {
+//         console.error('Failed to mark conversation as read', error);
+//     }
+// }
 
 // WebSocket functionality disabled - using HTTP polling only for better proxy compatibility
 /*
