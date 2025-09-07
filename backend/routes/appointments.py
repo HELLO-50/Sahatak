@@ -98,7 +98,7 @@ def get_appointments():
             appointments = OptimizedQueries.get_doctor_appointments(current_user.doctor_profile.id)
             app_logger.info(f"Found {len(appointments)} appointments for doctor")
         else:
-            return APIResponse.validation_error(message='Invalid user type')
+            return APIResponse.validation_error(field='user_type', message='Invalid user type')
         
         # Add patient and doctor names to each appointment
         appointments_data = []
@@ -161,8 +161,8 @@ def create_appointment():
         
         if not validation['valid']:
             return APIResponse.validation_error(
-                message=validation['message'],
-                field=validation.get('missing_fields', validation.get('unexpected_fields'))
+                field=validation.get('missing_fields', validation.get('unexpected_fields', 'data')),
+                message=validation['message']
             )
         
         # Validate doctor_id
@@ -871,6 +871,7 @@ def start_video_session(appointment_id):
         # Check appointment status
         if appointment.status not in ['scheduled', 'confirmed']:
             return APIResponse.validation_error(
+                field='status',
                 message=f'Cannot start video session for {appointment.status} appointment'
             )
         
@@ -882,7 +883,7 @@ def start_video_session(appointment_id):
         )
         
         if not is_valid:
-            return APIResponse.validation_error(message=timing_message)
+            return APIResponse.validation_error(field='timing', message=timing_message)
         
         # Generate room name if not exists
         if not appointment.session_id:
@@ -966,10 +967,10 @@ def join_video_session(appointment_id):
         
         # Check if session is active
         if not appointment.session_id:
-            return APIResponse.validation_error(message='Video session has not been started yet')
+            return APIResponse.validation_error(field='session', message='Video session has not been started yet')
         
         if appointment.session_status in ['ended', 'failed']:
-            return APIResponse.validation_error(message='Video session has ended')
+            return APIResponse.validation_error(field='session_status', message='Video session has ended')
         
         # Validate session timing
         from services.video_conf_service import VideoConferenceService
@@ -979,7 +980,7 @@ def join_video_session(appointment_id):
         )
         
         if not is_valid:
-            return APIResponse.validation_error(message=timing_message)
+            return APIResponse.validation_error(field='timing', message=timing_message)
         
         # Generate JWT token
         jwt_token = VideoConferenceService.generate_jwt_token(
