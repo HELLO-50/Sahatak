@@ -410,7 +410,7 @@ async function loadDoctorPatients() {
         console.log('👥 Doctor appointments response:', response);
         
         if (response.success) {
-            const appointments = response.data || response.data.appointments || [];
+            const appointments = response.data.appointments || response.data || [];
             console.log('📋 Processing appointments for patients:', appointments);
             
             // Extract unique patients from appointments
