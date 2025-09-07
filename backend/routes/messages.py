@@ -167,10 +167,15 @@ def start_conversation():
             app_logger.info(f"Doctor initiating conversation with patient profile ID: {recipient_id}")
             from models import Patient
             patient = Patient.query.get(recipient_id)
+            app_logger.info(f"Patient query result: {patient}")
             if not patient:
                 app_logger.error(f"Patient not found with profile ID: {recipient_id}")
+                # List all patients for debugging
+                all_patients = Patient.query.all()
+                app_logger.info(f"Available patient IDs: {[p.id for p in all_patients]}")
                 return APIResponse.not_found(message='Patient not found')
             recipient = patient.user
+            app_logger.info(f"Patient's user: {recipient}")
             if not recipient:
                 app_logger.error(f"Patient user not found for patient profile ID: {recipient_id}")
                 return APIResponse.not_found(message='Patient user not found')
