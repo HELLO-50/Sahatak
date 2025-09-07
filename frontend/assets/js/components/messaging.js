@@ -677,10 +677,10 @@ async function startNewConversation(patientId, patientName) {
         // Create a new conversation
         const response = await ApiHelper.makeRequest('/messages/conversations', {
             method: 'POST',
-            data: {
+            body: JSON.stringify({
                 recipient_id: patientId,
-                recipient_type: 'patient'
-            }
+                recipient_type: 'patient'  // Indicate this is a patient profile ID, not user ID
+            })
         });
         
         if (response.success) {
