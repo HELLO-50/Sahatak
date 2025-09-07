@@ -65,7 +65,7 @@ const VideoConsultationDashboard = {
         try {
             const response = await ApiHelper.makeRequest(
                 `/appointments/${appointmentId}/video/start`,
-                'POST'
+                { method: 'POST' }
             );
             
             if (response.success) {
@@ -85,7 +85,7 @@ const VideoConsultationDashboard = {
         try {
             const response = await ApiHelper.makeRequest(
                 `/appointments/${appointmentId}/video/join`,
-                'POST'
+                { method: 'POST' }
             );
             
             if (response.success) {

@@ -453,7 +453,7 @@ const VideoConsultation = {
                 `/appointments/${this.appointmentId}/video/start` :
                 `/appointments/${this.appointmentId}/video/join`;
             
-            const response = await ApiHelper.makeRequest(endpoint, 'POST');
+            const response = await ApiHelper.makeRequest(endpoint, { method: 'POST' });
             
             if (!response.success) {
                 this.showError(response.message);
