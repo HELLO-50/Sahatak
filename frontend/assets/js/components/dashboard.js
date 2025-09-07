@@ -138,6 +138,7 @@ const Dashboard = {
      * Load appointments from backend
      */
     async loadAppointments() {
+        console.log('🚀 loadAppointments called - NEW VERSION');
         try {
             const response = await ApiHelper.makeRequest('/appointments/');
             console.log('🔍 Full appointments API response:', response);
