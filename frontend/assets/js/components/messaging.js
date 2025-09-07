@@ -513,9 +513,13 @@ function displayDoctorConversations(conversationList) {
                 console.warn('Patient ID not available in conversation:', conversation.id);
                 return; // Skip this conversation
             }
+            // Get patient name from participant_info if available
+            const patientName = conversation.participant_info?.patient?.name || 
+                               conversation.patient_name || 
+                               'Patient';
             const patient = {
                 id: conversation.patient_id,
-                name: conversation.patient_name || 'Patient'
+                name: patientName
             };
             const patientItem = document.createElement('div');
             patientItem.className = `patient-item ${index === 0 ? 'active' : ''}`;
@@ -548,9 +552,13 @@ function displayDoctorConversations(conversationList) {
         if (conversationList.length > 0) {
             const firstConv = conversationList[0];
             if (firstConv.patient_id) {
+                // Get patient name from participant_info if available
+                const patientName = firstConv.participant_info?.patient?.name || 
+                                   firstConv.patient_name || 
+                                   'Patient';
                 const patient = {
                     id: firstConv.patient_id,
-                    name: firstConv.patient_name || 'Patient'
+                    name: patientName
                 };
                 selectConversation(firstConv.id, patient.id, patient.name);
             } else {
