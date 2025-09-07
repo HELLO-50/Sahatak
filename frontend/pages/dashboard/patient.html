@@ -820,11 +820,20 @@
                 if (appointmentsResponse.success) {
                     const appointments = appointmentsResponse.data.appointments;
                     
-                    // Get upcoming appointments for display
-                    const upcomingAppointments = appointments.filter(apt => 
-                        ['scheduled', 'confirmed'].includes(apt.status) && 
-                        new Date(apt.appointment_date) > new Date()
-                    ).sort((a, b) => new Date(a.appointment_date) - new Date(b.appointment_date));
+                    // Get upcoming appointments for display (including today's appointments)
+                    const now = new Date();
+                    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()); // Start of today
+                    
+                    console.log('🔍 Patient appointments received:', appointments);
+                    
+                    const upcomingAppointments = appointments.filter(apt => {
+                        const isValidStatus = ['scheduled', 'confirmed'].includes(apt.status);
+                        const aptDate = new Date(apt.appointment_date);
+                        const isUpcoming = aptDate >= today; // Include today's appointments
+                        
+                        console.log(`📅 Patient appointment ${apt.id}: ${apt.appointment_date}, status: ${apt.status}, valid: ${isValidStatus}, upcoming: ${isUpcoming}`);
+                        return isValidStatus && isUpcoming;
+                    }).sort((a, b) => new Date(a.appointment_date) - new Date(b.appointment_date));
                     
                     // Update appointment counter
                     document.getElementById('stat-appointments-count').textContent = upcomingAppointments.length;
