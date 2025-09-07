@@ -165,7 +165,7 @@ def start_conversation():
         if current_user.user_type == 'doctor' and recipient_type == 'patient':
             # Doctor starting conversation with patient - recipient_id is patient profile ID
             app_logger.info(f"Doctor initiating conversation with patient profile ID: {recipient_id}")
-            from backend.models import Patient
+            from models import Patient
             patient = Patient.query.get(recipient_id)
             if not patient:
                 app_logger.error(f"Patient not found with profile ID: {recipient_id}")
