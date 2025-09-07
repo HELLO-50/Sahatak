@@ -82,11 +82,21 @@ def get_available_doctors():
 def get_appointments():
     """Get user's appointments with optimized queries"""
     try:
+        app_logger.info(f"Getting appointments for user {current_user.id}, type: {current_user.user_type}")
+        
         # Get appointments based on user type using optimized queries
         if current_user.user_type == 'patient':
+            if not current_user.patient_profile:
+                app_logger.error(f"Patient profile not found for user {current_user.id}")
+                return APIResponse.not_found(message='Patient profile not found')
             appointments = OptimizedQueries.get_patient_appointments(current_user.patient_profile.id)
         elif current_user.user_type == 'doctor':
+            if not current_user.doctor_profile:
+                app_logger.error(f"Doctor profile not found for user {current_user.id}")
+                return APIResponse.not_found(message='Doctor profile not found')
+            app_logger.info(f"Getting appointments for doctor {current_user.doctor_profile.id}")
             appointments = OptimizedQueries.get_doctor_appointments(current_user.doctor_profile.id)
+            app_logger.info(f"Found {len(appointments)} appointments for doctor")
         else:
             return APIResponse.validation_error(message='Invalid user type')
         
