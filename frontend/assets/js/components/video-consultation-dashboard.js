@@ -63,17 +63,28 @@ const VideoConsultationDashboard = {
     // Start video consultation (doctors only)
     async startVideoConsultation(appointmentId) {
         try {
+            console.log('Starting video consultation for appointment:', appointmentId);
             const response = await ApiHelper.makeRequest(
                 `/appointments/${appointmentId}/video/start`,
                 { method: 'POST' }
             );
             
-            if (response.success) {
+            console.log('Video start response:', response);
+            
+            if (response && response.success) {
                 // Navigate to video consultation page
                 const videoUrl = `../../pages/appointments/video-consultation.html?appointmentId=${appointmentId}`;
+                console.log('Navigating to:', videoUrl);
+                console.log('Current location:', window.location.href);
                 window.location.href = videoUrl;
+                // Add a fallback in case navigation doesn't work
+                setTimeout(() => {
+                    console.log('Navigation might have failed, trying window.open');
+                    window.open(videoUrl, '_self');
+                }, 1000);
             } else {
-                throw new Error(response.message || 'Failed to start video consultation');
+                console.error('Response not successful:', response);
+                throw new Error(response?.message || 'Failed to start video consultation');
             }
         } catch (error) {
             throw new Error(error.message || 'Failed to start video consultation');
