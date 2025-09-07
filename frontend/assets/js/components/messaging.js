@@ -450,6 +450,8 @@ async function loadDoctorPatients() {
 
 // Enhanced display for doctor conversations with available patients
 function displayDoctorConversations(conversationList) {
+    console.log('🔍 displayDoctorConversations called with conversations:', conversationList);
+    console.log('👥 Available patients:', availablePatients);
     const patientList = document.getElementById('patientList');
     
     // Clear the patient list
@@ -562,8 +564,13 @@ function displayDoctorConversations(conversationList) {
 
 // Display available patients for new conversations
 function displayAvailablePatients() {
+    console.log('🔍 displayAvailablePatients called with:', availablePatients);
     const availablePatientsContainer = document.getElementById('availablePatientsList');
-    if (!availablePatientsContainer) return;
+    if (!availablePatientsContainer) {
+        console.error('❌ availablePatientsList container not found');
+        return;
+    }
+    console.log('✅ availablePatientsList container found');
     
     availablePatientsContainer.innerHTML = '';
     
