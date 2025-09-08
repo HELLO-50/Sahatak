@@ -829,6 +829,30 @@
     color: #6c757d !important;
 }
 
+/* Filter Buttons Styling */
+#appointment-tabs .btn {
+    background-color: white !important;
+    color: var(--medical-blue) !important;
+    border: 1px solid var(--medical-blue) !important;
+    font-weight: 500;
+}
+
+#appointment-tabs .btn:hover {
+    background-color: var(--medical-blue) !important;
+    color: white !important;
+    border-color: var(--medical-blue) !important;
+}
+
+#appointment-tabs .btn.active {
+    background-color: var(--medical-blue) !important;
+    color: white !important;
+    border-color: var(--medical-blue) !important;
+}
+
+#appointment-tabs .btn:focus {
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+}
+
 /* Print Styles */
 @media print {
     .video-consultation-container,
