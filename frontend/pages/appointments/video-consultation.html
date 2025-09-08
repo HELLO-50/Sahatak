@@ -53,6 +53,198 @@
             right: auto;
             left: 10px;
         }
+        
+        /* Enhanced Mobile Responsiveness */
+        @media (max-width: 768px) {
+            /* Navigation adjustments */
+            .navbar .container {
+                padding: 0 15px;
+            }
+            
+            .navbar-brand {
+                font-size: 18px;
+            }
+            
+            .navbar-brand img {
+                height: 30px;
+            }
+            
+            /* Pre-join screen mobile */
+            .pre-join-screen {
+                padding: 1rem;
+                margin: 10px;
+            }
+            
+            /* Video container mobile */
+            #jitsi-container {
+                height: calc(100vh - 80px);
+            }
+            
+            /* Error screen mobile */
+            .card {
+                margin: 10px;
+            }
+            
+            .card-body {
+                padding: 1.5rem 1rem;
+            }
+            
+            /* Button adjustments */
+            .btn {
+                padding: 12px 20px;
+                font-size: 14px;
+            }
+            
+            .btn-lg {
+                padding: 15px 25px;
+                font-size: 16px;
+            }
+            
+            /* Connection status mobile */
+            .connection-status {
+                position: fixed;
+                top: 70px;
+                right: 10px;
+                z-index: 1001;
+            }
+            
+            .rtl .connection-status {
+                right: auto;
+                left: 10px;
+            }
+            
+            /* Loading screen mobile */
+            .spinner-border {
+                width: 2.5rem !important;
+                height: 2.5rem !important;
+            }
+            
+            /* Progress bar mobile */
+            .progress {
+                width: 280px !important;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            /* Small mobile devices */
+            .pre-join-screen {
+                padding: 0.75rem;
+                margin: 5px;
+            }
+            
+            .post-call-screen {
+                margin: 5px;
+                padding: 0.75rem;
+            }
+            
+            /* Jitsi container small mobile */
+            #jitsi-container {
+                height: calc(100vh - 70px);
+            }
+            
+            /* Button stacking */
+            .d-flex.justify-content-center.gap-2 {
+                flex-direction: column;
+                gap: 10px !important;
+            }
+            
+            .d-flex.justify-content-center.gap-2 .btn {
+                width: 100%;
+                margin-bottom: 8px;
+            }
+            
+            /* Error suggestions list */
+            .list-unstyled {
+                text-align: center;
+                padding: 0 10px;
+            }
+            
+            /* Progress bar small mobile */
+            .progress {
+                width: 250px !important;
+            }
+            
+            /* Text adjustments */
+            h3 {
+                font-size: 1.3rem;
+            }
+            
+            h5 {
+                font-size: 1.1rem;
+            }
+            
+            /* Dropdown adjustments */
+            .dropdown-menu {
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            /* Very small devices */
+            .navbar-brand span {
+                display: none;
+            }
+            
+            .connection-status .badge {
+                font-size: 10px;
+                padding: 4px 6px;
+            }
+            
+            #jitsi-container {
+                height: calc(100vh - 65px);
+            }
+            
+            .progress {
+                width: 220px !important;
+                height: 6px;
+            }
+            
+            .card-body.py-5 {
+                padding: 2rem 0.75rem !important;
+            }
+        }
+        
+        /* Landscape orientation adjustments */
+        @media (max-width: 768px) and (orientation: landscape) {
+            #jitsi-container {
+                height: calc(100vh - 60px);
+            }
+            
+            .navbar {
+                padding: 0.25rem 0;
+            }
+            
+            .connection-status {
+                top: 10px;
+            }
+        }
+        
+        /* Touch-friendly improvements */
+        @media (hover: none) and (pointer: coarse) {
+            .btn {
+                min-height: 44px;
+                min-width: 44px;
+            }
+            
+            .dropdown-toggle {
+                padding: 12px;
+            }
+            
+            .dropdown-item {
+                padding: 12px 20px;
+            }
+        }
+        
+        /* Dark mode media query support */
+        @media (prefers-color-scheme: dark) {
+            .connection-status .badge {
+                background-color: #495057 !important;
+            }
+            
+            .audio-meter {
+                background: #343a40;
+            }
+        }
     </style>
 </head>
 <body>
@@ -75,6 +267,12 @@
                     <!-- Quality indicator will be added here -->
                 </div>
                 
+                <!-- Language Toggle -->
+                <button class="btn btn-outline-light btn-sm me-3" onclick="LanguageManager.toggleLanguage && LanguageManager.toggleLanguage()">
+                    <i class="bi bi-translate me-1"></i>
+                    <span id="current-lang">English</span>
+                </button>
+                
                 <!-- User Info -->
                 <div class="dropdown">
                     <button class="btn btn-outline-primary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown">
@@ -82,15 +280,15 @@
                         <span id="user-name"></span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="../dashboard/patient.html">
-                            <i class="bi bi-speedometer2"></i> Dashboard
+                        <li><a class="dropdown-item" href="#" onclick="navigateToDashboard()">
+                            <i class="bi bi-speedometer2"></i> <span id="nav-dashboard">Dashboard</span>
                         </a></li>
-                        <li><a class="dropdown-item" href="appointment-list.html">
-                            <i class="bi bi-calendar-event"></i> My Appointments
+                        <li><a class="dropdown-item" href="./appointment-list.html">
+                            <i class="bi bi-calendar-event"></i> <span id="nav-appointments">My Appointments</span>
                         </a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item text-danger" href="#" id="end-call-btn">
-                            <i class="bi bi-telephone-x"></i> End Call
+                            <i class="bi bi-telephone-x"></i> <span id="nav-end-call">End Call</span>
                         </a></li>
                     </ul>
                 </div>
@@ -108,9 +306,9 @@
             <!-- Content will be dynamically loaded here -->
             <div class="text-center py-5">
                 <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
+                    <span class="visually-hidden" id="loading-text">Loading...</span>
                 </div>
-                <p class="mt-3">Initializing video consultation...</p>
+                <p class="mt-3" id="initializing-text">Initializing video consultation...</p>
             </div>
         </div>
     </main>
@@ -125,13 +323,14 @@
     <script src="../../assets/js/components/auth-storage.js"></script>
     <script src="../../assets/js/components/auth-guard.js"></script>
     <script src="../../assets/js/main.js"></script>
+    <script src="../../assets/js/components/dashboard-translations.js"></script>
     <script src="../../assets/js/components/video-consultation.js"></script>
     <script src="../../assets/js/components/video-consultation-dashboard.js"></script>
     
     <script>
         // Check authentication
         if (!AuthStorage.isAuthenticated()) {
-            window.location.href = '/login.html';
+            window.location.href = '/';
         }
         
         // Set user name
@@ -140,13 +339,42 @@
             document.getElementById('user-name').textContent = user.full_name || 'User';
         }
         
-        // Initialize language
-        const currentLang = localStorage.getItem('language') || 'en';
-        if (currentLang === 'ar') {
-            document.documentElement.dir = 'rtl';
-            document.documentElement.lang = 'ar';
-            document.body.classList.add('rtl');
+        // Initialize language support
+        function initializeLanguageSupport() {
+            const currentLang = LanguageManager?.getLanguage() || 'ar';
+            
+            // Set document direction
+            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            document.documentElement.lang = currentLang;
+            
+            // Add RTL class for styling
+            if (currentLang === 'ar') {
+                document.body.classList.add('rtl');
+            } else {
+                document.body.classList.remove('rtl');
+            }
+            
+            // Update current language display
+            const langSpan = document.getElementById('current-lang');
+            if (langSpan) {
+                langSpan.textContent = currentLang === 'ar' ? 'English' : 'العربية';
+            }
         }
+        
+        // Initialize language
+        initializeLanguageSupport();
+        
+        // Navigation function for dashboard
+        function navigateToDashboard() {
+            const userType = AuthStorage.getUserType();
+            const dashboardPath = userType === 'doctor' 
+                ? '../dashboard/doctor.html'
+                : '../dashboard/patient.html';
+            window.location.href = dashboardPath;
+        }
+        
+        // Make function globally available
+        window.navigateToDashboard = navigateToDashboard;
     </script>
 </body>
 </html>

@@ -51,15 +51,20 @@
                     </div>
                     
                     <div class="col-lg-4 text-center">
-                        <h1 class="dashboard-title">Patient Communication Hub</h1>
-                        <p class="dashboard-subtitle">Secure messaging and communication with your patients</p>
+                        <h1 class="dashboard-title" id="dashboard-title">Patient Communication Hub</h1>
+                        <p class="dashboard-subtitle" id="dashboard-subtitle">Secure messaging and communication with your patients</p>
                     </div>
                     
                     <div class="col-lg-4 text-end">
                         <div class="dashboard-controls">
+                            <!-- Language Toggle -->
+                            <button class="btn btn-outline-light btn-sm me-2" onclick="LanguageManager.toggleLanguage && LanguageManager.toggleLanguage()">
+                                <i class="bi bi-translate me-1"></i>
+                                <span id="current-lang">English</span>
+                            </button>
                             <button class="btn btn-outline-medical btn-sm me-2" onclick="window.location.href='../../dashboard/doctor.html'">
                                 <i class="bi bi-arrow-left me-1"></i>
-                                <span>Back to Dashboard</span>
+                                <span id="back-to-dashboard">Back to Dashboard</span>
                             </button>
                         </div>
                     </div>
@@ -71,17 +76,17 @@
                 <div class="col-lg-4">
                     <div class="dashboard-card h-100">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5><i class="bi bi-people me-2"></i>Patients</h5>
+                            <h5><i class="bi bi-people me-2"></i><span id="patients-title">Patients</span></h5>
                             <div class="btn-group btn-group-sm" role="group">
-                                <button type="button" class="btn btn-outline-primary active" onclick="filterConversations('all')">All</button>
-                                <button type="button" class="btn btn-outline-primary" onclick="filterConversations('unread')">Unread</button>
-                                <button type="button" class="btn btn-outline-primary" onclick="filterConversations('urgent')">Urgent</button>
+                                <button type="button" class="btn btn-outline-primary active" onclick="filterConversations('all')" id="filter-all">All</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="filterConversations('unread')" id="filter-unread">Unread</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="filterConversations('urgent')" id="filter-urgent">Urgent</button>
                             </div>
                         </div>
 
                         <!-- Search Bar -->
                         <div class="mb-3">
-                            <input type="text" class="form-control" id="patientSearch" placeholder="Search patients..." onkeyup="searchPatients()">
+                            <input type="text" class="form-control" id="patientSearch" data-translate-placeholder="messaging.search_patients" placeholder="Search patients..." onkeyup="searchPatients()">
                         </div>
 
                         <!-- Patient List -->
@@ -173,14 +178,40 @@
     <script src="../../../assets/js/components/auth-guard.js"></script>
     <script src="../../../assets/js/components/logger.js"></script>
     <script src="../../../assets/js/components/dashboard.js"></script>
+    <script src="../../../assets/js/components/dashboard-translations.js"></script>
     <script src="../../../assets/js/components/messaging.js"></script>
     
     <script>
         // Use global updateVerificationStatus function from dashboard.js
         
         
+        // Initialize language support
+        function initializeLanguageSupport() {
+            const currentLang = LanguageManager?.getLanguage() || 'ar';
+            
+            // Set document direction
+            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            document.documentElement.lang = currentLang;
+            
+            // Add RTL class for styling
+            if (currentLang === 'ar') {
+                document.body.classList.add('rtl');
+            } else {
+                document.body.classList.remove('rtl');
+            }
+            
+            // Update current language display
+            const langSpan = document.getElementById('current-lang');
+            if (langSpan) {
+                langSpan.textContent = currentLang === 'ar' ? 'English' : 'العربية';
+            }
+        }
+        
         // Initialize page with user data
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize language support
+            initializeLanguageSupport();
+            
             // Use AuthGuard first for real user data
             const authUser = AuthGuard.getCurrentUser();
             if (authUser && authUser.full_name) {
