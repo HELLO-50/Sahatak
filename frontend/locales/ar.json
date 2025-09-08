@@ -1308,6 +1308,7 @@
 
   "video_consultation": {
     "title": "استشارة بالفيديو",
+    "preparing": "الاستعداد للاستشارة",
     "connecting": "الاتصال بجلسة الفيديو...",
     "initializing": "تهيئة مكالمة الفيديو...",
     "joining": "الانضمام إلى غرفة الاستشارة...",
@@ -1316,6 +1317,26 @@
     "authenticating": "المصادقة على الجلسة...",
     "loading": "جاري التحميل...",
     "please_wait": "يرجى الانتظار...",
+    "system_checks": {
+      "browser": "متصفح الويب",
+      "network_quality": "جودة الشبكة",
+      "permissions": "الأذونات",
+      "camera": "الكاميرا",
+      "microphone": "الميكروفون",
+      "audio_only": "صوت فقط",
+      "speak_to_test": "تحدث لاختبار الصوت",
+      "select_speaker": "اختر مكبر الصوت",
+      "not_supported": "غير مدعوم",
+      "excellent": "ممتازة",
+      "good": "جيدة",
+      "fair": "متوسطة",
+      "poor": "ضعيفة"
+    },
+    "actions": {
+      "refresh_check": "إعادة فحص",
+      "test_devices": "اختبار الأجهزة",
+      "start_consultation": "بدء الاستشارة"
+    },
     "nav": {
       "dashboard": "لوحة التحكم",
       "appointments": "مواعيدي",

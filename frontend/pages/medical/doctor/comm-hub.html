@@ -205,6 +205,41 @@
             if (langSpan) {
                 langSpan.textContent = currentLang === 'ar' ? 'English' : 'العربية';
             }
+            
+            // Update messaging translations
+            updateMessagingTranslations(currentLang);
+        }
+        
+        // Update messaging translations
+        function updateMessagingTranslations(lang = 'ar') {
+            if (!LanguageManager?.translate) return;
+            
+            // Update title and subtitle
+            updateElementText('dashboard-title', LanguageManager.translate('messaging.title'));
+            updateElementText('dashboard-subtitle', LanguageManager.translate('messaging.subtitle'));
+            
+            // Update navigation
+            updateElementText('back-to-dashboard', LanguageManager.translate('messaging.navigation.back_to_dashboard'));
+            
+            // Update filters
+            updateElementText('patients-title', LanguageManager.translate('messaging.patients_title'));
+            updateElementText('filter-all', LanguageManager.translate('messaging.filters.all'));
+            updateElementText('filter-unread', LanguageManager.translate('messaging.filters.unread'));
+            updateElementText('filter-urgent', LanguageManager.translate('messaging.filters.urgent'));
+            
+            // Update search placeholder
+            const searchInput = document.getElementById('patientSearch');
+            if (searchInput) {
+                searchInput.placeholder = LanguageManager.translate('messaging.search_patients');
+            }
+        }
+        
+        // Helper function to update element text
+        function updateElementText(elementId, text) {
+            const element = document.getElementById(elementId);
+            if (element && text) {
+                element.textContent = text;
+            }
         }
         
         // Initialize page with user data

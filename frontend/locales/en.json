@@ -1308,6 +1308,7 @@
 
   "video_consultation": {
     "title": "Video Consultation",
+    "preparing": "Preparing for Consultation",
     "connecting": "Connecting to video session...",
     "initializing": "Initializing video call...",
     "joining": "Joining consultation room...",
@@ -1316,6 +1317,26 @@
     "authenticating": "Authenticating session...",
     "loading": "Loading...",
     "please_wait": "Please wait...",
+    "system_checks": {
+      "browser": "Browser",
+      "network_quality": "Network Quality",
+      "permissions": "Permissions",
+      "camera": "Camera",
+      "microphone": "Microphone",
+      "audio_only": "Audio Only",
+      "speak_to_test": "Speak to test audio",
+      "select_speaker": "Select Speaker",
+      "not_supported": "Not Supported",
+      "excellent": "Excellent",
+      "good": "Good",
+      "fair": "Fair",
+      "poor": "Poor"
+    },
+    "actions": {
+      "refresh_check": "Refresh Check",
+      "test_devices": "Test Devices",
+      "start_consultation": "Start Consultation"
+    },
     "nav": {
       "dashboard": "Dashboard",
       "appointments": "My Appointments",

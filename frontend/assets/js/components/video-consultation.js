@@ -12,9 +12,44 @@ const VideoConsultation = {
     },
     audioOnlyMode: false,
     
+    // Reconnection management
+    reconnectionAttempts: 0,
+    maxReconnectionAttempts: 3,
+    
+    // Analytics and monitoring
+    sessionAnalytics: {
+        sessionId: null,
+        startTime: null,
+        endTime: null,
+        duration: 0,
+        connectionEvents: [],
+        qualityMetrics: [],
+        participantEvents: [],
+        errorEvents: [],
+        deviceChanges: [],
+        networkChanges: []
+    },
+    
+    qualityMonitor: {
+        interval: null,
+        sampleRate: 5000, // 5 seconds
+        lastQualityCheck: null
+    },
+    
+    // Translation helper function
+    translate(key, fallback = null) {
+        if (LanguageManager && LanguageManager.translate) {
+            return LanguageManager.translate(key) || fallback || key;
+        }
+        return fallback || key;
+    },
+    
     // Initialize video consultation
     async init(appointmentId) {
         this.appointmentId = appointmentId;
+        
+        // Initialize analytics
+        this.initSessionAnalytics();
         
         // Check session status first
         const statusCheck = await this.checkSessionStatus();
@@ -33,7 +68,7 @@ const VideoConsultation = {
         try {
             const response = await ApiHelper.makeRequest(
                 `/appointments/${this.appointmentId}/video/status`,
-                'GET'
+                { method: 'GET' }
             );
             
             if (response.success) {
@@ -53,12 +88,12 @@ const VideoConsultation = {
         const container = document.getElementById('video-container');
         if (!container) return;
         
-        const currentLang = LanguageManager.getLanguage() || 'en';
+        const currentLang = LanguageManager?.getLanguage() || 'en';
         const isArabic = currentLang === 'ar';
         
         container.innerHTML = `
             <div class="pre-join-screen">
-                <h3 class="mb-4">${isArabic ? 'الاستعداد للاستشارة' : 'Preparing for Consultation'}</h3>
+                <h3 class="mb-4">${this.translate('video_consultation.preparing', 'Preparing for Consultation')}</h3>
                 
                 <!-- System Check Results -->
                 <div class="row mb-4">
@@ -67,7 +102,7 @@ const VideoConsultation = {
                             <div class="card-body text-center">
                                 <div id="browser-check">
                                     <i class="bi bi-browser-chrome fs-1 mb-2"></i>
-                                    <h6>${isArabic ? 'متصفح الويب' : 'Browser'}</h6>
+                                    <h6>${this.translate('video_consultation.system_checks.browser', 'Browser')}</h6>
                                     <div class="spinner-border spinner-border-sm" role="status"></div>
                                 </div>
                             </div>
@@ -78,7 +113,7 @@ const VideoConsultation = {
                             <div class="card-body text-center">
                                 <div id="network-check">
                                     <i class="bi bi-wifi fs-1 mb-2"></i>
-                                    <h6>${isArabic ? 'جودة الشبكة' : 'Network Quality'}</h6>
+                                    <h6>${this.translate('video_consultation.system_checks.network_quality', 'Network Quality')}</h6>
                                     <div class="spinner-border spinner-border-sm" role="status"></div>
                                 </div>
                             </div>
@@ -89,7 +124,7 @@ const VideoConsultation = {
                             <div class="card-body text-center">
                                 <div id="permissions-check">
                                     <i class="bi bi-shield-check fs-1 mb-2"></i>
-                                    <h6>${isArabic ? 'الأذونات' : 'Permissions'}</h6>
+                                    <h6>${this.translate('video_consultation.system_checks.permissions', 'Permissions')}</h6>
                                     <div class="spinner-border spinner-border-sm" role="status"></div>
                                 </div>
                             </div>
@@ -104,13 +139,13 @@ const VideoConsultation = {
                             <div class="card">
                                 <div class="card-body text-center">
                                     <i class="bi bi-camera-video fs-1 mb-2"></i>
-                                    <h5>${isArabic ? 'الكاميرا' : 'Camera'}</h5>
+                                    <h5>${this.translate('video_consultation.system_checks.camera', 'Camera')}</h5>
                                     <video id="local-preview" autoplay muted class="w-100 mb-2" style="max-height: 200px; border-radius: 8px;"></video>
                                     <select id="camera-select" class="form-select mb-2"></select>
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" id="audio-only-mode">
                                         <label class="form-check-label" for="audio-only-mode">
-                                            ${isArabic ? 'صوت فقط' : 'Audio Only'}
+                                            ${this.translate('video_consultation.system_checks.audio_only', 'Audio Only')}
                                         </label>
                                     </div>
                                 </div>
@@ -120,16 +155,16 @@ const VideoConsultation = {
                             <div class="card">
                                 <div class="card-body text-center">
                                     <i class="bi bi-mic fs-1 mb-2"></i>
-                                    <h5>${isArabic ? 'الميكروفون' : 'Microphone'}</h5>
+                                    <h5>${this.translate('video_consultation.system_checks.microphone', 'Microphone')}</h5>
                                     <div class="audio-meter mb-3">
                                         <div class="progress">
                                             <div id="audio-level" class="progress-bar bg-success" style="width: 0%"></div>
                                         </div>
-                                        <small class="text-muted">${isArabic ? 'تحدث لاختبار الصوت' : 'Speak to test audio'}</small>
+                                        <small class="text-muted">${this.translate('video_consultation.system_checks.speak_to_test', 'Speak to test audio')}</small>
                                     </div>
                                     <select id="mic-select" class="form-select mb-2"></select>
                                     <select id="speaker-select" class="form-select">
-                                        <option value="">${isArabic ? 'اختر مكبر الصوت' : 'Select Speaker'}</option>
+                                        <option value="">${this.translate('video_consultation.system_checks.select_speaker', 'Select Speaker')}</option>
                                     </select>
                                 </div>
                             </div>
@@ -140,13 +175,13 @@ const VideoConsultation = {
                 <!-- Control Buttons -->
                 <div class="text-center">
                     <button id="refresh-check-btn" class="btn btn-outline-secondary me-2">
-                        <i class="bi bi-arrow-clockwise"></i> ${isArabic ? 'إعادة فحص' : 'Refresh Check'}
+                        <i class="bi bi-arrow-clockwise"></i> ${this.translate('video_consultation.actions.refresh_check', 'Refresh Check')}
                     </button>
                     <button id="test-devices-btn" class="btn btn-secondary me-2">
-                        <i class="bi bi-gear"></i> ${isArabic ? 'اختبار الأجهزة' : 'Test Devices'}
+                        <i class="bi bi-gear"></i> ${this.translate('video_consultation.actions.test_devices', 'Test Devices')}
                     </button>
                     <button id="join-call-btn" class="btn btn-primary btn-lg" disabled>
-                        <i class="bi bi-camera-video"></i> ${isArabic ? 'بدء الاستشارة' : 'Start Consultation'}
+                        <i class="bi bi-camera-video"></i> ${this.translate('video_consultation.actions.start_consultation', 'Start Consultation')}
                     </button>
                 </div>
                 
@@ -213,21 +248,21 @@ const VideoConsultation = {
                 isSupported = true;
             }
             
-            const currentLang = LanguageManager.getLanguage() || 'en';
+            const currentLang = LanguageManager?.getLanguage() || 'en';
             const isArabic = currentLang === 'ar';
             
             if (hasWebRTC && isSupported) {
                 browserCheck.innerHTML = `
                     <i class="bi bi-check-circle-fill text-success fs-1 mb-2"></i>
-                    <h6>${isArabic ? 'متصفح الويب' : 'Browser'}</h6>
+                    <h6>${this.translate('video_consultation.system_checks.browser', 'Browser')}</h6>
                     <small class="text-success">${browserName} ✓</small>
                 `;
                 this.systemChecks.browser = true;
             } else {
                 browserCheck.innerHTML = `
                     <i class="bi bi-x-circle-fill text-danger fs-1 mb-2"></i>
-                    <h6>${isArabic ? 'متصفح الويب' : 'Browser'}</h6>
-                    <small class="text-danger">${isArabic ? 'غير مدعوم' : 'Not Supported'}</small>
+                    <h6>${this.translate('video_consultation.system_checks.browser', 'Browser')}</h6>
+                    <small class="text-danger">${this.translate('video_consultation.system_checks.not_supported', 'Not Supported')}</small>
                 `;
                 this.systemChecks.browser = false;
                 this.showWarning(isArabic ? 
@@ -262,45 +297,45 @@ const VideoConsultation = {
             const endTime = performance.now();
             const latency = endTime - startTime;
             
-            const currentLang = LanguageManager.getLanguage() || 'en';
+            const currentLang = LanguageManager?.getLanguage() || 'en';
             const isArabic = currentLang === 'ar';
             
             let qualityText = '';
             let qualityClass = '';
             
             if (latency < 200) {
-                qualityText = isArabic ? 'ممتازة' : 'Excellent';
+                qualityText = this.translate('video_consultation.system_checks.excellent', 'Excellent');
                 qualityClass = 'text-success';
                 this.systemChecks.network = true;
             } else if (latency < 500) {
-                qualityText = isArabic ? 'جيدة' : 'Good';
+                qualityText = this.translate('video_consultation.system_checks.good', 'Good');
                 qualityClass = 'text-info';
                 this.systemChecks.network = true;
             } else if (latency < 1000) {
-                qualityText = isArabic ? 'متوسطة' : 'Fair';
+                qualityText = this.translate('video_consultation.system_checks.fair', 'Fair');
                 qualityClass = 'text-warning';
                 this.systemChecks.network = true;
             } else {
-                qualityText = isArabic ? 'ضعيفة' : 'Poor';
+                qualityText = this.translate('video_consultation.system_checks.poor', 'Poor');
                 qualityClass = 'text-danger';
                 this.systemChecks.network = false;
             }
             
             networkCheck.innerHTML = `
                 <i class="bi bi-wifi fs-1 mb-2 ${qualityClass}"></i>
-                <h6>${isArabic ? 'جودة الشبكة' : 'Network Quality'}</h6>
+                <h6>${this.translate('video_consultation.system_checks.network_quality', 'Network Quality')}</h6>
                 <small class="${qualityClass}">${qualityText}</small>
                 <div><small class="text-muted">${Math.round(latency)}ms</small></div>
             `;
             
         } catch (error) {
             console.error('Network check error:', error);
-            const currentLang = LanguageManager.getLanguage() || 'en';
+            const currentLang = LanguageManager?.getLanguage() || 'en';
             const isArabic = currentLang === 'ar';
             
             networkCheck.innerHTML = `
                 <i class="bi bi-wifi-off text-warning fs-1 mb-2"></i>
-                <h6>${isArabic ? 'جودة الشبكة' : 'Network Quality'}</h6>
+                <h6>${this.translate('video_consultation.system_checks.network_quality', 'Network Quality')}</h6>
                 <small class="text-warning">${isArabic ? 'غير معروف' : 'Unknown'}</small>
             `;
             this.systemChecks.network = true; // Don't block on network check failure
@@ -319,7 +354,7 @@ const VideoConsultation = {
                 audio: true 
             });
             
-            const currentLang = LanguageManager.getLanguage() || 'en';
+            const currentLang = LanguageManager?.getLanguage() || 'en';
             const isArabic = currentLang === 'ar';
             
             permissionsCheck.innerHTML = `
@@ -335,7 +370,7 @@ const VideoConsultation = {
             
         } catch (error) {
             console.error('Permissions check error:', error);
-            const currentLang = LanguageManager.getLanguage() || 'en';
+            const currentLang = LanguageManager?.getLanguage() || 'en';
             const isArabic = currentLang === 'ar';
             
             permissionsCheck.innerHTML = `
@@ -510,44 +545,58 @@ const VideoConsultation = {
         // Video conference joined
         this.jitsiApi.addEventListener('videoConferenceJoined', (e) => {
             console.log('Joined conference:', e);
+            this.logAnalyticsEvent('conference_joined', { event_data: e });
             this.onConferenceJoined();
         });
         
         // Video conference left
         this.jitsiApi.addEventListener('videoConferenceLeft', (e) => {
             console.log('Left conference:', e);
+            this.logAnalyticsEvent('conference_left', { event_data: e });
             this.onConferenceLeft();
         });
         
         // Participant joined
         this.jitsiApi.addEventListener('participantJoined', (e) => {
             console.log('Participant joined:', e);
+            this.logAnalyticsEvent('participant_joined', { participant: e });
             this.showNotification('Participant joined the call');
         });
         
         // Participant left
         this.jitsiApi.addEventListener('participantLeft', (e) => {
             console.log('Participant left:', e);
+            this.logAnalyticsEvent('participant_left', { participant: e });
             this.showNotification('Participant left the call');
         });
         
         // Connection quality
         this.jitsiApi.addEventListener('connectionQualityChanged', (e) => {
             console.log('Connection quality:', e);
+            this.logAnalyticsEvent('connection_quality_changed', { quality: e });
             this.updateConnectionQuality(e);
         });
         
         // Error handling
         this.jitsiApi.addEventListener('errorOccurred', (e) => {
             console.error('Jitsi error:', e);
+            this.logAnalyticsEvent('jitsi_error', { error: e });
             this.handleJitsiError(e);
         });
     },
     
     // Conference joined handler
     onConferenceJoined() {
+        console.log('Conference joined successfully');
+        
+        // Start quality monitoring
+        this.startQualityMonitoring();
+        
         // Start monitoring connection
         this.startConnectionMonitoring();
+        
+        // Start heartbeat
+        this.startHeartbeat();
         
         // Update UI
         const statusEl = document.getElementById('connection-status');
@@ -573,31 +622,50 @@ const VideoConsultation = {
         try {
             await ApiHelper.makeRequest(
                 `/appointments/${this.appointmentId}/video/end`,
-                'POST'
+                { method: 'POST' }
             );
         } catch (error) {
             console.error('End session error:', error);
         }
     },
     
-    // Show post-call screen
+    // Show post-call screen with correct navigation
     showPostCallScreen() {
         const container = document.getElementById('video-container');
         if (!container) return;
         
-        const currentLang = LanguageManager.getLanguage() || 'en';
+        const currentLang = LanguageManager?.getLanguage() || 'en';
         const isArabic = currentLang === 'ar';
+        
+        // Determine correct navigation paths based on user type
+        const userType = AuthStorage.getUserType();
+        const dashboardPath = userType === 'doctor' 
+            ? '../dashboard/doctor.html'
+            : '../dashboard/patient.html';
+        
+        const appointmentPath = './appointment-list.html';
         
         container.innerHTML = `
             <div class="post-call-screen text-center py-5">
                 <i class="bi bi-check-circle text-success" style="font-size: 4rem;"></i>
                 <h3 class="mt-3">${isArabic ? 'انتهت الاستشارة' : 'Consultation Ended'}</h3>
-                <p>${isArabic ? 'شكراً لاستخدامك خدماتنا' : 'Thank you for using our services'}</p>
+                <p class="mb-4">${isArabic ? 'شكراً لاستخدامك خدماتنا' : 'Thank you for using our services'}</p>
                 
-                <div class="mt-4">
-                    <a href="/pages/appointments/appointment-list.html" class="btn btn-primary">
-                        ${isArabic ? 'العودة إلى المواعيد' : 'Back to Appointments'}
+                <div class="d-flex gap-2 justify-content-center flex-wrap">
+                    <a href="${appointmentPath}" class="btn btn-primary">
+                        <i class="bi bi-calendar-event"></i>
+                        ${isArabic ? 'المواعيد' : 'Appointments'}
                     </a>
+                    <a href="${dashboardPath}" class="btn btn-outline-primary">
+                        <i class="bi bi-speedometer2"></i>
+                        ${isArabic ? 'الرئيسية' : 'Dashboard'}
+                    </a>
+                </div>
+                
+                <div class="mt-3">
+                    <small class="text-muted">
+                        ${isArabic ? 'يمكنك إغلاق هذه النافذة الآن' : 'You can safely close this window now'}
+                    </small>
                 </div>
             </div>
         `;
@@ -655,11 +723,141 @@ const VideoConsultation = {
         }
     },
     
-    // End call
-    endCall() {
-        if (this.jitsiApi) {
-            this.jitsiApi.executeCommand('hangup');
+    // End call with proper cleanup
+    async endCall() {
+        console.log('Ending video consultation with full cleanup...');
+        
+        try {
+            // First, call backend to end session
+            await this.endSessionOnBackend();
+        } catch (error) {
+            console.error('Error ending session on backend:', error);
+            // Continue with cleanup even if backend call fails
         }
+        
+        // Perform complete cleanup
+        this.cleanup();
+        
+        // Show post-call screen
+        this.showPostCallScreen();
+    },
+    
+    // End session on backend
+    async endSessionOnBackend() {
+        try {
+            const response = await ApiHelper.makeRequest(
+                `/appointments/${this.appointmentId}/video/end`,
+                { method: 'POST' }
+            );
+            
+            if (response.success) {
+                console.log('Session ended on backend successfully');
+                return response;
+            } else {
+                throw new Error(response.message);
+            }
+        } catch (error) {
+            console.error('Failed to end session on backend:', error);
+            throw error;
+        }
+    },
+    
+    // Comprehensive cleanup method
+    cleanup() {
+        console.log('Starting comprehensive cleanup...');
+        
+        // 0. End session analytics
+        this.endSessionAnalytics();
+        
+        // 1. Dispose Jitsi API
+        if (this.jitsiApi) {
+            try {
+                console.log('Disposing Jitsi API...');
+                this.jitsiApi.dispose();
+                this.jitsiApi = null;
+                console.log('Jitsi API disposed successfully');
+            } catch (error) {
+                console.error('Error disposing Jitsi API:', error);
+            }
+        }
+        
+        // 2. Stop all media streams
+        this.stopAllMediaStreams();
+        
+        // 3. Clear all intervals
+        this.stopConnectionMonitoring();
+        this.stopHeartbeat();
+        
+        // 4. Remove event listeners
+        this.removeEventListeners();
+        
+        // 5. Reset component state
+        this.resetState();
+        
+        console.log('Cleanup completed');
+    },
+    
+    // Stop all media streams to release camera/microphone
+    stopAllMediaStreams() {
+        console.log('Stopping all media streams...');
+        
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            // Get current streams and stop them
+            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                .then(stream => {
+                    stream.getTracks().forEach(track => {
+                        track.stop();
+                        console.log(`Stopped ${track.kind} track`);
+                    });
+                })
+                .catch(error => {
+                    console.log('No active streams to stop or error getting streams');
+                });
+        }
+        
+        // Also try to stop any streams that might be attached to video elements
+        const videoElements = document.querySelectorAll('video');
+        videoElements.forEach(video => {
+            if (video.srcObject) {
+                const stream = video.srcObject;
+                if (stream.getTracks) {
+                    stream.getTracks().forEach(track => {
+                        track.stop();
+                        console.log(`Stopped track from video element: ${track.kind}`);
+                    });
+                }
+                video.srcObject = null;
+            }
+        });
+    },
+    
+    // Stop heartbeat
+    stopHeartbeat() {
+        if (this.heartbeatInterval) {
+            clearInterval(this.heartbeatInterval);
+            this.heartbeatInterval = null;
+            console.log('Heartbeat stopped');
+        }
+    },
+    
+    // Remove event listeners
+    removeEventListeners() {
+        // Remove any specific event listeners we added
+        // (Most are handled automatically when elements are removed)
+        console.log('Event listeners removed');
+    },
+    
+    // Reset component state
+    resetState() {
+        this.roomName = null;
+        this.sessionData = null;
+        this.audioOnlyMode = false;
+        this.systemChecks = {
+            browser: false,
+            network: false,
+            permissions: false
+        };
+        console.log('Component state reset');
     },
     
     // Start connection monitoring
@@ -705,18 +903,76 @@ const VideoConsultation = {
         qualityEl.innerHTML = `<span class="badge ${badgeClass}">${text}</span>`;
     },
     
-    // Handle Jitsi errors
+    // Enhanced Jitsi error handling with specific recovery strategies
     handleJitsiError(error) {
-        console.error('Jitsi error:', error);
+        console.error('Jitsi error occurred:', error);
         
-        // Check error type
-        if (error.type === 'connection.dropped') {
-            this.showError('Connection lost. Trying to reconnect...');
-            // Attempt reconnection
-            setTimeout(() => this.reconnect(), 3000);
-        } else {
-            this.showError('An error occurred during the video call');
+        const currentLang = LanguageManager?.getLanguage() || 'en';
+        const isArabic = currentLang === 'ar';
+        
+        let errorMessage, recoveryAction, showRetry = true;
+        
+        // Handle specific error types
+        switch (error.name || error.type) {
+            case 'connection.failed':
+            case 'CONNECTION_FAILED':
+                errorMessage = isArabic ? 'فشل في الاتصال بالخادم' : 'Failed to connect to server';
+                recoveryAction = () => this.attemptReconnection();
+                break;
+                
+            case 'conference.failed':
+            case 'CONFERENCE_FAILED':
+                errorMessage = isArabic ? 'فشل في الانضمام للاستشارة' : 'Failed to join consultation';
+                recoveryAction = () => this.retryJoinConference();
+                break;
+                
+            case 'connection.dropped':
+            case 'CONNECTION_DROPPED':
+                errorMessage = isArabic ? 'انقطع الاتصال' : 'Connection was lost';
+                recoveryAction = () => this.attemptReconnection();
+                this.showReconnectionDialog();
+                return; // Handle separately
+                
+            case 'not-allowed':
+            case 'PERMISSION_DENIED':
+                errorMessage = isArabic ? 
+                    'يُرجى السماح للكاميرا والميكروفون' : 
+                    'Please allow camera and microphone access';
+                recoveryAction = () => this.requestPermissionsAgain();
+                break;
+                
+            case 'camera.error':
+            case 'CAMERA_ERROR':
+                errorMessage = isArabic ? 
+                    'خطأ في الكاميرا - التبديل للصوت فقط' : 
+                    'Camera error - switching to audio only';
+                recoveryAction = () => this.switchToAudioOnly();
+                break;
+                
+            case 'microphone.error':
+            case 'MICROPHONE_ERROR':
+                errorMessage = isArabic ? 'خطأ في الميكروفون' : 'Microphone error';
+                recoveryAction = () => this.handleMicrophoneError();
+                break;
+                
+            case 'network.error':
+            case 'NETWORK_ERROR':
+                errorMessage = isArabic ? 
+                    'مشكلة في الشبكة - يُرجى التحقق من الاتصال' : 
+                    'Network issue - please check your connection';
+                recoveryAction = () => this.handleNetworkError();
+                break;
+                
+            default:
+                errorMessage = isArabic ? 
+                    'حدث خطأ غير متوقع في المكالمة' : 
+                    'An unexpected error occurred during the call';
+                recoveryAction = () => this.handleGenericError();
+                break;
         }
+        
+        // Show error with recovery options
+        this.showErrorScreen(errorMessage, showRetry, recoveryAction);
     },
     
     // Reconnect to session
@@ -733,34 +989,473 @@ const VideoConsultation = {
             }
         } catch (error) {
             console.error('Reconnection failed:', error);
+            this.showErrorScreen('Reconnection failed. Please try again.', true);
         }
     },
     
-    // Show loading state
-    showLoading() {
+    // Show reconnection dialog with automatic retry
+    showReconnectionDialog() {
+        const currentLang = LanguageManager?.getLanguage() || 'en';
+        const isArabic = currentLang === 'ar';
+        
         const container = document.getElementById('video-container');
         if (!container) return;
         
+        // Set up reconnection attempt counter
+        this.reconnectionAttempts = 0;
+        this.maxReconnectionAttempts = 3;
+        
+        container.innerHTML = `
+            <div class="reconnection-screen text-center py-5">
+                <div class="mb-4">
+                    <div class="spinner-border text-warning mb-3" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">Reconnecting...</span>
+                    </div>
+                    <h4 class="text-warning">
+                        <i class="bi bi-wifi"></i>
+                        ${isArabic ? 'محاولة إعادة الاتصال...' : 'Reconnecting...'}
+                    </h4>
+                    <p id="reconnection-status">
+                        ${isArabic ? 'يُرجى الانتظار بينما نحاول إعادة الاتصال' : 'Please wait while we try to reconnect'}
+                    </p>
+                    <div class="progress mb-3" style="height: 10px;">
+                        <div id="reconnection-progress" class="progress-bar progress-bar-striped progress-bar-animated bg-warning" 
+                             role="progressbar" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2 justify-content-center">
+                    <button id="manual-reconnect-btn" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-clockwise"></i>
+                        ${isArabic ? 'إعادة المحاولة الآن' : 'Retry Now'}
+                    </button>
+                    <button id="audio-only-btn" class="btn btn-outline-warning">
+                        <i class="bi bi-telephone"></i>
+                        ${isArabic ? 'الصوت فقط' : 'Audio Only'}
+                    </button>
+                    <button id="end-call-reconnection-btn" class="btn btn-outline-danger">
+                        <i class="bi bi-telephone-x"></i>
+                        ${isArabic ? 'إنهاء المكالمة' : 'End Call'}
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        // Set up event listeners
+        document.getElementById('manual-reconnect-btn').addEventListener('click', () => {
+            this.attemptReconnection();
+        });
+        
+        document.getElementById('audio-only-btn').addEventListener('click', () => {
+            this.switchToAudioOnly();
+        });
+        
+        document.getElementById('end-call-reconnection-btn').addEventListener('click', () => {
+            this.endCall();
+        });
+        
+        // Start automatic reconnection
+        this.attemptReconnection();
+    },
+    
+    // Attempt reconnection with exponential backoff
+    async attemptReconnection() {
+        const currentLang = LanguageManager?.getLanguage() || 'en';
+        const isArabic = currentLang === 'ar';
+        
+        this.reconnectionAttempts = (this.reconnectionAttempts || 0) + 1;
+        
+        if (this.reconnectionAttempts > this.maxReconnectionAttempts) {
+            this.showErrorScreen(
+                isArabic ? 'فشل في إعادة الاتصال. يُرجى المحاولة لاحقاً' : 'Failed to reconnect. Please try again later.',
+                true,
+                () => this.retryJoinConference()
+            );
+            return;
+        }
+        
+        // Update UI
+        const statusEl = document.getElementById('reconnection-status');
+        const progressEl = document.getElementById('reconnection-progress');
+        
+        if (statusEl) {
+            statusEl.textContent = isArabic ? 
+                `محاولة رقم ${this.reconnectionAttempts} من ${this.maxReconnectionAttempts}` :
+                `Attempt ${this.reconnectionAttempts} of ${this.maxReconnectionAttempts}`;
+        }
+        
+        if (progressEl) {
+            const progress = (this.reconnectionAttempts / this.maxReconnectionAttempts) * 100;
+            progressEl.style.width = `${progress}%`;
+        }
+        
+        try {
+            console.log(`Reconnection attempt ${this.reconnectionAttempts}/${this.maxReconnectionAttempts}`);
+            
+            // Check if session is still valid
+            const statusResponse = await ApiHelper.makeRequest(
+                `/appointments/${this.appointmentId}/video/status`,
+                { method: 'GET' }
+            );
+            
+            if (!statusResponse.success || !statusResponse.data.can_join) {
+                throw new Error('Session no longer available');
+            }
+            
+            // Try to rejoin
+            const response = await ApiHelper.makeRequest(
+                `/appointments/${this.appointmentId}/video/join`,
+                { method: 'POST' }
+            );
+            
+            if (response.success) {
+                console.log('Reconnection successful');
+                this.sessionData = response.data;
+                this.initJitsi(response.data);
+                this.reconnectionAttempts = 0; // Reset counter
+            } else {
+                throw new Error(response.message);
+            }
+            
+        } catch (error) {
+            console.error(`Reconnection attempt ${this.reconnectionAttempts} failed:`, error);
+            
+            // Wait before next attempt (exponential backoff)
+            const delay = Math.min(1000 * Math.pow(2, this.reconnectionAttempts - 1), 10000);
+            
+            setTimeout(() => {
+                this.attemptReconnection();
+            }, delay);
+        }
+    },
+    
+    // Retry joining conference
+    async retryJoinConference() {
+        this.showLoadingState('Rejoining consultation...');
+        
+        // Reset attempts
+        this.reconnectionAttempts = 0;
+        
+        // Try to join again
+        await this.attemptReconnection();
+    },
+    
+    // Switch to audio-only mode
+    switchToAudioOnly() {
+        console.log('Switching to audio-only mode');
+        
+        const currentLang = LanguageManager?.getLanguage() || 'en';
+        const isArabic = currentLang === 'ar';
+        
+        this.audioOnlyMode = true;
+        
+        // If Jitsi is already initialized, disable video
+        if (this.jitsiApi) {
+            this.jitsiApi.executeCommand('toggleVideo');
+            this.showNotification(
+                isArabic ? 'تم التبديل للصوت فقط' : 'Switched to audio only mode',
+                'warning'
+            );
+        } else {
+            // Try to join in audio-only mode
+            this.showLoadingState(
+                isArabic ? 'الانضمام بالصوت فقط...' : 'Joining in audio-only mode...'
+            );
+            this.attemptReconnection();
+        }
+    },
+    
+    // Request permissions again
+    async requestPermissionsAgain() {
+        const currentLang = LanguageManager?.getLanguage() || 'en';
+        const isArabic = currentLang === 'ar';
+        
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: !this.audioOnlyMode, 
+                audio: true 
+            });
+            
+            // Stop the stream immediately (we just needed to trigger permission)
+            stream.getTracks().forEach(track => track.stop());
+            
+            this.showNotification(
+                isArabic ? 'تم منح الأذونات بنجاح' : 'Permissions granted successfully',
+                'success'
+            );
+            
+            // Retry joining
+            this.attemptReconnection();
+            
+        } catch (error) {
+            this.showErrorScreen(
+                isArabic ? 
+                    'يُرجى السماح للكاميرا والميكروفون من إعدادات المتصفح' :
+                    'Please allow camera and microphone access in your browser settings',
+                true,
+                () => this.requestPermissionsAgain()
+            );
+        }
+    },
+    
+    // Handle microphone error
+    handleMicrophoneError() {
+        console.log('Handling microphone error');
+        
+        const currentLang = LanguageManager?.getLanguage() || 'en';
+        const isArabic = currentLang === 'ar';
+        
+        // Try to continue without microphone or request new permissions
+        this.showErrorScreen(
+            isArabic ? 
+                'خطأ في الميكروفون. هل تريد المتابعة بدون صوت؟' :
+                'Microphone error. Do you want to continue without audio?',
+            true,
+            () => {
+                if (this.jitsiApi) {
+                    this.jitsiApi.executeCommand('toggleAudio');
+                }
+                this.attemptReconnection();
+            }
+        );
+    },
+    
+    // Handle network error
+    async handleNetworkError() {
+        const currentLang = LanguageManager?.getLanguage() || 'en';
+        const isArabic = currentLang === 'ar';
+        
+        // Test network connectivity
+        try {
+            const response = await fetch('/assets/img/logo.png', { method: 'HEAD' });
+            if (response.ok) {
+                // Network is okay, might be Jitsi server issue
+                this.showErrorScreen(
+                    isArabic ? 
+                        'مشكلة في خادم الفيديو. محاولة إعادة الاتصال...' :
+                        'Video server issue. Attempting to reconnect...',
+                    true,
+                    () => this.attemptReconnection()
+                );
+            } else {
+                throw new Error('Network test failed');
+            }
+        } catch (error) {
+            this.showErrorScreen(
+                isArabic ? 
+                    'لا يوجد اتصال بالإنترنت. يُرجى التحقق من الاتصال' :
+                    'No internet connection. Please check your connection.',
+                true,
+                () => this.handleNetworkError()
+            );
+        }
+    },
+    
+    // Handle generic errors
+    handleGenericError() {
+        const currentLang = LanguageManager?.getLanguage() || 'en';
+        const isArabic = currentLang === 'ar';
+        
+        this.showErrorScreen(
+            isArabic ? 
+                'حدث خطأ. هل تريد المحاولة مرة أخرى؟' :
+                'An error occurred. Would you like to try again?',
+            true,
+            () => this.attemptReconnection()
+        );
+    },
+    
+    // Show loading state with detailed progress
+    showLoading(message = 'Connecting to video session...') {
+        const container = document.getElementById('video-container');
+        if (!container) return;
+        
+        const currentLang = LanguageManager?.getLanguage() || 'en';
+        const isArabic = currentLang === 'ar';
+        
+        const loadingMessages = {
+            en: {
+                'connecting': 'Connecting to video session...',
+                'initializing': 'Initializing video call...',
+                'joining': 'Joining consultation room...',
+                'reconnecting': 'Reconnecting to session...',
+                'testing': 'Testing audio and video devices...',
+                'authenticating': 'Authenticating session...'
+            },
+            ar: {
+                'connecting': 'الاتصال بجلسة الفيديو...',
+                'initializing': 'تهيئة مكالمة الفيديو...',
+                'joining': 'الانضمام إلى غرفة الاستشارة...',
+                'reconnecting': 'إعادة الاتصال بالجلسة...',
+                'testing': 'اختبار أجهزة الصوت والفيديو...',
+                'authenticating': 'المصادقة على الجلسة...'
+            }
+        };
+        
+        const displayMessage = loadingMessages[isArabic ? 'ar' : 'en'][message] || message;
+        
         container.innerHTML = `
             <div class="text-center py-5">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
+                <div class="mb-4">
+                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">${displayMessage}</span>
+                    </div>
                 </div>
-                <p class="mt-3">Connecting to video session...</p>
+                <h5 class="mb-3">${displayMessage}</h5>
+                <div class="progress mx-auto" style="width: 300px; height: 8px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" 
+                         style="width: 100%" 
+                         aria-valuenow="100" 
+                         aria-valuemin="0" 
+                         aria-valuemax="100">
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <small class="text-muted">
+                        ${isArabic ? 'يرجى الانتظار...' : 'Please wait...'}
+                    </small>
+                </div>
             </div>
         `;
     },
     
-    // Show error message
-    showError(message) {
+    // Show loading state with custom message
+    showLoadingState(message) {
+        this.showLoading(message);
+    },
+    
+    // Show comprehensive error screen with recovery options
+    showErrorScreen(message, showRetry = true, recoveryAction = null, errorType = 'general') {
         const container = document.getElementById('video-container');
         if (!container) return;
         
+        const currentLang = LanguageManager?.getLanguage() || 'en';
+        const isArabic = currentLang === 'ar';
+        
+        // Error type specific configurations
+        const errorConfigs = {
+            'connection': {
+                icon: 'bi-wifi-off',
+                title: isArabic ? 'مشكلة في الاتصال' : 'Connection Problem',
+                suggestions: isArabic ? 
+                    ['تحقق من اتصال الإنترنت', 'أعد تحميل الصفحة', 'جرب شبكة أخرى'] :
+                    ['Check your internet connection', 'Reload the page', 'Try a different network']
+            },
+            'permissions': {
+                icon: 'bi-camera-video-off',
+                title: isArabic ? 'مشكلة في الأذونات' : 'Permission Problem',
+                suggestions: isArabic ? 
+                    ['اسمح بالوصول للكاميرا والميكروفون', 'تحقق من إعدادات المتصفح', 'أعد تحميل الصفحة'] :
+                    ['Allow camera and microphone access', 'Check browser settings', 'Reload the page']
+            },
+            'device': {
+                icon: 'bi-camera-video-off',
+                title: isArabic ? 'مشكلة في الجهاز' : 'Device Problem',
+                suggestions: isArabic ? 
+                    ['تأكد من توصيل الكاميرا والميكروفون', 'أغلق التطبيقات الأخرى التي تستخدم الكاميرا', 'أعد تشغيل المتصفح'] :
+                    ['Ensure camera and microphone are connected', 'Close other apps using camera', 'Restart browser']
+            },
+            'server': {
+                icon: 'bi-server',
+                title: isArabic ? 'مشكلة في الخادم' : 'Server Problem',
+                suggestions: isArabic ? 
+                    ['جرب مرة أخرى بعد قليل', 'تحقق من حالة الخدمة', 'اتصل بالدعم الفني'] :
+                    ['Try again in a few moments', 'Check service status', 'Contact technical support']
+            },
+            'general': {
+                icon: 'bi-exclamation-triangle',
+                title: isArabic ? 'حدث خطأ' : 'An Error Occurred',
+                suggestions: isArabic ? 
+                    ['جرب مرة أخرى', 'أعد تحميل الصفحة', 'اتصل بالدعم الفني'] :
+                    ['Try again', 'Reload the page', 'Contact support']
+            }
+        };
+        
+        const config = errorConfigs[errorType] || errorConfigs['general'];
+        
+        // Generate unique button ID for event handling
+        const retryButtonId = 'retry-btn-' + Date.now();
+        
+        const retryButton = showRetry ? `
+            <button type="button" class="btn btn-primary me-2" id="${retryButtonId}">
+                <i class="bi bi-arrow-clockwise"></i>
+                ${isArabic ? 'إعادة المحاولة' : 'Retry'}
+            </button>
+        ` : '';
+        
         container.innerHTML = `
-            <div class="alert alert-danger">
-                <i class="bi bi-exclamation-triangle"></i> ${message}
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-6">
+                    <div class="card border-0 shadow">
+                        <div class="card-body text-center py-5">
+                            <div class="mb-4">
+                                <i class="${config.icon} display-1 text-danger"></i>
+                            </div>
+                            <h3 class="mb-3 text-danger">${config.title}</h3>
+                            <div class="alert alert-danger mb-4">
+                                <div class="fw-bold mb-2">
+                                    <i class="bi bi-info-circle"></i> ${isArabic ? 'تفاصيل الخطأ:' : 'Error Details:'}
+                                </div>
+                                <div>${message}</div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h5 class="mb-3">${isArabic ? 'اقتراحات للحل:' : 'Suggested Solutions:'}</h5>
+                                <ul class="list-unstyled text-start">
+                                    ${config.suggestions.map(suggestion => 
+                                        `<li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>${suggestion}</li>`
+                                    ).join('')}
+                                </ul>
+                            </div>
+                            
+                            <div class="d-flex justify-content-center gap-2">
+                                ${retryButton}
+                                <button type="button" class="btn btn-outline-primary" onclick="VideoConsultation.showAudioOnlyOption()">
+                                    <i class="bi bi-telephone"></i>
+                                    ${isArabic ? 'جرب الصوت فقط' : 'Try Audio Only'}
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="VideoConsultation.goBackToDashboard()">
+                                    <i class="bi bi-arrow-left"></i>
+                                    ${isArabic ? 'العودة' : 'Go Back'}
+                                </button>
+                            </div>
+                            
+                            <div class="mt-4 pt-3 border-top">
+                                <small class="text-muted">
+                                    ${isArabic ? 
+                                        'إذا استمرت المشكلة، يرجى <a href="#" onclick="VideoConsultation.contactSupport()">الاتصال بالدعم الفني</a>' :
+                                        'If the problem persists, please <a href="#" onclick="VideoConsultation.contactSupport()">contact technical support</a>'
+                                    }
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         `;
+        
+        // Add event listener for retry button if it exists
+        if (showRetry && recoveryAction) {
+            setTimeout(() => {
+                const retryBtn = document.getElementById(retryButtonId);
+                if (retryBtn) {
+                    retryBtn.addEventListener('click', recoveryAction);
+                }
+            }, 100);
+        } else if (showRetry) {
+            setTimeout(() => {
+                const retryBtn = document.getElementById(retryButtonId);
+                if (retryBtn) {
+                    retryBtn.addEventListener('click', () => this.handleRetry());
+                }
+            }, 100);
+        }
+    },
+    
+    // Show simple error message (backward compatibility)
+    showError(message) {
+        this.showErrorScreen(message, true, null, 'general');
     },
     
     // Show notification
@@ -771,6 +1466,295 @@ const VideoConsultation = {
         } else {
             console.log(`[${type}] ${message}`);
         }
+    },
+    
+    // Error recovery actions
+    handleRetry() {
+        console.log('Retrying video session...');
+        this.showLoading('reconnecting');
+        
+        // Clear any existing state
+        this.cleanup();
+        
+        // Wait a moment then retry
+        setTimeout(() => {
+            this.init();
+        }, 1000);
+    },
+    
+    showAudioOnlyOption() {
+        const currentLang = LanguageManager?.getLanguage() || 'en';
+        const isArabic = currentLang === 'ar';
+        
+        // Set audio-only mode
+        this.audioOnlyMode = true;
+        
+        // Show confirmation dialog
+        if (confirm(isArabic ? 
+            'هل تريد المتابعة بالصوت فقط بدون فيديو؟' : 
+            'Would you like to continue with audio only (no video)?'
+        )) {
+            this.showLoading('connecting');
+            this.startVideoSession();
+        }
+    },
+    
+    goBackToDashboard() {
+        // Clean up before leaving
+        this.cleanup();
+        
+        // Navigate back to dashboard
+        if (window.navigateToDashboard) {
+            window.navigateToDashboard();
+        } else {
+            // Fallback navigation
+            const userType = AuthStorage.getUserType();
+            const dashboardPath = userType === 'doctor' 
+                ? '../dashboard/doctor.html'
+                : '../dashboard/patient.html';
+            window.location.href = dashboardPath;
+        }
+    },
+    
+    // ===========================================
+    // Session Analytics and Monitoring Methods
+    // ===========================================
+    
+    // Initialize session analytics
+    initSessionAnalytics() {
+        console.log('Initializing session analytics...');
+        
+        // Generate unique session ID
+        this.sessionAnalytics.sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        this.sessionAnalytics.startTime = new Date();
+        
+        // Log session start
+        this.logAnalyticsEvent('session_initialized', {
+            appointment_id: this.appointmentId,
+            user_type: AuthStorage.getUserType(),
+            user_agent: navigator.userAgent,
+            screen_resolution: `${screen.width}x${screen.height}`,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            language: LanguageManager?.getLanguage() || 'en'
+        });
+    },
+    
+    // Start quality monitoring
+    startQualityMonitoring() {
+        if (!this.jitsiApi) return;
+        
+        console.log('Starting quality monitoring...');
+        
+        this.qualityMonitor.interval = setInterval(() => {
+            this.collectQualityMetrics();
+        }, this.qualityMonitor.sampleRate);
+        
+        // Log monitoring start
+        this.logAnalyticsEvent('quality_monitoring_started', {
+            sample_rate: this.qualityMonitor.sampleRate
+        });
+    },
+    
+    // Collect quality metrics
+    async collectQualityMetrics() {
+        if (!this.jitsiApi) return;
+        
+        try {
+            // Get connection stats from Jitsi
+            const stats = await this.jitsiApi.getConnectionState();
+            const participants = this.jitsiApi.getNumberOfParticipants();
+            
+            const metrics = {
+                timestamp: new Date(),
+                connection_state: stats || 'unknown',
+                participant_count: participants,
+                audio_muted: this.jitsiApi.isAudioMuted(),
+                video_muted: this.jitsiApi.isVideoMuted(),
+                screen_sharing: this.jitsiApi.isScreenSharing && this.jitsiApi.isScreenSharing(),
+                network_info: this.getNetworkInfo()
+            };
+            
+            // Store metrics
+            this.sessionAnalytics.qualityMetrics.push(metrics);
+            
+            // Keep only last 100 metrics to avoid memory issues
+            if (this.sessionAnalytics.qualityMetrics.length > 100) {
+                this.sessionAnalytics.qualityMetrics = this.sessionAnalytics.qualityMetrics.slice(-100);
+            }
+            
+            this.qualityMonitor.lastQualityCheck = new Date();
+            
+        } catch (error) {
+            console.error('Error collecting quality metrics:', error);
+        }
+    },
+    
+    // Get network information
+    getNetworkInfo() {
+        const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        
+        if (connection) {
+            return {
+                effective_type: connection.effectiveType,
+                downlink: connection.downlink,
+                rtt: connection.rtt,
+                save_data: connection.saveData
+            };
+        }
+        
+        return { available: false };
+    },
+    
+    // Log analytics event
+    logAnalyticsEvent(eventType, data = {}) {
+        const event = {
+            type: eventType,
+            timestamp: new Date(),
+            appointment_id: this.appointmentId,
+            session_id: this.sessionAnalytics.sessionId,
+            data: data
+        };
+        
+        // Store event based on type
+        switch (eventType) {
+            case 'connection_failed':
+            case 'connection_restored':
+            case 'connection_quality_changed':
+                this.sessionAnalytics.connectionEvents.push(event);
+                break;
+            case 'participant_joined':
+            case 'participant_left':
+            case 'participant_muted':
+            case 'participant_unmuted':
+                this.sessionAnalytics.participantEvents.push(event);
+                break;
+            case 'error':
+            case 'jitsi_error':
+            case 'api_error':
+                this.sessionAnalytics.errorEvents.push(event);
+                break;
+            case 'device_changed':
+            case 'camera_changed':
+            case 'microphone_changed':
+                this.sessionAnalytics.deviceChanges.push(event);
+                break;
+            case 'network_changed':
+            case 'connection_type_changed':
+                this.sessionAnalytics.networkChanges.push(event);
+                break;
+        }
+        
+        console.log(`Analytics Event [${eventType}]:`, event);
+        
+        // Send to backend for real-time monitoring (non-blocking)
+        this.sendAnalyticsEvent(event).catch(error => {
+            console.error('Failed to send analytics event:', error);
+        });
+    },
+    
+    // Send analytics event to backend
+    async sendAnalyticsEvent(event) {
+        try {
+            await ApiHelper.makeRequest(
+                `/appointments/${this.appointmentId}/video/analytics`,
+                {
+                    method: 'POST',
+                    body: JSON.stringify(event),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+        } catch (error) {
+            // Don't throw - analytics shouldn't break the main functionality
+            console.warn('Analytics event send failed:', error);
+        }
+    },
+    
+    // End session analytics
+    endSessionAnalytics() {
+        console.log('Ending session analytics...');
+        
+        if (!this.sessionAnalytics.startTime) return;
+        
+        this.sessionAnalytics.endTime = new Date();
+        this.sessionAnalytics.duration = this.sessionAnalytics.endTime - this.sessionAnalytics.startTime;
+        
+        // Stop quality monitoring
+        if (this.qualityMonitor.interval) {
+            clearInterval(this.qualityMonitor.interval);
+            this.qualityMonitor.interval = null;
+        }
+        
+        // Log session end with summary
+        this.logAnalyticsEvent('session_ended', {
+            duration_ms: this.sessionAnalytics.duration,
+            duration_formatted: this.formatDuration(this.sessionAnalytics.duration),
+            total_events: {
+                connection: this.sessionAnalytics.connectionEvents.length,
+                participant: this.sessionAnalytics.participantEvents.length,
+                error: this.sessionAnalytics.errorEvents.length,
+                device: this.sessionAnalytics.deviceChanges.length,
+                network: this.sessionAnalytics.networkChanges.length
+            },
+            quality_samples: this.sessionAnalytics.qualityMetrics.length,
+            final_quality: this.sessionAnalytics.qualityMetrics.length > 0 ? 
+                this.sessionAnalytics.qualityMetrics[this.sessionAnalytics.qualityMetrics.length - 1] : null
+        });
+        
+        // Send final analytics summary to backend
+        this.sendFinalAnalytics().catch(error => {
+            console.error('Failed to send final analytics:', error);
+        });
+    },
+    
+    // Send final analytics summary
+    async sendFinalAnalytics() {
+        try {
+            await ApiHelper.makeRequest(
+                `/appointments/${this.appointmentId}/video/analytics/summary`,
+                {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        session_summary: this.sessionAnalytics,
+                        user_type: AuthStorage.getUserType()
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+            
+            console.log('Final analytics sent successfully');
+        } catch (error) {
+            console.warn('Final analytics send failed:', error);
+        }
+    },
+    
+    // Format duration in human readable form
+    formatDuration(milliseconds) {
+        const seconds = Math.floor(milliseconds / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+        
+        if (hours > 0) {
+            return `${hours}h ${minutes % 60}m ${seconds % 60}s`;
+        } else if (minutes > 0) {
+            return `${minutes}m ${seconds % 60}s`;
+        } else {
+            return `${seconds}s`;
+        }
+    },
+    
+    contactSupport() {
+        const currentLang = LanguageManager?.getLanguage() || 'en';
+        const isArabic = currentLang === 'ar';
+        
+        // Show contact information
+        alert(isArabic ? 
+            'للحصول على الدعم الفني، يرجى الاتصال على:\n\nهاتف: +1-800-SAHATAK\nبريد إلكتروني: support@sahatak.com' :
+            'For technical support, please contact:\n\nPhone: +1-800-SAHATAK\nEmail: support@sahatak.com'
+        );
     },
     
     // Show warning message
@@ -792,7 +1776,7 @@ const VideoConsultation = {
         
         if (!joinBtn || !messagesDiv) return;
         
-        const currentLang = LanguageManager.getLanguage() || 'en';
+        const currentLang = LanguageManager?.getLanguage() || 'en';
         const isArabic = currentLang === 'ar';
         
         // Check if all critical checks pass
@@ -868,6 +1852,29 @@ const VideoConsultation = {
         
         // Stop monitoring
         this.stopConnectionMonitoring();
+    },
+    
+    // Start heartbeat to keep session alive
+    startHeartbeat() {
+        console.log('Starting heartbeat...');
+        
+        // Send heartbeat every 30 seconds
+        this.heartbeatInterval = setInterval(async () => {
+            try {
+                const response = await ApiHelper.makeRequest(
+                    `/appointments/${this.appointmentId}/video/heartbeat`,
+                    { method: 'POST' }
+                );
+                
+                if (!response.success || !response.data.active) {
+                    console.warn('Session ended by server or other participant');
+                    this.endCall();
+                }
+            } catch (error) {
+                console.error('Heartbeat error:', error);
+                // Don't end call on heartbeat error - might be temporary network issue
+            }
+        }, 30000);
     }
 };
 
@@ -882,7 +1889,44 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Cleanup on page unload
-window.addEventListener('beforeunload', () => {
-    VideoConsultation.cleanup();
+// Enhanced cleanup handlers with confirmation
+window.addEventListener('beforeunload', (event) => {
+    if (VideoConsultation.jitsiApi) {
+        console.log('Page unloading - comprehensive cleanup...');
+        VideoConsultation.cleanup();
+        
+        // Show confirmation dialog
+        const message = 'You are currently in a video consultation. Are you sure you want to leave?';
+        event.returnValue = message;
+        return message;
+    }
 });
+
+// Handle page visibility changes (user switches tabs/minimizes)
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden' && VideoConsultation.jitsiApi) {
+        console.log('Page hidden - starting cleanup timer...');
+        
+        // Give user 2 minutes to return before cleanup
+        VideoConsultation.visibilityTimer = setTimeout(() => {
+            if (document.visibilityState === 'hidden') {
+                console.log('Page hidden for 2 minutes - ending call');
+                VideoConsultation.endCall();
+            }
+        }, 120000); // 2 minutes
+        
+    } else if (document.visibilityState === 'visible' && VideoConsultation.visibilityTimer) {
+        console.log('Page visible again - canceling cleanup timer');
+        clearTimeout(VideoConsultation.visibilityTimer);
+        VideoConsultation.visibilityTimer = null;
+    }
+});
+
+// Handle browser back/forward navigation
+window.addEventListener('popstate', () => {
+    console.log('Navigation detected - cleaning up video consultation...');
+    if (VideoConsultation.jitsiApi) {
+        VideoConsultation.cleanup();
+    }
+});
+
