@@ -871,9 +871,13 @@
                                     // Generate video consultation button if applicable
                                     const videoButton = VideoConsultationDashboard.generateVideoConsultationButton(apt);
                                     
-                                    // Check if appointment can be modified (1 hour before)
+                                    // Check if appointment can be modified (1 hour before and not cancelled/completed)
                                     const canModify = ['scheduled', 'confirmed'].includes(apt.status) && 
+                                                     apt.status !== 'cancelled' &&
+                                                     apt.status !== 'completed' &&
                                                      appointmentDate > new Date(Date.now() + 60*60*1000);
+                                                     
+                                    console.log(`Appointment ${apt.id}: status=${apt.status}, canModify=${canModify}`);
                                     
                                     // Get translation texts
                                     const cancelText = LanguageManager?.translate('appointments.cancel') || 'Cancel';
@@ -1165,27 +1169,51 @@
 
             // Confirm cancellation
             async confirmCancellation() {
-                if (!this.currentAppointmentId) return;
+                if (!this.currentAppointmentId) {
+                    console.error('No appointment ID selected for cancellation');
+                    return;
+                }
+
+                console.log('Attempting to cancel appointment:', this.currentAppointmentId);
 
                 try {
                     const reason = document.getElementById('cancellation-reason').value;
+                    console.log('Cancellation reason:', reason);
+                    
                     const response = await ApiHelper.makeRequest(`/appointments/${this.currentAppointmentId}/cancel`, {
                         method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
                         body: JSON.stringify({ cancellation_reason: reason })
                     });
+
+                    console.log('Cancel response:', response);
 
                     if (response.success) {
                         // Close modal
                         bootstrap.Modal.getInstance(document.getElementById('cancel-modal')).hide();
 
-                        // Reload dashboard stats
+                        // Reload dashboard stats to refresh appointments
                         loadDashboardStats();
 
                         const currentLang = LanguageManager?.getLanguage() || 'en';
                         const successMsg = currentLang === 'ar' ? 'تم إلغاء الموعد بنجاح' : 'Appointment cancelled successfully';
                         this.showSuccess(successMsg);
                     } else {
-                        this.showError(response.message || 'Failed to cancel appointment');
+                        // Handle specific error cases
+                        let errorMessage = response.message || 'Failed to cancel appointment';
+                        
+                        if (response.message && response.message.includes('already cancelled')) {
+                            // Close modal and refresh if already cancelled
+                            bootstrap.Modal.getInstance(document.getElementById('cancel-modal')).hide();
+                            loadDashboardStats(); // Refresh to show current status
+                            
+                            const currentLang = LanguageManager?.getLanguage() || 'en';
+                            errorMessage = currentLang === 'ar' ? 'هذا الموعد ملغى بالفعل' : 'This appointment is already cancelled';
+                        }
+                        
+                        this.showError(errorMessage);
                     }
                 } catch (error) {
                     console.error('Error cancelling appointment:', error);
@@ -1281,9 +1309,9 @@
                     </h5>
                 </div>
                 <div class="modal-body">
-                    <p id="cancel-modal-message">Are you sure you want to cancel this appointment?</p>
+                    <p id="cancel-modal-message" style="color: #212529;">Are you sure you want to cancel this appointment?</p>
                     <div class="mb-3">
-                        <label for="cancellation-reason" class="form-label" id="cancellation-reason-label">Reason for cancellation (optional)</label>
+                        <label for="cancellation-reason" class="form-label" id="cancellation-reason-label" style="color: #212529;">Reason for cancellation (optional)</label>
                         <textarea class="form-control" id="cancellation-reason" rows="3" 
                                 placeholder="Write the reason for cancelling the appointment..."></textarea>
                     </div>
@@ -1311,11 +1339,11 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p id="reschedule-modal-subtitle">Select new date and time</p>
+                    <p id="reschedule-modal-subtitle" style="color: #212529;">Select new date and time</p>
                     
                     <!-- Current appointment info -->
                     <div class="alert alert-info mb-4">
-                        <h6 class="mb-2" id="current-appointment-label">Current Appointment:</h6>
+                        <h6 class="mb-2" id="current-appointment-label" style="color: #212529;">Current Appointment:</h6>
                         <div id="current-appointment-info">
                             <!-- Will be populated by JavaScript -->
                         </div>
@@ -1324,14 +1352,14 @@
                     <!-- New date selection -->
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <label for="new-appointment-date" class="form-label" id="new-date-label">New Date</label>
+                            <label for="new-appointment-date" class="form-label" id="new-date-label" style="color: #212529;">New Date</label>
                             <input type="date" class="form-control" id="new-appointment-date">
                         </div>
                     </div>
                     
                     <!-- Available time slots -->
                     <div id="reschedule-time-slots-container" class="mb-4">
-                        <h6 class="mb-3" id="new-time-label">Available Times</h6>
+                        <h6 class="mb-3" id="new-time-label" style="color: #212529;">Available Times</h6>
                         <div id="reschedule-time-slots" class="d-flex flex-wrap gap-2">
                             <!-- Time slots will be populated here -->
                         </div>
@@ -1339,7 +1367,7 @@
                     
                     <!-- Reschedule reason -->
                     <div class="mb-3">
-                        <label for="reschedule-reason" class="form-label" id="reschedule-reason-label">Reason for rescheduling (optional)</label>
+                        <label for="reschedule-reason" class="form-label" id="reschedule-reason-label" style="color: #212529;">Reason for rescheduling (optional)</label>
                         <textarea class="form-control" id="reschedule-reason" rows="3" 
                                 placeholder="Write the reason for rescheduling the appointment..."></textarea>
                     </div>
