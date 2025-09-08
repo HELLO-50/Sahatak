@@ -1306,6 +1306,94 @@
     "prescriptions": "Prescriptions"
   },
 
+  "video_consultation": {
+    "title": "Video Consultation",
+    "connecting": "Connecting to video session...",
+    "initializing": "Initializing video call...",
+    "joining": "Joining consultation room...",
+    "reconnecting": "Reconnecting to session...",
+    "testing": "Testing audio and video devices...",
+    "authenticating": "Authenticating session...",
+    "loading": "Loading...",
+    "please_wait": "Please wait...",
+    "nav": {
+      "dashboard": "Dashboard",
+      "appointments": "My Appointments",
+      "end_call": "End Call"
+    },
+    "error": {
+      "connection": "Connection Problem",
+      "permissions": "Permission Problem",
+      "device": "Device Problem",
+      "server": "Server Problem",
+      "general": "An Error Occurred",
+      "retry": "Retry",
+      "audio_only": "Try Audio Only",
+      "go_back": "Go Back",
+      "details": "Error Details:",
+      "solutions": "Suggested Solutions:"
+    },
+    "suggestions": {
+      "connection": [
+        "Check your internet connection",
+        "Reload the page",
+        "Try a different network"
+      ],
+      "permissions": [
+        "Allow camera and microphone access",
+        "Check browser settings",
+        "Reload the page"
+      ],
+      "device": [
+        "Ensure camera and microphone are connected",
+        "Close other apps using camera",
+        "Restart browser"
+      ],
+      "server": [
+        "Try again in a few moments",
+        "Check service status",
+        "Contact technical support"
+      ],
+      "general": [
+        "Try again",
+        "Reload the page",
+        "Contact support"
+      ]
+    },
+    "support": {
+      "contact": "For technical support, please contact:",
+      "phone": "Phone: +1-800-SAHATAK",
+      "email": "Email: support@sahatak.com",
+      "persistent_problem": "If the problem persists, please contact technical support"
+    }
+  },
+
+  "messaging": {
+    "title": "Patient Communication Hub",
+    "patient_title": "Chat with Doctor",
+    "subtitle": "Secure messaging and communication with your patients",
+    "patients_title": "Patients",
+    "search_patients": "Search patients...",
+    "filters": {
+      "all": "All",
+      "unread": "Unread",
+      "urgent": "Urgent"
+    },
+    "actions": {
+      "urgent": "Urgent",
+      "send": "Send",
+      "type_message": "Type a message..."
+    },
+    "status": {
+      "online": "Online",
+      "offline": "Offline",
+      "typing": "Typing..."
+    },
+    "navigation": {
+      "back_to_dashboard": "Back to Dashboard"
+    }
+  },
+
   "footer": {
     "brand": "Sahatak",
     "description": "A secure and trusted medical platform to connect with doctors remotely",
