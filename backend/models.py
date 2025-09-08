@@ -411,7 +411,10 @@ class Appointment(db.Model):
             'connection_quality': self.connection_quality,
             'recording_enabled': self.recording_enabled,
             'created_at': self.created_at.isoformat(),
-            'updated_at': self.updated_at.isoformat()
+            'updated_at': self.updated_at.isoformat(),
+            # Add doctor and patient names for convenience
+            'doctor_name': self.doctor.user.full_name if self.doctor and self.doctor.user else 'Unknown Doctor',
+            'patient_name': self.patient.user.full_name if self.patient and self.patient.user else 'Unknown Patient'
         }
     
     def __repr__(self):

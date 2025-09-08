@@ -392,9 +392,9 @@
                     if (appointmentsResponse.success) {
                         const appointments = appointmentsResponse.data.appointments || [];
                         
-                        // Add recently scheduled appointments
+                        // Add recently scheduled appointments (last 30 days)
                         appointments.filter(apt => 
-                            new Date() - new Date(apt.created_at || apt.appointment_date) < 7 * 24 * 60 * 60 * 1000 // Last 7 days
+                            new Date() - new Date(apt.created_at || apt.appointment_date) < 30 * 24 * 60 * 60 * 1000 // Last 30 days
                         ).forEach(apt => {
                             const createdDate = new Date(apt.created_at || apt.appointment_date);
                             const appointmentDate = new Date(apt.appointment_date);
@@ -418,7 +418,7 @@
                         // Add recently completed appointments
                         appointments.filter(apt => 
                             apt.status === 'completed' &&
-                            new Date() - new Date(apt.updated_at || apt.appointment_date) < 7 * 24 * 60 * 60 * 1000 // Last 7 days
+                            new Date() - new Date(apt.updated_at || apt.appointment_date) < 30 * 24 * 60 * 60 * 1000 // Last 30 days
                         ).forEach(apt => {
                             const completedDate = new Date(apt.updated_at || apt.appointment_date);
                             
@@ -431,6 +431,26 @@
                                 color: 'text-success'
                             });
                         });
+
+                        // Add recently cancelled appointments  
+                        appointments.filter(apt => 
+                            apt.status === 'cancelled' &&
+                            new Date() - new Date(apt.updated_at || apt.appointment_date) < 30 * 24 * 60 * 60 * 1000 // Last 30 days
+                        ).forEach(apt => {
+                            const cancelledDate = new Date(apt.updated_at || apt.appointment_date);
+                            
+                            activities.push({
+                                type: 'appointment_cancelled',
+                                date: cancelledDate,
+                                title: 'Appointment Cancelled',
+                                description: `Appointment with ${apt.doctor_name || 'Doctor'} was cancelled`,
+                                icon: 'bi-x-circle',
+                                color: 'text-warning'
+                            });
+                        });
+
+                        console.log(`Found ${appointments.length} appointments for recent activity`);
+                        console.log(`Filtered activities from appointments:`, activities.filter(a => a.type.startsWith('appointment')));
                     }
                 } catch (error) {
                     console.error('Error loading appointments for activity:', error);
