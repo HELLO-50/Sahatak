@@ -520,6 +520,73 @@
         
         // Make function globally available
         window.navigateToDashboard = navigateToDashboard;
+
+        // Initialize video consultation from URL parameters
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('Video consultation page loading...');
+            
+            // Get appointment ID from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const appointmentId = urlParams.get('appointmentId') || urlParams.get('appointment_id');
+            
+            if (appointmentId) {
+                console.log('Starting video consultation for appointment:', appointmentId);
+                
+                try {
+                    // Initialize the video consultation
+                    await VideoConsultation.init(appointmentId);
+                    console.log('Video consultation initialized successfully');
+                } catch (error) {
+                    console.error('Failed to initialize video consultation:', error);
+                    
+                    // Show error message
+                    const container = document.getElementById('video-container');
+                    container.innerHTML = `
+                        <div class="text-center py-5">
+                            <div class="alert alert-danger" role="alert">
+                                <h4 class="alert-heading">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    ${LanguageManager?.translate('video_consultation.error.initialization_failed') || 'Failed to start video consultation'}
+                                </h4>
+                                <p>${error.message || 'Please check your connection and try again.'}</p>
+                                <hr>
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                                    <button class="btn btn-primary" onclick="window.location.reload()">
+                                        <i class="bi bi-arrow-clockwise me-1"></i>
+                                        ${LanguageManager?.translate('video_consultation.error.retry') || 'Try Again'}
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="navigateToDashboard()">
+                                        <i class="bi bi-house me-1"></i>
+                                        ${LanguageManager?.translate('video_consultation.navigation.back_to_dashboard') || 'Back to Dashboard'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            } else {
+                console.error('No appointment ID provided');
+                
+                // Show error for missing appointment ID
+                const container = document.getElementById('video-container');
+                container.innerHTML = `
+                    <div class="text-center py-5">
+                        <div class="alert alert-warning" role="alert">
+                            <h4 class="alert-heading">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                ${LanguageManager?.translate('video_consultation.error.no_appointment') || 'No appointment specified'}
+                            </h4>
+                            <p>${LanguageManager?.translate('video_consultation.error.no_appointment_desc') || 'Please access video consultation through your appointment list.'}</p>
+                            <hr>
+                            <button class="btn btn-primary" onclick="navigateToDashboard()">
+                                <i class="bi bi-house me-1"></i>
+                                ${LanguageManager?.translate('video_consultation.navigation.back_to_dashboard') || 'Back to Dashboard'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        });
     </script>
 </body>
 </html>

@@ -1030,6 +1030,12 @@
             console.log('Patient dashboard initializing...');
             await DashboardTranslations.initializeDashboard('patient');
             
+            // Initialize video consultation dashboard
+            if (typeof VideoConsultationDashboard !== 'undefined') {
+                VideoConsultationDashboard.init();
+                console.log('VideoConsultationDashboard initialized');
+            }
+            
             // Load dashboard statistics after translations are loaded
             setTimeout(() => {
                 loadDashboardStats();

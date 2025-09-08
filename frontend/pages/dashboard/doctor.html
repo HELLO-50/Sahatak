@@ -1436,6 +1436,12 @@
             console.log('Doctor dashboard initializing...');
             await DashboardTranslations.initializeDashboard('doctor');
             
+            // Initialize video consultation dashboard
+            if (typeof VideoConsultationDashboard !== 'undefined') {
+                VideoConsultationDashboard.init();
+                console.log('VideoConsultationDashboard initialized');
+            }
+            
             // Load and update user data including verification status
             const user = AuthGuard.getCurrentUser();
             if (user && user.full_name) {
