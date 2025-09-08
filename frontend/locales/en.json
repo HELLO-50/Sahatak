@@ -226,6 +226,7 @@
     "success_message": "Your appointment has been booked successfully!",
     "success_email": "Appointment details will be sent to your email",
     "view_appointments": "View My Appointments",
+    "view_past_appointments": "View Past Appointments",
     "back_home": "Back to Home",
     "doctor_participation_note": "Volunteer doctors provide their services for free, while paid doctors charge consultation fees",
     "loading": "Loading...",

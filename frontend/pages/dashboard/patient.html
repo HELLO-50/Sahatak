@@ -577,6 +577,11 @@
             window.location.href = '../appointments/book-appointment.html';
         }
         
+        function viewPastAppointments() {
+            console.log('View past appointments clicked');
+            window.location.href = '../appointments/appointment-list.html';
+        }
+        
         function viewRecords() {
             console.log('View records clicked');
             window.location.href = '../medical/patient/index.html';
@@ -885,6 +890,12 @@
                                         </div>
                                     `;
                                 }).join('')}
+                                <div class="text-center mt-3">
+                                    <button class="btn btn-outline-primary btn-sm" onclick="viewPastAppointments()">
+                                        <i class="bi bi-calendar-check me-1"></i>
+                                        <span id="btn-view-past">${LanguageManager?.translate('appointments.view_past_appointments') || 'View Past Appointments'}</span>
+                                    </button>
+                                </div>
                             `;
                         } else {
                             appointmentsContainer.innerHTML = `
@@ -893,6 +904,12 @@
                                     Upcoming Appointments
                                 </h5>
                                 <p class="text-muted text-center py-3">No upcoming appointments</p>
+                                <div class="text-center mt-3">
+                                    <button class="btn btn-outline-primary btn-sm" onclick="viewPastAppointments()">
+                                        <i class="bi bi-calendar-check me-1"></i>
+                                        <span id="btn-view-past">${LanguageManager?.translate('appointments.view_past_appointments') || 'View Past Appointments'}</span>
+                                    </button>
+                                </div>
                             `;
                         }
                     }

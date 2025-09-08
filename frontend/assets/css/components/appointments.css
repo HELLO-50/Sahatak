@@ -749,6 +749,86 @@
     100% { transform: rotate(360deg); }
 }
 
+/* Text Visibility Fixes */
+/* Fix "Choose Your Doctor" text visibility */
+#choose-doctor-label,
+.booking-step h4 span {
+    color: #212529 !important;
+    font-weight: 600;
+}
+
+/* Fix "Confirm Appointment" section text visibility */
+#confirm-appointment-label,
+#step3 h4 span {
+    color: #212529 !important;
+    font-weight: 600;
+}
+
+/* Fix appointment summary text in cream background */
+#appointment-summary,
+#appointment-summary * {
+    color: #212529 !important;
+}
+
+#appointment-summary {
+    background-color: #f8f9fa !important;
+    border: 1px solid #dee2e6 !important;
+}
+
+/* Fix "I agree to terms" text visibility */
+#terms-label,
+.form-check-label {
+    color: #212529 !important;
+    font-weight: 500;
+}
+
+/* Fix booking success modal text visibility */
+.modal-body p,
+.modal-body .text-muted {
+    color: #212529 !important;
+}
+
+/* Style success title in medical blue */
+#success-title,
+.modal-title {
+    color: var(--medical-blue) !important;
+    font-weight: 600;
+}
+
+/* Ensure all text in booking steps is visible */
+.booking-step h4,
+.booking-step label,
+.booking-step p,
+.booking-step small,
+.text-muted {
+    color: #212529 !important;
+}
+
+/* Fix step indicator text */
+#step1-text,
+#step2-text,
+#step3-text {
+    font-weight: 600;
+}
+
+#step1-text.text-primary {
+    color: var(--medical-blue) !important;
+}
+
+#step2-text.text-primary {
+    color: var(--medical-blue) !important;
+}
+
+#step3-text.text-primary {
+    color: var(--medical-blue) !important;
+}
+
+#step1-text.text-muted,
+#step2-text.text-muted,
+#step3-text.text-muted {
+    color: #6c757d !important;
+}
+
 /* Print Styles */
 @media print {
     .video-consultation-container,

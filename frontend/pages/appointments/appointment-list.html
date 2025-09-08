@@ -82,38 +82,24 @@
             <!-- Main Content -->
             <div class="row">
                 <div class="col-12">
-                    <!-- Filter Tabs -->
-                    <div class="dashboard-card mb-4">
-                        <div class="card-header">
-                            <h5 class="mb-0">
-                                <i class="bi bi-funnel me-2 text-primary"></i>
-                                <span id="filter-title">Filter Appointments</span>
-                            </h5>
-                        </div>
-                        <div class="card-body py-2">
-                            <div class="row g-2 align-items-center">
-                                <div class="col-md-8">
-                                    <ul class="nav nav-pills nav-justified nav-fill" id="appointment-tabs">
-                                        <li class="nav-item">
-                                            <a class="nav-link active px-2 py-1" href="javascript:void(0)" data-filter="all" id="tab-all">All</a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link px-2 py-1" href="javascript:void(0)" data-filter="upcoming" id="tab-upcoming">Upcoming</a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link px-2 py-1" href="javascript:void(0)" data-filter="completed" id="tab-completed">Completed</a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link px-2 py-1" href="javascript:void(0)" data-filter="cancelled" id="tab-cancelled">Cancelled</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <div class="col-md-4 text-end">
-                                    <small class="text-muted">
-                                        <i class="bi bi-filter me-1"></i>
-                                        <span id="filter-count">0 appointments</span>
-                                    </small>
-                                </div>
+                    <!-- Filter Buttons -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-funnel me-2 text-primary"></i>
+                                    <span id="filter-title">Filter Appointments</span>
+                                </h5>
+                                <small class="text-muted">
+                                    <i class="bi bi-filter me-1"></i>
+                                    <span id="filter-count">0 appointments</span>
+                                </small>
+                            </div>
+                            <div class="btn-group w-100" role="group" id="appointment-tabs">
+                                <button type="button" class="btn btn-outline-primary active" data-filter="all" id="tab-all">All</button>
+                                <button type="button" class="btn btn-outline-primary" data-filter="upcoming" id="tab-upcoming">Upcoming</button>
+                                <button type="button" class="btn btn-outline-primary" data-filter="completed" id="tab-completed">Completed</button>
+                                <button type="button" class="btn btn-outline-primary" data-filter="cancelled" id="tab-cancelled">Cancelled</button>
                             </div>
                         </div>
                     </div>
@@ -545,16 +531,16 @@
             // Setup event listeners
             setupEventListeners() {
                 // Tab filters
-                document.querySelectorAll('#appointment-tabs .nav-link').forEach(link => {
-                    link.addEventListener('click', (e) => {
+                document.querySelectorAll('#appointment-tabs button').forEach(button => {
+                    button.addEventListener('click', (e) => {
                         e.preventDefault();
                         
                         // Update active tab
-                        document.querySelectorAll('#appointment-tabs .nav-link').forEach(l => l.classList.remove('active'));
-                        link.classList.add('active');
+                        document.querySelectorAll('#appointment-tabs button').forEach(b => b.classList.remove('active'));
+                        button.classList.add('active');
                         
                         // Filter appointments
-                        this.currentFilter = link.getAttribute('data-filter');
+                        this.currentFilter = button.getAttribute('data-filter');
                         this.renderAppointments();
                     });
                 });
