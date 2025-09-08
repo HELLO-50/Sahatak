@@ -645,7 +645,7 @@
                                     <div class="col-md-8">
                                         <div class="d-flex align-items-center mb-2">
                                             <i class="bi bi-person-badge text-primary me-2 fs-5"></i>
-                                            <h6 class="mb-0">Dr. ${appointment.doctor_name || 'Unknown'}</h6>
+                                            <h6 class="mb-0">${appointment.doctor_name || 'Unknown Doctor'}</h6>
                                         </div>
                                         
                                         <div class="row text-muted small">
@@ -725,51 +725,51 @@
                         const notesLabel = currentLang === 'ar' ? 'ملاحظات:' : 'Notes:';
                         
                         const detailsHtml = `
-                            <div class="row">
+                            <div class="row" style="color: #212529;">
                                 <div class="col-sm-6 mb-3">
-                                    <strong>${doctorLabel}</strong><br>
-                                    Dr. ${appointment.doctor_name || 'Unknown'}
+                                    <strong style="color: #212529;">${doctorLabel}</strong><br>
+                                    <span style="color: #212529;">${appointment.doctor_name || 'Unknown Doctor'}</span>
                                 </div>
                                 <div class="col-sm-6 mb-3">
-                                    <strong>${dateTimeLabel}</strong><br>
-                                    ${date.toLocaleDateString()} - ${date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
+                                    <strong style="color: #212529;">${dateTimeLabel}</strong><br>
+                                    <span style="color: #212529;">${date.toLocaleDateString()} - ${date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</span>
                                 </div>
                                 <div class="col-sm-6 mb-3">
-                                    <strong>${typeLabel}</strong><br>
-                                    ${this.getAppointmentTypeText(appointment.appointment_type)}
+                                    <strong style="color: #212529;">${typeLabel}</strong><br>
+                                    <span style="color: #212529;">${this.getAppointmentTypeText(appointment.appointment_type)}</span>
                                 </div>
                                 <div class="col-sm-6 mb-3">
-                                    <strong>${statusLabel}</strong><br>
+                                    <strong style="color: #212529;">${statusLabel}</strong><br>
                                     <span class="badge ${this.getStatusClass(appointment.status)}">${this.getStatusText(appointment.status)}</span>
                                 </div>
                                 ${appointment.reason_for_visit ? `
                                     <div class="col-12 mb-3">
-                                        <strong>${reasonLabel}</strong><br>
-                                        ${appointment.reason_for_visit}
+                                        <strong style="color: #212529;">${reasonLabel}</strong><br>
+                                        <span style="color: #212529;">${appointment.reason_for_visit}</span>
                                     </div>
                                 ` : ''}
                                 ${appointment.symptoms ? `
                                     <div class="col-12 mb-3">
-                                        <strong>${symptomsLabel}</strong><br>
-                                        ${appointment.symptoms}
+                                        <strong style="color: #212529;">${symptomsLabel}</strong><br>
+                                        <span style="color: #212529;">${appointment.symptoms}</span>
                                     </div>
                                 ` : ''}
                                 ${appointment.diagnosis ? `
                                     <div class="col-12 mb-3">
-                                        <strong>${diagnosisLabel}</strong><br>
-                                        ${appointment.diagnosis}
+                                        <strong style="color: #212529;">${diagnosisLabel}</strong><br>
+                                        <span style="color: #212529;">${appointment.diagnosis}</span>
                                     </div>
                                 ` : ''}
                                 ${appointment.prescription ? `
                                     <div class="col-12 mb-3">
-                                        <strong>${prescriptionLabel}</strong><br>
-                                        ${appointment.prescription}
+                                        <strong style="color: #212529;">${prescriptionLabel}</strong><br>
+                                        <span style="color: #212529;">${appointment.prescription}</span>
                                     </div>
                                 ` : ''}
                                 ${appointment.notes ? `
                                     <div class="col-12 mb-3">
-                                        <strong>${notesLabel}</strong><br>
-                                        ${appointment.notes}
+                                        <strong style="color: #212529;">${notesLabel}</strong><br>
+                                        <span style="color: #212529;">${appointment.notes}</span>
                                     </div>
                                 ` : ''}
                             </div>
@@ -833,7 +833,7 @@
                     document.getElementById('current-appointment-info').innerHTML = `
                         <strong>${dateLabel}</strong> ${date.toLocaleDateString()}<br>
                         <strong>${timeLabel}</strong> ${date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}<br>
-                        <strong>${doctorLabel}</strong> Dr. ${this.currentAppointment.doctor_name || 'Unknown'}
+                        <strong>${doctorLabel}</strong> ${this.currentAppointment.doctor_name || 'Unknown Doctor'}
                     `;
                     
                     // Reset form
