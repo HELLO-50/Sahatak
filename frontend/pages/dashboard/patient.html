@@ -871,21 +871,45 @@
                                     // Generate video consultation button if applicable
                                     const videoButton = VideoConsultationDashboard.generateVideoConsultationButton(apt);
                                     
+                                    // Check if appointment can be modified (1 hour before)
+                                    const canModify = ['scheduled', 'confirmed'].includes(apt.status) && 
+                                                     appointmentDate > new Date(Date.now() + 60*60*1000);
+                                    
+                                    // Get translation texts
+                                    const cancelText = LanguageManager?.translate('appointments.cancel') || 'Cancel';
+                                    const rescheduleText = LanguageManager?.translate('appointments.reschedule') || 'Reschedule';
+                                    
                                     return `
                                         <div class="${videoClass}" data-appointment-id="${apt.id}">
-                                            <div class="appointment-item d-flex justify-content-between align-items-center p-2 mb-2 bg-light rounded">
-                                                <div>
-                                                    <div style="color: black;"><strong>${apt.doctor_name || 'Unknown Doctor'}</strong></div>
-                                                    <div class="text-muted small">
-                                                        <i class="bi ${apt.appointment_type === 'video' ? 'bi-camera-video' : 'bi-calendar-check'} me-1"></i>${apt.appointment_type}
+                                            <div class="appointment-item p-3 mb-2 bg-light rounded">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <div class="flex-grow-1">
+                                                        <div style="color: black;"><strong>${apt.doctor_name || 'Unknown Doctor'}</strong></div>
+                                                        <div class="text-muted small">
+                                                            <i class="bi ${apt.appointment_type === 'video' ? 'bi-camera-video' : 'bi-calendar-check'} me-1"></i>${apt.appointment_type}
+                                                        </div>
+                                                        ${apt.reason_for_visit ? `<div class="text-muted small">${apt.reason_for_visit}</div>` : ''}
+                                                        <div class="small" style="color: darkgreen;">
+                                                            <i class="bi bi-calendar me-1"></i>${dateStr} ${timeStr}
+                                                        </div>
+                                                        ${videoButton ? `<div class="mt-2">${videoButton}</div>` : ''}
                                                     </div>
-                                                    ${apt.reason_for_visit ? `<div class="text-muted small">${apt.reason_for_visit}</div>` : ''}
-                                                    <div class="small" style="color: darkgreen;">
-                                                        <i class="bi bi-calendar me-1"></i>${dateStr} ${timeStr}
+                                                    <div class="text-end">
+                                                        <div class="mb-2">
+                                                            <span class="badge bg-primary">${apt.status}</span>
+                                                        </div>
+                                                        ${canModify ? `
+                                                            <div class="btn-group-vertical btn-group-sm">
+                                                                <button class="btn btn-outline-warning btn-sm" onclick="PatientDashboard.rescheduleAppointment(${apt.id})" title="${rescheduleText}">
+                                                                    <i class="bi bi-calendar-event me-1"></i>${rescheduleText}
+                                                                </button>
+                                                                <button class="btn btn-outline-danger btn-sm" onclick="PatientDashboard.cancelAppointment(${apt.id})" title="${cancelText}">
+                                                                    <i class="bi bi-x-circle me-1"></i>${cancelText}
+                                                                </button>
+                                                            </div>
+                                                        ` : ''}
                                                     </div>
-                                                    ${videoButton ? `<div class="mt-2">${videoButton}</div>` : ''}
                                                 </div>
-                                                <span class="badge bg-primary">${apt.status}</span>
                                             </div>
                                         </div>
                                     `;
@@ -1007,6 +1031,328 @@
                 loadDashboardStats();
             }, 1000); // Small delay to ensure API is ready
         });
+
+        // PatientDashboard object for appointment management
+        const PatientDashboard = {
+            currentAppointmentId: null,
+            currentAppointment: null,
+            selectedNewDateTime: null,
+
+            // Cancel appointment
+            cancelAppointment(appointmentId) {
+                this.currentAppointmentId = appointmentId;
+                document.getElementById('cancellation-reason').value = '';
+                const cancelModal = new bootstrap.Modal(document.getElementById('cancel-modal'));
+                cancelModal.show();
+            },
+
+            // Reschedule appointment
+            rescheduleAppointment(appointmentId) {
+                // Find appointment in current appointments list
+                const appointmentElement = document.querySelector(`[data-appointment-id="${appointmentId}"]`);
+                if (!appointmentElement) return;
+
+                this.currentAppointmentId = appointmentId;
+                
+                // Mock appointment data (in real app, get from API)
+                this.currentAppointment = {
+                    id: appointmentId,
+                    doctor_name: appointmentElement.querySelector('strong').textContent,
+                    appointment_date: new Date(), // Would get from API
+                    doctor_id: 1 // Would get from API
+                };
+
+                // Show current appointment info
+                const date = new Date(this.currentAppointment.appointment_date);
+                const currentLang = LanguageManager?.getLanguage() || 'en';
+                const dateLabel = currentLang === 'ar' ? 'التاريخ:' : 'Date:';
+                const timeLabel = currentLang === 'ar' ? 'الوقت:' : 'Time:';
+                const doctorLabel = currentLang === 'ar' ? 'الطبيب:' : 'Doctor:';
+
+                document.getElementById('current-appointment-info').innerHTML = `
+                    <strong>${dateLabel}</strong> ${date.toLocaleDateString()}<br>
+                    <strong>${timeLabel}</strong> ${date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}<br>
+                    <strong>${doctorLabel}</strong> ${this.currentAppointment.doctor_name}
+                `;
+
+                // Reset form
+                document.getElementById('new-appointment-date').value = '';
+                document.getElementById('reschedule-reason').value = '';
+                document.getElementById('reschedule-time-slots').innerHTML = '';
+                document.getElementById('confirm-reschedule').disabled = true;
+                this.selectedNewDateTime = null;
+
+                // Set minimum date to today
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('new-appointment-date').min = today;
+
+                // Add event listener for date change
+                document.getElementById('new-appointment-date').onchange = () => this.loadRescheduleTimeSlots();
+
+                const rescheduleModal = new bootstrap.Modal(document.getElementById('reschedule-modal'));
+                rescheduleModal.show();
+            },
+
+            // Load available time slots for reschedule
+            async loadRescheduleTimeSlots() {
+                if (!this.currentAppointment) return;
+
+                const date = document.getElementById('new-appointment-date').value;
+                if (!date) return;
+
+                try {
+                    const response = await ApiHelper.makeRequest(
+                        `/appointments/doctors/${this.currentAppointment.doctor_id}/availability?date=${date}`
+                    );
+
+                    if (response.success) {
+                        this.renderRescheduleTimeSlots(response.data.available_slots);
+                    } else {
+                        const currentLang = LanguageManager?.getLanguage() || 'en';
+                        const errorMsg = currentLang === 'ar' ? 'فشل في تحميل الأوقات المتاحة' : 'Failed to load available times';
+                        this.showError(errorMsg);
+                    }
+                } catch (error) {
+                    console.error('Error loading time slots:', error);
+                    const currentLang = LanguageManager?.getLanguage() || 'en';
+                    const errorMsg = currentLang === 'ar' ? 'خطأ في تحميل الأوقات المتاحة' : 'Error loading available times';
+                    this.showError(errorMsg);
+                }
+            },
+
+            // Render time slots for reschedule
+            renderRescheduleTimeSlots(slots) {
+                const container = document.getElementById('reschedule-time-slots');
+
+                if (slots.length === 0) {
+                    const currentLang = LanguageManager?.getLanguage() || 'en';
+                    const noSlotsMessage = currentLang === 'ar' ? 
+                        'لا توجد أوقات متاحة في هذا اليوم' : 
+                        'No time slots available for this day';
+                    container.innerHTML = `<p class="text-muted">${noSlotsMessage}</p>`;
+                    return;
+                }
+
+                const slotsHtml = slots.map(slot => `
+                    <button type="button" 
+                            class="btn btn-outline-primary time-slot ${!slot.available ? 'disabled' : ''}"
+                            data-time="${slot.datetime}"
+                            onclick="PatientDashboard.selectRescheduleTimeSlot('${slot.datetime}', '${slot.start}')"
+                            ${!slot.available ? 'disabled' : ''}>
+                        ${slot.start}
+                    </button>
+                `).join('');
+
+                container.innerHTML = slotsHtml;
+            },
+
+            // Select time slot for reschedule
+            selectRescheduleTimeSlot(datetime, displayTime) {
+                // Remove previous selection
+                document.querySelectorAll('#reschedule-time-slots .time-slot').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+
+                // Add selection to clicked button
+                event.target.classList.add('active');
+
+                // Store selected time
+                this.selectedNewDateTime = datetime;
+
+                // Enable confirm button
+                document.getElementById('confirm-reschedule').disabled = false;
+            },
+
+            // Confirm cancellation
+            async confirmCancellation() {
+                if (!this.currentAppointmentId) return;
+
+                try {
+                    const reason = document.getElementById('cancellation-reason').value;
+                    const response = await ApiHelper.makeRequest(`/appointments/${this.currentAppointmentId}/cancel`, {
+                        method: 'PUT',
+                        body: JSON.stringify({ cancellation_reason: reason })
+                    });
+
+                    if (response.success) {
+                        // Close modal
+                        bootstrap.Modal.getInstance(document.getElementById('cancel-modal')).hide();
+
+                        // Reload dashboard stats
+                        loadDashboardStats();
+
+                        const currentLang = LanguageManager?.getLanguage() || 'en';
+                        const successMsg = currentLang === 'ar' ? 'تم إلغاء الموعد بنجاح' : 'Appointment cancelled successfully';
+                        this.showSuccess(successMsg);
+                    } else {
+                        this.showError(response.message || 'Failed to cancel appointment');
+                    }
+                } catch (error) {
+                    console.error('Error cancelling appointment:', error);
+                    const currentLang = LanguageManager?.getLanguage() || 'en';
+                    const errorMsg = currentLang === 'ar' ? 'خطأ في إلغاء الموعد' : 'Error cancelling appointment';
+                    this.showError(errorMsg);
+                }
+            },
+
+            // Confirm reschedule
+            async confirmReschedule() {
+                if (!this.currentAppointmentId || !this.selectedNewDateTime) return;
+
+                try {
+                    const reason = document.getElementById('reschedule-reason').value;
+                    const response = await ApiHelper.makeRequest(`/appointments/${this.currentAppointmentId}/reschedule`, {
+                        method: 'PUT',
+                        body: JSON.stringify({ 
+                            new_appointment_date: this.selectedNewDateTime,
+                            reschedule_reason: reason 
+                        })
+                    });
+
+                    if (response.success) {
+                        // Close modal
+                        bootstrap.Modal.getInstance(document.getElementById('reschedule-modal')).hide();
+
+                        // Reload dashboard stats
+                        loadDashboardStats();
+
+                        const currentLang = LanguageManager?.getLanguage() || 'en';
+                        const successMsg = currentLang === 'ar' ? 'تم إعادة جدولة الموعد بنجاح' : 'Appointment rescheduled successfully';
+                        this.showSuccess(successMsg);
+                    } else {
+                        this.showError(response.message || 'Failed to reschedule appointment');
+                    }
+                } catch (error) {
+                    console.error('Error rescheduling appointment:', error);
+                    const currentLang = LanguageManager?.getLanguage() || 'en';
+                    const errorMsg = currentLang === 'ar' ? 'خطأ في إعادة جدولة الموعد' : 'Error rescheduling appointment';
+                    this.showError(errorMsg);
+                }
+            },
+
+            showError(message) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'alert alert-danger alert-dismissible fade show position-fixed';
+                errorDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+                errorDiv.innerHTML = `
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                
+                document.body.appendChild(errorDiv);
+                
+                setTimeout(() => {
+                    if (errorDiv.parentNode) {
+                        errorDiv.remove();
+                    }
+                }, 5000);
+            },
+
+            showSuccess(message) {
+                const successDiv = document.createElement('div');
+                successDiv.className = 'alert alert-success alert-dismissible fade show position-fixed';
+                successDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+                successDiv.innerHTML = `
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                
+                document.body.appendChild(successDiv);
+                
+                setTimeout(() => {
+                    if (successDiv.parentNode) {
+                        successDiv.remove();
+                    }
+                }, 3000);
+            }
+        };
     </script>
+
+    <!-- Cancel Confirmation Modal -->
+    <div class="modal fade" id="cancel-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <span id="cancel-modal-title">Confirm Cancellation</span>
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <p id="cancel-modal-message">Are you sure you want to cancel this appointment?</p>
+                    <div class="mb-3">
+                        <label for="cancellation-reason" class="form-label" id="cancellation-reason-label">Reason for cancellation (optional)</label>
+                        <textarea class="form-control" id="cancellation-reason" rows="3" 
+                                placeholder="Write the reason for cancelling the appointment..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" onclick="PatientDashboard.confirmCancellation()">
+                        <i class="bi bi-check me-1"></i>
+                        <span id="confirm-cancel-btn">Yes, Cancel Appointment</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="keep-appointment-btn">Keep Appointment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reschedule Modal -->
+    <div class="modal fade" id="reschedule-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-calendar-event text-primary me-2"></i>
+                        <span id="reschedule-modal-title">Reschedule Appointment</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="reschedule-modal-subtitle">Select new date and time</p>
+                    
+                    <!-- Current appointment info -->
+                    <div class="alert alert-info mb-4">
+                        <h6 class="mb-2" id="current-appointment-label">Current Appointment:</h6>
+                        <div id="current-appointment-info">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <!-- New date selection -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label for="new-appointment-date" class="form-label" id="new-date-label">New Date</label>
+                            <input type="date" class="form-control" id="new-appointment-date">
+                        </div>
+                    </div>
+                    
+                    <!-- Available time slots -->
+                    <div id="reschedule-time-slots-container" class="mb-4">
+                        <h6 class="mb-3" id="new-time-label">Available Times</h6>
+                        <div id="reschedule-time-slots" class="d-flex flex-wrap gap-2">
+                            <!-- Time slots will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Reschedule reason -->
+                    <div class="mb-3">
+                        <label for="reschedule-reason" class="form-label" id="reschedule-reason-label">Reason for rescheduling (optional)</label>
+                        <textarea class="form-control" id="reschedule-reason" rows="3" 
+                                placeholder="Write the reason for rescheduling the appointment..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="PatientDashboard.confirmReschedule()" id="confirm-reschedule" disabled>
+                        <i class="bi bi-calendar-check me-1"></i>
+                        <span id="confirm-reschedule-btn">Confirm Reschedule</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
