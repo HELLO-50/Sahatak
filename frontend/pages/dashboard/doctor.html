@@ -1423,59 +1423,27 @@
         async function loadWaitingPatients() {
             console.log('Loading waiting patients/pending messages...');
             
-            try {
-                const messagesResponse = await ApiHelper.makeRequest('/messages/unread-count');
-                
-                const container = document.getElementById('waiting-patients-container');
-                if (!container) return;
-                
-                if (messagesResponse.success && messagesResponse.data && messagesResponse.data.total_unread > 0) {
-                    const unreadData = messagesResponse.data;
-                    const currentLang = LanguageManager.getLanguage() || 'en';
-                    
-                    // Get conversations with unread messages
-                    const conversationsResponse = await ApiHelper.makeRequest('/messages/conversations?per_page=5');
-                    
-                    if (conversationsResponse.success && conversationsResponse.data.conversations) {
-                        const conversationsWithUnread = conversationsResponse.data.conversations.filter(conv => conv.unread_count > 0);
-                        
-                        container.innerHTML = conversationsWithUnread.slice(0, 3).map(conv => {
-                            const lastMessageDate = new Date(conv.last_message_at);
-                            const timeAgo = getTimeAgo(lastMessageDate);
-                            
-                            return `
-                                <div class="waiting-patient-item d-flex align-items-center p-2 mb-2 bg-light rounded">
-                                    <div class="avatar-placeholder bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
-                                        <i class="bi bi-person"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div style="color: black;"><strong>${conv.patient_name || 'Patient'}</strong></div>
-                                        <div class="text-muted small">${conv.subject || 'Medical consultation'}</div>
-                                        <small class="text-muted">${timeAgo}</small>
-                                    </div>
-                                    <div>
-                                        <span class="badge bg-warning">${conv.unread_count} ${currentLang === 'ar' ? 'رسائل جديدة' : 'new'}</span>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('');
-                    } else {
-                        container.innerHTML = `<p class="text-muted text-center py-3">${currentLang === 'ar' ? 'رسائل غير مقروءة لكن لا يمكن تحميل التفاصيل' : `${unreadData.total_unread} unread messages`}</p>`;
-                    }
-                } else {
-                    const currentLang = LanguageManager.getLanguage() || 'en';
-                    container.innerHTML = `<p class="text-muted text-center py-3">${currentLang === 'ar' ? 'لا توجد رسائل في الانتظار' : 'No pending messages'}</p>`;
-                }
-            } catch (error) {
-                console.error('Error loading waiting patients:', error);
-                const container = document.getElementById('waiting-patients-container');
-                if (container) {
-                    const currentLang = LanguageManager.getLanguage() || 'en';
-                    // Show a friendly message instead of an error when API is unavailable
-                    const msg = currentLang === 'ar' ? 'لا توجد رسائل جديدة في الوقت الحالي' : 'No new messages at this time';
-                    container.innerHTML = `<p class="text-muted text-center py-3"><i class="bi bi-chat-dots me-2"></i>${msg}</p>`;
-                }
-            }
+            const container = document.getElementById('waiting-patients-container');
+            if (!container) return;
+            
+            const currentLang = LanguageManager.getLanguage() || 'en';
+            
+            // Show a helpful message directing to comm-hub since API has CORS issues
+            const commHubMsg = currentLang === 'ar' ? 
+                'يرجى التحقق من مركز الاتصالات لمراجعة الرسائل' : 
+                'Please check the Communication Hub to view messages';
+            
+            container.innerHTML = `
+                <p class="text-muted text-center py-3">
+                    <i class="bi bi-chat-dots me-2"></i>${commHubMsg}
+                </p>
+                <div class="text-center">
+                    <button class="btn btn-outline-primary btn-sm" onclick="openCommunicationHub()">
+                        <i class="bi bi-chat-text me-1"></i>
+                        ${currentLang === 'ar' ? 'فتح مركز الاتصالات' : 'Open Communication Hub'}
+                    </button>
+                </div>
+            `;
         }
         
         // Helper function to get relative time
