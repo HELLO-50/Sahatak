@@ -727,6 +727,7 @@
       "activities": {
         "appointment_scheduled": "New appointment scheduled with {patient_name}",
         "appointment_completed": "Consultation completed with {patient_name}",
+        "video_session_ended": "Video call ended with {patient_name}",
         "time": {
           "just_now": "Just now",
           "minutes_ago": "{count} minutes ago",

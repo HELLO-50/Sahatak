@@ -727,6 +727,7 @@
       "activities": {
         "appointment_scheduled": "موعد جديد مع {patient_name}",
         "appointment_completed": "تم إنهاء الاستشارة مع {patient_name}",
+        "video_session_ended": "انتهت المكالمة المرئية مع {patient_name}",
         "time": {
           "just_now": "الآن",
           "minutes_ago": "منذ {count} دقيقة",

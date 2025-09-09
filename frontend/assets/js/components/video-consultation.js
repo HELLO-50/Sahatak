@@ -1130,16 +1130,16 @@ const VideoConsultation = {
             case 'CONFERENCE_FAILED':
                 // Check if it's a membersOnly error
                 if (error.message && (error.message.includes('membersOnly') || error.message.includes('conference.connectionError.membersOnly'))) {
-                    console.log('🔧 MembersOnly error detected, applying fallback configuration...');
+                    console.log('🔧 MembersOnly error detected, switching to emergency public room...');
                     errorMessage = isArabic ? 
-                        'خطأ في المصادقة - سيتم إعادة المحاولة' : 
-                        'Authentication error - retrying connection';
-                    recoveryAction = () => this.retryWithFallbackConfig();
+                        'خطأ في المصادقة - التبديل للغرفة العامة' : 
+                        'Authentication error - switching to public room';
+                    recoveryAction = () => this.initEmergencyPublicRoom();
                     // Auto-retry immediately for membersOnly errors
                     setTimeout(() => {
-                        console.log('🔧 Auto-retrying with fallback config in 2 seconds...');
-                        this.retryWithFallbackConfig();
-                    }, 2000);
+                        console.log('🔧 Auto-switching to emergency public room in 1 second...');
+                        this.initEmergencyPublicRoom();
+                    }, 1000);
                 } else {
                     errorMessage = isArabic ? 'فشل في الانضمام للاستشارة' : 'Failed to join consultation';
                     recoveryAction = () => this.retryJoinConference();
@@ -1420,8 +1420,103 @@ const VideoConsultation = {
             
         } catch (error) {
             console.error('Fallback config retry failed:', error);
-            // Fall back to regular retry
-            await this.retryJoinConference();
+            // Fall back to emergency public room
+            this.initEmergencyPublicRoom();
+        }
+    },
+    
+    // Initialize emergency public room (bypasses all authentication)
+    async initEmergencyPublicRoom() {
+        console.log('🔧 Initializing emergency public room...');
+        
+        try {
+            // Clean up existing Jitsi instance
+            if (this.jitsiApi) {
+                this.jitsiApi.dispose();
+                this.jitsiApi = null;
+            }
+            
+            // Create a room name with patient name and appointment ID
+            const userName = AuthStorage.get('name') || 'User';
+            const sanitizedUserName = userName.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, ''); // Keep alphanumeric and Arabic chars
+            const publicRoomName = `sahatak-${sanitizedUserName}-appt${this.appointmentId}-${Date.now()}`;
+            
+            console.log('🔧 Emergency public room:', publicRoomName);
+            
+            // Container setup
+            const container = document.getElementById('video-container');
+            if (!container) return;
+            
+            container.innerHTML = '<div id="jitsi-container" style="height: 100vh;"></div>';
+            
+            // Minimal public room configuration
+            const emergencyOptions = {
+                roomName: publicRoomName,
+                parentNode: document.getElementById('jitsi-container'),
+                userInfo: {
+                    displayName: `${AuthStorage.get('name') || 'User'} (Appointment ${this.appointmentId})`
+                },
+                configOverwrite: {
+                    // Completely public room settings
+                    enableWelcomePage: false,
+                    enableClosePage: false,
+                    disableDeepLinking: true,
+                    startWithAudioMuted: false,
+                    startWithVideoMuted: this.audioOnlyMode,
+                    requireDisplayName: false,
+                    enableLobbyChat: false,
+                    enableNoAudioDetection: false,
+                    enableNoisyMicDetection: false,
+                    enableUserRolesBasedOnToken: false,
+                    enableInsecureRoomNameWarning: false,
+                    // Force public access
+                    lobby: { enabled: false },
+                    authentication: { enabled: false },
+                    roomConfig: { 
+                        enableLobby: false,
+                        password: null,
+                        requireAuth: false
+                    }
+                },
+                interfaceConfigOverwrite: {
+                    TOOLBAR_BUTTONS: [
+                        'microphone', 'camera', 'desktop', 'chat', 'raisehand',
+                        'participants-pane', 'tileview', 'toggle-camera', 'hangup'
+                    ],
+                    SHOW_JITSI_WATERMARK: false,
+                    SHOW_WATERMARK_FOR_GUESTS: false
+                }
+                // NO JWT TOKEN - completely public access
+            };
+            
+            console.log('🔧 Emergency room options:', emergencyOptions);
+            
+            // Show notification about emergency mode
+            const currentLang = LanguageManager?.getLanguage() || 'en';
+            const isArabic = currentLang === 'ar';
+            
+            this.showNotification(
+                isArabic ? 
+                    'تم التبديل للوضع الطارئ - غرفة عامة' : 
+                    'Switched to emergency mode - public room',
+                'warning'
+            );
+            
+            // Initialize Jitsi with emergency settings
+            this.jitsiApi = new JitsiMeetExternalAPI('meet.jit.si', emergencyOptions);
+            
+            // Setup basic event handlers
+            this.setupJitsiEventHandlers();
+            
+            console.log('🔧 Emergency public room initialized successfully');
+            
+        } catch (error) {
+            console.error('🔧 Emergency public room failed:', error);
+            this.showErrorScreen(
+                'Unable to establish video connection. Please try again or contact support.',
+                true,
+                () => this.handleRetry()
+            );
         }
     },
     

@@ -49,6 +49,29 @@ const VideoConsultationDashboard = {
                 case 'complete-consultation':
                     await this.completeConsultationFromDashboard(appointmentId);
                     break;
+                case 'wait-restart':
+                    // Patient waiting for doctor to restart - refresh status and show message
+                    const currentLang = LanguageManager?.getLanguage() || 'en';
+                    const isArabic = currentLang === 'ar';
+                    const statusMessage = isArabic 
+                        ? 'المكالمة المرئية انتهت. في انتظار الطبيب لبدء جلسة جديدة...'
+                        : 'Video call ended. Waiting for doctor to start a new session...';
+                    
+                    this.showInfo(statusMessage);
+                    
+                    // Force refresh appointment status after 2 seconds
+                    setTimeout(async () => {
+                        try {
+                            await this.checkVideoSessionStatus(appointmentId);
+                            // Also refresh dashboard if function exists
+                            if (typeof loadDashboardStats === 'function') {
+                                loadDashboardStats();
+                            }
+                        } catch (error) {
+                            console.warn('Failed to refresh appointment status:', error);
+                        }
+                    }, 2000);
+                    break;
                 default:
                     throw new Error('Unknown video consultation action');
             }
@@ -294,7 +317,17 @@ const VideoConsultationDashboard = {
             }
         } else {
             // Patient
-            if (isInProgress && !sessionEnded) {
+            // If appointment is in_progress but session ended, treat as waiting for doctor to restart
+            if (isInProgress && sessionEnded) {
+                return {
+                    class: 'btn-session-ended',
+                    action: 'wait-restart',
+                    icon: 'bi-clock-history',
+                    text: isArabic ? 'في انتظار الطبيب' : 'Waiting for Doctor',
+                    title: isArabic ? 'المكالمة المرئية انتهت - في انتظار الطبيب لبدء جلسة جديدة' : 'Video call ended - waiting for doctor to start a new session',
+                    disabled: true
+                };
+            } else if (isInProgress && !sessionEnded) {
                 return {
                     class: 'btn-join-video',
                     action: 'join',

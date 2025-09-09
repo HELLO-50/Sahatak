@@ -816,7 +816,8 @@
             // Fallback to English
             const fallbacks = {
                 'appointment_scheduled': `New appointment scheduled with ${patientName}`,
-                'appointment_completed': `Consultation completed with ${patientName}`
+                'appointment_completed': `Consultation completed with ${patientName}`,
+                'video_session_ended': `Video call ended with ${patientName}`
             };
             return fallbacks[activityType] || `Activity with ${patientName}`;
         }
@@ -1388,11 +1389,18 @@
                             });
                         });
                         
-                        // Add recently completed appointments
-                        const recentCompleted = appointments.filter(apt => 
-                            apt.status === 'completed' && 
-                            new Date() - new Date(apt.updated_at || apt.appointment_date) < 7 * 24 * 60 * 60 * 1000 // Last 7 days
-                        ).slice(0, 2);
+                        // Add recently completed appointments (only if they were properly completed, not just video ended)
+                        const recentCompleted = appointments.filter(apt => {
+                            const isCompleted = apt.status === 'completed';
+                            const isRecent = new Date() - new Date(apt.updated_at || apt.appointment_date) < 7 * 24 * 60 * 60 * 1000; // Last 7 days
+                            // Only show as "completed" if it's actually marked as completed AND has a completion_reason or was completed through proper flow
+                            const isProperlyCompleted = isCompleted && (
+                                apt.completion_reason || // Has completion reason
+                                apt.completion_method === 'manual' || // Was manually completed
+                                (apt.session_status !== 'ended' && apt.session_status !== 'disconnected') // Not just a video disconnect
+                            );
+                            return isProperlyCompleted && isRecent;
+                        }).slice(0, 2);
                         
                         recentCompleted.forEach(apt => {
                             const completedDate = new Date(apt.updated_at || apt.appointment_date);
@@ -1401,6 +1409,24 @@
                                 message: getActivityMessage('appointment_completed', apt.patient_name || 'Patient'),
                                 date: completedDate,
                                 icon: 'bi-check-circle'
+                            });
+                        });
+                        
+                        // Add video session activities for sessions that ended but appointment is still active
+                        const recentVideoSessions = appointments.filter(apt => {
+                            const isActive = apt.status === 'in_progress' || apt.status === 'scheduled';
+                            const sessionEnded = apt.session_status === 'ended' || apt.session_status === 'disconnected';
+                            const isRecent = apt.session_updated_at && new Date() - new Date(apt.session_updated_at) < 2 * 60 * 60 * 1000; // Last 2 hours
+                            return isActive && sessionEnded && isRecent;
+                        }).slice(0, 1);
+                        
+                        recentVideoSessions.forEach(apt => {
+                            const sessionDate = new Date(apt.session_updated_at);
+                            recentActivities.push({
+                                type: 'video_session_ended',
+                                message: getActivityMessage('video_session_ended', apt.patient_name || 'Patient'),
+                                date: sessionDate,
+                                icon: 'bi-camera-video-off'
                             });
                         });
                         
