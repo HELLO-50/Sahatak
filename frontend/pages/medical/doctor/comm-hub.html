@@ -212,25 +212,31 @@
         
         // Update messaging translations
         function updateMessagingTranslations(lang = 'ar') {
-            if (!LanguageManager?.translate) return;
+            const t = LanguageManager.translations[lang];
+            if (!t || !t.messaging) {
+                console.error('Messaging translations not found for language:', lang);
+                return;
+            }
             
-            // Update title and subtitle
-            updateElementText('dashboard-title', LanguageManager.translate('dashboard.doctor.quick_actions.communication'));
-            updateElementText('dashboard-subtitle', LanguageManager.translate('dashboard.doctor.quick_actions.communication_desc'));
+            const messaging = t.messaging;
+            
+            // Update title and subtitle  
+            updateElementText('dashboard-title', messaging.title);
+            updateElementText('dashboard-subtitle', messaging.subtitle);
             
             // Update navigation
-            updateElementText('back-to-dashboard', LanguageManager.translate('dashboard.doctor.nav.home'));
+            updateElementText('back-to-dashboard', messaging.navigation?.back_to_dashboard);
             
             // Update filters
-            updateElementText('patients-title', LanguageManager.translate('dashboard.doctor.nav.patients'));
-            updateElementText('filter-all', LanguageManager.translate('dashboard.doctor.buttons.all'));
-            updateElementText('filter-unread', LanguageManager.translate('dashboard.doctor.buttons.unread'));
-            updateElementText('filter-urgent', LanguageManager.translate('dashboard.doctor.buttons.urgent'));
+            updateElementText('patients-title', messaging.patients_title);
+            updateElementText('filter-all', messaging.filters?.all);
+            updateElementText('filter-unread', messaging.filters?.unread);
+            updateElementText('filter-urgent', messaging.filters?.urgent);
             
             // Update search placeholder
             const searchInput = document.getElementById('patientSearch');
-            if (searchInput) {
-                searchInput.placeholder = LanguageManager.translate('dashboard.doctor.search_placeholder');
+            if (searchInput && messaging.search_patients) {
+                searchInput.placeholder = messaging.search_patients;
             }
         }
         
