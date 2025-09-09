@@ -519,6 +519,31 @@ const VideoConsultation = {
         // Jitsi domain
         const domain = sessionData.jitsi_domain || 'meet.jit.si';
         
+        // Debug session data
+        console.log('🔧 Jitsi session data:', {
+            room_name: sessionData.room_name,
+            jwt_token: sessionData.jwt_token ? 'Present' : 'Missing',
+            domain: domain
+        });
+        
+        // Default config to handle authentication issues
+        const defaultConfig = {
+            enableWelcomePage: false,
+            enableClosePage: false,
+            disableDeepLinking: true,
+            startWithAudioMuted: false,
+            startWithVideoMuted: false,
+            requireDisplayName: false
+        };
+        
+        // Default interface config
+        const defaultInterfaceConfig = {
+            TOOLBAR_BUTTONS: [
+                'microphone', 'camera', 'desktop', 'chat', 'raisehand',
+                'participants-pane', 'tileview', 'toggle-camera', 'hangup'
+            ]
+        };
+        
         // Merge configurations
         const options = {
             roomName: sessionData.room_name,
@@ -526,10 +551,16 @@ const VideoConsultation = {
             userInfo: {
                 displayName: AuthStorage.get('name') || 'User'
             },
-            configOverwrite: sessionData.config || {},
-            interfaceConfigOverwrite: sessionData.interface_config || {},
+            configOverwrite: { ...defaultConfig, ...(sessionData.config || {}) },
+            interfaceConfigOverwrite: { ...defaultInterfaceConfig, ...(sessionData.interface_config || {}) },
             jwt: sessionData.jwt_token || undefined
         };
+        
+        console.log('🔧 Jitsi options:', {
+            roomName: options.roomName,
+            hasJWT: !!options.jwt,
+            domain: domain
+        });
         
         // Initialize Jitsi API
         this.jitsiApi = new JitsiMeetExternalAPI(domain, options);
@@ -1019,8 +1050,16 @@ const VideoConsultation = {
                 
             case 'conference.failed':
             case 'CONFERENCE_FAILED':
-                errorMessage = isArabic ? 'فشل في الانضمام للاستشارة' : 'Failed to join consultation';
-                recoveryAction = () => this.retryJoinConference();
+                // Check if it's a membersOnly error
+                if (error.message && error.message.includes('membersOnly')) {
+                    errorMessage = isArabic ? 
+                        'خطأ في المصادقة - سيتم إعادة المحاولة' : 
+                        'Authentication error - retrying connection';
+                    recoveryAction = () => this.retryWithFallbackConfig();
+                } else {
+                    errorMessage = isArabic ? 'فشل في الانضمام للاستشارة' : 'Failed to join consultation';
+                    recoveryAction = () => this.retryJoinConference();
+                }
                 break;
                 
             case 'connection.dropped':
@@ -1235,6 +1274,56 @@ const VideoConsultation = {
         
         // Try to join again
         await this.attemptReconnection();
+    },
+    
+    // Retry with fallback configuration (for membersOnly errors)
+    async retryWithFallbackConfig() {
+        console.log('🔧 Retrying with fallback configuration for membersOnly error...');
+        
+        try {
+            // Get fresh session data from the backend
+            const response = await ApiHelper.makeRequest(
+                `/appointments/${this.appointmentId}/video/join`,
+                { method: 'POST' }
+            );
+            
+            if (response.success && response.data) {
+                // Clean up existing Jitsi instance
+                if (this.jitsiApi) {
+                    this.jitsiApi.dispose();
+                    this.jitsiApi = null;
+                }
+                
+                // Add fallback configuration for authentication issues
+                const fallbackSessionData = {
+                    ...response.data,
+                    config: {
+                        ...response.data.config,
+                        // Disable lobby if JWT authentication fails
+                        enableLobbyChat: false,
+                        enableNoAudioDetection: false,
+                        enableNoisyMicDetection: false,
+                        startWithAudioMuted: false,
+                        startWithVideoMuted: false,
+                        requireDisplayName: false
+                    }
+                };
+                
+                console.log('🔧 Using fallback config:', fallbackSessionData);
+                
+                // Initialize Jitsi with fallback config
+                this.sessionData = fallbackSessionData;
+                this.initJitsi(fallbackSessionData);
+                
+            } else {
+                throw new Error(response.message || 'Failed to get session data');
+            }
+            
+        } catch (error) {
+            console.error('Fallback config retry failed:', error);
+            // Fall back to regular retry
+            await this.retryJoinConference();
+        }
     },
     
     // Switch to audio-only mode
