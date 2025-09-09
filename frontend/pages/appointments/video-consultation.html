@@ -314,7 +314,7 @@
     <script>
         // Check authentication
         if (!AuthStorage.isAuthenticated()) {
-            window.location.href = '/';
+            window.location.href = `${window.location.origin}/Sahatak/frontend/pages/auth/login.html`;
         }
         
         // Set user name
@@ -348,14 +348,12 @@
             } else {
                 // Fallback for direct access - navigate to dashboard
                 const userType = AuthStorage.get('type');
-                const currentUrl = window.location.href;
                 const targetUrl = userType === 'doctor' ? 
-                    currentUrl.replace(/\/Sahatak\/.*$/, '/Sahatak/frontend/pages/dashboard/doctor.html') :
-                    currentUrl.replace(/\/Sahatak\/.*$/, '/Sahatak/frontend/pages/dashboard/patient.html');
+                    `${window.location.origin}/Sahatak/frontend/pages/dashboard/doctor.html` :
+                    `${window.location.origin}/Sahatak/frontend/pages/dashboard/patient.html`;
                 
                 console.log('Navigating to dashboard:', {
                     userType,
-                    currentUrl,
                     targetUrl
                 });
                 
@@ -364,8 +362,7 @@
         }
         
         function viewAppointments() {
-            const currentUrl = window.location.href;
-            const targetUrl = currentUrl.replace(/\/Sahatak\/.*$/, '/Sahatak/frontend/pages/appointments/appointment-list.html');
+            const targetUrl = `${window.location.origin}/Sahatak/frontend/pages/appointments/appointment-list.html`;
             window.location.href = targetUrl;
         }
         
