@@ -1190,9 +1190,6 @@
                     
                     const response = await ApiHelper.makeRequest(`/appointments/${this.currentAppointmentId}/cancel`, {
                         method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
                         body: JSON.stringify({ cancellation_reason: reason })
                     });
 
