@@ -188,9 +188,9 @@
                             </div>
                             <!-- Action Buttons -->
                             <div class="action-buttons">
-                                <button class="btn btn-action" onclick="goBackToDashboard()" title="Back to Dashboard">
-                                    <i class="bi bi-arrow-left"></i>
-                                    <span id="btn-back">Dashboard</span>
+                                <button class="btn btn-action" onclick="goBackToDashboard()" title="Close Video Window">
+                                    <i class="bi bi-x-lg"></i>
+                                    <span id="btn-back">Close Window</span>
                                 </button>
                                 <button class="btn btn-action btn-logout" onclick="endConsultation()" title="End Call">
                                     <i class="bi bi-telephone-x"></i>
@@ -341,23 +341,26 @@
         
         // Navigation functions
         function goBackToDashboard() {
-            const userType = AuthStorage.get('type');
-            
-            // Use a more direct approach - replace the current path
-            const currentUrl = window.location.href;
-            
-            // Replace everything after /Sahatak/ with the dashboard path
-            const targetUrl = userType === 'doctor' ? 
-                currentUrl.replace(/\/Sahatak\/.*$/, '/Sahatak/frontend/pages/dashboard/doctor.html') :
-                currentUrl.replace(/\/Sahatak\/.*$/, '/Sahatak/frontend/pages/dashboard/patient.html');
-            
-            console.log('Navigating to dashboard:', {
-                userType,
-                currentUrl,
-                targetUrl
-            });
-            
-            window.location.href = targetUrl;
+            // If this is a popup window, close it instead of navigating
+            if (window.opener && !window.opener.closed) {
+                console.log('Closing video consultation popup window');
+                window.close();
+            } else {
+                // Fallback for direct access - navigate to dashboard
+                const userType = AuthStorage.get('type');
+                const currentUrl = window.location.href;
+                const targetUrl = userType === 'doctor' ? 
+                    currentUrl.replace(/\/Sahatak\/.*$/, '/Sahatak/frontend/pages/dashboard/doctor.html') :
+                    currentUrl.replace(/\/Sahatak\/.*$/, '/Sahatak/frontend/pages/dashboard/patient.html');
+                
+                console.log('Navigating to dashboard:', {
+                    userType,
+                    currentUrl,
+                    targetUrl
+                });
+                
+                window.location.href = targetUrl;
+            }
         }
         
         function viewAppointments() {
@@ -370,6 +373,19 @@
             if (VideoConsultation.jitsiApi) {
                 if (confirm('Are you sure you want to end the consultation?')) {
                     VideoConsultation.endCall();
+                    
+                    // Close window after ending consultation if it's a popup
+                    setTimeout(() => {
+                        if (window.opener && !window.opener.closed) {
+                            console.log('Closing video consultation window after ending call');
+                            window.close();
+                        }
+                    }, 2000); // Give time for cleanup
+                }
+            } else {
+                // If no active call, just close the window
+                if (window.opener && !window.opener.closed) {
+                    window.close();
                 }
             }
         }

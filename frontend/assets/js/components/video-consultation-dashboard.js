@@ -78,13 +78,23 @@ const VideoConsultationDashboard = {
                 // Refresh the appointment status to update button
                 await this.checkVideoSessionStatus(appointmentId);
                 
-                // Navigate to video consultation page
+                // Open video consultation in a new window
                 const videoUrl = `../../pages/appointments/video-consultation.html?appointmentId=${appointmentId}`;
-                console.log('Navigating to:', videoUrl);
+                console.log('Opening video consultation in new window:', videoUrl);
                 
                 // Use setTimeout to allow UI update to complete first
                 setTimeout(() => {
-                    window.location.href = videoUrl;
+                    const windowFeatures = 'width=1200,height=800,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=no,directories=no,status=no';
+                    const videoWindow = window.open(videoUrl, `video-consultation-${appointmentId}`, windowFeatures);
+                    
+                    // Focus the new window
+                    if (videoWindow) {
+                        videoWindow.focus();
+                    } else {
+                        // Fallback if popup was blocked
+                        console.warn('Video consultation popup was blocked, using current window');
+                        window.location.href = videoUrl;
+                    }
                 }, 500);
             } else {
                 console.error('Response not successful:', response);
@@ -104,9 +114,21 @@ const VideoConsultationDashboard = {
             );
             
             if (response.success) {
-                // Navigate to video consultation page
+                // Open video consultation in a new window
                 const videoUrl = `../../pages/appointments/video-consultation.html?appointmentId=${appointmentId}`;
-                window.location.href = videoUrl;
+                console.log('Opening video consultation in new window:', videoUrl);
+                
+                const windowFeatures = 'width=1200,height=800,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=no,directories=no,status=no';
+                const videoWindow = window.open(videoUrl, `video-consultation-${appointmentId}`, windowFeatures);
+                
+                // Focus the new window
+                if (videoWindow) {
+                    videoWindow.focus();
+                } else {
+                    // Fallback if popup was blocked
+                    console.warn('Video consultation popup was blocked, using current window');
+                    window.location.href = videoUrl;
+                }
             } else {
                 throw new Error(response.message || 'Failed to join video consultation');
             }
