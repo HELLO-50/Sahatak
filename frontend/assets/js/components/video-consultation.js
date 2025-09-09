@@ -566,6 +566,7 @@ const VideoConsultation = {
         console.log('🔧 Jitsi session data:', {
             room_name: sessionData.room_name,
             jwt_token: sessionData.jwt_token ? 'Present' : 'Missing',
+            jwt_sample: sessionData.jwt_token ? sessionData.jwt_token.substring(0, 50) + '...' : 'Missing',
             domain: domain
         });
         
@@ -576,7 +577,21 @@ const VideoConsultation = {
             disableDeepLinking: true,
             startWithAudioMuted: false,
             startWithVideoMuted: false,
-            requireDisplayName: false
+            requireDisplayName: false,
+            // Disable lobby functionality entirely to prevent membersOnly errors
+            enableLobbyChat: false,
+            lobby: {
+                enabled: false
+            },
+            // Make room public to avoid authentication issues
+            roomConfig: {
+                enableLobby: false,
+                password: null
+            },
+            // Disable authentication requirements
+            authentication: {
+                enabled: false
+            }
         };
         
         // Default interface config
@@ -587,6 +602,10 @@ const VideoConsultation = {
             ]
         };
         
+        // Determine if we should use JWT or public access
+        const useJWT = sessionData.jwt_token && sessionData.jwt_token.length > 0;
+        console.log('🔧 JWT Decision:', { useJWT, hasToken: !!sessionData.jwt_token });
+        
         // Merge configurations
         const options = {
             roomName: sessionData.room_name,
@@ -596,7 +615,8 @@ const VideoConsultation = {
             },
             configOverwrite: { ...defaultConfig, ...(sessionData.config || {}) },
             interfaceConfigOverwrite: { ...defaultInterfaceConfig, ...(sessionData.interface_config || {}) },
-            jwt: sessionData.jwt_token || undefined
+            // Only include JWT if we have a valid token, otherwise use public access
+            ...(useJWT && { jwt: sessionData.jwt_token })
         };
         
         console.log('🔧 Jitsi options:', {
@@ -605,11 +625,26 @@ const VideoConsultation = {
             domain: domain
         });
         
-        // Initialize Jitsi API
-        this.jitsiApi = new JitsiMeetExternalAPI(domain, options);
-        
-        // Setup event handlers
-        this.setupJitsiEventHandlers();
+        try {
+            // Initialize Jitsi API
+            this.jitsiApi = new JitsiMeetExternalAPI(domain, options);
+            
+            // Setup event handlers
+            this.setupJitsiEventHandlers();
+            
+            console.log('🔧 Jitsi API initialized successfully');
+            
+        } catch (initError) {
+            console.error('🔧 Jitsi initialization failed:', initError);
+            
+            // If initialization fails, try fallback immediately
+            if (initError.message && initError.message.includes('membersOnly')) {
+                console.log('🔧 MembersOnly error during initialization - applying immediate fallback');
+                setTimeout(() => this.retryWithFallbackConfig(), 1000);
+            } else {
+                this.handleJitsiError(initError);
+            }
+        }
     },
     
     // Setup Jitsi event handlers
@@ -1094,11 +1129,17 @@ const VideoConsultation = {
             case 'conference.failed':
             case 'CONFERENCE_FAILED':
                 // Check if it's a membersOnly error
-                if (error.message && error.message.includes('membersOnly')) {
+                if (error.message && (error.message.includes('membersOnly') || error.message.includes('conference.connectionError.membersOnly'))) {
+                    console.log('🔧 MembersOnly error detected, applying fallback configuration...');
                     errorMessage = isArabic ? 
                         'خطأ في المصادقة - سيتم إعادة المحاولة' : 
                         'Authentication error - retrying connection';
                     recoveryAction = () => this.retryWithFallbackConfig();
+                    // Auto-retry immediately for membersOnly errors
+                    setTimeout(() => {
+                        console.log('🔧 Auto-retrying with fallback config in 2 seconds...');
+                        this.retryWithFallbackConfig();
+                    }, 2000);
                 } else {
                     errorMessage = isArabic ? 'فشل في الانضمام للاستشارة' : 'Failed to join consultation';
                     recoveryAction = () => this.retryJoinConference();
@@ -1342,14 +1383,29 @@ const VideoConsultation = {
                     ...response.data,
                     config: {
                         ...response.data.config,
-                        // Disable lobby if JWT authentication fails
+                        // Completely disable lobby and authentication
                         enableLobbyChat: false,
                         enableNoAudioDetection: false,
                         enableNoisyMicDetection: false,
                         startWithAudioMuted: false,
                         startWithVideoMuted: false,
-                        requireDisplayName: false
-                    }
+                        requireDisplayName: false,
+                        lobby: {
+                            enabled: false
+                        },
+                        roomConfig: {
+                            enableLobby: false,
+                            password: null
+                        },
+                        authentication: {
+                            enabled: false
+                        },
+                        // Override any server-side authentication settings
+                        enableUserRolesBasedOnToken: false,
+                        enableInsecureRoomNameWarning: false
+                    },
+                    // Remove JWT token to force public room access
+                    jwt_token: undefined
                 };
                 
                 console.log('🔧 Using fallback config:', fallbackSessionData);
