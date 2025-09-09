@@ -583,7 +583,7 @@ const VideoConsultation = {
             this.roomName = publicRoomName;
             
             // Initialize Jitsi directly with public room
-            this.initJitsi(publicSessionData);
+            await this.initJitsi(publicSessionData);
             
         } catch (error) {
             console.error('Start video session error:', error);
@@ -592,7 +592,7 @@ const VideoConsultation = {
     },
     
     // Initialize Jitsi Meet
-    initJitsi(sessionData) {
+    async initJitsi(sessionData) {
         const container = document.getElementById('video-container');
         if (!container) return;
         
@@ -1429,7 +1429,7 @@ const VideoConsultation = {
             );
             
             if (response.success) {
-                this.initJitsi(response.data);
+                await this.initJitsi(response.data);
             }
         } catch (error) {
             console.error('Reconnection failed:', error);
@@ -1555,7 +1555,7 @@ const VideoConsultation = {
             if (response.success) {
                 console.log('Reconnection successful');
                 this.sessionData = response.data;
-                this.initJitsi(response.data);
+                await this.initJitsi(response.data);
                 this.reconnectionAttempts = 0; // Reset counter
             } else {
                 throw new Error(response.message);
@@ -1636,7 +1636,7 @@ const VideoConsultation = {
                 
                 // Initialize Jitsi with fallback config
                 this.sessionData = fallbackSessionData;
-                this.initJitsi(fallbackSessionData);
+                await this.initJitsi(fallbackSessionData);
                 
             } else {
                 throw new Error(response.message || 'Failed to get session data');
