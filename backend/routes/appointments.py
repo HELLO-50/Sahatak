@@ -1114,10 +1114,17 @@ def get_video_session_status(appointment_id):
         
         # Check if session can be started
         from services.video_conf_service import VideoConferenceService
-        can_start, timing_message = VideoConferenceService.validate_session_timing(
-            appointment.appointment_date,
-            current_app.config.get('JITSI_SESSION_BUFFER_MINUTES', 15)
-        )
+        
+        # Doctors can always rejoin in_progress sessions
+        if current_user.user_type == 'doctor' and appointment.status == 'in_progress':
+            can_start = True
+            timing_message = "Doctor can rejoin in-progress session"
+        else:
+            # Apply timing validation for other cases
+            can_start, timing_message = VideoConferenceService.validate_session_timing(
+                appointment.appointment_date,
+                current_app.config.get('JITSI_SESSION_BUFFER_MINUTES', 15)
+            )
         
         return APIResponse.success(
             data={
