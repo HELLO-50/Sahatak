@@ -791,6 +791,10 @@ const VideoConsultation = {
         // End session on backend
         await this.endVideoSession();
         
+        // Force refresh dashboard status even if backend call failed
+        // This ensures UI updates even when API calls fail due to auth issues
+        this.refreshDashboardStatus();
+        
         // Show post-call screen
         this.showPostCallScreen();
     },
@@ -799,6 +803,19 @@ const VideoConsultation = {
     async endVideoSession() {
         try {
             console.log('🔚 Attempting to end video session for appointment:', this.appointmentId);
+            
+            // Check if we have authentication token
+            const token = localStorage.getItem('sahatak_access_token');
+            if (!token) {
+                console.warn('⚠️ No auth token found - attempting to refresh session');
+                // Try to get token from AuthStorage if available
+                const authToken = AuthStorage?.get('access_token');
+                if (authToken) {
+                    localStorage.setItem('sahatak_access_token', authToken);
+                    console.log('✅ Token restored from AuthStorage');
+                }
+            }
+            
             const response = await ApiHelper.makeRequest(
                 `/appointments/${this.appointmentId}/video/end`,
                 { method: 'POST' }
@@ -810,6 +827,36 @@ const VideoConsultation = {
             
             // Even if backend call fails, we should still clean up locally
             // This is important because the user has left the video call
+        }
+    },
+    
+    // Refresh dashboard status to update UI after video session ends
+    refreshDashboardStatus() {
+        try {
+            console.log('🔄 Triggering dashboard refresh after video session end');
+            
+            // If VideoConsultationDashboard is available, refresh it
+            if (window.VideoConsultationDashboard && typeof window.VideoConsultationDashboard.checkAllAppointmentStatuses === 'function') {
+                console.log('🔄 Refreshing VideoConsultationDashboard status');
+                window.VideoConsultationDashboard.checkAllAppointmentStatuses();
+            }
+            
+            // If Dashboard is available, refresh it too
+            if (window.Dashboard && typeof window.Dashboard.refreshAppointments === 'function') {
+                console.log('🔄 Refreshing main Dashboard');
+                window.Dashboard.refreshAppointments();
+            }
+            
+            // Also trigger a general page refresh after a short delay to ensure all dashboards update
+            setTimeout(() => {
+                console.log('🔄 Triggering delayed dashboard refresh');
+                if (window.location.pathname.includes('dashboard')) {
+                    window.location.reload();
+                }
+            }, 2000);
+            
+        } catch (error) {
+            console.error('Error refreshing dashboard status:', error);
         }
     },
     
