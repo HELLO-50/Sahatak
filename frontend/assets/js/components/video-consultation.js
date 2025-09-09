@@ -603,12 +603,17 @@ const VideoConsultation = {
         let backendConfig = null;
         let domain = sessionData.jitsi_domain || 'meet.jit.si';
         
+        console.log('🔧 Attempting to load config from backend...');
         try {
             const currentLang = LanguageManager?.getLanguage() || 'en';
+            console.log('🔧 Making request to:', `/appointments/${this.appointmentId}/video/config?lang=${currentLang}`);
+            
             const configResponse = await ApiHelper.makeRequest(
                 `/appointments/${this.appointmentId}/video/config?lang=${currentLang}`,
                 { method: 'GET' }
             );
+            
+            console.log('🔧 Backend response:', configResponse);
             backendConfig = configResponse.data;
             
             // Update domain from backend if available
@@ -616,9 +621,10 @@ const VideoConsultation = {
                 domain = backendConfig.jitsi_domain;
             }
             
-            console.log('🔧 Loaded Jitsi config from backend:', backendConfig);
+            console.log('🔧 Successfully loaded Jitsi config from backend:', backendConfig);
         } catch (error) {
-            console.warn('🔧 Failed to load config from backend, using fallback:', error);
+            console.error('🔧 Failed to load config from backend, using fallback:', error);
+            console.error('🔧 Error details:', error.message, error.status);
         }
         
         // Debug session data
