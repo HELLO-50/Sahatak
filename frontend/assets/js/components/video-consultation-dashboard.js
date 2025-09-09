@@ -283,7 +283,12 @@ const VideoConsultationDashboard = {
     // Get button configuration based on user type and appointment status
     getButtonConfig(userType, appointment, isArabic) {
         const isInProgress = appointment.status === 'in_progress';
-        const sessionEnded = appointment.session_status === 'ended' || appointment.session_status === 'disconnected';
+        // Session is considered ended if:
+        // 1. Explicitly marked as 'ended' or 'disconnected'
+        // 2. Session was started but status is null/undefined (indicates abnormal termination)
+        const sessionEnded = appointment.session_status === 'ended' || 
+                            appointment.session_status === 'disconnected' ||
+                            (appointment.session_started_at && !appointment.session_status);
         
         if (userType === 'doctor') {
             // If session ended but appointment still active, show complete consultation option
@@ -398,6 +403,7 @@ const VideoConsultationDashboard = {
     // Update appointment card with video consultation UI elements
     updateAppointmentVideoUI(appointmentId, sessionData) {
         console.log(`🎨 updateAppointmentVideoUI called for appointment ${appointmentId} with data:`, sessionData);
+        console.log(`🔍 DEBUG session_status: "${sessionData.session_status}" (type: ${typeof sessionData.session_status})`);
         
         const appointmentCard = document.querySelector(`[data-appointment-id="${appointmentId}"]`);
         if (!appointmentCard) {
