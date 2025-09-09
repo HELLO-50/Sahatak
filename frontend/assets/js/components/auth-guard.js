@@ -139,6 +139,12 @@ class AuthGuard {
         if (requiredUserType && !this.hasUserType(requiredUserType)) {
             console.warn(`User type mismatch. Required: ${requiredUserType}, Current: ${localStorage.getItem('sahatak_user_type')}`);
             
+            // Don't redirect if we're on video consultation page
+            if (window.location.pathname.includes('video-consultation.html')) {
+                console.log('Skipping AuthGuard redirect for video consultation page');
+                return true; // Allow access to video consultation regardless of user type mismatch
+            }
+            
             // Redirect to correct dashboard based on actual user type
             const actualUserType = localStorage.getItem('sahatak_user_type');
             if (actualUserType === 'patient') {
