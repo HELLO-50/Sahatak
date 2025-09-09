@@ -291,13 +291,16 @@ class OptimizedQueries:
     @staticmethod
     @cached_query(ttl=300)  # Cache for 5 minutes
     def get_doctor_appointments(doctor_id):
-        """Get doctor appointments with patient info"""
+        """Get doctor appointments with patient info (excluding completed ones)"""
         from models import Appointment, Patient, User
         from sqlalchemy.orm import joinedload
         
         return Appointment.query.options(
             joinedload(Appointment.patient).joinedload(Patient.user)
-        ).filter_by(doctor_id=doctor_id).order_by(
+        ).filter(
+            Appointment.doctor_id == doctor_id,
+            Appointment.status != 'completed'  # Exclude completed appointments
+        ).order_by(
             Appointment.appointment_date.desc()
         ).all()
     
