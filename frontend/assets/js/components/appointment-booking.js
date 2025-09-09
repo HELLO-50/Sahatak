@@ -48,12 +48,12 @@ const AppointmentBooking = {
         if (!dropdown) return;
 
         // Keep the "All Specialties" option and add the loaded specialties
-        dropdown.innerHTML = '<option value="">All Specialties</option>';
+        dropdown.innerHTML = `<option value="">${LanguageManager?.translate('appointments.all_specialties') || 'All Specialties'}</option>`;
         
         specialties.forEach(specialty => {
             const option = document.createElement('option');
             option.value = specialty;
-            option.textContent = specialty;
+            option.textContent = this.getSpecialtyDisplayName(specialty);
             dropdown.appendChild(option);
         });
     },
@@ -196,16 +196,16 @@ const AppointmentBooking = {
                         
                         <div class="row text-center">
                             <div class="col-4">
-                                <small class="text-muted d-block">Experience</small>
-                                <strong>${doctor.years_of_experience || 0} years</strong>
+                                <small class="text-muted d-block">${LanguageManager?.translate('appointments.experience') || 'Experience'}</small>
+                                <strong>${doctor.years_of_experience || 0} ${LanguageManager?.translate('appointments.experience_years') || 'years'}</strong>
                             </div>
                             <div class="col-4">
-                                <small class="text-muted d-block">Fee</small>
-                                <strong>${doctor.consultation_fee ? doctor.consultation_fee + ' SDG' : 'Free'}</strong>
+                                <small class="text-muted d-block">${LanguageManager?.translate('appointments.fee') || 'Fee'}</small>
+                                <strong>${doctor.consultation_fee ? doctor.consultation_fee + ' ' + (LanguageManager?.translate('appointments.currency') || 'SDG') : (LanguageManager?.translate('appointments.free') || 'Free')}</strong>
                             </div>
                             <div class="col-4">
-                                <small class="text-muted d-block">Status</small>
-                                <span class="badge bg-success">Available</span>
+                                <small class="text-muted d-block">${LanguageManager?.translate('appointments.status') || 'Status'}</small>
+                                <span class="badge bg-success">${LanguageManager?.translate('appointments.available') || 'Available'}</span>
                             </div>
                         </div>
                         

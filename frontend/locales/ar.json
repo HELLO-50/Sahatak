@@ -239,6 +239,8 @@
     "years": "سنة",
     "currency": "د.س",
     "reviews": "تقييم",
+    "status": "الحالة",
+    "experience_years": "سنوات",
     "cancel": "إلغاء",
     "reschedule": "إعادة جدولة",
     "cancel_appointment": "إلغاء الموعد",
@@ -611,6 +613,8 @@
         "status_pending": "في الانتظار",
         "view_all": "عرض جميع المواعيد"
       },
+      "upcoming_appointments_title": "المواعيد القادمة",
+      "health_summary_title": "ملخص الحالة الصحية",
       "health_summary": {
         "title": "ملخص الحالة الصحية",
         "blood_pressure": "ضغط الدم",
@@ -625,6 +629,10 @@
         "no_prescriptions": "لا توجد وصفات طبية نشطة",
         "no_records": "لا توجد سجلات طبية متاحة"
       },
+      "no_active_prescriptions": "لا توجد وصفات طبية نشطة",
+      "no_medical_records": "لا توجد سجلات طبية",
+      "active_prescriptions_title": "الوصفات النشطة",
+      "medical_records_title": "التقارير الطبية الأخيرة",
       "profile": {
         "title": "ملف المريض الشخصي",
         "close": "إغلاق",
@@ -693,6 +701,16 @@
         "schedule": "جدولي",
         "profile": "الملف الشخصي",
         "settings": "الإعدادات"
+      },
+      "activities": {
+        "appointment_scheduled": "موعد جديد مع {patient_name}",
+        "appointment_completed": "تم إنهاء الاستشارة مع {patient_name}",
+        "time": {
+          "just_now": "الآن",
+          "minutes_ago": "منذ {count} دقيقة",
+          "hours_ago": "منذ {count} ساعة",
+          "days_ago": "منذ {count} يوم"
+        }
       },
       "quick_actions": {
         "communication": "التواصل مع المرضى",

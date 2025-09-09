@@ -850,7 +850,7 @@
                             appointmentsContainer.innerHTML = `
                                 <h5 class="mb-3">
                                     <i class="bi bi-calendar-day me-2"></i>
-                                    Upcoming Appointments
+                                    <span id="upcoming-appointments-title">Upcoming Appointments</span>
                                 </h5>
                                 ${upcomingAppointments.slice(0, 3).map(apt => {
                                     const appointmentDate = new Date(apt.appointment_date);
@@ -929,9 +929,9 @@
                             appointmentsContainer.innerHTML = `
                                 <h5 class="mb-3">
                                     <i class="bi bi-calendar-day me-2"></i>
-                                    Upcoming Appointments
+                                    <span id="upcoming-appointments-title">Upcoming Appointments</span>
                                 </h5>
-                                <p class="text-muted text-center py-3">No upcoming appointments</p>
+                                <p class="text-center py-3" style="color: black;"><span id="no-upcoming-appointments">No upcoming appointments</span></p>
                                 <div class="text-center mt-3">
                                     <button class="btn btn-outline-primary btn-sm" onclick="viewPastAppointments()">
                                         <i class="bi bi-calendar-check me-1"></i>

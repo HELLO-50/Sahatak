@@ -358,7 +358,7 @@ const Dashboard = {
         // Add title
         const title = document.createElement('h5');
         title.className = 'mb-3';
-        title.innerHTML = '<i class="bi bi-prescription2 me-2"></i>Active Prescriptions';
+        title.innerHTML = '<i class="bi bi-prescription2 me-2"></i><span id="active-prescriptions-title">Active Prescriptions</span>';
         container.appendChild(title);
         
         // Create prescriptions list
@@ -416,7 +416,7 @@ const Dashboard = {
         container.innerHTML = `
             <div class="text-center py-4">
                 <i class="bi bi-prescription fs-1 text-muted"></i>
-                <p class="mt-2" id="no-active-prescriptions">No active prescriptions</p>
+                <p class="mt-2" style="color: black;" id="no-active-prescriptions">No active prescriptions</p>
             </div>
         `;
     },
@@ -540,7 +540,7 @@ const Dashboard = {
         container.innerHTML = `
             <div class="text-center py-4">
                 <i class="bi bi-clipboard-heart fs-1 text-muted"></i>
-                <p class="mt-2">No health data available</p>
+                <p class="mt-2" style="color: black;">No health data available</p>
                 <button class="btn btn-primary btn-sm" onclick="updateMedicalHistory()">
                     Update Medical History
                 </button>
@@ -582,7 +582,7 @@ const Dashboard = {
         // Add title
         const title = document.createElement('h5');
         title.className = 'mb-3';
-        title.innerHTML = '<i class="bi bi-file-medical me-2"></i>Recent Medical Reports';
+        title.innerHTML = '<i class="bi bi-file-medical me-2"></i><span id="medical-records-title">Recent Medical Reports</span>';
         container.appendChild(title);
         
         // Create records list
@@ -639,7 +639,7 @@ const Dashboard = {
         container.innerHTML = `
             <div class="text-center py-4">
                 <i class="bi bi-file-medical fs-1 text-muted"></i>
-                <p class="mt-2" id="no-medical-records">No medical records available</p>
+                <p class="mt-2" style="color: black;" id="no-medical-records">No medical records available</p>
             </div>
         `;
     },

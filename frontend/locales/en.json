@@ -239,6 +239,8 @@
     "years": "years",
     "currency": "SDG",
     "reviews": "reviews",
+    "status": "Status",
+    "experience_years": "years",
     "cancel": "Cancel",
     "reschedule": "Reschedule",
     "cancel_appointment": "Cancel Appointment",
@@ -611,6 +613,8 @@
         "status_pending": "Pending",
         "view_all": "View All Appointments"
       },
+      "upcoming_appointments_title": "Upcoming Appointments",
+      "health_summary_title": "Health Summary",
       "health_summary": {
         "title": "Health Summary",
         "blood_pressure": "Blood Pressure",
@@ -625,6 +629,10 @@
         "no_prescriptions": "No active prescriptions",
         "no_records": "No medical records available"
       },
+      "no_active_prescriptions": "No active prescriptions",
+      "no_medical_records": "No medical records",
+      "active_prescriptions_title": "Active Prescriptions",
+      "medical_records_title": "Recent Medical Reports",
       "profile": {
         "title": "Patient Profile",
         "close": "Close",
@@ -693,6 +701,16 @@
         "schedule": "My Schedule",
         "profile": "Profile",
         "settings": "Settings"
+      },
+      "activities": {
+        "appointment_scheduled": "New appointment scheduled with {patient_name}",
+        "appointment_completed": "Consultation completed with {patient_name}",
+        "time": {
+          "just_now": "Just now",
+          "minutes_ago": "{count} minutes ago",
+          "hours_ago": "{count} hours ago",
+          "days_ago": "{count} days ago"
+        }
       },
       "quick_actions": {
         "communication": "Patient Communication",
