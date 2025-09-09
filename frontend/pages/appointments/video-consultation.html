@@ -5,10 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Consultation - Sahatak</title>
     
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%230d47a1' d='m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523.942-.661 2.27.067 3.71L8 15.5l6.533-8.737c.728-1.44.59-2.768.067-3.71C13.486.878 10.4.28 8.717 2.01L8 2.748z'/></svg>">
+    
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    
+    <!-- Bootstrap Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Arabic Font - Noto Sans Arabic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <!-- Main CSS -->
     <link rel="stylesheet" href="../../assets/css/main.css">
     <!-- Dashboard CSS -->
@@ -17,461 +27,289 @@
     <link rel="stylesheet" href="../../assets/css/components/video-consultation-dashboard.css">
     
     <style>
-        .pre-join-screen {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-        
-        .audio-meter {
-            height: 30px;
-            background: #f0f0f0;
+        /* Override for video consultation specific styles */
+        .video-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
             border-radius: 15px;
-            overflow: hidden;
-            margin: 10px 0;
-        }
-        
-        .post-call-screen {
-            max-width: 600px;
-            margin: 0 auto;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
         }
         
         #jitsi-container {
             width: 100%;
-            height: calc(100vh - 100px);
+            height: 70vh;
+            min-height: 450px;
             position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #1a1a1a;
         }
         
-        .connection-status {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
+        .pre-join-screen {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
         }
         
-        .rtl .connection-status {
-            right: auto;
-            left: 10px;
+        .system-check-card {
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
         
-        /* Enhanced Mobile Responsiveness */
+        .system-check-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .device-check video {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+        }
+        
+        .audio-meter {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .audio-meter-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745 0%, #ffc107 50%, #dc3545 100%);
+            transition: width 0.1s ease;
+            width: 0%;
+        }
+        
+        .connection-status-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .connection-status-indicator.connected {
+            background: rgba(25, 135, 84, 0.1);
+            color: #198754;
+        }
+        
+        .connection-status-indicator.connecting {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+        
+        .connection-status-indicator.disconnected {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+        
+        /* Mobile Responsive Styles */
         @media (max-width: 768px) {
-            /* Navigation adjustments */
-            .navbar .container {
-                padding: 0 15px;
+            .dashboard-header .row {
+                text-align: center;
             }
             
-            .navbar-brand {
-                font-size: 18px;
+            .dashboard-header .col-lg-4 {
+                margin-bottom: 1rem;
             }
             
-            .navbar-brand img {
-                height: 30px;
+            .profile-section {
+                flex-direction: column;
+                align-items: center;
             }
             
-            /* Pre-join screen mobile */
+            .action-buttons {
+                justify-content: center;
+                margin-top: 1rem;
+            }
+            
+            #jitsi-container {
+                height: 60vh;
+                min-height: 350px;
+            }
+            
             .pre-join-screen {
                 padding: 1rem;
-                margin: 10px;
             }
             
-            /* Video container mobile */
-            #jitsi-container {
-                height: calc(100vh - 80px);
-            }
-            
-            /* Error screen mobile */
-            .card {
-                margin: 10px;
-            }
-            
-            .card-body {
-                padding: 1.5rem 1rem;
-            }
-            
-            /* Button adjustments */
-            .btn {
-                padding: 12px 20px;
-                font-size: 14px;
-            }
-            
-            .btn-lg {
-                padding: 15px 25px;
-                font-size: 16px;
-            }
-            
-            /* Connection status mobile */
-            .connection-status {
-                position: fixed;
-                top: 70px;
-                right: 10px;
-                z-index: 1001;
-            }
-            
-            .rtl .connection-status {
-                right: auto;
-                left: 10px;
-            }
-            
-            /* Loading screen mobile */
-            .spinner-border {
-                width: 2.5rem !important;
-                height: 2.5rem !important;
-            }
-            
-            /* Progress bar mobile */
-            .progress {
-                width: 280px !important;
+            .system-check-card {
+                margin-bottom: 1rem;
             }
         }
         
         @media (max-width: 576px) {
-            /* Small mobile devices */
-            .pre-join-screen {
-                padding: 0.75rem;
-                margin: 5px;
+            .dashboard-title {
+                font-size: 1.5rem;
             }
             
-            .post-call-screen {
-                margin: 5px;
-                padding: 0.75rem;
+            .dashboard-subtitle {
+                font-size: 0.875rem;
             }
             
-            /* Jitsi container small mobile */
             #jitsi-container {
-                height: calc(100vh - 70px);
+                height: 50vh;
+                min-height: 300px;
             }
             
-            /* Button stacking */
-            .d-flex.justify-content-center.gap-2 {
-                flex-direction: column;
-                gap: 10px !important;
-            }
-            
-            .d-flex.justify-content-center.gap-2 .btn {
-                width: 100%;
-                margin-bottom: 8px;
-            }
-            
-            /* Error suggestions list */
-            .list-unstyled {
-                text-align: center;
-                padding: 0 10px;
-            }
-            
-            /* Progress bar small mobile */
-            .progress {
-                width: 250px !important;
-            }
-            
-            /* Text adjustments */
-            h3 {
-                font-size: 1.3rem;
-            }
-            
-            h5 {
-                font-size: 1.1rem;
-            }
-            
-            /* Dropdown adjustments */
-            .dropdown-menu {
-                font-size: 14px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            /* Very small devices */
-            .navbar-brand span {
+            .btn-action span {
                 display: none;
             }
             
-            .connection-status .badge {
-                font-size: 10px;
-                padding: 4px 6px;
-            }
-            
-            #jitsi-container {
-                height: calc(100vh - 65px);
-            }
-            
-            .progress {
-                width: 220px !important;
-                height: 6px;
-            }
-            
-            .card-body.py-5 {
-                padding: 2rem 0.75rem !important;
-            }
-        }
-        
-        /* Landscape orientation adjustments */
-        @media (max-width: 768px) and (orientation: landscape) {
-            #jitsi-container {
-                height: calc(100vh - 60px);
-            }
-            
-            .navbar {
-                padding: 0.25rem 0;
-            }
-            
-            .connection-status {
-                top: 10px;
-            }
-        }
-        
-        /* Touch-friendly improvements */
-        @media (hover: none) and (pointer: coarse) {
-            .btn {
-                min-height: 44px;
-                min-width: 44px;
-            }
-            
-            .dropdown-toggle {
-                padding: 12px;
-            }
-            
-            .dropdown-item {
-                padding: 12px 20px;
-            }
-        }
-        
-        /* Dark mode media query support */
-        @media (prefers-color-scheme: dark) {
-            .connection-status .badge {
-                background-color: #495057 !important;
-            }
-            
-            .audio-meter {
-                background: #343a40;
-            }
-        }
-        
-        /* RTL (Right-to-Left) Support for Arabic */
-        [dir="rtl"] {
-            text-align: right;
-        }
-        
-        [dir="rtl"] .navbar-brand {
-            margin-left: auto;
-            margin-right: 0;
-        }
-        
-        [dir="rtl"] .navbar-brand img {
-            margin-left: 8px;
-            margin-right: 0;
-        }
-        
-        [dir="rtl"] .d-flex.align-items-center {
-            flex-direction: row-reverse;
-        }
-        
-        [dir="rtl"] .me-3 {
-            margin-left: 1rem !important;
-            margin-right: 0 !important;
-        }
-        
-        [dir="rtl"] .dropdown-menu {
-            right: 0;
-            left: auto;
-        }
-        
-        [dir="rtl"] .dropdown-menu-end {
-            right: auto;
-            left: 0;
-        }
-        
-        [dir="rtl"] .text-end {
-            text-align: right !important;
-        }
-        
-        [dir="rtl"] .connection-status {
-            left: 10px;
-            right: auto;
-        }
-        
-        [dir="rtl"] .spinner-border {
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        [dir="rtl"] .progress {
-            direction: ltr; /* Progress bars work better LTR */
-        }
-        
-        [dir="rtl"] .btn {
-            text-align: center;
-        }
-        
-        [dir="rtl"] .btn .bi {
-            margin-left: 0.25rem;
-            margin-right: 0;
-        }
-        
-        [dir="rtl"] .btn-group .btn:first-child {
-            border-top-right-radius: 0;
-            border-bottom-right-radius: 0;
-            border-top-left-radius: 0.375rem;
-            border-bottom-left-radius: 0.375rem;
-        }
-        
-        [dir="rtl"] .btn-group .btn:last-child {
-            border-top-left-radius: 0;
-            border-bottom-left-radius: 0;
-            border-top-right-radius: 0.375rem;
-            border-bottom-right-radius: 0.375rem;
-        }
-        
-        [dir="rtl"] .card {
-            text-align: right;
-        }
-        
-        [dir="rtl"] .list-unstyled {
-            text-align: right;
-        }
-        
-        [dir="rtl"] .text-center {
-            text-align: center !important;
-        }
-        
-        [dir="rtl"] .alert {
-            text-align: right;
-        }
-        
-        [dir="rtl"] .d-flex.justify-content-center.gap-2 {
-            direction: rtl;
-        }
-        
-        [dir="rtl"] .d-flex.justify-content-center.gap-2 .btn {
-            margin-left: 0.5rem;
-            margin-right: 0;
-        }
-        
-        [dir="rtl"] .d-flex.justify-content-center.gap-2 .btn:first-child {
-            margin-left: 0;
-        }
-        
-        /* RTL adjustments for error screens */
-        [dir="rtl"] .card-body {
-            text-align: right;
-        }
-        
-        [dir="rtl"] .card-body.text-center {
-            text-align: center !important;
-        }
-        
-        [dir="rtl"] .fw-bold {
-            text-align: inherit;
-        }
-        
-        /* RTL Mobile adjustments */
-        @media (max-width: 768px) {
-            [dir="rtl"] .navbar .container {
-                direction: rtl;
-            }
-            
-            [dir="rtl"] .connection-status {
-                left: 10px;
-                right: auto;
-            }
-            
-            [dir="rtl"] .dropdown-menu {
-                right: auto;
-                left: 0;
-            }
-        }
-        
-        @media (max-width: 576px) {
-            [dir="rtl"] .d-flex.justify-content-center.gap-2 {
-                flex-direction: column;
-            }
-            
-            [dir="rtl"] .d-flex.justify-content-center.gap-2 .btn {
-                margin-left: 0;
-                margin-right: 0;
+            .action-buttons .btn-action {
+                padding: 0.5rem;
             }
         }
     </style>
 </head>
-<body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-        <div class="container">
-            <a class="navbar-brand" href="/">
-                <span class="h4 mb-0 text-primary fw-bold">
-                    <i class="bi bi-heart-pulse me-2"></i>Sahatak
-                </span>
-            </a>
-            
-            <div class="d-flex align-items-center">
-                <!-- Connection Status -->
-                <div id="connection-status" class="me-3">
-                    <span class="badge bg-secondary">Disconnected</span>
+<body data-protect="all">
+    <div class="dashboard-container">
+        <div class="container-fluid">
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <div class="row align-items-center">
+                    <!-- Profile Section -->
+                    <div class="col-lg-4 col-md-12 mb-3 mb-lg-0">
+                        <div class="profile-section">
+                            <div class="user-avatar">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <div class="user-details">
+                                <h5 class="mb-1" id="user-name">User</h5>
+                            </div>
+                            <!-- Action Buttons -->
+                            <div class="action-buttons">
+                                <button class="btn btn-action" onclick="goBackToDashboard()" title="Back to Dashboard">
+                                    <i class="bi bi-arrow-left"></i>
+                                    <span id="btn-back">Dashboard</span>
+                                </button>
+                                <button class="btn btn-action btn-logout" onclick="endConsultation()" title="End Call">
+                                    <i class="bi bi-telephone-x"></i>
+                                    <span id="btn-end">End Call</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Title Section -->
+                    <div class="col-lg-4 col-md-12 text-center mb-3 mb-lg-0">
+                        <h1 class="dashboard-title" id="consultation-title">Video Consultation</h1>
+                        <p class="dashboard-subtitle" id="consultation-subtitle">Secure medical consultation</p>
+                    </div>
+                    
+                    <!-- Status Section -->
+                    <div class="col-lg-4 col-md-12 text-center text-lg-end">
+                        <div id="connection-status" class="connection-status-indicator connecting">
+                            <i class="bi bi-circle-fill me-2" style="font-size: 0.5rem;"></i>
+                            <span id="status-text">Connecting...</span>
+                        </div>
+                    </div>
                 </div>
-                
-                <!-- Connection Quality -->
-                <div id="connection-quality" class="me-3">
-                    <!-- Quality indicator will be added here -->
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="video-container">
+                        <!-- Pre-join screen will be shown initially -->
+                        <div id="video-container">
+                            <!-- Dynamic content loaded by video-consultation.js -->
+                        </div>
+                        
+                        <!-- Jitsi container (hidden initially) -->
+                        <div id="jitsi-container" style="display: none;"></div>
+                        
+                        <!-- Post-call screen (hidden initially) -->
+                        <div id="post-call-container" style="display: none;">
+                            <div class="post-call-screen text-center py-5">
+                                <i class="bi bi-check-circle text-success" style="font-size: 4rem;"></i>
+                                <h3 class="mt-3">Consultation Ended</h3>
+                                <p class="text-muted">Thank you for using Sahatak medical consultation service</p>
+                                <div class="mt-4">
+                                    <button class="btn btn-primary me-2" onclick="goBackToDashboard()">
+                                        <i class="bi bi-house me-2"></i>Back to Dashboard
+                                    </button>
+                                    <button class="btn btn-outline-primary" onclick="viewAppointments()">
+                                        <i class="bi bi-calendar-check me-2"></i>View Appointments
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                
-                <!-- Language Toggle -->
-                <button class="btn btn-outline-light btn-sm me-3" onclick="LanguageManager.toggleLanguage && LanguageManager.toggleLanguage()">
-                    <i class="bi bi-translate me-1"></i>
-                    <span id="current-lang">English</span>
-                </button>
-                
-                <!-- User Info -->
-                <div class="dropdown">
-                    <button class="btn btn-outline-primary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown">
-                        <i class="bi bi-person-circle"></i>
-                        <span id="user-name"></span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="#" onclick="navigateToDashboard()">
-                            <i class="bi bi-speedometer2"></i> <span id="nav-dashboard">Dashboard</span>
-                        </a></li>
-                        <li><a class="dropdown-item" href="./appointment-list.html">
-                            <i class="bi bi-calendar-event"></i> <span id="nav-appointments">My Appointments</span>
-                        </a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="#" id="end-call-btn">
-                            <i class="bi bi-telephone-x"></i> <span id="nav-end-call">End Call</span>
-                        </a></li>
-                    </ul>
+            </div>
+
+            <!-- Controls Section (Optional - shown during call) -->
+            <div class="row mt-3" id="call-controls" style="display: none;">
+                <div class="col-12">
+                    <div class="dashboard-card p-3">
+                        <div class="d-flex justify-content-center gap-3 flex-wrap">
+                            <button class="btn btn-outline-primary" onclick="toggleAudio()">
+                                <i class="bi bi-mic" id="mic-icon"></i>
+                                <span class="ms-2 d-none d-sm-inline">Microphone</span>
+                            </button>
+                            <button class="btn btn-outline-primary" onclick="toggleVideo()">
+                                <i class="bi bi-camera-video" id="camera-icon"></i>
+                                <span class="ms-2 d-none d-sm-inline">Camera</span>
+                            </button>
+                            <button class="btn btn-outline-primary" onclick="toggleScreen()">
+                                <i class="bi bi-display"></i>
+                                <span class="ms-2 d-none d-sm-inline">Share Screen</span>
+                            </button>
+                            <button class="btn btn-danger" onclick="endConsultation()">
+                                <i class="bi bi-telephone-x"></i>
+                                <span class="ms-2 d-none d-sm-inline">End Call</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </nav>
-    
-    <!-- Main Content -->
-    <main class="container-fluid mt-4">
-        <!-- Alert Container -->
-        <div id="alert-container"></div>
-        
-        <!-- Video Container -->
-        <div id="video-container">
-            <!-- Content will be dynamically loaded here -->
-            <div class="text-center py-5">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden" id="loading-text">Loading...</span>
+    </div>
+
+    <!-- Error Modal -->
+    <div class="modal fade" id="error-modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title">
+                        <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                        <span id="error-title">Connection Error</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <p class="mt-3" id="initializing-text">Initializing video consultation...</p>
+                <div class="modal-body">
+                    <p id="error-message">Unable to connect to video service</p>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="retryConnection()">Retry</button>
+                </div>
             </div>
         </div>
-    </main>
-    
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </div>
+
+    <!-- Bootstrap 5 JavaScript CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     
     <!-- Jitsi Meet External API -->
     <script src="https://meet.jit.si/external_api.js"></script>
     
-    <!-- App Scripts -->
-    <script src="../../assets/js/components/auth-storage.js"></script>
+    <!-- Core Components -->
     <script src="../../assets/js/components/auth-guard.js"></script>
+    <script src="../../assets/js/components/auth-storage.js"></script>
     <script src="../../assets/js/main.js"></script>
     <script src="../../assets/js/components/dashboard-translations.js"></script>
     <script src="../../assets/js/components/video-consultation.js"></script>
-    <script src="../../assets/js/components/video-consultation-dashboard.js"></script>
     
     <script>
         // Check authentication
@@ -489,104 +327,109 @@
         function initializeLanguageSupport() {
             const currentLang = LanguageManager?.getLanguage() || 'ar';
             
-            // Set document direction
-            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
-            document.documentElement.lang = currentLang;
+            // Apply translations
+            if (typeof VideoConsultationTranslations !== 'undefined') {
+                VideoConsultationTranslations.updateTranslations(currentLang);
+            }
             
-            // Add RTL class for styling
-            if (currentLang === 'ar') {
-                document.body.classList.add('rtl');
+            // Update language button
+            const langBtn = document.getElementById('current-lang');
+            if (langBtn) {
+                langBtn.textContent = currentLang === 'ar' ? 'English' : 'العربية';
+            }
+        }
+        
+        // Navigation functions
+        function goBackToDashboard() {
+            const userType = AuthStorage.get('type');
+            if (userType === 'doctor') {
+                window.location.href = '../dashboard/doctor.html';
             } else {
-                document.body.classList.remove('rtl');
-            }
-            
-            // Update current language display
-            const langSpan = document.getElementById('current-lang');
-            if (langSpan) {
-                langSpan.textContent = currentLang === 'ar' ? 'English' : 'العربية';
+                window.location.href = '../dashboard/patient.html';
             }
         }
         
-        // Initialize language
-        initializeLanguageSupport();
-        
-        // Navigation function for dashboard
-        function navigateToDashboard() {
-            const userType = AuthStorage.getUserType();
-            const dashboardPath = userType === 'doctor' 
-                ? '../dashboard/doctor.html'
-                : '../dashboard/patient.html';
-            window.location.href = dashboardPath;
+        function viewAppointments() {
+            window.location.href = 'appointment-list.html';
         }
         
-        // Make function globally available
-        window.navigateToDashboard = navigateToDashboard;
-
-        // Initialize video consultation from URL parameters
-        document.addEventListener('DOMContentLoaded', async function() {
-            console.log('Video consultation page loading...');
-            
-            // Get appointment ID from URL parameters
-            const urlParams = new URLSearchParams(window.location.search);
-            const appointmentId = urlParams.get('appointmentId') || urlParams.get('appointment_id');
-            
-            if (appointmentId) {
-                console.log('Starting video consultation for appointment:', appointmentId);
-                
-                try {
-                    // Initialize the video consultation
-                    await VideoConsultation.init(appointmentId);
-                    console.log('Video consultation initialized successfully');
-                } catch (error) {
-                    console.error('Failed to initialize video consultation:', error);
-                    
-                    // Show error message
-                    const container = document.getElementById('video-container');
-                    container.innerHTML = `
-                        <div class="text-center py-5">
-                            <div class="alert alert-danger" role="alert">
-                                <h4 class="alert-heading">
-                                    <i class="bi bi-exclamation-triangle"></i>
-                                    ${LanguageManager?.translate('video_consultation.error.initialization_failed') || 'Failed to start video consultation'}
-                                </h4>
-                                <p>${error.message || 'Please check your connection and try again.'}</p>
-                                <hr>
-                                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-                                    <button class="btn btn-primary" onclick="window.location.reload()">
-                                        <i class="bi bi-arrow-clockwise me-1"></i>
-                                        ${LanguageManager?.translate('video_consultation.error.retry') || 'Try Again'}
-                                    </button>
-                                    <button class="btn btn-secondary" onclick="navigateToDashboard()">
-                                        <i class="bi bi-house me-1"></i>
-                                        ${LanguageManager?.translate('video_consultation.navigation.back_to_dashboard') || 'Back to Dashboard'}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
+        function endConsultation() {
+            if (VideoConsultation.jitsiApi) {
+                if (confirm('Are you sure you want to end the consultation?')) {
+                    VideoConsultation.endCall();
                 }
-            } else {
-                console.error('No appointment ID provided');
-                
-                // Show error for missing appointment ID
-                const container = document.getElementById('video-container');
-                container.innerHTML = `
-                    <div class="text-center py-5">
-                        <div class="alert alert-warning" role="alert">
-                            <h4 class="alert-heading">
-                                <i class="bi bi-exclamation-triangle"></i>
-                                ${LanguageManager?.translate('video_consultation.error.no_appointment') || 'No appointment specified'}
-                            </h4>
-                            <p>${LanguageManager?.translate('video_consultation.error.no_appointment_desc') || 'Please access video consultation through your appointment list.'}</p>
-                            <hr>
-                            <button class="btn btn-primary" onclick="navigateToDashboard()">
-                                <i class="bi bi-house me-1"></i>
-                                ${LanguageManager?.translate('video_consultation.navigation.back_to_dashboard') || 'Back to Dashboard'}
-                            </button>
-                        </div>
-                    </div>
-                `;
             }
+        }
+        
+        function retryConnection() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const appointmentId = urlParams.get('appointmentId');
+            if (appointmentId && VideoConsultation) {
+                VideoConsultation.init(appointmentId);
+            }
+        }
+        
+        // Control functions
+        function toggleAudio() {
+            if (VideoConsultation.jitsiApi) {
+                VideoConsultation.jitsiApi.isAudioMuted().then(muted => {
+                    VideoConsultation.jitsiApi.executeCommand('toggleAudio');
+                    const icon = document.getElementById('mic-icon');
+                    if (icon) {
+                        icon.className = muted ? 'bi bi-mic' : 'bi bi-mic-mute';
+                    }
+                });
+            }
+        }
+        
+        function toggleVideo() {
+            if (VideoConsultation.jitsiApi) {
+                VideoConsultation.jitsiApi.isVideoMuted().then(muted => {
+                    VideoConsultation.jitsiApi.executeCommand('toggleVideo');
+                    const icon = document.getElementById('camera-icon');
+                    if (icon) {
+                        icon.className = muted ? 'bi bi-camera-video' : 'bi bi-camera-video-off';
+                    }
+                });
+            }
+        }
+        
+        function toggleScreen() {
+            if (VideoConsultation.jitsiApi) {
+                VideoConsultation.jitsiApi.executeCommand('toggleShareScreen');
+            }
+        }
+        
+        // Update connection status
+        function updateConnectionStatus(status, text) {
+            const statusElement = document.getElementById('connection-status');
+            const statusText = document.getElementById('status-text');
+            
+            if (statusElement) {
+                statusElement.className = `connection-status-indicator ${status}`;
+            }
+            
+            if (statusText) {
+                statusText.textContent = text;
+            }
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeLanguageSupport();
+            
+            // Add event listener for video consultation ready
+            document.addEventListener('videoConsultationReady', () => {
+                document.getElementById('call-controls').style.display = 'block';
+                updateConnectionStatus('connected', 'Connected');
+            });
+            
+            document.addEventListener('videoConsultationEnded', () => {
+                document.getElementById('call-controls').style.display = 'none';
+                document.getElementById('jitsi-container').style.display = 'none';
+                document.getElementById('post-call-container').style.display = 'block';
+                updateConnectionStatus('disconnected', 'Disconnected');
+            });
         });
     </script>
 </body>
