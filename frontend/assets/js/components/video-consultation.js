@@ -528,10 +528,10 @@ const VideoConsultation = {
             // BYPASS BACKEND - Use direct public room creation for free Jitsi
             console.log('🔧 Bypassing backend - creating direct public room');
             
-            // Create public room data directly
+            // Create simple public room name (avoid any triggers for lobby/auth)
             const userName = AuthStorage.get('name') || 'User';
-            const sanitizedUserName = userName.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '');
-            const publicRoomName = `sahatak-${sanitizedUserName}-appt${this.appointmentId}`;
+            const sanitizedUserName = userName.replace(/[^a-zA-Z0-9]/g, ''); // Remove all special chars including Arabic
+            const publicRoomName = `public${this.appointmentId}${sanitizedUserName}`;
             
             const publicSessionData = {
                 room_name: publicRoomName,
@@ -544,15 +544,36 @@ const VideoConsultation = {
                     startWithAudioMuted: false,
                     startWithVideoMuted: this.audioOnlyMode || false,
                     requireDisplayName: false,
+                    // COMPLETELY DISABLE ALL LOBBY FEATURES
                     enableLobbyChat: false,
-                    lobby: { enabled: false },
-                    authentication: { enabled: false }
+                    lobby: {
+                        enabled: false,
+                        autoKnock: false,
+                        enableChat: false
+                    },
+                    roomConfig: {
+                        enableLobby: false,
+                        password: null,
+                        requireAuth: false
+                    },
+                    authentication: { enabled: false },
+                    disableLobby: true,
+                    enableUserRolesBasedOnToken: false,
+                    enableInsecureRoomNameWarning: false,
+                    enableGuestDomain: true,
+                    disableModeratorIndicator: true,
+                    disableRemoteMute: true
                 },
                 interface_config: {
                     TOOLBAR_BUTTONS: [
                         'microphone', 'camera', 'desktop', 'chat', 'raisehand',
                         'participants-pane', 'tileview', 'toggle-camera', 'hangup'
-                    ]
+                    ],
+                    SHOW_LOBBY_CHAT: false,
+                    ENABLE_LOBBY_CHAT: false,
+                    SHOW_POWERED_BY: false,
+                    SHOW_JITSI_WATERMARK: false,
+                    SHOW_WATERMARK_FOR_GUESTS: false
                 }
             };
             
@@ -590,7 +611,7 @@ const VideoConsultation = {
             domain: domain
         });
         
-        // Default config to handle authentication issues
+        // Default config to handle authentication issues - FORCE NO LOBBY
         const defaultConfig = {
             enableWelcomePage: false,
             enableClosePage: false,
@@ -598,37 +619,60 @@ const VideoConsultation = {
             startWithAudioMuted: false,
             startWithVideoMuted: false,
             requireDisplayName: false,
-            // Disable lobby functionality entirely to prevent membersOnly errors
+            // COMPLETELY DISABLE ALL LOBBY FEATURES
             enableLobbyChat: false,
             lobby: {
-                enabled: false
+                enabled: false,
+                autoKnock: false,
+                enableChat: false
             },
-            // Make room public to avoid authentication issues
+            // Force public room
             roomConfig: {
                 enableLobby: false,
-                password: null
+                password: null,
+                requireAuth: false
             },
-            // Disable authentication requirements
+            // Disable all authentication
             authentication: {
                 enabled: false
-            }
+            },
+            // Additional lobby disabling options
+            disableLobby: true,
+            enableUserRolesBasedOnToken: false,
+            enableInsecureRoomNameWarning: false,
+            // Force guest access
+            enableGuestDomain: true,
+            // Disable moderation features that might trigger lobby
+            disableModeratorIndicator: true,
+            disableRemoteMute: true
         };
         
-        // Default interface config
+        // Default interface config - NO LOBBY FEATURES
         const defaultInterfaceConfig = {
             TOOLBAR_BUTTONS: [
                 'microphone', 'camera', 'desktop', 'chat', 'raisehand',
                 'participants-pane', 'tileview', 'toggle-camera', 'hangup'
-            ]
+            ],
+            // Disable lobby UI elements
+            DISABLE_JOIN_LEAVE_NOTIFICATIONS: false,
+            SHOW_LOBBY_CHAT: false,
+            ENABLE_LOBBY_CHAT: false,
+            // Remove any authentication-related UI
+            SHOW_POWERED_BY: false,
+            SHOW_JITSI_WATERMARK: false,
+            SHOW_WATERMARK_FOR_GUESTS: false,
+            // Ensure guest-friendly interface
+            DEFAULT_LOCAL_DISPLAY_NAME: 'User',
+            DEFAULT_REMOTE_DISPLAY_NAME: 'Participant'
         };
         
         // FORCE PUBLIC ROOM (Free Jitsi doesn't support authentication)
         console.log('🔧 Using PUBLIC ROOM (free Jitsi Meet doesn\'t support authentication)');
         
-        // Create a unique public room name with patient info
+        // Create simple public room name (avoid any triggers for lobby/auth)
         const userName = AuthStorage.get('name') || 'User';
-        const sanitizedUserName = userName.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '');
-        const publicRoomName = `sahatak-${sanitizedUserName}-appt${this.appointmentId}`;
+        const sanitizedUserName = userName.replace(/[^a-zA-Z0-9]/g, '');
+        const publicRoomName = `public${this.appointmentId}${sanitizedUserName}`;
         
         // Merge configurations for public room only
         const options = {
@@ -1459,10 +1503,10 @@ const VideoConsultation = {
                 this.jitsiApi = null;
             }
             
-            // Create a room name with patient name and appointment ID
+            // Create simple emergency public room name  
             const userName = AuthStorage.get('name') || 'User';
-            const sanitizedUserName = userName.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, ''); // Keep alphanumeric and Arabic chars
-            const publicRoomName = `sahatak-${sanitizedUserName}-appt${this.appointmentId}-${Date.now()}`;
+            const sanitizedUserName = userName.replace(/[^a-zA-Z0-9]/g, '');
+            const publicRoomName = `emergency${this.appointmentId}${Date.now()}`;
             
             console.log('🔧 Emergency public room:', publicRoomName);
             
