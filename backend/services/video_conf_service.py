@@ -3,6 +3,7 @@ Video Conference Service using Jitsi Meet
 Handles JWT token generation and room management for video consultations
 """
 
+import os
 import jwt
 import time
 import hashlib
@@ -105,7 +106,7 @@ class VideoConferenceService:
     @staticmethod
     def get_jitsi_config(language: str = 'en') -> Dict:
         """
-        Get Jitsi Meet configuration options
+        Get Jitsi Meet configuration options from environment variables
         
         Args:
             language: Interface language ('ar' or 'en')
@@ -113,26 +114,27 @@ class VideoConferenceService:
         Returns:
             Dictionary with Jitsi configuration
         """
+        # Load configuration from environment variables
         config = {
             "startWithAudioMuted": False,
             "startWithVideoMuted": False,
-            "disableModeratorIndicator": False,
+            "disableModeratorIndicator": not os.getenv('JITSI_MODERATOR_RIGHTS_REQUIRED', 'false').lower() == 'true',
             "enableWelcomePage": False,
             "enableClosePage": False,
-            "disableInviteFunctions": True,  # Disable external invites
-            "disableRemoteMute": False,
-            "enableLobby": False,  # Disable waiting room for public Jitsi
-            "requireDisplayName": True,
+            "disableInviteFunctions": True,
+            "disableRemoteMute": not os.getenv('JITSI_MODERATOR_RIGHTS_REQUIRED', 'false').lower() == 'true',
+            "enableLobby": os.getenv('VIDEO_CALL_LOBBY_ENABLED', 'false').lower() == 'true',
+            "requireDisplayName": os.getenv('JITSI_REQUIRE_DISPLAY_NAME', 'true').lower() == 'true',
             "enableInsecureRoomNameWarning": False,
-            "prejoinPageEnabled": False,  # Disable pre-join for direct access
+            "prejoinPageEnabled": False,
             "disableThirdPartyRequests": True,
             "enableNoisyMicDetection": True,
-            "resolution": 720,  # Default video quality
+            "resolution": int(os.getenv('JITSI_DEFAULT_VIDEO_QUALITY', '720')),
             "constraints": {
                 "video": {
                     "height": {
-                        "ideal": 720,
-                        "max": 1080,
+                        "ideal": int(os.getenv('JITSI_DEFAULT_VIDEO_QUALITY', '720')),
+                        "max": int(os.getenv('JITSI_MAX_VIDEO_QUALITY', '1080')),
                         "min": 240
                     }
                 }
@@ -148,7 +150,27 @@ class VideoConferenceService:
                 "dialog.micNotSendingData",
                 "dialog.serviceUnavailable",
                 "dialog.sessTerminated"
-            ]
+            ],
+            # Additional lobby configuration
+            "lobby": {
+                "enabled": os.getenv('VIDEO_CALL_LOBBY_ENABLED', 'false').lower() == 'true',
+                "autoKnock": False,
+                "enableChat": False
+            },
+            "authentication": {
+                "enabled": not os.getenv('JITSI_GUEST_ACCESS_ENABLED', 'true').lower() == 'true'
+            },
+            "roomConfig": {
+                "enableLobby": os.getenv('VIDEO_CALL_LOBBY_ENABLED', 'false').lower() == 'true',
+                "password": None,
+                "requireAuth": not os.getenv('JITSI_GUEST_ACCESS_ENABLED', 'true').lower() == 'true'
+            },
+            "disableLobby": not os.getenv('VIDEO_CALL_LOBBY_ENABLED', 'false').lower() == 'true',
+            "enableGuestDomain": os.getenv('JITSI_GUEST_ACCESS_ENABLED', 'true').lower() == 'true',
+            "enableUserRolesBasedOnToken": not os.getenv('JITSI_GUEST_ACCESS_ENABLED', 'true').lower() == 'true',
+            "enableLobbyChat": os.getenv('VIDEO_CALL_LOBBY_ENABLED', 'false').lower() == 'true',
+            "enableEncryption": os.getenv('JITSI_ENABLE_E2EE', 'true').lower() == 'true',
+            "enableRecording": os.getenv('VIDEO_CALL_RECORDING_ENABLED', 'false').lower() == 'true'
         }
         
         return config
@@ -156,38 +178,42 @@ class VideoConferenceService:
     @staticmethod
     def get_interface_config() -> Dict:
         """
-        Get Jitsi Meet interface configuration
+        Get Jitsi Meet interface configuration from environment variables
         
         Returns:
             Dictionary with interface configuration
         """
+        # Base toolbar buttons
+        toolbar_buttons = ["microphone", "camera", "hangup"]
+        
+        # Add optional features based on environment variables
+        if os.getenv('JITSI_ENABLE_SCREEN_SHARING', 'true').lower() == 'true':
+            toolbar_buttons.append("desktop")
+        if os.getenv('JITSI_ENABLE_CHAT', 'true').lower() == 'true':
+            toolbar_buttons.append("chat")
+        
+        # Add additional buttons
+        toolbar_buttons.extend([
+            "fullscreen", "raisehand", "settings", "stats", "shortcuts", 
+            "tileview", "help", "participants-pane", "toggle-camera"
+        ])
+        
+        # Add moderator buttons if moderator rights are enabled
+        if os.getenv('JITSI_MODERATOR_RIGHTS_REQUIRED', 'false').lower() == 'true':
+            toolbar_buttons.extend(["mute-everyone", "security"])
+        
         config = {
-            "TOOLBAR_BUTTONS": [
-                "microphone",
-                "camera",
-                "desktop",  # Screen sharing for medical reports
-                "fullscreen",
-                "raisehand",
-                "chat",
-                "settings",
-                "hangup",
-                "stats",
-                "shortcuts",
-                "tileview",
-                "help",
-                "mute-everyone",  # For moderators
-                "security"  # For moderators
-            ],
+            "TOOLBAR_BUTTONS": toolbar_buttons,
             "SETTINGS_SECTIONS": [
                 "devices",
                 "language",
-                "moderator",
+                "moderator" if os.getenv('JITSI_MODERATOR_RIGHTS_REQUIRED', 'false').lower() == 'true' else None,
                 "profile"
             ],
             "SHOW_JITSI_WATERMARK": False,
             "SHOW_WATERMARK_FOR_GUESTS": False,
-            "DEFAULT_REMOTE_DISPLAY_NAME": "Patient",
-            "DEFAULT_LOCAL_DISPLAY_NAME": "Doctor",
+            "DEFAULT_REMOTE_DISPLAY_NAME": "Participant",
+            "DEFAULT_LOCAL_DISPLAY_NAME": "User", 
             "DISABLE_VIDEO_BACKGROUND": False,
             "MOBILE_APP_PROMO": False,
             "HIDE_INVITE_MORE_HEADER": True,
@@ -205,8 +231,14 @@ class VideoConferenceService:
             "INVITATION_POWERED_BY": False,
             "RECENT_LIST_ENABLED": False,
             "VIDEO_QUALITY_LABEL_DISABLED": False,
-            "CONNECTION_INDICATOR_DISABLED": False
+            "CONNECTION_INDICATOR_DISABLED": False,
+            # Lobby specific UI options
+            "SHOW_LOBBY_CHAT": os.getenv('VIDEO_CALL_LOBBY_ENABLED', 'false').lower() == 'true',
+            "ENABLE_LOBBY_CHAT": os.getenv('VIDEO_CALL_LOBBY_ENABLED', 'false').lower() == 'true'
         }
+        
+        # Filter out None values from SETTINGS_SECTIONS
+        config["SETTINGS_SECTIONS"] = [s for s in config["SETTINGS_SECTIONS"] if s is not None]
         
         return config
     

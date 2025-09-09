@@ -599,19 +599,39 @@ const VideoConsultation = {
         // Clear container
         container.innerHTML = '<div id="jitsi-container" style="height: 100vh;"></div>';
         
-        // Jitsi domain
-        const domain = sessionData.jitsi_domain || 'meet.jit.si';
+        // Load configuration from backend
+        let backendConfig = null;
+        let domain = sessionData.jitsi_domain || 'meet.jit.si';
+        
+        try {
+            const currentLang = LanguageManager?.getLanguage() || 'en';
+            const configResponse = await ApiHelper.makeRequest(
+                `/appointments/${this.appointmentId}/video/config?lang=${currentLang}`,
+                { method: 'GET' }
+            );
+            backendConfig = configResponse.data;
+            
+            // Update domain from backend if available
+            if (backendConfig?.jitsi_domain) {
+                domain = backendConfig.jitsi_domain;
+            }
+            
+            console.log('🔧 Loaded Jitsi config from backend:', backendConfig);
+        } catch (error) {
+            console.warn('🔧 Failed to load config from backend, using fallback:', error);
+        }
         
         // Debug session data
         console.log('🔧 Jitsi session data:', {
             room_name: sessionData.room_name,
             jwt_token: sessionData.jwt_token ? 'Present' : 'Missing',
             jwt_sample: sessionData.jwt_token ? sessionData.jwt_token.substring(0, 50) + '...' : 'Missing',
-            domain: domain
+            domain: domain,
+            backend_config_loaded: !!backendConfig
         });
         
-        // Default config to handle authentication issues - FORCE NO LOBBY
-        const defaultConfig = {
+        // Use backend config or fallback to hardcoded defaults
+        const defaultConfig = backendConfig?.config || {
             enableWelcomePage: false,
             enableClosePage: false,
             disableDeepLinking: true,
@@ -646,8 +666,8 @@ const VideoConsultation = {
             disableRemoteMute: true
         };
         
-        // Default interface config - NO LOBBY FEATURES
-        const defaultInterfaceConfig = {
+        // Use backend interface config or fallback to hardcoded defaults
+        const defaultInterfaceConfig = backendConfig?.interface_config || {
             TOOLBAR_BUTTONS: [
                 'microphone', 'camera', 'desktop', 'chat', 'raisehand',
                 'participants-pane', 'tileview', 'toggle-camera', 'hangup'
@@ -1653,6 +1673,60 @@ const VideoConsultation = {
             
             container.innerHTML = '<div id="jitsi-container" style="height: 100vh;"></div>';
             
+            // Load backend config for emergency mode too
+            let emergencyBackendConfig = null;
+            try {
+                const currentLang = LanguageManager?.getLanguage() || 'en';
+                const configResponse = await ApiHelper.makeRequest(
+                    `/appointments/${this.appointmentId}/video/config?lang=${currentLang}`,
+                    { method: 'GET' }
+                );
+                emergencyBackendConfig = configResponse.data;
+            } catch (error) {
+                console.warn('🔧 Failed to load config for emergency mode:', error);
+            }
+            
+            // Use backend config for emergency mode or fallback to minimal config
+            const emergencyConfig = emergencyBackendConfig?.config || {
+                // Completely public room settings
+                enableWelcomePage: false,
+                enableClosePage: false,
+                disableDeepLinking: true,
+                startWithAudioMuted: false,
+                startWithVideoMuted: this.audioOnlyMode,
+                requireDisplayName: false,
+                enableLobbyChat: false,
+                enableNoAudioDetection: false,
+                enableNoisyMicDetection: false,
+                enableUserRolesBasedOnToken: false,
+                enableInsecureRoomNameWarning: false,
+                // Force public access - COMPLETE LOBBY DISABLE
+                lobby: { 
+                    enabled: false,
+                    autoKnock: false,
+                    enableChat: false 
+                },
+                disableLobby: true,
+                authentication: { enabled: false },
+                roomConfig: { 
+                    enableLobby: false,
+                    password: null,
+                    requireAuth: false
+                }
+            };
+
+            const emergencyInterfaceConfig = emergencyBackendConfig?.interface_config || {
+                TOOLBAR_BUTTONS: [
+                    'microphone', 'camera', 'desktop', 'chat', 'raisehand',
+                    'participants-pane', 'tileview', 'toggle-camera', 'hangup'
+                ],
+                SHOW_POWERED_BY: false,
+                SHOW_JITSI_WATERMARK: false,
+                SHOW_WATERMARK_FOR_GUESTS: false,
+                DEFAULT_LOCAL_DISPLAY_NAME: 'User',
+                DEFAULT_REMOTE_DISPLAY_NAME: 'Participant'
+            };
+
             // Minimal public room configuration
             const emergencyOptions = {
                 roomName: publicRoomName,
@@ -1660,41 +1734,8 @@ const VideoConsultation = {
                 userInfo: {
                     displayName: `${AuthStorage.get('name') || 'User'} (Appointment ${this.appointmentId})`
                 },
-                configOverwrite: {
-                    // Completely public room settings
-                    enableWelcomePage: false,
-                    enableClosePage: false,
-                    disableDeepLinking: true,
-                    startWithAudioMuted: false,
-                    startWithVideoMuted: this.audioOnlyMode,
-                    requireDisplayName: false,
-                    enableLobbyChat: false,
-                    enableNoAudioDetection: false,
-                    enableNoisyMicDetection: false,
-                    enableUserRolesBasedOnToken: false,
-                    enableInsecureRoomNameWarning: false,
-                    // Force public access - COMPLETE LOBBY DISABLE
-                    lobby: { 
-                        enabled: false,
-                        autoKnock: false,
-                        enableChat: false 
-                    },
-                    disableLobby: true,
-                    authentication: { enabled: false },
-                    roomConfig: { 
-                        enableLobby: false,
-                        password: null,
-                        requireAuth: false
-                    }
-                },
-                interfaceConfigOverwrite: {
-                    TOOLBAR_BUTTONS: [
-                        'microphone', 'camera', 'desktop', 'chat', 'raisehand',
-                        'participants-pane', 'tileview', 'toggle-camera', 'hangup'
-                    ],
-                    SHOW_JITSI_WATERMARK: false,
-                    SHOW_WATERMARK_FOR_GUESTS: false
-                }
+                configOverwrite: emergencyConfig,
+                interfaceConfigOverwrite: emergencyInterfaceConfig
                 // NO JWT TOKEN - completely public access
             };
             

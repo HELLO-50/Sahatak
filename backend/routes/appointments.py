@@ -1402,3 +1402,63 @@ def handle_video_disconnect(appointment_id):
         db.session.rollback()
         app_logger.error(f"Handle video disconnect error: {str(e)}")
         return APIResponse.internal_error(message='Failed to handle disconnect')
+
+
+@appointments_bp.route('/<int:appointment_id>/video/config', methods=['GET'])
+def get_video_config(appointment_id):
+    """
+    Get Jitsi configuration for video consultation (public endpoint)
+    
+    This endpoint loads all Jitsi configuration from environment variables
+    to ensure consistent settings between backend and frontend.
+    No authentication required for public video consultation access.
+    """
+    try:
+        # Get appointment to verify it exists
+        appointment = Appointment.query.filter_by(id=appointment_id).first()
+        
+        if not appointment:
+            return APIResponse.not_found(message='Appointment not found')
+        
+        from services.video_conf_service import VideoConferenceService
+        import os
+        
+        # Get language from query parameter or default to 'en'
+        language = request.args.get('lang', 'en')
+        
+        # Get Jitsi configuration from environment
+        config = VideoConferenceService.get_jitsi_config(language)
+        interface_config = VideoConferenceService.get_interface_config()
+        
+        # Get domain and other settings from environment
+        jitsi_domain = os.getenv('JITSI_DOMAIN', 'meet.jit.si')
+        app_id = os.getenv('JITSI_APP_ID', '')
+        
+        response_data = {
+            'jitsi_domain': jitsi_domain,
+            'app_id': app_id,
+            'config': config,
+            'interface_config': interface_config,
+            'room_prefix': os.getenv('JITSI_ROOM_PREFIX', 'sahatak_consultation_'),
+            'max_duration_minutes': int(os.getenv('VIDEO_CALL_MAX_DURATION_MINUTES', '60')),
+            'features': {
+                'recording_enabled': os.getenv('VIDEO_CALL_RECORDING_ENABLED', 'false').lower() == 'true',
+                'lobby_enabled': os.getenv('VIDEO_CALL_LOBBY_ENABLED', 'false').lower() == 'true',
+                'password_protection': os.getenv('VIDEO_CALL_PASSWORD_PROTECTED', 'false').lower() == 'true',
+                'guest_access': os.getenv('JITSI_GUEST_ACCESS_ENABLED', 'true').lower() == 'true',
+                'moderator_rights_required': os.getenv('JITSI_MODERATOR_RIGHTS_REQUIRED', 'false').lower() == 'true',
+                'e2ee_enabled': os.getenv('JITSI_ENABLE_E2EE', 'true').lower() == 'true',
+                'chat_enabled': os.getenv('JITSI_ENABLE_CHAT', 'true').lower() == 'true',
+                'screen_sharing_enabled': os.getenv('JITSI_ENABLE_SCREEN_SHARING', 'true').lower() == 'true',
+                'audio_only_mode': os.getenv('JITSI_ENABLE_AUDIO_ONLY_MODE', 'true').lower() == 'true'
+            }
+        }
+        
+        return APIResponse.success(
+            data=response_data,
+            message='Video configuration retrieved successfully'
+        )
+        
+    except Exception as e:
+        app_logger.error(f"Get video config error: {str(e)}")
+        return APIResponse.internal_error(message='Failed to get video configuration')
