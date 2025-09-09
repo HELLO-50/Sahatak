@@ -342,15 +342,20 @@
         // Navigation functions
         function goBackToDashboard() {
             const userType = AuthStorage.get('type');
-            if (userType === 'doctor') {
-                window.location.href = '/Sahatak/frontend/pages/dashboard/doctor.html';
-            } else {
-                window.location.href = '/Sahatak/frontend/pages/dashboard/patient.html';
-            }
+            const targetUrl = userType === 'doctor' ? '../dashboard/doctor.html' : '../dashboard/patient.html';
+            
+            console.log('Navigating to dashboard:', {
+                userType,
+                targetUrl,
+                currentUrl: window.location.href
+            });
+            
+            window.location.href = targetUrl;
         }
         
         function viewAppointments() {
-            window.location.href = '/Sahatak/frontend/pages/appointments/appointment-list.html';
+            // Stay in the same appointments directory
+            window.location.href = './appointment-list.html';
         }
         
         function endConsultation() {
