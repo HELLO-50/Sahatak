@@ -629,46 +629,106 @@ const VideoConsultation = {
         }
     },
     
-    // Show post-call screen with correct navigation
+    // Show post-call screen with consultation completion options
     showPostCallScreen() {
         const container = document.getElementById('video-container');
         if (!container) return;
         
         const currentLang = LanguageManager?.getLanguage() || 'en';
         const isArabic = currentLang === 'ar';
+        const userType = AuthStorage.get('type');
+        const isDoctorView = userType === 'doctor';
         
         // Determine correct navigation paths based on user type
-        const userType = AuthStorage.get('type');
-        const dashboardPath = userType === 'doctor' 
+        const dashboardPath = isDoctorView 
             ? `${window.location.origin}/Sahatak/frontend/pages/dashboard/doctor.html`
             : `${window.location.origin}/Sahatak/frontend/pages/dashboard/patient.html`;
         
         const appointmentPath = './appointment-list.html';
         
-        container.innerHTML = `
-            <div class="post-call-screen text-center py-5">
-                <i class="bi bi-check-circle text-success" style="font-size: 4rem;"></i>
-                <h3 class="mt-3">${isArabic ? 'انتهت الاستشارة' : 'Consultation Ended'}</h3>
-                <p class="mb-4">${isArabic ? 'شكراً لاستخدامك خدماتنا' : 'Thank you for using our services'}</p>
-                
-                <div class="d-flex gap-2 justify-content-center flex-wrap">
-                    <a href="${appointmentPath}" class="btn btn-primary">
-                        <i class="bi bi-calendar-event"></i>
-                        ${isArabic ? 'المواعيد' : 'Appointments'}
-                    </a>
-                    <a href="${dashboardPath}" class="btn btn-outline-primary">
-                        <i class="bi bi-speedometer2"></i>
-                        ${isArabic ? 'الرئيسية' : 'Dashboard'}
-                    </a>
+        // Different screens for doctor vs patient
+        if (isDoctorView) {
+            // Doctor sees options to complete or continue consultation
+            container.innerHTML = `
+                <div class="post-call-screen text-center py-5">
+                    <i class="bi bi-camera-video-off text-primary" style="font-size: 4rem;"></i>
+                    <h3 class="mt-3">${isArabic ? 'انتهت المكالمة المرئية' : 'Video Call Ended'}</h3>
+                    <p class="mb-4">${isArabic ? 'ما الذي تود فعله بالاستشارة؟' : 'What would you like to do with the consultation?'}</p>
+                    
+                    <div class="row justify-content-center">
+                        <div class="col-md-6">
+                            <div class="card border-success mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title text-success">
+                                        <i class="bi bi-check-circle me-2"></i>
+                                        ${isArabic ? 'إنهاء الاستشارة' : 'Complete Consultation'}
+                                    </h5>
+                                    <p class="card-text text-muted">
+                                        ${isArabic ? 'يتم وضع علامة على الموعد كمكتمل وإزالته من لوحة التحكم' : 'Mark appointment as completed and remove from dashboard'}
+                                    </p>
+                                    <button class="btn btn-success w-100" onclick="VideoConsultation.handleCompleteConsultation()">
+                                        <i class="bi bi-check-lg me-2"></i>
+                                        ${isArabic ? 'إنهاء الاستشارة' : 'Complete Consultation'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-warning mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title text-warning">
+                                        <i class="bi bi-arrow-left-circle me-2"></i>
+                                        ${isArabic ? 'العودة للوحة التحكم' : 'Return to Dashboard'}
+                                    </h5>
+                                    <p class="card-text text-muted">
+                                        ${isArabic ? 'يبقى الموعد نشطاً في لوحة التحكم للمتابعة لاحقاً' : 'Keep appointment active in dashboard for follow-up later'}
+                                    </p>
+                                    <a href="${dashboardPath}" class="btn btn-outline-warning w-100">
+                                        <i class="bi bi-speedometer2 me-2"></i>
+                                        ${isArabic ? 'العودة للوحة التحكم' : 'Back to Dashboard'}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <a href="${appointmentPath}" class="text-decoration-none">
+                                <i class="bi bi-calendar-event me-1"></i>
+                                ${isArabic ? 'عرض جميع المواعيد' : 'View all appointments'}
+                            </a>
+                        </small>
+                    </div>
                 </div>
-                
-                <div class="mt-3">
-                    <small class="text-muted">
-                        ${isArabic ? 'يمكنك إغلاق هذه النافذة الآن' : 'You can safely close this window now'}
-                    </small>
+            `;
+        } else {
+            // Patient sees standard end screen
+            container.innerHTML = `
+                <div class="post-call-screen text-center py-5">
+                    <i class="bi bi-check-circle text-success" style="font-size: 4rem;"></i>
+                    <h3 class="mt-3">${isArabic ? 'انتهت الاستشارة' : 'Consultation Ended'}</h3>
+                    <p class="mb-4">${isArabic ? 'شكراً لاستخدامك خدماتنا' : 'Thank you for using our services'}</p>
+                    
+                    <div class="d-flex gap-2 justify-content-center flex-wrap">
+                        <a href="${appointmentPath}" class="btn btn-primary">
+                            <i class="bi bi-calendar-event me-2"></i>
+                            ${isArabic ? 'المواعيد' : 'Appointments'}
+                        </a>
+                        <a href="${dashboardPath}" class="btn btn-outline-primary">
+                            <i class="bi bi-speedometer2 me-2"></i>
+                            ${isArabic ? 'الرئيسية' : 'Dashboard'}
+                        </a>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            ${isArabic ? 'يمكنك إغلاق هذه النافذة الآن' : 'You can safely close this window now'}
+                        </small>
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
+        }
     },
     
     // Setup event listeners
@@ -723,41 +783,61 @@ const VideoConsultation = {
         }
     },
     
-    // End call with proper cleanup
+    // End call with proper cleanup (video session only, NOT appointment)
     async endCall() {
-        console.log('Ending video consultation with full cleanup...');
+        console.log('Ending video session (keeping appointment active)...');
         
         try {
-            // First, call backend to end session
-            await this.endSessionOnBackend();
+            // Call disconnect endpoint to end video session only
+            await this.disconnectVideoSession();
         } catch (error) {
-            console.error('Error ending session on backend:', error);
+            console.error('Error ending video session on backend:', error);
             // Continue with cleanup even if backend call fails
         }
         
         // Perform complete cleanup
         this.cleanup();
         
-        // Show post-call screen
+        // Show post-call screen with consultation options
         this.showPostCallScreen();
     },
     
-    // End session on backend
-    async endSessionOnBackend() {
+    // Disconnect video session (ends video only, keeps appointment active)
+    async disconnectVideoSession() {
         try {
             const response = await ApiHelper.makeRequest(
-                `/appointments/${this.appointmentId}/video/end`,
+                `/appointments/${this.appointmentId}/video/disconnect`,
                 { method: 'POST' }
             );
             
             if (response.success) {
-                console.log('Session ended on backend successfully');
+                console.log('Video session disconnected successfully');
                 return response;
             } else {
                 throw new Error(response.message);
             }
         } catch (error) {
-            console.error('Failed to end session on backend:', error);
+            console.error('Failed to disconnect video session:', error);
+            throw error;
+        }
+    },
+    
+    // Complete consultation (marks appointment as finished)
+    async completeConsultation() {
+        try {
+            const response = await ApiHelper.makeRequest(
+                `/appointments/${this.appointmentId}/complete`,
+                { method: 'POST' }
+            );
+            
+            if (response.success) {
+                console.log('Consultation completed successfully');
+                return response;
+            } else {
+                throw new Error(response.message);
+            }
+        } catch (error) {
+            console.error('Failed to complete consultation:', error);
             throw error;
         }
     },
@@ -1516,6 +1596,65 @@ const VideoConsultation = {
         }
     },
     
+    // Handle complete consultation button click
+    async handleCompleteConsultation() {
+        const currentLang = LanguageManager?.getLanguage() || 'en';
+        const isArabic = currentLang === 'ar';
+        
+        const confirmMessage = isArabic 
+            ? 'هل أنت متأكد من أنك تريد إنهاء هذه الاستشارة؟ لن يكون بإمكانك التراجع عن هذا الإجراء.'
+            : 'Are you sure you want to complete this consultation? This action cannot be undone.';
+        
+        if (confirm(confirmMessage)) {
+            try {
+                // Show loading
+                const container = document.getElementById('video-container');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary mb-3" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <h5>${isArabic ? 'جاري إنهاء الاستشارة...' : 'Completing consultation...'}</h5>
+                        </div>
+                    `;
+                }
+                
+                // Complete consultation
+                await this.completeConsultation();
+                
+                // Show success and redirect
+                const successMessage = isArabic 
+                    ? 'تم إنهاء الاستشارة بنجاح'
+                    : 'Consultation completed successfully';
+                
+                if (typeof showNotification === 'function') {
+                    showNotification(successMessage, 'success');
+                }
+                
+                // Navigate back to dashboard
+                setTimeout(() => {
+                    this.goBackToDashboard();
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Error completing consultation:', error);
+                const errorMessage = isArabic 
+                    ? 'حدث خطأ أثناء إنهاء الاستشارة'
+                    : 'Error completing consultation';
+                
+                if (typeof showNotification === 'function') {
+                    showNotification(errorMessage, 'error');
+                } else {
+                    alert(errorMessage);
+                }
+                
+                // Go back to post-call screen
+                this.showPostCallScreen();
+            }
+        }
+    },
+    
     goBackToDashboard() {
         // Clean up before leaving
         this.cleanup();
@@ -1913,10 +2052,17 @@ window.addEventListener('beforeunload', (event) => {
         
         // Call disconnect endpoint to reset appointment state if doctor
         if (VideoConsultation.appointmentId) {
+            console.log(`Calling disconnect endpoint for appointment ${VideoConsultation.appointmentId}`);
+            
             // Use sendBeacon for reliable disconnect on page unload
             const baseUrl = ApiHelper?.baseUrl || 'https://sahatak.pythonanywhere.com/api';
             const disconnectUrl = `${baseUrl}/appointments/${VideoConsultation.appointmentId}/video/disconnect`;
-            const token = localStorage.getItem('sahatak_token');
+            const token = localStorage.getItem('sahatak_token') || AuthStorage?.getToken();
+            
+            if (!token) {
+                console.error('No authentication token found for disconnect');
+                return;
+            }
             
             // Use synchronous XMLHttpRequest for reliability
             // sendBeacon doesn't support custom headers which we need for authorization
@@ -1925,7 +2071,15 @@ window.addEventListener('beforeunload', (event) => {
                 xhr.open('POST', disconnectUrl, false); // false makes it synchronous
                 xhr.setRequestHeader('Content-Type', 'application/json');
                 xhr.setRequestHeader('Authorization', `Bearer ${token}`);
-                xhr.send(JSON.stringify({}));
+                
+                const response = xhr.send(JSON.stringify({}));
+                console.log(`Disconnect endpoint response: status ${xhr.status}`);
+                
+                if (xhr.status === 200) {
+                    console.log('Successfully called disconnect endpoint');
+                } else {
+                    console.error(`Disconnect endpoint failed with status ${xhr.status}: ${xhr.responseText}`);
+                }
             } catch (e) {
                 console.error('Failed to send disconnect notification:', e);
             }

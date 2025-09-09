@@ -46,6 +46,9 @@ const VideoConsultationDashboard = {
                 case 'check-status':
                     await this.checkVideoSessionStatus(appointmentId);
                     break;
+                case 'complete-consultation':
+                    await this.completeConsultationFromDashboard(appointmentId);
+                    break;
                 default:
                     throw new Error('Unknown video consultation action');
             }
@@ -137,6 +140,54 @@ const VideoConsultationDashboard = {
         }
     },
     
+    // Complete consultation from dashboard (doctors only)
+    async completeConsultationFromDashboard(appointmentId) {
+        try {
+            const currentLang = LanguageManager?.getLanguage() || 'en';
+            const isArabic = currentLang === 'ar';
+            
+            const confirmMessage = isArabic 
+                ? 'هل أنت متأكد من أنك تريد إنهاء هذه الاستشارة؟ لن يكون بإمكانك التراجع عن هذا الإجراء.'
+                : 'Are you sure you want to complete this consultation? This action cannot be undone.';
+            
+            if (!confirm(confirmMessage)) {
+                return;
+            }
+            
+            const response = await ApiHelper.makeRequest(
+                `/appointments/${appointmentId}/complete`,
+                { method: 'POST' }
+            );
+            
+            if (response.success) {
+                // Show success message
+                const successMessage = isArabic 
+                    ? 'تم إنهاء الاستشارة بنجاح'
+                    : 'Consultation completed successfully';
+                
+                this.showSuccess(successMessage);
+                
+                // Remove appointment from dashboard or refresh stats
+                const appointmentCard = document.querySelector(`[data-appointment-id="${appointmentId}"]`);
+                if (appointmentCard) {
+                    appointmentCard.style.animation = 'fadeOut 0.5s ease-out';
+                    setTimeout(() => {
+                        appointmentCard.remove();
+                        // Refresh dashboard statistics if available
+                        if (typeof refreshDoctorDashboardStats === 'function') {
+                            refreshDoctorDashboardStats();
+                        }
+                    }, 500);
+                }
+            } else {
+                throw new Error(response.message || 'Failed to complete consultation');
+            }
+        } catch (error) {
+            console.error('Error completing consultation from dashboard:', error);
+            throw new Error(error.message || 'Failed to complete consultation');
+        }
+    },
+    
     // Check video session status
     async checkVideoSessionStatus(appointmentId) {
         try {
@@ -209,9 +260,20 @@ const VideoConsultationDashboard = {
     // Get button configuration based on user type and appointment status
     getButtonConfig(userType, appointment, isArabic) {
         const isInProgress = appointment.status === 'in_progress';
+        const sessionEnded = appointment.session_status === 'ended' || appointment.session_status === 'disconnected';
         
         if (userType === 'doctor') {
-            if (isInProgress && appointment.session_status === 'waiting') {
+            // If session ended but appointment still active, show complete consultation option
+            if (isInProgress && sessionEnded) {
+                return {
+                    class: 'btn-complete-consultation',
+                    action: 'complete-consultation',
+                    icon: 'bi-check-circle',
+                    text: isArabic ? 'إنهاء الاستشارة' : 'Complete Consultation',
+                    title: isArabic ? 'إنهاء الاستشارة ووضع علامة كمكتملة' : 'Complete consultation and mark as finished',
+                    disabled: false
+                };
+            } else if (isInProgress && appointment.session_status === 'waiting') {
                 return {
                     class: 'btn-join-video',
                     action: 'join',
@@ -232,7 +294,7 @@ const VideoConsultationDashboard = {
             }
         } else {
             // Patient
-            if (isInProgress) {
+            if (isInProgress && !sessionEnded) {
                 return {
                     class: 'btn-join-video',
                     action: 'join',
@@ -240,6 +302,15 @@ const VideoConsultationDashboard = {
                     text: isArabic ? 'انضم للاستشارة' : 'Join Consultation',
                     title: isArabic ? 'انضم للاستشارة المرئية' : 'Join Video Consultation',
                     disabled: false
+                };
+            } else if (sessionEnded) {
+                return {
+                    class: 'btn-consultation-ended',
+                    action: 'view-summary',
+                    icon: 'bi-check-circle-fill',
+                    text: isArabic ? 'انتهت الاستشارة' : 'Consultation Ended',
+                    title: isArabic ? 'انتهت الاستشارة - في انتظار إتمام الطبيب' : 'Consultation ended - waiting for doctor to complete',
+                    disabled: true
                 };
             } else {
                 return {

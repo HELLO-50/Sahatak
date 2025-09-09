@@ -54,6 +54,58 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
         }
         
+        /* Pre-join system check cards styling */
+        .pre-join-screen .row:first-child .card {
+            background: linear-gradient(135deg, #0d47a1 0%, #1976d2 100%);
+            color: white;
+            border: none;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(13, 71, 161, 0.2);
+        }
+        
+        .pre-join-screen .row:first-child .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(13, 71, 161, 0.3);
+        }
+        
+        .pre-join-screen .row:first-child .card-body {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .pre-join-screen .row:first-child .card .bi {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .pre-join-screen .row:first-child .card h6 {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+        
+        .pre-join-screen .row:first-child .card .spinner-border {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .pre-join-screen .row:first-child .card .text-success {
+            color: #4caf50 !important;
+        }
+        
+        .pre-join-screen .row:first-child .card .text-danger {
+            color: #f44336 !important;
+        }
+        
+        .pre-join-screen .row:first-child .card .text-warning {
+            color: #ff9800 !important;
+        }
+        
         .system-check-card {
             transition: all 0.3s ease;
             border: none;
@@ -65,9 +117,31 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         
+        /* Device check cards styling */
+        .device-check .card {
+            border: 2px solid #e3f2fd;
+            background: linear-gradient(to bottom, #ffffff 0%, #f8fcff 100%);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        
+        .device-check .card:hover {
+            border-color: #1976d2;
+            box-shadow: 0 4px 12px rgba(25, 118, 210, 0.15);
+        }
+        
+        .device-check .card .bi {
+            color: #1976d2;
+        }
+        
+        .device-check .card h5 {
+            color: #0d47a1;
+            font-weight: 600;
+        }
+        
         .device-check video {
             background: #f8f9fa;
-            border: 2px solid #e9ecef;
+            border: 2px solid #e3f2fd;
             border-radius: 8px;
         }
         
@@ -192,9 +266,13 @@
                                     <i class="bi bi-x-lg"></i>
                                     <span id="btn-back">Close Window</span>
                                 </button>
-                                <button class="btn btn-action btn-logout" onclick="endConsultation()" title="End Call">
-                                    <i class="bi bi-telephone-x"></i>
-                                    <span id="btn-end">End Call</span>
+                                <button class="btn btn-action btn-warning" onclick="endVideoCall()" title="End Video Call">
+                                    <i class="bi bi-camera-video-off"></i>
+                                    <span id="btn-end-video">End Video</span>
+                                </button>
+                                <button class="btn btn-action btn-logout" id="complete-consultation-btn" onclick="completeFullConsultation()" title="Complete Consultation" style="display: none;">
+                                    <i class="bi bi-check-circle"></i>
+                                    <span id="btn-complete">Complete</span>
                                 </button>
                             </div>
                         </div>
@@ -317,10 +395,18 @@
             window.location.href = `${window.location.origin}/Sahatak/index.html`;
         }
         
-        // Set user name
+        // Set user name and configure UI based on user type
         const user = AuthStorage.getAuthData();
         if (user) {
             document.getElementById('user-name').textContent = user.name || 'User';
+            
+            // Show Complete Consultation button only for doctors
+            if (user.type === 'doctor') {
+                const completeBtn = document.getElementById('complete-consultation-btn');
+                if (completeBtn) {
+                    completeBtn.style.display = 'inline-block';
+                }
+            }
         }
         
         // Initialize language support (inherit from dashboard)
@@ -360,6 +446,11 @@
         
         // Navigation functions
         function goBackToDashboard() {
+            // Call disconnect endpoint before closing/navigating
+            if (VideoConsultation && VideoConsultation.appointmentId) {
+                callDisconnectEndpoint();
+            }
+            
             // If this is a popup window, close it instead of navigating
             if (window.opener && !window.opener.closed) {
                 console.log('Closing video consultation popup window');
@@ -380,23 +471,57 @@
             }
         }
         
+        // Helper function to call disconnect endpoint
+        function callDisconnectEndpoint() {
+            if (!VideoConsultation.appointmentId) return;
+            
+            console.log(`Calling disconnect endpoint for appointment ${VideoConsultation.appointmentId}`);
+            
+            const baseUrl = 'https://sahatak.pythonanywhere.com/api';
+            const disconnectUrl = `${baseUrl}/appointments/${VideoConsultation.appointmentId}/video/disconnect`;
+            const token = localStorage.getItem('sahatak_token') || AuthStorage?.getToken();
+            
+            if (!token) {
+                console.error('No authentication token found for disconnect');
+                return;
+            }
+            
+            try {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', disconnectUrl, false); // Synchronous for reliability
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+                
+                xhr.send(JSON.stringify({}));
+                console.log(`Disconnect endpoint response: status ${xhr.status}`);
+                
+                if (xhr.status === 200) {
+                    console.log('Successfully called disconnect endpoint');
+                } else {
+                    console.error(`Disconnect endpoint failed with status ${xhr.status}: ${xhr.responseText}`);
+                }
+            } catch (e) {
+                console.error('Failed to send disconnect notification:', e);
+            }
+        }
+        
         function viewAppointments() {
             const targetUrl = `${window.location.origin}/Sahatak/frontend/pages/appointments/appointment-list.html`;
             window.location.href = targetUrl;
         }
         
-        function endConsultation() {
+        // End video call only (not consultation)
+        function endVideoCall() {
             if (VideoConsultation.jitsiApi) {
-                if (confirm('Are you sure you want to end the consultation?')) {
-                    VideoConsultation.endCall();
+                const currentLang = LanguageManager?.getLanguage() || 'en';
+                const isArabic = currentLang === 'ar';
+                
+                const confirmMessage = isArabic ? 
+                    'هل تريد إنهاء المكالمة المرئية؟ (لن يتم إنهاء الاستشارة)' :
+                    'Do you want to end the video call? (Consultation will remain active)';
                     
-                    // Close window after ending consultation if it's a popup
-                    setTimeout(() => {
-                        if (window.opener && !window.opener.closed) {
-                            console.log('Closing video consultation window after ending call');
-                            window.close();
-                        }
-                    }, 2000); // Give time for cleanup
+                if (confirm(confirmMessage)) {
+                    VideoConsultation.endCall();
                 }
             } else {
                 // If no active call, just close the window
@@ -404,6 +529,18 @@
                     window.close();
                 }
             }
+        }
+        
+        // Complete full consultation (only for doctors)
+        function completeFullConsultation() {
+            if (VideoConsultation && VideoConsultation.handleCompleteConsultation) {
+                VideoConsultation.handleCompleteConsultation();
+            }
+        }
+        
+        // Legacy function for backward compatibility
+        function endConsultation() {
+            endVideoCall();
         }
         
         function retryConnection() {
@@ -422,6 +559,14 @@
             }
             // Initialize language support
             initializeLanguageSupport();
+        });
+        
+        // Handle window close to call disconnect endpoint
+        window.addEventListener('beforeunload', function(event) {
+            if (VideoConsultation && VideoConsultation.appointmentId) {
+                console.log('Video consultation window closing - calling disconnect endpoint');
+                callDisconnectEndpoint();
+            }
         });
         
         // Control functions

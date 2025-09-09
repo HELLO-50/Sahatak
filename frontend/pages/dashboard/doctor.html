@@ -70,6 +70,49 @@
             color: #856404;
             font-size: 24px;
         }
+        
+        /* Video consultation button styling */
+        .btn-complete-consultation {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-complete-consultation:hover {
+            background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+        
+        .btn-consultation-ended {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+        
+        /* Animation for removing appointments */
+        @keyframes fadeOut {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+        }
     </style>
 </head>
 <body data-protect="doctor">
@@ -761,6 +804,45 @@
     
     <!-- Doctor Dashboard JavaScript -->
     <script>
+        // Translation helper functions for activities
+        function getActivityMessage(activityType, patientName) {
+            const currentLang = LanguageManager?.getLanguage() || 'en';
+            const t = LanguageManager?.translations?.[currentLang];
+            
+            if (t?.dashboard?.doctor?.activities?.[activityType]) {
+                return t.dashboard.doctor.activities[activityType].replace('{patient_name}', patientName);
+            }
+            
+            // Fallback to English
+            const fallbacks = {
+                'appointment_scheduled': `New appointment scheduled with ${patientName}`,
+                'appointment_completed': `Consultation completed with ${patientName}`
+            };
+            return fallbacks[activityType] || `Activity with ${patientName}`;
+        }
+        
+        function getTimeMessage(timeType, count = null) {
+            const currentLang = LanguageManager?.getLanguage() || 'en';
+            const t = LanguageManager?.translations?.[currentLang];
+            
+            if (t?.dashboard?.doctor?.activities?.time?.[timeType]) {
+                let message = t.dashboard.doctor.activities.time[timeType];
+                if (count !== null) {
+                    message = message.replace('{count}', count);
+                }
+                return message;
+            }
+            
+            // Fallback to English
+            const fallbacks = {
+                'just_now': 'Just now',
+                'minutes_ago': `${count} minutes ago`,
+                'hours_ago': `${count} hours ago`,
+                'days_ago': `${count} days ago`
+            };
+            return fallbacks[timeType] || '';
+        }
+        
         // Doctor dashboard specific functions
         function openCommunicationHub() {
             console.log('Communication Hub clicked');
@@ -1300,7 +1382,7 @@
                             const createdDate = new Date(apt.created_at || apt.appointment_date);
                             recentActivities.push({
                                 type: 'appointment_scheduled',
-                                message: `New appointment scheduled with ${apt.patient_name || 'Patient'}`,
+                                message: getActivityMessage('appointment_scheduled', apt.patient_name || 'Patient'),
                                 date: createdDate,
                                 icon: 'bi-calendar-plus'
                             });
@@ -1316,7 +1398,7 @@
                             const completedDate = new Date(apt.updated_at || apt.appointment_date);
                             recentActivities.push({
                                 type: 'appointment_completed',
-                                message: `Consultation completed with ${apt.patient_name || 'Patient'}`,
+                                message: getActivityMessage('appointment_completed', apt.patient_name || 'Patient'),
                                 date: completedDate,
                                 icon: 'bi-check-circle'
                             });
@@ -1454,10 +1536,10 @@
             const diffHours = Math.floor(diffMins / 60);
             const diffDays = Math.floor(diffHours / 24);
 
-            if (diffMins < 1) return 'Just now';
-            if (diffMins < 60) return `${diffMins} minutes ago`;
-            if (diffHours < 24) return `${diffHours} hours ago`;
-            if (diffDays < 7) return `${diffDays} days ago`;
+            if (diffMins < 1) return getTimeMessage('just_now');
+            if (diffMins < 60) return getTimeMessage('minutes_ago', diffMins);
+            if (diffHours < 24) return getTimeMessage('hours_ago', diffHours);
+            if (diffDays < 7) return getTimeMessage('days_ago', diffDays);
             return date.toLocaleDateString();
         }
         
