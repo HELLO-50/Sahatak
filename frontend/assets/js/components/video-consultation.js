@@ -729,7 +729,8 @@ const VideoConsultation = {
         
         // Video conference left
         this.jitsiApi.addEventListener('videoConferenceLeft', (e) => {
-            console.log('Left conference:', e);
+            console.log('🚪 LEFT CONFERENCE EVENT FIRED:', e);
+            console.log('🔚 Calling onConferenceLeft...');
             this.logAnalyticsEvent('conference_left', { event_data: e });
             this.onConferenceLeft();
         });
@@ -761,6 +762,18 @@ const VideoConsultation = {
             this.logAnalyticsEvent('jitsi_error', { error: e });
             this.handleJitsiError(e);
         });
+        
+        // Add window unload handler as backup to catch direct window closes
+        window.addEventListener('beforeunload', (e) => {
+            console.log('🚪 WINDOW CLOSING - Triggering emergency session end');
+            // Use sync request for immediate execution before page unloads
+            this.emergencyEndSession();
+        });
+        
+        window.addEventListener('pagehide', (e) => {
+            console.log('🚪 PAGE HIDING - Triggering emergency session end');
+            this.emergencyEndSession();
+        });
     },
     
     // Conference joined handler
@@ -785,18 +798,27 @@ const VideoConsultation = {
     
     // Conference left handler
     async onConferenceLeft() {
+        console.log('🔚 onConferenceLeft() called - starting cleanup process');
+        
         // Stop monitoring
         this.stopConnectionMonitoring();
+        console.log('🔚 Connection monitoring stopped');
         
         // End session on backend
+        console.log('🔚 Calling endVideoSession()...');
         await this.endVideoSession();
+        console.log('🔚 endVideoSession() completed');
         
         // Force refresh dashboard status even if backend call failed
         // This ensures UI updates even when API calls fail due to auth issues
+        console.log('🔚 Calling refreshDashboardStatus()...');
         this.refreshDashboardStatus();
+        console.log('🔚 refreshDashboardStatus() completed');
         
         // Show post-call screen
+        console.log('🔚 Calling showPostCallScreen()...');
         this.showPostCallScreen();
+        console.log('🔚 onConferenceLeft() completed');
     },
     
     // End video session
@@ -827,6 +849,49 @@ const VideoConsultation = {
             
             // Even if backend call fails, we should still clean up locally
             // This is important because the user has left the video call
+        }
+    },
+    
+    // Emergency session end for window close/unload events
+    emergencyEndSession() {
+        try {
+            console.log('🚨 EMERGENCY SESSION END for appointment:', this.appointmentId);
+            
+            // Use sendBeacon for reliable delivery during page unload
+            const token = localStorage.getItem('sahatak_access_token') || AuthStorage?.get('access_token');
+            
+            if (navigator.sendBeacon && token) {
+                const url = `${ApiHelper.baseUrl}/appointments/${this.appointmentId}/video/end`;
+                const data = JSON.stringify({});
+                const headers = {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                };
+                
+                // Create a Blob with the data and headers
+                const blob = new Blob([data], { type: 'application/json' });
+                
+                console.log('🚨 Sending beacon to end session');
+                navigator.sendBeacon(url, blob);
+            } else {
+                console.log('🚨 Beacon not available or no token, using fetch');
+                // Fallback to synchronous fetch
+                const url = `${ApiHelper.baseUrl}/appointments/${this.appointmentId}/video/end`;
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    keepalive: true
+                }).catch(error => console.error('Emergency session end failed:', error));
+            }
+            
+            // Also store a flag in localStorage to trigger dashboard refresh on next page load
+            localStorage.setItem(`sahatak_video_ended_${this.appointmentId}`, Date.now().toString());
+            
+        } catch (error) {
+            console.error('Emergency session end error:', error);
         }
     },
     

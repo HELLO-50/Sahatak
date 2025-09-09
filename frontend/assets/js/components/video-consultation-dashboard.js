@@ -5,6 +5,9 @@ const VideoConsultationDashboard = {
     
     // Initialize video consultation dashboard features
     init() {
+        // Check for any pending video session ends from emergency handlers
+        this.checkEmergencySessionEnds();
+        
         this.setupEventListeners();
         this.startSessionStatusMonitoring();
     },
@@ -278,6 +281,32 @@ const VideoConsultationDashboard = {
                 <span>${buttonConfig.text}</span>
             </button>
         `;
+    },
+    
+    // Check for emergency session end flags from video consultation page
+    checkEmergencySessionEnds() {
+        try {
+            const keys = Object.keys(localStorage).filter(key => key.startsWith('sahatak_video_ended_'));
+            
+            if (keys.length > 0) {
+                console.log('🔄 Found emergency session end flags:', keys);
+                
+                // Clear the flags and trigger status refresh
+                keys.forEach(key => {
+                    const appointmentId = key.replace('sahatak_video_ended_', '');
+                    console.log('🔄 Processing emergency session end for appointment:', appointmentId);
+                    localStorage.removeItem(key);
+                });
+                
+                // Force a complete dashboard refresh
+                setTimeout(() => {
+                    console.log('🔄 Refreshing dashboard after emergency session ends');
+                    this.checkAllAppointmentStatuses();
+                }, 1000);
+            }
+        } catch (error) {
+            console.error('Error checking emergency session ends:', error);
+        }
     },
     
     // Get button configuration based on user type and appointment status
