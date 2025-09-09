@@ -1166,19 +1166,40 @@ const VideoConsultation = {
     // Complete consultation (marks appointment as finished)
     async completeConsultation() {
         try {
+            console.log('🏁 Attempting to complete consultation for appointment:', this.appointmentId);
+            
+            // Check if we have authentication token
+            const token = localStorage.getItem('sahatak_access_token');
+            if (!token) {
+                console.warn('⚠️ No auth token found - attempting to refresh session');
+                const authToken = AuthStorage?.get('access_token');
+                if (authToken) {
+                    localStorage.setItem('sahatak_access_token', authToken);
+                    console.log('✅ Token restored from AuthStorage');
+                }
+            }
+            
             const response = await ApiHelper.makeRequest(
                 `/appointments/${this.appointmentId}/complete`,
                 { method: 'POST' }
             );
             
+            console.log('🏁 Complete consultation API response:', response);
+            
             if (response.success) {
-                console.log('Consultation completed successfully');
+                console.log('✅ Consultation completed successfully');
                 return response;
             } else {
+                console.error('❌ Complete consultation failed:', response.message);
                 throw new Error(response.message);
             }
         } catch (error) {
-            console.error('Failed to complete consultation:', error);
+            console.error('❌ Failed to complete consultation:', error);
+            console.error('Error details:', {
+                message: error.message,
+                status: error.status,
+                response: error.response
+            });
             throw error;
         }
     },
