@@ -739,14 +739,14 @@ const ApiHelper = {
         
         // Add JWT token to headers if available (fallback for session issues)
         const token = localStorage.getItem('sahatak_access_token');
-        console.log('🎫 Token available for API call:', !!token);
-        console.log('🎫 Token preview:', token ? token.substring(0, 30) + '...' : 'NO TOKEN');
-        console.log('🧹 All localStorage keys:', Object.keys(localStorage).filter(k => k.includes('sahatak')));
+        // Token debug info (reduced verbosity)
+        if (!token) {
+            console.warn('⚠️ No token available for API call');
+        }
         
         const authHeaders = {};
         if (token) {
             authHeaders['Authorization'] = `Bearer ${token}`;
-            console.log('🔑 Added Authorization header to request');
         } else {
             console.log('🚨 NO TOKEN - This will likely result in 401 error');
         }
@@ -767,8 +767,8 @@ const ApiHelper = {
         try {
             // TEMPORARILY DISABLE aggressive session checking to debug logout issue
             // TODO: Re-enable once logout issue is resolved
+            // Only log API calls for auth endpoints or errors
             const isLoginEndpoint = endpoint.includes('/auth/login') || endpoint.includes('/auth/register') || endpoint.includes('/auth/me');
-            console.log('🔍 API call to:', endpoint, 'isLoginEndpoint:', isLoginEndpoint);
             
             // Debug: Log request details
             const cookieString = document.cookie;
