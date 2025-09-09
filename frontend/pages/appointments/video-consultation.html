@@ -343,18 +343,17 @@
         function goBackToDashboard() {
             const userType = AuthStorage.get('type');
             
-            // Get the base URL by removing everything after /Sahatak/
+            // Use a more direct approach - replace the current path
             const currentUrl = window.location.href;
-            const baseUrl = currentUrl.split('/Sahatak/')[0] + '/Sahatak';
             
+            // Replace everything after /Sahatak/ with the dashboard path
             const targetUrl = userType === 'doctor' ? 
-                baseUrl + '/frontend/pages/dashboard/doctor.html' : 
-                baseUrl + '/frontend/pages/dashboard/patient.html';
+                currentUrl.replace(/\/Sahatak\/.*$/, '/Sahatak/frontend/pages/dashboard/doctor.html') :
+                currentUrl.replace(/\/Sahatak\/.*$/, '/Sahatak/frontend/pages/dashboard/patient.html');
             
             console.log('Navigating to dashboard:', {
                 userType,
                 currentUrl,
-                baseUrl,
                 targetUrl
             });
             
@@ -363,8 +362,8 @@
         
         function viewAppointments() {
             const currentUrl = window.location.href;
-            const baseUrl = currentUrl.split('/Sahatak/')[0] + '/Sahatak';
-            window.location.href = baseUrl + '/frontend/pages/appointments/appointment-list.html';
+            const targetUrl = currentUrl.replace(/\/Sahatak\/.*$/, '/Sahatak/frontend/pages/appointments/appointment-list.html');
+            window.location.href = targetUrl;
         }
         
         function endConsultation() {
