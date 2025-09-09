@@ -762,6 +762,23 @@ const VideoConsultation = {
         }
     },
     
+    // Handle unexpected disconnect
+    async handleDisconnect() {
+        try {
+            const response = await ApiHelper.makeRequest(
+                `/appointments/${this.appointmentId}/video/disconnect`,
+                { method: 'POST' }
+            );
+            
+            if (response.success) {
+                console.log('Disconnect handled on backend successfully');
+                return response;
+            }
+        } catch (error) {
+            console.error('Failed to handle disconnect on backend:', error);
+        }
+    },
+    
     // Comprehensive cleanup method
     cleanup() {
         console.log('Starting comprehensive cleanup...');
@@ -1892,7 +1909,28 @@ document.addEventListener('DOMContentLoaded', () => {
 // Enhanced cleanup handlers with confirmation
 window.addEventListener('beforeunload', (event) => {
     if (VideoConsultation.jitsiApi) {
-        console.log('Page unloading - comprehensive cleanup...');
+        console.log('Page unloading - calling disconnect endpoint...');
+        
+        // Call disconnect endpoint to reset appointment state if doctor
+        if (VideoConsultation.appointmentId) {
+            // Use sendBeacon for reliable disconnect on page unload
+            const disconnectUrl = `${window.API_BASE_URL}/appointments/${VideoConsultation.appointmentId}/video/disconnect`;
+            const token = localStorage.getItem('sahatak_token');
+            
+            if (navigator.sendBeacon) {
+                // Use sendBeacon for reliable delivery even during page unload
+                const data = new Blob([JSON.stringify({})], { type: 'application/json' });
+                navigator.sendBeacon(disconnectUrl, data);
+            } else {
+                // Fallback to synchronous XMLHttpRequest (deprecated but works)
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', disconnectUrl, false); // false makes it synchronous
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+                xhr.send(JSON.stringify({}));
+            }
+        }
+        
         VideoConsultation.cleanup();
         
         // Show confirmation dialog

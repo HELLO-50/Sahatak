@@ -966,15 +966,9 @@ def join_video_session(appointment_id):
         if appointment.session_status in ['ended', 'failed']:
             return APIResponse.validation_error(field='session_status', message='Video session has ended')
         
-        # Validate session timing
+        # Skip timing validation - patients can join anytime the session is active
+        # This allows patients to join whenever they see the "Join Consultation" button
         from services.video_conf_service import VideoConferenceService
-        is_valid, timing_message = VideoConferenceService.validate_session_timing(
-            appointment.appointment_date,
-            current_app.config.get('JITSI_SESSION_BUFFER_MINUTES', 15)
-        )
-        
-        if not is_valid:
-            return APIResponse.validation_error(field='timing', message=timing_message)
         
         # Generate JWT token
         jwt_token = VideoConferenceService.generate_jwt_token(
@@ -1276,3 +1270,71 @@ def video_analytics_summary(appointment_id):
     except Exception as e:
         app_logger.error(f"Video analytics summary error: {str(e)}")
         return APIResponse.internal_error(message='Failed to log analytics summary')
+
+
+@appointments_bp.route('/<int:appointment_id>/video/disconnect', methods=['POST'])
+@api_login_required
+def handle_video_disconnect(appointment_id):
+    """Handle unexpected video session disconnect (browser close, network issue, etc.)"""
+    try:
+        # Get appointment
+        appointment = Appointment.query.filter_by(id=appointment_id).first()
+        
+        if not appointment:
+            return APIResponse.not_found(message='Appointment not found')
+        
+        # Verify user is participant
+        is_doctor = (current_user.user_type == 'doctor' and 
+                    appointment.doctor and 
+                    appointment.doctor.user_id == current_user.id)
+        is_patient = (current_user.user_type == 'patient' and 
+                     appointment.patient and 
+                     appointment.patient.user_id == current_user.id)
+        
+        if not (is_doctor or is_patient):
+            return APIResponse.forbidden(message='You are not authorized for this appointment')
+        
+        # If doctor disconnects unexpectedly, reset appointment to scheduled state
+        # This allows doctor to restart and patient to see "Waiting for Doctor"
+        if is_doctor and appointment.status == 'in_progress':
+            # Reset to scheduled state so doctor can restart
+            appointment.status = 'scheduled'
+            appointment.session_status = None
+            appointment.session_id = None  # Clear session ID to generate new one
+            appointment.session_started_at = None
+            appointment.session_ended_at = None
+            appointment.session_duration = None
+            
+            app_logger.info(f"Doctor disconnected unexpectedly from appointment {appointment_id}, resetting to scheduled state")
+        
+        # If patient disconnects, just update session status but keep appointment in progress
+        elif is_patient and appointment.status == 'in_progress':
+            appointment.session_status = 'patient_disconnected'
+            app_logger.info(f"Patient disconnected from appointment {appointment_id}")
+        
+        db.session.commit()
+        
+        # Log disconnect event
+        from services.video_conf_service import VideoConferenceService
+        VideoConferenceService.log_session_event(
+            appointment_id=appointment_id,
+            event_type='disconnect',
+            user_id=current_user.id,
+            details={
+                'user_type': current_user.user_type,
+                'reason': 'unexpected_disconnect'
+            }
+        )
+        
+        return APIResponse.success(
+            data={
+                'appointment_status': appointment.status,
+                'session_status': appointment.session_status
+            },
+            message='Disconnect handled successfully'
+        )
+        
+    except Exception as e:
+        db.session.rollback()
+        app_logger.error(f"Handle video disconnect error: {str(e)}")
+        return APIResponse.internal_error(message='Failed to handle disconnect')

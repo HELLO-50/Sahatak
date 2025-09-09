@@ -397,31 +397,52 @@ const AppointmentBooking = {
             const doctor = this.selectedDoctor;
             const date = new Date(this.selectedDateTime.datetime);
             
+            // Get current language and translations
+            const currentLang = LanguageManager.getLanguage() || 'ar';
+            const translations = LanguageManager.translations;
+            const t = translations && translations[currentLang] ? translations[currentLang] : {};
+            
+            // Get translated labels
+            const labels = {
+                doctor: currentLang === 'ar' ? 'الطبيب' : 'Doctor',
+                specialty: t.appointments?.specialty || (currentLang === 'ar' ? 'التخصص' : 'Specialty'),
+                date: t.appointments?.date || (currentLang === 'ar' ? 'التاريخ' : 'Date'),
+                time: currentLang === 'ar' ? 'الوقت' : 'Time',
+                consultationType: t.appointments?.consultation_type || (currentLang === 'ar' ? 'نوع الاستشارة' : 'Consultation Type'),
+                fee: currentLang === 'ar' ? 'الرسوم' : 'Fee'
+            };
+            
+            // Format date based on locale
+            const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+            const formattedDate = currentLang === 'ar' ? 
+                date.toLocaleDateString('ar-SA', dateOptions) : 
+                date.toLocaleDateString('en-US', dateOptions);
+            
             const summaryHtml = `
                     <div class="row">
                         <div class="col-sm-6 mb-3">
-                            <strong>Doctor:</strong><br>
+                            <strong>${labels.doctor}:</strong><br>
                             ${this.formatDoctorName(doctor.user ? doctor.user.full_name : doctor.full_name)}
                         </div>
                         <div class="col-sm-6 mb-3">
-                            <strong>Specialty:</strong><br>
+                            <strong>${labels.specialty}:</strong><br>
                             ${this.getSpecialtyDisplayName(doctor.specialty)}
                         </div>
                         <div class="col-sm-6 mb-3">
-                            <strong>Date:</strong><br>
-                            ${date.toLocaleDateString()}
+                            <strong>${labels.date}:</strong><br>
+                            ${formattedDate}
                         </div>
                         <div class="col-sm-6 mb-3">
-                            <strong>Time:</strong><br>
+                            <strong>${labels.time}:</strong><br>
                             ${this.selectedDateTime.displayTime}
                         </div>
                         <div class="col-sm-6 mb-3">
-                            <strong>Consultation Type:</strong><br>
+                            <strong>${labels.consultationType}:</strong><br>
                             ${this.getAppointmentTypeDisplayName(this.selectedType)}
                         </div>
                         <div class="col-sm-6 mb-3">
-                            <strong>Fee:</strong><br>
-                            ${doctor.consultation_fee ? doctor.consultation_fee + ' SDG' : 'Free'}
+                            <strong>${labels.fee}:</strong><br>
+                            ${doctor.consultation_fee ? doctor.consultation_fee + ' SDG' : (currentLang === 'ar' ? 'مجاني' : 'Free')}
                         </div>
                     </div>
                 `;
@@ -610,7 +631,19 @@ const AppointmentBooking = {
     },
 
     getSpecialtyDisplayName(specialty) {
-        const specialties = {
+        const currentLang = LanguageManager.getLanguage() || 'ar';
+        
+        const specialtiesAr = {
+            cardiology: 'طب القلب',
+            pediatrics: 'طب الأطفال',
+            dermatology: 'طب الجلدية',
+            internal: 'الطب الباطني',
+            psychiatry: 'الطب النفسي',
+            orthopedics: 'جراحة العظام',
+            general: 'الطب العام'
+        };
+        
+        const specialtiesEn = {
             cardiology: 'Cardiology',
             pediatrics: 'Pediatrics',
             dermatology: 'Dermatology',
@@ -619,15 +652,40 @@ const AppointmentBooking = {
             orthopedics: 'Orthopedics',
             general: 'General Medicine'
         };
+        
+        const specialties = currentLang === 'ar' ? specialtiesAr : specialtiesEn;
         return specialties[specialty] || specialty;
     },
 
     getAppointmentTypeDisplayName(type) {
-        const types = {
+        const currentLang = LanguageManager.getLanguage() || 'ar';
+        const translations = LanguageManager.translations;
+        const t = translations && translations[currentLang] ? translations[currentLang] : {};
+        
+        // Use translations from the language file if available
+        if (t.appointments) {
+            const types = {
+                video: t.appointments.video_call || (currentLang === 'ar' ? 'مكالمة فيديو' : 'Video Call'),
+                audio: t.appointments.audio_call || (currentLang === 'ar' ? 'مكالمة صوتية' : 'Audio Call'),
+                chat: t.appointments.text_chat || (currentLang === 'ar' ? 'محادثة نصية' : 'Text Chat')
+            };
+            return types[type] || type;
+        }
+        
+        // Fallback if translations not loaded
+        const typesAr = {
+            video: 'مكالمة فيديو',
+            audio: 'مكالمة صوتية',
+            chat: 'محادثة نصية'
+        };
+        
+        const typesEn = {
             video: 'Video Call',
             audio: 'Audio Call',
             chat: 'Text Chat'
         };
+        
+        const types = currentLang === 'ar' ? typesAr : typesEn;
         return types[type] || type;
     },
 
