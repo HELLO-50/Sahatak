@@ -1914,20 +1914,20 @@ window.addEventListener('beforeunload', (event) => {
         // Call disconnect endpoint to reset appointment state if doctor
         if (VideoConsultation.appointmentId) {
             // Use sendBeacon for reliable disconnect on page unload
-            const disconnectUrl = `${window.API_BASE_URL}/appointments/${VideoConsultation.appointmentId}/video/disconnect`;
+            const baseUrl = ApiHelper?.baseUrl || 'https://sahatak.pythonanywhere.com/api';
+            const disconnectUrl = `${baseUrl}/appointments/${VideoConsultation.appointmentId}/video/disconnect`;
             const token = localStorage.getItem('sahatak_token');
             
-            if (navigator.sendBeacon) {
-                // Use sendBeacon for reliable delivery even during page unload
-                const data = new Blob([JSON.stringify({})], { type: 'application/json' });
-                navigator.sendBeacon(disconnectUrl, data);
-            } else {
-                // Fallback to synchronous XMLHttpRequest (deprecated but works)
+            // Use synchronous XMLHttpRequest for reliability
+            // sendBeacon doesn't support custom headers which we need for authorization
+            try {
                 const xhr = new XMLHttpRequest();
                 xhr.open('POST', disconnectUrl, false); // false makes it synchronous
                 xhr.setRequestHeader('Content-Type', 'application/json');
                 xhr.setRequestHeader('Authorization', `Bearer ${token}`);
                 xhr.send(JSON.stringify({}));
+            } catch (e) {
+                console.error('Failed to send disconnect notification:', e);
             }
         }
         
