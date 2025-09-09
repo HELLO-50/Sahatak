@@ -343,14 +343,14 @@
         function goBackToDashboard() {
             const userType = AuthStorage.get('type');
             if (userType === 'doctor') {
-                window.location.href = '../dashboard/doctor.html';
+                window.location.href = '/Sahatak/frontend/pages/dashboard/doctor.html';
             } else {
-                window.location.href = '../dashboard/patient.html';
+                window.location.href = '/Sahatak/frontend/pages/dashboard/patient.html';
             }
         }
         
         function viewAppointments() {
-            window.location.href = 'appointment-list.html';
+            window.location.href = '/Sahatak/frontend/pages/appointments/appointment-list.html';
         }
         
         function endConsultation() {
