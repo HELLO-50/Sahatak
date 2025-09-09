@@ -1106,7 +1106,14 @@ def complete_appointment(appointment_id):
             return APIResponse.not_found(message='Appointment not found')
         
         # Check permissions (only doctor can complete appointment)
-        if current_user.user_type != 'doctor' or appointment.doctor_id != current_user.id:
+        # Get the doctor record for the current user
+        from models import Doctor
+        current_doctor = Doctor.query.filter_by(user_id=current_user.id).first() if current_user.user_type == 'doctor' else None
+        
+        app_logger.info(f"Complete appointment check - User type: {current_user.user_type}, User ID: {current_user.id}, Doctor ID: {current_doctor.id if current_doctor else None}, Appointment doctor ID: {appointment.doctor_id}")
+        
+        if current_user.user_type != 'doctor' or not current_doctor or appointment.doctor_id != current_doctor.id:
+            app_logger.warning(f"Authorization failed - User {current_user.id} ({current_user.user_type}) with doctor ID {current_doctor.id if current_doctor else 'None'} trying to complete appointment for doctor {appointment.doctor_id}")
             return APIResponse.forbidden(message='Only the assigned doctor can complete this appointment')
         
         # Check if appointment can be completed
