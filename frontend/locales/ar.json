@@ -642,6 +642,15 @@
         "active_prescriptions": "الوصفات الطبية النشطة",
         "medical_records": "السجلات الطبية"
       },
+      "alerts": {
+        "use_settings_to_edit": "يرجى استخدام قسم الإعدادات لتحرير معلومات الملف الشخصي.",
+        "settings_saved": "تم حفظ الإعدادات بنجاح!",
+        "settings_saved_with_changes": "تم حفظ الإعدادات بنجاح!\\nتم التحديث: ",
+        "confirm_reload_settings": "هل أنت متأكد من أنك تريد إعادة تحميل الإعدادات من قاعدة البيانات؟",
+        "settings_reloaded": "تم إعادة تحميل الإعدادات من قاعدة البيانات.",
+        "password_change_redirect": "ستتم إعادة توجيهك لصفحة تغيير كلمة المرور الآمنة.",
+        "two_factor_setup": "سيتم تنفيذ إعداد المصادقة الثنائية."
+      },
       "no_active_prescriptions": "لا توجد وصفات طبية نشطة",
       "no_medical_records": "لا توجد سجلات طبية",
       "active_prescriptions_title": "الوصفات النشطة",

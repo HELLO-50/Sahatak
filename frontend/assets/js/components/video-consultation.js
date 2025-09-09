@@ -93,39 +93,52 @@ const VideoConsultation = {
         
         container.innerHTML = `
             <div class="pre-join-screen">
-                <h3 class="mb-4">${this.translate('video_consultation.preparing', 'Preparing for Consultation')}</h3>
+                <!-- Header Section -->
+                <div class="text-center mb-5">
+                    <div class="consultation-icon mb-3">
+                        <i class="bi bi-camera-video-fill text-primary" style="font-size: 3rem;"></i>
+                    </div>
+                    <h2 class="text-primary fw-bold mb-2">${this.translate('video_consultation.preparing', 'Preparing for Consultation')}</h2>
+                    <p class="text-muted">${isArabic ? 'جاري التحقق من النظام والأجهزة للتأكد من جودة الاتصال' : 'Checking your system and devices to ensure the best consultation experience'}</p>
+                </div>
                 
                 <!-- System Check Results -->
-                <div class="row mb-4">
-                    <div class="col-md-4">
-                        <div class="card">
-                            <div class="card-body text-center">
-                                <div id="browser-check">
-                                    <i class="bi bi-browser-chrome fs-1 mb-2"></i>
-                                    <h6>${this.translate('video_consultation.system_checks.browser', 'Browser')}</h6>
-                                    <div class="spinner-border spinner-border-sm" role="status"></div>
+                <div class="system-checks mb-5">
+                    <h5 class="mb-3"><i class="bi bi-gear me-2"></i>${isArabic ? 'فحص النظام' : 'System Checks'}</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="check-card">
+                                <div class="check-card-body text-center">
+                                    <div id="browser-check">
+                                        <i class="bi bi-browser-chrome check-icon mb-2"></i>
+                                        <h6 class="check-title">${this.translate('video_consultation.system_checks.browser', 'Browser')}</h6>
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                        <div class="check-status"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card">
-                            <div class="card-body text-center">
-                                <div id="network-check">
-                                    <i class="bi bi-wifi fs-1 mb-2"></i>
-                                    <h6>${this.translate('video_consultation.system_checks.network_quality', 'Network Quality')}</h6>
-                                    <div class="spinner-border spinner-border-sm" role="status"></div>
+                        <div class="col-md-4">
+                            <div class="check-card">
+                                <div class="check-card-body text-center">
+                                    <div id="network-check">
+                                        <i class="bi bi-wifi check-icon mb-2"></i>
+                                        <h6 class="check-title">${this.translate('video_consultation.system_checks.network_quality', 'Network Quality')}</h6>
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                        <div class="check-status"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card">
-                            <div class="card-body text-center">
-                                <div id="permissions-check">
-                                    <i class="bi bi-shield-check fs-1 mb-2"></i>
-                                    <h6>${this.translate('video_consultation.system_checks.permissions', 'Permissions')}</h6>
-                                    <div class="spinner-border spinner-border-sm" role="status"></div>
+                        <div class="col-md-4">
+                            <div class="check-card">
+                                <div class="check-card-body text-center">
+                                    <div id="permissions-check">
+                                        <i class="bi bi-shield-check check-icon mb-2"></i>
+                                        <h6 class="check-title">${this.translate('video_consultation.system_checks.permissions', 'Permissions')}</h6>
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                        <div class="check-status"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -133,65 +146,95 @@ const VideoConsultation = {
                 </div>
                 
                 <!-- Device Setup -->
-                <div class="device-check mb-4">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-body text-center">
-                                    <i class="bi bi-camera-video fs-1 mb-2"></i>
-                                    <h5>${this.translate('video_consultation.system_checks.camera', 'Camera')}</h5>
-                                    <video id="local-preview" autoplay muted class="w-100 mb-2" style="max-height: 200px; border-radius: 8px;"></video>
-                                    <select id="camera-select" class="form-select mb-2"></select>
-                                    <div class="form-check">
+                <div class="device-setup mb-5">
+                    <h5 class="mb-3"><i class="bi bi-camera-video me-2"></i>${isArabic ? 'إعداد الأجهزة' : 'Device Setup'}</h5>
+                    <div class="row g-4">
+                        <div class="col-lg-6">
+                            <div class="device-card">
+                                <div class="device-header">
+                                    <i class="bi bi-camera-video text-primary me-2"></i>
+                                    <h6 class="mb-0">${this.translate('video_consultation.system_checks.camera', 'Camera')}</h6>
+                                </div>
+                                <div class="device-body">
+                                    <div class="preview-container mb-3">
+                                        <video id="local-preview" autoplay muted class="preview-video"></video>
+                                        <div class="preview-overlay" id="camera-overlay" style="display: none;">
+                                            <i class="bi bi-camera-video-off"></i>
+                                            <p class="mb-0">${isArabic ? 'الكاميرا غير متاحة' : 'Camera not available'}</p>
+                                        </div>
+                                    </div>
+                                    <select id="camera-select" class="form-select mb-3"></select>
+                                    <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" id="audio-only-mode">
                                         <label class="form-check-label" for="audio-only-mode">
+                                            <i class="bi bi-mic me-1"></i>
                                             ${this.translate('video_consultation.system_checks.audio_only', 'Audio Only')}
                                         </label>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-body text-center">
-                                    <i class="bi bi-mic fs-1 mb-2"></i>
-                                    <h5>${this.translate('video_consultation.system_checks.microphone', 'Microphone')}</h5>
-                                    <div class="audio-meter mb-3">
-                                        <div class="progress">
-                                            <div id="audio-level" class="progress-bar bg-success" style="width: 0%"></div>
+                        <div class="col-lg-6">
+                            <div class="device-card">
+                                <div class="device-header">
+                                    <i class="bi bi-mic text-primary me-2"></i>
+                                    <h6 class="mb-0">${this.translate('video_consultation.system_checks.microphone', 'Microphone')}</h6>
+                                </div>
+                                <div class="device-body">
+                                    <div class="audio-test mb-3">
+                                        <div class="audio-meter">
+                                            <div class="progress">
+                                                <div id="audio-level" class="progress-bar bg-success" style="width: 0%"></div>
+                                            </div>
+                                            <small class="text-muted mt-1 d-block">${this.translate('video_consultation.system_checks.speak_to_test', 'Speak to test audio')}</small>
                                         </div>
-                                        <small class="text-muted">${this.translate('video_consultation.system_checks.speak_to_test', 'Speak to test audio')}</small>
                                     </div>
-                                    <select id="mic-select" class="form-select mb-2"></select>
-                                    <select id="speaker-select" class="form-select">
-                                        <option value="">${this.translate('video_consultation.system_checks.select_speaker', 'Select Speaker')}</option>
-                                    </select>
+                                    <div class="mb-2">
+                                        <label class="form-label small">${isArabic ? 'الميكروفون' : 'Microphone'}</label>
+                                        <select id="mic-select" class="form-select"></select>
+                                    </div>
+                                    <div>
+                                        <label class="form-label small">${isArabic ? 'مكبر الصوت' : 'Speaker'}</label>
+                                        <select id="speaker-select" class="form-select">
+                                            <option value="">${this.translate('video_consultation.system_checks.select_speaker', 'Select Speaker')}</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Control Buttons -->
-                <div class="text-center">
-                    <button id="refresh-check-btn" class="btn btn-outline-secondary me-2">
-                        <i class="bi bi-arrow-clockwise"></i> ${this.translate('video_consultation.actions.refresh_check', 'Refresh Check')}
-                    </button>
-                    <button id="test-devices-btn" class="btn btn-secondary me-2">
-                        <i class="bi bi-gear"></i> ${this.translate('video_consultation.actions.test_devices', 'Test Devices')}
-                    </button>
-                    <button id="join-call-btn" class="btn btn-primary btn-lg" disabled>
-                        <i class="bi bi-camera-video"></i> ${this.translate('video_consultation.actions.start_consultation', 'Start Consultation')}
-                    </button>
+                <!-- Action Buttons -->
+                <div class="action-buttons text-center">
+                    <div class="btn-group mb-3" role="group">
+                        <button id="refresh-check-btn" class="btn btn-outline-primary">
+                            <i class="bi bi-arrow-clockwise me-1"></i>
+                            ${this.translate('video_consultation.actions.refresh_check', 'Refresh Check')}
+                        </button>
+                        <button id="test-devices-btn" class="btn btn-outline-primary">
+                            <i class="bi bi-gear me-1"></i>
+                            ${this.translate('video_consultation.actions.test_devices', 'Test Devices')}
+                        </button>
+                    </div>
+                    <div>
+                        <button id="join-call-btn" class="btn btn-primary btn-lg px-5 py-3" disabled>
+                            <i class="bi bi-camera-video me-2"></i>
+                            ${this.translate('video_consultation.actions.start_consultation', 'Start Consultation')}
+                        </button>
+                    </div>
                 </div>
                 
                 <!-- Status Messages -->
-                <div id="pre-join-messages" class="mt-3">
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle"></i>
-                        ${isArabic ? 
-                            'جاري فحص النظام والأجهزة...' : 
-                            'Checking system and devices...'}
+                <div id="pre-join-messages" class="mt-4">
+                    <div class="status-card">
+                        <div class="d-flex align-items-center">
+                            <div class="spinner-border spinner-border-sm text-primary me-3" role="status"></div>
+                            <div>
+                                <h6 class="mb-1">${isArabic ? 'جاري التحضير...' : 'Getting Ready...'}</h6>
+                                <p class="text-muted mb-0 small">${isArabic ? 'جاري فحص النظام والأجهزة لضمان أفضل جودة استشارة' : 'Checking system and devices to ensure the best consultation quality'}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

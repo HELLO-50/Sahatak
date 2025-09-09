@@ -78,6 +78,15 @@ const DashboardTranslations = {
         this.updateElementText('blood-sugar', patient.health_summary.blood_sugar);
         this.updateElementText('weight', patient.health_summary.weight);
         
+        // Loading messages
+        this.updateElementText('loading-appointments', patient.loading.appointments);
+        this.updateElementText('loading-health-data', patient.loading.health_data);
+        this.updateElementText('loading-prescriptions', patient.loading.prescriptions);
+        this.updateElementText('loading-medical-records', patient.loading.medical_records);
+        
+        // Section titles
+        this.updateElementText('upcoming-appointments-title', patient.sections.upcoming_appointments);
+        
         // No data messages
         this.updateElementText('no-upcoming-appointments', patient.no_data.no_appointments);
         this.updateElementText('no-active-prescriptions', patient.no_data.no_prescriptions);

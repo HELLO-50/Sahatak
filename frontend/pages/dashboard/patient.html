@@ -142,7 +142,7 @@
                                         <div class="spinner-border" role="status">
                                             <span class="visually-hidden">Loading...</span>
                                         </div>
-                                        <p class="mt-2">Loading appointments...</p>
+                                        <p class="mt-2" id="loading-appointments">Loading appointments...</p>
                                     </div>
                                 </div>
                             </div>
@@ -157,7 +157,7 @@
                                         <div class="spinner-border" role="status">
                                             <span class="visually-hidden">Loading...</span>
                                         </div>
-                                        <p class="mt-2">Loading health data...</p>
+                                        <p class="mt-2" id="loading-health-data">Loading health data...</p>
                                     </div>
                                 </div>
                             </div>
@@ -172,7 +172,7 @@
                                         <div class="spinner-border" role="status">
                                             <span class="visually-hidden">Loading...</span>
                                         </div>
-                                        <p class="mt-2">Loading prescriptions...</p>
+                                        <p class="mt-2" id="loading-prescriptions">Loading prescriptions...</p>
                                     </div>
                                 </div>
                             </div>
@@ -187,7 +187,7 @@
                                         <div class="spinner-border" role="status">
                                             <span class="visually-hidden">Loading...</span>
                                         </div>
-                                        <p class="mt-2">Loading medical records...</p>
+                                        <p class="mt-2" id="loading-medical-records">Loading medical records...</p>
                                     </div>
                                 </div>
                             </div>
@@ -598,6 +598,8 @@
             const currentLang = LanguageManager.getLanguage() || 'ar';
             const newLang = currentLang === 'ar' ? 'en' : 'ar';
             
+            console.log(`Switching language from ${currentLang} to ${newLang}`);
+            
             // Change language
             LanguageManager.setLanguage(newLang);
             LanguageManager.applyLanguage(newLang);
@@ -605,11 +607,15 @@
             // Update dashboard translations (call after applyLanguage to ensure footer is properly updated)
             if (DashboardTranslations && DashboardTranslations.updatePatientDashboard) {
                 DashboardTranslations.updatePatientDashboard(newLang);
+                console.log(`Patient dashboard translations updated to ${newLang}`);
             }
             
             // Update the language button text
             const langBtn = document.getElementById('current-lang');
-            langBtn.textContent = newLang === 'ar' ? 'العربية' : 'English';
+            if (langBtn) {
+                langBtn.textContent = newLang === 'ar' ? 'العربية' : 'English';
+                console.log(`Language button updated to show: ${langBtn.textContent}`);
+            }
         }
         
         function showProfile() {
@@ -677,7 +683,9 @@
             // Switch to settings section for editing
             hideProfile();
             showSettings();
-            alert('Please use the Settings section to edit your profile information.');
+            const currentLang = LanguageManager?.getLanguage() || 'ar';
+            const alertMsg = LanguageManager?.translate('dashboard.patient.alerts.use_settings_to_edit') || 'Please use the Settings section to edit your profile information.';
+            alert(alertMsg);
         }
 
         function showSettings() {
@@ -776,10 +784,13 @@
             if (currentUser.email !== updatedUser.email) changedFields.push('Email');
             if (currentUser.phone !== updatedUser.phone) changedFields.push('Phone');
             
+            const currentLang = LanguageManager?.getLanguage() || 'ar';
             if (changedFields.length > 0) {
-                alert(`Settings saved successfully!\nUpdated: ${changedFields.join(', ')}`);
+                const msg = LanguageManager?.translate('dashboard.patient.alerts.settings_saved_with_changes') || 'Settings saved successfully!\nUpdated: ';
+                alert(msg + changedFields.join(', '));
             } else {
-                alert('Settings saved successfully!');
+                const msg = LanguageManager?.translate('dashboard.patient.alerts.settings_saved') || 'Settings saved successfully!';
+                alert(msg);
             }
             
             console.log('Settings saved:', updatedUser, updatedPrefs);
@@ -791,19 +802,26 @@
         }
 
         function resetSettings() {
-            if (confirm('Are you sure you want to reload settings from database?')) {
+            const currentLang = LanguageManager?.getLanguage() || 'ar';
+            const confirmMsg = LanguageManager?.translate('dashboard.patient.alerts.confirm_reload_settings') || 'Are you sure you want to reload settings from database?';
+            if (confirm(confirmMsg)) {
                 // Reload original values from database
                 loadUserSettings();
-                alert('Settings reloaded from database.');
+                const alertMsg = LanguageManager?.translate('dashboard.patient.alerts.settings_reloaded') || 'Settings reloaded from database.';
+                alert(alertMsg);
             }
         }
 
         function changePassword() {
-            alert('Password change functionality will redirect to secure password update page.');
+            const currentLang = LanguageManager?.getLanguage() || 'ar';
+            const alertMsg = LanguageManager?.translate('dashboard.patient.alerts.password_change_redirect') || 'Password change functionality will redirect to secure password update page.';
+            alert(alertMsg);
         }
 
         function enableTwoFactor() {
-            alert('Two-factor authentication setup will be implemented.');
+            const currentLang = LanguageManager?.getLanguage() || 'ar';
+            const alertMsg = LanguageManager?.translate('dashboard.patient.alerts.two_factor_setup') || 'Two-factor authentication setup will be implemented.';
+            alert(alertMsg);
         }
         
         function viewAllAppointments() {
@@ -1030,7 +1048,13 @@
             console.log('Patient dashboard initializing...');
             // Ensure title is correct for patient dashboard
             document.title = 'Patient Dashboard - Sahatak';
+            
+            // Initialize dashboard translations first
             await DashboardTranslations.initializeDashboard('patient');
+            
+            // Apply current language to the dashboard
+            const currentLang = LanguageManager.getLanguage() || 'ar';
+            DashboardTranslations.updatePatientDashboard(currentLang);
             
             // Initialize video consultation dashboard
             if (typeof VideoConsultationDashboard !== 'undefined') {
