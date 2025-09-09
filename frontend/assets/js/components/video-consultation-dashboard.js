@@ -446,11 +446,27 @@ const VideoConsultationDashboard = {
         let existingButton = appointmentCard.querySelector('.video-consultation-btn');
         console.log(`🔍 Existing video button for appointment ${appointmentId}:`, existingButton);
         
+        // Check for inconsistent state that needs fixing
+        const needsStatusFix = sessionData.appointment_status === 'in_progress' && 
+                              sessionData.session_status === 'waiting' && 
+                              sessionData.session_started_at;
+        
+        if (needsStatusFix) {
+            console.log(`🚨 Found inconsistent state for appointment ${appointmentId} - forcing status reset`);
+            console.log(`   appointment_status: ${sessionData.appointment_status}`);
+            console.log(`   session_status: ${sessionData.session_status}`);
+            console.log(`   session_started_at: ${sessionData.session_started_at}`);
+            
+            // Force call to video/end endpoint to reset status
+            this.forceSessionEnd(appointmentId);
+        }
+        
         // Only update if there's actually a meaningful change
         const cachedStatus = this.sessionStatusCache.get(appointmentId);
         if (cachedStatus && 
             cachedStatus.session_status === sessionData.session_status &&
-            cachedStatus.appointment_status === sessionData.appointment_status) {
+            cachedStatus.appointment_status === sessionData.appointment_status &&
+            !needsStatusFix) {
             console.log(`⏭️ Skipping UI update for appointment ${appointmentId} - no status change detected`);
             return;
         }
@@ -516,6 +532,29 @@ const VideoConsultationDashboard = {
             return `${minutes}:${seconds.toString().padStart(2, '0')}`;
         }
         return '0:00';
+    },
+    
+    // Force session end for appointments in inconsistent state
+    async forceSessionEnd(appointmentId) {
+        try {
+            console.log(`🚨 Forcing session end for appointment ${appointmentId}`);
+            
+            const response = await ApiHelper.makeRequest(
+                `/appointments/${appointmentId}/video/end`,
+                { method: 'POST' }
+            );
+            
+            console.log(`✅ Forced session end successful for appointment ${appointmentId}:`, response);
+            
+            // Trigger status refresh after a short delay
+            setTimeout(() => {
+                console.log(`🔄 Refreshing status after forced session end for appointment ${appointmentId}`);
+                this.checkAppointmentStatus(appointmentId);
+            }, 1000);
+            
+        } catch (error) {
+            console.error(`❌ Failed to force session end for appointment ${appointmentId}:`, error);
+        }
     },
     
     // Start monitoring session status for active video appointments
