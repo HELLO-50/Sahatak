@@ -149,7 +149,7 @@ def create_appointment():
                 message='Please complete your medical history before booking an appointment',
                 status_code=428,  # Precondition Required
                 error_code='MEDICAL_HISTORY_REQUIRED',
-                data={'redirect': '/medical/patient/medical-history-form.html'}
+                details={'redirect': '/medical/patient/medical-history-form.html'}
             )
         
         data = request.get_json()
