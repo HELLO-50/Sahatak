@@ -217,19 +217,13 @@ const VideoConsultationDashboard = {
     // Check video session status
     async checkVideoSessionStatus(appointmentId) {
         try {
-            console.log(`🔍 Checking video session status for appointment ${appointmentId}...`);
             const response = await ApiHelper.makeRequest(
                 `/appointments/${appointmentId}/video/status`,
                 'GET'
             );
             
-            console.log(`📡 API Response for appointment ${appointmentId}:`, response);
-            
             if (response.success) {
-                console.log(`💾 Caching session status for appointment ${appointmentId}:`, response.data);
                 this.sessionStatusCache.set(appointmentId, response.data);
-                
-                console.log(`🔄 Updating UI for appointment ${appointmentId}...`);
                 this.updateAppointmentVideoUI(appointmentId, response.data);
                 
                 return response.data;
@@ -431,20 +425,14 @@ const VideoConsultationDashboard = {
     
     // Update appointment card with video consultation UI elements
     updateAppointmentVideoUI(appointmentId, sessionData) {
-        console.log(`🎨 updateAppointmentVideoUI called for appointment ${appointmentId} with data:`, sessionData);
-        console.log(`🔍 DEBUG session_status: "${sessionData.session_status}" (type: ${typeof sessionData.session_status})`);
-        
         const appointmentCard = document.querySelector(`[data-appointment-id="${appointmentId}"]`);
         if (!appointmentCard) {
             console.error(`❌ Could not find appointment card for ID ${appointmentId}`);
             return;
         }
         
-        console.log(`🔎 Found appointment card for ${appointmentId}:`, appointmentCard);
-        
         // Check if video consultation button already exists
         let existingButton = appointmentCard.querySelector('.video-consultation-btn');
-        console.log(`🔍 Existing video button for appointment ${appointmentId}:`, existingButton);
         
         // Check for inconsistent state that needs fixing
         const needsStatusFix = sessionData.appointment_status === 'in_progress' && 
@@ -453,10 +441,6 @@ const VideoConsultationDashboard = {
         
         if (needsStatusFix) {
             console.log(`🚨 Found inconsistent state for appointment ${appointmentId} - forcing status reset`);
-            console.log(`   appointment_status: ${sessionData.appointment_status}`);
-            console.log(`   session_status: ${sessionData.session_status}`);
-            console.log(`   session_started_at: ${sessionData.session_started_at}`);
-            
             // Force call to video/end endpoint to reset status
             this.forceSessionEnd(appointmentId);
         }
@@ -467,19 +451,15 @@ const VideoConsultationDashboard = {
             cachedStatus.session_status === sessionData.session_status &&
             cachedStatus.appointment_status === sessionData.appointment_status &&
             !needsStatusFix) {
-            console.log(`⏭️ Skipping UI update for appointment ${appointmentId} - no status change detected`);
-            return;
+            return; // Skip UI update silently
         }
         
         // Add video consultation actions if not present
         let actionsContainer = appointmentCard.querySelector('.video-consultation-actions');
         if (!actionsContainer) {
-            console.log(`➕ Creating new video-consultation-actions container for appointment ${appointmentId}`);
             actionsContainer = document.createElement('div');
             actionsContainer.className = 'video-consultation-actions';
             appointmentCard.appendChild(actionsContainer);
-        } else {
-            console.log(`♻️ Using existing video-consultation-actions container for appointment ${appointmentId}`);
         }
         
         // Preserve existing button content and only add session info
@@ -567,33 +547,29 @@ const VideoConsultationDashboard = {
     
     // Check status for all active video sessions
     async checkActiveVideoSessions() {
-        console.log('🔄 VideoConsultationDashboard: Running 30-second status check...');
         const videoAppointments = document.querySelectorAll('.appointment-card.video-appointment');
-        console.log(`📹 Found ${videoAppointments.length} video appointments to check:`, videoAppointments);
-        
         const checkPromises = [];
         
-        videoAppointments.forEach((card, index) => {
+        videoAppointments.forEach((card) => {
             const appointmentId = card.dataset.appointmentId;
             const appointmentStatus = card.dataset.appointmentStatus;
-            console.log(`📋 Video appointment ${index + 1}: ID=${appointmentId}, Status=${appointmentStatus}`, card);
             
             if (appointmentId) {
                 // Only monitor appointments that are in_progress or about to start (confirmed)
                 // Skip purely scheduled appointments to reduce unnecessary API calls
                 if (appointmentStatus === 'in_progress' || appointmentStatus === 'confirmed') {
-                    console.log(`✅ Monitoring appointment ${appointmentId} (status: ${appointmentStatus})`);
                     checkPromises.push(this.checkVideoSessionStatus(appointmentId));
-                } else {
-                    console.log(`⏭️ Skipping appointment ${appointmentId} monitoring (status: ${appointmentStatus})`);
                 }
             }
         });
         
+        // Only log if there are active sessions to check
+        if (checkPromises.length > 0) {
+            console.log(`🔄 VideoConsultationDashboard: Checking ${checkPromises.length} active video sessions`);
+        }
+        
         try {
-            console.log(`🚀 Starting ${checkPromises.length} status checks (${videoAppointments.length - checkPromises.length} skipped)...`);
             await Promise.all(checkPromises);
-            console.log('✅ All status checks completed');
         } catch (error) {
             console.error('❌ Batch session status check error:', error);
         }
