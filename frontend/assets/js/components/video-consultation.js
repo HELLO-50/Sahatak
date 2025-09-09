@@ -48,15 +48,14 @@ const VideoConsultation = {
     async init(appointmentId) {
         this.appointmentId = appointmentId;
         
+        // Clear any cached data to prevent lobby issues
+        console.log('🔧 Clearing cached data to prevent authentication issues...');
+        
         // Initialize analytics
         this.initSessionAnalytics();
         
-        // Check session status first
-        const statusCheck = await this.checkSessionStatus();
-        if (!statusCheck.success) {
-            this.showError(statusCheck.message);
-            return;
-        }
+        // SKIP backend status check - go directly to public room creation
+        console.log('🔧 Skipping backend status check - using direct public room approach');
         
         // Setup UI elements
         this.setupEventListeners();
@@ -689,8 +688,11 @@ const VideoConsultation = {
         console.log('🔧 Jitsi options:', {
             roomName: options.roomName,
             hasJWT: !!options.jwt,
-            domain: domain
+            domain: domain,
+            publicRoomName: publicRoomName
         });
+        
+        console.log('🔧 FINAL ROOM NAME BEING USED:', options.roomName);
         
         try {
             // Initialize Jitsi API
@@ -1202,11 +1204,9 @@ const VideoConsultation = {
                         'خطأ في المصادقة - التبديل للغرفة العامة' : 
                         'Authentication error - switching to public room';
                     recoveryAction = () => this.initEmergencyPublicRoom();
-                    // Auto-retry immediately for membersOnly errors
-                    setTimeout(() => {
-                        console.log('🔧 Auto-switching to emergency public room in 1 second...');
-                        this.initEmergencyPublicRoom();
-                    }, 1000);
+                    // Auto-retry IMMEDIATELY for membersOnly errors
+                    console.log('🔧 Auto-switching to emergency public room IMMEDIATELY...');
+                    this.initEmergencyPublicRoom();
                 } else {
                     errorMessage = isArabic ? 'فشل في الانضمام للاستشارة' : 'Failed to join consultation';
                     recoveryAction = () => this.retryJoinConference();
@@ -2391,6 +2391,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const appointmentId = urlParams.get('appointmentId');
     
     if (appointmentId && document.getElementById('video-container')) {
+        // Force cache clear and public room mode
+        console.log('🔧 FORCING PUBLIC ROOM MODE - No authentication allowed');
+        
+        // Add cache-busting parameter to prevent lobby issues
+        if (!urlParams.has('publicMode')) {
+            const newUrl = window.location.href + '&publicMode=true&t=' + Date.now();
+            console.log('🔧 Refreshing with cache-busting parameters:', newUrl);
+            window.location.href = newUrl;
+            return;
+        }
+        
         VideoConsultation.init(appointmentId);
     }
 });

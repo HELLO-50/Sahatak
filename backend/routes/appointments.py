@@ -1057,9 +1057,12 @@ def end_video_session(appointment_id):
         appointment.session_ended_at = datetime.utcnow()
         appointment.session_duration = session_duration
         
+        # Reset appointment status to scheduled so it can be restarted
+        appointment.status = 'scheduled'
+        
         # IMPORTANT: /video/end should NOT mark appointment as completed
         # Use the new /complete endpoint for that
-        # This endpoint only ends the video session
+        # This endpoint only ends the video session and allows restart
         
         db.session.commit()
         
