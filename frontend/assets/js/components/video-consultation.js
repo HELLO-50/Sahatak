@@ -673,14 +673,33 @@ const VideoConsultation = {
         const sanitizedUserName = userName.replace(/[^a-zA-Z0-9]/g, '');
         const publicRoomName = `public${this.appointmentId}${sanitizedUserName}`;
         
-        // Merge configurations for public room only
+        // Merge configurations for public room only - ENSURE LOBBY IS ALWAYS DISABLED
+        const finalConfig = { 
+            ...defaultConfig, 
+            ...(sessionData.config || {}),
+            // Force lobby to be completely disabled - override any backend settings
+            lobby: {
+                enabled: false,
+                autoKnock: false,
+                enableChat: false
+            },
+            enableLobbyChat: false,
+            disableLobby: true,
+            authentication: { enabled: false },
+            roomConfig: { 
+                enableLobby: false,
+                password: null,
+                requireAuth: false
+            }
+        };
+        
         const options = {
             roomName: publicRoomName, // Use our public room name instead of backend room name
             parentNode: document.getElementById('jitsi-container'),
             userInfo: {
                 displayName: `${AuthStorage.get('name') || 'User'} (Appointment ${this.appointmentId})`
             },
-            configOverwrite: { ...defaultConfig, ...(sessionData.config || {}) },
+            configOverwrite: finalConfig,
             interfaceConfigOverwrite: { ...defaultInterfaceConfig, ...(sessionData.interface_config || {}) }
             // NO JWT TOKEN - free Jitsi only supports public rooms
         };
@@ -1654,8 +1673,13 @@ const VideoConsultation = {
                     enableNoisyMicDetection: false,
                     enableUserRolesBasedOnToken: false,
                     enableInsecureRoomNameWarning: false,
-                    // Force public access
-                    lobby: { enabled: false },
+                    // Force public access - COMPLETE LOBBY DISABLE
+                    lobby: { 
+                        enabled: false,
+                        autoKnock: false,
+                        enableChat: false 
+                    },
+                    disableLobby: true,
                     authentication: { enabled: false },
                     roomConfig: { 
                         enableLobby: false,
@@ -2278,6 +2302,15 @@ const VideoConsultation = {
     
     // Send analytics event to backend
     async sendAnalyticsEvent(event) {
+        // Skip analytics calls in public mode to avoid 401 errors
+        const urlParams = new URLSearchParams(window.location.search);
+        const isPublicMode = urlParams.get('publicMode') === 'true';
+        
+        if (isPublicMode) {
+            console.log('🔧 Skipping analytics call in public mode:', event.type);
+            return;
+        }
+        
         try {
             await ApiHelper.makeRequest(
                 `/appointments/${this.appointmentId}/video/analytics`,
@@ -2334,6 +2367,15 @@ const VideoConsultation = {
     
     // Send final analytics summary
     async sendFinalAnalytics() {
+        // Skip analytics calls in public mode to avoid 401 errors
+        const urlParams = new URLSearchParams(window.location.search);
+        const isPublicMode = urlParams.get('publicMode') === 'true';
+        
+        if (isPublicMode) {
+            console.log('🔧 Skipping final analytics call in public mode');
+            return;
+        }
+        
         try {
             await ApiHelper.makeRequest(
                 `/appointments/${this.appointmentId}/video/analytics/summary`,
