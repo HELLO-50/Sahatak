@@ -79,7 +79,7 @@ const VideoConsultationDashboard = {
                 await this.checkVideoSessionStatus(appointmentId);
                 
                 // Open video consultation in a new window
-                const videoUrl = `../../pages/appointments/video-consultation.html?appointmentId=${appointmentId}`;
+                const videoUrl = `${window.location.origin}/frontend/pages/appointments/video-consultation.html?appointmentId=${appointmentId}`;
                 console.log('Opening video consultation in new window:', videoUrl);
                 
                 // Use setTimeout to allow UI update to complete first
@@ -115,7 +115,7 @@ const VideoConsultationDashboard = {
             
             if (response.success) {
                 // Open video consultation in a new window
-                const videoUrl = `../../pages/appointments/video-consultation.html?appointmentId=${appointmentId}`;
+                const videoUrl = `${window.location.origin}/frontend/pages/appointments/video-consultation.html?appointmentId=${appointmentId}`;
                 console.log('Opening video consultation in new window:', videoUrl);
                 
                 const windowFeatures = 'width=1200,height=800,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=no,directories=no,status=no';
