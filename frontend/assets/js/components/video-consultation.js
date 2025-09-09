@@ -640,8 +640,8 @@ const VideoConsultation = {
         // Determine correct navigation paths based on user type
         const userType = AuthStorage.get('type');
         const dashboardPath = userType === 'doctor' 
-            ? '../dashboard/doctor.html'
-            : '../dashboard/patient.html';
+            ? `${window.location.origin}/Sahatak/frontend/pages/dashboard/doctor.html`
+            : `${window.location.origin}/Sahatak/frontend/pages/dashboard/patient.html`;
         
         const appointmentPath = './appointment-list.html';
         
@@ -1527,8 +1527,8 @@ const VideoConsultation = {
             // Fallback navigation
             const userType = AuthStorage.get('type');
             const dashboardPath = userType === 'doctor' 
-                ? '../dashboard/doctor.html'
-                : '../dashboard/patient.html';
+                ? `${window.location.origin}/Sahatak/frontend/pages/dashboard/doctor.html`
+                : `${window.location.origin}/Sahatak/frontend/pages/dashboard/patient.html`;
             window.location.href = dashboardPath;
         }
     },
