@@ -138,12 +138,10 @@ const Dashboard = {
      * Load appointments from backend
      */
     async loadAppointments() {
-        document.title = '🚀 Loading appointments...';
         console.log('🚀 loadAppointments called - NEW VERSION');
         try {
             const response = await ApiHelper.makeRequest('/appointments/');
             console.log('🔍 Full appointments API response:', response);
-            document.title = `📊 Got ${response.data ? (Array.isArray(response.data) ? response.data.length : 'non-array') : 0} appointments`;
             
             if (response.data) {
                 // Ensure data is always an array
