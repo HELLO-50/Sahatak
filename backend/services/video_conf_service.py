@@ -121,10 +121,10 @@ class VideoConferenceService:
             "enableClosePage": False,
             "disableInviteFunctions": True,  # Disable external invites
             "disableRemoteMute": False,
-            "enableLobby": True,  # Enable waiting room
+            "enableLobby": False,  # Disable waiting room for public Jitsi
             "requireDisplayName": True,
             "enableInsecureRoomNameWarning": False,
-            "prejoinPageEnabled": True,  # Show pre-join screen
+            "prejoinPageEnabled": False,  # Disable pre-join for direct access
             "disableThirdPartyRequests": True,
             "enableNoisyMicDetection": True,
             "resolution": 720,  # Default video quality
