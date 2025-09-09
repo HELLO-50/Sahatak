@@ -629,6 +629,19 @@
         "no_prescriptions": "لا توجد وصفات طبية نشطة",
         "no_records": "لا توجد سجلات طبية متاحة"
       },
+      "loading": {
+        "appointments": "جاري تحميل المواعيد...",
+        "health_data": "جاري تحميل البيانات الصحية...",
+        "prescriptions": "جاري تحميل الوصفات الطبية...",
+        "medical_records": "جاري تحميل السجلات الطبية...",
+        "general": "جاري التحميل..."
+      },
+      "sections": {
+        "upcoming_appointments": "المواعيد القادمة",
+        "health_summary": "ملخص الحالة الصحية",
+        "active_prescriptions": "الوصفات الطبية النشطة",
+        "medical_records": "السجلات الطبية"
+      },
       "no_active_prescriptions": "لا توجد وصفات طبية نشطة",
       "no_medical_records": "لا توجد سجلات طبية",
       "active_prescriptions_title": "الوصفات النشطة",

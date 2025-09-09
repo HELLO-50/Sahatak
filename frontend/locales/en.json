@@ -626,8 +626,21 @@
       },
       "no_data": {
         "no_appointments": "No upcoming appointments",
-        "no_prescriptions": "No active prescriptions",
+        "no_prescriptions": "No active prescriptions", 
         "no_records": "No medical records available"
+      },
+      "loading": {
+        "appointments": "Loading appointments...",
+        "health_data": "Loading health data...",
+        "prescriptions": "Loading prescriptions...",
+        "medical_records": "Loading medical records...",
+        "general": "Loading..."
+      },
+      "sections": {
+        "upcoming_appointments": "Upcoming Appointments",
+        "health_summary": "Health Summary",
+        "active_prescriptions": "Active Prescriptions",
+        "medical_records": "Medical Records"
       },
       "no_active_prescriptions": "No active prescriptions",
       "no_medical_records": "No medical records",
