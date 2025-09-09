@@ -72,16 +72,20 @@ const VideoConsultationDashboard = {
             console.log('Video start response:', response);
             
             if (response && response.success) {
+                // Update UI first, then navigate
+                console.log('Video session started successfully, updating UI...');
+                
+                // Refresh the appointment status to update button
+                await this.checkVideoSessionStatus(appointmentId);
+                
                 // Navigate to video consultation page
                 const videoUrl = `../../pages/appointments/video-consultation.html?appointmentId=${appointmentId}`;
                 console.log('Navigating to:', videoUrl);
-                console.log('Current location:', window.location.href);
-                window.location.href = videoUrl;
-                // Add a fallback in case navigation doesn't work
+                
+                // Use setTimeout to allow UI update to complete first
                 setTimeout(() => {
-                    console.log('Navigation might have failed, trying window.open');
-                    window.open(videoUrl, '_self');
-                }, 1000);
+                    window.location.href = videoUrl;
+                }, 500);
             } else {
                 console.error('Response not successful:', response);
                 throw new Error(response?.message || 'Failed to start video consultation');
@@ -145,7 +149,16 @@ const VideoConsultationDashboard = {
         const canStart = appointment.status === 'scheduled' || appointment.status === 'confirmed';
         const isInProgress = appointment.status === 'in_progress';
         
+        console.log(`Generating button for appointment ${appointment.id}:`, {
+            userType,
+            status: appointment.status,
+            session_status: appointment.session_status,
+            canStart,
+            isInProgress
+        });
+        
         if (!canStart && !isInProgress) {
+            console.log(`No button for appointment ${appointment.id} - status: ${appointment.status}`);
             return '';
         }
         
