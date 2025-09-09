@@ -1057,12 +1057,18 @@ def end_video_session(appointment_id):
         appointment.session_ended_at = datetime.utcnow()
         appointment.session_duration = session_duration
         
-        # Reset appointment status to scheduled so it can be restarted
-        appointment.status = 'scheduled'
+        # Keep appointment as in_progress - doctor can restart video or complete consultation
+        # Only reset to scheduled if no session was actually started
+        if appointment.status == 'confirmed':
+            appointment.status = 'scheduled'  # If never started, go back to scheduled
+        else:
+            # If consultation was in progress, keep it in progress
+            # Doctor needs to explicitly use /complete endpoint to end consultation
+            appointment.status = 'in_progress'
         
         # IMPORTANT: /video/end should NOT mark appointment as completed
         # Use the new /complete endpoint for that
-        # This endpoint only ends the video session and allows restart
+        # This endpoint only ends the video session, consultation continues
         
         db.session.commit()
         
