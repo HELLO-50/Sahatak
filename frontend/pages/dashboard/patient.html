@@ -1028,6 +1028,8 @@
 
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('Patient dashboard initializing...');
+            // Ensure title is correct for patient dashboard
+            document.title = 'Patient Dashboard - Sahatak';
             await DashboardTranslations.initializeDashboard('patient');
             
             // Initialize video consultation dashboard
