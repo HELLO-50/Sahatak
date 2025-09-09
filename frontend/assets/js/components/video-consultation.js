@@ -636,7 +636,7 @@ const VideoConsultation = {
             backend_config_loaded: !!backendConfig
         });
         
-        // Use backend config or fallback to hardcoded defaults
+        // Use backend config or fallback to completely public defaults
         const defaultConfig = backendConfig?.config || {
             enableWelcomePage: false,
             enableClosePage: false,
@@ -644,14 +644,16 @@ const VideoConsultation = {
             startWithAudioMuted: false,
             startWithVideoMuted: false,
             requireDisplayName: false,
+            prejoinPageEnabled: false,
             // COMPLETELY DISABLE ALL LOBBY FEATURES
+            enableLobby: false,
             enableLobbyChat: false,
             lobby: {
                 enabled: false,
                 autoKnock: false,
                 enableChat: false
             },
-            // Force public room
+            // Force public room settings
             roomConfig: {
                 enableLobby: false,
                 password: null,
@@ -665,11 +667,21 @@ const VideoConsultation = {
             disableLobby: true,
             enableUserRolesBasedOnToken: false,
             enableInsecureRoomNameWarning: false,
-            // Force guest access
+            // Force guest access without restrictions
             enableGuestDomain: true,
+            enableGuests: true,
+            guestsAllowed: true,
             // Disable moderation features that might trigger lobby
             disableModeratorIndicator: true,
-            disableRemoteMute: true
+            disableRemoteMute: true,
+            enableNoAudioSignal: false,
+            enableNoisyMicDetection: false,
+            // Additional security bypass options
+            enableClosePage: false,
+            disableThirdPartyRequests: false,
+            // Bypass any security checks that might enable lobby
+            skipPrejoin: true,
+            hideDisplayName: false
         };
         
         // Use backend interface config or fallback to hardcoded defaults
@@ -703,19 +715,31 @@ const VideoConsultation = {
         const finalConfig = { 
             ...defaultConfig, 
             ...(sessionData.config || {}),
-            // Force lobby to be completely disabled - override any backend settings
-            lobby: {
-                enabled: false,
-                autoKnock: false,
-                enableChat: false
-            },
+            // TRIPLE FORCE: lobby to be completely disabled - override any backend settings
+            lobby: false, // Simple boolean disable
+            enableLobby: false,
+            lobbyEnabled: false,
             enableLobbyChat: false,
+            lobbyMode: false,
             disableLobby: true,
             authentication: { enabled: false },
             roomConfig: { 
                 enableLobby: false,
                 password: null,
                 requireAuth: false
+            },
+            // Override any membership or authentication requirements
+            membersOnly: false,
+            membersOnlyEnabled: false,
+            // Force public room access
+            publicRoom: true,
+            guestAccess: true,
+            allowGuests: true,
+            // Bypass all security features that might trigger lobby
+            security: {
+                enabled: false,
+                lobby: false,
+                password: false
             }
         };
         
