@@ -529,7 +529,7 @@ const VideoConsultationDashboard = {
             // Trigger status refresh after a short delay
             setTimeout(() => {
                 console.log(`🔄 Refreshing status after forced session end for appointment ${appointmentId}`);
-                this.checkAppointmentStatus(appointmentId);
+                this.checkVideoSessionStatus(appointmentId);
             }, 1000);
             
         } catch (error) {
