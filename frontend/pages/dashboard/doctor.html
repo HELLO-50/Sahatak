@@ -1373,19 +1373,21 @@
                         // Create activity entries from recent appointments
                         const recentActivities = [];
                         
-                        // Add recently scheduled appointments
+                        // Add ALL recently scheduled appointments (not just 2)
                         const recentScheduled = appointments.filter(apt => 
                             apt.status === 'scheduled' && 
                             new Date() - new Date(apt.created_at || apt.appointment_date) < 7 * 24 * 60 * 60 * 1000 // Last 7 days
-                        ).slice(0, 2);
+                        );
                         
                         recentScheduled.forEach(apt => {
                             const createdDate = new Date(apt.created_at || apt.appointment_date);
                             recentActivities.push({
+                                id: `scheduled_${apt.id}_${createdDate.getTime()}`, // Unique ID for each activity
                                 type: 'appointment_scheduled',
                                 message: getActivityMessage('appointment_scheduled', apt.patient_name || 'Patient'),
                                 date: createdDate,
-                                icon: 'bi-calendar-plus'
+                                icon: 'bi-calendar-plus',
+                                appointmentId: apt.id
                             });
                         });
                         
@@ -1400,15 +1402,17 @@
                                 (apt.session_status !== 'ended' && apt.session_status !== 'disconnected') // Not just a video disconnect
                             );
                             return isProperlyCompleted && isRecent;
-                        }).slice(0, 2);
+                        });
                         
                         recentCompleted.forEach(apt => {
                             const completedDate = new Date(apt.updated_at || apt.appointment_date);
                             recentActivities.push({
+                                id: `completed_${apt.id}_${completedDate.getTime()}`,
                                 type: 'appointment_completed',
                                 message: getActivityMessage('appointment_completed', apt.patient_name || 'Patient'),
                                 date: completedDate,
-                                icon: 'bi-check-circle'
+                                icon: 'bi-check-circle',
+                                appointmentId: apt.id
                             });
                         });
                         
@@ -1418,30 +1422,49 @@
                             const sessionEnded = apt.session_status === 'ended' || apt.session_status === 'disconnected';
                             const isRecent = apt.session_updated_at && new Date() - new Date(apt.session_updated_at) < 2 * 60 * 60 * 1000; // Last 2 hours
                             return isActive && sessionEnded && isRecent;
-                        }).slice(0, 1);
+                        });
                         
                         recentVideoSessions.forEach(apt => {
                             const sessionDate = new Date(apt.session_updated_at);
                             recentActivities.push({
+                                id: `video_${apt.id}_${sessionDate.getTime()}`,
                                 type: 'video_session_ended',
                                 message: getActivityMessage('video_session_ended', apt.patient_name || 'Patient'),
                                 date: sessionDate,
-                                icon: 'bi-camera-video-off'
+                                icon: 'bi-camera-video-off',
+                                appointmentId: apt.id
                             });
                         });
                         
                         // Sort by date (most recent first)
                         recentActivities.sort((a, b) => b.date - a.date);
                         
-                        if (recentActivities.length > 0) {
-                            activityContainer.innerHTML = recentActivities.slice(0, 3).map(activity => {
+                        // Remove duplicate activities (same appointment ID and type)
+                        const uniqueActivities = [];
+                        const seen = new Set();
+                        recentActivities.forEach(activity => {
+                            const key = `${activity.appointmentId}_${activity.type}`;
+                            if (!seen.has(key)) {
+                                seen.add(key);
+                                uniqueActivities.push(activity);
+                            }
+                        });
+                        
+                        if (uniqueActivities.length > 0) {
+                            activityContainer.innerHTML = uniqueActivities.slice(0, 5).map(activity => {
                                 const timeAgo = getTimeAgo(activity.date);
+                                const formattedDate = activity.date.toLocaleString(undefined, {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                });
                                 return `
                                     <div class="activity-item d-flex align-items-start p-2 mb-2 bg-light rounded">
                                         <i class="bi ${activity.icon} text-primary me-3 mt-1"></i>
-                                        <div>
+                                        <div class="flex-grow-1">
                                             <div style="color: black;">${activity.message}</div>
-                                            <small class="text-muted">${timeAgo}</small>
+                                            <small class="text-muted" title="${formattedDate}">${timeAgo}</small>
                                         </div>
                                     </div>
                                 `;
