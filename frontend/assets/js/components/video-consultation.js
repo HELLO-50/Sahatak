@@ -483,7 +483,7 @@ const VideoConsultation = {
             this.showLoading();
             
             // Determine if starting or joining
-            const userType = AuthStorage.getUserType();
+            const userType = AuthStorage.get('type');
             const endpoint = userType === 'doctor' ? 
                 `/appointments/${this.appointmentId}/video/start` :
                 `/appointments/${this.appointmentId}/video/join`;
@@ -524,7 +524,7 @@ const VideoConsultation = {
             roomName: sessionData.room_name,
             parentNode: document.getElementById('jitsi-container'),
             userInfo: {
-                displayName: AuthStorage.getUser()?.full_name || 'User'
+                displayName: AuthStorage.get('name') || 'User'
             },
             configOverwrite: sessionData.config || {},
             interfaceConfigOverwrite: sessionData.interface_config || {},
@@ -638,7 +638,7 @@ const VideoConsultation = {
         const isArabic = currentLang === 'ar';
         
         // Determine correct navigation paths based on user type
-        const userType = AuthStorage.getUserType();
+        const userType = AuthStorage.get('type');
         const dashboardPath = userType === 'doctor' 
             ? '../dashboard/doctor.html'
             : '../dashboard/patient.html';
@@ -1525,7 +1525,7 @@ const VideoConsultation = {
             window.navigateToDashboard();
         } else {
             // Fallback navigation
-            const userType = AuthStorage.getUserType();
+            const userType = AuthStorage.get('type');
             const dashboardPath = userType === 'doctor' 
                 ? '../dashboard/doctor.html'
                 : '../dashboard/patient.html';
@@ -1548,7 +1548,7 @@ const VideoConsultation = {
         // Log session start
         this.logAnalyticsEvent('session_initialized', {
             appointment_id: this.appointmentId,
-            user_type: AuthStorage.getUserType(),
+            user_type: AuthStorage.get('type'),
             user_agent: navigator.userAgent,
             screen_resolution: `${screen.width}x${screen.height}`,
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -1734,7 +1734,7 @@ const VideoConsultation = {
                     method: 'POST',
                     body: JSON.stringify({
                         session_summary: this.sessionAnalytics,
-                        user_type: AuthStorage.getUserType()
+                        user_type: AuthStorage.get('type')
                     }),
                     headers: {
                         'Content-Type': 'application/json'

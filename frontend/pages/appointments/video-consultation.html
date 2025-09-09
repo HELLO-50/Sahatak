@@ -397,8 +397,9 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
         <div class="container">
             <a class="navbar-brand" href="/">
-                <img src="../../assets/images/logo.png" alt="Sahatak" height="40" onerror="this.style.display='none'">
-                <span class="fw-bold text-primary">Sahatak</span>
+                <span class="h4 mb-0 text-primary fw-bold">
+                    <i class="bi bi-heart-pulse me-2"></i>Sahatak
+                </span>
             </a>
             
             <div class="d-flex align-items-center">
@@ -479,9 +480,9 @@
         }
         
         // Set user name
-        const user = AuthStorage.getUser();
+        const user = AuthStorage.getAuthData();
         if (user) {
-            document.getElementById('user-name').textContent = user.full_name || 'User';
+            document.getElementById('user-name').textContent = user.name || 'User';
         }
         
         // Initialize language support
