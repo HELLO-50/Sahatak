@@ -800,9 +800,10 @@ const ApiHelper = {
                 window.SahatakLogger?.warn(`Slow API request: ${method} ${endpoint} took ${duration}ms`);
             }
             
-            // Check for session invalidation (but not during login attempts or messaging calls)
+            // Check for session invalidation (but not during login attempts, messaging calls, or video consultation pages)
             const isMessagingEndpoint = endpoint.includes('/messages') || endpoint.includes('/conversations');
-            const shouldTriggerLogout = !isLoginEndpoint && !isMessagingEndpoint && (response.status === 401 || (response.status === 302 && response.url.includes('/auth/login')));
+            const isVideoConsultationPage = window.location.pathname.includes('video-consultation.html');
+            const shouldTriggerLogout = !isLoginEndpoint && !isMessagingEndpoint && !isVideoConsultationPage && (response.status === 401 || (response.status === 302 && response.url.includes('/auth/login')));
             
             if (shouldTriggerLogout) {
                 console.log('🚨 Got 401/302 response for', endpoint, 'Status:', response.status);
@@ -819,13 +820,13 @@ const ApiHelper = {
             
             // Handle standardized API response format
             if (data.success === false) {
-                // Handle authentication errors (but not for messaging endpoints)
-                if (data.status_code === 401 && !isMessagingEndpoint) {
+                // Handle authentication errors (but not for messaging endpoints or video consultation pages)
+                if (data.status_code === 401 && !isMessagingEndpoint && !isVideoConsultationPage) {
                     console.log('🚨 API response 401 for non-messaging endpoint:', endpoint);
                     window.SahatakLogger?.warn('Authentication failed - auto logging out');
                     await this.handleSessionExpired();
-                } else if (data.status_code === 401 && isMessagingEndpoint) {
-                    console.log('🔸 Messaging 401 ignored to prevent logout loop');
+                } else if (data.status_code === 401 && (isMessagingEndpoint || isVideoConsultationPage)) {
+                    console.log('🔸 401 ignored for messaging or video consultation to prevent logout loop');
                 }
                 
                 const error = new ApiError(data.message, data.status_code, data.error_code, data.field);
