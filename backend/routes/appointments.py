@@ -1057,9 +1057,9 @@ def end_video_session(appointment_id):
         appointment.session_ended_at = datetime.utcnow()
         appointment.session_duration = session_duration
         
-        # Only doctors can mark appointment as completed
-        if is_doctor:
-            appointment.status = 'completed'
+        # IMPORTANT: /video/end should NOT mark appointment as completed
+        # Use the new /complete endpoint for that
+        # This endpoint only ends the video session
         
         db.session.commit()
         
@@ -1087,6 +1087,60 @@ def end_video_session(appointment_id):
         db.session.rollback()
         app_logger.error(f"End video session error: {str(e)}")
         return APIResponse.internal_error(message='Failed to end video session')
+
+
+@appointments_bp.route('/<int:appointment_id>/complete', methods=['POST'])
+@api_login_required
+def complete_appointment(appointment_id):
+    """Complete appointment consultation"""
+    try:
+        # Get appointment
+        appointment = Appointment.query.filter_by(id=appointment_id).first()
+        
+        if not appointment:
+            return APIResponse.not_found(message='Appointment not found')
+        
+        # Check permissions (only doctor can complete appointment)
+        if current_user.user_type != 'doctor' or appointment.doctor_id != current_user.id:
+            return APIResponse.forbidden(message='Only the assigned doctor can complete this appointment')
+        
+        # Check if appointment can be completed
+        if appointment.status == 'completed':
+            return APIResponse.bad_request(message='Appointment already completed')
+        
+        if appointment.status not in ['scheduled', 'in_progress']:
+            return APIResponse.bad_request(message='Appointment cannot be completed in its current state')
+        
+        # Complete the appointment
+        appointment.status = 'completed'
+        appointment.completed_at = datetime.utcnow()
+        
+        db.session.commit()
+        
+        # Log completion activity
+        from services.video_conf_service import VideoConferenceService
+        VideoConferenceService.log_session_event(
+            appointment_id=appointment_id,
+            event_type='complete',
+            user_id=current_user.id,
+            details={
+                'user_type': current_user.user_type,
+                'completed_at': appointment.completed_at.isoformat()
+            }
+        )
+        
+        return APIResponse.success(
+            data={
+                'status': appointment.status,
+                'completed_at': appointment.completed_at.isoformat()
+            },
+            message='Appointment completed successfully'
+        )
+        
+    except Exception as e:
+        db.session.rollback()
+        app_logger.error(f"Complete appointment error: {str(e)}")
+        return APIResponse.internal_error(message='Failed to complete appointment')
 
 
 @appointments_bp.route('/<int:appointment_id>/video/status', methods=['GET'])
