@@ -215,22 +215,22 @@
             if (!LanguageManager?.translate) return;
             
             // Update title and subtitle
-            updateElementText('dashboard-title', LanguageManager.translate('messaging.title'));
-            updateElementText('dashboard-subtitle', LanguageManager.translate('messaging.subtitle'));
+            updateElementText('dashboard-title', LanguageManager.translate('dashboard.doctor.quick_actions.communication'));
+            updateElementText('dashboard-subtitle', LanguageManager.translate('dashboard.doctor.quick_actions.communication_desc'));
             
             // Update navigation
-            updateElementText('back-to-dashboard', LanguageManager.translate('messaging.navigation.back_to_dashboard'));
+            updateElementText('back-to-dashboard', LanguageManager.translate('dashboard.doctor.nav.home'));
             
             // Update filters
-            updateElementText('patients-title', LanguageManager.translate('messaging.patients_title') || 'Patients');
-            updateElementText('filter-all', LanguageManager.translate('messaging.filters.all'));
-            updateElementText('filter-unread', LanguageManager.translate('messaging.filters.unread'));
-            updateElementText('filter-urgent', LanguageManager.translate('messaging.filters.urgent'));
+            updateElementText('patients-title', LanguageManager.translate('dashboard.doctor.nav.patients'));
+            updateElementText('filter-all', LanguageManager.translate('dashboard.doctor.buttons.all'));
+            updateElementText('filter-unread', LanguageManager.translate('dashboard.doctor.buttons.unread'));
+            updateElementText('filter-urgent', LanguageManager.translate('dashboard.doctor.buttons.urgent'));
             
             // Update search placeholder
             const searchInput = document.getElementById('patientSearch');
             if (searchInput) {
-                searchInput.placeholder = LanguageManager.translate('messaging.search_patients');
+                searchInput.placeholder = LanguageManager.translate('dashboard.doctor.search_placeholder');
             }
         }
         
