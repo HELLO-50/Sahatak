@@ -1309,6 +1309,7 @@
 
   "video_consultation": {
     "title": "Video Consultation",
+    "subtitle": "Secure medical consultation",
     "preparing": "Preparing for Consultation",
     "connecting": "Connecting to video session...",
     "initializing": "Initializing video call...",

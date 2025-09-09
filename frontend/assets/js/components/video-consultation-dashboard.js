@@ -462,9 +462,12 @@ const VideoConsultationDashboard = {
     }
 };
 
-// Initialize on DOM ready
+// Initialize on DOM ready (only on dashboard pages, not on video consultation page)
 document.addEventListener('DOMContentLoaded', () => {
-    VideoConsultationDashboard.init();
+    // Don't initialize on the actual video consultation page
+    if (!window.location.pathname.includes('video-consultation.html')) {
+        VideoConsultationDashboard.init();
+    }
 });
 
 // Cleanup on page unload

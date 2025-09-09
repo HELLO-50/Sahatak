@@ -611,8 +611,8 @@ const DashboardTranslations = {
             this.updateFooter(t);
         }
         
-        // Initialize dashboard data loading
-        if (typeof Dashboard !== 'undefined' && Dashboard.initialize) {
+        // Initialize dashboard data loading (only on actual dashboard pages)
+        if (typeof Dashboard !== 'undefined' && Dashboard.initialize && !window.location.pathname.includes('video-consultation.html')) {
             try {
                 await Dashboard.initialize();
             } catch (error) {

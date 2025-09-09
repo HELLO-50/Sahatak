@@ -202,8 +202,8 @@
                     
                     <!-- Title Section -->
                     <div class="col-lg-4 col-md-12 text-center mb-3 mb-lg-0">
-                        <h1 class="dashboard-title" id="consultation-title">Video Consultation</h1>
-                        <p class="dashboard-subtitle" id="consultation-subtitle">Secure medical consultation</p>
+                        <h1 class="dashboard-title" id="dashboard-title">Video Consultation</h1>
+                        <p class="dashboard-subtitle" id="dashboard-subtitle">Secure medical consultation</p>
                     </div>
                     
                     <!-- Status Section -->
@@ -323,20 +323,39 @@
             document.getElementById('user-name').textContent = user.name || 'User';
         }
         
-        // Initialize language support
+        // Initialize language support (inherit from dashboard)
         function initializeLanguageSupport() {
-            const currentLang = LanguageManager?.getLanguage() || 'ar';
+            const currentLang = LanguageManager?.getLanguage() || 'en';
             
-            // Apply translations
-            if (typeof VideoConsultationTranslations !== 'undefined') {
-                VideoConsultationTranslations.updateTranslations(currentLang);
+            // Apply video consultation translations
+            updateVideoConsultationTranslations(currentLang);
+        }
+
+        // Update video consultation translations
+        function updateVideoConsultationTranslations(lang) {
+            if (!LanguageManager.translations[lang]) return;
+            
+            const t = LanguageManager.translations[lang];
+            
+            // Update basic elements
+            if (document.getElementById('dashboard-title')) {
+                document.getElementById('dashboard-title').textContent = 
+                    t.video_consultation?.title || 'Video Consultation';
+            }
+            if (document.getElementById('dashboard-subtitle')) {
+                document.getElementById('dashboard-subtitle').textContent = 
+                    t.video_consultation?.subtitle || 'Secure medical consultation';
+            }
+            if (document.getElementById('status-text')) {
+                document.getElementById('status-text').textContent = 
+                    t.video_consultation?.connecting || 'Connecting...';
             }
             
-            // Update language button
-            const langBtn = document.getElementById('current-lang');
-            if (langBtn) {
-                langBtn.textContent = currentLang === 'ar' ? 'English' : 'العربية';
-            }
+            // Update RTL/LTR direction
+            document.documentElement.setAttribute('lang', lang);
+            document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+            
+            console.log(`Video consultation translations updated to: ${lang}`);
         }
         
         // Navigation functions
@@ -394,6 +413,16 @@
                 VideoConsultation.init(appointmentId);
             }
         }
+        
+        // Initialize translations when page loads
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Load translations first
+            if (LanguageManager && LanguageManager.loadTranslations) {
+                await LanguageManager.loadTranslations();
+            }
+            // Initialize language support
+            initializeLanguageSupport();
+        });
         
         // Control functions
         function toggleAudio() {
