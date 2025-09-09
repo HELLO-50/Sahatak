@@ -1141,3 +1141,138 @@ def get_video_session_status(appointment_id):
     except Exception as e:
         app_logger.error(f"Get video session status error: {str(e)}")
         return APIResponse.internal_error(message='Failed to get session status')
+
+
+@appointments_bp.route('/<int:appointment_id>/video/heartbeat', methods=['POST'])
+@api_login_required
+def video_session_heartbeat(appointment_id):
+    """Keep video session alive with heartbeat"""
+    try:
+        # Get appointment
+        appointment = Appointment.query.options(
+            joinedload(Appointment.doctor),
+            joinedload(Appointment.patient)
+        ).filter_by(id=appointment_id).first()
+        
+        if not appointment:
+            return APIResponse.not_found(message='Appointment not found')
+        
+        # Verify user is participant
+        is_doctor = (current_user.user_type == 'doctor' and 
+                    appointment.doctor.user_id == current_user.id)
+        is_patient = (current_user.user_type == 'patient' and 
+                     appointment.patient.user_id == current_user.id)
+        
+        if not (is_doctor or is_patient):
+            return APIResponse.forbidden(message='You are not authorized for this appointment')
+        
+        # Check if session is still active
+        if appointment.session_status in ['ended', 'failed']:
+            return APIResponse.validation_error(
+                field='session_status',
+                message='Video session has ended'
+            )
+        
+        # Update session status if connecting
+        if appointment.session_status == 'connecting':
+            appointment.session_status = 'connected'
+        
+        db.session.commit()
+        
+        return APIResponse.success(
+            data={
+                'session_status': appointment.session_status,
+                'active': appointment.session_status not in ['ended', 'failed', 'timeout'],
+                'heartbeat_updated': True
+            },
+            message='Heartbeat received'
+        )
+        
+    except Exception as e:
+        app_logger.error(f"Video heartbeat error: {str(e)}")
+        return APIResponse.internal_error(message='Heartbeat failed')
+
+
+@appointments_bp.route('/<int:appointment_id>/video/analytics', methods=['POST'])
+@api_login_required
+def video_analytics_event(appointment_id):
+    """Log video session analytics event"""
+    try:
+        # Get appointment
+        appointment = Appointment.query.filter_by(id=appointment_id).first()
+        
+        if not appointment:
+            return APIResponse.not_found(message='Appointment not found')
+        
+        # Verify user is participant
+        is_doctor = (current_user.user_type == 'doctor' and 
+                    appointment.doctor and appointment.doctor.user_id == current_user.id)
+        is_patient = (current_user.user_type == 'patient' and 
+                     appointment.patient and appointment.patient.user_id == current_user.id)
+        
+        if not (is_doctor or is_patient):
+            return APIResponse.forbidden(message='You are not authorized for this appointment')
+        
+        # Get event data from request
+        data = request.get_json() or {}
+        
+        # Log the analytics event
+        app_logger.info(
+            f"Video Analytics Event - Appointment: {appointment_id}, "
+            f"User: {current_user.id} ({current_user.user_type}), "
+            f"Event: {data.get('type', 'unknown')}, "
+            f"Data: {data.get('data', {})}"
+        )
+        
+        return APIResponse.success(
+            data={'logged': True},
+            message='Analytics event logged'
+        )
+        
+    except Exception as e:
+        app_logger.error(f"Video analytics error: {str(e)}")
+        return APIResponse.internal_error(message='Failed to log analytics event')
+
+
+@appointments_bp.route('/<int:appointment_id>/video/analytics/summary', methods=['POST'])
+@api_login_required
+def video_analytics_summary(appointment_id):
+    """Log video session analytics summary"""
+    try:
+        # Get appointment
+        appointment = Appointment.query.filter_by(id=appointment_id).first()
+        
+        if not appointment:
+            return APIResponse.not_found(message='Appointment not found')
+        
+        # Verify user is participant
+        is_doctor = (current_user.user_type == 'doctor' and 
+                    appointment.doctor and appointment.doctor.user_id == current_user.id)
+        is_patient = (current_user.user_type == 'patient' and 
+                     appointment.patient and appointment.patient.user_id == current_user.id)
+        
+        if not (is_doctor or is_patient):
+            return APIResponse.forbidden(message='You are not authorized for this appointment')
+        
+        # Get summary data from request
+        data = request.get_json() or {}
+        session_summary = data.get('session_summary', {})
+        user_type = data.get('user_type', current_user.user_type)
+        
+        # Log comprehensive session summary
+        app_logger.info(
+            f"Video Session Summary - Appointment: {appointment_id}, "
+            f"User: {current_user.id} ({user_type}), "
+            f"Duration: {session_summary.get('duration', 0)}ms, "
+            f"Events: {len(session_summary.get('connectionEvents', []))}, "
+            f"Quality Samples: {len(session_summary.get('qualityMetrics', []))}"
+        )
+        
+        return APIResponse.success(
+            data={'logged': True},
+            message='Analytics summary logged'
+        )
+        
+    except Exception as e:
+        app_logger.error(f"Video analytics summary error: {str(e)}")
+        return APIResponse.internal_error(message='Failed to log analytics summary')

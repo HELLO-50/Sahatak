@@ -1204,6 +1204,13 @@
                 if (appointmentsResponse.success) {
                     const appointments = appointmentsResponse.data.appointments;
                     
+                    // Ensure appointments is an array
+                    if (!Array.isArray(appointments)) {
+                        console.error('Got non-array appointment data:', appointments);
+                        console.error('Full response:', appointmentsResponse);
+                        return;
+                    }
+                    
                     // Count scheduled/confirmed appointments (upcoming)
                     const scheduledCount = appointments.filter(apt => 
                         ['scheduled', 'confirmed'].includes(apt.status) && 
@@ -1219,10 +1226,10 @@
                         apt.status === 'completed'
                     ).length;
                     
-                    // Get upcoming appointments for display
+                    // Get upcoming appointments for display (include in_progress for video consultations)
                     const upcomingAppointments = appointments.filter(apt => 
-                        ['scheduled', 'confirmed'].includes(apt.status) && 
-                        new Date(apt.appointment_date) > new Date()
+                        ['scheduled', 'confirmed', 'in_progress'].includes(apt.status) && 
+                        new Date(apt.appointment_date) > new Date(Date.now() - 24*60*60*1000) // Include today's appointments
                     ).sort((a, b) => new Date(a.appointment_date) - new Date(b.appointment_date));
                     
                     // Update appointments list
@@ -1410,6 +1417,55 @@
             }
         }
         
+        // Load waiting patients/pending messages
+        async function loadWaitingPatients() {
+            console.log('Loading waiting patients/pending messages...');
+            
+            try {
+                const messagesResponse = await ApiHelper.makeRequest('/messages/pending');
+                
+                const container = document.getElementById('waiting-patients-container');
+                if (!container) return;
+                
+                if (messagesResponse.success && messagesResponse.data && messagesResponse.data.length > 0) {
+                    const pendingMessages = messagesResponse.data;
+                    const currentLang = LanguageManager.getLanguage() || 'en';
+                    
+                    container.innerHTML = pendingMessages.slice(0, 3).map(msg => {
+                        const messageDate = new Date(msg.created_at || msg.timestamp);
+                        const timeAgo = getTimeAgo(messageDate);
+                        
+                        return `
+                            <div class="waiting-patient-item d-flex align-items-center p-2 mb-2 bg-light rounded">
+                                <div class="avatar-placeholder bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-person"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div style="color: black;"><strong>${msg.patient_name || msg.sender_name || 'Patient'}</strong></div>
+                                    <div class="text-muted small">${msg.message ? msg.message.substring(0, 50) + (msg.message.length > 50 ? '...' : '') : 'New message'}</div>
+                                    <small class="text-muted">${timeAgo}</small>
+                                </div>
+                                <div>
+                                    <span class="badge bg-warning">${currentLang === 'ar' ? 'انتظار' : 'Pending'}</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    const currentLang = LanguageManager.getLanguage() || 'en';
+                    container.innerHTML = `<p class="text-muted text-center py-3">${currentLang === 'ar' ? 'لا توجد رسائل في الانتظار' : 'No pending messages'}</p>`;
+                }
+            } catch (error) {
+                console.error('Error loading waiting patients:', error);
+                const container = document.getElementById('waiting-patients-container');
+                if (container) {
+                    const currentLang = LanguageManager.getLanguage() || 'en';
+                    const errorMsg = currentLang === 'ar' ? 'خطأ في تحميل الرسائل' : 'Error loading messages';
+                    container.innerHTML = `<p class="text-muted text-center py-3">${errorMsg}</p>`;
+                }
+            }
+        }
+        
         // Helper function to get relative time
         function getTimeAgo(date) {
             const now = new Date();
@@ -1429,6 +1485,7 @@
         window.refreshDoctorDashboardStats = function() {
             console.log('Refreshing doctor dashboard statistics...');
             loadDoctorDashboardStats();
+            loadWaitingPatients();
         };
 
         // Initialize doctor dashboard on page load
@@ -1507,6 +1564,7 @@
             // Load dashboard statistics after translations are loaded
             setTimeout(() => {
                 loadDoctorDashboardStats();
+                loadWaitingPatients();
             }, 1000); // Small delay to ensure API is ready
         });
     </script>

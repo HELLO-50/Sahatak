@@ -118,20 +118,28 @@ const VideoConsultationDashboard = {
     // Check video session status
     async checkVideoSessionStatus(appointmentId) {
         try {
+            console.log(`🔍 Checking video session status for appointment ${appointmentId}...`);
             const response = await ApiHelper.makeRequest(
                 `/appointments/${appointmentId}/video/status`,
                 'GET'
             );
             
+            console.log(`📡 API Response for appointment ${appointmentId}:`, response);
+            
             if (response.success) {
+                console.log(`💾 Caching session status for appointment ${appointmentId}:`, response.data);
                 this.sessionStatusCache.set(appointmentId, response.data);
+                
+                console.log(`🔄 Updating UI for appointment ${appointmentId}...`);
                 this.updateAppointmentVideoUI(appointmentId, response.data);
+                
                 return response.data;
             } else {
+                console.error(`❌ Session status check failed for appointment ${appointmentId}:`, response.message);
                 throw new Error(response.message || 'Failed to check session status');
             }
         } catch (error) {
-            console.error('Session status check error:', error);
+            console.error(`💥 Session status check error for appointment ${appointmentId}:`, error);
             return null;
         }
     },
@@ -263,15 +271,45 @@ const VideoConsultationDashboard = {
     
     // Update appointment card with video consultation UI elements
     updateAppointmentVideoUI(appointmentId, sessionData) {
+        console.log(`🎨 updateAppointmentVideoUI called for appointment ${appointmentId} with data:`, sessionData);
+        
         const appointmentCard = document.querySelector(`[data-appointment-id="${appointmentId}"]`);
-        if (!appointmentCard) return;
+        if (!appointmentCard) {
+            console.error(`❌ Could not find appointment card for ID ${appointmentId}`);
+            return;
+        }
+        
+        console.log(`🔎 Found appointment card for ${appointmentId}:`, appointmentCard);
+        
+        // Check if video consultation button already exists
+        let existingButton = appointmentCard.querySelector('.video-consultation-btn');
+        console.log(`🔍 Existing video button for appointment ${appointmentId}:`, existingButton);
+        
+        // Only update if there's actually a meaningful change
+        const cachedStatus = this.sessionStatusCache.get(appointmentId);
+        if (cachedStatus && 
+            cachedStatus.session_status === sessionData.session_status &&
+            cachedStatus.appointment_status === sessionData.appointment_status) {
+            console.log(`⏭️ Skipping UI update for appointment ${appointmentId} - no status change detected`);
+            return;
+        }
         
         // Add video consultation actions if not present
         let actionsContainer = appointmentCard.querySelector('.video-consultation-actions');
         if (!actionsContainer) {
+            console.log(`➕ Creating new video-consultation-actions container for appointment ${appointmentId}`);
             actionsContainer = document.createElement('div');
             actionsContainer.className = 'video-consultation-actions';
             appointmentCard.appendChild(actionsContainer);
+        } else {
+            console.log(`♻️ Using existing video-consultation-actions container for appointment ${appointmentId}`);
+        }
+        
+        // Preserve existing button content and only add session info
+        let existingContent = '';
+        if (existingButton) {
+            console.log(`💾 Preserving existing button content for appointment ${appointmentId}`);
+            existingContent = existingButton.outerHTML;
         }
         
         // Update session info
@@ -292,7 +330,12 @@ const VideoConsultationDashboard = {
             `;
         }
         
-        actionsContainer.innerHTML = sessionInfo;
+        // Combine existing button with session info
+        const updatedContent = existingContent + sessionInfo;
+        
+        console.log(`📝 Setting actions container content for appointment ${appointmentId}:`, updatedContent);
+        actionsContainer.innerHTML = updatedContent;
+        console.log(`✅ UI update completed for appointment ${appointmentId}`);
     },
     
     // Calculate session duration display
@@ -324,20 +367,35 @@ const VideoConsultationDashboard = {
     
     // Check status for all active video sessions
     async checkActiveVideoSessions() {
+        console.log('🔄 VideoConsultationDashboard: Running 30-second status check...');
         const videoAppointments = document.querySelectorAll('.appointment-card.video-appointment');
+        console.log(`📹 Found ${videoAppointments.length} video appointments to check:`, videoAppointments);
+        
         const checkPromises = [];
         
-        videoAppointments.forEach(card => {
+        videoAppointments.forEach((card, index) => {
             const appointmentId = card.dataset.appointmentId;
+            const appointmentStatus = card.dataset.appointmentStatus;
+            console.log(`📋 Video appointment ${index + 1}: ID=${appointmentId}, Status=${appointmentStatus}`, card);
+            
             if (appointmentId) {
-                checkPromises.push(this.checkVideoSessionStatus(appointmentId));
+                // Only monitor appointments that are in_progress or about to start (confirmed)
+                // Skip purely scheduled appointments to reduce unnecessary API calls
+                if (appointmentStatus === 'in_progress' || appointmentStatus === 'confirmed') {
+                    console.log(`✅ Monitoring appointment ${appointmentId} (status: ${appointmentStatus})`);
+                    checkPromises.push(this.checkVideoSessionStatus(appointmentId));
+                } else {
+                    console.log(`⏭️ Skipping appointment ${appointmentId} monitoring (status: ${appointmentStatus})`);
+                }
             }
         });
         
         try {
+            console.log(`🚀 Starting ${checkPromises.length} status checks (${videoAppointments.length - checkPromises.length} skipped)...`);
             await Promise.all(checkPromises);
+            console.log('✅ All status checks completed');
         } catch (error) {
-            console.error('Batch session status check error:', error);
+            console.error('❌ Batch session status check error:', error);
         }
     },
     

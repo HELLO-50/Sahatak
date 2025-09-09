@@ -832,7 +832,7 @@
                     console.log('🔍 Patient appointments received:', appointments);
                     
                     const upcomingAppointments = appointments.filter(apt => {
-                        const isValidStatus = ['scheduled', 'confirmed'].includes(apt.status);
+                        const isValidStatus = ['scheduled', 'confirmed', 'in_progress'].includes(apt.status);
                         const aptDate = new Date(apt.appointment_date);
                         const isUpcoming = aptDate >= today; // Include today's appointments
                         
