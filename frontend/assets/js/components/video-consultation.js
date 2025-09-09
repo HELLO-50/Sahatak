@@ -525,25 +525,45 @@ const VideoConsultation = {
             // Show loading
             this.showLoading();
             
-            // Determine if starting or joining
-            const userType = AuthStorage.get('type');
-            const endpoint = userType === 'doctor' ? 
-                `/appointments/${this.appointmentId}/video/start` :
-                `/appointments/${this.appointmentId}/video/join`;
+            // BYPASS BACKEND - Use direct public room creation for free Jitsi
+            console.log('🔧 Bypassing backend - creating direct public room');
             
-            const response = await ApiHelper.makeRequest(endpoint, { method: 'POST' });
+            // Create public room data directly
+            const userName = AuthStorage.get('name') || 'User';
+            const sanitizedUserName = userName.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '');
+            const publicRoomName = `sahatak-${sanitizedUserName}-appt${this.appointmentId}`;
             
-            if (!response.success) {
-                this.showError(response.message);
-                return;
-            }
+            const publicSessionData = {
+                room_name: publicRoomName,
+                jitsi_domain: 'meet.jit.si',
+                jwt_token: null, // No authentication for public rooms
+                config: {
+                    enableWelcomePage: false,
+                    enableClosePage: false,
+                    disableDeepLinking: true,
+                    startWithAudioMuted: false,
+                    startWithVideoMuted: this.audioOnlyMode || false,
+                    requireDisplayName: false,
+                    enableLobbyChat: false,
+                    lobby: { enabled: false },
+                    authentication: { enabled: false }
+                },
+                interface_config: {
+                    TOOLBAR_BUTTONS: [
+                        'microphone', 'camera', 'desktop', 'chat', 'raisehand',
+                        'participants-pane', 'tileview', 'toggle-camera', 'hangup'
+                    ]
+                }
+            };
+            
+            console.log('🔧 Using direct public room:', publicSessionData);
             
             // Store session data
-            this.sessionData = response.data;
-            this.roomName = response.data.room_name;
+            this.sessionData = publicSessionData;
+            this.roomName = publicRoomName;
             
-            // Initialize Jitsi
-            this.initJitsi(response.data);
+            // Initialize Jitsi directly with public room
+            this.initJitsi(publicSessionData);
             
         } catch (error) {
             console.error('Start video session error:', error);
@@ -602,21 +622,24 @@ const VideoConsultation = {
             ]
         };
         
-        // Determine if we should use JWT or public access
-        const useJWT = sessionData.jwt_token && sessionData.jwt_token.length > 0;
-        console.log('🔧 JWT Decision:', { useJWT, hasToken: !!sessionData.jwt_token });
+        // FORCE PUBLIC ROOM (Free Jitsi doesn't support authentication)
+        console.log('🔧 Using PUBLIC ROOM (free Jitsi Meet doesn\'t support authentication)');
         
-        // Merge configurations
+        // Create a unique public room name with patient info
+        const userName = AuthStorage.get('name') || 'User';
+        const sanitizedUserName = userName.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '');
+        const publicRoomName = `sahatak-${sanitizedUserName}-appt${this.appointmentId}`;
+        
+        // Merge configurations for public room only
         const options = {
-            roomName: sessionData.room_name,
+            roomName: publicRoomName, // Use our public room name instead of backend room name
             parentNode: document.getElementById('jitsi-container'),
             userInfo: {
-                displayName: AuthStorage.get('name') || 'User'
+                displayName: `${AuthStorage.get('name') || 'User'} (Appointment ${this.appointmentId})`
             },
             configOverwrite: { ...defaultConfig, ...(sessionData.config || {}) },
-            interfaceConfigOverwrite: { ...defaultInterfaceConfig, ...(sessionData.interface_config || {}) },
-            // Only include JWT if we have a valid token, otherwise use public access
-            ...(useJWT && { jwt: sessionData.jwt_token })
+            interfaceConfigOverwrite: { ...defaultInterfaceConfig, ...(sessionData.interface_config || {}) }
+            // NO JWT TOKEN - free Jitsi only supports public rooms
         };
         
         console.log('🔧 Jitsi options:', {
