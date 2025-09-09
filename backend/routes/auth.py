@@ -22,8 +22,10 @@ def api_login_required(f):
     def decorated_function(*args, **kwargs):
         # Debug logging
         from flask import session
-        auth_logger.info(f"🔐 api_login_required called for {request.endpoint}")
-        auth_logger.info(f"API auth check - User authenticated: {current_user.is_authenticated}, Session keys: {list(session.keys()) if session else 'No session'}")
+        # Only log for video endpoints to reduce noise
+        if 'video' in request.endpoint or request.endpoint.endswith(('start', 'end', 'complete', 'disconnect')):
+            auth_logger.info(f"🎥 Video API auth check for {request.endpoint}")
+            auth_logger.info(f"🎥 User authenticated: {current_user.is_authenticated}, Session: {list(session.keys()) if session else 'No session'}")
         
         # First try session-based authentication
         if current_user.is_authenticated:
@@ -32,11 +34,15 @@ def api_login_required(f):
         # Fallback to token authentication
         token = None
         auth_header = request.headers.get('Authorization')
-        auth_logger.info(f"🔑 Auth header: {auth_header[:50] if auth_header else 'None'}...")
+        # Only log auth header for video endpoints
+        if 'video' in request.endpoint or request.endpoint.endswith(('start', 'end', 'complete', 'disconnect')):
+            auth_logger.info(f"🎥 Auth header: {auth_header[:50] if auth_header else 'None'}...")
         
         if auth_header and auth_header.startswith('Bearer '):
             token = auth_header[7:]  # Remove 'Bearer ' prefix
-            auth_logger.info(f"Extracted token (first 20 chars): {token[:20]}...")
+            # Only log token extraction for video endpoints to reduce noise
+            if 'video' in request.endpoint or request.endpoint.endswith(('start', 'end', 'complete', 'disconnect')):
+                auth_logger.info(f"🎥 Video endpoint auth - Token: {token[:20]}...")
         
         if token:
             try:
@@ -45,14 +51,18 @@ def api_login_required(f):
                 payload = JWTHelper.decode_token(token)
                 
                 if payload:
-                    auth_logger.info(f"JWT decoded successfully for user {payload.get('user_id')}")
+                    # Only log successful decode for video endpoints
+                    if 'video' in request.endpoint or request.endpoint.endswith(('start', 'end', 'complete', 'disconnect')):
+                        auth_logger.info(f"🎥 Video JWT decoded for user {payload.get('user_id')}")
                     
                     # Load user from token
                     user_id = payload.get('user_id')
                     user = User.query.get(user_id)
                     
                     if user and user.is_active:
-                        auth_logger.info(f"JWT auth successful for user {user.id}")
+                        # Only log success for video endpoints
+                        if 'video' in request.endpoint or request.endpoint.endswith(('start', 'end', 'complete', 'disconnect')):
+                            auth_logger.info(f"🎥 Video auth successful for user {user.id}")
                         from flask_login import login_user
                         login_user(user, remember=False)
                         return f(*args, **kwargs)
