@@ -138,19 +138,19 @@ def create_appointment():
         if current_user.user_type != 'patient':
             return APIResponse.forbidden(message='Only patients can book appointments')
         
-        # Check if patient has completed medical history
+        # Get patient profile (medical history completion is now optional)
         patient = current_user.get_profile()
         if not patient:
             return APIResponse.error(message='Patient profile not found')
         
-        # If medical history is not completed, return a special response
-        if not patient.medical_history_completed:
-            return APIResponse.error(
-                message='Please complete your medical history before booking an appointment',
-                status_code=428,  # Precondition Required
-                error_code='MEDICAL_HISTORY_REQUIRED',
-                details={'redirect': '/medical/patient/medical-history-form.html'}
-            )
+        # Medical history is now optional - patients can complete it anytime later
+        # if not patient.medical_history_completed:
+        #     return APIResponse.error(
+        #         message='Please complete your medical history before booking an appointment',
+        #         status_code=428,  # Precondition Required
+        #         error_code='MEDICAL_HISTORY_REQUIRED',
+        #         details={'redirect': '/medical/patient/medical-history-form.html'}
+        #     )
         
         data = request.get_json()
         

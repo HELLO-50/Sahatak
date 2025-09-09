@@ -798,12 +798,18 @@ const VideoConsultation = {
     // End video session
     async endVideoSession() {
         try {
-            await ApiHelper.makeRequest(
+            console.log('🔚 Attempting to end video session for appointment:', this.appointmentId);
+            const response = await ApiHelper.makeRequest(
                 `/appointments/${this.appointmentId}/video/end`,
                 { method: 'POST' }
             );
+            console.log('✅ Video session ended successfully:', response);
         } catch (error) {
-            console.error('End session error:', error);
+            console.error('❌ End session error:', error);
+            console.warn('⚠️ Video session end failed - appointment status may not be reset properly');
+            
+            // Even if backend call fails, we should still clean up locally
+            // This is important because the user has left the video call
         }
     },
     
