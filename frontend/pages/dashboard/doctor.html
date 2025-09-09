@@ -1208,6 +1208,8 @@
                     if (!Array.isArray(appointments)) {
                         console.error('Got non-array appointment data:', appointments);
                         console.error('Full response:', appointmentsResponse);
+                        // Ensure title remains correct even with API errors
+                        document.title = 'Doctor Dashboard - Sahatak';
                         return;
                     }
                     
@@ -1501,6 +1503,8 @@
         // Initialize doctor dashboard on page load
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('Doctor dashboard initializing...');
+            // Ensure title is correct from the start
+            document.title = 'Doctor Dashboard - Sahatak';
             await DashboardTranslations.initializeDashboard('doctor');
             
             // Initialize video consultation dashboard
