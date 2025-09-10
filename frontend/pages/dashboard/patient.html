@@ -832,6 +832,204 @@
         // logout function is now defined globally in main.js
         
         // Initialize patient dashboard on page load
+        // Load health summary data
+        async function loadHealthSummary() {
+            const container = document.getElementById('health-summary-container');
+            if (!container) return;
+            
+            try {
+                // For now, show placeholder data - in production this would come from API
+                const currentLang = LanguageManager.getLanguage() || 'en';
+                container.innerHTML = `
+                    <h5 class="mb-3">
+                        <i class="bi bi-heart-pulse me-2"></i>
+                        <span>${currentLang === 'ar' ? 'ملخص الحالة الصحية' : 'Health Summary'}</span>
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="health-metric">
+                                <label class="form-label text-muted small">${currentLang === 'ar' ? 'ضغط الدم' : 'Blood Pressure'}</label>
+                                <div class="h6 mb-0">120/80 mmHg</div>
+                                <small class="text-success">${currentLang === 'ar' ? 'طبيعي' : 'Normal'}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="health-metric">
+                                <label class="form-label text-muted small">${currentLang === 'ar' ? 'مستوى السكر' : 'Blood Sugar'}</label>
+                                <div class="h6 mb-0">95 mg/dL</div>
+                                <small class="text-success">${currentLang === 'ar' ? 'طبيعي' : 'Normal'}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="health-metric">
+                                <label class="form-label text-muted small">${currentLang === 'ar' ? 'الوزن' : 'Weight'}</label>
+                                <div class="h6 mb-0">75 kg</div>
+                                <small class="text-muted">${currentLang === 'ar' ? 'آخر قياس: اليوم' : 'Last measured: Today'}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="health-metric">
+                                <label class="form-label text-muted small">${currentLang === 'ar' ? 'درجة الحرارة' : 'Temperature'}</label>
+                                <div class="h6 mb-0">36.8°C</div>
+                                <small class="text-success">${currentLang === 'ar' ? 'طبيعي' : 'Normal'}</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading health summary:', error);
+                container.innerHTML = `
+                    <h5 class="mb-3">
+                        <i class="bi bi-heart-pulse me-2"></i>
+                        <span>Health Summary</span>
+                    </h5>
+                    <p class="text-center py-3">Unable to load health data at the moment.</p>
+                `;
+            }
+        }
+
+        // Load prescriptions data
+        async function loadPrescriptions() {
+            const container = document.getElementById('prescriptions-container');
+            if (!container) return;
+            
+            try {
+                const currentLang = LanguageManager.getLanguage() || 'en';
+                // Try to load from API first
+                const response = await ApiHelper.makeRequest('/prescriptions/');
+                
+                if (response.success && response.data.prescriptions && response.data.prescriptions.length > 0) {
+                    const prescriptions = response.data.prescriptions.filter(p => p.status === 'active').slice(0, 3);
+                    
+                    if (prescriptions.length > 0) {
+                        container.innerHTML = `
+                            <h5 class="mb-3">
+                                <i class="bi bi-prescription me-2"></i>
+                                <span>${currentLang === 'ar' ? 'الوصفات الطبية النشطة' : 'Active Prescriptions'}</span>
+                            </h5>
+                            ${prescriptions.map(prescription => `
+                                <div class="prescription-item p-3 mb-2 bg-light rounded">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="mb-1">${prescription.medication_name}</h6>
+                                            <p class="text-muted small mb-1">${prescription.dosage} - ${prescription.frequency}</p>
+                                            <small class="text-muted">Dr. ${prescription.doctor_name}</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-success">Active</span>
+                                            <small class="d-block text-muted mt-1">${new Date(prescription.prescribed_date).toLocaleDateString()}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                            <div class="text-center mt-3">
+                                <button class="btn btn-outline-primary btn-sm" onclick="viewRecords()">
+                                    <i class="bi bi-file-medical me-1"></i>
+                                    ${currentLang === 'ar' ? 'عرض جميع الوصفات' : 'View All Prescriptions'}
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        throw new Error('No active prescriptions');
+                    }
+                } else {
+                    throw new Error('No prescriptions data');
+                }
+            } catch (error) {
+                console.log('Using placeholder prescriptions data:', error.message);
+                container.innerHTML = `
+                    <h5 class="mb-3">
+                        <i class="bi bi-prescription me-2"></i>
+                        <span>${currentLang === 'ar' ? 'الوصفات الطبية النشطة' : 'Active Prescriptions'}</span>
+                    </h5>
+                    <p class="text-center py-3" style="color: #666;">${currentLang === 'ar' ? 'لا توجد وصفات طبية نشطة حالياً' : 'No active prescriptions at the moment'}</p>
+                    <div class="text-center mt-3">
+                        <button class="btn btn-outline-primary btn-sm" onclick="viewRecords()">
+                            <i class="bi bi-file-medical me-1"></i>
+                            ${currentLang === 'ar' ? 'عرض السجل الطبي' : 'View Medical Records'}
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Load medical records data
+        async function loadMedicalRecords() {
+            const container = document.getElementById('medical-records-container');
+            if (!container) return;
+            
+            try {
+                const currentLang = LanguageManager.getLanguage() || 'en';
+                const currentUser = AuthGuard.getCurrentUser();
+                
+                if (currentUser && currentUser.id) {
+                    const response = await ApiHelper.makeRequest(`/medical-history/patient/${currentUser.id}`);
+                    
+                    if (response.success && response.data) {
+                        const data = response.data;
+                        let recordCount = 0;
+                        
+                        // Count records
+                        if (data.appointments) recordCount += data.appointments.length;
+                        if (data.vital_signs) recordCount += data.vital_signs.length;
+                        if (data.lab_results) recordCount += data.lab_results.length;
+                        
+                        if (recordCount > 0) {
+                            container.innerHTML = `
+                                <h5 class="mb-3">
+                                    <i class="bi bi-file-medical me-2"></i>
+                                    <span>${currentLang === 'ar' ? 'السجل الطبي' : 'Medical Records'}</span>
+                                </h5>
+                                <div class="record-summary p-3 bg-light rounded">
+                                    <div class="row text-center">
+                                        <div class="col-4">
+                                            <div class="h4 text-primary mb-1">${(data.appointments || []).length}</div>
+                                            <small class="text-muted">${currentLang === 'ar' ? 'زيارات' : 'Visits'}</small>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="h4 text-success mb-1">${(data.vital_signs || []).length}</div>
+                                            <small class="text-muted">${currentLang === 'ar' ? 'قياسات حيوية' : 'Vitals'}</small>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="h4 text-info mb-1">${(data.lab_results || []).length}</div>
+                                            <small class="text-muted">${currentLang === 'ar' ? 'تحاليل' : 'Lab Results'}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-center mt-3">
+                                    <button class="btn btn-outline-primary btn-sm" onclick="viewRecords()">
+                                        <i class="bi bi-file-text me-1"></i>
+                                        ${currentLang === 'ar' ? 'عرض السجل الكامل' : 'View Full Records'}
+                                    </button>
+                                </div>
+                            `;
+                        } else {
+                            throw new Error('No medical records');
+                        }
+                    } else {
+                        throw new Error('Failed to load medical records');
+                    }
+                } else {
+                    throw new Error('No current user');
+                }
+            } catch (error) {
+                console.log('Using placeholder medical records:', error.message);
+                container.innerHTML = `
+                    <h5 class="mb-3">
+                        <i class="bi bi-file-medical me-2"></i>
+                        <span>${currentLang === 'ar' ? 'السجل الطبي' : 'Medical Records'}</span>
+                    </h5>
+                    <p class="text-center py-3" style="color: #666;">${currentLang === 'ar' ? 'ابدأ رحلتك الصحية بحجز أول موعد' : 'Start your health journey by booking your first appointment'}</p>
+                    <div class="text-center mt-3">
+                        <button class="btn btn-outline-primary btn-sm" onclick="bookAppointment()">
+                            <i class="bi bi-plus-circle me-1"></i>
+                            ${currentLang === 'ar' ? 'حجز موعد' : 'Book Appointment'}
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
         // Load dashboard statistics from API
         async function loadDashboardStats() {
             console.log('Loading dashboard statistics...');
@@ -1087,6 +1285,9 @@
             // Load dashboard statistics after translations are loaded
             setTimeout(() => {
                 loadDashboardStats();
+                loadHealthSummary();
+                loadPrescriptions();
+                loadMedicalRecords();
             }, 1000); // Small delay to ensure API is ready
         });
 

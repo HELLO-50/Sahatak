@@ -1321,17 +1321,45 @@
                     });
                     console.log('📊 Status counts:', statusCounts);
                     
-                    // Get upcoming appointments for display (include in_progress for video consultations)
+                    // Get recent appointments for display (include all recent appointments within 7 days)
+                    const now = new Date();
+                    const sevenDaysAgo = new Date(now.getTime() - 7*24*60*60*1000);
+                    
+                    // First get upcoming appointments (scheduled/confirmed/in_progress)
                     const upcomingAppointments = appointments.filter(apt => 
                         ['scheduled', 'confirmed', 'in_progress'].includes(apt.status) && 
-                        new Date(apt.appointment_date) > new Date(Date.now() - 24*60*60*1000) // Include today's appointments
+                        new Date(apt.appointment_date) > now
                     ).sort((a, b) => new Date(a.appointment_date) - new Date(b.appointment_date));
+                    
+                    // Then get recent appointments (any status within last 7 days)
+                    const recentAppointments = appointments.filter(apt => 
+                        new Date(apt.appointment_date) >= sevenDaysAgo
+                    ).sort((a, b) => new Date(b.appointment_date) - new Date(a.appointment_date)); // Most recent first
+                    
+                    // Combine: prioritize upcoming, then fill with recent
+                    const displayAppointments = [...upcomingAppointments];
+                    recentAppointments.forEach(apt => {
+                        if (displayAppointments.length < 5 && !displayAppointments.find(existing => existing.id === apt.id)) {
+                            displayAppointments.push(apt);
+                        }
+                    });
                     
                     // Update appointments list
                     const appointmentsContainer = document.getElementById('appointments-container');
                     if (appointmentsContainer) {
-                        if (upcomingAppointments.length > 0) {
-                            appointmentsContainer.innerHTML = upcomingAppointments.slice(0, 3).map(apt => {
+                        if (displayAppointments.length > 0) {
+                            const currentLang = LanguageManager.getLanguage() || 'en';
+                            const hasUpcoming = upcomingAppointments.length > 0;
+                            const sectionTitle = hasUpcoming ? 
+                                (currentLang === 'ar' ? 'المواعيد القادمة والحديثة' : 'Upcoming & Recent Appointments') :
+                                (currentLang === 'ar' ? 'المواعيد الحديثة' : 'Recent Appointments');
+                            
+                            appointmentsContainer.innerHTML = `
+                                <h5 class="mb-3">
+                                    <i class="bi bi-calendar-day me-2"></i>
+                                    ${sectionTitle}
+                                </h5>
+                                ${displayAppointments.slice(0, 4).map(apt => {
                                 const appointmentDate = new Date(apt.appointment_date);
                                 const dateStr = appointmentDate.toLocaleDateString('en-US', { 
                                     weekday: 'short', 
@@ -1350,6 +1378,18 @@
                                     : (apt.appointment_type === 'video' ? `<button class="btn btn-primary btn-sm" disabled>Loading...</button>` : '');
                                 const isVideoAppointment = apt.appointment_type === 'video';
                                 
+                                // Determine badge color based on status
+                                const getBadgeClass = (status) => {
+                                    switch(status) {
+                                        case 'scheduled': return 'bg-primary';
+                                        case 'confirmed': return 'bg-success';
+                                        case 'in_progress': return 'bg-warning text-dark';
+                                        case 'completed': return 'bg-secondary';
+                                        case 'cancelled': return 'bg-danger';
+                                        default: return 'bg-primary';
+                                    }
+                                };
+                                
                                 return `
                                     <div class="appointment-item appointment-card ${isVideoAppointment ? 'video-appointment' : ''} d-flex justify-content-between align-items-center p-3 mb-2 bg-light rounded" data-appointment-id="${apt.id}" data-appointment-status="${apt.status}">
                                         <div class="flex-grow-1">
@@ -1363,19 +1403,27 @@
                                                 <i class="bi bi-calendar me-1"></i>${dateStr} ${timeStr}
                                             </div>
                                             ${videoButton ? `
-                                                <div class="video-consultation-actions">
+                                                <div class="video-consultation-actions mt-2">
                                                     ${videoButton}
                                                 </div>
                                             ` : ''}
                                         </div>
                                         <div class="d-flex flex-column align-items-end gap-2">
-                                            <span class="badge bg-primary">${apt.status}</span>
+                                            <span class="badge ${getBadgeClass(apt.status)}">${apt.status}</span>
                                         </div>
                                     </div>
                                 `;
-                            }).join('');
+                            }).join('')}
+                            `;
                         } else {
-                            appointmentsContainer.innerHTML = '<p class="text-muted text-center py-3">No upcoming appointments</p>';
+                            const currentLang = LanguageManager.getLanguage() || 'en';
+                            appointmentsContainer.innerHTML = `
+                                <h5 class="mb-3">
+                                    <i class="bi bi-calendar-day me-2"></i>
+                                    ${currentLang === 'ar' ? 'المواعيد' : 'Appointments'}
+                                </h5>
+                                <p class="text-muted text-center py-3">${currentLang === 'ar' ? 'لا توجد مواعيد حديثة' : 'No recent appointments'}</p>
+                            `;
                         }
                     }
                     
