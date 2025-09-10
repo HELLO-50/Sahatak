@@ -375,11 +375,25 @@ const VideoConsultationDashboard = {
         const isInProgress = appointment.status === 'in_progress';
         const isCompleted = appointment.status === 'completed';
         
-        // Session states
-        const sessionActive = appointment.session_status === 'active' || appointment.session_status === 'in_call';
-        const sessionEnded = appointment.session_status === 'ended' || 
-                            appointment.session_status === 'disconnected' ||
+        // Session states (expanded to handle more cases)
+        const sessionActive = appointment.session_status === 'active' || 
+                            appointment.session_status === 'in_call' ||
+                            appointment.session_status === 'waiting_patient' ||
                             (appointment.session_started_at && !appointment.session_status);
+        const sessionEnded = appointment.session_status === 'ended' || 
+                            appointment.session_status === 'disconnected';
+        
+        // Debug logging for troubleshooting
+        console.log(`🔍 Button config debug for ${userType}:`, {
+            appointmentId: appointment.id,
+            status: appointment.status,
+            session_status: appointment.session_status,
+            session_started_at: appointment.session_started_at,
+            isScheduled,
+            isInProgress,
+            sessionActive,
+            sessionEnded
+        });
         
         if (userType === 'doctor') {
             // Doctor button logic
@@ -452,6 +466,16 @@ const VideoConsultationDashboard = {
                     title: isArabic ? 'انضم للاستشارة المرئية' : 'Join Video Consultation',
                     disabled: false
                 };
+            } else if (isInProgress && appointment.session_started_at && !sessionEnded) {
+                // Doctor has started session (in_progress + session_started_at) - allow join even if session_status unclear
+                return {
+                    class: 'btn-join-video',
+                    action: 'join',
+                    icon: 'bi-camera-video',
+                    text: isArabic ? 'انضم للاستشارة' : 'Join Consultation',
+                    title: isArabic ? 'انضم للاستشارة المرئية' : 'Join Video Consultation',
+                    disabled: false
+                };
             } else if (isScheduled && !sessionActive) {
                 // Scheduled but session not started - show Waiting for Doctor
                 return {
@@ -462,14 +486,14 @@ const VideoConsultationDashboard = {
                     title: isArabic ? 'في انتظار بدء الطبيب للجلسة' : 'Waiting for doctor to start session',
                     disabled: true
                 };
-            } else if (isInProgress && !sessionActive) {
-                // In progress but no active session - show waiting
+            } else if (isInProgress && !sessionActive && !appointment.session_started_at) {
+                // In progress but no session started yet - show waiting
                 return {
                     class: 'btn-waiting',
                     action: 'check-status',
                     icon: 'bi-clock',
                     text: isArabic ? 'انتظار الطبيب' : 'Waiting for Doctor',
-                    title: isArabic ? 'في انتظار بدء الطبيب للجلسة' : 'Waiting for doctor to restart session',
+                    title: isArabic ? 'في انتظار بدء الطبيب للجلسة' : 'Waiting for doctor to start session',
                     disabled: true
                 };
             } else if (isInProgress && sessionEnded) {
