@@ -1683,6 +1683,36 @@
                     const uniquePatientIds = [...new Set(appointments.map(apt => apt.patient_id))];
                     const totalPatients = uniquePatientIds.length;
                     
+                    // Debug: Get current doctor info
+                    const currentUser = AuthGuard.getCurrentUser();
+                    const currentDoctorId = currentUser?.id;
+                    console.log(`👨‍⚕️ Current doctor ID: ${currentDoctorId}`);
+                    
+                    // Debug: log ALL appointment statuses first
+                    console.log('📊 All appointment statuses breakdown:');
+                    const statusCounts = {};
+                    const doctorAppointments = [];
+                    appointments.forEach(apt => {
+                        const status = apt.status ? apt.status.toLowerCase() : 'no_status';
+                        statusCounts[status] = (statusCounts[status] || 0) + 1;
+                        console.log(`📄 Appointment ${apt.id}: status="${apt.status}" (${status}), patient=${apt.patient_name}, doctor_id=${apt.doctor_id}`);
+                        
+                        // Check if this appointment belongs to current doctor
+                        if (apt.doctor_id == currentDoctorId) {
+                            doctorAppointments.push(apt);
+                        }
+                    });
+                    console.log('📊 All Status counts:', statusCounts);
+                    console.log(`🩺 Doctor's appointments: ${doctorAppointments.length} out of ${appointments.length} total`);
+                    
+                    // Show doctor's appointment statuses
+                    const doctorStatusCounts = {};
+                    doctorAppointments.forEach(apt => {
+                        const status = apt.status ? apt.status.toLowerCase() : 'no_status';
+                        doctorStatusCounts[status] = (doctorStatusCounts[status] || 0) + 1;
+                    });
+                    console.log(`📊 Doctor's Status counts:`, doctorStatusCounts);
+                    
                     // Count completed appointments for consultation count (case-insensitive)
                     const completedAppointments = appointments.filter(apt => 
                         apt.status && apt.status.toLowerCase() === 'completed'
@@ -1698,18 +1728,19 @@
                             date: apt.appointment_date,
                             status: apt.status
                         })));
-                    }
-                    
-                    // Debug: log appointment statuses
-                    console.log('📊 Appointment statuses breakdown:');
-                    const statusCounts = {};
-                    appointments.forEach(apt => {
-                        statusCounts[apt.status] = (statusCounts[apt.status] || 0) + 1;
-                        if (apt.status === 'completed') {
-                            console.log(`✅ Completed appointment ${apt.id}: ${apt.patient_name} on ${apt.appointment_date}`);
+                    } else {
+                        console.log('❌ No completed appointments found. Looking for status variants...');
+                        const possibleCompleted = appointments.filter(apt => 
+                            apt.status && (
+                                apt.status.toLowerCase().includes('complete') ||
+                                apt.status.toLowerCase().includes('done') ||
+                                apt.status.toLowerCase().includes('finished')
+                            )
+                        );
+                        if (possibleCompleted.length > 0) {
+                            console.log('🔍 Found possible completed appointments with different status:', possibleCompleted);
                         }
-                    });
-                    console.log('📊 Status counts:', statusCounts);
+                    }
                     
                     // Get recent appointments for display (include all recent appointments within 7 days)
                     const now = new Date();
