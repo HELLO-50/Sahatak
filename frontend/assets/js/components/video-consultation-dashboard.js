@@ -108,6 +108,17 @@ const VideoConsultationDashboard = {
             
             console.log('Video start response:', response);
             
+            // Log detailed response data for debugging
+            if (response && response.data) {
+                console.log('🔍 Video start response data:', {
+                    appointment_id: response.data.appointment_id,
+                    session_status: response.data.session_status,
+                    appointment_status: response.data.appointment_status,
+                    session_started_at: response.data.session_started_at,
+                    session_id: response.data.session_id
+                });
+            }
+            
             if (response && response.success) {
                 // Update UI first, then navigate
                 console.log('Video session started successfully, updating UI...');
@@ -393,7 +404,15 @@ const VideoConsultationDashboard = {
             isScheduled,
             isInProgress,
             sessionActive,
-            sessionEnded
+            sessionEnded,
+            // Additional debug info
+            sessionActiveReasons: {
+                session_status_active: appointment.session_status === 'active',
+                session_status_in_call: appointment.session_status === 'in_call',
+                session_status_waiting_patient: appointment.session_status === 'waiting_patient',
+                session_status_waiting: appointment.session_status === 'waiting',
+                has_session_started_but_no_status: appointment.session_started_at && !appointment.session_status
+            }
         });
         
         if (userType === 'doctor') {
@@ -459,6 +478,7 @@ const VideoConsultationDashboard = {
             // Patient button logic
             if (sessionActive && (isScheduled || isInProgress)) {
                 // Session is active (doctor has started) - show Join Consultation
+                console.log(`✅ Patient can join - sessionActive: ${sessionActive}`);
                 return {
                     class: 'btn-join-video',
                     action: 'join',
@@ -469,6 +489,18 @@ const VideoConsultationDashboard = {
                 };
             } else if (isInProgress && appointment.session_started_at && !sessionEnded) {
                 // Doctor has started session (in_progress + session_started_at) - allow join even if session_status unclear
+                console.log(`✅ Patient can join - inProgress with session_started_at: ${appointment.session_started_at}`);
+                return {
+                    class: 'btn-join-video',
+                    action: 'join',
+                    icon: 'bi-camera-video',
+                    text: isArabic ? 'انضم للاستشارة' : 'Join Consultation',
+                    title: isArabic ? 'انضم للاستشارة المرئية' : 'Join Video Consultation',
+                    disabled: false
+                };
+            } else if (isInProgress && !sessionEnded) {
+                // Fallback: If appointment is in_progress and not ended, allow join (more permissive)
+                console.log(`🔄 Patient fallback join - appointment in progress, assuming doctor started`);
                 return {
                     class: 'btn-join-video',
                     action: 'join',
