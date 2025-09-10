@@ -668,10 +668,9 @@ const VideoConsultation = {
         // FORCE PUBLIC ROOM (Free Jitsi doesn't support authentication)
         console.log('🔧 Using PUBLIC ROOM (free Jitsi Meet doesn\'t support authentication)');
         
-        // Create simple public room name (avoid any triggers for lobby/auth)
-        const userName = AuthStorage.get('name') || 'User';
-        const sanitizedUserName = userName.replace(/[^a-zA-Z0-9]/g, '');
-        const publicRoomName = `public${this.appointmentId}${sanitizedUserName}`;
+        // Create completely random room name to avoid any membership triggers
+        const randomSuffix = Math.random().toString(36).substring(2, 15);
+        const publicRoomName = `room${this.appointmentId}x${randomSuffix}`;
         
         // Use configuration from backend - trust the .env settings
         const finalConfig = { 

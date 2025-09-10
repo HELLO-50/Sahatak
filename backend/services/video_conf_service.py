@@ -155,13 +155,16 @@ class VideoConferenceService:
             "publicRoom": os.getenv('JITSI_PUBLIC_ROOM_ACCESS', 'true').lower() == 'true',
             "enableUserRolesBasedOnToken": os.getenv('JITSI_ENABLE_USER_ROLES', 'false').lower() == 'true',
             
-            # Room Configuration (SINGLE INSTANCE)
+            # Room Configuration (SINGLE INSTANCE) - Explicitly disable all restrictions
             "roomConfig": {
                 "password": None,
-                "requireAuth": os.getenv('JITSI_REQUIRE_AUTH', 'false').lower() == 'true',
+                "requireAuth": False,
                 "membersOnly": False,
-                "enableLobby": os.getenv('JITSI_LOBBY_ENABLED', 'false').lower() == 'true'
+                "enableLobby": False
             },
+            
+            # Explicitly disable membersOnly at root level too
+            "membersOnly": False,
             
             # Moderator & Access Control
             "disableModeratorIndicator": os.getenv('JITSI_DISABLE_MODERATOR_INDICATOR', 'true').lower() == 'true',
@@ -180,6 +183,12 @@ class VideoConferenceService:
             # Features
             "enableEncryption": os.getenv('JITSI_ENABLE_E2EE', 'false').lower() == 'true',
             "enableRecording": os.getenv('VIDEO_CALL_RECORDING_ENABLED', 'false').lower() == 'true',
+            
+            # Additional anti-lobby/membership settings
+            "disableIncomingMessages": False,
+            "hideConferenceSubject": False,
+            "hideConferenceTimer": False,
+            "openBridgeChannel": True,
             
             # Notifications
             "notifications": [
