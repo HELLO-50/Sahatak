@@ -372,7 +372,7 @@ const VideoConsultationDashboard = {
                 // Force a complete dashboard refresh
                 setTimeout(() => {
                     console.log('🔄 Refreshing dashboard after emergency session ends');
-                    this.checkAllAppointmentStatuses();
+                    this.refreshVideoConsultationData();
                 }, 1000);
             }
         } catch (error) {
