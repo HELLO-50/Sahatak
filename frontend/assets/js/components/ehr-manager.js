@@ -772,6 +772,12 @@ const EHRManager = {
                 throw new Error('Primary diagnosis must be at least 10 characters long');
             }
             
+            // Debug: Log the data being sent
+            console.log('📋 Diagnosis data being sent:', formData);
+            console.log('🔍 Patient ID:', formData.patient_id);
+            console.log('🔍 Primary diagnosis:', formData.primary_diagnosis);
+            console.log('🔍 Is editing:', isEditing);
+            
             // Show loading state
             const saveBtn = document.getElementById('save-diagnosis-btn');
             const originalText = saveBtn.innerHTML;
@@ -814,6 +820,12 @@ const EHRManager = {
             
         } catch (error) {
             console.error('Error saving diagnosis:', error);
+            console.error('🚨 Full error details:', {
+                message: error.message,
+                statusCode: error.statusCode,
+                errorCode: error.errorCode,
+                field: error.field
+            });
             this.showAlert('error', error.message || 'فشل في حفظ التشخيص');
         } finally {
             // Reset button
