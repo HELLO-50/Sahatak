@@ -52,8 +52,6 @@ const VideoConsultationDashboard = {
                     break;
                 case 'check-status':
                     // Show feedback to user that we're checking
-                    const currentLang = LanguageManager?.getLanguage() || 'en';
-                    const isArabic = currentLang === 'ar';
                     const checkingMessage = isArabic 
                         ? 'جاري التحقق من حالة الجلسة...'
                         : 'Checking session status...';
@@ -66,8 +64,6 @@ const VideoConsultationDashboard = {
                     break;
                 case 'wait-restart':
                     // Patient waiting for doctor to restart - refresh status and show message
-                    const currentLang = LanguageManager?.getLanguage() || 'en';
-                    const isArabic = currentLang === 'ar';
                     const statusMessage = isArabic 
                         ? 'المكالمة المرئية انتهت. في انتظار الطبيب لبدء جلسة جديدة...'
                         : 'Video call ended. Waiting for doctor to start a new session...';
