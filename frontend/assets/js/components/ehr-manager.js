@@ -756,16 +756,21 @@ const EHRManager = {
             
             const formData = {
                 patient_id: this.patientId,
-                primary_diagnosis: document.getElementById('primary_diagnosis').value,
+                primary_diagnosis: document.getElementById('primary_diagnosis').value.trim(),
                 severity: document.getElementById('severity').value,
-                icd_10_code: document.getElementById('icd_10_code').value,
+                icd_10_code: document.getElementById('icd_10_code').value.trim(),
                 status: document.getElementById('status').value,
-                clinical_findings: document.getElementById('clinical_findings').value,
-                treatment_plan: document.getElementById('treatment_plan').value,
+                clinical_findings: document.getElementById('clinical_findings').value.trim(),
+                treatment_plan: document.getElementById('treatment_plan').value.trim(),
                 follow_up_required: document.getElementById('follow_up_required').checked,
                 follow_up_date: document.getElementById('follow_up_date').value,
-                follow_up_notes: document.getElementById('follow_up_notes').value
+                follow_up_notes: document.getElementById('follow_up_notes').value.trim()
             };
+            
+            // Validate primary diagnosis length (minimum 10 characters required by backend)
+            if (!formData.primary_diagnosis || formData.primary_diagnosis.length < 10) {
+                throw new Error('Primary diagnosis must be at least 10 characters long');
+            }
             
             // Show loading state
             const saveBtn = document.getElementById('save-diagnosis-btn');

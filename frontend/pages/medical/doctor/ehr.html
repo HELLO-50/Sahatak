@@ -662,8 +662,8 @@
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-md-8 mb-3">
-                                <label for="primary_diagnosis" class="form-label">Primary Diagnosis *</label>
-                                <textarea class="form-control" id="primary_diagnosis" rows="2" required></textarea>
+                                <label for="primary_diagnosis" class="form-label">Primary Diagnosis * <small class="text-muted">(minimum 10 characters)</small></label>
+                                <textarea class="form-control" id="primary_diagnosis" rows="2" required minlength="10" placeholder="Enter detailed diagnosis (minimum 10 characters required)"></textarea>
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label for="severity" class="form-label">Condition Severity</label>
@@ -1147,8 +1147,8 @@
         // Initialize EHR page translations
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize translation system for EHR page
-            if (typeof LanguageManager !== 'undefined') {
-                LanguageManager.initializeTranslations();
+            if (typeof DashboardTranslations !== 'undefined' && DashboardTranslations.initializeDashboard) {
+                DashboardTranslations.initializeDashboard('doctor');
             }
         });
     </script>
