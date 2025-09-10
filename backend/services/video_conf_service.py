@@ -138,15 +138,17 @@ class VideoConferenceService:
             # Language & Localization
             "defaultLanguage": language,
             
-            # Authentication & Security (SINGLE SOURCE - no duplicates)
-            "enableLobby": os.getenv('JITSI_LOBBY_ENABLED', 'false').lower() == 'true',
-            "disableLobby": os.getenv('JITSI_LOBBY_ENABLED', 'false').lower() != 'true',
-            "enableLobbyChat": os.getenv('JITSI_LOBBY_CHAT_ENABLED', 'false').lower() == 'true',
+            # Authentication & Security (FORCE DISABLE ALL LOBBY/AUTH)
+            "enableLobby": False,
+            "disableLobby": True,
+            "enableLobbyChat": False,
+            "lobby": False,  # Additional explicit disable
             "authentication": {
-                "enabled": os.getenv('JITSI_AUTHENTICATION_ENABLED', 'false').lower() == 'true'
+                "enabled": False
             },
-            "requireDisplayName": os.getenv('JITSI_REQUIRE_DISPLAY_NAME', 'false').lower() == 'true',
-            "prejoinPageEnabled": os.getenv('JITSI_PREJOIN_ENABLED', 'false').lower() == 'true',
+            "requireDisplayName": False,
+            "prejoinPageEnabled": False,
+            "skipPrejoin": True,
             
             # Guest Access & Public Room Settings
             "enableGuestDomain": os.getenv('JITSI_GUEST_DOMAIN_ENABLED', 'true').lower() == 'true',
