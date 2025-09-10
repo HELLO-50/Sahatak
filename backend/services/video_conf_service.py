@@ -114,21 +114,16 @@ class VideoConferenceService:
         Returns:
             Dictionary with Jitsi configuration
         """
-        # Load configuration from environment variables
+        # Load all configuration from environment variables - single source of truth
         config = {
+            # Audio/Video Settings
             "startWithAudioMuted": False,
             "startWithVideoMuted": False,
-            "disableModeratorIndicator": not os.getenv('JITSI_MODERATOR_RIGHTS_REQUIRED', 'false').lower() == 'true',
-            "enableWelcomePage": False,
-            "enableClosePage": False,
-            "disableInviteFunctions": True,
-            "disableRemoteMute": not os.getenv('JITSI_MODERATOR_RIGHTS_REQUIRED', 'false').lower() == 'true',
-            "enableLobby": os.getenv('VIDEO_CALL_LOBBY_ENABLED', 'false').lower() == 'true',
-            "requireDisplayName": os.getenv('JITSI_REQUIRE_DISPLAY_NAME', 'true').lower() == 'true',
-            "enableInsecureRoomNameWarning": False,
-            "prejoinPageEnabled": False,
-            "disableThirdPartyRequests": True,
             "enableNoisyMicDetection": True,
+            "enableTalkWhileMuted": False,
+            "disableRecordAudioNotification": False,
+            
+            # Video Quality
             "resolution": int(os.getenv('JITSI_DEFAULT_VIDEO_QUALITY', '720')),
             "constraints": {
                 "video": {
@@ -139,38 +134,60 @@ class VideoConferenceService:
                     }
                 }
             },
+            
+            # Language & Localization
             "defaultLanguage": language,
-            "enableTalkWhileMuted": False,
-            "disableDeepLinking": True,
-            "disableProfile": False,
-            "disableRecordAudioNotification": False,
+            
+            # Authentication & Security (SINGLE SOURCE - no duplicates)
+            "enableLobby": os.getenv('JITSI_LOBBY_ENABLED', 'false').lower() == 'true',
+            "disableLobby": os.getenv('JITSI_LOBBY_ENABLED', 'false').lower() != 'true',
+            "enableLobbyChat": os.getenv('JITSI_LOBBY_CHAT_ENABLED', 'false').lower() == 'true',
+            "authentication": {
+                "enabled": os.getenv('JITSI_AUTHENTICATION_ENABLED', 'false').lower() == 'true'
+            },
+            "requireDisplayName": os.getenv('JITSI_REQUIRE_DISPLAY_NAME', 'false').lower() == 'true',
+            "prejoinPageEnabled": os.getenv('JITSI_PREJOIN_ENABLED', 'false').lower() == 'true',
+            
+            # Guest Access & Public Room Settings
+            "enableGuestDomain": os.getenv('JITSI_GUEST_DOMAIN_ENABLED', 'true').lower() == 'true',
+            "enableGuests": os.getenv('JITSI_ALLOW_GUESTS', 'true').lower() == 'true',
+            "guestsAllowed": os.getenv('JITSI_ALLOW_GUESTS', 'true').lower() == 'true',
+            "publicRoom": os.getenv('JITSI_PUBLIC_ROOM_ACCESS', 'true').lower() == 'true',
+            "enableUserRolesBasedOnToken": os.getenv('JITSI_ENABLE_USER_ROLES', 'false').lower() == 'true',
+            
+            # Room Configuration (SINGLE INSTANCE)
+            "roomConfig": {
+                "password": None,
+                "requireAuth": os.getenv('JITSI_REQUIRE_AUTH', 'false').lower() == 'true',
+                "membersOnly": False,
+                "enableLobby": os.getenv('JITSI_LOBBY_ENABLED', 'false').lower() == 'true'
+            },
+            
+            # Moderator & Access Control
+            "disableModeratorIndicator": os.getenv('JITSI_DISABLE_MODERATOR_INDICATOR', 'true').lower() == 'true',
+            "disableRemoteMute": os.getenv('JITSI_DISABLE_REMOTE_MUTE', 'true').lower() == 'true',
+            
+            # UI & Interface Control
+            "enableWelcomePage": False,
+            "enableClosePage": False,
+            "disableInviteFunctions": os.getenv('JITSI_HIDE_INVITE_FUNCTIONS', 'true').lower() == 'true',
+            "disableProfile": os.getenv('JITSI_DISABLE_PROFILE', 'false').lower() == 'true',
+            "disableDeepLinking": os.getenv('JITSI_DISABLE_DEEP_LINKING', 'true').lower() == 'true',
+            "enableInsecureRoomNameWarning": False,
+            "disableThirdPartyRequests": True,
             "hiddenPrejoinButtons": ["invite"],
+            
+            # Features
+            "enableEncryption": os.getenv('JITSI_ENABLE_E2EE', 'false').lower() == 'true',
+            "enableRecording": os.getenv('VIDEO_CALL_RECORDING_ENABLED', 'false').lower() == 'true',
+            
+            # Notifications
             "notifications": [
                 "connection.CONNFAIL",
                 "dialog.micNotSendingData",
                 "dialog.serviceUnavailable",
                 "dialog.sessTerminated"
-            ],
-            # Additional lobby configuration
-            "lobby": {
-                "enabled": os.getenv('VIDEO_CALL_LOBBY_ENABLED', 'false').lower() == 'true',
-                "autoKnock": False,
-                "enableChat": False
-            },
-            "authentication": {
-                "enabled": not os.getenv('JITSI_GUEST_ACCESS_ENABLED', 'true').lower() == 'true'
-            },
-            "roomConfig": {
-                "enableLobby": os.getenv('VIDEO_CALL_LOBBY_ENABLED', 'false').lower() == 'true',
-                "password": None,
-                "requireAuth": not os.getenv('JITSI_GUEST_ACCESS_ENABLED', 'true').lower() == 'true'
-            },
-            "disableLobby": not os.getenv('VIDEO_CALL_LOBBY_ENABLED', 'false').lower() == 'true',
-            "enableGuestDomain": os.getenv('JITSI_GUEST_ACCESS_ENABLED', 'true').lower() == 'true',
-            "enableUserRolesBasedOnToken": not os.getenv('JITSI_GUEST_ACCESS_ENABLED', 'true').lower() == 'true',
-            "enableLobbyChat": os.getenv('VIDEO_CALL_LOBBY_ENABLED', 'false').lower() == 'true',
-            "enableEncryption": os.getenv('JITSI_ENABLE_E2EE', 'true').lower() == 'true',
-            "enableRecording": os.getenv('VIDEO_CALL_RECORDING_ENABLED', 'false').lower() == 'true'
+            ]
         }
         
         return config
@@ -210,31 +227,42 @@ class VideoConferenceService:
                 "moderator" if os.getenv('JITSI_MODERATOR_RIGHTS_REQUIRED', 'false').lower() == 'true' else None,
                 "profile"
             ],
-            "SHOW_JITSI_WATERMARK": False,
-            "SHOW_WATERMARK_FOR_GUESTS": False,
+            
+            # Branding & Watermarks (from env vars)
+            "SHOW_JITSI_WATERMARK": os.getenv('JITSI_SHOW_WATERMARK', 'false').lower() == 'true',
+            "SHOW_WATERMARK_FOR_GUESTS": os.getenv('JITSI_SHOW_WATERMARK', 'false').lower() == 'true',
+            "SHOW_POWERED_BY": os.getenv('JITSI_SHOW_POWERED_BY', 'false').lower() == 'true',
+            
+            # Display Names & UI Labels
             "DEFAULT_REMOTE_DISPLAY_NAME": "Participant",
             "DEFAULT_LOCAL_DISPLAY_NAME": "User", 
+            "APP_NAME": "Sahatak Consultation",
+            "NATIVE_APP_NAME": "Sahatak",
+            "PROVIDER_NAME": "Sahatak Telemedicine",
+            
+            # Interface Features
             "DISABLE_VIDEO_BACKGROUND": False,
             "MOBILE_APP_PROMO": False,
-            "HIDE_INVITE_MORE_HEADER": True,
+            "HIDE_INVITE_MORE_HEADER": os.getenv('JITSI_HIDE_INVITE_FUNCTIONS', 'true').lower() == 'true',
             "SHOW_CHROME_EXTENSION_BANNER": False,
             "TOOLBAR_ALWAYS_VISIBLE": False,
             "TOOLBAR_TIMEOUT": 4000,
             "DISABLE_JOIN_LEAVE_NOTIFICATIONS": False,
-            "SHOW_POWERED_BY": False,
+            
+            # Welcome & Close Pages
             "SHOW_PROMOTIONAL_CLOSE_PAGE": False,
             "GENERATE_ROOMNAMES_ON_WELCOME_PAGE": False,
             "DISPLAY_WELCOME_FOOTER": False,
-            "APP_NAME": "Sahatak Consultation",
-            "NATIVE_APP_NAME": "Sahatak",
-            "PROVIDER_NAME": "Sahatak Telemedicine",
             "INVITATION_POWERED_BY": False,
             "RECENT_LIST_ENABLED": False,
+            
+            # Connection & Quality Indicators
             "VIDEO_QUALITY_LABEL_DISABLED": False,
             "CONNECTION_INDICATOR_DISABLED": False,
-            # Lobby specific UI options
-            "SHOW_LOBBY_CHAT": os.getenv('VIDEO_CALL_LOBBY_ENABLED', 'false').lower() == 'true',
-            "ENABLE_LOBBY_CHAT": os.getenv('VIDEO_CALL_LOBBY_ENABLED', 'false').lower() == 'true'
+            
+            # Lobby UI Settings (from env vars - single source)
+            "SHOW_LOBBY_CHAT": os.getenv('JITSI_LOBBY_CHAT_ENABLED', 'false').lower() == 'true',
+            "ENABLE_LOBBY_CHAT": os.getenv('JITSI_LOBBY_CHAT_ENABLED', 'false').lower() == 'true'
         }
         
         # Filter out None values from SETTINGS_SECTIONS

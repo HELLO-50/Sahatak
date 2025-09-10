@@ -636,52 +636,14 @@ const VideoConsultation = {
             backend_config_loaded: !!backendConfig
         });
         
-        // Use backend config or fallback to completely public defaults
+        // Trust backend configuration completely - no overrides
         const defaultConfig = backendConfig?.config || {
+            // Minimal fallback if backend config fails to load
             enableWelcomePage: false,
             enableClosePage: false,
             disableDeepLinking: true,
             startWithAudioMuted: false,
-            startWithVideoMuted: false,
-            requireDisplayName: false,
-            prejoinPageEnabled: false,
-            // COMPLETELY DISABLE ALL LOBBY FEATURES
-            enableLobby: false,
-            enableLobbyChat: false,
-            lobby: {
-                enabled: false,
-                autoKnock: false,
-                enableChat: false
-            },
-            // Force public room settings
-            roomConfig: {
-                enableLobby: false,
-                password: null,
-                requireAuth: false
-            },
-            // Disable all authentication
-            authentication: {
-                enabled: false
-            },
-            // Additional lobby disabling options
-            disableLobby: true,
-            enableUserRolesBasedOnToken: false,
-            enableInsecureRoomNameWarning: false,
-            // Force guest access without restrictions
-            enableGuestDomain: true,
-            enableGuests: true,
-            guestsAllowed: true,
-            // Disable moderation features that might trigger lobby
-            disableModeratorIndicator: true,
-            disableRemoteMute: true,
-            enableNoAudioSignal: false,
-            enableNoisyMicDetection: false,
-            // Additional security bypass options
-            enableClosePage: false,
-            disableThirdPartyRequests: false,
-            // Bypass any security checks that might enable lobby
-            skipPrejoin: true,
-            hideDisplayName: false
+            startWithVideoMuted: false
         };
         
         // Use backend interface config or fallback to hardcoded defaults
@@ -711,36 +673,11 @@ const VideoConsultation = {
         const sanitizedUserName = userName.replace(/[^a-zA-Z0-9]/g, '');
         const publicRoomName = `public${this.appointmentId}${sanitizedUserName}`;
         
-        // Merge configurations for public room only - ENSURE LOBBY IS ALWAYS DISABLED
+        // Use configuration from backend - trust the .env settings
         const finalConfig = { 
             ...defaultConfig, 
-            ...(sessionData.config || {}),
-            // TRIPLE FORCE: lobby to be completely disabled - override any backend settings
-            lobby: false, // Simple boolean disable
-            enableLobby: false,
-            lobbyEnabled: false,
-            enableLobbyChat: false,
-            lobbyMode: false,
-            disableLobby: true,
-            authentication: { enabled: false },
-            roomConfig: { 
-                enableLobby: false,
-                password: null,
-                requireAuth: false
-            },
-            // Override any membership or authentication requirements
-            membersOnly: false,
-            membersOnlyEnabled: false,
-            // Force public room access
-            publicRoom: true,
-            guestAccess: true,
-            allowGuests: true,
-            // Bypass all security features that might trigger lobby
-            security: {
-                enabled: false,
-                lobby: false,
-                password: false
-            }
+            ...(sessionData.config || {})
+            // No overrides - let backend .env control everything
         };
         
         const options = {
@@ -1658,33 +1595,10 @@ const VideoConsultation = {
                     this.jitsiApi = null;
                 }
                 
-                // Add fallback configuration for authentication issues
+                // Use backend configuration without modifications - trust .env settings  
                 const fallbackSessionData = {
                     ...response.data,
-                    config: {
-                        ...response.data.config,
-                        // Completely disable lobby and authentication
-                        enableLobbyChat: false,
-                        enableNoAudioDetection: false,
-                        enableNoisyMicDetection: false,
-                        startWithAudioMuted: false,
-                        startWithVideoMuted: false,
-                        requireDisplayName: false,
-                        lobby: {
-                            enabled: false
-                        },
-                        roomConfig: {
-                            enableLobby: false,
-                            password: null
-                        },
-                        authentication: {
-                            enabled: false
-                        },
-                        // Override any server-side authentication settings
-                        enableUserRolesBasedOnToken: false,
-                        enableInsecureRoomNameWarning: false
-                    },
-                    // Remove JWT token to force public room access
+                    // Only remove JWT to force public access - keep all other backend config
                     jwt_token: undefined
                 };
                 
@@ -1742,33 +1656,15 @@ const VideoConsultation = {
                 console.warn('🔧 Failed to load config for emergency mode:', error);
             }
             
-            // Use backend config for emergency mode or fallback to minimal config
+            // Use backend config for emergency mode or minimal fallback
             const emergencyConfig = emergencyBackendConfig?.config || {
-                // Completely public room settings
+                // Minimal emergency config - trust backend for all lobby/auth settings
                 enableWelcomePage: false,
                 enableClosePage: false,
                 disableDeepLinking: true,
                 startWithAudioMuted: false,
                 startWithVideoMuted: this.audioOnlyMode,
-                requireDisplayName: false,
-                enableLobbyChat: false,
-                enableNoAudioDetection: false,
-                enableNoisyMicDetection: false,
-                enableUserRolesBasedOnToken: false,
-                enableInsecureRoomNameWarning: false,
-                // Force public access - COMPLETE LOBBY DISABLE
-                lobby: { 
-                    enabled: false,
-                    autoKnock: false,
-                    enableChat: false 
-                },
-                disableLobby: true,
-                authentication: { enabled: false },
-                roomConfig: { 
-                    enableLobby: false,
-                    password: null,
-                    requireAuth: false
-                }
+                requireDisplayName: false
             };
 
             const emergencyInterfaceConfig = emergencyBackendConfig?.interface_config || {
