@@ -440,7 +440,7 @@ Video Consultation - Doctor Side
 ```
 Video Session Management
 ├── Session Creation
-│   ├── Generate unique room name (sahatak-{id}-{hash})
+│   ├── Generate deterministic room name (sahatak_appointment_{id})
 │   ├── Set session timing validation (15min buffer)
 │   ├── Configure Jitsi with custom settings
 │   ├── Apply security settings (no recording by default)
