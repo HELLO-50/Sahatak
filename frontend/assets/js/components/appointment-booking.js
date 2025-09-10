@@ -504,11 +504,23 @@ const AppointmentBooking = {
             if (response.success) {
                 this.showSuccess('تم حجز الموعد بنجاح!');
                 
-                // Refresh dashboard statistics if function exists
-                if (typeof window.refreshDashboardStats === 'function') {
-                    window.refreshDashboardStats();
-                    console.log('Dashboard statistics refreshed after appointment booking');
+                // Clear all appointment-related cache immediately
+                if (window.SahatakCache) {
+                    window.SahatakCache.clearByType('appointments_list');
+                    window.SahatakCache.clearByType('dashboard_stats');
+                    window.SahatakCache.clear(); // Clear all cache as fallback
                 }
+                
+                // Add new appointment to dashboard immediately without full refresh
+                this.addAppointmentToDashboard(response.data);
+                
+                // Force refresh with cache-busting 
+                setTimeout(() => {
+                    if (typeof window.refreshDashboardStats === 'function') {
+                        window.refreshDashboardStats();
+                    }
+                    console.log('Dashboard updated after appointment booking');
+                }, 100);
                 
                 // Show success modal
                 const modal = new bootstrap.Modal(document.getElementById('success-modal'));
@@ -936,6 +948,90 @@ const AppointmentBooking = {
                 <i class="bi ${buttonIcon}"></i> ${buttonText}
             </button>
         `;
+    },
+    
+    // Add new appointment to dashboard immediately without full refresh
+    addAppointmentToDashboard(appointmentData) {
+        try {
+            // Check if we're on a dashboard page
+            const appointmentsContainer = document.getElementById('appointments-container');
+            if (!appointmentsContainer) return;
+            
+            // Update appointment counter immediately
+            const countElement = document.getElementById('stat-appointments-count');
+            if (countElement) {
+                const currentCount = parseInt(countElement.textContent) || 0;
+                countElement.textContent = currentCount + 1;
+            }
+            
+            // Add appointment to the list if there's space (showing max 3)
+            const existingAppointments = appointmentsContainer.querySelectorAll('.appointment-card').length;
+            if (existingAppointments < 3) {
+                this.prependAppointmentToList(appointmentData);
+            }
+            
+            console.log('Appointment added to dashboard immediately');
+        } catch (error) {
+            console.error('Error adding appointment to dashboard:', error);
+        }
+    },
+    
+    // Prepend new appointment to the list
+    prependAppointmentToList(appointment) {
+        const appointmentsContainer = document.getElementById('appointments-container');
+        if (!appointmentsContainer) return;
+        
+        const appointmentDate = new Date(appointment.appointment_date);
+        const dateStr = appointmentDate.toLocaleDateString('en-US', { 
+            weekday: 'short', 
+            month: 'short', 
+            day: 'numeric' 
+        });
+        const timeStr = appointmentDate.toLocaleTimeString('en-US', { 
+            hour: 'numeric', 
+            minute: '2-digit',
+            hour12: true 
+        });
+        
+        // Create new appointment HTML
+        const appointmentHTML = `
+            <div class="appointment-card card mb-3 border-start border-primary border-3" data-appointment-id="${appointment.id}">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h6 class="card-title mb-1">
+                                <i class="bi bi-person-fill-check text-primary me-2"></i>
+                                Dr. ${appointment.doctor_name || 'Doctor'}
+                            </h6>
+                            <p class="card-text small text-muted mb-0">
+                                <i class="bi bi-calendar3 me-1"></i>
+                                ${dateStr} at ${timeStr}
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <span class="badge bg-success">${appointment.status || 'scheduled'}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Find the appointments list and prepend the new appointment
+        const appointmentsList = appointmentsContainer.querySelector('.appointments-list');
+        if (appointmentsList) {
+            appointmentsList.insertAdjacentHTML('afterbegin', appointmentHTML);
+        } else {
+            // If no existing list, create it
+            appointmentsContainer.innerHTML = `
+                <h5 class="mb-3">
+                    <i class="bi bi-calendar-day me-2"></i>
+                    <span id="upcoming-appointments-title">Upcoming Appointments</span>
+                </h5>
+                <div class="appointments-list">
+                    ${appointmentHTML}
+                </div>
+            `;
+        }
     }
 };
 

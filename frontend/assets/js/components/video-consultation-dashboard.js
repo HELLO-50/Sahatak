@@ -197,17 +197,34 @@ const VideoConsultationDashboard = {
                 
                 this.showSuccess(successMessage);
                 
+                // Clear caches and refresh dashboard
+                this.sessionStatusCache.delete(appointmentId);
+                
+                // Clear all appointment-related cache to ensure fresh data
+                if (window.SahatakCache) {
+                    window.SahatakCache.clearByType('appointments_list');
+                    window.SahatakCache.clearByType('dashboard_stats');
+                }
+                
                 // Remove appointment from dashboard or refresh stats
                 const appointmentCard = document.querySelector(`[data-appointment-id="${appointmentId}"]`);
                 if (appointmentCard) {
                     appointmentCard.style.animation = 'fadeOut 0.5s ease-out';
                     setTimeout(() => {
                         appointmentCard.remove();
-                        // Refresh dashboard statistics if available
+                        // Refresh dashboard statistics immediately
                         if (typeof refreshDoctorDashboardStats === 'function') {
                             refreshDoctorDashboardStats();
                         }
+                        // Also refresh video consultation dashboard
+                        this.refreshVideoConsultationData();
                     }, 500);
+                } else {
+                    // If no card found, still refresh data
+                    if (typeof refreshDoctorDashboardStats === 'function') {
+                        refreshDoctorDashboardStats();
+                    }
+                    this.refreshVideoConsultationData();
                 }
             } else {
                 throw new Error(response.message || 'Failed to complete consultation');
@@ -673,6 +690,17 @@ const VideoConsultationDashboard = {
             // Fallback to console
             console.log('Video consultation success:', message);
         }
+    },
+    
+    // Refresh video consultation dashboard data
+    refreshVideoConsultationData() {
+        // Clear caches
+        this.sessionStatusCache.clear();
+        
+        // Trigger re-initialization or data refresh
+        setTimeout(() => {
+            this.init();
+        }, 100);
     },
     
     // Cleanup method

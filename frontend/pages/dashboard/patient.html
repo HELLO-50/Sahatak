@@ -1042,6 +1042,10 @@
         window.refreshDashboardStats = function() {
             console.log('Refreshing dashboard statistics...');
             loadDashboardStats();
+            // Also refresh video consultation dashboard if available
+            if (typeof VideoConsultationDashboard !== 'undefined' && VideoConsultationDashboard.refreshVideoConsultationData) {
+                VideoConsultationDashboard.refreshVideoConsultationData();
+            }
         };
 
         document.addEventListener('DOMContentLoaded', async function() {

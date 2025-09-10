@@ -1317,6 +1317,9 @@ const VideoConsultation = {
     
     // Update connection quality display
     updateConnectionQuality(data) {
+        // Store latest connection quality for metrics
+        this.lastConnectionQuality = data.quality;
+        
         const qualityEl = document.getElementById('connection-quality');
         if (!qualityEl) return;
         
@@ -2211,13 +2214,11 @@ const VideoConsultation = {
         if (!this.jitsiApi) return;
         
         try {
-            // Get connection stats from Jitsi
-            const stats = await this.jitsiApi.getConnectionState();
             const participants = this.jitsiApi.getNumberOfParticipants();
             
             const metrics = {
                 timestamp: new Date(),
-                connection_state: stats || 'unknown',
+                connection_quality: this.lastConnectionQuality || 'unknown',
                 participant_count: participants,
                 audio_muted: this.jitsiApi.isAudioMuted(),
                 video_muted: this.jitsiApi.isVideoMuted(),
@@ -2540,13 +2541,21 @@ const VideoConsultation = {
                     this.endCall();
                 }
             } catch (error) {
-                console.error('Heartbeat error:', error);
-                // Don't end call on heartbeat error - might be temporary network issue
+                // Check if it's a session ended error (expected behavior)
+                if (error.message?.includes('Video session has ended') || error.status === 400) {
+                    console.warn('Video session ended - stopping heartbeat');
+                    this.stopHeartbeat();
+                } else {
+                    console.error('Heartbeat error:', error);
+                    // Don't end call on other heartbeat errors - might be temporary network issue
+                }
             }
         }, 30000);
     },
     
     // Dynamically load Jitsi External API script based on domain from .env
+    // NOTE: Jitsi may show deprecation warning for ScriptProcessorNode (in TrackVADEmitter.js)
+    // This is a known issue with older Jitsi versions - functionality is not affected
     async loadJitsiExternalAPI(domain) {
         return new Promise((resolve, reject) => {
             // Check if script is already loaded for this domain
