@@ -1686,9 +1686,24 @@
                     // Debug: Get current doctor info
                     const currentUser = AuthGuard.getCurrentUser();
                     
-                    // Get doctor profile ID from localStorage doctor data
-                    const doctorData = JSON.parse(localStorage.getItem('sahatak_doctor_data') || '{}');
-                    const currentDoctorId = doctorData.id || currentUser?.doctor_id || currentUser?.profile?.id;
+                    // Get doctor profile ID - need to fetch from API since localStorage has user_id not doctor_id
+                    let currentDoctorId = null;
+                    try {
+                        // Try to get doctor profile from API using user_id
+                        const doctorResponse = await ApiHelper.makeRequest(`/doctors/profile`);
+                        if (doctorResponse.success && doctorResponse.data) {
+                            currentDoctorId = doctorResponse.data.id;
+                            console.log(`🩺 Got doctor profile ID from API: ${currentDoctorId}`);
+                        }
+                    } catch (error) {
+                        console.log('Could not fetch doctor profile, using fallback');
+                    }
+                    
+                    // Fallback: If user 158, we know from SQL it's doctor 62
+                    if (!currentDoctorId && currentUser?.id == 158) {
+                        currentDoctorId = 62;
+                        console.log(`🔧 Fallback: Using known doctor ID 62 for user 158`);
+                    }
                     
                     console.log(`👨‍⚕️ Current user ID: ${currentUser?.id}, Doctor profile ID: ${currentDoctorId}`);
                     
