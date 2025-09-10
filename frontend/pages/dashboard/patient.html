@@ -869,8 +869,20 @@
                 const currentLang = LanguageManager.getLanguage() || 'en';
                 const currentUser = AuthGuard.getCurrentUser();
                 
-                if (currentUser && currentUser.id) {
-                    const response = await ApiHelper.makeRequest(`/medical-history/patient/${currentUser.id}`);
+                // Get patient profile ID from API, not user ID
+                let currentPatientId = null;
+                try {
+                    const profileResponse = await ApiHelper.makeRequest(`/users/profile`);
+                    if (profileResponse.success && profileResponse.user && profileResponse.user.profile) {
+                        currentPatientId = profileResponse.user.profile.id;
+                        console.log(`🩺 Got patient profile ID from /users/profile: ${currentPatientId}`);
+                    }
+                } catch (error) {
+                    console.log('Could not fetch patient profile from API:', error);
+                }
+                
+                if (currentPatientId) {
+                    const response = await ApiHelper.makeRequest(`/medical-history/patient/${currentPatientId}`);
                     
                     if (response.success && response.data) {
                         const data = response.data;
@@ -1104,8 +1116,21 @@
             try {
                 // Load medical history/reports count from API
                 const currentUser = AuthGuard.getCurrentUser();
-                if (currentUser && currentUser.id) {
-                    const historyResponse = await ApiHelper.makeRequest(`/medical-history/patient/${currentUser.id}`);
+                
+                // Get patient profile ID from API, not user ID
+                let currentPatientId = null;
+                try {
+                    const profileResponse = await ApiHelper.makeRequest(`/users/profile`);
+                    if (profileResponse.success && profileResponse.user && profileResponse.user.profile) {
+                        currentPatientId = profileResponse.user.profile.id;
+                        console.log(`🩺 Got patient profile ID for stats: ${currentPatientId}`);
+                    }
+                } catch (error) {
+                    console.log('Could not fetch patient profile for stats:', error);
+                }
+                
+                if (currentPatientId) {
+                    const historyResponse = await ApiHelper.makeRequest(`/medical-history/patient/${currentPatientId}`);
                     
                     if (historyResponse.success) {
                         const historyData = historyResponse.data;
