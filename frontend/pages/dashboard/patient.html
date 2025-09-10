@@ -1237,7 +1237,7 @@
                 clearInterval(videoStatusMonitorInterval);
             }
             
-            // Check every 3 seconds for video appointment status updates (faster sync for patients)
+            // Check every 2 seconds for video appointment status updates (very fast sync for patients)
             videoStatusMonitorInterval = setInterval(async () => {
                 try {
                     // Find any video appointments that might need status updates
@@ -1247,16 +1247,25 @@
                         const appointmentId = card.dataset.appointmentId;
                         const appointmentStatus = card.dataset.appointmentStatus;
                         
-                        // Only check scheduled or in_progress video appointments
-                        if (appointmentId && (appointmentStatus === 'scheduled' || appointmentStatus === 'in_progress')) {
+                        // Check scheduled, in_progress, and completed appointments for status changes
+                        if (appointmentId && (appointmentStatus === 'scheduled' || appointmentStatus === 'in_progress' || appointmentStatus === 'completed')) {
                             console.log(`🔄 Monitoring video appointment ${appointmentId} (status: ${appointmentStatus})`);
                             
                             if (typeof VideoConsultationDashboard !== 'undefined' && VideoConsultationDashboard.checkVideoSessionStatus) {
                                 await VideoConsultationDashboard.checkVideoSessionStatus(appointmentId, true);
                                 
-                                // Also refresh dashboard stats to ensure buttons update
+                                // Force aggressive dashboard refresh for immediate UI updates
                                 if (window.refreshDashboardStats) {
                                     window.refreshDashboardStats();
+                                }
+                                
+                                // Additional refresh for completed appointments to ensure UI reflects changes
+                                if (appointmentStatus === 'completed') {
+                                    setTimeout(() => {
+                                        if (window.refreshDashboardStats) {
+                                            window.refreshDashboardStats();
+                                        }
+                                    }, 500);
                                 }
                             }
                         }
@@ -1264,9 +1273,9 @@
                 } catch (error) {
                     console.error('Error in video status monitoring:', error);
                 }
-            }, 3000); // Check every 3 seconds for faster response
+            }, 2000); // Check every 2 seconds for very fast response
             
-            console.log('✅ Video status monitoring started - checking every 3 seconds');
+            console.log('✅ Video status monitoring started - checking every 2 seconds');
         }
         
         function stopVideoStatusMonitoring() {
