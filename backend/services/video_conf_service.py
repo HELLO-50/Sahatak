@@ -192,11 +192,27 @@ class VideoConferenceService:
             "enableEncryption": os.getenv('JITSI_ENABLE_E2EE', 'false').lower() == 'true',
             "enableRecording": os.getenv('VIDEO_CALL_RECORDING_ENABLED', 'false').lower() == 'true',
             
+            # P2P Configuration (disable to avoid lobby conflicts)
+            "p2p": {
+                "enabled": False,
+                "useStunTurn": False
+            },
+            
             # Additional anti-lobby/membership settings
             "disableIncomingMessages": False,
             "hideConferenceSubject": False,
             "hideConferenceTimer": False,
             "openBridgeChannel": True,
+            
+            # Explicit lobby system disables (from environment)
+            "lobbyEnabled": os.getenv('JITSI_LOBBY_ENABLED', 'false').lower() == 'true',
+            "enableLobbyMode": os.getenv('JITSI_LOBBY_MODE_ENABLED', 'false').lower() == 'true',
+            "disableLobbyMode": True,
+            "knockingEnabled": os.getenv('JITSI_KNOCKING_ENABLED', 'false').lower() == 'true',
+            "enableKnocking": os.getenv('JITSI_ENABLE_KNOCKING', 'false').lower() == 'true',
+            "disableKnocking": True,
+            "moderatedRoomServiceUrl": None,
+            "enableModerationMode": os.getenv('JITSI_MODERATION_ENABLED', 'false').lower() == 'true',
             
             # Notifications
             "notifications": [
@@ -280,6 +296,12 @@ class VideoConferenceService:
             # Lobby UI Settings (DISABLED)
             "SHOW_LOBBY_CHAT": False,
             "ENABLE_LOBBY_CHAT": False,
+            "LOBBY_ENABLED": False,
+            "ENABLE_LOBBY": False,
+            "DISABLE_LOBBY": True,
+            "ENABLE_KNOCKING": False,
+            "DISABLE_KNOCKING": True,
+            "SHOW_LOBBY_BUTTON": False,
             
             # Anonymous Access UI
             "ENABLE_ANONYMOUS_DOMAIN_ACCESS": True,
