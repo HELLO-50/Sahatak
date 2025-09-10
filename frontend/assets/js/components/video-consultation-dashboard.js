@@ -520,13 +520,15 @@ const VideoConsultationDashboard = {
         // Check if video consultation button already exists
         let existingButton = appointmentCard.querySelector('.video-consultation-btn');
         
-        // Check for inconsistent state that needs fixing
+        // Check for truly inconsistent state that needs fixing
+        // Only force reset if the session has been waiting for too long (over 5 minutes)
         const needsStatusFix = sessionData.appointment_status === 'in_progress' && 
                               sessionData.session_status === 'waiting' && 
-                              sessionData.session_started_at;
+                              sessionData.session_started_at &&
+                              (new Date() - new Date(sessionData.session_started_at)) > 5 * 60 * 1000; // 5 minutes
         
         if (needsStatusFix) {
-            console.log(`🚨 Found inconsistent state for appointment ${appointmentId} - forcing status reset`);
+            console.log(`🚨 Found inconsistent state for appointment ${appointmentId} - session waiting for over 5 minutes, forcing status reset`);
             // Force call to video/end endpoint to reset status
             this.forceSessionEnd(appointmentId);
         }
@@ -583,7 +585,7 @@ const VideoConsultationDashboard = {
     
     // Calculate session duration display
     calculateSessionDuration(startTime, totalDuration) {
-        if (totalDuration) {
+        if (totalDuration && totalDuration > 0) {
             // Session ended, show total duration
             const minutes = Math.floor(totalDuration / 60);
             const seconds = totalDuration % 60;
@@ -592,7 +594,21 @@ const VideoConsultationDashboard = {
             // Session ongoing, calculate current duration
             const start = new Date(startTime);
             const now = new Date();
+            
+            // Validate date parsing
+            if (isNaN(start.getTime())) {
+                console.warn('Invalid start time for session duration:', startTime);
+                return '0:00';
+            }
+            
             const diffSeconds = Math.floor((now - start) / 1000);
+            
+            // Ensure non-negative duration
+            if (diffSeconds < 0) {
+                console.warn('Negative duration detected, showing 0:00');
+                return '0:00';
+            }
+            
             const minutes = Math.floor(diffSeconds / 60);
             const seconds = diffSeconds % 60;
             return `${minutes}:${seconds.toString().padStart(2, '0')}`;
