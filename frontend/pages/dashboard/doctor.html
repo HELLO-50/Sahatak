@@ -113,6 +113,71 @@
                 transform: scale(0.95);
             }
         }
+        
+        /* Pagination Styles */
+        .pagination-controls {
+            font-size: 14px;
+        }
+        
+        .pagination-controls .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+            border-radius: 0.25rem;
+            transition: all 0.15s ease-in-out;
+        }
+        
+        .pagination-controls .btn-outline-secondary:hover:not(:disabled) {
+            background-color: #6c757d;
+            border-color: #6c757d;
+            color: white;
+        }
+        
+        .pagination-controls .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .pagination-controls .d-flex.gap-1 > .btn {
+            min-width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .pagination-controls .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        
+        .pagination-controls .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+        
+        /* Page info styling */
+        #activity-page-info, #appointments-page-info {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        /* Responsive pagination */
+        @media (max-width: 768px) {
+            .pagination-controls {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .pagination-controls .d-flex:first-child,
+            .pagination-controls .d-flex:last-child {
+                justify-content: center;
+            }
+            
+            #activity-page-info, #appointments-page-info {
+                text-align: center;
+                margin-bottom: 0.5rem;
+            }
+        }
     </style>
 </head>
 <body data-protect="doctor">
@@ -233,12 +298,27 @@
                         <!-- Schedule -->
                         <div class="col-lg-6 mb-4">
                             <div id="schedule-card" class="dashboard-card verification-overlay">
-                                <h5 id="schedule-title">
-                                    <i class="bi bi-calendar-day me-2"></i>
-                                    Schedule
-                                </h5>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 id="schedule-title" class="mb-0">
+                                        <i class="bi bi-calendar-day me-2"></i>
+                                        Schedule
+                                    </h5>
+                                    <small class="text-muted" id="appointments-page-info">Page 1</small>
+                                </div>
                                 <div id="appointments-container">
                                     <!-- Appointments will be loaded dynamically -->
+                                </div>
+                                <!-- Pagination Controls for Appointments -->
+                                <div id="appointments-pagination" class="pagination-controls d-flex justify-content-between align-items-center mt-3" style="display: none !important;">
+                                    <button id="appointments-prev-btn" class="btn btn-sm btn-outline-secondary" onclick="changeAppointmentsPage('prev')" disabled>
+                                        <i class="bi bi-chevron-left"></i> Prev
+                                    </button>
+                                    <div id="appointments-page-numbers" class="d-flex gap-1">
+                                        <!-- Page numbers will be generated dynamically -->
+                                    </div>
+                                    <button id="appointments-next-btn" class="btn btn-sm btn-outline-secondary" onclick="changeAppointmentsPage('next')">
+                                        Next <i class="bi bi-chevron-right"></i>
+                                    </button>
                                 </div>
                                 <div class="text-center mt-3">
                                     <button class="btn btn-outline-medical" onclick="handleVerifiedAction('viewFullSchedule')">
@@ -287,12 +367,27 @@
                         <!-- Recent Activity -->
                         <div class="col-lg-6 mb-4">
                             <div id="activity-card" class="dashboard-card verification-overlay">
-                                <h5 id="activity-title">
-                                    <i class="bi bi-activity me-2"></i>
-                                    Recent Activity
-                                </h5>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 id="activity-title" class="mb-0">
+                                        <i class="bi bi-activity me-2"></i>
+                                        Recent Activity
+                                    </h5>
+                                    <small class="text-muted" id="activity-page-info">Page 1</small>
+                                </div>
                                 <div id="recent-activity-container">
                                     <!-- Recent activity will be loaded dynamically -->
+                                </div>
+                                <!-- Pagination Controls -->
+                                <div id="activity-pagination" class="pagination-controls d-flex justify-content-between align-items-center mt-3" style="display: none !important;">
+                                    <button id="activity-prev-btn" class="btn btn-sm btn-outline-secondary" onclick="changeActivityPage('prev')" disabled>
+                                        <i class="bi bi-chevron-left"></i> Prev
+                                    </button>
+                                    <div id="activity-page-numbers" class="d-flex gap-1">
+                                        <!-- Page numbers will be generated dynamically -->
+                                    </div>
+                                    <button id="activity-next-btn" class="btn btn-sm btn-outline-secondary" onclick="changeActivityPage('next')">
+                                        Next <i class="bi bi-chevron-right"></i>
+                                    </button>
                                 </div>
                                 <div class="text-center mt-3">
                                     <button class="btn btn-outline-medical" onclick="handleVerifiedAction('viewAllActivity')">
@@ -1322,6 +1417,242 @@
             }
         }
 
+        // Pagination state
+        let allAppointments = [];
+        let allActivities = [];
+        let currentAppointmentsPage = 1;
+        let currentActivityPage = 1;
+        const appointmentsPerPage = 3;
+        const activitiesPerPage = 6;
+        
+        // Pagination utility function
+        function createPaginationNumbers(totalPages, currentPage, containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            // Show page numbers (max 5 visible)
+            const maxVisible = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+            
+            // Adjust start if we're at the end
+            if (endPage - startPage + 1 < maxVisible) {
+                startPage = Math.max(1, endPage - maxVisible + 1);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const btn = document.createElement('button');
+                btn.className = `btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-outline-secondary'}`;
+                btn.textContent = i;
+                btn.onclick = () => {
+                    if (containerId === 'appointments-page-numbers') {
+                        currentAppointmentsPage = i;
+                        updateAppointmentsPagination();
+                    } else {
+                        currentActivityPage = i;
+                        updateActivityPagination();
+                    }
+                };
+                container.appendChild(btn);
+            }
+        }
+        
+        // Appointments pagination functions
+        function changeAppointmentsPage(direction) {
+            const totalPages = Math.ceil(allAppointments.length / appointmentsPerPage);
+            
+            if (direction === 'prev' && currentAppointmentsPage > 1) {
+                currentAppointmentsPage--;
+            } else if (direction === 'next' && currentAppointmentsPage < totalPages) {
+                currentAppointmentsPage++;
+            }
+            
+            updateAppointmentsPagination();
+        }
+        
+        function updateAppointmentsPagination() {
+            const totalPages = Math.ceil(allAppointments.length / appointmentsPerPage);
+            const startIndex = (currentAppointmentsPage - 1) * appointmentsPerPage;
+            const endIndex = startIndex + appointmentsPerPage;
+            const currentPageAppointments = allAppointments.slice(startIndex, endIndex);
+            
+            // Update page info
+            document.getElementById('appointments-page-info').textContent = 
+                totalPages > 1 ? `Page ${currentAppointmentsPage} of ${totalPages}` : `${allAppointments.length} items`;
+            
+            // Update pagination controls visibility
+            const paginationDiv = document.getElementById('appointments-pagination');
+            if (totalPages > 1) {
+                paginationDiv.style.display = 'flex';
+                paginationDiv.style.setProperty('display', 'flex', 'important');
+            } else {
+                paginationDiv.style.display = 'none';
+                paginationDiv.style.setProperty('display', 'none', 'important');
+            }
+            
+            // Update buttons
+            document.getElementById('appointments-prev-btn').disabled = currentAppointmentsPage <= 1;
+            document.getElementById('appointments-next-btn').disabled = currentAppointmentsPage >= totalPages;
+            
+            // Create page numbers
+            createPaginationNumbers(totalPages, currentAppointmentsPage, 'appointments-page-numbers');
+            
+            // Display appointments for current page
+            displayAppointmentsPage(currentPageAppointments);
+        }
+        
+        // Activity pagination functions  
+        function changeActivityPage(direction) {
+            const totalPages = Math.ceil(allActivities.length / activitiesPerPage);
+            
+            if (direction === 'prev' && currentActivityPage > 1) {
+                currentActivityPage--;
+            } else if (direction === 'next' && currentActivityPage < totalPages) {
+                currentActivityPage++;
+            }
+            
+            updateActivityPagination();
+        }
+        
+        function updateActivityPagination() {
+            const totalPages = Math.ceil(allActivities.length / activitiesPerPage);
+            const startIndex = (currentActivityPage - 1) * activitiesPerPage;
+            const endIndex = startIndex + activitiesPerPage;
+            const currentPageActivities = allActivities.slice(startIndex, endIndex);
+            
+            // Update page info
+            document.getElementById('activity-page-info').textContent = 
+                totalPages > 1 ? `Page ${currentActivityPage} of ${totalPages}` : `${allActivities.length} items`;
+            
+            // Update pagination controls visibility
+            const paginationDiv = document.getElementById('activity-pagination');
+            if (totalPages > 1) {
+                paginationDiv.style.display = 'flex';
+                paginationDiv.style.setProperty('display', 'flex', 'important');
+            } else {
+                paginationDiv.style.display = 'none';
+                paginationDiv.style.setProperty('display', 'none', 'important');
+            }
+            
+            // Update buttons
+            document.getElementById('activity-prev-btn').disabled = currentActivityPage <= 1;
+            document.getElementById('activity-next-btn').disabled = currentActivityPage >= totalPages;
+            
+            // Create page numbers
+            createPaginationNumbers(totalPages, currentActivityPage, 'activity-page-numbers');
+            
+            // Display activities for current page
+            displayActivitiesPage(currentPageActivities);
+        }
+        
+        function displayAppointmentsPage(appointments) {
+            const appointmentsContainer = document.getElementById('appointments-container');
+            if (!appointmentsContainer) return;
+            
+            if (appointments.length > 0) {
+                const currentLang = LanguageManager.getLanguage() || 'en';
+                const hasUpcoming = appointments.some(apt => ['scheduled', 'confirmed', 'in_progress'].includes(apt.status));
+                const sectionTitle = hasUpcoming ? 
+                    (currentLang === 'ar' ? 'المواعيد القادمة والحديثة' : 'Upcoming & Recent Appointments') :
+                    (currentLang === 'ar' ? 'المواعيد الحديثة' : 'Recent Appointments');
+                
+                appointmentsContainer.innerHTML = `
+                    <div class="appointments-content">
+                        ${appointments.map(apt => {
+                            const appointmentDate = new Date(apt.appointment_date);
+                            const dateStr = appointmentDate.toLocaleDateString('en-US', { 
+                                weekday: 'short', 
+                                month: 'short', 
+                                day: 'numeric' 
+                            });
+                            const timeStr = appointmentDate.toLocaleTimeString('en-US', { 
+                                hour: 'numeric', 
+                                minute: '2-digit',
+                                hour12: true 
+                            });
+                            
+                            // Generate video consultation button if applicable
+                            const videoButton = (typeof VideoConsultationDashboard !== 'undefined' && VideoConsultationDashboard.generateVideoConsultationButton) 
+                                ? VideoConsultationDashboard.generateVideoConsultationButton(apt) 
+                                : (apt.appointment_type === 'video' ? `<button class="btn btn-primary btn-sm" disabled>Loading...</button>` : '');
+                            const isVideoAppointment = apt.appointment_type === 'video';
+                            
+                            // Determine badge color based on status
+                            const getBadgeClass = (status) => {
+                                switch(status) {
+                                    case 'scheduled': return 'bg-primary';
+                                    case 'confirmed': return 'bg-success';
+                                    case 'in_progress': return 'bg-warning text-dark';
+                                    case 'completed': return 'bg-secondary';
+                                    case 'cancelled': return 'bg-danger';
+                                    default: return 'bg-primary';
+                                }
+                            };
+                            
+                            return `
+                                <div class="appointment-item appointment-card ${isVideoAppointment ? 'video-appointment' : ''} d-flex justify-content-between align-items-center p-3 mb-2 bg-light rounded" data-appointment-id="${apt.id}" data-appointment-status="${apt.status}">
+                                    <div class="flex-grow-1">
+                                        <div style="color: black;"><strong>${apt.patient_name || 'Unknown Patient'}</strong></div>
+                                        ${apt.patient_age ? `<span class="text-muted ms-2">Age ${apt.patient_age}</span>` : ''}
+                                        <div class="text-muted small">
+                                            <i class="bi bi-${apt.appointment_type === 'video' ? 'camera-video' : apt.appointment_type === 'audio' ? 'telephone' : 'chat-dots'} me-1"></i>${apt.appointment_type}
+                                        </div>
+                                        ${apt.reason_for_visit ? `<div class="text-muted small">${apt.reason_for_visit}</div>` : ''}
+                                        <div class="small" style="color: darkgreen;">
+                                            <i class="bi bi-calendar me-1"></i>${dateStr} ${timeStr}
+                                        </div>
+                                        ${videoButton ? `
+                                            <div class="video-consultation-actions mt-2">
+                                                ${videoButton}
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                    <div class="d-flex flex-column align-items-end gap-2">
+                                        <span class="badge ${getBadgeClass(apt.status)}">${apt.status}</span>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            } else {
+                const currentLang = LanguageManager.getLanguage() || 'en';
+                appointmentsContainer.innerHTML = `
+                    <p class="text-muted text-center py-3">${currentLang === 'ar' ? 'لا توجد مواعيد حديثة' : 'No recent appointments'}</p>
+                `;
+            }
+        }
+        
+        function displayActivitiesPage(activities) {
+            const activityContainer = document.getElementById('recent-activity-container');
+            if (!activityContainer) return;
+            
+            if (activities.length > 0) {
+                activityContainer.innerHTML = activities.map(activity => {
+                    const timeAgo = getTimeAgo(activity.date);
+                    const formattedDate = activity.date.toLocaleString(undefined, {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    return `
+                        <div class="activity-item d-flex align-items-start p-2 mb-2 bg-light rounded">
+                            <i class="bi ${activity.icon} text-primary me-3 mt-1"></i>
+                            <div class="flex-grow-1">
+                                <div style="color: black;">${activity.message}</div>
+                                <small class="text-muted" title="${formattedDate}">${timeAgo}</small>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                activityContainer.innerHTML = '<p class="text-muted text-center py-3">No recent activity</p>';
+            }
+        }
+
         // Load dashboard statistics from API
         async function loadDoctorDashboardStats() {
             console.log('Loading doctor dashboard statistics...');
@@ -1390,88 +1721,10 @@
                         }
                     });
                     
-                    // Update appointments list
-                    const appointmentsContainer = document.getElementById('appointments-container');
-                    if (appointmentsContainer) {
-                        if (displayAppointments.length > 0) {
-                            const currentLang = LanguageManager.getLanguage() || 'en';
-                            const hasUpcoming = upcomingAppointments.length > 0;
-                            const sectionTitle = hasUpcoming ? 
-                                (currentLang === 'ar' ? 'المواعيد القادمة والحديثة' : 'Upcoming & Recent Appointments') :
-                                (currentLang === 'ar' ? 'المواعيد الحديثة' : 'Recent Appointments');
-                            
-                            appointmentsContainer.innerHTML = `
-                                <h5 class="mb-3">
-                                    <i class="bi bi-calendar-day me-2"></i>
-                                    ${sectionTitle}
-                                </h5>
-                                ${displayAppointments.slice(0, 4).map(apt => {
-                                const appointmentDate = new Date(apt.appointment_date);
-                                const dateStr = appointmentDate.toLocaleDateString('en-US', { 
-                                    weekday: 'short', 
-                                    month: 'short', 
-                                    day: 'numeric' 
-                                });
-                                const timeStr = appointmentDate.toLocaleTimeString('en-US', { 
-                                    hour: 'numeric', 
-                                    minute: '2-digit',
-                                    hour12: true 
-                                });
-                                
-                                // Generate video consultation button if applicable
-                                const videoButton = (typeof VideoConsultationDashboard !== 'undefined' && VideoConsultationDashboard.generateVideoConsultationButton) 
-                                    ? VideoConsultationDashboard.generateVideoConsultationButton(apt) 
-                                    : (apt.appointment_type === 'video' ? `<button class="btn btn-primary btn-sm" disabled>Loading...</button>` : '');
-                                const isVideoAppointment = apt.appointment_type === 'video';
-                                
-                                // Determine badge color based on status
-                                const getBadgeClass = (status) => {
-                                    switch(status) {
-                                        case 'scheduled': return 'bg-primary';
-                                        case 'confirmed': return 'bg-success';
-                                        case 'in_progress': return 'bg-warning text-dark';
-                                        case 'completed': return 'bg-secondary';
-                                        case 'cancelled': return 'bg-danger';
-                                        default: return 'bg-primary';
-                                    }
-                                };
-                                
-                                return `
-                                    <div class="appointment-item appointment-card ${isVideoAppointment ? 'video-appointment' : ''} d-flex justify-content-between align-items-center p-3 mb-2 bg-light rounded" data-appointment-id="${apt.id}" data-appointment-status="${apt.status}">
-                                        <div class="flex-grow-1">
-                                            <div style="color: black;"><strong>${apt.patient_name || 'Unknown Patient'}</strong></div>
-                                            ${apt.patient_age ? `<span class="text-muted ms-2">Age ${apt.patient_age}</span>` : ''}
-                                            <div class="text-muted small">
-                                                <i class="bi bi-${apt.appointment_type === 'video' ? 'camera-video' : apt.appointment_type === 'audio' ? 'telephone' : 'chat-dots'} me-1"></i>${apt.appointment_type}
-                                            </div>
-                                            ${apt.reason_for_visit ? `<div class="text-muted small">${apt.reason_for_visit}</div>` : ''}
-                                            <div class="small" style="color: darkgreen;">
-                                                <i class="bi bi-calendar me-1"></i>${dateStr} ${timeStr}
-                                            </div>
-                                            ${videoButton ? `
-                                                <div class="video-consultation-actions mt-2">
-                                                    ${videoButton}
-                                                </div>
-                                            ` : ''}
-                                        </div>
-                                        <div class="d-flex flex-column align-items-end gap-2">
-                                            <span class="badge ${getBadgeClass(apt.status)}">${apt.status}</span>
-                                        </div>
-                                    </div>
-                                `;
-                            }).join('')}
-                            `;
-                        } else {
-                            const currentLang = LanguageManager.getLanguage() || 'en';
-                            appointmentsContainer.innerHTML = `
-                                <h5 class="mb-3">
-                                    <i class="bi bi-calendar-day me-2"></i>
-                                    ${currentLang === 'ar' ? 'المواعيد' : 'Appointments'}
-                                </h5>
-                                <p class="text-muted text-center py-3">${currentLang === 'ar' ? 'لا توجد مواعيد حديثة' : 'No recent appointments'}</p>
-                            `;
-                        }
-                    }
+                    // Update appointments list with pagination
+                    allAppointments = displayAppointments; // Store all appointments for pagination
+                    currentAppointmentsPage = 1; // Reset to first page
+                    updateAppointmentsPagination(); // Use pagination system
                     
                     // Update Recent Activity
                     const activityContainer = document.getElementById('recent-activity-container');
@@ -1556,28 +1809,10 @@
                             }
                         });
                         
-                        if (uniqueActivities.length > 0) {
-                            activityContainer.innerHTML = uniqueActivities.slice(0, 5).map(activity => {
-                                const timeAgo = getTimeAgo(activity.date);
-                                const formattedDate = activity.date.toLocaleString(undefined, {
-                                    month: 'short',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                });
-                                return `
-                                    <div class="activity-item d-flex align-items-start p-2 mb-2 bg-light rounded">
-                                        <i class="bi ${activity.icon} text-primary me-3 mt-1"></i>
-                                        <div class="flex-grow-1">
-                                            <div style="color: black;">${activity.message}</div>
-                                            <small class="text-muted" title="${formattedDate}">${timeAgo}</small>
-                                        </div>
-                                    </div>
-                                `;
-                            }).join('');
-                        } else {
-                            activityContainer.innerHTML = '<p class="text-muted text-center py-3">No recent activity</p>';
-                        }
+                        // Use pagination for activities
+                        allActivities = uniqueActivities; // Store all activities for pagination
+                        currentActivityPage = 1; // Reset to first page
+                        updateActivityPagination(); // Use pagination system
                     }
                     
                     // Update statistics in the doctor-stats-container
