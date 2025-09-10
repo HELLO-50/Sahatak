@@ -1685,8 +1685,12 @@
                     
                     // Debug: Get current doctor info
                     const currentUser = AuthGuard.getCurrentUser();
-                    const currentDoctorId = currentUser?.id;
-                    console.log(`👨‍⚕️ Current doctor ID: ${currentDoctorId}`);
+                    
+                    // Get doctor profile ID from localStorage doctor data
+                    const doctorData = JSON.parse(localStorage.getItem('sahatak_doctor_data') || '{}');
+                    const currentDoctorId = doctorData.id || currentUser?.doctor_id || currentUser?.profile?.id;
+                    
+                    console.log(`👨‍⚕️ Current user ID: ${currentUser?.id}, Doctor profile ID: ${currentDoctorId}`);
                     
                     // Debug: log ALL appointment statuses first
                     console.log('📊 All appointment statuses breakdown:');
