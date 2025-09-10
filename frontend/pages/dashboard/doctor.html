@@ -1683,9 +1683,22 @@
                     const uniquePatientIds = [...new Set(appointments.map(apt => apt.patient_id))];
                     const totalPatients = uniquePatientIds.length;
                     
-                    // Count completed appointments for consultation count
-                    const completedAppointments = appointments.filter(apt => apt.status === 'completed');
+                    // Count completed appointments for consultation count (case-insensitive)
+                    const completedAppointments = appointments.filter(apt => 
+                        apt.status && apt.status.toLowerCase() === 'completed'
+                    );
                     const completedCount = completedAppointments.length;
+                    
+                    // Debug: Show completed appointments details
+                    console.log(`🎯 Completed appointments found: ${completedCount}`);
+                    if (completedCount > 0) {
+                        console.log('📋 Completed appointments:', completedAppointments.map(apt => ({
+                            id: apt.id,
+                            patient: apt.patient_name,
+                            date: apt.appointment_date,
+                            status: apt.status
+                        })));
+                    }
                     
                     // Debug: log appointment statuses
                     console.log('📊 Appointment statuses breakdown:');

@@ -1010,6 +1010,22 @@ const AdminDashboard = {
         }
     },
     
+    // Format doctor name to avoid duplicate Dr. prefix
+    formatDoctorName(fullName) {
+        if (!fullName) return 'Unknown Doctor';
+        
+        // If the name already starts with "Dr.", "Doctor", or Arabic "د." prefix, don't add another prefix
+        if (fullName.toLowerCase().startsWith('dr.') || 
+            fullName.toLowerCase().startsWith('doctor ') ||
+            fullName.startsWith('د.') ||
+            fullName.startsWith('دكتور ')) {
+            return fullName;
+        }
+        
+        // Otherwise, add "Dr." prefix
+        return `Dr. ${fullName}`;
+    },
+
     // Display appointments table
     displayAppointmentsTable(appointments) {
         const tbody = document.getElementById('appointments-table-body');
@@ -1033,7 +1049,7 @@ const AdminDashboard = {
                     <small class="text-muted">${appointment.patient.email}</small>
                 </td>
                 <td>
-                    <strong>Dr. ${appointment.doctor.name}</strong><br>
+                    <strong>${this.formatDoctorName(appointment.doctor.name)}</strong><br>
                     <small class="text-muted">${appointment.doctor.specialty}</small>
                 </td>
                 <td>
@@ -1045,12 +1061,12 @@ const AdminDashboard = {
                 </td>
                 <td>
                     <div class="btn-group btn-group-sm">
-                        ${appointment.can_cancel ? `
+                        ${appointment.can_cancel && !['cancelled', 'completed'].includes(appointment.status) ? `
                             <button class="btn btn-warning" onclick="AdminDashboard.cancelAppointment(${appointment.id})" title="Cancel Appointment">
                                 <i class="bi bi-x-circle"></i>
                             </button>
                         ` : ''}
-                        ${appointment.can_delete ? `
+                        ${appointment.can_delete && !['cancelled', 'completed'].includes(appointment.status) ? `
                             <button class="btn btn-danger" onclick="AdminDashboard.deleteAppointment(${appointment.id})" title="Delete Appointment">
                                 <i class="bi bi-trash"></i>
                             </button>
@@ -1058,6 +1074,9 @@ const AdminDashboard = {
                         <button class="btn btn-info" onclick="AdminDashboard.viewAppointment(${appointment.id})" title="View Details">
                             <i class="bi bi-eye"></i>
                         </button>
+                        ${['cancelled', 'completed'].includes(appointment.status) ? `
+                            <span class="badge bg-secondary ms-1">View Only</span>
+                        ` : ''}
                     </div>
                 </td>
             </tr>
