@@ -319,7 +319,7 @@ const VideoConsultation = {
     },
     
     // Check network quality
-    async checkNetworkQuality() {
+    async checkNetworkQuality(testDomain = null) {
         const networkCheck = document.getElementById('network-check');
         if (!networkCheck) return;
         
@@ -328,7 +328,12 @@ const VideoConsultation = {
             
             // Test network speed with a small image
             const testImage = new Image();
-            testImage.src = 'https://meet.jit.si/images/watermark.svg?' + Math.random();
+            // Use domain from backend config or fallback for network test only
+            if (!testDomain) {
+                console.warn('🔧 No domain provided for network test, using fallback');
+                testDomain = 'meet.ffmuc.net'; // fallback only for network test
+            }
+            testImage.src = `https://${testDomain}/images/watermark.svg?` + Math.random();
             
             await new Promise((resolve, reject) => {
                 testImage.onload = resolve;
@@ -534,7 +539,7 @@ const VideoConsultation = {
             
             const publicSessionData = {
                 room_name: publicRoomName,
-                jitsi_domain: 'meet.jit.si',
+                jitsi_domain: null, // Will be loaded from backend
                 jwt_token: null, // No authentication for public rooms
                 config: {
                     enableWelcomePage: false,
@@ -599,11 +604,11 @@ const VideoConsultation = {
         // Clear container
         container.innerHTML = '<div id="jitsi-container" style="height: 100vh;"></div>';
         
-        // Load configuration from backend
+        // ALWAYS load configuration from backend - no fallbacks
         let backendConfig = null;
-        let domain = sessionData.jitsi_domain || 'meet.jit.si';
+        let domain = null;
         
-        console.log('🔧 Attempting to load config from backend...');
+        console.log('🔧 Loading ALL config from backend (.env via API)...');
         try {
             const currentLang = LanguageManager?.getLanguage() || 'en';
             console.log('🔧 Making request to:', `/appointments/${this.appointmentId}/video/config?lang=${currentLang}`);
@@ -616,15 +621,21 @@ const VideoConsultation = {
             console.log('🔧 Backend response:', configResponse);
             backendConfig = configResponse.data;
             
-            // Update domain from backend if available
-            if (backendConfig?.jitsi_domain) {
-                domain = backendConfig.jitsi_domain;
+            // Domain MUST come from backend (.env)
+            if (!backendConfig?.jitsi_domain) {
+                throw new Error('Backend did not provide jitsi_domain - check .env configuration');
             }
             
-            console.log('🔧 Successfully loaded Jitsi config from backend:', backendConfig);
+            domain = backendConfig.jitsi_domain;
+            console.log('🔧 Using domain from .env via backend:', domain);
+            console.log('🔧 Full backend config:', backendConfig);
+            
+            // Now dynamically load the Jitsi external API script for this domain
+            await this.loadJitsiExternalAPI(domain);
         } catch (error) {
-            console.error('🔧 Failed to load config from backend, using fallback:', error);
+            console.error('🔧 CRITICAL: Failed to load config from backend:', error);
             console.error('🔧 Error details:', error.message, error.status);
+            throw new Error('Cannot proceed without backend configuration - check server and .env file');
         }
         
         // Debug session data
@@ -1704,7 +1715,7 @@ const VideoConsultation = {
             );
             
             // Initialize Jitsi with emergency settings
-            this.jitsiApi = new JitsiMeetExternalAPI('meet.jit.si', emergencyOptions);
+            this.jitsiApi = new JitsiMeetExternalAPI(domain, emergencyOptions);
             
             // Setup basic event handlers
             this.setupJitsiEventHandlers();
@@ -2533,6 +2544,41 @@ const VideoConsultation = {
                 // Don't end call on heartbeat error - might be temporary network issue
             }
         }, 30000);
+    },
+    
+    // Dynamically load Jitsi External API script based on domain from .env
+    async loadJitsiExternalAPI(domain) {
+        return new Promise((resolve, reject) => {
+            // Check if script is already loaded for this domain
+            const existingScript = document.querySelector(`script[src*="${domain}/external_api.js"]`);
+            if (existingScript) {
+                console.log('🔧 Jitsi External API already loaded for domain:', domain);
+                resolve();
+                return;
+            }
+            
+            // Remove any existing Jitsi scripts (in case we're switching domains)
+            const oldScripts = document.querySelectorAll('script[src*="/external_api.js"]');
+            oldScripts.forEach(script => script.remove());
+            
+            // Create and load new script
+            const script = document.createElement('script');
+            script.src = `https://${domain}/external_api.js`;
+            script.async = true;
+            
+            script.onload = () => {
+                console.log('🔧 Successfully loaded Jitsi External API from:', script.src);
+                resolve();
+            };
+            
+            script.onerror = () => {
+                console.error('🔧 Failed to load Jitsi External API from:', script.src);
+                reject(new Error(`Failed to load Jitsi External API from ${domain}`));
+            };
+            
+            document.head.appendChild(script);
+            console.log('🔧 Loading Jitsi External API from:', script.src);
+        });
     }
 };
 
