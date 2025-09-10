@@ -1686,23 +1686,22 @@
                     // Debug: Get current doctor info
                     const currentUser = AuthGuard.getCurrentUser();
                     
-                    // Get doctor profile ID - need to fetch from API since localStorage has user_id not doctor_id
+                    // Get doctor profile ID from the working /users/profile endpoint
                     let currentDoctorId = null;
                     try {
-                        // Try to get doctor profile from API using user_id
-                        const doctorResponse = await ApiHelper.makeRequest(`/doctors/profile`);
-                        if (doctorResponse.success && doctorResponse.data) {
-                            currentDoctorId = doctorResponse.data.id;
-                            console.log(`🩺 Got doctor profile ID from API: ${currentDoctorId}`);
+                        // Use the working users/profile endpoint that already loads successfully
+                        const profileResponse = await ApiHelper.makeRequest(`/users/profile`);
+                        if (profileResponse.success && profileResponse.user && profileResponse.user.profile) {
+                            currentDoctorId = profileResponse.user.profile.id;
+                            console.log(`🩺 Got doctor profile ID from /users/profile: ${currentDoctorId}`);
                         }
                     } catch (error) {
-                        console.log('Could not fetch doctor profile, using fallback');
+                        console.log('Could not fetch doctor profile from API:', error);
                     }
                     
-                    // Fallback: If user 158, we know from SQL it's doctor 62
-                    if (!currentDoctorId && currentUser?.id == 158) {
-                        currentDoctorId = 62;
-                        console.log(`🔧 Fallback: Using known doctor ID 62 for user 158`);
+                    // If API fails, this is a critical error since we can't know the doctor ID
+                    if (!currentDoctorId) {
+                        console.error('❌ Could not determine doctor profile ID - appointments will not work correctly');
                     }
                     
                     console.log(`👨‍⚕️ Current user ID: ${currentUser?.id}, Doctor profile ID: ${currentDoctorId}`);
