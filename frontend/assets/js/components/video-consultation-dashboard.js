@@ -212,6 +212,9 @@ const VideoConsultationDashboard = {
                 if (window.SahatakCache) {
                     window.SahatakCache.clearByType('appointments_list');
                     window.SahatakCache.clearByType('dashboard_stats');
+                    // Clear all cache as extra measure
+                    window.SahatakCache.clear();
+                    console.log('🗑️ Cleared all cache after appointment completion');
                 }
                 
                 // Remove appointment from dashboard or refresh stats

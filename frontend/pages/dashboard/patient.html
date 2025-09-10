@@ -1063,13 +1063,23 @@
             DashboardTranslations.updatePatientDashboard(currentLang);
             
             // Initialize video consultation dashboard with retry
+            let retryCount = 0;
             const initVideoConsultationDashboard = () => {
                 if (typeof VideoConsultationDashboard !== 'undefined') {
                     VideoConsultationDashboard.init();
                     console.log('VideoConsultationDashboard initialized');
+                    // Refresh dashboard stats to update buttons
+                    setTimeout(() => {
+                        loadDashboardStats();
+                    }, 500);
                 } else {
-                    console.log('VideoConsultationDashboard not yet available, retrying in 100ms...');
-                    setTimeout(initVideoConsultationDashboard, 100);
+                    retryCount++;
+                    if (retryCount < 20) { // Max 2 seconds of retries
+                        console.log(`VideoConsultationDashboard not yet available, retrying in 100ms... (attempt ${retryCount})`);
+                        setTimeout(initVideoConsultationDashboard, 100);
+                    } else {
+                        console.error('VideoConsultationDashboard failed to load after 20 attempts');
+                    }
                 }
             };
             initVideoConsultationDashboard();

@@ -1307,9 +1307,19 @@
                     const totalPatients = uniquePatientIds.length;
                     
                     // Count completed appointments for consultation count
-                    const completedCount = appointments.filter(apt => 
-                        apt.status === 'completed'
-                    ).length;
+                    const completedAppointments = appointments.filter(apt => apt.status === 'completed');
+                    const completedCount = completedAppointments.length;
+                    
+                    // Debug: log appointment statuses
+                    console.log('📊 Appointment statuses breakdown:');
+                    const statusCounts = {};
+                    appointments.forEach(apt => {
+                        statusCounts[apt.status] = (statusCounts[apt.status] || 0) + 1;
+                        if (apt.status === 'completed') {
+                            console.log(`✅ Completed appointment ${apt.id}: ${apt.patient_name} on ${apt.appointment_date}`);
+                        }
+                    });
+                    console.log('📊 Status counts:', statusCounts);
                     
                     // Get upcoming appointments for display (include in_progress for video consultations)
                     const upcomingAppointments = appointments.filter(apt => 
@@ -1608,14 +1618,24 @@
             document.title = 'Doctor Dashboard - Sahatak';
             await DashboardTranslations.initializeDashboard('doctor');
             
-            // Initialize video consultation dashboard with retry
+            // Initialize video consultation dashboard with retry and refresh
+            let retryCount = 0;
             const initVideoConsultationDashboard = () => {
                 if (typeof VideoConsultationDashboard !== 'undefined') {
                     VideoConsultationDashboard.init();
                     console.log('VideoConsultationDashboard initialized');
+                    // Refresh dashboard stats to update buttons
+                    setTimeout(() => {
+                        loadDoctorDashboardStats();
+                    }, 500);
                 } else {
-                    console.log('VideoConsultationDashboard not yet available, retrying in 100ms...');
-                    setTimeout(initVideoConsultationDashboard, 100);
+                    retryCount++;
+                    if (retryCount < 20) { // Max 2 seconds of retries
+                        console.log(`VideoConsultationDashboard not yet available, retrying in 100ms... (attempt ${retryCount})`);
+                        setTimeout(initVideoConsultationDashboard, 100);
+                    } else {
+                        console.error('VideoConsultationDashboard failed to load after 20 attempts');
+                    }
                 }
             };
             initVideoConsultationDashboard();
