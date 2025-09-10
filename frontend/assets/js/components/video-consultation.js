@@ -1013,46 +1013,38 @@ const VideoConsultation = {
         
         // Different screens for doctor vs patient
         if (isDoctorView) {
-            // Doctor sees options to complete or continue consultation
+            // Doctor sees message to return to dashboard to complete consultation
             container.innerHTML = `
                 <div class="post-call-screen text-center py-5">
                     <i class="bi bi-camera-video-off text-primary" style="font-size: 4rem;"></i>
                     <h3 class="mt-3">${isArabic ? 'انتهت المكالمة المرئية' : 'Video Call Ended'}</h3>
-                    <p class="mb-4">${isArabic ? 'ما الذي تود فعله بالاستشارة؟' : 'What would you like to do with the consultation?'}</p>
+                    <p class="mb-4 text-muted">
+                        ${isArabic ? 'الجلسة المرئية انتهت. يمكنك العودة إلى لوحة التحكم لإكمال الاستشارة بإضافة الملاحظات.' : 
+                                    'Video session has ended. Return to your dashboard to complete the consultation with notes.'}
+                    </p>
                     
                     <div class="row justify-content-center">
-                        <div class="col-md-6">
-                            <div class="card border-success mb-3">
+                        <div class="col-md-8">
+                            <div class="card border-primary mb-3">
                                 <div class="card-body">
-                                    <h5 class="card-title text-success">
-                                        <i class="bi bi-check-circle me-2"></i>
-                                        ${isArabic ? 'إنهاء الاستشارة' : 'Complete Consultation'}
-                                    </h5>
-                                    <p class="card-text text-muted">
-                                        ${isArabic ? 'يتم وضع علامة على الموعد كمكتمل وإزالته من لوحة التحكم' : 'Mark appointment as completed and remove from dashboard'}
-                                    </p>
-                                    <button class="btn btn-success w-100" onclick="VideoConsultation.handleCompleteConsultation()">
-                                        <i class="bi bi-check-lg me-2"></i>
-                                        ${isArabic ? 'إنهاء الاستشارة' : 'Complete Consultation'}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card border-warning mb-3">
-                                <div class="card-body">
-                                    <h5 class="card-title text-warning">
-                                        <i class="bi bi-arrow-left-circle me-2"></i>
+                                    <h5 class="card-title text-primary">
+                                        <i class="bi bi-speedometer2 me-2"></i>
                                         ${isArabic ? 'العودة للوحة التحكم' : 'Return to Dashboard'}
                                     </h5>
                                     <p class="card-text text-muted">
-                                        ${isArabic ? 'يبقى الموعد نشطاً في لوحة التحكم للمتابعة لاحقاً' : 'Keep appointment active in dashboard for follow-up later'}
+                                        ${isArabic ? 'الاستشارة لا تزال قيد التقدم. يمكنك إعادة بدء المكالمة أو إكمال الاستشارة من لوحة التحكم.' : 
+                                                    'Consultation remains in progress. You can restart the call or complete the consultation from your dashboard.'}
                                     </p>
-                                    <a href="${dashboardPath}" class="btn btn-outline-warning w-100">
-                                        <i class="bi bi-speedometer2 me-2"></i>
+                                    <a href="${dashboardPath}" class="btn btn-primary w-100">
+                                        <i class="bi bi-arrow-left me-2"></i>
                                         ${isArabic ? 'العودة للوحة التحكم' : 'Back to Dashboard'}
                                     </a>
                                 </div>
+                            </div>
+                            <div class="alert alert-info" role="alert">
+                                <i class="bi bi-info-circle me-2"></i>
+                                ${isArabic ? 'ملاحظة: لإكمال الاستشارة، استخدم زر "إكمال الاستشارة" في لوحة التحكم بعد إضافة ملاحظاتك.' : 
+                                            'Note: To complete the consultation, use the "Complete Consultation" button in your dashboard after adding your notes.'}
                             </div>
                         </div>
                     </div>
@@ -1068,27 +1060,40 @@ const VideoConsultation = {
                 </div>
             `;
         } else {
-            // Patient sees standard end screen
+            // Patient sees message that consultation is still in progress
             container.innerHTML = `
                 <div class="post-call-screen text-center py-5">
-                    <i class="bi bi-check-circle text-success" style="font-size: 4rem;"></i>
-                    <h3 class="mt-3">${isArabic ? 'انتهت الاستشارة' : 'Consultation Ended'}</h3>
-                    <p class="mb-4">${isArabic ? 'شكراً لاستخدامك خدماتنا' : 'Thank you for using our services'}</p>
+                    <i class="bi bi-camera-video-off text-info" style="font-size: 4rem;"></i>
+                    <h3 class="mt-3">${isArabic ? 'انتهت المكالمة المرئية' : 'Video Call Ended'}</h3>
+                    <p class="mb-4 text-muted">
+                        ${isArabic ? 'انتهت الجلسة المرئية. الطبيب سيكمل الاستشارة ويضيف الملاحظات.' : 
+                                    'Video session has ended. The doctor will complete the consultation and add notes.'}
+                    </p>
+                    
+                    <div class="row justify-content-center">
+                        <div class="col-md-8">
+                            <div class="alert alert-info" role="alert">
+                                <i class="bi bi-info-circle me-2"></i>
+                                ${isArabic ? 'الاستشارة لا تزال قيد التقدم. سيقوم الطبيب بإكمالها من لوحة التحكم.' : 
+                                            'Consultation is still in progress. The doctor will complete it from their dashboard.'}
+                            </div>
+                        </div>
+                    </div>
                     
                     <div class="d-flex gap-2 justify-content-center flex-wrap">
-                        <a href="${appointmentPath}" class="btn btn-primary">
+                        <a href="${dashboardPath}" class="btn btn-primary">
+                            <i class="bi bi-speedometer2 me-2"></i>
+                            ${isArabic ? 'العودة للوحة التحكم' : 'Back to Dashboard'}
+                        </a>
+                        <a href="${appointmentPath}" class="btn btn-outline-primary">
                             <i class="bi bi-calendar-event me-2"></i>
                             ${isArabic ? 'المواعيد' : 'Appointments'}
-                        </a>
-                        <a href="${dashboardPath}" class="btn btn-outline-primary">
-                            <i class="bi bi-speedometer2 me-2"></i>
-                            ${isArabic ? 'الرئيسية' : 'Dashboard'}
                         </a>
                     </div>
                     
                     <div class="mt-3">
                         <small class="text-muted">
-                            ${isArabic ? 'يمكنك إغلاق هذه النافذة الآن' : 'You can safely close this window now'}
+                            ${isArabic ? 'يمكنك إغلاق هذه النافذة أو العودة للوحة التحكم' : 'You can close this window or return to dashboard'}
                         </small>
                     </div>
                 </div>

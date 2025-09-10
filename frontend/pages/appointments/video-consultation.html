@@ -442,10 +442,6 @@
                                     <i class="bi bi-camera-video-off"></i>
                                     <span id="btn-end-video">End Video</span>
                                 </button>
-                                <button class="btn btn-action btn-success" id="complete-consultation-btn" onclick="completeFullConsultation()" title="Complete Consultation" style="display: none;">
-                                    <i class="bi bi-check-circle"></i>
-                                    <span id="btn-complete">Complete</span>
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -572,13 +568,7 @@
         if (user) {
             document.getElementById('user-name').textContent = user.name || 'User';
             
-            // Show Complete Consultation button only for doctors
-            if (user.type === 'doctor') {
-                const completeBtn = document.getElementById('complete-consultation-btn');
-                if (completeBtn) {
-                    completeBtn.style.display = 'inline-block';
-                }
-            }
+            // Complete button removed - doctors complete from dashboard after adding notes
         }
         
         // Initialize language support (inherit from dashboard)

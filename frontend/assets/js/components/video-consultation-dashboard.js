@@ -43,6 +43,10 @@ const VideoConsultationDashboard = {
                 case 'start':
                     await this.startVideoConsultation(appointmentId);
                     break;
+                case 'restart':
+                    // Restart is same as start for doctor
+                    await this.startVideoConsultation(appointmentId);
+                    break;
                 case 'join':
                     await this.joinVideoConsultation(appointmentId);
                     break;
@@ -265,6 +269,34 @@ const VideoConsultationDashboard = {
         
         let buttonConfig = this.getButtonConfig(userType, appointment, isArabic);
         
+        if (!buttonConfig) {
+            return ''; // No button for completed appointments
+        }
+        
+        // Handle dual buttons for doctor when session ended but appointment in progress
+        if (buttonConfig.isDual) {
+            return `
+                <div class="video-consultation-buttons d-flex gap-2">
+                    <button class="video-consultation-btn ${buttonConfig.button1.class}" 
+                            data-appointment-id="${appointment.id}"
+                            data-action="${buttonConfig.button1.action}"
+                            title="${buttonConfig.button1.title}"
+                            ${buttonConfig.button1.disabled ? 'disabled' : ''}>
+                        <i class="bi ${buttonConfig.button1.icon}"></i>
+                        <span>${buttonConfig.button1.text}</span>
+                    </button>
+                    <button class="video-consultation-btn ${buttonConfig.button2.class}" 
+                            data-appointment-id="${appointment.id}"
+                            data-action="${buttonConfig.button2.action}"
+                            title="${buttonConfig.button2.title}"
+                            ${buttonConfig.button2.disabled ? 'disabled' : ''}>
+                        <i class="bi ${buttonConfig.button2.icon}"></i>
+                        <span>${buttonConfig.button2.text}</span>
+                    </button>
+                </div>
+            `;
+        }
+        
         return `
             <button class="video-consultation-btn ${buttonConfig.class}" 
                     data-appointment-id="${appointment.id}"
@@ -305,35 +337,66 @@ const VideoConsultationDashboard = {
     
     // Get button configuration based on user type and appointment status
     getButtonConfig(userType, appointment, isArabic) {
+        const isScheduled = appointment.status === 'scheduled' || appointment.status === 'confirmed';
         const isInProgress = appointment.status === 'in_progress';
-        // Session is considered ended if:
-        // 1. Explicitly marked as 'ended' or 'disconnected'
-        // 2. Session was started but status is null/undefined (indicates abnormal termination)
+        const isCompleted = appointment.status === 'completed';
+        
+        // Session states
+        const sessionActive = appointment.session_status === 'active' || appointment.session_status === 'in_call';
         const sessionEnded = appointment.session_status === 'ended' || 
                             appointment.session_status === 'disconnected' ||
                             (appointment.session_started_at && !appointment.session_status);
         
         if (userType === 'doctor') {
-            // If session ended but appointment still active, show complete consultation option
-            if (isInProgress && sessionEnded) {
+            // Doctor button logic
+            if (isScheduled && !appointment.session_started_at) {
+                // Scheduled, not started yet - show Start Consultation
                 return {
-                    class: 'btn-complete-consultation',
-                    action: 'complete-consultation',
-                    icon: 'bi-check-circle',
-                    text: isArabic ? 'إنهاء الاستشارة' : 'Complete Consultation',
-                    title: isArabic ? 'إنهاء الاستشارة ووضع علامة كمكتملة' : 'Complete consultation and mark as finished',
-                    disabled: false
-                };
-            } else if (isInProgress && appointment.session_status === 'waiting') {
-                return {
-                    class: 'btn-join-video',
-                    action: 'join',
+                    class: 'btn-start-video',
+                    action: 'start',
                     icon: 'bi-camera-video',
-                    text: isArabic ? 'انضم للاستشارة' : 'Join Consultation',
-                    title: isArabic ? 'انضم للاستشارة المرئية' : 'Join Video Consultation',
+                    text: isArabic ? 'بدء الاستشارة' : 'Start Consultation',
+                    title: isArabic ? 'بدء الاستشارة المرئية' : 'Start Video Consultation',
                     disabled: false
                 };
+            } else if (isInProgress && sessionActive) {
+                // In progress, session active - show Call in Session
+                return {
+                    class: 'btn-in-session',
+                    action: 'join',
+                    icon: 'bi-camera-video-fill',
+                    text: isArabic ? 'الجلسة نشطة' : 'Call in Session',
+                    title: isArabic ? 'الجلسة المرئية نشطة - انضم مرة أخرى' : 'Video session active - rejoin',
+                    disabled: false
+                };
+            } else if (isInProgress && sessionEnded) {
+                // In progress but session ended - show both In Session (disabled) and Complete button
+                // Return special marker for dual buttons
+                return {
+                    class: 'dual-buttons',
+                    isDual: true,
+                    button1: {
+                        class: 'btn-session-ended',
+                        action: 'restart',
+                        icon: 'bi-camera-video',
+                        text: isArabic ? 'إعادة بدء الجلسة' : 'Restart Session',
+                        title: isArabic ? 'إعادة بدء الجلسة المرئية' : 'Restart video session',
+                        disabled: false
+                    },
+                    button2: {
+                        class: 'btn-complete-consultation',
+                        action: 'complete-consultation',
+                        icon: 'bi-check-circle',
+                        text: isArabic ? 'إنهاء الاستشارة' : 'Complete Consultation',
+                        title: isArabic ? 'إنهاء الاستشارة ووضع علامة كمكتملة' : 'Complete consultation and mark as finished',
+                        disabled: false
+                    }
+                };
+            } else if (isCompleted) {
+                // Completed - no button
+                return null;
             } else {
+                // Default to start
                 return {
                     class: 'btn-start-video',
                     action: 'start',
@@ -344,18 +407,19 @@ const VideoConsultationDashboard = {
                 };
             }
         } else {
-            // Patient
-            // If appointment is in_progress but session ended, treat as waiting for doctor to restart
-            if (isInProgress && sessionEnded) {
+            // Patient button logic
+            if (isScheduled) {
+                // Scheduled - show Waiting for Doctor
                 return {
-                    class: 'btn-session-ended',
-                    action: 'wait-restart',
-                    icon: 'bi-clock-history',
-                    text: isArabic ? 'في انتظار الطبيب' : 'Waiting for Doctor',
-                    title: isArabic ? 'المكالمة المرئية انتهت - في انتظار الطبيب لبدء جلسة جديدة' : 'Video call ended - waiting for doctor to start a new session',
+                    class: 'btn-waiting',
+                    action: 'check-status',
+                    icon: 'bi-clock',
+                    text: isArabic ? 'انتظار الطبيب' : 'Waiting for Doctor to Join',
+                    title: isArabic ? 'في انتظار بدء الطبيب للجلسة' : 'Waiting for doctor to start session',
                     disabled: true
                 };
-            } else if (isInProgress && !sessionEnded) {
+            } else if (isInProgress && sessionActive) {
+                // In progress, session active - show Join Consultation
                 return {
                     class: 'btn-join-video',
                     action: 'join',
@@ -364,16 +428,21 @@ const VideoConsultationDashboard = {
                     title: isArabic ? 'انضم للاستشارة المرئية' : 'Join Video Consultation',
                     disabled: false
                 };
-            } else if (sessionEnded) {
+            } else if (isInProgress && sessionEnded) {
+                // In progress but session ended - show Waiting for Doctor
                 return {
-                    class: 'btn-consultation-ended',
-                    action: 'view-summary',
-                    icon: 'bi-check-circle-fill',
-                    text: isArabic ? 'انتهت الاستشارة' : 'Consultation Ended',
-                    title: isArabic ? 'انتهت الاستشارة - في انتظار إتمام الطبيب' : 'Consultation ended - waiting for doctor to complete',
+                    class: 'btn-waiting-restart',
+                    action: 'wait-restart',
+                    icon: 'bi-clock-history',
+                    text: isArabic ? 'في انتظار الطبيب' : 'Waiting for Doctor',
+                    title: isArabic ? 'الجلسة انتهت - في انتظار الطبيب' : 'Session ended - waiting for doctor',
                     disabled: true
                 };
+            } else if (isCompleted) {
+                // Completed - no button or show completed status
+                return null;
             } else {
+                // Default waiting state
                 return {
                     class: 'btn-waiting',
                     action: 'check-status',
