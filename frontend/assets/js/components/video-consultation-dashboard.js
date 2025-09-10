@@ -112,8 +112,8 @@ const VideoConsultationDashboard = {
                 // Update UI first, then navigate
                 console.log('Video session started successfully, updating UI...');
                 
-                // Refresh the appointment status to update button
-                await this.checkVideoSessionStatus(appointmentId);
+                // Refresh the appointment status to update button with force refresh
+                await this.checkVideoSessionStatus(appointmentId, true);
                 
                 // Open video consultation in a new window
                 const videoUrl = `${window.location.origin}/Sahatak/frontend/pages/appointments/video-consultation.html?appointmentId=${appointmentId}`;
@@ -242,17 +242,27 @@ const VideoConsultationDashboard = {
         }
     },
     
-    // Check video session status
-    async checkVideoSessionStatus(appointmentId) {
+    // Check video session status with enhanced synchronization
+    async checkVideoSessionStatus(appointmentId, forceRefresh = false) {
         try {
+            console.log(`🔍 Checking video session status for appointment ${appointmentId}...`);
+            
             const response = await ApiHelper.makeRequest(
                 `/appointments/${appointmentId}/video/status`,
                 'GET'
             );
             
             if (response.success) {
+                console.log(`✅ Session status response for appointment ${appointmentId}:`, response.data);
+                
                 this.sessionStatusCache.set(appointmentId, response.data);
                 this.updateAppointmentVideoUI(appointmentId, response.data);
+                
+                // Force refresh dashboard if requested
+                if (forceRefresh && typeof loadDashboardStats === 'function') {
+                    console.log(`🔄 Force refreshing dashboard stats...`);
+                    setTimeout(() => loadDashboardStats(), 500);
+                }
                 
                 return response.data;
             } else {

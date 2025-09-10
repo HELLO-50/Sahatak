@@ -1276,6 +1276,52 @@
             statusElement.innerHTML = `<small class="text-success"><i class="bi bi-check-circle me-1"></i>${file.name} selected</small>`;
         }
 
+        // Automatic video status monitoring for doctors
+        let videoStatusMonitorInterval = null;
+        
+        function startVideoStatusMonitoring() {
+            console.log('🎥 Starting video status monitoring for doctor...');
+            
+            // Clear any existing interval
+            if (videoStatusMonitorInterval) {
+                clearInterval(videoStatusMonitorInterval);
+            }
+            
+            // Check every 8 seconds for video appointment status updates (slightly faster for doctor)
+            videoStatusMonitorInterval = setInterval(async () => {
+                try {
+                    // Find any video appointments that might need status updates
+                    const videoCards = document.querySelectorAll('.appointment-card[data-appointment-id]');
+                    
+                    for (const card of videoCards) {
+                        const appointmentId = card.dataset.appointmentId;
+                        const appointmentStatus = card.dataset.appointmentStatus;
+                        
+                        // Only check scheduled, confirmed, or in_progress video appointments
+                        if (appointmentId && ['scheduled', 'confirmed', 'in_progress'].includes(appointmentStatus)) {
+                            console.log(`🔄 Monitoring video appointment ${appointmentId} (status: ${appointmentStatus})`);
+                            
+                            if (typeof VideoConsultationDashboard !== 'undefined' && VideoConsultationDashboard.checkVideoSessionStatus) {
+                                await VideoConsultationDashboard.checkVideoSessionStatus(appointmentId, true);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error in video status monitoring:', error);
+                }
+            }, 8000); // Check every 8 seconds
+            
+            console.log('✅ Video status monitoring started - checking every 8 seconds');
+        }
+        
+        function stopVideoStatusMonitoring() {
+            if (videoStatusMonitorInterval) {
+                clearInterval(videoStatusMonitorInterval);
+                videoStatusMonitorInterval = null;
+                console.log('🛑 Video status monitoring stopped');
+            }
+        }
+
         // Load dashboard statistics from API
         async function loadDoctorDashboardStats() {
             console.log('Loading doctor dashboard statistics...');
@@ -1672,6 +1718,10 @@
                 if (typeof VideoConsultationDashboard !== 'undefined') {
                     VideoConsultationDashboard.init();
                     console.log('VideoConsultationDashboard initialized');
+                    
+                    // Start automatic status monitoring for video appointments
+                    startVideoStatusMonitoring();
+                    
                     // Refresh dashboard stats to update buttons
                     setTimeout(() => {
                         loadDoctorDashboardStats();
