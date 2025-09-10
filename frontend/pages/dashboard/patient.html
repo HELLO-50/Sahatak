@@ -937,16 +937,17 @@
                 }
             } catch (error) {
                 console.log('Using placeholder prescriptions data:', error.message);
+                const fallbackLang = LanguageManager.getLanguage() || 'en';
                 container.innerHTML = `
                     <h5 class="mb-3">
                         <i class="bi bi-prescription me-2"></i>
-                        <span>${currentLang === 'ar' ? 'الوصفات الطبية النشطة' : 'Active Prescriptions'}</span>
+                        <span>${fallbackLang === 'ar' ? 'الوصفات الطبية النشطة' : 'Active Prescriptions'}</span>
                     </h5>
-                    <p class="text-center py-3" style="color: #666;">${currentLang === 'ar' ? 'لا توجد وصفات طبية نشطة حالياً' : 'No active prescriptions at the moment'}</p>
+                    <p class="text-center py-3" style="color: #666;">${fallbackLang === 'ar' ? 'لا توجد وصفات طبية نشطة حالياً' : 'No active prescriptions at the moment'}</p>
                     <div class="text-center mt-3">
                         <button class="btn btn-outline-primary btn-sm" onclick="viewRecords()">
                             <i class="bi bi-file-medical me-1"></i>
-                            ${currentLang === 'ar' ? 'عرض السجل الطبي' : 'View Medical Records'}
+                            ${fallbackLang === 'ar' ? 'عرض السجل الطبي' : 'View Medical Records'}
                         </button>
                     </div>
                 `;
@@ -1014,16 +1015,17 @@
                 }
             } catch (error) {
                 console.log('Using placeholder medical records:', error.message);
+                const fallbackLang = LanguageManager.getLanguage() || 'en';
                 container.innerHTML = `
                     <h5 class="mb-3">
                         <i class="bi bi-file-medical me-2"></i>
-                        <span>${currentLang === 'ar' ? 'السجل الطبي' : 'Medical Records'}</span>
+                        <span>${fallbackLang === 'ar' ? 'السجل الطبي' : 'Medical Records'}</span>
                     </h5>
-                    <p class="text-center py-3" style="color: #666;">${currentLang === 'ar' ? 'ابدأ رحلتك الصحية بحجز أول موعد' : 'Start your health journey by booking your first appointment'}</p>
+                    <p class="text-center py-3" style="color: #666;">${fallbackLang === 'ar' ? 'ابدأ رحلتك الصحية بحجز أول موعد' : 'Start your health journey by booking your first appointment'}</p>
                     <div class="text-center mt-3">
                         <button class="btn btn-outline-primary btn-sm" onclick="bookAppointment()">
                             <i class="bi bi-plus-circle me-1"></i>
-                            ${currentLang === 'ar' ? 'حجز موعد' : 'Book Appointment'}
+                            ${fallbackLang === 'ar' ? 'حجز موعد' : 'Book Appointment'}
                         </button>
                     </div>
                 `;
