@@ -156,7 +156,7 @@ class VideoConferenceService:
             "guestsAllowed": True,
             "publicRoom": True,
             "enableUserRolesBasedOnToken": False,
-            "anonymousdomain": "guest.8x8.vc",  # Critical for public Jitsi
+            "anonymousdomain": "guest.meet.ffmuc.net",  # Critical for public Jitsi
             "enableAnonymousAccess": True,
             
             # Room Configuration (SINGLE INSTANCE) - Explicitly disable all restrictions
@@ -305,7 +305,7 @@ class VideoConferenceService:
             
             # Anonymous Access UI
             "ENABLE_ANONYMOUS_DOMAIN_ACCESS": True,
-            "ANONYMOUS_DOMAIN": "guest.8x8.vc"
+            "ANONYMOUS_DOMAIN": "guest.meet.ffmuc.net"
         }
         
         # Filter out None values from SETTINGS_SECTIONS
