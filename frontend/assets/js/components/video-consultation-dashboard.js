@@ -51,6 +51,14 @@ const VideoConsultationDashboard = {
                     await this.joinVideoConsultation(appointmentId);
                     break;
                 case 'check-status':
+                    // Show feedback to user that we're checking
+                    const currentLang = LanguageManager?.getLanguage() || 'en';
+                    const isArabic = currentLang === 'ar';
+                    const checkingMessage = isArabic 
+                        ? 'جاري التحقق من حالة الجلسة...'
+                        : 'Checking session status...';
+                    this.showInfo(checkingMessage);
+                    
                     await this.checkVideoSessionStatus(appointmentId);
                     break;
                 case 'complete-consultation':
@@ -425,8 +433,18 @@ const VideoConsultationDashboard = {
             }
         } else {
             // Patient button logic
-            if (isScheduled) {
-                // Scheduled - show Waiting for Doctor
+            if (sessionActive && (isScheduled || isInProgress)) {
+                // Session is active (doctor has started) - show Join Consultation
+                return {
+                    class: 'btn-join-video',
+                    action: 'join',
+                    icon: 'bi-camera-video',
+                    text: isArabic ? 'انضم للاستشارة' : 'Join Consultation',
+                    title: isArabic ? 'انضم للاستشارة المرئية' : 'Join Video Consultation',
+                    disabled: false
+                };
+            } else if (isScheduled && !sessionActive) {
+                // Scheduled but session not started - show Waiting for Doctor
                 return {
                     class: 'btn-waiting',
                     action: 'check-status',
@@ -435,15 +453,15 @@ const VideoConsultationDashboard = {
                     title: isArabic ? 'في انتظار بدء الطبيب للجلسة' : 'Waiting for doctor to start session',
                     disabled: true
                 };
-            } else if (isInProgress && sessionActive) {
-                // In progress, session active - show Join Consultation
+            } else if (isInProgress && !sessionActive) {
+                // In progress but no active session - show waiting
                 return {
-                    class: 'btn-join-video',
-                    action: 'join',
-                    icon: 'bi-camera-video',
-                    text: isArabic ? 'انضم للاستشارة' : 'Join Consultation',
-                    title: isArabic ? 'انضم للاستشارة المرئية' : 'Join Video Consultation',
-                    disabled: false
+                    class: 'btn-waiting',
+                    action: 'check-status',
+                    icon: 'bi-clock',
+                    text: isArabic ? 'انتظار الطبيب' : 'Waiting for Doctor',
+                    title: isArabic ? 'في انتظار بدء الطبيب للجلسة' : 'Waiting for doctor to restart session',
+                    disabled: true
                 };
             } else if (isInProgress && sessionEnded) {
                 // In progress but session ended - show Waiting for Doctor
@@ -641,10 +659,10 @@ const VideoConsultationDashboard = {
     
     // Start monitoring session status for active video appointments
     startSessionStatusMonitoring() {
-        // Check every 30 seconds for active video sessions
+        // Check every 10 seconds for active video sessions (faster for better UX)
         this.statusCheckInterval = setInterval(() => {
             this.checkActiveVideoSessions();
-        }, 30000);
+        }, 10000);
     },
     
     // Check status for all active video sessions
@@ -705,6 +723,16 @@ const VideoConsultationDashboard = {
         } else {
             // Fallback to console
             console.log('Video consultation success:', message);
+        }
+    },
+    
+    // Show info message using existing notification system
+    showInfo(message) {
+        if (typeof showNotification === 'function') {
+            showNotification(message, 'info');
+        } else {
+            // Fallback to console
+            console.log('Video consultation info:', message);
         }
     },
     

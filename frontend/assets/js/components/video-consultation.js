@@ -816,6 +816,10 @@ const VideoConsultation = {
     async onConferenceLeft() {
         console.log('🔚 onConferenceLeft() called - starting cleanup process');
         
+        // Stop heartbeat immediately to prevent 400 errors
+        this.stopHeartbeat();
+        console.log('🔚 Heartbeat stopped');
+        
         // Stop monitoring
         this.stopConnectionMonitoring();
         console.log('🔚 Connection monitoring stopped');
@@ -1208,7 +1212,18 @@ const VideoConsultation = {
         if (this.jitsiApi) {
             try {
                 console.log('Disposing Jitsi API...');
-                this.jitsiApi.dispose();
+                // Try to hang up gracefully first
+                if (typeof this.jitsiApi.executeCommand === 'function') {
+                    this.jitsiApi.executeCommand('hangup');
+                }
+                // Small delay to allow graceful hangup
+                setTimeout(() => {
+                    try {
+                        this.jitsiApi.dispose();
+                    } catch (e) {
+                        console.warn('Jitsi dispose error (expected):', e.message);
+                    }
+                }, 100);
                 this.jitsiApi = null;
                 console.log('Jitsi API disposed successfully');
             } catch (error) {
