@@ -2720,3 +2720,10 @@ Colors:
     }
     */
 }
+
+/* Custom overrides for specific text elements to be black */
+.analytics-card h6,
+.metric-label,
+#completed-appointments {
+    color: #000000 !important;
+}
