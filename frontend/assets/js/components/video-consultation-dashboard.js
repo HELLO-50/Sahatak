@@ -100,35 +100,21 @@ const VideoConsultationDashboard = {
     // Start video consultation (doctors only)
     async startVideoConsultation(appointmentId) {
         try {
-            console.log('Starting video consultation for appointment:', appointmentId);
             const response = await ApiHelper.makeRequest(
                 `/appointments/${appointmentId}/video/start`,
                 { method: 'POST' }
             );
             
-            console.log('Video start response:', response);
             
-            // Log detailed response data for debugging
-            if (response && response.data) {
-                console.log('🔍 Video start response data:', {
-                    appointment_id: response.data.appointment_id,
-                    session_status: response.data.session_status,
-                    appointment_status: response.data.appointment_status,
-                    session_started_at: response.data.session_started_at,
-                    session_id: response.data.session_id
-                });
-            }
             
             if (response && response.success) {
                 // Update UI first, then navigate
-                console.log('Video session started successfully, updating UI...');
                 
                 // Refresh the appointment status to update button with force refresh
                 await this.checkVideoSessionStatus(appointmentId, true);
                 
                 // Open video consultation in a new window
                 const videoUrl = `${window.location.origin}/Sahatak/frontend/pages/appointments/video-consultation.html?appointmentId=${appointmentId}`;
-                console.log('Opening video consultation in new window:', videoUrl);
                 
                 // Use setTimeout to allow UI update to complete first
                 setTimeout(() => {
@@ -164,7 +150,6 @@ const VideoConsultationDashboard = {
             if (response.success) {
                 // Open video consultation in a new window
                 const videoUrl = `${window.location.origin}/Sahatak/frontend/pages/appointments/video-consultation.html?appointmentId=${appointmentId}`;
-                console.log('Opening video consultation in new window:', videoUrl);
                 
                 const windowFeatures = 'width=1200,height=800,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=no,directories=no,status=no';
                 const videoWindow = window.open(videoUrl, `video-consultation-${appointmentId}`, windowFeatures);
@@ -221,7 +206,6 @@ const VideoConsultationDashboard = {
                     window.SahatakCache.clearByType('dashboard_stats');
                     // Clear all cache as extra measure
                     window.SahatakCache.clear();
-                    console.log('🗑️ Cleared all cache after appointment completion');
                 }
                 
                 // Immediately refresh dashboard stats
@@ -263,7 +247,6 @@ const VideoConsultationDashboard = {
     // Check video session status with enhanced synchronization
     async checkVideoSessionStatus(appointmentId, forceRefresh = false) {
         try {
-            console.log(`🔍 Checking video session status for appointment ${appointmentId}...`);
             
             const response = await ApiHelper.makeRequest(
                 `/appointments/${appointmentId}/video/status`,
@@ -271,20 +254,17 @@ const VideoConsultationDashboard = {
             );
             
             if (response.success) {
-                console.log(`✅ Session status response for appointment ${appointmentId}:`, response.data);
                 
                 this.sessionStatusCache.set(appointmentId, response.data);
                 this.updateAppointmentVideoUI(appointmentId, response.data);
                 
                 // Force refresh dashboard if requested
                 if (forceRefresh && typeof loadDashboardStats === 'function') {
-                    console.log(`🔄 Force refreshing dashboard stats...`);
                     setTimeout(() => loadDashboardStats(), 500);
                 }
                 
                 return response.data;
             } else {
-                console.error(`❌ Session status check failed for appointment ${appointmentId}:`, response.message);
                 throw new Error(response.message || 'Failed to check session status');
             }
         } catch (error) {
@@ -306,16 +286,8 @@ const VideoConsultationDashboard = {
         const canStart = appointment.status === 'scheduled' || appointment.status === 'confirmed';
         const isInProgress = appointment.status === 'in_progress';
         
-        console.log(`Generating button for appointment ${appointment.id}:`, {
-            userType,
-            status: appointment.status,
-            session_status: appointment.session_status,
-            canStart,
-            isInProgress
-        });
         
         if (!canStart && !isInProgress) {
-            console.log(`No button for appointment ${appointment.id} - status: ${appointment.status}`);
             return '';
         }
         
@@ -367,18 +339,15 @@ const VideoConsultationDashboard = {
             const keys = Object.keys(localStorage).filter(key => key.startsWith('sahatak_video_ended_'));
             
             if (keys.length > 0) {
-                console.log('🔄 Found emergency session end flags:', keys);
                 
                 // Clear the flags and trigger status refresh
                 keys.forEach(key => {
                     const appointmentId = key.replace('sahatak_video_ended_', '');
-                    console.log('🔄 Processing emergency session end for appointment:', appointmentId);
                     localStorage.removeItem(key);
                 });
                 
                 // Force a complete dashboard refresh
                 setTimeout(() => {
-                    console.log('🔄 Refreshing dashboard after emergency session ends');
                     this.refreshVideoConsultationData();
                 }, 1000);
             }
@@ -402,25 +371,6 @@ const VideoConsultationDashboard = {
         const sessionEnded = appointment.session_status === 'ended' || 
                             appointment.session_status === 'disconnected';
         
-        // Debug logging for troubleshooting
-        console.log(`🔍 Button config debug for ${userType}:`, {
-            appointmentId: appointment.id,
-            status: appointment.status,
-            session_status: appointment.session_status,
-            session_started_at: appointment.session_started_at,
-            isScheduled,
-            isInProgress,
-            sessionActive,
-            sessionEnded,
-            // Additional debug info
-            sessionActiveReasons: {
-                session_status_active: appointment.session_status === 'active',
-                session_status_in_call: appointment.session_status === 'in_call',
-                session_status_waiting_patient: appointment.session_status === 'waiting_patient',
-                session_status_waiting: appointment.session_status === 'waiting',
-                has_session_started_but_no_status: appointment.session_started_at && !appointment.session_status
-            }
-        });
         
         if (userType === 'doctor') {
             // Doctor button logic
@@ -485,7 +435,6 @@ const VideoConsultationDashboard = {
             // Patient button logic
             if (sessionActive && (isScheduled || isInProgress)) {
                 // Session is active (doctor has started) - show Join Consultation
-                console.log(`✅ Patient can join - sessionActive: ${sessionActive}`);
                 return {
                     class: 'btn-join-video',
                     action: 'join',
@@ -496,7 +445,6 @@ const VideoConsultationDashboard = {
                 };
             } else if (isInProgress && appointment.session_started_at && !sessionEnded) {
                 // Doctor has started session (in_progress + session_started_at) - allow join even if session_status unclear
-                console.log(`✅ Patient can join - inProgress with session_started_at: ${appointment.session_started_at}`);
                 return {
                     class: 'btn-join-video',
                     action: 'join',
@@ -507,7 +455,6 @@ const VideoConsultationDashboard = {
                 };
             } else if (isInProgress && !sessionEnded) {
                 // Fallback: If appointment is in_progress and not ended, allow join (more permissive)
-                console.log(`🔄 Patient fallback join - appointment in progress, assuming doctor started`);
                 return {
                     class: 'btn-join-video',
                     action: 'join',
@@ -619,7 +566,6 @@ const VideoConsultationDashboard = {
                               (new Date() - new Date(sessionData.session_started_at)) > 5 * 60 * 1000; // 5 minutes
         
         if (needsStatusFix) {
-            console.log(`🚨 Found inconsistent state for appointment ${appointmentId} - session waiting for over 5 minutes, forcing status reset`);
             // Force call to video/end endpoint to reset status
             this.forceSessionEnd(appointmentId);
         }
@@ -644,7 +590,6 @@ const VideoConsultationDashboard = {
         // Preserve existing button content and only add session info
         let existingContent = '';
         if (existingButton) {
-            console.log(`💾 Preserving existing button content for appointment ${appointmentId}`);
             existingContent = existingButton.outerHTML;
         }
         
@@ -669,9 +614,7 @@ const VideoConsultationDashboard = {
         // Combine existing button with session info
         const updatedContent = existingContent + sessionInfo;
         
-        console.log(`📝 Setting actions container content for appointment ${appointmentId}:`, updatedContent);
         actionsContainer.innerHTML = updatedContent;
-        console.log(`✅ UI update completed for appointment ${appointmentId}`);
     },
     
     // Calculate session duration display
@@ -710,18 +653,15 @@ const VideoConsultationDashboard = {
     // Force session end for appointments in inconsistent state
     async forceSessionEnd(appointmentId) {
         try {
-            console.log(`🚨 Forcing session end for appointment ${appointmentId}`);
             
             const response = await ApiHelper.makeRequest(
                 `/appointments/${appointmentId}/video/end`,
                 { method: 'POST' }
             );
             
-            console.log(`✅ Forced session end successful for appointment ${appointmentId}:`, response);
             
             // Trigger status refresh after a short delay
             setTimeout(() => {
-                console.log(`🔄 Refreshing status after forced session end for appointment ${appointmentId}`);
                 this.checkVideoSessionStatus(appointmentId);
             }, 1000);
             
@@ -758,7 +698,6 @@ const VideoConsultationDashboard = {
         
         // Only log if there are active sessions to check
         if (checkPromises.length > 0) {
-            console.log(`🔄 VideoConsultationDashboard: Checking ${checkPromises.length} active video sessions`);
         }
         
         try {
@@ -811,7 +750,6 @@ const VideoConsultationDashboard = {
     
     // Refresh video consultation dashboard data
     refreshVideoConsultationData() {
-        console.log('🔄 Refreshing video consultation data immediately');
         
         // Clear caches aggressively
         this.sessionStatusCache.clear();
@@ -827,7 +765,6 @@ const VideoConsultationDashboard = {
         
         // Also trigger additional refresh after short delay
         setTimeout(() => {
-            console.log('🔄 Second refresh attempt for video consultation data');
             this.init();
         }, 500);
     },

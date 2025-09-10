@@ -49,13 +49,11 @@ const VideoConsultation = {
         this.appointmentId = appointmentId;
         
         // Clear any cached data to prevent lobby issues
-        console.log('🔧 Clearing cached data to prevent authentication issues...');
         
         // Initialize analytics
         this.initSessionAnalytics();
         
         // SKIP backend status check - go directly to public room creation
-        console.log('🔧 Skipping backend status check - using direct public room approach');
         
         // Setup UI elements
         this.setupEventListeners();
@@ -330,7 +328,7 @@ const VideoConsultation = {
             const testImage = new Image();
             // Use domain from backend config or fallback for network test only
             if (!testDomain) {
-                console.warn('🔧 No domain provided for network test, using fallback');
+                // Using fallback domain for network test
                 testDomain = 'meet.ffmuc.net'; // fallback only for network test
             }
             testImage.src = `https://${testDomain}/images/watermark.svg?` + Math.random();
@@ -530,7 +528,6 @@ const VideoConsultation = {
             this.showLoading();
             
             // BYPASS BACKEND - Use direct public room creation for free Jitsi
-            console.log('🔧 Bypassing backend - creating direct public room');
             
             // Create deterministic room name so doctor and patient join same room
             const publicRoomName = `sahatak_appointment_${this.appointmentId}`;
@@ -579,7 +576,6 @@ const VideoConsultation = {
                 }
             };
             
-            console.log('🔧 Using direct public room:', publicSessionData);
             
             // Store session data
             this.sessionData = publicSessionData;
@@ -606,17 +602,14 @@ const VideoConsultation = {
         let backendConfig = null;
         let domain = null;
         
-        console.log('🔧 Loading ALL config from backend (.env via API)...');
         try {
             const currentLang = LanguageManager?.getLanguage() || 'en';
-            console.log('🔧 Making request to:', `/appointments/${this.appointmentId}/video/config?lang=${currentLang}`);
             
             const configResponse = await ApiHelper.makeRequest(
                 `/appointments/${this.appointmentId}/video/config?lang=${currentLang}`,
                 { method: 'GET' }
             );
             
-            console.log('🔧 Backend response:', configResponse);
             backendConfig = configResponse.data;
             
             // Domain MUST come from backend (.env)
@@ -625,25 +618,16 @@ const VideoConsultation = {
             }
             
             domain = backendConfig.jitsi_domain;
-            console.log('🔧 Using domain from .env via backend:', domain);
-            console.log('🔧 Full backend config:', backendConfig);
             
             // Now dynamically load the Jitsi external API script for this domain
             await this.loadJitsiExternalAPI(domain);
         } catch (error) {
-            console.error('🔧 CRITICAL: Failed to load config from backend:', error);
-            console.error('🔧 Error details:', error.message, error.status);
+            console.error('CRITICAL: Failed to load config from backend:', error);
+            console.error('Error details:', error.message, error.status);
             throw new Error('Cannot proceed without backend configuration - check server and .env file');
         }
         
         // Debug session data
-        console.log('🔧 Jitsi session data:', {
-            room_name: sessionData.room_name,
-            jwt_token: sessionData.jwt_token ? 'Present' : 'Missing',
-            jwt_sample: sessionData.jwt_token ? sessionData.jwt_token.substring(0, 50) + '...' : 'Missing',
-            domain: domain,
-            backend_config_loaded: !!backendConfig
-        });
         
         // Trust backend configuration completely - no overrides
         const defaultConfig = backendConfig?.config || {
@@ -675,7 +659,6 @@ const VideoConsultation = {
         };
         
         // FORCE PUBLIC ROOM (Free Jitsi doesn't support authentication)
-        console.log('🔧 Using PUBLIC ROOM (free Jitsi Meet doesn\'t support authentication)');
         
         // Create deterministic room name so doctor and patient join same room
         const publicRoomName = `sahatak_appointment_${this.appointmentId}`;
@@ -698,14 +681,7 @@ const VideoConsultation = {
             // NO JWT TOKEN - free Jitsi only supports public rooms
         };
         
-        console.log('🔧 Jitsi options:', {
-            roomName: options.roomName,
-            hasJWT: !!options.jwt,
-            domain: domain,
-            publicRoomName: publicRoomName
-        });
         
-        console.log('🔧 FINAL ROOM NAME BEING USED:', options.roomName);
         
         try {
             // Initialize Jitsi API
@@ -714,14 +690,12 @@ const VideoConsultation = {
             // Setup event handlers
             this.setupJitsiEventHandlers();
             
-            console.log('🔧 Jitsi API initialized successfully');
             
         } catch (initError) {
-            console.error('🔧 Jitsi initialization failed:', initError);
+            console.error('Jitsi initialization failed:', initError);
             
             // If initialization fails, try fallback immediately
             if (initError.message && initError.message.includes('membersOnly')) {
-                console.log('🔧 MembersOnly error during initialization - applying immediate fallback');
                 setTimeout(() => this.retryWithFallbackConfig(), 1000);
             } else {
                 this.handleJitsiError(initError);
@@ -735,15 +709,12 @@ const VideoConsultation = {
         
         // Video conference joined
         this.jitsiApi.addEventListener('videoConferenceJoined', (e) => {
-            console.log('Joined conference:', e);
             this.logAnalyticsEvent('conference_joined', { event_data: e });
             this.onConferenceJoined();
         });
         
         // Video conference left
         this.jitsiApi.addEventListener('videoConferenceLeft', (e) => {
-            console.log('🚪 LEFT CONFERENCE EVENT FIRED:', e);
-            console.log('🔚 Calling onConferenceLeft...');
             this.logAnalyticsEvent('conference_left', { event_data: e });
             this.onConferenceLeft();
         });
@@ -778,13 +749,11 @@ const VideoConsultation = {
         
         // Add window unload handler as backup to catch direct window closes
         window.addEventListener('beforeunload', (e) => {
-            console.log('🚪 WINDOW CLOSING - Triggering emergency session end');
             // Use sync request for immediate execution before page unloads
             this.emergencyEndSession();
         });
         
         window.addEventListener('pagehide', (e) => {
-            console.log('🚪 PAGE HIDING - Triggering emergency session end');
             this.emergencyEndSession();
         });
     },
@@ -811,37 +780,27 @@ const VideoConsultation = {
     
     // Conference left handler
     async onConferenceLeft() {
-        console.log('🔚 onConferenceLeft() called - starting cleanup process');
         
         // Stop heartbeat immediately to prevent 400 errors
         this.stopHeartbeat();
-        console.log('🔚 Heartbeat stopped');
         
         // Stop monitoring
         this.stopConnectionMonitoring();
-        console.log('🔚 Connection monitoring stopped');
         
         // End session on backend
-        console.log('🔚 Calling endVideoSession()...');
         await this.endVideoSession();
-        console.log('🔚 endVideoSession() completed');
         
         // Force refresh dashboard status even if backend call failed
         // This ensures UI updates even when API calls fail due to auth issues
-        console.log('🔚 Calling refreshDashboardStatus()...');
         this.refreshDashboardStatus();
-        console.log('🔚 refreshDashboardStatus() completed');
         
         // Show post-call screen
-        console.log('🔚 Calling showPostCallScreen()...');
         this.showPostCallScreen();
-        console.log('🔚 onConferenceLeft() completed');
     },
     
     // End video session
     async endVideoSession() {
         try {
-            console.log('🔚 Attempting to end video session for appointment:', this.appointmentId);
             
             // Check if we have authentication token
             const token = localStorage.getItem('sahatak_access_token');
@@ -851,7 +810,6 @@ const VideoConsultation = {
                 const authToken = AuthStorage?.get('access_token');
                 if (authToken) {
                     localStorage.setItem('sahatak_access_token', authToken);
-                    console.log('✅ Token restored from AuthStorage');
                 }
             }
             
@@ -859,7 +817,6 @@ const VideoConsultation = {
                 `/appointments/${this.appointmentId}/video/end`,
                 { method: 'POST' }
             );
-            console.log('✅ Video session ended successfully:', response);
         } catch (error) {
             console.error('❌ End session error:', error);
             console.warn('⚠️ Video session end failed - appointment status may not be reset properly');
@@ -872,7 +829,6 @@ const VideoConsultation = {
     // Emergency session end for window close/unload events
     emergencyEndSession() {
         try {
-            console.log('🚨 EMERGENCY SESSION END for appointment:', this.appointmentId);
             
             // Use sendBeacon for reliable delivery during page unload
             const token = localStorage.getItem('sahatak_access_token') || AuthStorage?.get('access_token');
@@ -888,10 +844,8 @@ const VideoConsultation = {
                 // Create a Blob with the data and headers
                 const blob = new Blob([data], { type: 'application/json' });
                 
-                console.log('🚨 Sending beacon to end session');
                 navigator.sendBeacon(url, blob);
             } else {
-                console.log('🚨 Beacon not available or no token, using fetch');
                 // Fallback to synchronous fetch
                 const url = `${ApiHelper.baseUrl}/appointments/${this.appointmentId}/video/end`;
                 fetch(url, {
@@ -915,23 +869,19 @@ const VideoConsultation = {
     // Refresh dashboard status to update UI after video session ends
     refreshDashboardStatus() {
         try {
-            console.log('🔄 Triggering dashboard refresh after video session end');
             
             // If VideoConsultationDashboard is available, refresh it
             if (window.VideoConsultationDashboard && typeof window.VideoConsultationDashboard.checkAllAppointmentStatuses === 'function') {
-                console.log('🔄 Refreshing VideoConsultationDashboard status');
                 window.VideoConsultationDashboard.checkAllAppointmentStatuses();
             }
             
             // If Dashboard is available, refresh it too
             if (window.Dashboard && typeof window.Dashboard.refreshAppointments === 'function') {
-                console.log('🔄 Refreshing main Dashboard');
                 window.Dashboard.refreshAppointments();
             }
             
             // Also trigger a general page refresh after a short delay to ensure all dashboards update
             setTimeout(() => {
-                console.log('🔄 Triggering delayed dashboard refresh');
                 if (window.location.pathname.includes('dashboard')) {
                     window.location.reload();
                 }
@@ -1143,7 +1093,6 @@ const VideoConsultation = {
     // Complete consultation (marks appointment as finished)
     async completeConsultation() {
         try {
-            console.log('🏁 Attempting to complete consultation for appointment:', this.appointmentId);
             
             // Check if we have authentication token
             const token = localStorage.getItem('sahatak_access_token');
@@ -1152,7 +1101,6 @@ const VideoConsultation = {
                 const authToken = AuthStorage?.get('access_token');
                 if (authToken) {
                     localStorage.setItem('sahatak_access_token', authToken);
-                    console.log('✅ Token restored from AuthStorage');
                 }
             }
             
@@ -1161,10 +1109,8 @@ const VideoConsultation = {
                 { method: 'POST' }
             );
             
-            console.log('🏁 Complete consultation API response:', response);
             
             if (response.success) {
-                console.log('✅ Consultation completed successfully');
                 return response;
             } else {
                 console.error('❌ Complete consultation failed:', response.message);
@@ -1200,7 +1146,6 @@ const VideoConsultation = {
     
     // Comprehensive cleanup method
     cleanup() {
-        console.log('Starting comprehensive cleanup...');
         
         // 0. End session analytics
         this.endSessionAnalytics();
@@ -1241,7 +1186,6 @@ const VideoConsultation = {
         // 5. Reset component state
         this.resetState();
         
-        console.log('Cleanup completed');
     },
     
     // Stop all media streams to release camera/microphone
@@ -1374,13 +1318,11 @@ const VideoConsultation = {
             case 'CONFERENCE_FAILED':
                 // Check if it's a membersOnly error
                 if (error.message && (error.message.includes('membersOnly') || error.message.includes('conference.connectionError.membersOnly'))) {
-                    console.log('🔧 MembersOnly error detected, switching to emergency public room...');
                     errorMessage = isArabic ? 
                         'خطأ في المصادقة - التبديل للغرفة العامة' : 
                         'Authentication error - switching to public room';
                     recoveryAction = () => this.initEmergencyPublicRoom();
                     // Auto-retry IMMEDIATELY for membersOnly errors
-                    console.log('🔧 Auto-switching to emergency public room IMMEDIATELY...');
                     this.initEmergencyPublicRoom();
                 } else {
                     errorMessage = isArabic ? 'فشل في الانضمام للاستشارة' : 'Failed to join consultation';
@@ -1604,7 +1546,6 @@ const VideoConsultation = {
     
     // Retry with fallback configuration (for membersOnly errors)
     async retryWithFallbackConfig() {
-        console.log('🔧 Retrying with fallback configuration for membersOnly error...');
         
         try {
             // Get fresh session data from the backend
@@ -1627,7 +1568,6 @@ const VideoConsultation = {
                     jwt_token: undefined
                 };
                 
-                console.log('🔧 Using fallback config:', fallbackSessionData);
                 
                 // Initialize Jitsi with fallback config
                 this.sessionData = fallbackSessionData;
@@ -1646,7 +1586,6 @@ const VideoConsultation = {
     
     // Initialize emergency public room (bypasses all authentication)
     async initEmergencyPublicRoom() {
-        console.log('🔧 Initializing emergency public room...');
         
         try {
             // Clean up existing Jitsi instance
@@ -1660,7 +1599,6 @@ const VideoConsultation = {
             const sanitizedUserName = userName.replace(/[^a-zA-Z0-9]/g, '');
             const publicRoomName = `sahatak_appointment_${this.appointmentId}`;
             
-            console.log('🔧 Emergency public room:', publicRoomName);
             
             // Container setup
             const container = document.getElementById('video-container');
@@ -1678,7 +1616,7 @@ const VideoConsultation = {
                 );
                 emergencyBackendConfig = configResponse.data;
             } catch (error) {
-                console.warn('🔧 Failed to load config for emergency mode:', error);
+                console.warn('Failed to load config for emergency mode:', error);
             }
             
             // Use backend config for emergency mode or minimal fallback
@@ -1716,7 +1654,6 @@ const VideoConsultation = {
                 // NO JWT TOKEN - completely public access
             };
             
-            console.log('🔧 Emergency room options:', emergencyOptions);
             
             // Show notification about emergency mode
             const currentLang = LanguageManager?.getLanguage() || 'en';
@@ -1735,10 +1672,9 @@ const VideoConsultation = {
             // Setup basic event handlers
             this.setupJitsiEventHandlers();
             
-            console.log('🔧 Emergency public room initialized successfully');
             
         } catch (error) {
-            console.error('🔧 Emergency public room failed:', error);
+            console.error('Emergency public room failed:', error);
             this.showErrorScreen(
                 'Unable to establish video connection. Please try again or contact support.',
                 true,
@@ -2188,7 +2124,6 @@ const VideoConsultation = {
     
     // Initialize session analytics
     initSessionAnalytics() {
-        console.log('Initializing session analytics...');
         
         // Generate unique session ID
         this.sessionAnalytics.sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -2209,7 +2144,6 @@ const VideoConsultation = {
     startQualityMonitoring() {
         if (!this.jitsiApi) return;
         
-        console.log('Starting quality monitoring...');
         
         this.qualityMonitor.interval = setInterval(() => {
             this.collectQualityMetrics();
@@ -2323,7 +2257,6 @@ const VideoConsultation = {
         const isPublicMode = urlParams.get('publicMode') === 'true';
         
         if (isPublicMode) {
-            console.log('🔧 Skipping analytics call in public mode:', event.type);
             return;
         }
         
@@ -2388,7 +2321,6 @@ const VideoConsultation = {
         const isPublicMode = urlParams.get('publicMode') === 'true';
         
         if (isPublicMode) {
-            console.log('🔧 Skipping final analytics call in public mode');
             return;
         }
         
@@ -2538,7 +2470,6 @@ const VideoConsultation = {
     
     // Start heartbeat to keep session alive
     startHeartbeat() {
-        console.log('Starting heartbeat...');
         
         // Send heartbeat every 30 seconds
         this.heartbeatInterval = setInterval(async () => {
@@ -2573,7 +2504,6 @@ const VideoConsultation = {
             // Check if script is already loaded for this domain
             const existingScript = document.querySelector(`script[src*="${domain}/external_api.js"]`);
             if (existingScript) {
-                console.log('🔧 Jitsi External API already loaded for domain:', domain);
                 resolve();
                 return;
             }
@@ -2588,17 +2518,15 @@ const VideoConsultation = {
             script.async = true;
             
             script.onload = () => {
-                console.log('🔧 Successfully loaded Jitsi External API from:', script.src);
                 resolve();
             };
             
             script.onerror = () => {
-                console.error('🔧 Failed to load Jitsi External API from:', script.src);
+                console.error('Failed to load Jitsi External API from:', script.src);
                 reject(new Error(`Failed to load Jitsi External API from ${domain}`));
             };
             
             document.head.appendChild(script);
-            console.log('🔧 Loading Jitsi External API from:', script.src);
         });
     }
 };
@@ -2611,12 +2539,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (appointmentId && document.getElementById('video-container')) {
         // Force cache clear and public room mode
-        console.log('🔧 FORCING PUBLIC ROOM MODE - No authentication allowed');
         
         // Add cache-busting parameter to prevent lobby issues
         if (!urlParams.has('publicMode')) {
             const newUrl = window.location.href + '&publicMode=true&t=' + Date.now();
-            console.log('🔧 Refreshing with cache-busting parameters:', newUrl);
             window.location.href = newUrl;
             return;
         }
@@ -2656,7 +2582,6 @@ window.addEventListener('beforeunload', (event) => {
                 console.log(`Disconnect endpoint response: status ${xhr.status}`);
                 
                 if (xhr.status === 200) {
-                    console.log('Successfully called disconnect endpoint');
                 } else {
                     console.error(`Disconnect endpoint failed with status ${xhr.status}: ${xhr.responseText}`);
                 }

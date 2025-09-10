@@ -544,32 +544,25 @@
     <script>
         // Dashboard specific functions
         function bookAppointment() {
-            console.log('Book appointment clicked');
             window.location.href = '../appointments/book-appointment.html';
         }
         
         function viewPastAppointments() {
-            console.log('View past appointments clicked');
             window.location.href = '../appointments/appointment-list.html';
         }
         
         function viewRecords() {
-            console.log('View records clicked');
             window.location.href = '../medical/patient/index.html';
         }
         
         function chatWithDoctor() {
-            console.log('Chat with doctor clicked');
             window.location.href = '../medical/patient/comm-hub.html';
         }
         
         function showLanguageSelector() {
-            console.log('Language selector clicked');
             // Toggle between Arabic and English
             const currentLang = LanguageManager.getLanguage() || 'ar';
             const newLang = currentLang === 'ar' ? 'en' : 'ar';
-            
-            console.log(`Switching language from ${currentLang} to ${newLang}`);
             
             // Change language
             LanguageManager.setLanguage(newLang);
@@ -578,19 +571,16 @@
             // Update dashboard translations (call after applyLanguage to ensure footer is properly updated)
             if (DashboardTranslations && DashboardTranslations.updatePatientDashboard) {
                 DashboardTranslations.updatePatientDashboard(newLang);
-                console.log(`Patient dashboard translations updated to ${newLang}`);
             }
             
             // Update the language button text
             const langBtn = document.getElementById('current-lang');
             if (langBtn) {
                 langBtn.textContent = newLang === 'ar' ? 'العربية' : 'English';
-                console.log(`Language button updated to show: ${langBtn.textContent}`);
             }
         }
         
         function showProfile() {
-            console.log('Show profile clicked');
             const profileSection = document.getElementById('profile-section');
             const settingsSection = document.getElementById('settings-section');
             
@@ -660,7 +650,6 @@
         }
 
         function showSettings() {
-            console.log('Show settings clicked');
             const settingsSection = document.getElementById('settings-section');
             const profileSection = document.getElementById('profile-section');
             
@@ -764,7 +753,6 @@
                 alert(msg);
             }
             
-            console.log('Settings saved:', updatedUser, updatedPrefs);
             
             // Refresh profile section if it's open
             if (document.getElementById('profile-section').style.display !== 'none') {
@@ -796,7 +784,6 @@
         }
         
         function viewAllAppointments() {
-            console.log('View all appointments clicked');
             window.location.href = '../appointments/appointment-list.html';
         }
         
@@ -875,10 +862,8 @@
                     const profileResponse = await ApiHelper.makeRequest(`/users/profile`);
                     if (profileResponse.success && profileResponse.user && profileResponse.user.profile) {
                         currentPatientId = profileResponse.user.profile.id;
-                        console.log(`🩺 Got patient profile ID from /users/profile: ${currentPatientId}`);
                     }
                 } catch (error) {
-                    console.log('Could not fetch patient profile from API:', error);
                 }
                 
                 if (currentPatientId) {
@@ -932,7 +917,6 @@
                     throw new Error('No current user');
                 }
             } catch (error) {
-                console.log('Using placeholder medical records:', error.message);
                 const fallbackLang = LanguageManager.getLanguage() || 'en';
                 container.innerHTML = `
                     <h5 class="mb-3">
@@ -952,8 +936,6 @@
 
         // Load dashboard statistics from API
         async function loadDashboardStats() {
-            console.log('Loading dashboard statistics...');
-            
             try {
                 // Load appointments to count scheduled ones
                 const appointmentsResponse = await ApiHelper.makeRequest('/appointments/');
@@ -965,14 +947,12 @@
                     const now = new Date();
                     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()); // Start of today
                     
-                    console.log('🔍 Patient appointments received:', appointments);
                     
                     const upcomingAppointments = appointments.filter(apt => {
                         const isValidStatus = ['scheduled', 'confirmed', 'in_progress'].includes(apt.status);
                         const aptDate = new Date(apt.appointment_date);
                         const isUpcoming = aptDate >= today; // Include today's appointments
                         
-                        console.log(`📅 Patient appointment ${apt.id}: ${apt.appointment_date}, status: ${apt.status}, valid: ${isValidStatus}, upcoming: ${isUpcoming}`);
                         return isValidStatus && isUpcoming;
                     }).sort((a, b) => new Date(a.appointment_date) - new Date(b.appointment_date));
                     
@@ -1015,8 +995,7 @@
                                                      apt.status !== 'completed' &&
                                                      appointmentDate > new Date(Date.now() + 60*60*1000);
                                                      
-                                    console.log(`Appointment ${apt.id}: status=${apt.status}, canModify=${canModify}`);
-                                    
+                                                    
                                     // Get translation texts
                                     const cancelText = LanguageManager?.translate('appointments.cancel') || 'Cancel';
                                     const rescheduleText = LanguageManager?.translate('appointments.reschedule') || 'Reschedule';
@@ -1080,9 +1059,7 @@
                         }
                     }
                     
-                    console.log(`Updated appointment counter: ${upcomingAppointments.length}`);
                 } else {
-                    console.warn('Failed to load appointments for stats:', appointmentsResponse.message);
                     document.getElementById('stat-appointments-count').textContent = '0';
                 }
             } catch (error) {
@@ -1103,9 +1080,7 @@
                     ).length;
                     
                     document.getElementById('stat-prescriptions-count').textContent = activeCount;
-                    console.log(`Updated prescriptions counter: ${activeCount}`);
                 } else {
-                    console.warn('Failed to load prescriptions for stats:', prescriptionsResponse.message);
                     document.getElementById('stat-prescriptions-count').textContent = '0';
                 }
             } catch (error) {
@@ -1123,10 +1098,8 @@
                     const profileResponse = await ApiHelper.makeRequest(`/users/profile`);
                     if (profileResponse.success && profileResponse.user && profileResponse.user.profile) {
                         currentPatientId = profileResponse.user.profile.id;
-                        console.log(`🩺 Got patient profile ID for stats: ${currentPatientId}`);
                     }
                 } catch (error) {
-                    console.log('Could not fetch patient profile for stats:', error);
                 }
                 
                 if (currentPatientId) {
@@ -1150,19 +1123,15 @@
                         }
                         
                         document.getElementById('stat-reports-count').textContent = reportCount;
-                        console.log(`Updated medical reports counter: ${reportCount}`);
                     } else {
-                        console.warn('Failed to load medical history for stats:', historyResponse.message);
                         document.getElementById('stat-reports-count').textContent = '0';
                     }
                 } else {
-                    console.warn('No current user found for medical history stats');
                     document.getElementById('stat-reports-count').textContent = '0';
                 }
             } catch (error) {
                 // For 403 errors (new users), show 0 instead of error
                 if (error.statusCode === 403) {
-                    console.log('Medical history not accessible yet (new user) - showing 0');
                     document.getElementById('stat-reports-count').textContent = '0';
                 } else {
                     console.error('Error loading medical reports stats:', error);
@@ -1173,7 +1142,6 @@
         
         // Refresh dashboard statistics - can be called from other pages
         window.refreshDashboardStats = function() {
-            console.log('Refreshing dashboard statistics...');
             loadDashboardStats();
             // Also refresh video consultation dashboard if available
             if (typeof VideoConsultationDashboard !== 'undefined' && VideoConsultationDashboard.refreshVideoConsultationData) {
@@ -1182,7 +1150,6 @@
         };
 
         document.addEventListener('DOMContentLoaded', async function() {
-            console.log('Patient dashboard initializing...');
             // Ensure title is correct for patient dashboard
             document.title = 'Patient Dashboard - Sahatak';
             
@@ -1198,7 +1165,6 @@
             const initVideoConsultationDashboard = () => {
                 if (typeof VideoConsultationDashboard !== 'undefined') {
                     VideoConsultationDashboard.init();
-                    console.log('VideoConsultationDashboard initialized');
                     
                     // Start automatic status monitoring for video appointments
                     startVideoStatusMonitoring();
@@ -1210,7 +1176,6 @@
                 } else {
                     retryCount++;
                     if (retryCount < 20) { // Max 2 seconds of retries
-                        console.log(`VideoConsultationDashboard not yet available, retrying in 100ms... (attempt ${retryCount})`);
                         setTimeout(initVideoConsultationDashboard, 100);
                     } else {
                         console.error('VideoConsultationDashboard failed to load after 20 attempts');
@@ -1230,8 +1195,6 @@
         let videoStatusMonitorInterval = null;
         
         function startVideoStatusMonitoring() {
-            console.log('🎥 Starting video status monitoring for patient...');
-            
             // Clear any existing interval
             if (videoStatusMonitorInterval) {
                 clearInterval(videoStatusMonitorInterval);
@@ -1249,8 +1212,6 @@
                         
                         // Check scheduled, in_progress, and completed appointments for status changes
                         if (appointmentId && (appointmentStatus === 'scheduled' || appointmentStatus === 'in_progress' || appointmentStatus === 'completed')) {
-                            console.log(`🔄 Monitoring video appointment ${appointmentId} (status: ${appointmentStatus})`);
-                            
                             if (typeof VideoConsultationDashboard !== 'undefined' && VideoConsultationDashboard.checkVideoSessionStatus) {
                                 await VideoConsultationDashboard.checkVideoSessionStatus(appointmentId, true);
                                 
@@ -1274,15 +1235,12 @@
                     console.error('Error in video status monitoring:', error);
                 }
             }, 2000); // Check every 2 seconds for very fast response
-            
-            console.log('✅ Video status monitoring started - checking every 2 seconds');
         }
         
         function stopVideoStatusMonitoring() {
             if (videoStatusMonitorInterval) {
                 clearInterval(videoStatusMonitorInterval);
                 videoStatusMonitorInterval = null;
-                console.log('🛑 Video status monitoring stopped');
             }
         }
 
@@ -1424,18 +1382,15 @@
                     return;
                 }
 
-                console.log('Attempting to cancel appointment:', this.currentAppointmentId);
 
                 try {
                     const reason = document.getElementById('cancellation-reason').value;
-                    console.log('Cancellation reason:', reason);
                     
                     const response = await ApiHelper.makeRequest(`/appointments/${this.currentAppointmentId}/cancel`, {
                         method: 'PUT',
                         body: JSON.stringify({ cancellation_reason: reason })
                     });
 
-                    console.log('Cancel response:', response);
 
                     if (response.success) {
                         // Close modal
