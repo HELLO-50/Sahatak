@@ -150,23 +150,29 @@ class VideoConferenceService:
             "prejoinPageEnabled": False,
             "skipPrejoin": True,
             
-            # Guest Access & Public Room Settings
-            "enableGuestDomain": os.getenv('JITSI_GUEST_DOMAIN_ENABLED', 'true').lower() == 'true',
-            "enableGuests": os.getenv('JITSI_ALLOW_GUESTS', 'true').lower() == 'true',
-            "guestsAllowed": os.getenv('JITSI_ALLOW_GUESTS', 'true').lower() == 'true',
-            "publicRoom": os.getenv('JITSI_PUBLIC_ROOM_ACCESS', 'true').lower() == 'true',
-            "enableUserRolesBasedOnToken": os.getenv('JITSI_ENABLE_USER_ROLES', 'false').lower() == 'true',
+            # Guest Access & Public Room Settings (FORCE PUBLIC ACCESS)
+            "enableGuestDomain": True,
+            "enableGuests": True, 
+            "guestsAllowed": True,
+            "publicRoom": True,
+            "enableUserRolesBasedOnToken": False,
+            "anonymousdomain": "guest.meet.jit.si",  # Critical for public Jitsi
+            "enableAnonymousAccess": True,
             
             # Room Configuration (SINGLE INSTANCE) - Explicitly disable all restrictions
             "roomConfig": {
                 "password": None,
                 "requireAuth": False,
                 "membersOnly": False,
-                "enableLobby": False
+                "enableLobby": False,
+                "openBridgeChannel": True,
+                "enableAnonymousAccess": True
             },
             
             # Explicitly disable membersOnly at root level too
             "membersOnly": False,
+            "enableAnonymousUsers": True,
+            "anonymousUsers": True,
             
             # Moderator & Access Control
             "disableModeratorIndicator": os.getenv('JITSI_DISABLE_MODERATOR_INDICATOR', 'true').lower() == 'true',
@@ -271,9 +277,13 @@ class VideoConferenceService:
             "VIDEO_QUALITY_LABEL_DISABLED": False,
             "CONNECTION_INDICATOR_DISABLED": False,
             
-            # Lobby UI Settings (from env vars - single source)
-            "SHOW_LOBBY_CHAT": os.getenv('JITSI_LOBBY_CHAT_ENABLED', 'false').lower() == 'true',
-            "ENABLE_LOBBY_CHAT": os.getenv('JITSI_LOBBY_CHAT_ENABLED', 'false').lower() == 'true'
+            # Lobby UI Settings (DISABLED)
+            "SHOW_LOBBY_CHAT": False,
+            "ENABLE_LOBBY_CHAT": False,
+            
+            # Anonymous Access UI
+            "ENABLE_ANONYMOUS_DOMAIN_ACCESS": True,
+            "ANONYMOUS_DOMAIN": "guest.meet.jit.si"
         }
         
         # Filter out None values from SETTINGS_SECTIONS
