@@ -163,35 +163,6 @@
                             </div>
                         </div>
 
-                        <!-- Active Prescriptions -->
-                        <div class="col-lg-6 mb-4">
-                            <div class="dashboard-card">
-                                <div id="prescriptions-container">
-                                    <!-- Prescriptions will be loaded dynamically -->
-                                    <div class="text-center py-4">
-                                        <div class="spinner-border" role="status">
-                                            <span class="visually-hidden">Loading...</span>
-                                        </div>
-                                        <p class="mt-2" id="loading-prescriptions">Loading prescriptions...</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Medical Records -->
-                        <div class="col-lg-6 mb-4">
-                            <div class="dashboard-card">
-                                <div id="medical-records-container">
-                                    <!-- Medical records will be loaded dynamically -->
-                                    <div class="text-center py-4">
-                                        <div class="spinner-border" role="status">
-                                            <span class="visually-hidden">Loading...</span>
-                                        </div>
-                                        <p class="mt-2" id="loading-medical-records">Loading medical records...</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
                 </div>
@@ -888,71 +859,6 @@
             }
         }
 
-        // Load prescriptions data
-        async function loadPrescriptions() {
-            const container = document.getElementById('prescriptions-container');
-            if (!container) return;
-            
-            try {
-                const currentLang = LanguageManager.getLanguage() || 'en';
-                // Try to load from API first
-                const response = await ApiHelper.makeRequest('/prescriptions/');
-                
-                if (response.success && response.data.prescriptions && response.data.prescriptions.length > 0) {
-                    const prescriptions = response.data.prescriptions.filter(p => p.status === 'active').slice(0, 3);
-                    
-                    if (prescriptions.length > 0) {
-                        container.innerHTML = `
-                            <h5 class="mb-3">
-                                <i class="bi bi-prescription me-2"></i>
-                                <span>${currentLang === 'ar' ? 'الوصفات الطبية النشطة' : 'Active Prescriptions'}</span>
-                            </h5>
-                            ${prescriptions.map(prescription => `
-                                <div class="prescription-item p-3 mb-2 bg-light rounded">
-                                    <div class="d-flex justify-content-between">
-                                        <div>
-                                            <h6 class="mb-1">${prescription.medication_name}</h6>
-                                            <p class="text-muted small mb-1">${prescription.dosage} - ${prescription.frequency}</p>
-                                            <small class="text-muted">Dr. ${prescription.doctor_name}</small>
-                                        </div>
-                                        <div class="text-end">
-                                            <span class="badge bg-success">Active</span>
-                                            <small class="d-block text-muted mt-1">${new Date(prescription.prescribed_date).toLocaleDateString()}</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            `).join('')}
-                            <div class="text-center mt-3">
-                                <button class="btn btn-outline-primary btn-sm" onclick="viewRecords()">
-                                    <i class="bi bi-file-medical me-1"></i>
-                                    ${currentLang === 'ar' ? 'عرض جميع الوصفات' : 'View All Prescriptions'}
-                                </button>
-                            </div>
-                        `;
-                    } else {
-                        throw new Error('No active prescriptions');
-                    }
-                } else {
-                    throw new Error('No prescriptions data');
-                }
-            } catch (error) {
-                console.log('Using placeholder prescriptions data:', error.message);
-                const fallbackLang = LanguageManager.getLanguage() || 'en';
-                container.innerHTML = `
-                    <h5 class="mb-3">
-                        <i class="bi bi-prescription me-2"></i>
-                        <span>${fallbackLang === 'ar' ? 'الوصفات الطبية النشطة' : 'Active Prescriptions'}</span>
-                    </h5>
-                    <p class="text-center py-3" style="color: #666;">${fallbackLang === 'ar' ? 'لا توجد وصفات طبية نشطة حالياً' : 'No active prescriptions at the moment'}</p>
-                    <div class="text-center mt-3">
-                        <button class="btn btn-outline-primary btn-sm" onclick="viewRecords()">
-                            <i class="bi bi-file-medical me-1"></i>
-                            ${fallbackLang === 'ar' ? 'عرض السجل الطبي' : 'View Medical Records'}
-                        </button>
-                    </div>
-                `;
-            }
-        }
 
         // Load medical records data
         async function loadMedicalRecords() {
@@ -1292,8 +1198,6 @@
             setTimeout(() => {
                 loadDashboardStats();
                 loadHealthSummary();
-                loadPrescriptions();
-                loadMedicalRecords();
             }, 1000); // Small delay to ensure API is ready
         });
 
