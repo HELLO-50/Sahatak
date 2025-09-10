@@ -532,10 +532,8 @@ const VideoConsultation = {
             // BYPASS BACKEND - Use direct public room creation for free Jitsi
             console.log('🔧 Bypassing backend - creating direct public room');
             
-            // Create simple public room name (avoid any triggers for lobby/auth)
-            const userName = AuthStorage.get('name') || 'User';
-            const sanitizedUserName = userName.replace(/[^a-zA-Z0-9]/g, ''); // Remove all special chars including Arabic
-            const publicRoomName = `public${this.appointmentId}${sanitizedUserName}`;
+            // Create deterministic room name so doctor and patient join same room
+            const publicRoomName = `sahatak_appointment_${this.appointmentId}`;
             
             const publicSessionData = {
                 room_name: publicRoomName,
@@ -679,9 +677,8 @@ const VideoConsultation = {
         // FORCE PUBLIC ROOM (Free Jitsi doesn't support authentication)
         console.log('🔧 Using PUBLIC ROOM (free Jitsi Meet doesn\'t support authentication)');
         
-        // Create completely random room name to avoid any membership triggers
-        const randomSuffix = Math.random().toString(36).substring(2, 15);
-        const publicRoomName = `room${this.appointmentId}x${randomSuffix}`;
+        // Create deterministic room name so doctor and patient join same room
+        const publicRoomName = `sahatak_appointment_${this.appointmentId}`;
         
         // Use configuration from backend - trust the .env settings
         const finalConfig = { 
@@ -1661,7 +1658,7 @@ const VideoConsultation = {
             // Create simple emergency public room name  
             const userName = AuthStorage.get('name') || 'User';
             const sanitizedUserName = userName.replace(/[^a-zA-Z0-9]/g, '');
-            const publicRoomName = `emergency${this.appointmentId}${Date.now()}`;
+            const publicRoomName = `sahatak_appointment_${this.appointmentId}`;
             
             console.log('🔧 Emergency public room:', publicRoomName);
             

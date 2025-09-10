@@ -1253,6 +1253,11 @@
                             
                             if (typeof VideoConsultationDashboard !== 'undefined' && VideoConsultationDashboard.checkVideoSessionStatus) {
                                 await VideoConsultationDashboard.checkVideoSessionStatus(appointmentId, true);
+                                
+                                // Also refresh dashboard stats to ensure buttons update
+                                if (window.refreshDashboardStats) {
+                                    window.refreshDashboardStats();
+                                }
                             }
                         }
                     }
