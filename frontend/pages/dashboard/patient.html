@@ -887,7 +887,9 @@
                                     const videoClass = apt.appointment_type === 'video' ? 'appointment-card video-appointment' : 'appointment-card';
                                     
                                     // Generate video consultation button if applicable
-                                    const videoButton = VideoConsultationDashboard.generateVideoConsultationButton(apt);
+                                    const videoButton = (typeof VideoConsultationDashboard !== 'undefined' && VideoConsultationDashboard.generateVideoConsultationButton) 
+                                        ? VideoConsultationDashboard.generateVideoConsultationButton(apt) 
+                                        : (apt.appointment_type === 'video' ? `<button class="btn btn-secondary btn-sm" disabled>Loading...</button>` : '');
                                     
                                     // Check if appointment can be modified (1 hour before and not cancelled/completed)
                                     const canModify = ['scheduled', 'confirmed'].includes(apt.status) && 
@@ -1060,11 +1062,17 @@
             const currentLang = LanguageManager.getLanguage() || 'ar';
             DashboardTranslations.updatePatientDashboard(currentLang);
             
-            // Initialize video consultation dashboard
-            if (typeof VideoConsultationDashboard !== 'undefined') {
-                VideoConsultationDashboard.init();
-                console.log('VideoConsultationDashboard initialized');
-            }
+            // Initialize video consultation dashboard with retry
+            const initVideoConsultationDashboard = () => {
+                if (typeof VideoConsultationDashboard !== 'undefined') {
+                    VideoConsultationDashboard.init();
+                    console.log('VideoConsultationDashboard initialized');
+                } else {
+                    console.log('VideoConsultationDashboard not yet available, retrying in 100ms...');
+                    setTimeout(initVideoConsultationDashboard, 100);
+                }
+            };
+            initVideoConsultationDashboard();
             
             // Load dashboard statistics after translations are loaded
             setTimeout(() => {

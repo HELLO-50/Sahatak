@@ -1335,7 +1335,9 @@
                                 });
                                 
                                 // Generate video consultation button if applicable
-                                const videoButton = VideoConsultationDashboard.generateVideoConsultationButton(apt);
+                                const videoButton = (typeof VideoConsultationDashboard !== 'undefined' && VideoConsultationDashboard.generateVideoConsultationButton) 
+                                    ? VideoConsultationDashboard.generateVideoConsultationButton(apt) 
+                                    : (apt.appointment_type === 'video' ? `<button class="btn btn-primary btn-sm" disabled>Loading...</button>` : '');
                                 const isVideoAppointment = apt.appointment_type === 'video';
                                 
                                 return `
@@ -1606,11 +1608,17 @@
             document.title = 'Doctor Dashboard - Sahatak';
             await DashboardTranslations.initializeDashboard('doctor');
             
-            // Initialize video consultation dashboard
-            if (typeof VideoConsultationDashboard !== 'undefined') {
-                VideoConsultationDashboard.init();
-                console.log('VideoConsultationDashboard initialized');
-            }
+            // Initialize video consultation dashboard with retry
+            const initVideoConsultationDashboard = () => {
+                if (typeof VideoConsultationDashboard !== 'undefined') {
+                    VideoConsultationDashboard.init();
+                    console.log('VideoConsultationDashboard initialized');
+                } else {
+                    console.log('VideoConsultationDashboard not yet available, retrying in 100ms...');
+                    setTimeout(initVideoConsultationDashboard, 100);
+                }
+            };
+            initVideoConsultationDashboard();
             
             // Load and update user data including verification status
             const user = AuthGuard.getCurrentUser();
