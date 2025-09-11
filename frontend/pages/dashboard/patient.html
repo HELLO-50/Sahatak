@@ -823,29 +823,41 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <div class="health-metric">
-                                <label class="form-label text-muted small">${currentLang === 'ar' ? 'ضغط الدم' : 'Blood Pressure'}</label>
-                                <div class="h6 mb-0">120/80 mmHg</div>
+                                <label class="form-label health-metric-label small">
+                                    <i class="bi bi-heart-fill me-2 text-danger"></i>
+                                    ${currentLang === 'ar' ? 'ضغط الدم' : 'Blood Pressure'}
+                                </label>
+                                <div class="h6 mb-0 health-metric-value">120/80 mmHg</div>
                                 <small class="text-success">${currentLang === 'ar' ? 'طبيعي' : 'Normal'}</small>
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <div class="health-metric">
-                                <label class="form-label text-muted small">${currentLang === 'ar' ? 'مستوى السكر' : 'Blood Sugar'}</label>
-                                <div class="h6 mb-0">95 mg/dL</div>
+                                <label class="form-label health-metric-label small">
+                                    <i class="bi bi-droplet-fill me-2 text-primary"></i>
+                                    ${currentLang === 'ar' ? 'مستوى السكر' : 'Blood Sugar'}
+                                </label>
+                                <div class="h6 mb-0 health-metric-value">95 mg/dL</div>
                                 <small class="text-success">${currentLang === 'ar' ? 'طبيعي' : 'Normal'}</small>
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <div class="health-metric">
-                                <label class="form-label text-muted small">${currentLang === 'ar' ? 'الوزن' : 'Weight'}</label>
-                                <div class="h6 mb-0">75 kg</div>
-                                <small class="text-muted">${currentLang === 'ar' ? 'آخر قياس: اليوم' : 'Last measured: Today'}</small>
+                                <label class="form-label health-metric-label small">
+                                    <i class="bi bi-person-fill me-2 text-info"></i>
+                                    ${currentLang === 'ar' ? 'الوزن' : 'Weight'}
+                                </label>
+                                <div class="h6 mb-0 health-metric-value">75 kg</div>
+                                <small class="health-metric-note">${currentLang === 'ar' ? 'آخر قياس: اليوم' : 'Last measured: Today'}</small>
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <div class="health-metric">
-                                <label class="form-label text-muted small">${currentLang === 'ar' ? 'درجة الحرارة' : 'Temperature'}</label>
-                                <div class="h6 mb-0">36.8°C</div>
+                                <label class="form-label health-metric-label small">
+                                    <i class="bi bi-thermometer-half me-2 text-warning"></i>
+                                    ${currentLang === 'ar' ? 'درجة الحرارة' : 'Temperature'}
+                                </label>
+                                <div class="h6 mb-0 health-metric-value">36.8°C</div>
                                 <small class="text-success">${currentLang === 'ar' ? 'طبيعي' : 'Normal'}</small>
                             </div>
                         </div>

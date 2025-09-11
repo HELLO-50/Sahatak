@@ -935,6 +935,54 @@ div.dashboard-card.quick-action-card p.text-muted {
     font-size: 0.95rem;
 }
 
+/* Health metric styling - New comprehensive rules */
+.health-metric {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+}
+
+.health-metric:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Health metric labels - ensure black text with icons */
+.health-metric-label {
+    color: #000000 !important; /* Force black text */
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem !important;
+}
+
+/* Health metric values - main measurement numbers */
+.health-metric-value {
+    color: #000000 !important; /* Force black text for values */
+    font-weight: 700 !important;
+    font-size: 1.1rem !important;
+    margin-bottom: 0.25rem !important;
+}
+
+/* Health metric notes - like "Last measured" */
+.health-metric-note {
+    color: #374151 !important; /* Dark gray but readable */
+    font-weight: 500 !important;
+    font-size: 0.8rem !important;
+}
+
+/* Override any text-muted within health metrics */
+.health-metric .text-muted,
+.health-metric small.text-muted {
+    color: #374151 !important;
+    font-weight: 500 !important;
+}
+
 /* RTL Support */
 [dir="rtl"] .sidebar-nav a:hover,
 [dir="rtl"] .sidebar-nav a.active {
