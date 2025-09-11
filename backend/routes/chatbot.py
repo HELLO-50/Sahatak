@@ -8,6 +8,9 @@ from utils.responses import APIResponse, ErrorCodes
 from utils.logging_config import app_logger
 from utils.validators import validate_json_data
 
+# Initialize logger first
+chatbot_logger = app_logger
+
 # AI Libraries (Free Local Models Only) - Optional dependencies
 try:
     from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM, AutoModelForSequenceClassification
@@ -24,9 +27,6 @@ except ImportError as e:
     chatbot_logger.warning(f"Transformers library not available: {e}. Using fallback mode.")
 
 from datetime import timedelta
-
-# Initialize logger
-chatbot_logger = app_logger
 
 # Medical AI System Prompts
 MEDICAL_SYSTEM_PROMPT = {
