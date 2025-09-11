@@ -8,9 +8,21 @@ from utils.responses import APIResponse, ErrorCodes
 from utils.logging_config import app_logger
 from utils.validators import validate_json_data
 
-# AI Libraries (Free Local Models Only)
-from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM, AutoModelForSequenceClassification
-import torch
+# AI Libraries (Free Local Models Only) - Optional dependencies
+try:
+    from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM, AutoModelForSequenceClassification
+    import torch
+    TRANSFORMERS_AVAILABLE = True
+    chatbot_logger.info("Transformers library loaded successfully")
+except ImportError as e:
+    TRANSFORMERS_AVAILABLE = False
+    # Create dummy objects to prevent errors
+    torch = None
+    AutoTokenizer = None
+    AutoModelForCausalLM = None
+    AutoModelForSequenceClassification = None
+    chatbot_logger.warning(f"Transformers library not available: {e}. Using fallback mode.")
+
 from datetime import timedelta
 
 # Initialize logger
@@ -87,6 +99,10 @@ def load_local_model():
     """Load Hugging Face local model for medical analysis"""
     global local_model, local_tokenizer
     
+    if not TRANSFORMERS_AVAILABLE:
+        chatbot_logger.warning("Transformers library not available - cannot load local model")
+        return False
+    
     try:
         model_name = current_app.config.get('HUGGINGFACE_MODEL_NAME', 'aubmindlab/bert-base-arabertv2')
         chatbot_logger.info(f"Loading local model: {model_name}")
@@ -104,6 +120,17 @@ def load_local_model():
 def analyze_with_dialogpt(symptoms, language='en'):
     """Analyze symptoms using DialoGPT for conversational medical triage"""
     global local_model, local_tokenizer
+    
+    if not TRANSFORMERS_AVAILABLE:
+        chatbot_logger.info("Transformers not available - using enhanced rules fallback")
+        triage_result = analyze_symptoms_enhanced(symptoms, language)
+        ai_response = generate_local_response(symptoms, triage_result, language)
+        return {
+            'response': ai_response,
+            'triage_result': triage_result,
+            'model': 'enhanced-rules-fallback',
+            'tokens_generated': 0
+        }
     
     try:
         # Load DialoGPT model if not loaded
@@ -161,6 +188,18 @@ def analyze_with_dialogpt(symptoms, language='en'):
 def analyze_with_local_model(symptoms, language='en'):
     """Analyze symptoms using local Hugging Face model"""
     global local_model, local_tokenizer
+    
+    if not TRANSFORMERS_AVAILABLE:
+        chatbot_logger.info("Transformers not available - using enhanced rules fallback")
+        triage_result = analyze_symptoms_enhanced(symptoms, language)
+        response_text = generate_local_response(symptoms, triage_result, language)
+        return {
+            'response': response_text,
+            'triage_result': triage_result,
+            'confidence': 0.8,
+            'model': 'enhanced-rules-system',
+            'processing_time_ms': 50
+        }
     
     try:
         # Load model if not already loaded
@@ -347,7 +386,23 @@ def ai_assessment():
 def chatbot_health():
     """Health check endpoint for AI assessment service"""
     # Check local model availability
-    local_model_available = (local_model is not None and local_tokenizer is not None) or torch.cuda.is_available()
+    local_model_available = TRANSFORMERS_AVAILABLE and (local_model is not None and local_tokenizer is not None)
+    
+    # System info with safe torch access
+    system_info = {
+        'transformers_available': TRANSFORMERS_AVAILABLE,
+    }
+    
+    if torch is not None:
+        system_info.update({
+            'cuda_available': torch.cuda.is_available(),
+            'torch_version': torch.__version__
+        })
+    else:
+        system_info.update({
+            'cuda_available': False,
+            'torch_version': 'not_installed'
+        })
     
     return APIResponse.success(
         data={
@@ -357,7 +412,7 @@ def chatbot_health():
                 'dialogpt': {
                     'available': local_model_available,
                     'model': current_app.config.get('HUGGINGFACE_MODEL_NAME', 'microsoft/DialoGPT-medium'),
-                    'status': 'ready' if local_model_available else 'model_not_loaded'
+                    'status': 'ready' if local_model_available else 'dependencies_missing'
                 },
                 'fallback': {
                     'available': True,
@@ -365,10 +420,7 @@ def chatbot_health():
                     'status': 'ready'
                 }
             },
-            'system_info': {
-                'cuda_available': torch.cuda.is_available(),
-                'torch_version': torch.__version__
-            },
+            'system_info': system_info,
             'timestamp': datetime.utcnow().isoformat()
         },
         message="AI Assessment service health check completed"
