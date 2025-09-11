@@ -192,51 +192,90 @@
                                 
                                 <div class="row mb-4">
                                     <!-- Doctor Specialty Distribution -->
-                                    <div class="col-lg-6">
-                                        <div class="analytics-card">
-                                            <h6><i class="bi bi-pie-chart me-2"></i>Doctor Specialties</h6>
-                                            <div class="chart-container">
-                                                <canvas id="specialtyDistributionChart"></canvas>
-                                            </div>
+                                    <div class="col-lg-3">
+                                        <div class="metric-card">
+                                            <div class="metric-value" id="cardiology-count">0</div>
+                                            <div class="metric-label">Cardiology</div>
                                         </div>
                                     </div>
-                                    
+                                    <div class="col-lg-3">
+                                        <div class="metric-card">
+                                            <div class="metric-value" id="general-count">0</div>
+                                            <div class="metric-label">General Medicine</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="metric-card">
+                                            <div class="metric-value" id="pediatrics-count">0</div>
+                                            <div class="metric-label">Pediatrics</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="metric-card">
+                                            <div class="metric-value" id="other-specialties-count">0</div>
+                                            <div class="metric-label">Other Specialties</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-4">
                                     <!-- Appointment Status Distribution -->
-                                    <div class="col-lg-6">
-                                        <div class="analytics-card">
-                                            <h6><i class="bi bi-bar-chart me-2"></i>Appointment Status</h6>
-                                            <div class="chart-container">
-                                                <canvas id="appointmentStatusChart"></canvas>
-                                            </div>
+                                    <div class="col-lg-3">
+                                        <div class="metric-card">
+                                            <div class="metric-value" id="scheduled-appointments">0</div>
+                                            <div class="metric-label">Scheduled</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="metric-card">
+                                            <div class="metric-value" id="confirmed-appointments">0</div>
+                                            <div class="metric-label">Confirmed</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="metric-card">
+                                            <div class="metric-value" id="completed-appointments-status">0</div>
+                                            <div class="metric-label">Completed</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="metric-card">
+                                            <div class="metric-value" id="cancelled-appointments">0</div>
+                                            <div class="metric-label">Cancelled</div>
                                         </div>
                                     </div>
                                 </div>
                                 
                                 <!-- Recent Activity Summary -->
-                                <div class="analytics-card">
+                                <div class="analytics-card recent-activity-card">
                                     <h6><i class="bi bi-clock-history me-2"></i>Recent Activity Summary</h6>
                                    
                                     <div class="row">
                                         <div class="col-md-4">
-                                            <div class="activity-stat">
-                                                <span class="activity-value" id="new-users-30d">0</span>
-                                                <span class="activity-label">New Users (30d)</span>
-
-            
+                                            <div class="activity-stat-card">
+                                                <div class="activity-icon">
+                                                    <i class="bi bi-person-plus"></i>
+                                                </div>
+                                                <span class="activity-value" id="new-users-7d">0</span>
+                                                <span class="activity-label">New Users (7d)</span>
                                             </div>
                                         </div>
                                         <div class="col-md-4">
-                                            <div class="activity-stat">
-                                                <span class="activity-value" id="appointments-30d">0</span>
-                                                <span class="activity-label">Appointments (30d)</span>
-                                                
+                                            <div class="activity-stat-card">
+                                                <div class="activity-icon">
+                                                    <i class="bi bi-calendar-plus"></i>
+                                                </div>
+                                                <span class="activity-value" id="appointments-7d">0</span>
+                                                <span class="activity-label">Appointments (7d)</span>
                                             </div>
                                         </div>
                                         <div class="col-md-4">
-                                            <div class="activity-stat">
-                                                <span class="activity-value" id="completed-appointments">0</span>
-                                                <span class="activity-label">Completed Appointments</span>
-                                               
+                                            <div class="activity-stat-card">
+                                                <div class="activity-icon">
+                                                    <i class="bi bi-check-circle"></i>
+                                                </div>
+                                                <span class="activity-value" id="completed-appointments-7d">0</span>
+                                                <span class="activity-label">Completed (7d)</span>
                                             </div>
                                         </div>
                                     </div>

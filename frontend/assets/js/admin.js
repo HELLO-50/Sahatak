@@ -287,20 +287,20 @@ const AdminDashboard = {
             this.updateAnalytics(data.analytics);
         }
         
-        // Update individual activity stats that might be in stats instead of analytics
-        if (data.stats) {
-            // Update recent activity summary
-            const newUsers30dEl = document.getElementById('new-users-30d');
-            if (newUsers30dEl) newUsers30dEl.textContent = data.stats.new_users_30d || 0;
+        // Update 7-day activity statistics from analytics data
+        if (data.analytics) {
+            // Update 7-day activity summary with real data
+            const newUsers7dEl = document.getElementById('new-users-7d');
+            if (newUsers7dEl) newUsers7dEl.textContent = data.analytics.user_activity?.new_users_7d || 0;
             
-            const appointments30dEl = document.getElementById('appointments-30d');
-            if (appointments30dEl) appointments30dEl.textContent = data.stats.appointments_30d || 0;
+            const appointments7dEl = document.getElementById('appointments-7d');
+            if (appointments7dEl) appointments7dEl.textContent = data.analytics.appointment_metrics?.appointments_7d || 0;
             
-            const completedEl = document.getElementById('completed-appointments');
-            if (completedEl) completedEl.textContent = data.stats.completed_appointments || 0;
+            const completed7dEl = document.getElementById('completed-appointments-7d');
+            if (completed7dEl) completed7dEl.textContent = data.analytics.appointment_metrics?.completed_appointments || 0;
             
             const activeUsers7dEl = document.getElementById('active-users-7d');
-            if (activeUsers7dEl) activeUsers7dEl.textContent = data.stats.active_users_7d || 0;
+            if (activeUsers7dEl) activeUsers7dEl.textContent = data.analytics.user_activity?.active_users_7d || 0;
         }
     },
     
@@ -1322,6 +1322,47 @@ const AdminDashboard = {
             
             const completedEl = document.getElementById('completed-appointments');
             if (completedEl) completedEl.textContent = analytics.appointment_metrics.completed_appointments;
+            
+            // Update appointment status cards
+            if (analytics.appointment_metrics.appointment_status) {
+                analytics.appointment_metrics.appointment_status.forEach(status => {
+                    const statusEl = document.getElementById(`${status.status.toLowerCase()}-appointments`);
+                    if (statusEl) statusEl.textContent = status.count;
+                });
+            }
+        }
+        
+        // Update doctor specialty distribution
+        if (analytics.doctor_analytics && analytics.doctor_analytics.specialty_distribution) {
+            let cardiologyCount = 0;
+            let generalCount = 0;
+            let pediatricsCount = 0;
+            let otherCount = 0;
+            
+            analytics.doctor_analytics.specialty_distribution.forEach(spec => {
+                const specialty = spec.specialty.toLowerCase();
+                if (specialty.includes('cardio')) {
+                    cardiologyCount += spec.count;
+                } else if (specialty.includes('general') || specialty.includes('family')) {
+                    generalCount += spec.count;
+                } else if (specialty.includes('pediatric') || specialty.includes('child')) {
+                    pediatricsCount += spec.count;
+                } else {
+                    otherCount += spec.count;
+                }
+            });
+            
+            const cardiologyEl = document.getElementById('cardiology-count');
+            if (cardiologyEl) cardiologyEl.textContent = cardiologyCount;
+            
+            const generalEl = document.getElementById('general-count');
+            if (generalEl) generalEl.textContent = generalCount;
+            
+            const pediatricsEl = document.getElementById('pediatrics-count');
+            if (pediatricsEl) pediatricsEl.textContent = pediatricsCount;
+            
+            const otherEl = document.getElementById('other-specialties-count');
+            if (otherEl) otherEl.textContent = otherCount;
         }
         
         // Create charts

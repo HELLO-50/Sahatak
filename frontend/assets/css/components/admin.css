@@ -1382,23 +1382,90 @@ Colors:
     font-weight: 500;
 }
 
-.activity-stat {
+/* Recent Activity Cards - Improved */
+.recent-activity-card {
+    background: var(--admin-bg-card) !important;
+    border: 1px solid var(--admin-border-primary) !important;
+}
+
+.recent-activity-card h6 {
+    color: var(--admin-text) !important;
+    font-weight: 700 !important;
+    margin-bottom: var(--admin-space-lg) !important;
+}
+
+.activity-stat-card {
+    background: var(--admin-bg-section);
+    border: 1px solid var(--admin-border-primary);
+    border-radius: var(--admin-radius-lg);
+    padding: var(--admin-space-lg);
     text-align: center;
+    transition: var(--admin-transition-base);
+    margin-bottom: var(--admin-space-sm);
+    position: relative;
+    overflow: hidden;
+}
+
+.activity-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--admin-gradient-primary);
+    opacity: 0;
+    transition: var(--admin-transition-base);
+}
+
+.activity-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--admin-shadow-lg);
+    border-color: var(--admin-primary);
+}
+
+.activity-stat-card:hover::before {
+    opacity: 1;
+}
+
+.activity-icon {
+    margin-bottom: var(--admin-space-sm);
+}
+
+.activity-icon i {
+    font-size: var(--admin-text-xl);
+    color: var(--admin-primary);
+    background: rgba(37, 99, 235, 0.1);
     padding: var(--admin-space-sm);
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .activity-value {
     display: block;
-    font-size: var(--admin-text-xl);
+    font-size: var(--admin-text-2xl);
     font-weight: 700;
-    color: var(--admin-success);
+    color: var(--admin-primary) !important;
     margin-bottom: var(--admin-space-xs);
+    line-height: 1.2;
 }
 
 .activity-label {
     font-size: var(--admin-text-sm);
-    color: var(--admin-text-secondary);
+    color: var(--admin-text-secondary) !important;
     font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Legacy support for old activity stats */
+.activity-stat {
+    text-align: center;
+    padding: var(--admin-space-sm);
 }
 
 /* =============================================================================
