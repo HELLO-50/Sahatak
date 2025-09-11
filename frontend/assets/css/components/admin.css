@@ -2728,25 +2728,9 @@ Colors:
     color: #000000 !important;
 }
 
-
-
-::selection {
-    background: black;   
-    color: white;       
+.dashboard-title,
+.dashboard-subtitle {
+    color: #000 !important;
+    -webkit-text-fill-color: #000 !important;
+    text-shadow: none !important;
 }
-
-::-moz-selection {
-    background: black;
-    color: white;
-
-}
-::selection {
-    background: #f0f0f0;  
-    color: black;         
-}
-
-::-moz-selection {
-    background: #f0f0f0;
-    color: black;
-}
-
