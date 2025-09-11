@@ -1108,9 +1108,9 @@ def verify_doctor(doctor_id):
        # Verification notes field 
         if approved:
             doctor.is_verified = True
-            doctor.verification_date = datetime.utcnow()
-            doctor.verification_notes = notes
-            doctor.verified_by = current_user.id
+            doctor.verification_status = 'approved'
+            doctor.verification_reviewed_at = datetime.utcnow()
+            doctor.verified_by_admin_id = current_user.id
             
              # Send approval email
             email_subject = "Doctor Verification Approved - Sahatak Platform"
@@ -1145,9 +1145,10 @@ def verify_doctor(doctor_id):
                     error_code="REJECTION_NOTES_REQUIRED"
                 )
             
-            doctor.verification_notes = notes
-            doctor.rejection_date = datetime.utcnow()
-            doctor.rejected_by = current_user.id
+            doctor.verification_status = 'rejected'
+            doctor.rejection_reason = notes
+            doctor.verification_reviewed_at = datetime.utcnow()
+            doctor.verified_by_admin_id = current_user.id
             
             # Send rejection email
             email_subject = "Doctor Verification - Additional Information Required"
