@@ -1125,10 +1125,10 @@ def complete_appointment(appointment_id):
         
         # Check if appointment can be completed
         if appointment.status == 'completed':
-            return APIResponse.bad_request(message='Appointment already completed')
+            return APIResponse.conflict(message='Appointment already completed')
         
         if appointment.status not in ['scheduled', 'in_progress']:
-            return APIResponse.bad_request(message='Appointment cannot be completed in its current state')
+            return APIResponse.error(message='Appointment cannot be completed in its current state', status_code=400)
         
         # Complete the appointment
         appointment.status = 'completed'
