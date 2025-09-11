@@ -822,16 +822,6 @@ Colors:
     color: var(--admin-info) !important;
 }
 
-/* Admin specific colors continued */
-    --admin-bg: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-    --admin-card-bg: rgba(30, 41, 59, 0.95);
-    --admin-text: #f8fafc;
-    --admin-text-muted: #cbd5e1;
-    
-    /* Shadows and effects */
-    --admin-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    --admin-hover-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-}
 
 /* =============================================================================
    ADMIN LAYOUT & STRUCTURE (Darker Theme)
@@ -894,68 +884,6 @@ Colors:
     padding-bottom: 0.5rem;
 }
 
-/* Admin Stat Cards */
-.admin-stat-card {
-    position: relative;
-    background: #ffffff;
-    border: 1px solid rgba(37, 99, 235, 0.2);
-    border-radius: 12px;
-    transition: all 0.3s ease;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 1.5rem;
-    box-shadow: none !important;
-}
-
-.admin-stat-card:hover {
-    border-color: var(--admin-primary);
-    box-shadow: none !important;
-    transform: none;
-}
-
-.stat-number {
-    color: var(--admin-primary);
-    font-weight: 700;
-    font-size: 2rem;
-}
-
-.stat-label {
-    color: var(--admin-secondary);
-    font-weight: 500;
-}
-
-.stat-icon i {
-    color: var(--admin-accent);
-    font-size: 1.5rem;
-}
-
-.admin-stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--admin-primary) 0%, #3b82f6 100%);
-}
-
-.admin-stat-card .stat-number {
-    color: var(--admin-primary) !important;
-}
-
-.admin-stat-card .stat-label {
-    color: var(--admin-text-muted);
-}
-
-.admin-stat-card .stat-icon {
-    font-size: 2rem;
-    color: var(--admin-primary);
-    margin-bottom: 0.5rem;
-    text-align: center;
-}
 
 /* Admin Health Card */
 .admin-health-card {
@@ -1385,28 +1313,92 @@ Colors:
 }
 
 /* =============================================================================
-   CHARTS & ANALYTICS
+   CHARTS & ANALYTICS - Consolidated and Fixed
 ============================================================================= */
 
+.analytics-card {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: var(--admin-radius-lg);
+    padding: var(--admin-space-xl);
+    margin-bottom: var(--admin-space-xl);
+    box-shadow: var(--admin-shadow-sm);
+    overflow: hidden;
+}
+
 .chart-container {
-    background: white;
-    border-radius: 10px;
-    padding: 25px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
+    position: relative;
+    height: 300px;
+    width: 100%;
+    overflow: hidden;
+    border-radius: var(--admin-radius-md);
+}
+
+.chart-container canvas {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
 }
 
 .chart-title {
-    color: #2c3e50;
+    color: var(--admin-text);
     font-weight: 600;
-    margin-bottom: 20px;
+    margin-bottom: var(--admin-space-lg);
     text-align: center;
+    font-size: var(--admin-text-lg);
 }
 
-/* Awab: Add styles for Chart.js or other charting libraries */
 .chart-wrapper {
     position: relative;
     height: 300px;
+}
+
+.metric-card {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: var(--admin-radius-md);
+    padding: var(--admin-space-lg);
+    text-align: center;
+    transition: var(--admin-transition-base);
+}
+
+.metric-card:hover {
+    box-shadow: var(--admin-shadow-md);
+    transform: translateY(-2px);
+}
+
+.metric-value {
+    font-size: var(--admin-text-2xl);
+    font-weight: 700;
+    color: var(--admin-primary);
+    margin-bottom: var(--admin-space-xs);
+}
+
+.metric-label {
+    font-size: var(--admin-text-sm);
+    color: var(--admin-text-secondary);
+    font-weight: 500;
+}
+
+.activity-stat {
+    text-align: center;
+    padding: var(--admin-space-sm);
+}
+
+.activity-value {
+    display: block;
+    font-size: var(--admin-text-xl);
+    font-weight: 700;
+    color: var(--admin-success);
+    margin-bottom: var(--admin-space-xs);
+}
+
+.activity-label {
+    font-size: var(--admin-text-sm);
+    color: var(--admin-text-secondary);
+    font-weight: 500;
 }
 
 /* =============================================================================
@@ -2294,12 +2286,100 @@ Colors:
     background: #fef2f2 !important;
 }
 
-/* Accessibility Enhancements */
-.tab-content .form-control:focus,
-.tab-content .form-select:focus,
-.tab-content .form-check-input:focus {
-    outline: 2px solid transparent;
-    outline-offset: 2px;
+/* ============================================================================
+   ACCESSIBILITY ENHANCEMENTS - WCAG 2.1 AA Compliant
+   ============================================================================ */
+
+/* Focus indicators - visible and consistent */
+.btn-admin-nav:focus,
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus,
+.btn:focus {
+    outline: 2px solid var(--admin-primary) !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2) !important;
+}
+
+/* Skip to main content link */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: var(--admin-primary);
+    color: white;
+    padding: 8px;
+    text-decoration: none;
+    border-radius: 4px;
+    z-index: 9999;
+}
+
+.skip-link:focus {
+    top: 6px;
+}
+
+/* Screen reader only content */
+.visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .btn-admin-nav {
+        border-width: 2px !important;
+    }
+    
+    .dashboard-card {
+        border-width: 2px !important;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Color contrast improvements */
+.text-muted {
+    color: var(--admin-text-secondary) !important; /* 4.5:1 contrast ratio */
+}
+
+/* Interactive element sizing - 44px minimum */
+.btn-admin-nav,
+.btn,
+button {
+    min-height: 44px;
+    min-width: 44px;
+}
+
+/* Form accessibility */
+.form-label[required]::after {
+    content: " *";
+    color: var(--admin-error);
+}
+
+/* Error states */
+.form-control.is-invalid {
+    border-color: var(--admin-error) !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
+.form-control.is-valid {
+    border-color: var(--admin-success) !important;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
 }
 
 /* High Contrast for Better Readability */
@@ -2344,16 +2424,26 @@ Colors:
     color: #1e293b !important;
 }
 
-/* Medical Professional Color Scheme */
+/* Unified Admin Color Scheme - Single Source of Truth */
 :root {
-    --medical-primary: #1e40af;      /* Medical Blue */
-    --medical-secondary: #059669;    /* Medical Green */
-    --medical-accent: #0f172a;       /* Dark Text */
-    --medical-bg-light: #f0f9ff;     /* Light Blue Background */
-    --medical-bg-white: #ffffff;     /* Pure White */
-    --medical-border: #cbd5e1;       /* Light Border */
-    --medical-text: #0f172a;         /* Dark Text */
-    --medical-text-secondary: #475569; /* Secondary Text */
+    /* Update existing admin variables to be consistent */
+    --admin-text: #0f172a;           /* Dark text for better readability */
+    --admin-text-secondary: #475569; /* Secondary text */
+    --admin-text-muted: #64748b;     /* Muted text */
+    --admin-bg-card: #ffffff;        /* White card backgrounds */
+    --admin-bg-section: #f8fafc;     /* Light section background */
+    --admin-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Lighter shadows */
+    --admin-hover-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); /* Subtle hover shadows */
+    
+    /* Medical color aliases for consistency */
+    --medical-primary: var(--admin-primary);
+    --medical-secondary: var(--admin-secondary);
+    --medical-accent: var(--admin-text);
+    --medical-bg-light: var(--admin-bg-section);
+    --medical-bg-white: var(--admin-bg-card);
+    --medical-border: #cbd5e1;
+    --medical-text: var(--admin-text);
+    --medical-text-secondary: var(--admin-text-secondary);
 }
 
 /* ============================================================================
@@ -2721,16 +2811,22 @@ Colors:
     */
 }
 
-/* Custom overrides for specific text elements to be black */
+/* Text contrast fixes - Professional color scheme */
 .analytics-card h6,
 .metric-label,
 #completed-appointments {
-    color: #000000 !important;
+    color: var(--admin-text) !important;
 }
 
-.dashboard-title,
+.dashboard-title {
+    color: var(--admin-primary) !important;
+    -webkit-text-fill-color: var(--admin-primary) !important;
+    text-shadow: none !important;
+    font-weight: 700;
+}
+
 .dashboard-subtitle {
-    color: #000 !important;
-    -webkit-text-fill-color: #000 !important;
+    color: var(--admin-text-secondary) !important;
+    -webkit-text-fill-color: var(--admin-text-secondary) !important;
     text-shadow: none !important;
 }

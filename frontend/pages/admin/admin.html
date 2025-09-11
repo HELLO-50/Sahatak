@@ -26,74 +26,11 @@
     <!-- Chart.js -->
      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
      
-     <!-- Custom Chart Styles -->
-     <style>
-         .analytics-card {
-             background: #fff;
-             border: 1px solid #0a0a0a00;
-             border-radius: 8px;
-             padding: 20px;
-             margin-bottom: 20px;
-             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-             overflow: hidden;
-         }
-         
-         .chart-container {
-             position: relative;
-             height: 300px;
-             width: 100%;
-             overflow: hidden;
-         }
-         
-         .chart-container canvas {
-             position: absolute !important;
-             top: 0;
-             left: 0;
-             width: 100% !important;
-             height: 100% !important;
-         }
-         
-         .metric-card {
-             background: #f8f9fa;
-             border: 1px solid #e9ecef;
-             border-radius: 6px;
-             padding: 15px;
-             text-align: center;
-         }
-         
-         .metric-value {
-             font-size: 2rem;
-             font-weight: bold;
-             color: #0d6efd;
-             margin-bottom: 5px;
-         }
-         
-         .metric-label {
-             font-size: 0.875rem;
-             color: #6c757d;
-         }
-         
-         .activity-stat {
-             text-align: center;
-             padding: 10px;
-         }
-         
-         .activity-value {
-             display: block;
-             font-size: 1.5rem;
-             font-weight: bold;
-             color: #198754;
-         }
-         
-         .activity-label {
-             font-size: 0.875rem;
-             color: #6c757d;
-         }
-     </style>
      
 </head>
 <body>
-    <div class="dashboard-container">
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="dashboard-container" id="main-content">
         <div class="container-fluid">
             <!-- Dashboard Header -->
             <div class="dashboard-header">
@@ -120,8 +57,8 @@
                             <div class="user-avatar me-3">
                                 <i class="bi bi-person-circle fs-2"></i>
                             </div>
-                            <button class="btn btn-outline-danger btn-sm" onclick="AdminAuth.logout()" title="Logout">
-                                <i class="bi bi-box-arrow-right"></i> Logout
+                            <button class="btn btn-outline-danger btn-sm" onclick="AdminAuth.logout()" aria-label="Logout from admin dashboard">
+                                <i class="bi bi-box-arrow-right" aria-hidden="true"></i> Logout
                             </button>
                         </div>
                     </div>
@@ -133,24 +70,24 @@
                 <div class="col-12">
                     <div class="admin-navigation">
                         <div class="nav-buttons">
-                            <button class="btn btn-admin-nav active" data-target="dashboard">
-                                <i class="bi bi-speedometer2"></i>
+                            <button class="btn btn-admin-nav active" data-target="dashboard" aria-label="Navigate to Dashboard" aria-current="page">
+                                <i class="bi bi-speedometer2" aria-hidden="true"></i>
                                 <span id="admin-nav-dashboard">Dashboard</span>
                             </button>
-                            <button class="btn btn-admin-nav" data-target="users">
-                                <i class="bi bi-people"></i>
+                            <button class="btn btn-admin-nav" data-target="users" aria-label="Navigate to User Management">
+                                <i class="bi bi-people" aria-hidden="true"></i>
                                 <span id="admin-nav-users">User Management</span>
                             </button>
-                            <button class="btn btn-admin-nav" data-target="verification">
-                                <i class="bi bi-patch-check"></i>
+                            <button class="btn btn-admin-nav" data-target="verification" aria-label="Navigate to Doctor Verification">
+                                <i class="bi bi-patch-check" aria-hidden="true"></i>
                                 <span id="admin-nav-verification">Doctor Verification</span>
                             </button>
-                            <button class="btn btn-admin-nav" data-target="appointments">
-                                <i class="bi bi-calendar-check"></i>
+                            <button class="btn btn-admin-nav" data-target="appointments" aria-label="Navigate to Appointments Management">
+                                <i class="bi bi-calendar-check" aria-hidden="true"></i>
                                 <span id="admin-nav-appointments">Appointments</span>
                             </button>
-                            <button class="btn btn-admin-nav" data-target="settings">
-                                <i class="bi bi-sliders2"></i>
+                            <button class="btn btn-admin-nav" data-target="settings" aria-label="Navigate to System Settings">
+                                <i class="bi bi-sliders2" aria-hidden="true"></i>
                                 <span id="admin-nav-settings">System Settings</span>
                             </button>
                         </div>
@@ -164,7 +101,8 @@
                     <!-- Admin Sections -->
                     <div id="adminContent">
                         <!-- Dashboard Section - Always Visible -->
-                        <section id="dashboard" class="admin-section">
+                        <section id="dashboard" class="admin-section" role="main" aria-labelledby="dashboard-heading">
+                            <h2 id="dashboard-heading" class="visually-hidden">Admin Dashboard Overview</h2>
                 
                             <!-- Platform Statistics -->
                             <div class="row mb-4">
@@ -308,7 +246,8 @@
                         </section>
 
                         <!-- User Management Section -->
-                        <section id="users" class="admin-section">
+                        <section id="users" class="admin-section" role="main" aria-labelledby="users-heading">
+                            <h2 id="users-heading" class="visually-hidden">User Management</h2>
                             <div class="dashboard-card">
                                 <div class="d-flex justify-content-between align-items-center mb-4">
                                     <h5><i class="bi bi-people me-2"></i><span id="user-management-title">User Management</span></h5>
@@ -1118,9 +1057,6 @@
     
     <!-- jQuery (for Bootstrap's JavaScript plugins) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<!-- Bootstrap 5 JavaScript CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
