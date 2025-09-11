@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify, current_app
 from flask_login import current_user
+from flask_cors import cross_origin
 import json
 import os
 from datetime import datetime
@@ -265,10 +266,11 @@ def analyze_symptoms_rule_based(symptoms, language='en'):
     """Fallback rule-based analysis (kept for compatibility)"""
     return analyze_symptoms_enhanced(symptoms, language, 0.0)
 
-@chatbot_bp.route('/chat', methods=['POST'])
-def chat():
+@chatbot_bp.route('/assessment', methods=['POST', 'OPTIONS'])
+@cross_origin(origins=['http://127.0.0.1:5500', 'http://localhost:5500'], methods=['POST', 'OPTIONS'])
+def ai_assessment():
     """
-    Option 1: OpenAI GPT-3.5-Turbo chatbot for medical triage
+    AI Symptom Assessment - Medical triage chatbot
     """
     try:
         # Validate request data
@@ -284,7 +286,7 @@ def chat():
         user_message = data['message']
         language = data.get('language', 'en')
         
-        chatbot_logger.info(f"Option1 DialoGPT chat request - Language: {language}, Message length: {len(user_message)}")
+        chatbot_logger.info(f"AI Assessment chat request - Language: {language}, Message length: {len(user_message)}")
         
         try:
             # Use DialoGPT local model as primary option
@@ -303,7 +305,7 @@ def chat():
             
             return APIResponse.success(
                 data=response_data,
-                message="DialoGPT chatbot response generated successfully"
+                message="AI assessment response generated successfully"
             )
             
         except Exception as e:
@@ -334,118 +336,33 @@ def chat():
             )
     
     except Exception as e:
-        chatbot_logger.error(f"Option1 chat critical error: {str(e)}")
+        chatbot_logger.error(f"AI Assessment critical error: {str(e)}")
         return APIResponse.error(
-            message="Failed to process OpenAI chatbot request",
+            message="Failed to process AI assessment request",
             error_code=ErrorCodes.INTERNAL_ERROR
         )
 
-@chatbot_bp.route('/option2', methods=['POST'])
-def option2_chat():
-    """
-    Option 2: Hugging Face local model chatbot for medical triage
-    """
-    try:
-        # Validate request data
-        required_fields = ['message', 'language']
-        validation_result = validate_json_data(request.json, required_fields)
-        if not validation_result['valid']:
-            return APIResponse.error(
-                message=validation_result['message'],
-                error_code=ErrorCodes.VALIDATION_ERROR
-            )
-        
-        data = request.json
-        user_message = data['message']
-        language = data.get('language', 'en')
-        
-        chatbot_logger.info(f"Option2 local model chat request - Language: {language}, Message length: {len(user_message)}")
-        
-        try:
-            # Use actual Hugging Face local model
-            start_time = datetime.utcnow()
-            ai_result = analyze_with_local_model(user_message, language)
-            processing_time = (datetime.utcnow() - start_time).total_seconds() * 1000
-            
-            # Update processing time with actual measurement
-            ai_result['processing_time_ms'] = round(processing_time, 2)
-            
-            response_data = {
-                'response': ai_result['response'],
-                'triage_result': ai_result['triage_result'],
-                'language': language,
-                'model': ai_result['model'],
-                'confidence': ai_result.get('confidence', 0.0),
-                'processing_time_ms': ai_result['processing_time_ms'],
-                'timestamp': datetime.utcnow().isoformat()
-            }
-            
-            chatbot_logger.info(f"Local model response successful - Triage: {ai_result['triage_result']}, Confidence: {ai_result.get('confidence', 0.0):.2f}, Time: {ai_result['processing_time_ms']}ms")
-            
-            return APIResponse.success(
-                data=response_data,
-                message="Local AI model response generated successfully"
-            )
-            
-        except Exception as e:
-            chatbot_logger.error(f"Local model error: {str(e)}")
-            
-            # Fallback to enhanced rule-based response
-            triage_result = analyze_symptoms_enhanced(user_message, language)
-            response_text = TRIAGE_RESPONSES[triage_result][language]
-            
-            # Add fallback indicator
-            if language == 'ar':
-                ai_response = f"تم التحليل باستخدام النظام الاحتياطي. {response_text}"
-            else:
-                ai_response = f"Analysis completed using enhanced rules system. {response_text}"
-            
-            response_data = {
-                'response': ai_response,
-                'triage_result': triage_result,
-                'language': language,
-                'model': 'enhanced-rules-fallback',
-                'confidence': 0.7,  # Lower confidence for fallback
-                'processing_time_ms': 50,
-                'fallback_reason': str(e),
-                'timestamp': datetime.utcnow().isoformat()
-            }
-            
-            return APIResponse.success(
-                data=response_data,
-                message="Enhanced fallback response generated due to model unavailability"
-            )
-    
-    except Exception as e:
-        chatbot_logger.error(f"Option2 chat critical error: {str(e)}")
-        return APIResponse.error(
-            message="Failed to process local AI chatbot request",
-            error_code=ErrorCodes.INTERNAL_ERROR
-        )
 
 @chatbot_bp.route('/health', methods=['GET'])
 def chatbot_health():
-    """Health check endpoint for chatbot service"""
-    # Check OpenAI API key
-    openai_available = bool(current_app.config.get('OPENAI_API_KEY'))
-    
+    """Health check endpoint for AI assessment service"""
     # Check local model availability
     local_model_available = (local_model is not None and local_tokenizer is not None) or torch.cuda.is_available()
     
     return APIResponse.success(
         data={
-            'service': 'chatbot',
+            'service': 'ai-assessment',
             'status': 'healthy',
-            'options': {
-                'option1_openai': {
-                    'available': openai_available,
-                    'model': current_app.config.get('OPENAI_MODEL', 'gpt-3.5-turbo'),
-                    'status': 'ready' if openai_available else 'api_key_missing'
-                },
-                'option2_local': {
+            'ai_models': {
+                'dialogpt': {
                     'available': local_model_available,
-                    'model': current_app.config.get('HUGGINGFACE_MODEL_NAME', 'aubmindlab/bert-base-arabertv2'),
+                    'model': current_app.config.get('HUGGINGFACE_MODEL_NAME', 'microsoft/DialoGPT-medium'),
                     'status': 'ready' if local_model_available else 'model_not_loaded'
+                },
+                'fallback': {
+                    'available': True,
+                    'model': 'enhanced-rules-system',
+                    'status': 'ready'
                 }
             },
             'system_info': {
@@ -454,5 +371,5 @@ def chatbot_health():
             },
             'timestamp': datetime.utcnow().isoformat()
         },
-        message="Chatbot service health check completed"
+        message="AI Assessment service health check completed"
     )

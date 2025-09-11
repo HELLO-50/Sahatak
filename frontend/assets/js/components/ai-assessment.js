@@ -1,13 +1,13 @@
-// Option 2 Chatbot Component - Hugging Face Local Model Integration
-// Optimized for 2G networks and offline functionality
+// AI Symptom Assessment Component - Medical Triage System
+// Three-option recommendation system
 
-class Option2Chatbot {
+class AIAssessmentChatbot {
     constructor() {
         this.currentLanguage = 'en';
         this.isProcessing = false;
-        this.apiEndpoint = 'https://sahatak.pythonanywhere.com/api/chatbot/option2';
-        this.maxRetries = 2; // Fewer retries for local processing
-        this.retryDelay = 500; // Faster retry for local model
+        this.apiEndpoint = 'https://sahatak.pythonanywhere.com/api/chatbot/assessment';
+        this.maxRetries = 2; 
+        this.retryDelay = 500;
         
         // Initialize translations
         this.translations = {
@@ -387,14 +387,14 @@ class Option2Chatbot {
 
 // Global functions for HTML onclick handlers
 function setLanguage(lang) {
-    if (window.option2Chatbot) {
-        window.option2Chatbot.setLanguage(lang);
+    if (window.aiAssessmentChatbot) {
+        window.aiAssessmentChatbot.setLanguage(lang);
     }
 }
 
 function sendMessage() {
-    if (window.option2Chatbot) {
-        window.option2Chatbot.sendMessage();
+    if (window.aiAssessmentChatbot) {
+        window.aiAssessmentChatbot.sendMessage();
     }
 }
 
@@ -405,8 +405,8 @@ async function loadTranslations() {
             await LanguageManager.loadTranslations();
             // Apply current language from LanguageManager if available
             const currentLang = LanguageManager.currentLanguage || 'en';
-            if (window.option2Chatbot) {
-                window.option2Chatbot.setLanguage(currentLang);
+            if (window.aiAssessmentChatbot) {
+                window.aiAssessmentChatbot.setLanguage(currentLang);
             }
         } catch (error) {
             console.warn('Could not load LanguageManager translations:', error);
@@ -414,13 +414,13 @@ async function loadTranslations() {
     }
 }
 
-// Initialize chatbot when DOM is ready
+// Initialize AI Assessment chatbot when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-    window.option2Chatbot = new Option2Chatbot();
-    window.option2Chatbot.init();
+    window.aiAssessmentChatbot = new AIAssessmentChatbot();
+    window.aiAssessmentChatbot.init();
 });
 
 // Export for module usage
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Option2Chatbot;
+    module.exports = AIAssessmentChatbot;
 }
