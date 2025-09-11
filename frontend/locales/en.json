@@ -1458,6 +1458,129 @@
     }
   },
 
+  "prescriptions": {
+    "title": "Prescriptions",
+    "subtitle": "Manage medical prescriptions and medications",
+    "create_prescription": "Create Prescription",
+    "nav_dashboard": "Dashboard",
+    "nav_back": "Back",
+    "btn_logout": "Logout",
+    "stats": {
+      "total_prescriptions": "Total Prescriptions",
+      "active_prescriptions": "Active Prescriptions",
+      "completed_prescriptions": "Completed Prescriptions",
+      "patients": "Patients"
+    },
+    "search": {
+      "placeholder": "Search by medication, doctor, or patient..."
+    },
+    "filters": {
+      "all_status": "All Status",
+      "active": "Active",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "expired": "Expired",
+      "sort_newest": "Newest First",
+      "sort_oldest": "Oldest First",
+      "sort_medication": "By Medication",
+      "sort_status": "By Status"
+    },
+    "loading": {
+      "text": "Loading...",
+      "prescriptions_text": "Loading prescriptions..."
+    },
+    "empty_state": {
+      "title": "No Prescriptions Found",
+      "subtitle": "No prescriptions found based on the specified criteria",
+      "create_btn": "Create Prescription"
+    },
+    "card": {
+      "duration": "Duration",
+      "instructions": "Instructions",
+      "quantity": "Quantity",
+      "details_btn": "Details",
+      "complete_btn": "Complete",
+      "edit_btn": "Edit",
+      "expiring_soon": "Expiring Soon"
+    },
+    "modal": {
+      "new_prescription": "New Prescription",
+      "edit_prescription": "Edit Prescription",
+      "patient_label": "Patient",
+      "select_patient": "Select Patient",
+      "appointment_label": "Appointment",
+      "select_appointment": "Select Appointment",
+      "medication_name_label": "Medication Name",
+      "medication_name_placeholder": "Enter medication name",
+      "dosage_label": "Dosage",
+      "dosage_placeholder": "e.g., 500mg",
+      "frequency_label": "Frequency",
+      "frequency_placeholder": "e.g., Twice daily",
+      "duration_label": "Duration",
+      "duration_placeholder": "e.g., 7 days",
+      "quantity_label": "Quantity",
+      "quantity_placeholder": "e.g., 21 tablets",
+      "refills_label": "Refills Allowed",
+      "start_date_label": "Start Date",
+      "end_date_label": "End Date",
+      "instructions_label": "Instructions",
+      "instructions_placeholder": "Enter usage instructions",
+      "notes_label": "Notes",
+      "notes_placeholder": "Additional notes (optional)",
+      "cancel": "Cancel",
+      "save": "Save Prescription"
+    },
+    "details": {
+      "title": "Prescription Details",
+      "medication_info": "Medication Information",
+      "prescription_info": "Prescription Information",
+      "medication_name": "Medication Name",
+      "dosage": "Dosage",
+      "frequency": "Frequency",
+      "duration": "Duration",
+      "quantity": "Quantity",
+      "status": "Status",
+      "prescribed_date": "Prescribed Date",
+      "start_date": "Start Date",
+      "end_date": "End Date",
+      "refills_allowed": "Refills Allowed",
+      "instructions_title": "Usage Instructions",
+      "notes_title": "Doctor's Notes",
+      "doctor": "Treating Doctor",
+      "patient": "Patient",
+      "edit_btn": "Edit",
+      "mark_complete_btn": "Mark as Complete",
+      "close_btn": "Close"
+    },
+    "status_modal": {
+      "title": "Change Status",
+      "confirm_complete_text": "Are you sure you want to mark this prescription as completed?",
+      "completion_notes_label": "Completion Notes (Optional)",
+      "completion_notes_placeholder": "Add any notes about completion",
+      "confirm_btn": "Confirm Complete",
+      "cancel_btn": "Cancel"
+    },
+    "status": {
+      "active": "Active",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "expired": "Expired"
+    },
+    "messages": {
+      "create_success": "Prescription created successfully",
+      "update_success": "Prescription updated successfully",
+      "status_update_success": "Prescription status updated successfully",
+      "load_error": "Error loading prescriptions",
+      "save_error": "Error saving prescription",
+      "required_fields": "Please fill all required fields",
+      "details_error": "Error loading prescription details"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next"
+    }
+  },
+
   "footer": {
     "brand": "Sahatak",
     "description": "A secure and trusted medical platform to connect with doctors remotely",

@@ -513,9 +513,15 @@
         // Load complete history updates
         async function loadHistoryUpdates() {
             try {
-                const url = currentPatientId === 'current' 
-                    ? `/medical-history/updates/${getCurrentUserId()}`
-                    : `/medical-history/updates/${currentPatientId}`;
+                // Skip loading updates if we don't have a valid patient ID
+                const userId = getCurrentUserId();
+                if (!userId) {
+                    console.log('No valid user ID for loading history updates, skipping...');
+                    historyUpdates = [];
+                    return;
+                }
+                
+                const url = `/medical-history/updates/${userId}`;
                 
                 console.log('Loading history updates from:', url);
                 const response = await ApiHelper.makeRequest(url);
@@ -526,10 +532,12 @@
                     console.log('Loaded history updates:', historyUpdates);
                 } else {
                     console.warn('Failed to load history updates:', response.message);
+                    // Don't show error to user, just use empty updates
                     historyUpdates = [];
                 }
             } catch (error) {
-                console.error('Error loading history updates:', error);
+                console.warn('Could not load history updates (this is normal for new users):', error);
+                // Don't show error to user, just use empty updates
                 historyUpdates = [];
             }
         }
@@ -931,17 +939,25 @@
         }
 
         function getCurrentUserId() {
-            // Try to get user ID from token or session
+            // Try to get patient ID from stored user data
             try {
+                // First check if we have stored user data
+                const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                if (userData.patient_id) {
+                    return userData.patient_id;
+                }
+                
+                // Try to get from token
                 const token = localStorage.getItem('token');
                 if (token) {
                     const payload = JSON.parse(atob(token.split('.')[1]));
-                    return payload.user_id || payload.id || 'current';
+                    // For patients, the patient_id should be in the token
+                    return payload.patient_id || payload.user_id || payload.id || null;
                 }
             } catch (error) {
-                console.warn('Could not extract user ID from token:', error);
+                console.warn('Could not extract user ID:', error);
             }
-            return 'current';
+            return null;
         }
 
         function showError(message) {
