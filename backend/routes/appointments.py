@@ -1133,6 +1133,10 @@ def complete_appointment(appointment_id):
         # Complete the appointment
         appointment.status = 'completed'
         appointment.completed_at = datetime.utcnow()
+        appointment.completion_method = 'manual'  # Mark as manually completed
+        
+        # Add debug logging
+        app_logger.info(f"Appointment {appointment_id} marked as completed by doctor {current_user.id}")
         
         db.session.commit()
         

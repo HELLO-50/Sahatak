@@ -1360,10 +1360,14 @@
                         const appointmentStatus = card.dataset.appointmentStatus;
                         
                         // Only check scheduled, confirmed, or in_progress video appointments
+                        // Skip completed appointments to avoid UI update errors
                         if (appointmentId && ['scheduled', 'confirmed', 'in_progress'].includes(appointmentStatus)) {
                             if (typeof VideoConsultationDashboard !== 'undefined' && VideoConsultationDashboard.checkVideoSessionStatus) {
                                 await VideoConsultationDashboard.checkVideoSessionStatus(appointmentId, true);
                             }
+                        } else if (appointmentStatus === 'completed') {
+                            // Skip completed appointments - they should not be monitored
+                            console.log(`⏭️ Skipping completed appointment ${appointmentId} from video monitoring`);
                         }
                     }
                 } catch (error) {

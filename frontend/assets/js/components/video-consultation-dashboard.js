@@ -551,6 +551,13 @@ const VideoConsultationDashboard = {
     updateAppointmentVideoUI(appointmentId, sessionData) {
         const appointmentCard = document.querySelector(`[data-appointment-id="${appointmentId}"]`);
         if (!appointmentCard) {
+            // Check if this is a completed appointment (which is expected to be removed from DOM)
+            if (sessionData && sessionData.appointment_status === 'completed') {
+                console.log(`✅ Appointment ${appointmentId} is completed and removed from dashboard (expected)`);
+                // Clear the cache for completed appointments
+                this.sessionStatusCache.delete(appointmentId);
+                return;
+            }
             console.error(`❌ Could not find appointment card for ID ${appointmentId}`);
             return;
         }
