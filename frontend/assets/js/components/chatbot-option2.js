@@ -5,7 +5,7 @@ class Option2Chatbot {
     constructor() {
         this.currentLanguage = 'en';
         this.isProcessing = false;
-        this.apiEndpoint = '/api/chatbot/option2';
+        this.apiEndpoint = 'https://sahatak.pythonanywhere.com/api/chatbot/option2';
         this.maxRetries = 2; // Fewer retries for local processing
         this.retryDelay = 500; // Faster retry for local model
         
