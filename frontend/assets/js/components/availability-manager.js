@@ -426,13 +426,7 @@ const AvailabilityManager = {
                         html += `</div>`;
                     }
                     
-                    // Count blocked slots
-                    const blockedSlots = dayData.available_slots ? 
-                        dayData.available_slots.filter(slot => !slot.available).length : 0;
-                    
-                    if (blockedSlots > 0) {
-                        html += `<span class="blocked-count">${blockedSlots} محجوب</span>`;
-                    }
+                    // Removed appointment count display - individual appointments are already visible
                     
                     html += '</td>';
                     date++;
