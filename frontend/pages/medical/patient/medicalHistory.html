@@ -400,6 +400,50 @@
         let historyUpdates = [];
         let currentFilter = 'all';
 
+        // Temporary helper function for translations (fallback)
+        function getTranslation(key) {
+            // This is a temporary fallback until proper translations are implemented
+            const translations = {
+                'labels.date': 'Date',
+                'labels.time': 'Time', 
+                'labels.doctor': 'Doctor',
+                'labels.notes': 'Notes',
+                'labels.updated_fields': 'Updated Fields',
+                'labels.from': 'From',
+                'labels.to': 'To',
+                'status.not_specified': 'Not specified',
+                'status.no_details': 'No details available',
+                'timeline.initial_registration': 'Initial Registration',
+                'timeline.self_update': 'Self Update',
+                'timeline.appointment_update': 'Appointment Update', 
+                'timeline.doctor_update': 'Doctor Update',
+                'timeline.update': 'Update',
+                'fields.medical_history': 'Medical History',
+                'fields.allergies': 'Allergies',
+                'fields.current_medications': 'Current Medications',
+                'fields.chronic_conditions': 'Chronic Conditions',
+                'fields.family_history': 'Family History',
+                'fields.surgical_history': 'Surgical History',
+                'fields.smoking_status': 'Smoking Status',
+                'fields.alcohol_consumption': 'Alcohol Consumption',
+                'fields.exercise_frequency': 'Exercise Frequency',
+                'fields.height': 'Height',
+                'fields.weight': 'Weight',
+                'fields.blood_type': 'Blood Type',
+                'smoking.never': 'Never smoked',
+                'smoking.former': 'Former smoker',
+                'smoking.current': 'Current smoker',
+                'exercise.rare': 'Rarely',
+                'exercise.weekly': 'Weekly',
+                'exercise.daily': 'Daily',
+                'bmi.underweight': 'Underweight',
+                'bmi.normal': 'Normal weight',
+                'bmi.overweight': 'Overweight',
+                'bmi.obese': 'Obese'
+            };
+            return translations[key] || key;
+        }
+
         // Initialize medical history page on page load
         document.addEventListener('DOMContentLoaded', async function() {
             await DashboardTranslations.initializeDashboard('records');
@@ -455,14 +499,14 @@
                         await loadHistoryUpdates();
                         renderTimeline();
                     } else {
-                        showError(getTranslation('errors.loading_history_failed') || 'Failed to load medical history');
+                        showError('Failed to load medical history');
                     }
                 } else {
-                    showError(getTranslation('errors.access_history_failed') || 'Failed to access medical history');
+                    showError('Failed to access medical history');
                 }
             } catch (error) {
                 console.error('Error loading medical history:', error);
-                showError(getTranslation('errors.loading_history_error') || 'Error loading medical history');
+                showError('Error loading medical history');
             }
         }
 
@@ -473,13 +517,20 @@
                     ? `/medical-history/updates/${getCurrentUserId()}`
                     : `/medical-history/updates/${currentPatientId}`;
                 
+                console.log('Loading history updates from:', url);
                 const response = await ApiHelper.makeRequest(url);
+                console.log('History updates response:', response);
                 
                 if (response.success) {
                     historyUpdates = response.data.updates || [];
+                    console.log('Loaded history updates:', historyUpdates);
+                } else {
+                    console.warn('Failed to load history updates:', response.message);
+                    historyUpdates = [];
                 }
             } catch (error) {
                 console.error('Error loading history updates:', error);
+                historyUpdates = [];
             }
         }
 
@@ -488,26 +539,26 @@
             const container = document.getElementById('history-summary');
             
             if (!medicalHistory) {
-                container.innerHTML = `<p class="text-muted text-center">${getTranslation('status.no_information') || 'No information available'}</p>`;
+                container.innerHTML = `<p class="text-muted text-center">No information available</p>`;
                 return;
             }
             
             const completionStatus = medicalHistory.medical_history_completed ? 
-                `<span class="badge bg-success">${getTranslation('status.completed') || 'Complete'}</span>` : 
-                `<span class="badge bg-warning">${getTranslation('status.incomplete') || 'Incomplete'}</span>`;
+                `<span class="badge bg-success">Complete</span>` : 
+                `<span class="badge bg-warning">Incomplete</span>`;
             
             const lastUpdated = medicalHistory.medical_history_last_updated ? 
                 new Date(medicalHistory.medical_history_last_updated).toLocaleDateString('ar-SA') : 
-                getTranslation('status.not_updated') || 'Not updated';
+                'Not updated';
             
             const summaryHtml = `
                 <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="fw-bold">${getTranslation('labels.completion_status') || 'Completion Status'}:</span>
+                        <span class="fw-bold">Completion Status:</span>
                         ${completionStatus}
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="fw-bold">${getTranslation('labels.last_update') || 'Last Update'}:</span>
+                        <span class="fw-bold">Last Update:</span>
                         <span class="text-muted">${lastUpdated}</span>
                     </div>
                 </div>
@@ -518,15 +569,15 @@
                     <div class="col-6 mb-2">
                         <div class="bg-light rounded p-2">
                             <i class="bi bi-droplet text-danger fs-4"></i>
-                            <div class="small text-muted">${getTranslation('labels.blood_type') || 'Blood Type'}</div>
-                            <div class="fw-bold">${medicalHistory.blood_type || getTranslation('status.not_specified') || '--'}</div>
+                            <div class="small text-muted">Blood Type</div>
+                            <div class="fw-bold">${medicalHistory.blood_type || '--'}</div>
                         </div>
                     </div>
                     <div class="col-6 mb-2">
                         <div class="bg-light rounded p-2">
                             <i class="bi bi-activity text-success fs-4"></i>
-                            <div class="small text-muted">${getTranslation('labels.general_status') || 'General Status'}</div>
-                            <div class="fw-bold text-success">${getTranslation('status.good') || 'Good'}</div>
+                            <div class="small text-muted">General Status</div>
+                            <div class="fw-bold text-success">Good</div>
                         </div>
                     </div>
                 </div>
@@ -534,7 +585,7 @@
                 <div class="mt-3">
                     <small class="text-muted">
                         <i class="bi bi-info-circle me-1"></i>
-                        ${getTranslation('info.complete_all_info') || 'For comprehensive medical care, ensure all information is complete'}
+                        For comprehensive medical care, ensure all information is complete
                     </small>
                 </div>
             `;
@@ -547,12 +598,14 @@
         function renderTimeline() {
             const container = document.getElementById('medical-timeline');
             
+            console.log('Rendering timeline with historyUpdates:', historyUpdates);
+            
             if (!historyUpdates || historyUpdates.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-5">
                         <i class="bi bi-clock-history display-4 text-muted mb-3"></i>
-                        <h6 class="text-muted mb-3">${getTranslation('timeline.no_updates') || 'No update history'}</h6>
-                        <p class="text-muted">${getTranslation('timeline.updates_will_appear') || 'All medical history updates will appear here'}</p>
+                        <h6 class="text-muted mb-3">No update history</h6>
+                        <p class="text-muted">All medical history updates will appear here</p>
                     </div>
                 `;
                 return;
@@ -577,7 +630,7 @@
                 container.innerHTML = `
                     <div class="text-center py-5">
                         <i class="bi bi-filter display-4 text-muted mb-3"></i>
-                        <h6 class="text-muted">${getTranslation('timeline.no_updates_category') || 'No updates in this category'}</h6>
+                        <h6 class="text-muted">No updates in this category</h6>
                     </div>
                 `;
                 return;
@@ -602,11 +655,11 @@
                                 </small>
                             </div>
                             <div class="timeline-body">
-                                <p class="mb-2">${update.notes || getTranslation('updates.medical_history') || 'Medical history update'}</p>
+                                <p class="mb-2">${update.notes || 'Medical history update'}</p>
                                 <div class="timeline-fields">
                                     <small class="text-muted">
                                         <i class="bi bi-pencil me-1"></i>
-                                        ${getTranslation('timeline.fields_updated') || 'Updated'} ${update.updated_fields?.length || 0} ${getTranslation('timeline.fields') || 'fields'}
+                                        Updated ${update.updated_fields?.length || 0} fields
                                     </small>
                                 </div>
                                 ${update.doctor_name ? `
@@ -874,12 +927,20 @@
                 'weekly': getTranslation('exercise.weekly') || 'Weekly',
                 'daily': getTranslation('exercise.daily') || 'Daily'
             };
-            return frequencies[frequency] || getTranslation('status.not_specified') || 'Not specified';
+            return frequencies[frequency] || 'Not specified';
         }
 
         function getCurrentUserId() {
-            // This should be implemented based on your auth system
-            // For now, return a placeholder
+            // Try to get user ID from token or session
+            try {
+                const token = localStorage.getItem('token');
+                if (token) {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    return payload.user_id || payload.id || 'current';
+                }
+            } catch (error) {
+                console.warn('Could not extract user ID from token:', error);
+            }
             return 'current';
         }
 
