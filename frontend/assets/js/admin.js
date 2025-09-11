@@ -1322,47 +1322,6 @@ const AdminDashboard = {
             
             const completedEl = document.getElementById('completed-appointments');
             if (completedEl) completedEl.textContent = analytics.appointment_metrics.completed_appointments;
-            
-            // Update appointment status cards
-            if (analytics.appointment_metrics.appointment_status) {
-                analytics.appointment_metrics.appointment_status.forEach(status => {
-                    const statusEl = document.getElementById(`${status.status.toLowerCase()}-appointments`);
-                    if (statusEl) statusEl.textContent = status.count;
-                });
-            }
-        }
-        
-        // Update doctor specialty distribution
-        if (analytics.doctor_analytics && analytics.doctor_analytics.specialty_distribution) {
-            let cardiologyCount = 0;
-            let generalCount = 0;
-            let pediatricsCount = 0;
-            let otherCount = 0;
-            
-            analytics.doctor_analytics.specialty_distribution.forEach(spec => {
-                const specialty = spec.specialty.toLowerCase();
-                if (specialty.includes('cardio')) {
-                    cardiologyCount += spec.count;
-                } else if (specialty.includes('general') || specialty.includes('family')) {
-                    generalCount += spec.count;
-                } else if (specialty.includes('pediatric') || specialty.includes('child')) {
-                    pediatricsCount += spec.count;
-                } else {
-                    otherCount += spec.count;
-                }
-            });
-            
-            const cardiologyEl = document.getElementById('cardiology-count');
-            if (cardiologyEl) cardiologyEl.textContent = cardiologyCount;
-            
-            const generalEl = document.getElementById('general-count');
-            if (generalEl) generalEl.textContent = generalCount;
-            
-            const pediatricsEl = document.getElementById('pediatrics-count');
-            if (pediatricsEl) pediatricsEl.textContent = pediatricsCount;
-            
-            const otherEl = document.getElementById('other-specialties-count');
-            if (otherEl) otherEl.textContent = otherCount;
         }
         
         // Create charts
