@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Test Suite - Sahatak</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%230d47a1' d='m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523.942-.661 2.27.067 3.71L8 15.5l6.533-8.737c.728-1.44.59-2.768.067-3.71C13.486.878 10.4.28 8.717 2.01L8 2.748z'/></svg>">
+    
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    
+    <!-- Bootstrap Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Arabic Font - Noto Sans Arabic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    
+    <style>
+        .test-container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .option-card {
+            background: rgba(17,24,39,.8);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            backdrop-filter: blur(8px);
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .option-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(0,0,0,.35);
+        }
+        
+        .option-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .option-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 1rem;
+        }
+        
+        .option1-icon {
+            background: linear-gradient(135deg, var(--medical-blue), #1d4ed8);
+            color: white;
+        }
+        
+        .option2-icon {
+            background: linear-gradient(135deg, var(--medical-green), #047857);
+            color: white;
+        }
+        
+        .option-title {
+            color: var(--text);
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .option-subtitle {
+            color: var(--muted);
+            margin: 0.25rem 0 0 0;
+            font-size: 0.9rem;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 1rem 0;
+        }
+        
+        .feature-list li {
+            padding: 0.5rem 0;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+        }
+        
+        .feature-list i {
+            margin-right: 0.75rem;
+            color: var(--primary);
+            width: 16px;
+        }
+        
+        .test-btn {
+            background: linear-gradient(135deg, var(--medical-blue), #1d4ed8);
+            border: none;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .test-btn:hover {
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.4);
+        }
+        
+        .test-btn.option2 {
+            background: linear-gradient(135deg, var(--medical-green), #047857);
+        }
+        
+        .test-btn.option2:hover {
+            box-shadow: 0 5px 15px rgba(5, 150, 105, 0.4);
+        }
+        
+        .test-btn i {
+            margin-left: 0.5rem;
+        }
+        
+        .comparison-table {
+            background: rgba(17,24,39,.6);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-top: 2rem;
+        }
+        
+        .comparison-table th,
+        .comparison-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+        }
+        
+        .comparison-table th {
+            background: rgba(34,211,238,.06);
+            font-weight: 600;
+        }
+        
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-free {
+            background: rgba(25, 135, 84, 0.2);
+            color: var(--success-color);
+        }
+        
+        .status-fast {
+            background: rgba(255, 193, 7, 0.2);
+            color: var(--warning-color);
+        }
+        
+        .status-premium {
+            background: rgba(34, 211, 238, 0.2);
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <!-- Header -->
+        <div class="text-center mb-5">
+            <h1 class="text-white mb-3">
+                <i class="bi bi-chat-dots me-3" style="color: var(--primary);"></i>
+                Chatbot Test Suite
+            </h1>
+            <p class="text-muted mb-4">Compare and test both AI chatbot implementations for medical triage</p>
+            <div class="d-flex justify-content-center gap-3">
+                <span class="status-badge status-free">Free to Use</span>
+                <span class="status-badge status-fast">2G Optimized</span>
+                <span class="status-badge status-premium">Arabic Support</span>
+            </div>
+        </div>
+        
+        <!-- Option 1: OpenAI GPT-3.5 -->
+        <div class="option-card">
+            <div class="option-header">
+                <div class="option-icon option1-icon">
+                    <i class="bi bi-robot"></i>
+                </div>
+                <div>
+                    <h3 class="option-title">Option 1: OpenAI GPT-3.5-Turbo</h3>
+                    <p class="option-subtitle">Advanced AI model with superior language understanding</p>
+                </div>
+            </div>
+            
+            <ul class="feature-list">
+                <li><i class="bi bi-check-circle-fill"></i> Free tier with 1M tokens/month</li>
+                <li><i class="bi bi-check-circle-fill"></i> Excellent Arabic and Sudanese dialect support</li>
+                <li><i class="bi bi-check-circle-fill"></i> Advanced natural language processing</li>
+                <li><i class="bi bi-check-circle-fill"></i> Response time: ~2-3 seconds</li>
+                <li><i class="bi bi-check-circle-fill"></i> High accuracy medical triage</li>
+            </ul>
+            
+            <a href="option1chat.html" class="test-btn">
+                Test Option 1
+                <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+        
+        <!-- Option 2: Hugging Face Local -->
+        <div class="option-card">
+            <div class="option-header">
+                <div class="option-icon option2-icon">
+                    <i class="bi bi-cpu"></i>
+                </div>
+                <div>
+                    <h3 class="option-title">Option 2: Hugging Face Local Model</h3>
+                    <p class="option-subtitle">Lightweight local processing for maximum privacy</p>
+                </div>
+            </div>
+            
+            <ul class="feature-list">
+                <li><i class="bi bi-check-circle-fill"></i> Completely free and open source</li>
+                <li><i class="bi bi-check-circle-fill"></i> Works offline - no internet required</li>
+                <li><i class="bi bi-check-circle-fill"></i> Ultra-fast response time: ~150ms</li>
+                <li><i class="bi bi-check-circle-fill"></i> 100% private - data stays on device</li>
+                <li><i class="bi bi-check-circle-fill"></i> Arabic BERT model specialized for healthcare</li>
+            </ul>
+            
+            <a href="option2chat.html" class="test-btn option2">
+                Test Option 2
+                <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+        
+        <!-- Comparison Table -->
+        <div class="comparison-table">
+            <table class="table table-dark mb-0">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Option 1 (OpenAI)</th>
+                        <th>Option 2 (Local)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Cost</strong></td>
+                        <td>Free tier (1M tokens/month)</td>
+                        <td>Completely free</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Response Time</strong></td>
+                        <td>2-3 seconds</td>
+                        <td>~150ms</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Internet Required</strong></td>
+                        <td>Yes</td>
+                        <td>No (works offline)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Arabic Support</strong></td>
+                        <td>Excellent + Sudanese dialect</td>
+                        <td>Good (Arabic BERT)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Privacy</strong></td>
+                        <td>Data sent to OpenAI</td>
+                        <td>100% local processing</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2G Compatibility</strong></td>
+                        <td>Optimized requests</td>
+                        <td>Perfect (offline capable)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Medical Accuracy</strong></td>
+                        <td>Very High</td>
+                        <td>High</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Navigation -->
+        <div class="text-center mt-5">
+            <button class="btn btn-outline-light me-3" onclick="window.history.back()">
+                <i class="bi bi-arrow-left me-2"></i>
+                Back to Dashboard
+            </button>
+            <button class="btn btn-outline-info" onclick="window.open('../../index.html', '_blank')">
+                <i class="bi bi-house me-2"></i>
+                Home Page
+            </button>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+</body>
+</html>

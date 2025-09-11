@@ -10,7 +10,7 @@ For complete installation instructions, see [INSTALL.md](INSTALL.md).
 
 ```bash
 # Development setup
-git clone https://github.com/hmb104/Sahatak.git
+git clone https://github.com/HELLO-50/sahatak.git
 cd Sahatak
 ```
 
@@ -22,6 +22,13 @@ cd Sahatak
 ---
 
 ## Recent Updates (Since v1.0.0)
+
+### Latest Improvements (v1.4.0)
+- **Production Readiness**: Comprehensive console debug cleanup for production deployment
+- **Video Consultation Enhancement**: Fixed deterministic room naming for reliable doctor-patient connections  
+- **Dashboard Performance**: Improved video consultation dashboard with 2-second refresh rates
+- **Documentation Accuracy**: Updated all technical documentation to match current implementation
+- **Code Quality**: Removed 280+ debug console statements while preserving essential error logging
 
 ### Major Features Added
 - **Complete Admin Dashboard**: Comprehensive admin interface with Arabic translations and full functionality
@@ -393,6 +400,7 @@ Appointments (1) ── (n) Medical Records
 - **v1.1.0** - Added admin dashboard and medical records system
 - **v1.2.0** - Enhanced notifications and RTL support improvements
 - **v1.3.0** - Security enhancements and email verification system
+- **v1.4.0** - Production readiness improvements and video consultation enhancements
 
 ---
 

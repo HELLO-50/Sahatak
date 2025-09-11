@@ -62,11 +62,11 @@ User Browser → GitHub Pages (Frontend) → PythonAnywhere (Backend API) → SQ
 
 1. Visit [PythonAnywhere.com](https://www.pythonanywhere.com)
 2. Click **"Create a free account"**
-3. Choose a username (e.g., `sahatak-health`, `your-name`)
+3. Choose a username: `sahatak`
 4. Complete registration with a valid email address
 5. Verify your email address
 
-**Note:** Your backend will be available at `https://yourusername.pythonanywhere.com`
+**Note:** Your backend will be available at `https://sahatak.pythonanywhere.com`
 
 ### Step 2: Upload Code to PythonAnywhere
 
@@ -80,7 +80,7 @@ User Browser → GitHub Pages (Frontend) → PythonAnywhere (Backend API) → SQ
 2. **Clone the Repository**
    ```bash
    # Clone your Sahatak repository
-   git clone https://github.com/YOUR-USERNAME/sahatak.git
+   git clone https://github.com/HELLO-50/sahatak.git
    cd sahatak
    
    # Verify the structure
@@ -102,14 +102,14 @@ User Browser → GitHub Pages (Frontend) → PythonAnywhere (Backend API) → SQ
 2. **Upload via Files Tab**
    - In PythonAnywhere dashboard, go to **"Files"** tab
    - Create folder: `sahatak`
-   - Upload all backend files to `/home/yourusername/sahatak/backend/`
+   - Upload all backend files to `/home/sahatak/sahatak/backend/`
 
 ### Step 3: Install Dependencies
 
 1. **In the PythonAnywhere Bash console:**
    ```bash
    # Navigate to backend directory
-   cd /home/yourusername/sahatak/backend
+   cd /home/sahatak/sahatak/backend
    
    # Install requirements (this may take a few minutes)
    pip3.10 install --user -r requirements.txt
@@ -129,7 +129,7 @@ User Browser → GitHub Pages (Frontend) → PythonAnywhere (Backend API) → SQ
 1. **Create Environment File**
    ```bash
    # In the backend directory
-   cd /home/yourusername/sahatak/backend
+   cd /home/sahatak/sahatak/backend
    nano .env
    ```
 
@@ -138,10 +138,10 @@ User Browser → GitHub Pages (Frontend) → PythonAnywhere (Backend API) → SQ
    # Flask Configuration
    SECRET_KEY=your-super-secret-key-change-this-in-production-12345
    FLASK_ENV=production
-   DATABASE_URL=sqlite:////home/yourusername/sahatak/backend/sahatak_production.db
+   DATABASE_URL=sqlite:////home/sahatak/sahatak/backend/sahatak_production.db
    
    # Frontend URL (will be updated later)
-   FRONTEND_URL=https://yourusername.github.io/sahatak
+   FRONTEND_URL=https://HELLO-50.github.io/sahatak
    
    # Mail Configuration (Optional - for email notifications)
    MAIL_SERVER=smtp.gmail.com
@@ -175,10 +175,10 @@ User Browser → GitHub Pages (Frontend) → PythonAnywhere (Backend API) → SQ
 
 2. **Create WSGI File**
    ```bash
-   nano yourusername_pythonanywhere_com_wsgi.py
+   nano sahatak_pythonanywhere_com_wsgi.py
    ```
 
-3. **Add WSGI Configuration** (replace `yourusername` with your actual username):
+3. **Add WSGI Configuration**:
    ```python
    #!/usr/bin/python3.10
    
@@ -191,7 +191,7 @@ User Browser → GitHub Pages (Frontend) → PythonAnywhere (Backend API) → SQ
    import os
    
    # Add your project directory to the Python path
-   project_home = '/home/yourusername/sahatak/backend'
+   project_home = '/home/sahatak/sahatak/backend'
    if project_home not in sys.path:
        sys.path = [project_home] + sys.path
    
@@ -254,17 +254,17 @@ User Browser → GitHub Pages (Frontend) → PythonAnywhere (Backend API) → SQ
    - Click **"Next"**
 
 3. **Set Configuration Paths**
-   - **Source code:** `/home/yourusername/sahatak/backend`
-   - **WSGI configuration file:** `/var/www/yourusername_pythonanywhere_com_wsgi.py`
+   - **Source code:** `/home/sahatak/sahatak/backend`
+   - **WSGI configuration file:** `/var/www/sahatak_pythonanywhere_com_wsgi.py`
 
 4. **Configure Virtual Environment** (Optional but recommended)
-   - **Virtualenv:** `/home/yourusername/.local`
+   - **Virtualenv:** `/home/sahatak/.local`
 
 ### Step 7: Initialize Database
 
 1. **In PythonAnywhere Bash console:**
    ```bash
-   cd /home/yourusername/sahatak/backend
+   cd /home/sahatak/sahatak/backend
    python3.10 -c "
    from app import app, db
    with app.app_context():
@@ -282,15 +282,15 @@ User Browser → GitHub Pages (Frontend) → PythonAnywhere (Backend API) → SQ
 ### Step 8: Test Backend Deployment
 
 1. **Reload Web App**
-   - In PythonAnywhere Web tab, click **"Reload yourusername.pythonanywhere.com"**
+   - In PythonAnywhere Web tab, click **"Reload sahatak.pythonanywhere.com"**
 
 2. **Test Health Endpoint**
-   - Visit: `https://yourusername.pythonanywhere.com/health`
+   - Visit: `https://sahatak.pythonanywhere.com/api/health`
    - Should return JSON with `"success": true`
 
 3. **Check Error Logs** (if needed)
    ```bash
-   tail -f /var/log/yourusername.pythonanywhere.com.error.log
+   tail -f /var/log/sahatak.pythonanywhere.com.error.log
    ```
 
 ---
@@ -308,14 +308,14 @@ User Browser → GitHub Pages (Frontend) → PythonAnywhere (Backend API) → SQ
    - Click **"Create repository"**
 
 2. **Note Your Repository URL**
-   - Example: `https://github.com/yourusername/sahatak`
+   - Example: `https://github.com/HELLO-50/sahatak`
 
 ### Step 2: Update Frontend Configuration
 
 1. **Download/Clone Project Locally**
    ```bash
    # If you don't have it locally yet
-   git clone https://github.com/yourusername/sahatak.git
+   git clone https://github.com/HELLO-50/sahatak.git
    cd sahatak
    ```
 
@@ -328,7 +328,7 @@ User Browser → GitHub Pages (Frontend) → PythonAnywhere (Backend API) → SQ
    // In frontend/assets/js/main.js
    const ApiHelper = {
        // Replace 'yourusername' with your actual PythonAnywhere username
-       baseUrl: 'https://yourusername.pythonanywhere.com/api',
+       baseUrl: 'https://sahatak.pythonanywhere.com/api',
        
        async makeRequest(endpoint, options = {}) {
            const language = LanguageManager.getLanguage() || 'ar';
@@ -369,7 +369,7 @@ User Browser → GitHub Pages (Frontend) → PythonAnywhere (Backend API) → SQ
 
 2. **Add Remote Origin**
    ```bash
-   git remote add origin https://github.com/yourusername/sahatak.git
+   git remote add origin https://github.com/HELLO-50/sahatak.git
    ```
 
 3. **Add and Commit Files**
@@ -414,7 +414,7 @@ User Browser → GitHub Pages (Frontend) → PythonAnywhere (Backend API) → SQ
 1. **Update Backend CORS Settings**
    - In PythonAnywhere Bash console:
    ```bash
-   cd /home/yourusername/sahatak/backend
+   cd /home/sahatak/sahatak/backend
    nano app.py
    ```
 
@@ -444,7 +444,7 @@ User Browser → GitHub Pages (Frontend) → PythonAnywhere (Backend API) → SQ
 
 1. **Update Frontend URL in Backend**
    ```bash
-   cd /home/yourusername/sahatak/backend
+   cd /home/sahatak/sahatak/backend
    nano .env
    ```
 
@@ -487,7 +487,7 @@ User Browser → GitHub Pages (Frontend) → PythonAnywhere (Backend API) → SQ
 
 2. **Update Environment Variables**
    ```bash
-   cd /home/yourusername/sahatak/backend
+   cd /home/sahatak/sahatak/backend
    nano .env
    ```
 
@@ -503,7 +503,7 @@ User Browser → GitHub Pages (Frontend) → PythonAnywhere (Backend API) → SQ
 1. **Create Admin User via API**
    ```bash
    # In PythonAnywhere console
-   cd /home/yourusername/sahatak/backend
+   cd /home/sahatak/sahatak/backend
    python3.10 -c "
    from app import app, db
    from models import User
@@ -601,7 +601,7 @@ with app.app_context():
 **Solution:**
 ```bash
 # Check error logs
-tail -f /var/log/yourusername.pythonanywhere.com.error.log
+tail -f /var/log/sahatak.pythonanywhere.com.error.log
 
 # Check application logs
 cd /home/yourusername/sahatak/backend
@@ -612,7 +612,7 @@ tail -f logs/sahatak_errors.log
 
 ```bash
 # Check if web app is running
-curl https://yourusername.pythonanywhere.com/health
+curl https://sahatak.pythonanywhere.com/api/health
 
 # Test database connection
 cd /home/yourusername/sahatak/backend
@@ -643,7 +643,7 @@ tail -20 /home/yourusername/sahatak/backend/logs/sahatak_app.log
 
 ### Post-Deployment Monitoring
 
-- [ ] **Health Checks**: Verify `/health` endpoint works
+- [ ] **Health Checks**: Verify `/api/health` endpoint works
 - [ ] **Log Monitoring**: Check logs regularly for errors
 - [ ] **User Registration**: Test complete user registration flow
 - [ ] **Email Functionality**: Verify email notifications work
@@ -656,7 +656,7 @@ tail -20 /home/yourusername/sahatak/backend/logs/sahatak_app.log
 1. **Database Backup**
    ```bash
    # Create backup
-   cd /home/yourusername/sahatak/backend
+   cd /home/sahatak/sahatak/backend
    cp sahatak_production.db sahatak_backup_$(date +%Y%m%d).db
    ```
 
@@ -732,5 +732,5 @@ For Sahatak-specific issues, create an issue in the GitHub repository with:
 
 Visit your deployed application at:
 - **Frontend**: `https://yourusername.github.io/sahatak`
-- **Backend API**: `https://yourusername.pythonanywhere.com`
-- **Health Check**: `https://yourusername.pythonanywhere.com/health`
+- **Backend API**: `https://sahatak.pythonanywhere.com`
+- **Health Check**: `https://sahatak.pythonanywhere.com/api/health`
