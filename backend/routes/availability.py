@@ -291,7 +291,7 @@ def get_availability_calendar():
                     'notes': appointment.notes,
                     'session_started_at': appointment.session_started_at.isoformat() if appointment.session_started_at else None,
                     'session_ended_at': appointment.session_ended_at.isoformat() if appointment.session_ended_at else None,
-                    'completed_at': appointment.completed_at.isoformat() if appointment.completed_at else None
+                    'session_duration': appointment.session_duration
                 }
                 day_data['appointments'].append(appointment_data)
             
