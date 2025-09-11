@@ -1029,10 +1029,15 @@ def get_pending_verifications():
         per_page = request.args.get('per_page', 20, type=int)
         page, per_page = validate_pagination_params(page, per_page)
         
-        # Query unverified doctors with user details
+        # Query unverified doctors with user details - ONLY show email-verified users
         pending_query = Doctor.query.options(
             joinedload(Doctor.user)
-        ).filter(Doctor.is_verified == False).order_by(Doctor.created_at.asc())
+        ).join(User).filter(
+            and_(
+                Doctor.is_verified == False,
+                User.is_verified == True  # Only show doctors with verified emails
+            )
+        ).order_by(Doctor.created_at.asc())
         
         pending_pagination = pending_query.paginate(
             page=page,

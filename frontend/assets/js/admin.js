@@ -1709,8 +1709,14 @@ const AdminDashboard = {
 
     // Reject doctor
     async rejectDoctor(doctorId) {
-        const reason = prompt('Enter reason for rejection (optional):');
+        let reason = prompt('Enter reason for rejection (required):');
         if (reason === null) return; // User cancelled
+        
+        // Keep asking until they provide a reason
+        while (!reason || reason.trim() === '') {
+            reason = prompt('Rejection reason is required. Please enter a reason:');
+            if (reason === null) return; // User cancelled
+        }
 
         try {
             const response = await AdminAuth.apiRequest(`/admin/doctors/${doctorId}/verify`, {
@@ -1718,7 +1724,7 @@ const AdminDashboard = {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     approved: false,
-                    notes: reason || 'Rejected by admin'
+                    notes: reason.trim()
                 })
             });
             const data = await response.json();
