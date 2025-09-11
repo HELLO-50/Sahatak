@@ -592,6 +592,10 @@ const ApiHelper = {
 
     // Determine if endpoint should be cached
     _shouldCache(endpoint, method) {
+        // Never cache appointments for real-time medical data
+        if (endpoint.includes('/appointments/') || endpoint.includes('/appointments')) {
+            return false;
+        }
         return method === 'GET' && this.cacheableEndpoints.some(cacheable => 
             endpoint.startsWith(cacheable) || endpoint.includes('/availability/') || endpoint.includes('/ehr/')
         );
@@ -751,14 +755,23 @@ const ApiHelper = {
             console.log('🚨 NO TOKEN - This will likely result in 401 error');
         }
         
+        const headers = {
+            'Content-Type': 'application/json',
+            'Accept-Language': language,
+            'X-Timestamp': Date.now().toString(),
+            ...authHeaders,
+            ...options.headers
+        };
+        
+        // Add cache-busting headers for appointment endpoints  
+        if (endpoint.includes('/appointments')) {
+            headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+            headers['Pragma'] = 'no-cache';
+            headers['Expires'] = '0';
+        }
+        
         const defaultOptions = {
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept-Language': language,
-                'X-Timestamp': Date.now().toString(),
-                ...authHeaders,
-                ...options.headers
-            },
+            headers: headers,
             credentials: 'include' // Important for session-based authentication
         };
         
