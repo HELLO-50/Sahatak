@@ -65,6 +65,14 @@ class Config:
     MAX_VITAL_SIGNS_PER_REQUEST = int(os.getenv('MAX_VITAL_SIGNS_PER_REQUEST', 10))
     MAX_PRESCRIPTIONS_PER_REQUEST = int(os.getenv('MAX_PRESCRIPTIONS_PER_REQUEST', 20))
     
+    # AI Chatbot Settings (Hugging Face Local Models - Free)
+    HUGGINGFACE_MODEL_NAME = os.getenv('HUGGINGFACE_MODEL_NAME', 'microsoft/DialoGPT-medium')
+    MEDICAL_MODEL_NAME = os.getenv('MEDICAL_MODEL_NAME', 'emilyalsentzer/Bio_ClinicalBERT')
+    LOCAL_MODEL_PATH = os.getenv('LOCAL_MODEL_PATH', 'models/')
+    MODEL_CACHE_TIMEOUT_HOURS = int(os.getenv('MODEL_CACHE_TIMEOUT_HOURS', 24))
+    AI_MAX_LENGTH = int(os.getenv('AI_MAX_LENGTH', 100))
+    AI_TEMPERATURE = float(os.getenv('AI_TEMPERATURE', 0.7))
+    
     # Jitsi Video Conference Settings
     JITSI_DOMAIN = os.getenv('JITSI_DOMAIN', 'meet.jit.si')  # Public Jitsi server by default
     JITSI_APP_ID = os.getenv('JITSI_APP_ID', None)  # Optional for public server
