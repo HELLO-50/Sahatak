@@ -827,9 +827,14 @@ DashboardTranslations.updateRecordsDashboard = function(lang) {
     this.updateElementText('view-all-prescriptions-btn', medicalDashboard?.['view-all-prescriptions-btn'] || records.buttons?.view_all_prescriptions || 'View All Prescriptions');
     this.updateElementText('active-prescriptions-btn', medicalDashboard?.['active-prescriptions-btn'] || records.buttons?.active_prescriptions || 'Active Prescriptions');
 
-    // Recent Activity
-    this.updateElementText('recent-activity-title', records.recent_activity?.title);
+    // Recent Activity - use medical_dashboard section as primary source
+    this.updateElementText('recent-activity-title', medicalDashboard?.['recent-activity-title'] || records.recent_activity?.title);
     this.updateElementText('view-all-activity', records.recent_activity?.view_all);
+    
+    // Pagination elements - use medical_dashboard section
+    this.updateElementText('pagination-info-text', medicalDashboard?.['pagination-info-text']);
+    this.updateElementText('prev-text', medicalDashboard?.['prev-text']);
+    this.updateElementText('next-text', medicalDashboard?.['next-text']);
 
     // Loading states
     this.updateElementText('loading-text', records.loading?.default || records.loading || 'Loading...');
