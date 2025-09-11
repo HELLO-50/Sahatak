@@ -2728,25 +2728,28 @@ Colors:
     color: #000000 !important;
 }
 
-::selection {
-    background: rgb(255, 255, 255);   
-    color: rgb(0, 0, 0);        
+
+.card-header,
+h5,
+h4 {
+    color: #000 !important;
+    font-weight: 600; 
+}
+
+.card-header,
+h5,
+h4 {
+    color: #000 !important;
+    font-weight: 600; 
+}
+
+/* Recent Activity Summary */
+.card-header h5 {
+    color: #000 !important;
 }
 
 
-::-moz-selection {
-    background: rgb(255, 255, 255);
-    color: rgb(0, 0, 0);
+/* Platform Health and Analytics */
+.card-header h4 {
+    color: #000 !important;
 }
-
-::selection {
-    background: #000000;
-    color: rgb(255, 255, 255);         
-}
-
-::-moz-selection {
-    background: #000000;
-    color: rgb(255, 255, 255);
-}
-
-
