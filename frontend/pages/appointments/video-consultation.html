@@ -572,8 +572,29 @@
         }
         
         // Initialize language support (inherit from dashboard)
-        function initializeLanguageSupport() {
-            const currentLang = LanguageManager?.getLanguage() || 'en';
+        async function initializeLanguageSupport() {
+            console.log('🚀 Initializing video consultation language support...');
+            
+            // Ensure LanguageManager exists
+            if (!LanguageManager) {
+                console.error('❌ LanguageManager not available!');
+                return;
+            }
+            
+            const currentLang = LanguageManager.getLanguage() || 'en';
+            console.log('🌐 Current language:', currentLang);
+            
+            // Load translations if not already loaded
+            if (!LanguageManager.translations || Object.keys(LanguageManager.translations).length === 0) {
+                console.log('📥 Loading translations...');
+                try {
+                    await LanguageManager.loadTranslations();
+                    console.log('✅ Translations loaded successfully');
+                } catch (error) {
+                    console.error('❌ Failed to load translations:', error);
+                    return;
+                }
+            }
             
             // Apply video consultation translations
             updateVideoConsultationTranslations(currentLang);
@@ -581,29 +602,40 @@
 
         // Update video consultation translations
         function updateVideoConsultationTranslations(lang) {
-            if (!LanguageManager.translations[lang]) return;
+            console.log('🌍 Updating video consultation translations for:', lang);
+            console.log('📋 LanguageManager available:', !!LanguageManager);
+            console.log('📚 Available translations:', LanguageManager?.translations ? Object.keys(LanguageManager.translations) : 'none');
+            
+            if (!LanguageManager || !LanguageManager.translations || !LanguageManager.translations[lang]) {
+                console.warn('⚠️ Translations not available for language:', lang);
+                return;
+            }
             
             const t = LanguageManager.translations[lang];
+            console.log('🎯 Video consultation translations:', t.video_consultation);
             
             // Update basic elements
             if (document.getElementById('dashboard-title')) {
-                document.getElementById('dashboard-title').textContent = 
-                    t.video_consultation?.title || 'Video Consultation';
+                const titleText = t.video_consultation?.title || 'Video Consultation';
+                document.getElementById('dashboard-title').textContent = titleText;
+                console.log('📝 Set title to:', titleText);
             }
             if (document.getElementById('dashboard-subtitle')) {
-                document.getElementById('dashboard-subtitle').textContent = 
-                    t.video_consultation?.subtitle || 'Secure medical consultation';
+                const subtitleText = t.video_consultation?.subtitle || 'Secure medical consultation';
+                document.getElementById('dashboard-subtitle').textContent = subtitleText;
+                console.log('📝 Set subtitle to:', subtitleText);
             }
             if (document.getElementById('status-text')) {
-                document.getElementById('status-text').textContent = 
-                    t.video_consultation?.connecting || 'Connecting...';
+                const statusText = t.video_consultation?.connecting || 'Connecting...';
+                document.getElementById('status-text').textContent = statusText;
+                console.log('📝 Set status to:', statusText);
             }
             
             // Update RTL/LTR direction
             document.documentElement.setAttribute('lang', lang);
             document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
             
-            console.log(`Video consultation translations updated to: ${lang}`);
+            console.log(`✅ Video consultation translations updated to: ${lang}`);
         }
         
         // Navigation functions
@@ -740,12 +772,13 @@
         
         // Initialize translations when page loads
         document.addEventListener('DOMContentLoaded', async function() {
-            // Load translations first
-            if (LanguageManager && LanguageManager.loadTranslations) {
-                await LanguageManager.loadTranslations();
-            }
-            // Initialize language support
-            initializeLanguageSupport();
+            console.log('📄 Video consultation page loaded, initializing...');
+            
+            // Wait a bit for all scripts to load
+            setTimeout(async () => {
+                // Initialize language support (it will handle translation loading)
+                await initializeLanguageSupport();
+            }, 100);
         });
         
         // Handle window close to call disconnect endpoint
