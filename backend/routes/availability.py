@@ -33,10 +33,18 @@ def get_doctor_schedule():
             'sunday': {'start': '09:00', 'end': '17:00', 'enabled': True}
         }
         
+        # Safe doctor name extraction
+        doctor_name = 'Unknown Doctor'
+        if hasattr(doctor, 'user') and doctor.user:
+            if hasattr(doctor.user, 'get_full_name'):
+                doctor_name = doctor.user.get_full_name()
+            elif hasattr(doctor.user, 'full_name'):
+                doctor_name = doctor.user.full_name or 'Unknown Doctor'
+        
         return APIResponse.success(
             data={
                 'doctor_id': doctor.id,
-                'doctor_name': doctor.user.get_full_name(),
+                'doctor_name': doctor_name,
                 'schedule': schedule,
                 'timezone': doctor.timezone or 'UTC'
             },
@@ -279,21 +287,46 @@ def get_availability_calendar():
             ]
             
             for appointment in day_appointments:
-                # Include full appointment details for calendar and modal use
-                appointment_data = {
-                    'id': appointment.id,
-                    'time': appointment.appointment_date.strftime('%H:%M'),
-                    'patient_name': appointment.patient.user.get_full_name() if appointment.patient and appointment.patient.user else 'No Patient',
-                    'appointment_type': appointment.appointment_type,
-                    'status': appointment.status,
-                    'appointment_date': appointment.appointment_date.isoformat(),
-                    'reason_for_visit': appointment.reason_for_visit,
-                    'notes': appointment.notes,
-                    'session_started_at': appointment.session_started_at.isoformat() if appointment.session_started_at else None,
-                    'session_ended_at': appointment.session_ended_at.isoformat() if appointment.session_ended_at else None,
-                    'session_duration': appointment.session_duration
-                }
-                day_data['appointments'].append(appointment_data)
+                try:
+                    # Safe patient name extraction
+                    patient_name = 'No Patient'
+                    if appointment.patient and hasattr(appointment.patient, 'user') and appointment.patient.user:
+                        if hasattr(appointment.patient.user, 'get_full_name'):
+                            patient_name = appointment.patient.user.get_full_name()
+                        elif hasattr(appointment.patient.user, 'full_name'):
+                            patient_name = appointment.patient.user.full_name or 'No Patient'
+                    
+                    # Include full appointment details for calendar and modal use
+                    appointment_data = {
+                        'id': appointment.id,
+                        'time': appointment.appointment_date.strftime('%H:%M'),
+                        'patient_name': patient_name,
+                        'appointment_type': appointment.appointment_type,
+                        'status': appointment.status,
+                        'appointment_date': appointment.appointment_date.isoformat(),
+                        'reason_for_visit': appointment.reason_for_visit or '',
+                        'notes': appointment.notes or '',
+                        'session_started_at': appointment.session_started_at.isoformat() if appointment.session_started_at else None,
+                        'session_ended_at': appointment.session_ended_at.isoformat() if appointment.session_ended_at else None,
+                        'session_duration': appointment.session_duration
+                    }
+                    day_data['appointments'].append(appointment_data)
+                except Exception as apt_error:
+                    app_logger.error(f"Error processing appointment {appointment.id}: {str(apt_error)}")
+                    # Add minimal data to not break the calendar
+                    day_data['appointments'].append({
+                        'id': appointment.id,
+                        'time': appointment.appointment_date.strftime('%H:%M'),
+                        'patient_name': 'Error Loading Patient',
+                        'appointment_type': appointment.appointment_type,
+                        'status': appointment.status,
+                        'appointment_date': appointment.appointment_date.isoformat(),
+                        'reason_for_visit': '',
+                        'notes': '',
+                        'session_started_at': None,
+                        'session_ended_at': None,
+                        'session_duration': None
+                    })
             
             # Generate available slots if day is enabled
             if day_data['enabled']:
