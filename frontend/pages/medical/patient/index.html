@@ -200,7 +200,7 @@
     <script src="../../../assets/js/main.js"></script>
     <script src="../../../assets/js/components/auth-guard.js"></script>
     <script src="../../../assets/js/components/dashboard-translations.js"></script>
-    <script src="../../../assets/js/components/medical-records-api.js"></script>
+    <script src="../../../assets/js/components/medical-records.js"></script>
     
     <script>
         let userType = null;
@@ -212,6 +212,14 @@
         // Initialize records dashboard on page load
         document.addEventListener('DOMContentLoaded', async function() {
             await DashboardTranslations.initializeDashboard('records');
+            
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Load overview data after initialization
+            setTimeout(async () => {
+                await loadOverviewData();
+            }, 500);
         });
 
 
@@ -252,13 +260,26 @@
                 const statsResult = await PrescriptionsAPI.getPrescriptionStats();
                 if (statsResult.success) {
                     updateStats(statsResult.data);
+                } else {
+                    // If stats API fails, calculate basic stats from available data
+                    updateStats({
+                        active_prescriptions: prescriptionData ? (prescriptionData.prescriptions || []).filter(p => p.status === 'active').length : 0
+                    });
                 }
 
                 // Load recent activity
                 await loadRecentActivity();
+                
+                // Ensure stats are updated even if some API calls failed
+                if (!document.getElementById('history-completion').textContent || document.getElementById('history-completion').textContent === '--') {
+                    updateStats();
+                }
             } catch (error) {
                 console.error('Error loading overview data:', error);
                 showError('Error loading overview data');
+                
+                // Still try to show whatever data we have
+                updateStats();
             }
         }
 
@@ -352,31 +373,101 @@
             container.innerHTML = summaryHtml;
         }
 
-        // Update stats
-        function updateStats(stats) {
-            // Calculate completion percentage
+        // Update stats - Enhanced with proper calculations
+        function updateStats(stats = {}) {
+            console.log('Updating stats with:', stats);
+            console.log('Medical data available:', !!medicalData);
+            console.log('Prescription data available:', !!prescriptionData);
+
+            // 1. Calculate completion percentage
             let completionPercentage = 0;
             if (medicalData && medicalData.medicalHistory) {
-                const requiredFields = ['medical_history', 'allergies', 'current_medications'];
-                const completedRequired = requiredFields.filter(field => 
-                    medicalData.medicalHistory[field] && medicalData.medicalHistory[field].trim()
-                ).length;
+                const requiredFields = ['medical_history', 'allergies', 'current_medications', 'blood_type', 'height', 'weight'];
+                const completedRequired = requiredFields.filter(field => {
+                    const value = medicalData.medicalHistory[field];
+                    return value && value.toString().trim() !== '';
+                }).length;
                 completionPercentage = Math.round((completedRequired / requiredFields.length) * 100);
             }
 
-            // Calculate days since last update
-            let daysSinceUpdate = '--';
-            if (medicalData && medicalData.medicalHistory && medicalData.medicalHistory.medical_history_last_updated) {
-                const lastUpdate = new Date(medicalData.medicalHistory.medical_history_last_updated);
-                const today = new Date();
-                daysSinceUpdate = Math.floor((today - lastUpdate) / (1000 * 60 * 60 * 24));
+            // 2. Calculate active prescriptions count
+            let activePrescriptionsCount = 0;
+            if (stats.active_prescriptions !== undefined) {
+                activePrescriptionsCount = stats.active_prescriptions;
+            } else if (prescriptionData && prescriptionData.prescriptions) {
+                activePrescriptionsCount = prescriptionData.prescriptions.filter(p => p.status === 'active').length;
             }
 
-            // Update display
-            document.getElementById('history-completion').textContent = completionPercentage + '%';
-            document.getElementById('active-prescriptions-count').textContent = stats.active_prescriptions || 0;
-            document.getElementById('recent-updates-count').textContent = (medicalData?.historyUpdates?.length || 0) + (prescriptionData?.prescriptions?.length || 0);
-            document.getElementById('last-update-days').textContent = daysSinceUpdate === '--' ? daysSinceUpdate : daysSinceUpdate + ' days';
+            // 3. Calculate recent updates count (medical + prescription updates in last 30 days)
+            let recentUpdatesCount = 0;
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+            // Count medical history updates
+            if (medicalData && medicalData.historyUpdates) {
+                recentUpdatesCount += medicalData.historyUpdates.filter(update => 
+                    new Date(update.created_at) >= thirtyDaysAgo
+                ).length;
+            }
+
+            // Count recent prescriptions
+            if (prescriptionData && prescriptionData.prescriptions) {
+                recentUpdatesCount += prescriptionData.prescriptions.filter(prescription => 
+                    new Date(prescription.created_at) >= thirtyDaysAgo
+                ).length;
+            }
+
+            // 4. Calculate days since last update
+            let daysSinceUpdate = 'Never';
+            let mostRecentDate = null;
+
+            // Check medical history last updated
+            if (medicalData && medicalData.medicalHistory && medicalData.medicalHistory.medical_history_last_updated) {
+                mostRecentDate = new Date(medicalData.medicalHistory.medical_history_last_updated);
+            }
+
+            // Check most recent prescription
+            if (prescriptionData && prescriptionData.prescriptions && prescriptionData.prescriptions.length > 0) {
+                const mostRecentPrescription = prescriptionData.prescriptions
+                    .map(p => new Date(p.created_at))
+                    .sort((a, b) => b - a)[0];
+                
+                if (!mostRecentDate || mostRecentPrescription > mostRecentDate) {
+                    mostRecentDate = mostRecentPrescription;
+                }
+            }
+
+            if (mostRecentDate) {
+                const today = new Date();
+                const diffTime = today - mostRecentDate;
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                
+                if (diffDays === 0) {
+                    daysSinceUpdate = 'Today';
+                } else if (diffDays === 1) {
+                    daysSinceUpdate = '1 day ago';
+                } else {
+                    daysSinceUpdate = `${diffDays} days ago`;
+                }
+            }
+
+            // Update display elements
+            const elements = {
+                'history-completion': `${completionPercentage}%`,
+                'active-prescriptions-count': activePrescriptionsCount.toString(),
+                'recent-updates-count': recentUpdatesCount.toString(),
+                'last-update-days': daysSinceUpdate
+            };
+
+            Object.keys(elements).forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = elements[id];
+                    console.log(`Updated ${id}: ${elements[id]}`);
+                } else {
+                    console.warn(`Element not found: ${id}`);
+                }
+            });
         }
 
         // Load recent activity
@@ -386,71 +477,128 @@
             try {
                 const activities = [];
 
-                // Add appointment activities
+                // Add appointment activities - Enhanced with all statuses and proper timestamps
                 try {
                     const appointmentsResponse = await ApiHelper.makeRequest('/appointments/');
                     if (appointmentsResponse.success) {
                         const appointments = appointmentsResponse.data.appointments || [];
+                        console.log(`Processing ${appointments.length} appointments for recent activity`);
                         
-                        // Add recently scheduled appointments (last 30 days)
-                        appointments.filter(apt => 
-                            new Date() - new Date(apt.created_at || apt.appointment_date) < 30 * 24 * 60 * 60 * 1000 // Last 30 days
-                        ).forEach(apt => {
-                            const createdDate = new Date(apt.created_at || apt.appointment_date);
+                        // Process each appointment to extract status changes and events
+                        appointments.forEach(apt => {
                             const appointmentDate = new Date(apt.appointment_date);
+                            const createdDate = new Date(apt.created_at || apt.appointment_date);
+                            const updatedDate = new Date(apt.updated_at || apt.created_at || apt.appointment_date);
+                            const now = new Date();
+                            const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
                             
-                            activities.push({
-                                type: 'appointment_scheduled',
-                                date: createdDate,
-                                title: 'New Appointment Scheduled',
-                                description: `Appointment with ${apt.doctor_name || 'Doctor'} on ${appointmentDate.toLocaleDateString('en-US', { 
-                                    weekday: 'short', 
-                                    month: 'short', 
-                                    day: 'numeric',
-                                    hour: 'numeric',
-                                    minute: '2-digit'
-                                })}`,
-                                icon: 'bi-calendar-plus',
-                                color: 'text-primary'
-                            });
-                        });
-                        
-                        // Add recently completed appointments
-                        appointments.filter(apt => 
-                            apt.status === 'completed' &&
-                            new Date() - new Date(apt.updated_at || apt.appointment_date) < 30 * 24 * 60 * 60 * 1000 // Last 30 days
-                        ).forEach(apt => {
-                            const completedDate = new Date(apt.updated_at || apt.appointment_date);
-                            
-                            activities.push({
-                                type: 'appointment_completed',
-                                date: completedDate,
-                                title: 'Consultation Completed',
-                                description: `Consultation completed with ${apt.doctor_name || 'Doctor'}`,
-                                icon: 'bi-check-circle',
-                                color: 'text-success'
-                            });
+                            // 1. Appointment Scheduled/Created (if within last 30 days)
+                            if (createdDate >= thirtyDaysAgo) {
+                                activities.push({
+                                    type: 'appointment_scheduled',
+                                    date: createdDate,
+                                    title: 'New Appointment Scheduled',
+                                    description: `Appointment with ${apt.doctor_name || 'Doctor'} scheduled for ${appointmentDate.toLocaleDateString('en-US', { 
+                                        weekday: 'short', 
+                                        month: 'short', 
+                                        day: 'numeric'
+                                    })} at ${appointmentDate.toLocaleTimeString('en-US', {
+                                        hour: 'numeric',
+                                        minute: '2-digit',
+                                        hour12: true
+                                    })}`,
+                                    icon: 'bi-calendar-plus',
+                                    color: 'bg-primary'
+                                });
+                            }
+
+                            // 2. Status-based activities (if status changed within last 30 days)
+                            if (updatedDate >= thirtyDaysAgo) {
+                                switch (apt.status) {
+                                    case 'confirmed':
+                                        if (updatedDate > createdDate) { // Only if confirmed after creation
+                                            activities.push({
+                                                type: 'appointment_confirmed',
+                                                date: updatedDate,
+                                                title: 'Appointment Confirmed',
+                                                description: `Appointment with ${apt.doctor_name || 'Doctor'} has been confirmed`,
+                                                icon: 'bi-check-circle',
+                                                color: 'bg-info'
+                                            });
+                                        }
+                                        break;
+                                    
+                                    case 'completed':
+                                        activities.push({
+                                            type: 'appointment_completed',
+                                            date: updatedDate,
+                                            title: 'Consultation Completed',
+                                            description: `Medical consultation completed with ${apt.doctor_name || 'Doctor'}${apt.diagnosis ? '. Diagnosis recorded.' : ''}`,
+                                            icon: 'bi-check-circle-fill',
+                                            color: 'bg-success'
+                                        });
+                                        break;
+                                    
+                                    case 'cancelled':
+                                        activities.push({
+                                            type: 'appointment_cancelled',
+                                            date: updatedDate,
+                                            title: 'Appointment Cancelled',
+                                            description: `Appointment with ${apt.doctor_name || 'Doctor'} was cancelled${apt.cancellation_reason ? '. Reason: ' + apt.cancellation_reason : ''}`,
+                                            icon: 'bi-x-circle-fill',
+                                            color: 'bg-warning'
+                                        });
+                                        break;
+                                    
+                                    case 'no-show':
+                                        activities.push({
+                                            type: 'appointment_missed',
+                                            date: updatedDate,
+                                            title: 'Appointment Missed',
+                                            description: `Missed appointment with ${apt.doctor_name || 'Doctor'}`,
+                                            icon: 'bi-exclamation-triangle-fill',
+                                            color: 'bg-danger'
+                                        });
+                                        break;
+                                    
+                                    case 'in_progress':
+                                        activities.push({
+                                            type: 'appointment_started',
+                                            date: updatedDate,
+                                            title: 'Consultation Started',
+                                            description: `Consultation with ${apt.doctor_name || 'Doctor'} is now in progress`,
+                                            icon: 'bi-play-circle-fill',
+                                            color: 'bg-info'
+                                        });
+                                        break;
+
+                                    case 'rescheduled':
+                                        activities.push({
+                                            type: 'appointment_rescheduled',
+                                            date: updatedDate,
+                                            title: 'Appointment Rescheduled',
+                                            description: `Appointment with ${apt.doctor_name || 'Doctor'} has been rescheduled`,
+                                            icon: 'bi-calendar-event',
+                                            color: 'bg-secondary'
+                                        });
+                                        break;
+                                }
+                            }
+
+                            // 3. Add special activities for video appointments
+                            if (apt.appointment_type === 'video' && apt.status === 'confirmed') {
+                                activities.push({
+                                    type: 'video_appointment_ready',
+                                    date: createdDate,
+                                    title: 'Video Consultation Ready',
+                                    description: `Video consultation with ${apt.doctor_name || 'Doctor'} is ready to join`,
+                                    icon: 'bi-camera-video-fill',
+                                    color: 'bg-info'
+                                });
+                            }
                         });
 
-                        // Add recently cancelled appointments  
-                        appointments.filter(apt => 
-                            apt.status === 'cancelled' &&
-                            new Date() - new Date(apt.updated_at || apt.appointment_date) < 30 * 24 * 60 * 60 * 1000 // Last 30 days
-                        ).forEach(apt => {
-                            const cancelledDate = new Date(apt.updated_at || apt.appointment_date);
-                            
-                            activities.push({
-                                type: 'appointment_cancelled',
-                                date: cancelledDate,
-                                title: 'Appointment Cancelled',
-                                description: `Appointment with ${apt.doctor_name || 'Doctor'} was cancelled`,
-                                icon: 'bi-x-circle',
-                                color: 'text-warning'
-                            });
-                        });
-
-                        console.log(`Found ${appointments.length} appointments for recent activity`);
-                        console.log(`Filtered activities from appointments:`, activities.filter(a => a.type.startsWith('appointment')));
+                        console.log(`Generated ${activities.filter(a => a.type.startsWith('appointment')).length} appointment activities`);
                     }
                 } catch (error) {
                     console.error('Error loading appointments for activity:', error);
@@ -505,11 +653,20 @@
                                 </div>
                             </div>
                             <div class="activity-content flex-grow-1">
-                                <h6 class="mb-1">${activity.title}</h6>
-                                <p class="text-muted small mb-1">${activity.description}</p>
-                                <small class="text-muted">
+                                <h6 class="mb-1" style="color: #000000;">${activity.title}</h6>
+                                <p class="text-muted small mb-1" style="color: #374151 !important;">${activity.description}</p>
+                                <small class="text-muted" style="color: #374151 !important;">
                                     <i class="bi bi-clock me-1"></i>
-                                    ${activity.date.toLocaleDateString('ar-SA')} - ${activity.date.toLocaleTimeString('ar-SA', {hour: '2-digit', minute: '2-digit'})}
+                                    ${activity.date.toLocaleDateString('en-US', { 
+                                        weekday: 'short',
+                                        year: 'numeric', 
+                                        month: 'short', 
+                                        day: 'numeric' 
+                                    })} at ${activity.date.toLocaleTimeString('en-US', {
+                                        hour: 'numeric', 
+                                        minute: '2-digit',
+                                        hour12: true
+                                    })}
                                 </small>
                             </div>
                         </div>

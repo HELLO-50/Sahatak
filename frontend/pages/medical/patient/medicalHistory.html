@@ -390,7 +390,7 @@
     <script src="../../../assets/js/main.js"></script>
     <script src="../../../assets/js/components/auth-guard.js"></script>
     <script src="../../../assets/js/components/dashboard-translations.js"></script>
-    <script src="../../../assets/js/components/medical-records-api.js"></script>
+    <script src="../../../assets/js/components/medical-records.js"></script>
     
     <script>
         // All translations are handled by dashboard-translations.js
@@ -403,6 +403,14 @@
         // Initialize medical history page on page load
         document.addEventListener('DOMContentLoaded', async function() {
             await DashboardTranslations.initializeDashboard('records');
+            
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Load medical history data after initialization
+            setTimeout(async () => {
+                await loadMedicalHistory();
+            }, 500);
         });
 
         // Setup event listeners
@@ -619,27 +627,57 @@
         }
 
         // Open edit modal
-        function openEditModal() {
-            if (medicalHistory) {
-                populateEditForm();
+        async function openEditModal() {
+            // Ensure we have the latest medical history data
+            if (!medicalHistory) {
+                console.log('Loading medical history for edit form...');
+                await loadMedicalHistory();
             }
+            
+            // Populate form with current data (or leave empty if none exists)
+            populateEditForm();
+            
             const modal = new bootstrap.Modal(document.getElementById('edit-history-modal'));
             modal.show();
         }
 
         // Populate edit form with current data
         function populateEditForm() {
-            const fields = [
-                'blood_type', 'height', 'weight', 'smoking_status', 
-                'exercise_frequency', 'alcohol_consumption', 'allergies',
-                'current_medications', 'chronic_conditions', 'family_history',
-                'surgical_history', 'medical_history'
-            ];
+            if (!medicalHistory) {
+                console.log('No medical history data available to populate form');
+                return;
+            }
+
+            console.log('Populating form with medical history:', medicalHistory);
             
-            fields.forEach(field => {
-                const element = document.getElementById(field.replace('_', '-'));
-                if (element && medicalHistory[field]) {
-                    element.value = medicalHistory[field];
+            // Field mapping: database_field -> form_element_id
+            const fieldMappings = {
+                'blood_type': 'blood-type',
+                'height': 'height', 
+                'weight': 'weight',
+                'smoking_status': 'smoking-status',
+                'exercise_frequency': 'exercise-frequency', 
+                'alcohol_consumption': 'alcohol-consumption',
+                'allergies': 'allergies',
+                'current_medications': 'current-medications',
+                'chronic_conditions': 'chronic-conditions', 
+                'family_history': 'family-history',
+                'surgical_history': 'surgical-history',
+                'medical_history': 'medical-history'
+            };
+            
+            // Populate each field
+            Object.keys(fieldMappings).forEach(dbField => {
+                const elementId = fieldMappings[dbField];
+                const element = document.getElementById(elementId);
+                
+                if (element && medicalHistory[dbField]) {
+                    element.value = medicalHistory[dbField];
+                    console.log(`Populated ${elementId} with:`, medicalHistory[dbField]);
+                } else if (!element) {
+                    console.warn(`Form element not found: ${elementId}`);
+                } else {
+                    console.log(`No data for field: ${dbField}`);
                 }
             });
         }
@@ -671,7 +709,10 @@
                 if (response.success) {
                     showSuccess(getTranslation('success.history_updated') || 'Medical history updated successfully');
                     bootstrap.Modal.getInstance(document.getElementById('edit-history-modal')).hide();
-                    await loadMedicalHistory(); // Reload data
+                    
+                    // Reload data to reflect changes
+                    console.log('Medical history updated successfully, reloading data...');
+                    await loadMedicalHistory();
                 } else {
                     showError(response.message || getTranslation('errors.update_failed') || 'Failed to update medical history');
                 }
