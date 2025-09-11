@@ -290,9 +290,21 @@ class EmailService:
                 sender=current_app.config['MAIL_DEFAULT_SENDER']
             )
             
-            self.mail.send(msg)
-            app_logger.info(f"Email confirmation sent to {recipient_email}")
-            return True
+            # Add retry mechanism for network issues
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    self.mail.send(msg)
+                    app_logger.info(f"Email confirmation sent to {recipient_email}")
+                    return True
+                except OSError as network_error:
+                    if attempt < max_retries - 1:
+                        app_logger.warning(f"Network error sending to {recipient_email}, attempt {attempt + 1}/{max_retries}: {str(network_error)}")
+                        import time
+                        time.sleep(2)  # Wait 2 seconds before retry
+                        continue
+                    else:
+                        raise network_error
             
         except Exception as e:
             # Log detailed error information for debugging
