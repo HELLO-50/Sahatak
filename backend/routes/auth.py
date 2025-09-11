@@ -224,6 +224,33 @@ def register():
         db.session.add(user)
         db.session.flush()  # Get user ID without committing
         
+        # Send email confirmation EARLY to avoid network timing issues
+        email_sent_early = False
+        try:
+            email_language = data.get('language_preference', 'ar')
+            auth_logger.info(f"=== EARLY EMAIL ATTEMPT FOR {data['user_type'].upper()} ===")
+            auth_logger.info(f"Sending email early to: {email}")
+            
+            from services.email_service import email_service
+            email_success = email_service.send_email_confirmation(
+                recipient_email=email,
+                user_data={
+                    'full_name': user.full_name,
+                    'verification_token': user.verification_token,
+                    'user_type': user.user_type
+                },
+                language=email_language
+            )
+            
+            if email_success:
+                auth_logger.info(f"Early email confirmation sent to {email}")
+                email_sent_early = True
+            else:
+                auth_logger.warning(f"Early email confirmation failed for {email}")
+                
+        except Exception as e:
+            auth_logger.warning(f"Early email attempt failed for {email}: {str(e)}")
+        
         # Create specific profile based on user type
         if data['user_type'] == 'patient':
             # Validate patient-specific fields (phone already validated above)
@@ -332,35 +359,33 @@ def register():
         # Commit transaction
         db.session.commit()
         
-        # Send email confirmation (always required now)
-        try:
-            email_language = data.get('language_preference', 'ar')
-            auth_logger.info(f"=== EMAIL LANGUAGE DEBUG ===")
-            auth_logger.info(f"Raw registration data keys: {list(data.keys())}")
-            auth_logger.info(f"Language preference in data: '{data.get('language_preference')}'")
-            auth_logger.info(f"Language preference type: {type(data.get('language_preference'))}")
-            auth_logger.info(f"Final email language: '{email_language}'")
-            auth_logger.info(f"Will use template: templates/email/{email_language}/email_confirmation.html")
-            auth_logger.info(f"=============================")
-            
-            from services.email_service import email_service
-            email_success = email_service.send_email_confirmation(
-                recipient_email=email,
-                user_data={
-                    'full_name': user.full_name,
-                    'verification_token': user.verification_token,
-                    'user_type': user.user_type
-                },
-                language=email_language
-            )
-            
-            if email_success:
-                auth_logger.info(f"Email confirmation sent to {email}")
-            else:
-                auth_logger.warning(f"Failed to send email confirmation to {email}")
+        # Send email confirmation (skip if already sent early)
+        if not email_sent_early:
+            try:
+                email_language = data.get('language_preference', 'ar')
+                auth_logger.info(f"=== RETRY EMAIL FOR {data['user_type'].upper()} ===")
+                auth_logger.info(f"About to send email to: {email}")
                 
-        except Exception as e:
-            auth_logger.error(f"Error sending email confirmation: {str(e)}")
+                from services.email_service import email_service
+                email_success = email_service.send_email_confirmation(
+                    recipient_email=email,
+                    user_data={
+                        'full_name': user.full_name,
+                        'verification_token': user.verification_token,
+                        'user_type': user.user_type
+                    },
+                    language=email_language
+                )
+                
+                if email_success:
+                    auth_logger.info(f"Retry email confirmation sent to {email}")
+                else:
+                    auth_logger.warning(f"Failed to send retry email confirmation to {email}")
+                    
+            except Exception as e:
+                auth_logger.error(f"Error sending retry email confirmation: {str(e)}")
+        else:
+            auth_logger.info(f"Email already sent early for {email}, skipping retry")
         
         # Log successful registration
         log_user_action(user.id, 'user_registered', {
