@@ -71,6 +71,9 @@ const DashboardTranslations = {
         this.updateElementText('status-pending', patient.upcoming.status_pending);
         this.updateElementText('view-all-appointments', patient.upcoming.view_all);
         
+        // Past Appointments Button
+        this.updateElementText('btn-view-past', t.appointments?.view_past_appointments || 'View Past Appointments');
+        
         // Health Summary
         this.updateElementText('health-summary-title', patient.health_summary.title);
         this.updateElementText('blood-pressure', patient.health_summary.blood_pressure);
@@ -110,6 +113,18 @@ const DashboardTranslations = {
             console.log('✅ Patient dashboard footer update completed');
         } catch (footerError) {
             console.error('❌ Patient footer update failed:', footerError);
+        }
+        
+        // Refresh dynamic content that uses inline translations
+        if (typeof loadHealthSummary === 'function') {
+            console.log('🔄 Refreshing Health Summary for language change');
+            loadHealthSummary();
+        }
+        
+        // Refresh appointments list if function exists
+        if (typeof loadDashboardStats === 'function') {
+            console.log('🔄 Refreshing Dashboard Stats for language change');
+            setTimeout(() => loadDashboardStats(), 100); // Small delay to ensure translation is applied
         }
     },
     
