@@ -707,18 +707,18 @@
                 });
                 
                 if (response.success) {
-                    showSuccess(getTranslation('success.history_updated') || 'Medical history updated successfully');
+                    showSuccess('Medical history updated successfully');
                     bootstrap.Modal.getInstance(document.getElementById('edit-history-modal')).hide();
                     
                     // Reload data to reflect changes
                     console.log('Medical history updated successfully, reloading data...');
                     await loadMedicalHistory();
                 } else {
-                    showError(response.message || getTranslation('errors.update_failed') || 'Failed to update medical history');
+                    showError(response.message || 'Failed to update medical history');
                 }
             } catch (error) {
                 console.error('Error saving medical history:', error);
-                showError(getTranslation('errors.save_error') || 'Error saving medical history');
+                showError('Error saving medical history');
             }
         }
 

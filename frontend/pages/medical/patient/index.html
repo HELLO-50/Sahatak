@@ -170,11 +170,14 @@
         <div class="row">
             <div class="col-12">
                 <div class="card recent-activity">
-                    <div class="card-header text-white" style="background: #0d47a1 !important;">
+                    <div class="card-header text-white d-flex justify-content-between align-items-center" style="background: #0d47a1 !important;">
                         <h5 class="card-title mb-0">
                             <i class="bi bi-activity me-2"></i>
                             <span id="recent-activity-title">Recent Activity</span>
                         </h5>
+                        <small class="text-white-50" id="activity-count">
+                            <!-- Activity count will be populated here -->
+                        </small>
                     </div>
                     <div class="card-body">
                         <div id="recent-activity">
@@ -183,6 +186,30 @@
                                     <span class="visually-hidden" id="spinner-loading-text">Loading...</span>
                                 </div>
                                 <p class="mt-3" id="loading-activity-text">Loading recent activity...</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Pagination Controls -->
+                        <div id="activity-pagination" class="d-none">
+                            <hr>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="pagination-info">
+                                    <small class="text-muted" id="pagination-info-text">
+                                        <!-- Pagination info will be populated here -->
+                                    </small>
+                                </div>
+                                <div class="pagination-controls">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button type="button" class="btn btn-outline-primary" id="prev-page-btn" onclick="previousActivityPage()">
+                                            <i class="bi bi-chevron-left"></i>
+                                            <span id="prev-text">Previous</span>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-primary" id="next-page-btn" onclick="nextActivityPage()">
+                                            <span id="next-text">Next</span>
+                                            <i class="bi bi-chevron-right"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -206,6 +233,12 @@
         let userType = null;
         let medicalData = null;
         let prescriptionData = null;
+        
+        // Pagination state for Recent Activity
+        let currentActivityPage = 1;
+        const activitiesPerPage = 5;
+        let totalActivities = [];
+        let filteredActivities = [];
         
         // All translations are handled by dashboard-translations.js
 
@@ -475,7 +508,7 @@
             const container = document.getElementById('recent-activity');
             
             try {
-                const activities = [];
+                totalActivities = []; // Reset the global activities array
 
                 // Add appointment activities - Enhanced with all statuses and proper timestamps
                 try {
@@ -494,7 +527,7 @@
                             
                             // 1. Appointment Scheduled/Created (if within last 30 days)
                             if (createdDate >= thirtyDaysAgo) {
-                                activities.push({
+                                totalActivities.push({
                                     type: 'appointment_scheduled',
                                     date: createdDate,
                                     title: 'New Appointment Scheduled',
@@ -517,7 +550,7 @@
                                 switch (apt.status) {
                                     case 'confirmed':
                                         if (updatedDate > createdDate) { // Only if confirmed after creation
-                                            activities.push({
+                                            totalActivities.push({
                                                 type: 'appointment_confirmed',
                                                 date: updatedDate,
                                                 title: 'Appointment Confirmed',
@@ -529,7 +562,7 @@
                                         break;
                                     
                                     case 'completed':
-                                        activities.push({
+                                        totalActivities.push({
                                             type: 'appointment_completed',
                                             date: updatedDate,
                                             title: 'Consultation Completed',
@@ -540,7 +573,7 @@
                                         break;
                                     
                                     case 'cancelled':
-                                        activities.push({
+                                        totalActivities.push({
                                             type: 'appointment_cancelled',
                                             date: updatedDate,
                                             title: 'Appointment Cancelled',
@@ -551,7 +584,7 @@
                                         break;
                                     
                                     case 'no-show':
-                                        activities.push({
+                                        totalActivities.push({
                                             type: 'appointment_missed',
                                             date: updatedDate,
                                             title: 'Appointment Missed',
@@ -562,7 +595,7 @@
                                         break;
                                     
                                     case 'in_progress':
-                                        activities.push({
+                                        totalActivities.push({
                                             type: 'appointment_started',
                                             date: updatedDate,
                                             title: 'Consultation Started',
@@ -573,7 +606,7 @@
                                         break;
 
                                     case 'rescheduled':
-                                        activities.push({
+                                        totalActivities.push({
                                             type: 'appointment_rescheduled',
                                             date: updatedDate,
                                             title: 'Appointment Rescheduled',
@@ -587,7 +620,7 @@
 
                             // 3. Add special activities for video appointments
                             if (apt.appointment_type === 'video' && apt.status === 'confirmed') {
-                                activities.push({
+                                totalActivities.push({
                                     type: 'video_appointment_ready',
                                     date: createdDate,
                                     title: 'Video Consultation Ready',
@@ -598,7 +631,7 @@
                             }
                         });
 
-                        console.log(`Generated ${activities.filter(a => a.type.startsWith('appointment')).length} appointment activities`);
+                        console.log(`Generated ${totalActivities.filter(a => a.type.startsWith('appointment')).length} appointment activities`);
                     }
                 } catch (error) {
                     console.error('Error loading appointments for activity:', error);
@@ -607,7 +640,7 @@
                 // Add medical history updates
                 if (medicalData && medicalData.historyUpdates) {
                     medicalData.historyUpdates.forEach(update => {
-                        activities.push({
+                        totalActivities.push({
                             type: 'medical_update',
                             date: new Date(update.created_at),
                             title: MedicalRecordsUtils.getUpdateTypeInfo(update.update_type).title,
@@ -620,8 +653,8 @@
 
                 // Add recent prescriptions
                 if (prescriptionData && prescriptionData.prescriptions) {
-                    prescriptionData.prescriptions.slice(0, 5).forEach(prescription => {
-                        activities.push({
+                    prescriptionData.prescriptions.forEach(prescription => {
+                        totalActivities.push({
                             type: 'prescription',
                             date: new Date(prescription.created_at),
                             title: 'New prescription',
@@ -633,47 +666,11 @@
                 }
 
                 // Sort by date (newest first)
-                activities.sort((a, b) => b.date - a.date);
+                totalActivities.sort((a, b) => b.date - a.date);
 
-                // Render activities
-                if (activities.length === 0) {
-                    container.innerHTML = `
-                        <div class="empty-state">
-                            <i class="bi bi-activity"></i>
-                            <h6>No Recent Activity</h6>
-                            <p>Activity and updates will appear here</p>
-                        </div>
-                    `;
-                } else {
-                    const activitiesHtml = activities.slice(0, 8).map(activity => `
-                        <div class="activity-item d-flex align-items-center py-3 border-bottom">
-                            <div class="activity-icon me-3">
-                                <div class="rounded-circle ${activity.color} d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                    <i class="bi ${activity.icon} text-white"></i>
-                                </div>
-                            </div>
-                            <div class="activity-content flex-grow-1">
-                                <h6 class="mb-1" style="color: #000000;">${activity.title}</h6>
-                                <p class="text-muted small mb-1" style="color: #374151 !important;">${activity.description}</p>
-                                <small class="text-muted" style="color: #374151 !important;">
-                                    <i class="bi bi-clock me-1"></i>
-                                    ${activity.date.toLocaleDateString('en-US', { 
-                                        weekday: 'short',
-                                        year: 'numeric', 
-                                        month: 'short', 
-                                        day: 'numeric' 
-                                    })} at ${activity.date.toLocaleTimeString('en-US', {
-                                        hour: 'numeric', 
-                                        minute: '2-digit',
-                                        hour12: true
-                                    })}
-                                </small>
-                            </div>
-                        </div>
-                    `).join('');
-
-                    container.innerHTML = activitiesHtml;
-                }
+                // Reset to first page and render
+                currentActivityPage = 1;
+                renderActivityPage();
             } catch (error) {
                 console.error('Error loading recent activity:', error);
                 container.innerHTML = `
@@ -735,6 +732,115 @@
         function goToDashboard() {
             const dashboardUrl = userType === 'doctor' ? '../../dashboard/doctor.html' : '../../dashboard/patient.html';
             window.location.href = dashboardUrl;
+        }
+
+        // Pagination Functions for Recent Activity
+        function renderActivityPage() {
+            const container = document.getElementById('recent-activity');
+            const paginationContainer = document.getElementById('activity-pagination');
+            const activityCountElement = document.getElementById('activity-count');
+            
+            if (totalActivities.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state text-center py-4">
+                        <i class="bi bi-activity display-4 text-muted mb-3"></i>
+                        <h6 class="text-muted">No Recent Activity</h6>
+                        <p class="text-muted">Activity and updates will appear here</p>
+                    </div>
+                `;
+                paginationContainer.classList.add('d-none');
+                activityCountElement.textContent = '';
+                return;
+            }
+
+            // Calculate pagination
+            const startIndex = (currentActivityPage - 1) * activitiesPerPage;
+            const endIndex = startIndex + activitiesPerPage;
+            const pageActivities = totalActivities.slice(startIndex, endIndex);
+            const totalPages = Math.ceil(totalActivities.length / activitiesPerPage);
+
+            // Update activity count
+            activityCountElement.textContent = `${totalActivities.length} total activities`;
+
+            // Render activities for current page
+            const activitiesHtml = pageActivities.map(activity => `
+                <div class="activity-item d-flex align-items-center py-3 border-bottom">
+                    <div class="activity-icon me-3">
+                        <div class="rounded-circle ${activity.color} d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                            <i class="bi ${activity.icon} text-white"></i>
+                        </div>
+                    </div>
+                    <div class="activity-content flex-grow-1">
+                        <h6 class="mb-1" style="color: #000000;">${activity.title}</h6>
+                        <p class="text-muted small mb-1" style="color: #374151 !important;">${activity.description}</p>
+                        <small class="text-muted" style="color: #374151 !important;">
+                            <i class="bi bi-clock me-1"></i>
+                            ${activity.date.toLocaleDateString('en-US', { 
+                                weekday: 'short',
+                                year: 'numeric', 
+                                month: 'short', 
+                                day: 'numeric' 
+                            })} at ${activity.date.toLocaleTimeString('en-US', {
+                                hour: 'numeric', 
+                                minute: '2-digit',
+                                hour12: true
+                            })}
+                        </small>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = activitiesHtml;
+
+            // Update pagination controls
+            if (totalPages > 1) {
+                paginationContainer.classList.remove('d-none');
+                updatePaginationControls(totalPages);
+            } else {
+                paginationContainer.classList.add('d-none');
+            }
+        }
+
+        function updatePaginationControls(totalPages) {
+            const paginationInfo = document.getElementById('pagination-info-text');
+            const prevBtn = document.getElementById('prev-page-btn');
+            const nextBtn = document.getElementById('next-page-btn');
+
+            // Update pagination info
+            const startItem = (currentActivityPage - 1) * activitiesPerPage + 1;
+            const endItem = Math.min(currentActivityPage * activitiesPerPage, totalActivities.length);
+            paginationInfo.textContent = `Showing ${startItem}-${endItem} of ${totalActivities.length} activities`;
+
+            // Update button states
+            prevBtn.disabled = currentActivityPage <= 1;
+            nextBtn.disabled = currentActivityPage >= totalPages;
+            
+            if (currentActivityPage <= 1) {
+                prevBtn.classList.add('disabled');
+            } else {
+                prevBtn.classList.remove('disabled');
+            }
+            
+            if (currentActivityPage >= totalPages) {
+                nextBtn.classList.add('disabled');
+            } else {
+                nextBtn.classList.remove('disabled');
+            }
+        }
+
+        function previousActivityPage() {
+            if (currentActivityPage > 1) {
+                currentActivityPage--;
+                renderActivityPage();
+            }
+        }
+
+        function nextActivityPage() {
+            const totalPages = Math.ceil(totalActivities.length / activitiesPerPage);
+            if (currentActivityPage < totalPages) {
+                currentActivityPage++;
+                renderActivityPage();
+            }
         }
         
         // Use the global language switching function
