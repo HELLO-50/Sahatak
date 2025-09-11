@@ -39,7 +39,11 @@ const VideoConsultation = {
     // Translation helper function
     translate(key, fallback = null) {
         if (LanguageManager && LanguageManager.translate) {
-            return LanguageManager.translate(key) || fallback || key;
+            const translation = LanguageManager.translate(key);
+            // If translation returns the key itself, it means translation not found
+            if (translation && translation !== key) {
+                return translation;
+            }
         }
         return fallback || key;
     },
