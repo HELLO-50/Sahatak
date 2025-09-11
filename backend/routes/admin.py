@@ -158,55 +158,66 @@ def dashboard():
         from datetime import datetime, timedelta
         from sqlalchemy import func
         
-        # Get basic statistics
-        total_users = User.query.count()
-        total_patients = User.query.filter_by(user_type='patient').count()
-        total_doctors = User.query.filter_by(user_type='doctor').count()
-        total_admins = User.query.filter_by(user_type='admin').count()
-        
-        # Get verified doctors count
-        verified_doctors = Doctor.query.filter_by(is_verified=True).count()
-        
-        # Get total appointments
-        total_appointments = Appointment.query.count()
-        
         # Get recent activity data (last 30 days)
         thirty_days_ago = datetime.utcnow() - timedelta(days=30)
         seven_days_ago = datetime.utcnow() - timedelta(days=7)
         
-        # User activity metrics
-        new_users_30d = User.query.filter(User.created_at >= thirty_days_ago).count()
-        new_users_7d = User.query.filter(User.created_at >= seven_days_ago).count()
-        active_users_7d = User.query.filter(User.last_activity_at >= seven_days_ago).count() if hasattr(User, 'last_activity_at') else 0
+        # Optimize with single query for user counts by type
+        user_stats = db.session.query(
+            func.count(User.id).label('total'),
+            func.sum(func.case([(User.user_type == 'patient', 1)], else_=0)).label('patients'),
+            func.sum(func.case([(User.user_type == 'doctor', 1)], else_=0)).label('doctors'),
+            func.sum(func.case([(User.user_type == 'admin', 1)], else_=0)).label('admins'),
+            func.sum(func.case([(User.created_at >= thirty_days_ago, 1)], else_=0)).label('new_30d'),
+            func.sum(func.case([(User.created_at >= seven_days_ago, 1)], else_=0)).label('new_7d')
+        ).first()
         
-        # Appointment metrics
-        appointments_30d = Appointment.query.filter(Appointment.created_at >= thirty_days_ago).count()
-        appointments_7d = Appointment.query.filter(Appointment.created_at >= seven_days_ago).count()
-        completed_appointments = Appointment.query.filter_by(status='completed').count()
+        total_users = user_stats.total
+        total_patients = user_stats.patients
+        total_doctors = user_stats.doctors
+        total_admins = user_stats.admins
+        new_users_30d = user_stats.new_30d
+        new_users_7d = user_stats.new_7d
         
-        # User registration trends (last 7 days)
-        registration_trends = []
-        for i in range(6, -1, -1):  # Start from 6 days ago and go to today
-            day_start = datetime.utcnow() - timedelta(days=i+1)
-            day_end = datetime.utcnow() - timedelta(days=i)
-            count = User.query.filter(User.created_at >= day_start, User.created_at < day_end).count()
-            registration_trends.append({
-                'date': day_start.strftime('%Y-%m-%d'),
-                'count': count
-            })
-        # No need to reverse since we're already building in chronological order
+        # Get verified doctors count
+        verified_doctors = Doctor.query.filter_by(is_verified=True).count()
         
-        # Appointment booking trends (last 7 days)
-        appointment_trends = []
-        for i in range(6, -1, -1):  # Start from 6 days ago and go to today
-            day_start = datetime.utcnow() - timedelta(days=i+1)
-            day_end = datetime.utcnow() - timedelta(days=i)
-            count = Appointment.query.filter(Appointment.created_at >= day_start, Appointment.created_at < day_end).count()
-            appointment_trends.append({
-                'date': day_start.strftime('%Y-%m-%d'),
-                'count': count
-            })
-        # No need to reverse since we're already building in chronological order
+        # Optimize appointment queries
+        appointment_stats = db.session.query(
+            func.count(Appointment.id).label('total'),
+            func.sum(func.case([(Appointment.created_at >= thirty_days_ago, 1)], else_=0)).label('appt_30d'),
+            func.sum(func.case([(Appointment.created_at >= seven_days_ago, 1)], else_=0)).label('appt_7d'),
+            func.sum(func.case([(Appointment.status == 'completed', 1)], else_=0)).label('completed')
+        ).first()
+        
+        total_appointments = appointment_stats.total
+        appointments_30d = appointment_stats.appt_30d
+        appointments_7d = appointment_stats.appt_7d
+        completed_appointments = appointment_stats.completed
+        
+        # Remove slow last_activity_at query - set to 0 for now
+        active_users_7d = 0
+        
+        # Optimize trends queries - use simplified trends for performance
+        # Get daily user registrations (more efficient query)
+        user_trend_data = db.session.query(
+            func.date(User.created_at).label('date'),
+            func.count(User.id).label('count')
+        ).filter(User.created_at >= seven_days_ago).group_by(func.date(User.created_at)).all()
+        
+        registration_trends = [
+            {'date': str(date), 'count': count} for date, count in user_trend_data
+        ]
+        
+        # Get daily appointment bookings (more efficient query)  
+        appt_trend_data = db.session.query(
+            func.date(Appointment.created_at).label('date'),
+            func.count(Appointment.id).label('count')
+        ).filter(Appointment.created_at >= seven_days_ago).group_by(func.date(Appointment.created_at)).all()
+        
+        appointment_trends = [
+            {'date': str(date), 'count': count} for date, count in appt_trend_data
+        ]
         
         # Doctor specialty distribution
         specialty_stats = db.session.query(
@@ -237,8 +248,10 @@ def dashboard():
         
         system_health = min(100, max(0, 100 - (error_rate * 10)))  # Simple calculation
         
-        # Get recent activities (last 10)
-        recent_users = User.query.order_by(User.created_at.desc()).limit(10).all()
+        # Get recent activities (last 10) - only select needed fields for performance
+        recent_users = User.query.with_entities(
+            User.id, User.full_name, User.user_type, User.created_at
+        ).order_by(User.created_at.desc()).limit(10).all()
         
         return APIResponse.success(
             data={
