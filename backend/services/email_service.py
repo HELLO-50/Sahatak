@@ -28,9 +28,16 @@ class EmailService:
             app.config.setdefault('MAIL_PASSWORD', os.getenv('MAIL_PASSWORD'))
             app.config.setdefault('MAIL_DEFAULT_SENDER', os.getenv('MAIL_DEFAULT_SENDER', os.getenv('MAIL_USERNAME')))
             
+            # Log configuration details for debugging (without exposing sensitive data)
+            app_logger.info(f"Email config - Server: {app.config.get('MAIL_SERVER')} Port: {app.config.get('MAIL_PORT')}")
+            app_logger.info(f"Email config - Username: {app.config.get('MAIL_USERNAME')} TLS: {app.config.get('MAIL_USE_TLS')}")
+            
             self.mail = Mail(app)
             app_logger.info("Email service initialized successfully")
             
+        except ImportError as ie:
+            app_logger.error(f"Flask-Mail not installed: {str(ie)} - Please install with: pip install Flask-Mail")
+            self.mail = None
         except Exception as e:
             app_logger.error(f"Failed to initialize email service: {str(e)}")
             self.mail = None

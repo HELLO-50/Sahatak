@@ -1188,7 +1188,7 @@ def verify_doctor(doctor_id):
                 'doctor_id': doctor_id,
                 'approved': approved,
                 'notes': notes,
-                'verification_date': datetime.utcnow().isoformat()
+                'verification_reviewed_at': datetime.utcnow().isoformat()
             }
         )
             
@@ -1208,7 +1208,7 @@ def verify_doctor(doctor_id):
             data={
                 'doctor_id': doctor_id,
                 'verified': approved,
-                'verification_date': doctor.verification_date.isoformat() if approved else None,
+                'verification_date': doctor.verification_reviewed_at.isoformat() if doctor.verification_reviewed_at else None,
                 'notes': notes
             },
             message=f"Doctor {'verified' if approved else 'rejected'} successfully"
@@ -1302,9 +1302,9 @@ def add_doctor_manually():
             bio=data.get('bio', '').strip(),
             consultation_fee=data.get('consultation_fee', 0),
             is_verified=True,
-            verification_date=datetime.utcnow(),
-            verified_by=current_user.id,
-            verification_notes=f"Manually added by admin {current_user.email}",
+            verification_reviewed_at=datetime.utcnow(),
+            verified_by_admin_id=current_user.id,
+            verification_status='approved',
             created_at=datetime.utcnow()
         )
         db.session.add(new_doctor)
