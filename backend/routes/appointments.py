@@ -277,8 +277,7 @@ def create_appointment():
             db.session.add(appointment)
             db.session.commit()  # Commit the transaction
             
-            # Invalidate related caches
-            invalidate_appointment_cache()
+            # No caching - real-time data for medical appointments
             
         except Exception as e:
             db.session.rollback()
@@ -512,6 +511,8 @@ def cancel_appointment(appointment_id):
         
         db.session.commit()
         
+        # No caching - real-time data
+        
         # Log the cancellation
         log_user_action(
             current_user.id,
@@ -610,6 +611,8 @@ def reschedule_appointment(appointment_id):
         appointment.updated_at = datetime.utcnow()
         
         db.session.commit()
+        
+        # No caching - real-time data
         
         # Log the reschedule
         log_user_action(
@@ -907,6 +910,8 @@ def start_video_session(appointment_id):
         
         db.session.commit()
         
+        # No caching - real-time data
+        
         # Log session event
         VideoConferenceService.log_session_event(
             appointment_id=appointment_id,
@@ -1130,6 +1135,8 @@ def complete_appointment(appointment_id):
         appointment.completed_at = datetime.utcnow()
         
         db.session.commit()
+        
+        # No caching - real-time data
         
         # Log completion activity
         from services.video_conf_service import VideoConferenceService

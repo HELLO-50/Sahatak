@@ -32,7 +32,14 @@ class QueryCache:
     
     def get(self, query_str, params=None):
         """Get cached result if available and not expired"""
-        key = self._generate_key(query_str, params)
+        # Handle both direct keys (from @cached_query) and query-based keys
+        if params is None and isinstance(query_str, str) and len(query_str) > 32:
+            # Likely already a direct key from @cached_query decorator
+            key = query_str
+        else:
+            # Generate key from query and params
+            key = self._generate_key(query_str, params)
+            
         if key in self.cache:
             result, timestamp, ttl = self.cache[key]
             if time.time() - timestamp < ttl:
@@ -47,7 +54,15 @@ class QueryCache:
         """Cache query result"""
         if ttl is None:
             ttl = self.default_ttl
-        key = self._generate_key(query_str, params)
+            
+        # Handle both direct keys (from @cached_query) and query-based keys
+        if params is None and isinstance(query_str, str) and len(query_str) > 32:
+            # Likely already a direct key from @cached_query decorator
+            key = query_str
+        else:
+            # Generate key from query and params
+            key = self._generate_key(query_str, params)
+            
         self.cache[key] = (result, time.time(), ttl)
         app_logger.debug(f"Cache set: {key[:12]}... (TTL: {ttl}s)")
     
@@ -60,8 +75,8 @@ class QueryCache:
         """Clear cache entries matching pattern"""
         keys_to_remove = []
         for key in self.cache:
-            query_str = list(self.cache[key])[0] if self.cache[key] else ""
-            if pattern in str(query_str):
+            # Check the cache key itself, not the cached result
+            if pattern in str(key):
                 keys_to_remove.append(key)
         
         for key in keys_to_remove:
@@ -245,6 +260,9 @@ def invalidate_user_cache(user_id):
 
 def invalidate_appointment_cache():
     """Invalidate appointment-related cache"""
+    # Clear patterns that match function names used by @cached_query decorator
+    query_cache.clear_pattern("get_patient_appointments")
+    query_cache.clear_pattern("get_doctor_appointments")
     query_cache.clear_pattern("appointment")
     query_cache.clear_pattern("availability")
 
@@ -276,7 +294,6 @@ class OptimizedQueries:
         ).all()
     
     @staticmethod
-    @cached_query(ttl=300)  # Cache for 5 minutes
     def get_patient_appointments(patient_id):
         """Get patient appointments with doctor info"""
         from models import Appointment, Doctor, User
@@ -289,7 +306,6 @@ class OptimizedQueries:
         ).all()
     
     @staticmethod
-    @cached_query(ttl=300)  # Cache for 5 minutes
     def get_doctor_appointments(doctor_id):
         """Get doctor appointments with patient info (excluding completed ones)"""
         from models import Appointment, Patient, User
