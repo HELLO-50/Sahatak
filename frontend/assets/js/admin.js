@@ -1657,7 +1657,7 @@ const AdminDashboard = {
                                 <button class="btn btn-success btn-sm" onclick="AdminDashboard.approveDoctor(${doctor.id})" title="Approve">
                                     <i class="bi bi-check me-1"></i>Approve
                                 </button>
-                                <button class="btn btn-danger btn-sm" onclick="AdminDashboard.rejectDoctor(${doctor.id})" title="Reject">
+                                <button class="btn btn-danger btn-sm" onclick="console.log('Reject button clicked for doctor ${doctor.id}'); AdminDashboard.rejectDoctor(${doctor.id})" title="Reject">
                                     <i class="bi bi-x me-1"></i>Reject
                                 </button>
                                 <button class="btn btn-outline-info btn-sm" onclick="AdminDashboard.viewDoctorDetails(${doctor.id})" title="View Details">
@@ -1709,16 +1709,26 @@ const AdminDashboard = {
 
     // Reject doctor
     async rejectDoctor(doctorId) {
+        console.log('rejectDoctor called with doctorId:', doctorId);
         let reason = prompt('Enter reason for rejection (required):');
-        if (reason === null) return; // User cancelled
+        if (reason === null) {
+            console.log('User cancelled rejection');
+            return; // User cancelled
+        }
         
         // Keep asking until they provide a reason
         while (!reason || reason.trim() === '') {
             reason = prompt('Rejection reason is required. Please enter a reason:');
-            if (reason === null) return; // User cancelled
+            if (reason === null) {
+                console.log('User cancelled rejection after retry');
+                return; // User cancelled
+            }
         }
+        
+        console.log('Proceeding with rejection, reason:', reason);
 
         try {
+            console.log('Making API request to reject doctor:', doctorId);
             const response = await AdminAuth.apiRequest(`/admin/doctors/${doctorId}/verify`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1727,7 +1737,9 @@ const AdminDashboard = {
                     notes: reason.trim()
                 })
             });
+            console.log('Response status:', response.status);
             const data = await response.json();
+            console.log('Response data:', data);
 
             if (data.success) {
                 this.showNotification('Doctor rejected successfully', 'success');
