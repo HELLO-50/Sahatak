@@ -402,7 +402,27 @@ const AvailabilityManager = {
                     
                     if (dayData.appointments && dayData.appointments.length > 0) {
                         html += `<div class="day-appointments">`;
-                        html += `<span class="appointment-count">${dayData.appointments.length} مواعيد</span>`;
+                        
+                        // Show individual appointments with patient names and color coding
+                        dayData.appointments.forEach((appointment, index) => {
+                            if (index < 3) { // Show max 3 appointments, then show count
+                                const statusClass = this.getAppointmentStatusClass(appointment.status);
+                                const time = this.formatAppointmentTime(appointment.appointment_time || appointment.appointment_date);
+                                const patientName = appointment.patient_name || 'Patient';
+                                
+                                html += `<div class="appointment-item ${statusClass}" data-appointment-id="${appointment.id}" onclick="AvailabilityManager.showAppointmentDetails(${appointment.id})">`;
+                                html += `<div class="appointment-time">${time}</div>`;
+                                html += `<div class="appointment-patient">${patientName}</div>`;
+                                html += `</div>`;
+                            }
+                        });
+                        
+                        // Show "+X more" if there are more appointments
+                        if (dayData.appointments.length > 3) {
+                            const remaining = dayData.appointments.length - 3;
+                            html += `<div class="appointment-more">+${remaining} more</div>`;
+                        }
+                        
                         html += `</div>`;
                     }
                     
@@ -662,6 +682,180 @@ const AvailabilityManager = {
         }
     },
     
+    // Get appointment status CSS class based on status
+    getAppointmentStatusClass(status) {
+        switch (status?.toLowerCase()) {
+            case 'completed':
+                return 'appointment-completed'; // Green
+            case 'cancelled':
+                return 'appointment-cancelled'; // Red
+            case 'in_progress':
+                return 'appointment-ongoing'; // Blue
+            case 'scheduled':
+            case 'confirmed':
+            default:
+                return 'appointment-upcoming'; // Gray
+        }
+    },
+    
+    // Format appointment time for display
+    formatAppointmentTime(dateTimeString) {
+        if (!dateTimeString) return '';
+        
+        try {
+            const date = new Date(dateTimeString);
+            return date.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+            });
+        } catch (error) {
+            console.error('Error formatting time:', error);
+            return '';
+        }
+    },
+    
+    // Show appointment details modal
+    async showAppointmentDetails(appointmentId) {
+        try {
+            const response = await ApiHelper.makeRequest(`/appointments/${appointmentId}`);
+            
+            if (response.success) {
+                const appointment = response.data;
+                this.displayAppointmentModal(appointment);
+            } else {
+                throw new Error(response.message);
+            }
+        } catch (error) {
+            console.error('Error loading appointment details:', error);
+            this.showAlert('error', 'Failed to load appointment details');
+        }
+    },
+    
+    // Display appointment details in modal
+    displayAppointmentModal(appointment) {
+        const modalHtml = `
+            <div class="modal fade" id="appointmentDetailsModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="bi bi-calendar-check me-2"></i>
+                                Appointment Details
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row mb-3">
+                                <div class="col-sm-4"><strong>Patient:</strong></div>
+                                <div class="col-sm-8">${appointment.patient_name || 'N/A'}</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-4"><strong>Date & Time:</strong></div>
+                                <div class="col-sm-8">${this.formatAppointmentDateTime(appointment.appointment_date)}</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-4"><strong>Status:</strong></div>
+                                <div class="col-sm-8">
+                                    <span class="badge ${this.getStatusBadgeClass(appointment.status)}">${appointment.status}</span>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-4"><strong>Type:</strong></div>
+                                <div class="col-sm-8">${appointment.appointment_type || 'Regular'}</div>
+                            </div>
+                            ${appointment.session_started_at ? `
+                                <div class="row mb-3">
+                                    <div class="col-sm-4"><strong>Duration:</strong></div>
+                                    <div class="col-sm-8">${this.calculateDuration(appointment)}</div>
+                                </div>
+                            ` : ''}
+                            ${appointment.notes ? `
+                                <div class="row mb-3">
+                                    <div class="col-sm-4"><strong>Notes:</strong></div>
+                                    <div class="col-sm-8">${appointment.notes}</div>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Remove existing modal if any
+        const existingModal = document.getElementById('appointmentDetailsModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        // Add modal to body
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('appointmentDetailsModal'));
+        modal.show();
+    },
+    
+    // Format full appointment date and time
+    formatAppointmentDateTime(dateTimeString) {
+        if (!dateTimeString) return 'N/A';
+        
+        try {
+            const date = new Date(dateTimeString);
+            return date.toLocaleString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (error) {
+            return dateTimeString;
+        }
+    },
+    
+    // Get status badge class
+    getStatusBadgeClass(status) {
+        switch (status?.toLowerCase()) {
+            case 'completed':
+                return 'bg-success';
+            case 'cancelled':
+                return 'bg-danger';
+            case 'in_progress':
+                return 'bg-primary';
+            case 'scheduled':
+            case 'confirmed':
+            default:
+                return 'bg-secondary';
+        }
+    },
+    
+    // Calculate appointment duration
+    calculateDuration(appointment) {
+        if (!appointment.session_started_at) {
+            return 'Not started';
+        }
+        
+        const startTime = new Date(appointment.session_started_at);
+        const endTime = appointment.completed_at ? 
+            new Date(appointment.completed_at) : 
+            (appointment.session_ended_at ? new Date(appointment.session_ended_at) : new Date());
+        
+        const durationMs = endTime - startTime;
+        const minutes = Math.floor(durationMs / 60000);
+        const hours = Math.floor(minutes / 60);
+        
+        if (hours > 0) {
+            return `${hours}h ${minutes % 60}m`;
+        } else {
+            return `${minutes}m`;
+        }
+    },
+
     // Show alert message
     showAlert(type, message) {
         const container = document.getElementById('alert-container');
