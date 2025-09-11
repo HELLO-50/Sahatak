@@ -244,7 +244,23 @@
 
         // Initialize records dashboard on page load
         document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🔧 Medical Records: Starting initialization...');
+            
+            // Load translations first
+            await LanguageManager.loadTranslations();
+            console.log('🌐 Medical Records: Translations loaded');
+            
+            // Get saved language
+            const savedLanguage = LanguageManager.getLanguage() || 'ar';
+            console.log('🔤 Medical Records: Using language:', savedLanguage);
+            
+            // Check if translations exist
+            const translations = LanguageManager.translations[savedLanguage];
+            console.log('📚 Medical Records: Available translation sections:', translations ? Object.keys(translations) : 'NONE');
+            console.log('📋 Medical Records: Records section exists:', !!translations?.records);
+            
             await DashboardTranslations.initializeDashboard('records');
+            console.log('✅ Medical Records: Dashboard initialization completed');
             
             // Set up event listeners
             setupEventListeners();

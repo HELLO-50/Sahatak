@@ -802,28 +802,30 @@ DashboardTranslations.updateRecordsDashboard = function(lang) {
     this.updateElementText('nav-back', t.auth?.back || 'Back');
     this.updateElementText('btn-logout', t.dashboard?.patient?.buttons?.logout || 'Logout');
     
-    // Stats
-    this.updateElementText('total-records-count', records.stats?.total_records || 'Total Records');
-    this.updateElementText('active-prescriptions-count', records.stats?.active_prescriptions || 'Active Prescriptions');
-    this.updateElementText('recent-updates-count', records.stats?.recent_updates || 'Recent Updates');
-    this.updateElementText('last-update-days', records.stats?.days_since_update || 'Days Since Update');
+    // Stats - use medical_dashboard section for these specific IDs
+    const medicalDashboard = t.medical_dashboard;
+    this.updateElementText('history-completion', records.stats?.history_completion || medicalDashboard?.['stat-history-completion']);
+    this.updateElementText('active-prescriptions-count', records.stats?.active_prescriptions || medicalDashboard?.['stat-active-prescriptions']);
+    this.updateElementText('recent-updates-count', records.stats?.recent_updates || medicalDashboard?.['stat-recent-updates']);
+    this.updateElementText('last-update-days', records.stats?.days_since_update || medicalDashboard?.['stat-days-since-update']);
     
-    this.updateElementText('stat-total-records', records.stats?.total_records);
-    this.updateElementText('stat-active-prescriptions', records.stats?.active_prescriptions);
-    this.updateElementText('stat-recent-updates', records.stats?.recent_updates);
-    this.updateElementText('stat-days-since-update', records.stats?.days_since_update);
+    // Stat labels - use medical_dashboard section as primary source
+    this.updateElementText('stat-history-completion', medicalDashboard?.['stat-history-completion'] || records.stats?.history_completion);
+    this.updateElementText('stat-active-prescriptions', medicalDashboard?.['stat-active-prescriptions'] || records.stats?.active_prescriptions);
+    this.updateElementText('stat-recent-updates', medicalDashboard?.['stat-recent-updates'] || records.stats?.recent_updates);
+    this.updateElementText('stat-days-since-update', medicalDashboard?.['stat-days-since-update'] || records.stats?.days_since_update);
 
-    // Navigation cards
-    this.updateElementText('medical-history-card-title', records.navigation?.medical_history);
-    this.updateElementText('medical-history-card-desc', records.navigation?.medical_history_desc);
-    this.updateElementText('prescriptions-card-title', records.navigation?.prescriptions);
-    this.updateElementText('prescriptions-card-desc', records.navigation?.prescriptions_desc);
+    // Navigation cards - use medical_dashboard section as primary source
+    this.updateElementText('medical-history-card-title', medicalDashboard?.['medical-history-card-title'] || records.navigation?.medical_history);
+    this.updateElementText('medical-history-card-desc', medicalDashboard?.['medical-history-card-desc'] || records.navigation?.medical_history_desc);
+    this.updateElementText('prescriptions-card-title', medicalDashboard?.['prescriptions-card-title'] || records.navigation?.prescriptions);
+    this.updateElementText('prescriptions-card-desc', medicalDashboard?.['prescriptions-card-desc'] || records.navigation?.prescriptions_desc);
 
-    // Buttons
-    this.updateElementText('view-complete-history-btn', records.buttons?.view_complete_history || 'View Complete History');
-    this.updateElementText('update-history-btn', records.buttons?.update_data || 'Update Data');
-    this.updateElementText('view-all-prescriptions-btn', records.buttons?.view_all_prescriptions || 'View All Prescriptions');
-    this.updateElementText('active-prescriptions-btn', records.buttons?.active_prescriptions || 'Active Prescriptions');
+    // Buttons - use medical_dashboard section as primary source
+    this.updateElementText('view-complete-history-btn', medicalDashboard?.['view-complete-history-btn'] || records.buttons?.view_complete_history || 'View Complete History');
+    this.updateElementText('update-history-btn', medicalDashboard?.['update-history-btn'] || records.buttons?.update_data || 'Update Data');
+    this.updateElementText('view-all-prescriptions-btn', medicalDashboard?.['view-all-prescriptions-btn'] || records.buttons?.view_all_prescriptions || 'View All Prescriptions');
+    this.updateElementText('active-prescriptions-btn', medicalDashboard?.['active-prescriptions-btn'] || records.buttons?.active_prescriptions || 'Active Prescriptions');
 
     // Recent Activity
     this.updateElementText('recent-activity-title', records.recent_activity?.title);

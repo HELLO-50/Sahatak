@@ -12,13 +12,13 @@ class Option2Chatbot {
         // Initialize translations
         this.translations = {
             en: {
-                page_title: "Option 2: Hugging Face Local Model",
-                page_subtitle: "Lightweight local AI model optimized for 2G networks",
-                performance_text: "Fast & Offline",
-                chat_title: "Local AI Assistant",
-                chat_subtitle: "Arabic Healthcare BERT Model",
+                page_title: "AI Symptom Assessment",
+                page_subtitle: "Get personalized healthcare recommendations based on your symptoms",
+                performance_text: "Quick Assessment",
+                chat_title: "AI Symptom Assistant",
+                chat_subtitle: "Medical Triage & Assessment",
                 offline_text: "Works Offline",
-                welcome_message: "Hello! I'm your local AI medical assistant. I can analyze your symptoms quickly using an offline model optimized for Arabic and English. Please describe how you're feeling.",
+                welcome_message: "Hello! I'm your AI symptom assessment assistant. I'll ask you follow-up questions about your symptoms and provide one of three recommendations: schedule on this platform, visit ER immediately, or see a doctor in person. Please describe your symptoms.",
                 model_info: "Model: ArabicBERT-Health | Response time: ~150ms | Works offline",
                 input_placeholder: "Describe your symptoms...",
                 input_help: "Processing happens locally on your device - no data sent to external servers",
@@ -31,18 +31,18 @@ class Option2Chatbot {
                 error_network: "Local processing error. Please try again.",
                 error_processing: "Sorry, I couldn't analyze your symptoms. Please try again.",
                 error_empty_message: "Please enter your symptoms before sending.",
-                triage_emergency: "⚠️ URGENT: Your symptoms suggest you need immediate medical attention. Please go to the nearest emergency room or call emergency services right away.",
-                triage_appointment: "✅ Based on your symptoms, you can schedule an appointment with a doctor on our platform. This seems suitable for online consultation.",
-                triage_local_doctor: "🏥 Your symptoms require in-person examination. Please visit a doctor in your local area for proper diagnosis and treatment."
+                triage_emergency: "⚠️ You need to go to the nearest ER immediately.",
+                triage_telemedicine: "✅ You can be seen on this platform, please schedule an appointment.",
+                triage_in_person: "🏥 You need to be seen in person, please schedule an appointment with your primary care or with any physician."
             },
             ar: {
-                page_title: "الخيار الثاني: نموذج محلي من Hugging Face",
-                page_subtitle: "نموذج ذكاء اصطناعي محلي خفيف محسن لشبكات 2G",
-                performance_text: "سريع وبدون اتصال",
-                chat_title: "المساعد الذكي المحلي",
-                chat_subtitle: "نموذج BERT العربي للرعاية الصحية",
+                page_title: "تقييم الأعراض بالذكاء الاصطناعي",
+                page_subtitle: "احصل على توصيات رعاية صحية مخصصة بناءً على أعراضك",
+                performance_text: "تقييم سريع",
+                chat_title: "مساعد تقييم الأعراض",
+                chat_subtitle: "الفرز الطبي والتقييم",
                 offline_text: "يعمل بدون اتصال",
-                welcome_message: "مرحباً بك في مساعد صحتك الذكي المحلي. يمكنني تحليل أعراضك بسرعة باستخدام نموذج محلي محسن للعربية والإنجليزية. يرجى وصف شعورك.",
+                welcome_message: "مرحباً! أنا مساعد تقييم الأعراض بالذكاء الاصطناعي. سأطرح عليك أسئلة متابعة حول أعراضك وأقدم واحدة من ثلاث توصيات: حجز موعد على هذه المنصة، أو الذهاب للطوارئ فوراً، أو زيارة طبيب شخصياً. يرجى وصف أعراضك.",
                 model_info: "النموذج: ArabicBERT-Health | وقت الاستجابة: ~150 مللي ثانية | يعمل بدون اتصال",
                 input_placeholder: "اوصف أعراضك...",
                 input_help: "تتم المعالجة محلياً على جهازك - لا يتم إرسال بيانات لخوادم خارجية",
@@ -55,9 +55,9 @@ class Option2Chatbot {
                 error_network: "خطأ في المعالجة المحلية. يرجى إعادة المحاولة.",
                 error_processing: "عذراً، لم أستطع تحليل أعراضك. يرجى إعادة المحاولة.",
                 error_empty_message: "يرجى إدخال أعراضك قبل الإرسال.",
-                triage_emergency: "⚠️ عاجل: أعراضك تشير إلى أنك تحتاج إلى عناية طبية فورية. يرجى الذهاب إلى أقرب قسم طوارئ أو الاتصال بخدمات الطوارئ فوراً.",
-                triage_appointment: "✅ بناءً على أعراضك، يمكنك حجز موعد مع طبيب على منصتنا. هذا يبدو مناسباً للاستشارة الطبية عبر الإنترنت.",
-                triage_local_doctor: "🏥 أعراضك تتطلب فحصاً شخصياً. يرجى زيارة طبيب في منطقتك للحصول على تشخيص وعلاج مناسب."
+                triage_emergency: "⚠️ تحتاج للذهاب إلى أقرب قسم طوارئ فوراً.",
+                triage_telemedicine: "✅ يمكن فحصك على هذه المنصة، يرجى حجز موعد.",
+                triage_in_person: "🏥 تحتاج للفحص الشخصي، يرجى حجز موعد مع طبيب الرعاية الأولية أو أي طبيب."
             }
         };
 
@@ -345,10 +345,10 @@ class Option2Chatbot {
         switch (triageResult) {
             case 'emergency':
                 return translations.triage_emergency;
-            case 'appointment':
-                return translations.triage_appointment;
-            case 'local_doctor':
-                return translations.triage_local_doctor;
+            case 'telemedicine':
+                return translations.triage_telemedicine;
+            case 'in_person':
+                return translations.triage_in_person;
             default:
                 return '';
         }

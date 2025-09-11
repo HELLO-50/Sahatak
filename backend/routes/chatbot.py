@@ -17,30 +17,40 @@ chatbot_logger = app_logger
 
 # Medical AI System Prompts
 MEDICAL_SYSTEM_PROMPT = {
-    'en': '''You are a medical AI assistant for telemedicine triage. Your role is to:
-1. Analyze patient symptoms described in natural language
-2. Determine if symptoms require: EMERGENCY care, ONLINE appointment, or LOCAL doctor visit
-3. Provide brief, clear recommendations
-4. Never diagnose specific conditions - only recommend care levels
+    'en': '''You are a medical AI assistant for symptom assessment. Your only role is to:
+1. Ask follow-up questions to understand patient symptoms better
+2. Collect symptom details (severity, duration, associated symptoms)
+3. Provide exactly ONE of these three recommendations:
+   - "telemedicine": You can be seen on this platform, please schedule an appointment
+   - "emergency": You need to go to the nearest ER immediately 
+   - "in_person": You need to be seen in person, please schedule an appointment with your primary care or with any physician
 
-Respond with:
-- Brief analysis of symptoms
-- Recommended action: emergency/appointment/local_doctor
-- Short explanation (1-2 sentences)
+Guidelines:
+- NEVER provide medical diagnoses or treatment advice
+- Ask specific follow-up questions about symptoms
+- Focus on symptom assessment only
+- Emergency for: chest pain, difficulty breathing, loss of consciousness, severe bleeding, stroke signs, severe injury
+- Telemedicine for: mild symptoms that can be evaluated remotely (cold, mild fever, basic questions)
+- In-person for: physical symptoms requiring examination (rash, injury, persistent pain, physical findings needed)
 
-IMPORTANT: Always recommend emergency care for chest pain, difficulty breathing, loss of consciousness, severe bleeding, or signs of stroke.''',
-    'ar': '''أنت مساعد ذكي طبي لفرز المرضى في التطبيب عن بعد. دورك:
-1. تحليل أعراض المرضى الموصوفة باللغة الطبيعية
-2. تحديد ما إذا كانت الأعراض تتطلب: رعاية طارئة، موعد عبر الإنترنت، أو زيارة طبيب محلي
-3. تقديم توصيات واضحة ومختصرة
-4. لا تشخص حالات محددة - فقط أوصِ بمستويات الرعاية
+Always conclude with exactly one of the three recommendations above.''',
+    'ar': '''أنت مساعد ذكي لتقييم الأعراض الطبية. دورك الوحيد:
+1. طرح أسئلة متابعة لفهم أعراض المريض بشكل أفضل
+2. جمع تفاصيل الأعراض (الشدة، المدة، الأعراض المصاحبة)
+3. تقديم واحدة فقط من هذه التوصيات الثلاث:
+   - "telemedicine": يمكن فحصك على هذه المنصة، يرجى حجز موعد
+   - "emergency": تحتاج للذهاب إلى أقرب قسم طوارئ فوراً
+   - "in_person": تحتاج للفحص الشخصي، يرجى حجز موعد مع طبيب الرعاية الأولية أو أي طبيب
 
-أجب بـ:
-- تحليل مختصر للأعراض
-- الإجراء الموصى به: emergency/appointment/local_doctor
-- شرح مختصر (جملة أو جملتان)
+الإرشادات:
+- لا تقدم أبداً تشخيصاً طبياً أو نصائح علاجية
+- اطرح أسئلة متابعة محددة حول الأعراض
+- ركز على تقييم الأعراض فقط
+- طوارئ للأعراض: ألم الصدر، صعوبة التنفس، فقدان الوعي، النزيف الشديد، علامات الجلطة، إصابة شديدة
+- طب عن بُعد للأعراض: الأعراض البسيطة التي يمكن تقييمها عن بُعد (برد، حمى بسيطة، أسئلة أساسية)
+- فحص شخصي للأعراض: الأعراض الجسدية التي تتطلب فحصاً (طفح جلدي، إصابة، ألم مستمر، حاجة لفحص جسدي)
 
-مهم: أوصِ دائماً برعاية طارئة لألم الصدر، صعوبة التنفس، فقدان الوعي، النزيف الشديد، أو علامات الجلطة.'''
+اختتم دائماً بواحدة بالضبط من التوصيات الثلاث أعلاه.'''
 }
 
 # Initialize AI models (will be loaded when needed)
@@ -53,16 +63,16 @@ chatbot_bp = Blueprint('chatbot', __name__)
 # Medical triage responses in both languages
 TRIAGE_RESPONSES = {
     'emergency': {
-        'en': "⚠️ URGENT: Your symptoms suggest you need immediate medical attention. Please go to the nearest emergency room or call emergency services right away.",
-        'ar': "⚠️ عاجل: أعراضك تشير إلى أنك تحتاج إلى عناية طبية فورية. يرجى الذهاب إلى أقرب قسم طوارئ أو الاتصال بخدمات الطوارئ فوراً."
+        'en': "⚠️ You need to go to the nearest ER immediately.",
+        'ar': "⚠️ تحتاج للذهاب إلى أقرب قسم طوارئ فوراً."
     },
-    'appointment': {
-        'en': "✅ Based on your symptoms, you can schedule an appointment with a doctor on our platform. This seems suitable for online consultation.",
-        'ar': "✅ بناءً على أعراضك، يمكنك حجز موعد مع طبيب على منصتنا. هذا يبدو مناسباً للاستشارة الطبية عبر الإنترنت."
+    'telemedicine': {
+        'en': "✅ You can be seen on this platform, please schedule an appointment.",
+        'ar': "✅ يمكن فحصك على هذه المنصة، يرجى حجز موعد."
     },
-    'local_doctor': {
-        'en': "🏥 Your symptoms require in-person examination. Please visit a doctor in your local area for proper diagnosis and treatment.",
-        'ar': "🏥 أعراضك تتطلب فحصاً شخصياً. يرجى زيارة طبيب في منطقتك للحصول على تشخيص وعلاج مناسب."
+    'in_person': {
+        'en': "🏥 You need to be seen in person, please schedule an appointment with your primary care or with any physician.",
+        'ar': "🏥 تحتاج للفحص الشخصي، يرجى حجز موعد مع طبيب الرعاية الأولية أو أي طبيب."
     }
 }
 
@@ -217,28 +227,30 @@ def analyze_symptoms_enhanced(symptoms, language='en', confidence=0.0):
     
     # Check for in-person consultation needs
     in_person_keywords = {
-        'en': ['rash', 'injury', 'wound', 'fracture', 'broken', 'cut', 'burn', 'swelling', 'lump'],
-        'ar': ['طفح جلدي', 'إصابة', 'جرح', 'كسر', 'مكسور', 'قطع', 'حرق', 'تورم', 'كتلة']
+        'en': ['rash', 'injury', 'wound', 'fracture', 'broken', 'cut', 'burn', 'swelling', 'lump', 'physical exam', 'examination needed'],
+        'ar': ['طفح جلدي', 'إصابة', 'جرح', 'كسر', 'مكسور', 'قطع', 'حرق', 'تورم', 'كتلة', 'فحص جسدي']
     }
     
     in_person_words = in_person_keywords.get(language, in_person_keywords['en'])
     for keyword in in_person_words:
         if keyword.lower() in symptoms_lower:
-            return 'local_doctor'
+            return 'in_person'
     
-    # Default to online appointment for other symptoms
-    return 'appointment'
+    # Default to telemedicine for other symptoms
+    return 'telemedicine'
 
 def extract_triage_decision(ai_response):
     """Extract triage decision from AI response"""
     response_lower = ai_response.lower()
     
-    if any(word in response_lower for word in ['emergency', 'urgent', 'immediate', 'طارئ', 'عاجل']):
+    if any(word in response_lower for word in ['emergency', 'urgent', 'immediate', 'طارئ', 'عاجل', 'er immediately']):
         return 'emergency'
-    elif any(word in response_lower for word in ['local', 'in-person', 'visit', 'محلي', 'شخصي', 'زيارة']):
-        return 'local_doctor'
+    elif any(word in response_lower for word in ['in-person', 'in person', 'primary care', 'شخصي', 'رعاية أولية']):
+        return 'in_person'
+    elif any(word in response_lower for word in ['telemedicine', 'platform', 'schedule', 'منصة', 'حجز موعد']):
+        return 'telemedicine'
     else:
-        return 'appointment'
+        return 'telemedicine'
 
 def generate_local_response(symptoms, triage_result, language):
     """Generate appropriate response for local model"""
@@ -253,8 +265,8 @@ def analyze_symptoms_rule_based(symptoms, language='en'):
     """Fallback rule-based analysis (kept for compatibility)"""
     return analyze_symptoms_enhanced(symptoms, language, 0.0)
 
-@chatbot_bp.route('/option1', methods=['POST'])
-def option1_chat():
+@chatbot_bp.route('/chat', methods=['POST'])
+def chat():
     """
     Option 1: OpenAI GPT-3.5-Turbo chatbot for medical triage
     """
