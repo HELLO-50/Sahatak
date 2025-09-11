@@ -4,11 +4,11 @@ import json
 import os
 from datetime import datetime
 from utils.responses import APIResponse, ErrorCodes
-from utils.logging_config import get_logger
+from utils.logging_config import app_logger
 from utils.validators import validate_required_fields
 
 # Initialize logger
-chatbot_logger = get_logger('chatbot')
+chatbot_logger = app_logger
 
 # Create blueprint
 chatbot_bp = Blueprint('chatbot', __name__)
