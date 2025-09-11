@@ -1,0 +1,822 @@
+/* Mobile Optimization for Patient Interfaces */
+
+/* ==========================================
+   MOBILE-FIRST PATIENT INTERFACE STYLES
+   ========================================== */
+
+/* Safe Area Support for iPhone/Android notches */
+.safe-area-top {
+    padding-top: constant(safe-area-inset-top);
+    padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+    padding-bottom: constant(safe-area-inset-bottom);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Mobile Navigation Enhancement */
+@media (max-width: 768px) {
+    .topbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        background: var(--medical-blue);
+        padding: calc(0.75rem + env(safe-area-inset-top)) 1rem 0.75rem 1rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .content {
+        padding-top: calc(60px + env(safe-area-inset-top));
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .dashboard-container {
+        padding-top: calc(80px + env(safe-area-inset-top));
+    }
+}
+
+/* Touch-Optimized Form Controls */
+@media (max-width: 768px) {
+    .form-control, .form-select {
+        min-height: 48px;
+        font-size: 16px; /* Prevent iOS zoom */
+        padding: 14px 16px;
+        border-radius: 12px;
+        border: 2px solid #e5e7eb;
+        transition: border-color 0.15s ease-in-out;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: var(--medical-blue);
+        box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+        outline: none;
+    }
+    
+    .form-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 0.5rem;
+    }
+    
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+    }
+}
+
+/* Enhanced Button Styling */
+@media (max-width: 768px) {
+    .btn {
+        min-height: 48px;
+        padding: 14px 24px;
+        font-size: 16px;
+        font-weight: 500;
+        border-radius: 12px;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-primary {
+        background: var(--medical-blue);
+        border: none;
+        color: white;
+    }
+    
+    .btn-primary:hover, .btn-primary:focus {
+        background: #1d4ed8;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+    
+    .btn-success {
+        background: var(--medical-green);
+        border: none;
+    }
+    
+    .btn-success:hover {
+        background: #047857;
+        transform: translateY(-1px);
+    }
+    
+    .btn-lg {
+        min-height: 56px;
+        padding: 16px 32px;
+        font-size: 18px;
+    }
+}
+
+/* Mobile Dashboard Cards */
+@media (max-width: 768px) {
+    .dashboard-cards {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 1rem;
+    }
+    
+    .dashboard-card {
+        padding: 1.5rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        background: white;
+        border: 1px solid #f1f5f9;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .dashboard-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+    
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .card-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--medical-blue);
+        margin: 0;
+    }
+    
+    .card-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        line-height: 1;
+        margin: 0.5rem 0;
+    }
+    
+    .card-subtitle {
+        font-size: 14px;
+        color: var(--secondary-color);
+        margin: 0;
+    }
+    
+    .card-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: white;
+        background: var(--medical-blue);
+    }
+}
+
+/* Mobile-Friendly Tables */
+@media (max-width: 768px) {
+    .table-responsive-mobile {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .table-responsive-mobile table {
+        min-width: 600px;
+        margin-bottom: 0;
+    }
+    
+    /* Stack table data for very small screens */
+    .table-stack {
+        display: block;
+        width: 100%;
+    }
+    
+    .table-stack thead {
+        display: none;
+    }
+    
+    .table-stack tbody tr {
+        display: block;
+        border: 1px solid #e5e7eb;
+        margin-bottom: 1rem;
+        border-radius: 12px;
+        padding: 1rem;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    
+    .table-stack tbody td {
+        display: block;
+        text-align: right;
+        border: none;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    
+    .table-stack tbody td:last-child {
+        border-bottom: none;
+    }
+    
+    .table-stack tbody td:before {
+        content: attr(data-label) ": ";
+        font-weight: 600;
+        color: var(--medical-blue);
+        float: left;
+    }
+}
+
+/* Mobile Appointment List */
+@media (max-width: 768px) {
+    .appointment-list {
+        padding: 0;
+    }
+    
+    .appointment-item {
+        display: block;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border-radius: 16px;
+        background: white;
+        border: 1px solid #f1f5f9;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        transition: all 0.2s ease;
+    }
+    
+    .appointment-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    }
+    
+    .appointment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+    
+    .appointment-doctor {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin: 0 0 0.25rem 0;
+    }
+    
+    .appointment-specialty {
+        font-size: 14px;
+        color: var(--secondary-color);
+        margin: 0;
+    }
+    
+    .appointment-status {
+        padding: 0.375rem 0.75rem;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+    
+    .appointment-status.scheduled {
+        background: rgba(107, 114, 128, 0.1);
+        color: #374151;
+    }
+    
+    .appointment-status.confirmed {
+        background: rgba(59, 130, 246, 0.1);
+        color: #1e40af;
+    }
+    
+    .appointment-status.completed {
+        background: rgba(34, 197, 94, 0.1);
+        color: #166534;
+    }
+    
+    .appointment-status.cancelled {
+        background: rgba(239, 68, 68, 0.1);
+        color: #991b1b;
+    }
+    
+    .appointment-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #f1f5f9;
+    }
+    
+    .appointment-detail {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 14px;
+    }
+    
+    .appointment-detail i {
+        color: var(--medical-blue);
+        width: 16px;
+    }
+    
+    .appointment-actions {
+        margin-top: 1rem;
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+    
+    .appointment-actions .btn {
+        flex: 1;
+        min-width: 120px;
+    }
+}
+
+/* Mobile Doctor Selection */
+@media (max-width: 768px) {
+    .doctor-card {
+        display: block;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border-radius: 16px;
+        background: white;
+        border: 2px solid #f1f5f9;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    
+    .doctor-card:hover, .doctor-card.selected {
+        border-color: var(--medical-blue);
+        box-shadow: 0 4px 20px rgba(37, 99, 235, 0.15);
+        transform: translateY(-2px);
+    }
+    
+    .doctor-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .doctor-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #22d3ee, #818cf8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 24px;
+        font-weight: 600;
+        flex-shrink: 0;
+    }
+    
+    .doctor-info h4 {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin: 0 0 0.25rem 0;
+    }
+    
+    .doctor-specialty {
+        font-size: 14px;
+        color: var(--secondary-color);
+        margin: 0 0 0.25rem 0;
+    }
+    
+    .doctor-experience {
+        font-size: 12px;
+        color: var(--medical-blue);
+        font-weight: 500;
+        margin: 0;
+    }
+    
+    .doctor-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #f1f5f9;
+    }
+    
+    .doctor-detail {
+        text-align: center;
+    }
+    
+    .doctor-detail-label {
+        font-size: 12px;
+        color: var(--secondary-color);
+        margin-bottom: 0.25rem;
+    }
+    
+    .doctor-detail-value {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--dark-color);
+    }
+    
+    .doctor-fee {
+        color: var(--medical-green);
+    }
+    
+    .doctor-rating {
+        color: #fbbf24;
+    }
+}
+
+/* Mobile Loading States */
+.mobile-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    gap: 1rem;
+    padding: 2rem;
+}
+
+.mobile-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(37, 99, 235, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--medical-blue);
+    animation: mobile-spin 1s linear infinite;
+}
+
+@keyframes mobile-spin {
+    to { transform: rotate(360deg); }
+}
+
+.mobile-loading-text {
+    font-size: 16px;
+    color: var(--secondary-color);
+    text-align: center;
+}
+
+/* Mobile Toast Notifications */
+@media (max-width: 768px) {
+    .mobile-toast {
+        position: fixed;
+        bottom: calc(20px + env(safe-area-inset-bottom));
+        left: 20px;
+        right: 20px;
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        z-index: 1000;
+        transform: translateY(100px);
+        transition: transform 0.3s ease;
+        font-size: 16px;
+        font-weight: 500;
+    }
+    
+    .mobile-toast.show {
+        transform: translateY(0);
+    }
+    
+    .mobile-toast.success {
+        background: var(--medical-green);
+        color: white;
+    }
+    
+    .mobile-toast.error {
+        background: var(--danger-color);
+        color: white;
+    }
+    
+    .mobile-toast.info {
+        background: var(--medical-blue);
+        color: white;
+    }
+}
+
+/* Mobile Form Validation */
+@media (max-width: 768px) {
+    .mobile-error-message {
+        color: var(--danger-color);
+        font-size: 14px;
+        margin-top: 0.5rem;
+        padding: 0.75rem 1rem;
+        background-color: rgba(220, 53, 69, 0.1);
+        border-radius: 8px;
+        border-left: 4px solid var(--danger-color);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .mobile-error-message i {
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+    
+    .form-control.is-invalid {
+        border-color: var(--danger-color);
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+}
+
+/* Mobile Medical History Form */
+@media (max-width: 768px) {
+    .medical-history-section {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        border: 1px solid #f1f5f9;
+    }
+    
+    .medical-history-section h3 {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--medical-blue);
+        margin: 0 0 1rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .medical-history-section h3 i {
+        font-size: 24px;
+    }
+    
+    .condition-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        background: #f8fafc;
+        border-radius: 12px;
+        border: 2px solid transparent;
+        transition: all 0.2s ease;
+    }
+    
+    .condition-checkbox:hover {
+        background: #f1f5f9;
+    }
+    
+    .condition-checkbox.checked {
+        background: rgba(37, 99, 235, 0.05);
+        border-color: var(--medical-blue);
+    }
+    
+    .condition-checkbox input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        border: 2px solid #d1d5db;
+        margin: 0;
+    }
+    
+    .condition-checkbox input[type="checkbox"]:checked {
+        background: var(--medical-blue);
+        border-color: var(--medical-blue);
+    }
+    
+    .condition-label {
+        font-size: 16px;
+        color: var(--dark-color);
+        flex: 1;
+        cursor: pointer;
+    }
+}
+
+/* Mobile Prescription View */
+@media (max-width: 768px) {
+    .prescription-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        border: 1px solid #f1f5f9;
+    }
+    
+    .prescription-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+        gap: 1rem;
+    }
+    
+    .prescription-date {
+        font-size: 14px;
+        color: var(--secondary-color);
+        font-weight: 500;
+    }
+    
+    .prescription-doctor {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--medical-blue);
+        margin: 0.25rem 0;
+    }
+    
+    .prescription-status {
+        padding: 0.375rem 0.75rem;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+        white-space: nowrap;
+    }
+    
+    .prescription-medications {
+        border-top: 1px solid #f1f5f9;
+        padding-top: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .medication-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f8fafc;
+    }
+    
+    .medication-item:last-child {
+        border-bottom: none;
+    }
+    
+    .medication-name {
+        font-weight: 600;
+        color: var(--dark-color);
+        font-size: 16px;
+    }
+    
+    .medication-dosage {
+        font-size: 14px;
+        color: var(--secondary-color);
+    }
+    
+    .medication-instructions {
+        font-size: 14px;
+        color: var(--medical-blue);
+        font-weight: 500;
+    }
+}
+
+/* Mobile Bottom Actions */
+@media (max-width: 768px) {
+    .bottom-actions {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 1rem calc(1rem + env(safe-area-inset-right)) calc(1rem + env(safe-area-inset-bottom)) calc(1rem + env(safe-area-inset-left));
+        background: white;
+        border-top: 1px solid #e5e7eb;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        z-index: 50;
+    }
+    
+    .bottom-actions .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .bottom-actions .btn:last-child {
+        margin-bottom: 0;
+    }
+    
+    /* Add bottom padding to content when bottom actions are present */
+    .content-with-bottom-actions {
+        padding-bottom: calc(100px + env(safe-area-inset-bottom));
+    }
+}
+
+/* Mobile Video Consultation */
+@media (max-width: 768px) {
+    .video-consultation-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1000;
+        background: #000;
+    }
+    
+    #jitsi-container {
+        height: 100vh !important;
+        width: 100vw !important;
+    }
+    
+    .video-controls {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0,0,0,0.8);
+        padding: calc(1rem + env(safe-area-inset-bottom)) 1rem 1rem 1rem;
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        z-index: 1001;
+    }
+    
+    .video-control-btn {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+    
+    .video-control-btn.end-call {
+        background: var(--danger-color);
+    }
+    
+    .video-control-btn.mute {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .video-control-btn:hover {
+        transform: scale(1.1);
+    }
+}
+
+/* Mobile Accessibility */
+@media (max-width: 768px) {
+    /* Focus indicators for touch navigation */
+    .btn:focus-visible,
+    .nav-link:focus-visible,
+    input:focus-visible,
+    select:focus-visible {
+        outline: 3px solid var(--medical-blue);
+        outline-offset: 2px;
+    }
+    
+    /* High contrast mode support */
+    @media (prefers-contrast: high) {
+        .btn {
+            border: 2px solid currentColor;
+        }
+        
+        .card, .appointment-item, .doctor-card {
+            border: 2px solid #333;
+        }
+    }
+    
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+    
+    /* Skip link for mobile users */
+    .skip-link {
+        position: absolute;
+        top: -40px;
+        left: 6px;
+        background: var(--medical-blue);
+        color: white;
+        padding: 8px;
+        text-decoration: none;
+        border-radius: 4px;
+        z-index: 10000;
+        font-size: 14px;
+    }
+    
+    .skip-link:focus {
+        top: 6px;
+    }
+}
+
+/* Mobile Performance Optimizations */
+@media (max-width: 768px) {
+    /* Optimize animations for mobile */
+    .card, .btn, .appointment-item {
+        backface-visibility: hidden;
+        transform: translateZ(0);
+    }
+    
+    /* Reduce box-shadows on very small screens */
+    @media (max-width: 480px) {
+        .dashboard-card,
+        .appointment-item,
+        .doctor-card {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+    }
+}

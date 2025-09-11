@@ -1,0 +1,124 @@
+{
+  "name": "صحتك - Sahatak Telemedicine",
+  "short_name": "صحتك",
+  "description": "منصة طبية آمنة للتواصل مع الأطباء عن بُعد - Secure telemedicine platform for remote doctor consultations",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#2563eb",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "ar",
+  "dir": "rtl",
+  "categories": ["health", "medical", "productivity"],
+  "screenshots": [
+    {
+      "src": "frontend/assets/images/screenshots/mobile-dashboard.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "frontend/assets/images/screenshots/tablet-dashboard.png", 
+      "sizes": "768x1024",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "icons": [
+    {
+      "src": "frontend/assets/images/icons/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "frontend/assets/images/icons/icon-96.png",
+      "sizes": "96x96", 
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "frontend/assets/images/icons/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png", 
+      "purpose": "any"
+    },
+    {
+      "src": "frontend/assets/images/icons/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "frontend/assets/images/icons/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "frontend/assets/images/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "frontend/assets/images/icons/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "frontend/assets/images/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "حجز موعد",
+      "short_name": "حجز",
+      "description": "حجز موعد جديد مع طبيب",
+      "url": "/frontend/pages/appointments/book-appointment.html",
+      "icons": [
+        {
+          "src": "frontend/assets/images/icons/shortcut-appointment.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "مواعيدي",
+      "short_name": "المواعيد", 
+      "description": "عرض مواعيدي المحجوزة",
+      "url": "/frontend/pages/appointments/appointment-list.html",
+      "icons": [
+        {
+          "src": "frontend/assets/images/icons/shortcut-list.png",
+          "sizes": "96x96", 
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "الوصفات الطبية",
+      "short_name": "الوصفات",
+      "description": "عرض الوصفات الطبية",
+      "url": "/frontend/pages/medical/patient/prescriptions.html",
+      "icons": [
+        {
+          "src": "frontend/assets/images/icons/shortcut-prescriptions.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "edge_side_panel": {
+    "preferred_width": 400
+  }
+}
