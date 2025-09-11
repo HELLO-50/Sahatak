@@ -912,6 +912,7 @@
             const fallbacks = {
                 'appointment_scheduled': `New appointment scheduled with ${patientName}`,
                 'appointment_completed': `Consultation completed with ${patientName}`,
+                'appointment_cancelled': `Appointment cancelled with ${patientName}`,
                 'video_session_ended': `Video call ended with ${patientName}`
             };
             return fallbacks[activityType] || `Activity with ${patientName}`;
@@ -1675,24 +1676,33 @@
                         }
                     });
                     
-                    // Count completed appointments for consultation count (case-insensitive)
+                    // Count completed appointments for consultation count (case-insensitive) - only for current doctor
                     const completedAppointments = appointments.filter(apt => 
-                        apt.status && apt.status.toLowerCase() === 'completed'
+                        apt.status && apt.status.toLowerCase() === 'completed' && apt.doctor_id == currentDoctorId
                     );
                     const completedCount = completedAppointments.length;
+                    
+                    console.log(`📊 Doctor ${currentDoctorId} appointments:`, {
+                        total: appointments.length,
+                        completed: completedAppointments.length,
+                        forCurrentDoctor: appointments.filter(apt => apt.doctor_id == currentDoctorId).length,
+                        appointmentDoctorIds: [...new Set(appointments.map(apt => apt.doctor_id))]
+                    });
                     
                     // Get recent appointments for display (include all recent appointments within 7 days)
                     const now = new Date();
                     const sevenDaysAgo = new Date(now.getTime() - 7*24*60*60*1000);
                     
-                    // First get upcoming appointments (scheduled/confirmed/in_progress)
+                    // First get upcoming appointments (scheduled/confirmed/in_progress) - only for current doctor
                     const upcomingAppointments = appointments.filter(apt => 
                         ['scheduled', 'confirmed', 'in_progress'].includes(apt.status) && 
+                        apt.doctor_id == currentDoctorId &&
                         new Date(apt.appointment_date) > now
                     ).sort((a, b) => new Date(a.appointment_date) - new Date(b.appointment_date));
                     
-                    // Then get recent appointments (any status within last 7 days)
+                    // Then get recent appointments (any status within last 7 days) - only for current doctor
                     const recentAppointments = appointments.filter(apt => 
+                        apt.doctor_id == currentDoctorId &&
                         new Date(apt.appointment_date) >= sevenDaysAgo
                     ).sort((a, b) => new Date(b.appointment_date) - new Date(a.appointment_date)); // Most recent first
                     
@@ -1715,9 +1725,10 @@
                         // Create activity entries from recent appointments
                         const recentActivities = [];
                         
-                        // Add ALL recently scheduled appointments (not just 2)
+                        // Add ALL recently scheduled appointments (not just 2) - only for current doctor
                         const recentScheduled = appointments.filter(apt => 
                             apt.status === 'scheduled' && 
+                            apt.doctor_id == currentDoctorId &&
                             new Date() - new Date(apt.created_at || apt.appointment_date) < 7 * 24 * 60 * 60 * 1000 // Last 7 days
                         );
                         
@@ -1733,37 +1744,55 @@
                             });
                         });
                         
-                        // Add recently completed appointments (only if they were properly completed, not just video ended)
+                        // Add recently completed appointments - simplified logic
                         const recentCompleted = appointments.filter(apt => {
                             const isCompleted = apt.status === 'completed';
-                            const isRecent = new Date() - new Date(apt.updated_at || apt.appointment_date) < 7 * 24 * 60 * 60 * 1000; // Last 7 days
-                            // Only show as "completed" if it's actually marked as completed AND has a completion_reason or was completed through proper flow
-                            const isProperlyCompleted = isCompleted && (
-                                apt.completion_reason || // Has completion reason
-                                apt.completion_method === 'manual' || // Was manually completed
-                                (apt.session_status !== 'ended' && apt.session_status !== 'disconnected') // Not just a video disconnect
-                            );
-                            return isProperlyCompleted && isRecent;
+                            const isRecent = new Date() - new Date(apt.updated_at || apt.completed_at || apt.appointment_date) < 7 * 24 * 60 * 60 * 1000; // Last 7 days
+                            const isMyAppointment = apt.doctor_id == currentDoctorId;
+                            
+                            return isCompleted && isRecent && isMyAppointment;
                         });
                         
                         recentCompleted.forEach(apt => {
-                            const completedDate = new Date(apt.updated_at || apt.appointment_date);
+                            const completedDate = new Date(apt.updated_at || apt.completed_at || apt.appointment_date);
                             recentActivities.push({
                                 id: `completed_${apt.id}_${completedDate.getTime()}`,
                                 type: 'appointment_completed',
                                 message: getActivityMessage('appointment_completed', apt.patient_name || 'Patient'),
                                 date: completedDate,
-                                icon: 'bi-check-circle',
+                                icon: 'bi-check-circle-fill',
                                 appointmentId: apt.id
                             });
                         });
                         
-                        // Add video session activities for sessions that ended but appointment is still active
+                        // Add recently cancelled appointments
+                        const recentCancelled = appointments.filter(apt => {
+                            const isCancelled = apt.status === 'cancelled';
+                            const isRecent = new Date() - new Date(apt.updated_at || apt.appointment_date) < 7 * 24 * 60 * 60 * 1000; // Last 7 days
+                            const isMyAppointment = apt.doctor_id == currentDoctorId;
+                            
+                            return isCancelled && isRecent && isMyAppointment;
+                        });
+                        
+                        recentCancelled.forEach(apt => {
+                            const cancelledDate = new Date(apt.updated_at || apt.appointment_date);
+                            recentActivities.push({
+                                id: `cancelled_${apt.id}_${cancelledDate.getTime()}`,
+                                type: 'appointment_cancelled',
+                                message: getActivityMessage('appointment_cancelled', apt.patient_name || 'Patient'),
+                                date: cancelledDate,
+                                icon: 'bi-x-circle-fill',
+                                appointmentId: apt.id
+                            });
+                        });
+                        
+                        // Add video session activities for sessions that ended but appointment is still active - only for current doctor
                         const recentVideoSessions = appointments.filter(apt => {
                             const isActive = apt.status === 'in_progress' || apt.status === 'scheduled';
                             const sessionEnded = apt.session_status === 'ended' || apt.session_status === 'disconnected';
                             const isRecent = apt.session_updated_at && new Date() - new Date(apt.session_updated_at) < 2 * 60 * 60 * 1000; // Last 2 hours
-                            return isActive && sessionEnded && isRecent;
+                            const isMyAppointment = apt.doctor_id == currentDoctorId;
+                            return isActive && sessionEnded && isRecent && isMyAppointment;
                         });
                         
                         recentVideoSessions.forEach(apt => {
@@ -1780,6 +1809,14 @@
                         
                         // Sort by date (most recent first)
                         recentActivities.sort((a, b) => b.date - a.date);
+                        
+                        console.log(`📋 Recent activities generated:`, {
+                            total: recentActivities.length,
+                            scheduled: recentActivities.filter(a => a.type === 'appointment_scheduled').length,
+                            completed: recentActivities.filter(a => a.type === 'appointment_completed').length,
+                            cancelled: recentActivities.filter(a => a.type === 'appointment_cancelled').length,
+                            videoEnded: recentActivities.filter(a => a.type === 'video_session_ended').length
+                        });
                         
                         // Remove duplicate activities (same appointment ID and type)
                         const uniqueActivities = [];
