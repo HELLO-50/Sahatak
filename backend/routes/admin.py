@@ -658,6 +658,19 @@ def delete_user(user_id):
             'user_type': user.user_type
         }
         
+        # Handle appointments before deletion
+        if user.user_type == 'patient' and user.patient_profile:
+            # Delete all appointments for this patient
+            appointments = Appointment.query.filter_by(patient_id=user.patient_profile.id).all()
+            for appointment in appointments:
+                db.session.delete(appointment)
+                
+        elif user.user_type == 'doctor' and user.doctor_profile:
+            # Delete all appointments for this doctor
+            appointments = Appointment.query.filter_by(doctor_id=user.doctor_profile.id).all()
+            for appointment in appointments:
+                db.session.delete(appointment)
+        
         # Delete user (this will cascade to related records)
         db.session.delete(user)
         db.session.commit()
