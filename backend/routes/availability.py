@@ -1,7 +1,7 @@
 from flask import Blueprint, request, current_app
 from flask_login import current_user
 from routes.auth import api_login_required
-from models import db, Doctor, User, Appointment
+from models import db, Doctor, User, Patient, Appointment
 from datetime import datetime, datetime as dt, timedelta, time
 from sqlalchemy import and_, or_
 from utils.responses import APIResponse, ErrorCodes
@@ -245,7 +245,7 @@ def get_availability_calendar():
         
         # Include ALL appointments (completed, cancelled, etc.) for full calendar view
         appointments = Appointment.query.options(
-            db.joinedload(Appointment.patient).joinedload('user')
+            db.joinedload(Appointment.patient).joinedload(Patient.user)
         ).filter(
             and_(
                 Appointment.doctor_id == doctor.id,
