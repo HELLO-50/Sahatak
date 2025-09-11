@@ -243,12 +243,14 @@ def get_availability_calendar():
         start_datetime = dt.combine(start_date, time.min)
         end_datetime = dt.combine(end_date + timedelta(days=1), time.min)
         
-        appointments = Appointment.query.filter(
+        # Include ALL appointments (completed, cancelled, etc.) for full calendar view
+        appointments = Appointment.query.options(
+            db.joinedload(Appointment.patient).joinedload('user')
+        ).filter(
             and_(
                 Appointment.doctor_id == doctor.id,
                 Appointment.appointment_date >= start_datetime,
-                Appointment.appointment_date < end_datetime,
-                Appointment.status.in_(['scheduled', 'confirmed', 'in_progress'])
+                Appointment.appointment_date < end_datetime
             )
         ).all()
         
@@ -277,13 +279,21 @@ def get_availability_calendar():
             ]
             
             for appointment in day_appointments:
-                day_data['appointments'].append({
+                # Include full appointment details for calendar and modal use
+                appointment_data = {
                     'id': appointment.id,
                     'time': appointment.appointment_date.strftime('%H:%M'),
-                    'patient_name': appointment.patient.user.get_full_name(),
-                    'type': appointment.appointment_type,
-                    'status': appointment.status
-                })
+                    'patient_name': appointment.patient.user.get_full_name() if appointment.patient and appointment.patient.user else 'No Patient',
+                    'appointment_type': appointment.appointment_type,
+                    'status': appointment.status,
+                    'appointment_date': appointment.appointment_date.isoformat(),
+                    'reason_for_visit': appointment.reason_for_visit,
+                    'notes': appointment.notes,
+                    'session_started_at': appointment.session_started_at.isoformat() if appointment.session_started_at else None,
+                    'session_ended_at': appointment.session_ended_at.isoformat() if appointment.session_ended_at else None,
+                    'completed_at': appointment.completed_at.isoformat() if appointment.completed_at else None
+                }
+                day_data['appointments'].append(appointment_data)
             
             # Generate available slots if day is enabled
             if day_data['enabled']:

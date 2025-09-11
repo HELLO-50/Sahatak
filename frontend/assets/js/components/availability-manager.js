@@ -718,14 +718,31 @@ const AvailabilityManager = {
     // Show appointment details modal
     async showAppointmentDetails(appointmentId) {
         try {
-            const response = await ApiHelper.makeRequest(`/appointments/${appointmentId}`);
+            // First try to find the appointment in the calendar data
+            let appointment = null;
             
-            if (response.success) {
-                const appointment = response.data;
-                this.displayAppointmentModal(appointment);
-            } else {
-                throw new Error(response.message);
+            if (this.calendarData) {
+                // Search through calendar data for the appointment
+                for (const day of this.calendarData) {
+                    const foundAppointment = day.appointments.find(apt => apt.id == appointmentId);
+                    if (foundAppointment) {
+                        appointment = foundAppointment;
+                        break;
+                    }
+                }
             }
+            
+            // If not found in calendar data, fetch from API as fallback
+            if (!appointment) {
+                const response = await ApiHelper.makeRequest(`/appointments/${appointmentId}`);
+                if (response.success) {
+                    appointment = response.data;
+                } else {
+                    throw new Error(response.message);
+                }
+            }
+            
+            this.displayAppointmentModal(appointment);
         } catch (error) {
             console.error('Error loading appointment details:', error);
             this.showAlert('error', 'Failed to load appointment details');
