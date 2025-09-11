@@ -5,7 +5,7 @@ import os
 from datetime import datetime
 from utils.responses import APIResponse, ErrorCodes
 from utils.logging_config import app_logger
-from utils.validators import validate_required_fields
+from utils.validators import validate_json_data
 
 # Initialize logger
 chatbot_logger = app_logger
@@ -70,7 +70,7 @@ def option1_chat():
     try:
         # Validate request data
         required_fields = ['message', 'language']
-        validation_result = validate_required_fields(request.json, required_fields)
+        validation_result = validate_json_data(request.json, required_fields)
         if not validation_result['valid']:
             return APIResponse.error(
                 message=validation_result['message'],
@@ -148,7 +148,7 @@ def option2_chat():
     try:
         # Validate request data
         required_fields = ['message', 'language']
-        validation_result = validate_required_fields(request.json, required_fields)
+        validation_result = validate_json_data(request.json, required_fields)
         if not validation_result['valid']:
             return APIResponse.error(
                 message=validation_result['message'],
