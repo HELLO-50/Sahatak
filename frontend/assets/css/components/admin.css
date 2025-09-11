@@ -2729,24 +2729,24 @@ Colors:
 }
 
 ::selection {
-    background: black;   
-    color: white;        
+    background: rgb(255, 255, 255);   
+    color: rgb(0, 0, 0);        
 }
 
 
 ::-moz-selection {
-    background: black;
-    color: white;
+    background: rgb(255, 255, 255);
+    color: rgb(0, 0, 0);
 }
 
 ::selection {
-    background: #f0f0f0;
-    color: black;         
+    background: #000000;
+    color: rgb(255, 255, 255);         
 }
 
 ::-moz-selection {
-    background: #f0f0f0;
-    color: black;
+    background: #000000;
+    color: rgb(255, 255, 255);
 }
 
 
