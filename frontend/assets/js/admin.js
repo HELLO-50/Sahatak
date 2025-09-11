@@ -252,6 +252,12 @@ const AdminDashboard = {
                 totalUsersElement.textContent = data.stats.total_users || 0;
             }
             
+            // Update Total Patients card
+            const totalPatientsElement = document.getElementById('total-patients-count');
+            if (totalPatientsElement) {
+                totalPatientsElement.textContent = data.stats.total_patients || 0;
+            }
+            
             // Update Verified Doctors card
             const verifiedDoctorsElement = document.getElementById('verified-doctors-count');
             if (verifiedDoctorsElement) {
