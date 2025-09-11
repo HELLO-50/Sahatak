@@ -1018,9 +1018,8 @@ def get_pending_verifications():
         # Query unverified doctors with user details - ONLY show email-verified users
         pending_query = Doctor.query.options(
             joinedload(Doctor.user)
-        ).join(User).filter(
-            Doctor.is_verified == False,
-            User.is_verified == True  # Only show doctors with verified emails
+        ).filter(
+            Doctor.is_verified == False
         ).order_by(Doctor.created_at.asc())
         
         pending_pagination = pending_query.paginate(
@@ -1029,28 +1028,30 @@ def get_pending_verifications():
             error_out=False
         )
         
-        # Format doctor data for verification
+        # Format doctor data for verification - FILTER for verified emails only
         doctors_data = []
         for doctor in pending_pagination.items:
-            doctors_info = {
-                'id': doctor.id,
-                'user_id': doctor.user_id,
-                'name': doctor.user.full_name,
-                'email': doctor.user.email,
-                'phone': doctor.phone,
-                'specialty': doctor.specialty,
-                'license_number': doctor.license_number,
-                'bio': doctor.bio,
-                'years_of_experience': doctor.years_of_experience,
-                'submitted_at': doctor.created_at.isoformat(),
-                'days_waiting': (datetime.utcnow() - doctor.created_at).days,
-                'documents_submitted': {
-                    'license_document': bool(doctor.license_document_path),
-                    'degree_document': bool(doctor.degree_document_path),
-                    'id_document': bool(doctor.id_document_path)
+            # Only include doctors with verified email addresses
+            if doctor.user and doctor.user.is_verified:
+                doctors_info = {
+                    'id': doctor.id,
+                    'user_id': doctor.user_id,
+                    'name': doctor.user.full_name,
+                    'email': doctor.user.email,
+                    'phone': doctor.phone,
+                    'specialty': doctor.specialty,
+                    'license_number': doctor.license_number,
+                    'bio': doctor.bio,
+                    'years_of_experience': doctor.years_of_experience,
+                    'submitted_at': doctor.created_at.isoformat(),
+                    'days_waiting': (datetime.utcnow() - doctor.created_at).days,
+                    'documents_submitted': {
+                        'license_document': bool(doctor.license_document_path) if hasattr(doctor, 'license_document_path') else False,
+                        'degree_document': bool(doctor.degree_document_path) if hasattr(doctor, 'degree_document_path') else False,
+                        'id_document': bool(doctor.id_document_path) if hasattr(doctor, 'id_document_path') else False
+                    }
                 }
-            }
-            doctors_data.append(doctors_info)
+                doctors_data.append(doctors_info)
         
         log_user_action(
             current_user.id,
