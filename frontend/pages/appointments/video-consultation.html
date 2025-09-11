@@ -616,7 +616,11 @@
             // If this is a popup window, close it instead of navigating
             if (window.opener && !window.opener.closed) {
                 console.log('Closing video consultation popup window');
-                window.close();
+                
+                // Add small delay to ensure disconnect completes first
+                setTimeout(() => {
+                    window.close();
+                }, 100);
             } else {
                 // Fallback for direct access - navigate to dashboard
                 const userType = AuthStorage.get('type');
@@ -659,6 +663,27 @@
                 
                 if (xhr.status === 200) {
                     console.log('Successfully called disconnect endpoint');
+                    
+                    // Immediately refresh parent dashboard if this is a popup
+                    if (window.opener && !window.opener.closed) {
+                        try {
+                            // Force immediate dashboard refresh in parent window
+                            if (window.opener.VideoConsultationDashboard && window.opener.VideoConsultationDashboard.checkVideoSessionStatus) {
+                                window.opener.VideoConsultationDashboard.checkVideoSessionStatus(VideoConsultation.appointmentId, true);
+                            }
+                            
+                            // Also try direct dashboard refresh functions
+                            if (window.opener.loadDashboardStats) {
+                                window.opener.loadDashboardStats();
+                            } else if (window.opener.loadDoctorDashboardStats) {
+                                window.opener.loadDoctorDashboardStats();
+                            }
+                            
+                            console.log('✅ Parent dashboard refresh triggered immediately');
+                        } catch (e) {
+                            console.warn('Could not refresh parent dashboard:', e);
+                        }
+                    }
                 } else {
                     console.error(`Disconnect endpoint failed with status ${xhr.status}: ${xhr.responseText}`);
                 }

@@ -1349,7 +1349,7 @@
                 clearInterval(videoStatusMonitorInterval);
             }
             
-            // Check every 8 seconds for video appointment status updates (slightly faster for doctor)
+            // Check every 2 seconds for video appointment status updates (fast updates for real-time UX)
             videoStatusMonitorInterval = setInterval(async () => {
                 try {
                     // Find any video appointments that might need status updates
@@ -1369,7 +1369,7 @@
                 } catch (error) {
                     console.error('Error in video status monitoring:', error);
                 }
-            }, 8000); // Check every 8 seconds
+            }, 2000); // Check every 2 seconds for immediate status updates
         }
         
         function stopVideoStatusMonitoring() {

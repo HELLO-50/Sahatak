@@ -1376,18 +1376,15 @@ def handle_video_disconnect(appointment_id):
         if not (is_doctor or is_patient):
             return APIResponse.forbidden(message='You are not authorized for this appointment')
         
-        # If doctor disconnects unexpectedly, reset appointment to scheduled state
-        # This allows doctor to restart and patient to see "Waiting for Doctor"
+        # If doctor disconnects unexpectedly, keep appointment in_progress for immediate completion access
+        # But clear session details so doctor can restart video or complete consultation
         if is_doctor and appointment.status == 'in_progress':
-            # Reset to scheduled state so doctor can restart
-            appointment.status = 'scheduled'
-            appointment.session_status = None
-            appointment.session_id = None  # Clear session ID to generate new one
-            appointment.session_started_at = None
-            appointment.session_ended_at = None
-            appointment.session_duration = None
+            # Keep status as in_progress but clear session to allow restart OR completion
+            appointment.session_status = 'ended'  # Mark session as ended
+            appointment.session_ended_at = datetime.utcnow()
+            appointment.session_id = None  # Clear session ID to generate new one if restarting
             
-            app_logger.info(f"Doctor disconnected unexpectedly from appointment {appointment_id}, resetting to scheduled state")
+            app_logger.info(f"Doctor disconnected from appointment {appointment_id}, session ended but appointment remains in_progress for completion")
         
         # If patient disconnects, just update session status but keep appointment in progress
         elif is_patient and appointment.status == 'in_progress':

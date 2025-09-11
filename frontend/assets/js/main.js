@@ -763,12 +763,7 @@ const ApiHelper = {
             ...options.headers
         };
         
-        // Add cache-busting headers for appointment endpoints  
-        if (endpoint.includes('/appointments')) {
-            headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
-            headers['Pragma'] = 'no-cache';
-            headers['Expires'] = '0';
-        }
+        // Cache-busting for appointments is handled by _shouldCache() exclusion
         
         const defaultOptions = {
             headers: headers,
