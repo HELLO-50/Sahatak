@@ -162,38 +162,24 @@ def dashboard():
         thirty_days_ago = datetime.utcnow() - timedelta(days=30)
         seven_days_ago = datetime.utcnow() - timedelta(days=7)
         
-        # Optimize with single query for user counts by type
-        user_stats = db.session.query(
-            func.count(User.id).label('total'),
-            func.sum(func.case([(User.user_type == 'patient', 1)], else_=0)).label('patients'),
-            func.sum(func.case([(User.user_type == 'doctor', 1)], else_=0)).label('doctors'),
-            func.sum(func.case([(User.user_type == 'admin', 1)], else_=0)).label('admins'),
-            func.sum(func.case([(User.created_at >= thirty_days_ago, 1)], else_=0)).label('new_30d'),
-            func.sum(func.case([(User.created_at >= seven_days_ago, 1)], else_=0)).label('new_7d')
-        ).first()
+        # Get basic statistics with simpler queries
+        total_users = User.query.count()
+        total_patients = User.query.filter_by(user_type='patient').count()
+        total_doctors = User.query.filter_by(user_type='doctor').count()
+        total_admins = User.query.filter_by(user_type='admin').count()
         
-        total_users = user_stats.total
-        total_patients = user_stats.patients
-        total_doctors = user_stats.doctors
-        total_admins = user_stats.admins
-        new_users_30d = user_stats.new_30d
-        new_users_7d = user_stats.new_7d
+        # User activity metrics
+        new_users_30d = User.query.filter(User.created_at >= thirty_days_ago).count()
+        new_users_7d = User.query.filter(User.created_at >= seven_days_ago).count()
         
         # Get verified doctors count
         verified_doctors = Doctor.query.filter_by(is_verified=True).count()
         
-        # Optimize appointment queries
-        appointment_stats = db.session.query(
-            func.count(Appointment.id).label('total'),
-            func.sum(func.case([(Appointment.created_at >= thirty_days_ago, 1)], else_=0)).label('appt_30d'),
-            func.sum(func.case([(Appointment.created_at >= seven_days_ago, 1)], else_=0)).label('appt_7d'),
-            func.sum(func.case([(Appointment.status == 'completed', 1)], else_=0)).label('completed')
-        ).first()
-        
-        total_appointments = appointment_stats.total
-        appointments_30d = appointment_stats.appt_30d
-        appointments_7d = appointment_stats.appt_7d
-        completed_appointments = appointment_stats.completed
+        # Appointment metrics
+        total_appointments = Appointment.query.count()
+        appointments_30d = Appointment.query.filter(Appointment.created_at >= thirty_days_ago).count()
+        appointments_7d = Appointment.query.filter(Appointment.created_at >= seven_days_ago).count()
+        completed_appointments = Appointment.query.filter_by(status='completed').count()
         
         # Remove slow last_activity_at query - set to 0 for now
         active_users_7d = 0
