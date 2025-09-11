@@ -265,7 +265,8 @@ def queue_notification(user_id, title, message, notification_type='info', send_e
 def send_email(to_email, subject, body):
     """Send email using EmailService (compatibility wrapper)"""
     try:
-        email_service = EmailService()
+        # Use the initialized singleton instance instead of creating a new one
+        from services.email_service import email_service
         return email_service.send_custom_email(to_email, subject, body)
     except Exception as e:
         app_logger.error(f"Error sending email: {str(e)}")
