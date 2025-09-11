@@ -1145,6 +1145,8 @@ def verify_doctor(doctor_id):
                     error_code="REJECTION_NOTES_REQUIRED"
                 )
             
+            # Mark as processed (reviewed) so they don't appear in pending list anymore
+            doctor.is_verified = True  # This means "processed by admin", not "approved"
             doctor.verification_status = 'rejected'
             doctor.rejection_reason = notes
             doctor.verification_reviewed_at = datetime.utcnow()

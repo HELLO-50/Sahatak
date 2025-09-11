@@ -1709,26 +1709,26 @@ const AdminDashboard = {
 
     // Reject doctor
     async rejectDoctor(doctorId) {
-        console.log('rejectDoctor called with doctorId:', doctorId);
         let reason = prompt('Enter reason for rejection (required):');
-        if (reason === null) {
-            console.log('User cancelled rejection');
-            return; // User cancelled
-        }
+        if (reason === null) return; // User cancelled
         
         // Keep asking until they provide a reason
         while (!reason || reason.trim() === '') {
             reason = prompt('Rejection reason is required. Please enter a reason:');
-            if (reason === null) {
-                console.log('User cancelled rejection after retry');
-                return; // User cancelled
-            }
+            if (reason === null) return; // User cancelled
         }
-        
-        console.log('Proceeding with rejection, reason:', reason);
+
+        // Show loading feedback
+        const rejectBtn = document.querySelector(`button[onclick="AdminDashboard.rejectDoctor(${doctorId})"]`);
+        const originalText = rejectBtn ? rejectBtn.textContent : '';
+        if (rejectBtn) {
+            rejectBtn.disabled = true;
+            rejectBtn.textContent = 'Rejecting...';
+        }
 
         try {
-            console.log('Making API request to reject doctor:', doctorId);
+            console.log(`Rejecting doctor ${doctorId} with reason: ${reason}`);
+            
             const response = await AdminAuth.apiRequest(`/admin/doctors/${doctorId}/verify`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1737,19 +1737,40 @@ const AdminDashboard = {
                     notes: reason.trim()
                 })
             });
-            console.log('Response status:', response.status);
             const data = await response.json();
-            console.log('Response data:', data);
+
+            console.log('Reject response:', { status: response.status, data });
 
             if (data.success) {
-                this.showNotification('Doctor rejected successfully', 'success');
-                this.loadPendingVerifications(); // Refresh the list
+                // Show enhanced success notification
+                this.showNotification(`✅ Doctor rejected successfully. Reason: "${reason}". Doctor removed from pending list.`, 'success');
+                
+                // Add visual feedback by highlighting the removal
+                const doctorRow = rejectBtn?.closest('tr');
+                if (doctorRow) {
+                    doctorRow.style.backgroundColor = '#ffebee';
+                    doctorRow.style.transition = 'all 0.5s ease';
+                    setTimeout(() => {
+                        doctorRow.style.opacity = '0';
+                        setTimeout(() => {
+                            this.loadPendingVerifications(); // Refresh after animation
+                        }, 500);
+                    }, 1000);
+                } else {
+                    this.loadPendingVerifications(); // Fallback immediate refresh
+                }
             } else {
                 throw new Error(data.message || 'Failed to reject doctor');
             }
         } catch (error) {
             console.error('Reject doctor error:', error);
-            this.showNotification('Failed to reject doctor', 'error');
+            this.showNotification(`❌ Failed to reject doctor: ${error.message}`, 'error');
+            
+            // Restore button state on error
+            if (rejectBtn) {
+                rejectBtn.disabled = false;
+                rejectBtn.textContent = originalText;
+            }
         }
     },
 
