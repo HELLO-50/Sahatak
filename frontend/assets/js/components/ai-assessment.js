@@ -32,10 +32,10 @@ class MedicalTriageChat {
         const hostname = window.location.hostname;
         
         if (hostname === 'localhost' || hostname === '127.0.0.1') {
-            return 'http://localhost:5000/api/chatbot';
+            return 'http://localhost:5000/api/ai';
         } else {
             // For production deployment, adjust this URL accordingly
-            return `${window.location.origin}/api/chatbot`;
+            return `${window.location.origin}/api/ai`;
         }
     }
     

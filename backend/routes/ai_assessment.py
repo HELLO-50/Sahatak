@@ -10,7 +10,7 @@ import openai
 from openai import OpenAI
 
 # Create blueprint
-chatbot_bp = Blueprint('chatbot', __name__)
+ai_bp = Blueprint('ai_assessment', __name__)
 
 # Initialize OpenAI client (will be loaded when needed)
 openai_client = None
@@ -98,7 +98,7 @@ def extract_triage_decision(ai_response):
         # Default to telemedicine if unclear
         return 'telemedicine'
 
-@chatbot_bp.route('/assessment', methods=['POST', 'OPTIONS'])
+@ai_bp.route('/assessment', methods=['POST', 'OPTIONS'])
 @cross_origin()
 @handle_api_errors
 def ai_assessment():
@@ -217,7 +217,7 @@ def ai_assessment():
             error_code=ErrorCodes.INTERNAL_ERROR
         )
 
-@chatbot_bp.route('/stt', methods=['POST', 'OPTIONS'])
+@ai_bp.route('/stt', methods=['POST', 'OPTIONS'])
 @cross_origin()
 @handle_api_errors
 def speech_to_text():
@@ -304,7 +304,7 @@ def speech_to_text():
             error_code=ErrorCodes.INTERNAL_ERROR
         )
 
-@chatbot_bp.route('/health', methods=['GET'])
+@ai_bp.route('/health', methods=['GET'])
 def chatbot_health():
     """Health check endpoint for AI assessment service"""
     openai_available = openai_client is not None or initialize_openai_client()
