@@ -851,13 +851,21 @@
                 }
 
                 if (!patientId) {
-                    // Fallback: try using user ID directly (backend should resolve)
+                    // Fallback: try to get patient profile ID from AuthGuard
                     const currentUser = AuthGuard.getCurrentUser();
-                    if (currentUser && currentUser.id) {
-                        patientId = currentUser.id;
-                        console.log('Using fallback patient ID:', patientId);
+                    console.log('Fallback: Current user from AuthGuard:', currentUser);
+                    
+                    if (currentUser && currentUser.user_type === 'patient') {
+                        // Try to get patient profile ID from stored user data
+                        patientId = currentUser.profile?.id || currentUser.patient_profile?.id;
+                        console.log('Fallback patient profile ID:', patientId);
+                        
+                        if (!patientId) {
+                            console.error('Cannot determine Patient Profile ID - will not proceed with User ID to avoid 403 errors');
+                            throw new Error('Patient Profile ID not available');
+                        }
                     } else {
-                        throw new Error('Could not get patient ID');
+                        throw new Error('User not identified as patient');
                     }
                 }
 
@@ -870,11 +878,8 @@
                         console.log('Medical history response:', medicalResponse);
                         // Use medical history data if available, then try EHR
                         if (medicalResponse.data.patient_medical_history) {
-                            console.log('Found patient via medical history, now trying EHR...');
-                            // Get the actual patient profile ID from the medical history response
-                            const actualPatientId = medicalResponse.data.patient_medical_history.id;
-                            console.log('Actual patient ID from medical history:', actualPatientId);
-                            patientId = actualPatientId;
+                            console.log('Found patient via medical history, using existing patient ID for EHR...');
+                            console.log('Patient ID already resolved to:', patientId);
                         }
                     }
                 } catch (error) {

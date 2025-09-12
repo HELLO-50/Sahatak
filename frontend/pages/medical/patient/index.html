@@ -716,8 +716,10 @@
                     }
                     
                     if (userData && userData.user_type === 'patient') {
-                        // Use user ID - backend will resolve to patient profile
-                        const ehrResponse = await ApiHelper.makeRequest(`/ehr/patient/${userData.id}`);
+                        // Extract Patient Profile ID from user.profile.id
+                        const ehrPatientId = userData.profile?.id || userData.patient_profile?.id || userData.id;
+                        console.log('EHR Patient ID for Recent Activity:', ehrPatientId);
+                        const ehrResponse = await ApiHelper.makeRequest(`/ehr/patient/${ehrPatientId}`);
                         if (ehrResponse.success && ehrResponse.data.ehr) {
                             const ehrData = ehrResponse.data.ehr;
                             
