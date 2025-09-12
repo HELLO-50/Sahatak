@@ -807,14 +807,44 @@
         // logout function is now defined globally in main.js
         
         // Initialize patient dashboard on page load
-        // Load health summary data
+        // Load health summary data from EHR API
         async function loadHealthSummary() {
             const container = document.getElementById('health-summary-container');
             if (!container) return;
             
             try {
-                // For now, show placeholder data - in production this would come from API
                 const currentLang = LanguageManager.getLanguage() || 'en';
+                const currentUser = AuthGuard.getCurrentUser();
+                
+                // Get patient profile ID first
+                let patientId = null;
+                try {
+                    const profileResponse = await ApiHelper.makeRequest(`/users/profile`);
+                    if (profileResponse.success && profileResponse.data.user_type === 'patient') {
+                        patientId = profileResponse.data.patient_profile?.id;
+                    }
+                } catch (error) {
+                    console.error('Error getting patient profile:', error);
+                }
+
+                if (!patientId) {
+                    throw new Error('Could not get patient ID');
+                }
+
+                // Fetch EHR data for the patient
+                const ehrResponse = await ApiHelper.makeRequest(`/ehr/patient/${patientId}`);
+                
+                if (!ehrResponse.success) {
+                    throw new Error('Could not load EHR data');
+                }
+
+                const ehrData = ehrResponse.data.ehr;
+                const patientInfo = ehrData.patient_info;
+                const latestVitals = ehrData.vital_signs?.[0]; // Most recent vital signs
+                
+                // Calculate health metrics from real data
+                const healthMetrics = calculateHealthMetrics(patientInfo, latestVitals);
+                
                 container.innerHTML = `
                     <h5 class="mb-3">
                         <i class="bi bi-heart-pulse me-2"></i>
@@ -827,28 +857,28 @@
                                     <i class="bi bi-heart-fill me-2 text-danger"></i>
                                     ${currentLang === 'ar' ? 'ضغط الدم' : 'Blood Pressure'}
                                 </label>
-                                <div class="h6 mb-0 health-metric-value">120/80 mmHg</div>
-                                <small class="text-success">${currentLang === 'ar' ? 'طبيعي' : 'Normal'}</small>
+                                <div class="h6 mb-0 health-metric-value">${healthMetrics.bloodPressure.value}</div>
+                                <small class="${healthMetrics.bloodPressure.statusClass}">${healthMetrics.bloodPressure.status}</small>
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <div class="health-metric">
                                 <label class="form-label health-metric-label small">
-                                    <i class="bi bi-droplet-fill me-2 text-primary"></i>
-                                    ${currentLang === 'ar' ? 'مستوى السكر' : 'Blood Sugar'}
+                                    <i class="bi bi-heart me-2 text-primary"></i>
+                                    ${currentLang === 'ar' ? 'معدل النبض' : 'Heart Rate'}
                                 </label>
-                                <div class="h6 mb-0 health-metric-value">95 mg/dL</div>
-                                <small class="text-success">${currentLang === 'ar' ? 'طبيعي' : 'Normal'}</small>
+                                <div class="h6 mb-0 health-metric-value">${healthMetrics.heartRate.value}</div>
+                                <small class="${healthMetrics.heartRate.statusClass}">${healthMetrics.heartRate.status}</small>
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <div class="health-metric">
                                 <label class="form-label health-metric-label small">
                                     <i class="bi bi-person-fill me-2 text-info"></i>
-                                    ${currentLang === 'ar' ? 'الوزن' : 'Weight'}
+                                    ${currentLang === 'ar' ? 'الوزن' : 'Weight & BMI'}
                                 </label>
-                                <div class="h6 mb-0 health-metric-value">75 kg</div>
-                                <small class="health-metric-note">${currentLang === 'ar' ? 'آخر قياس: اليوم' : 'Last measured: Today'}</small>
+                                <div class="h6 mb-0 health-metric-value">${healthMetrics.weight.value}</div>
+                                <small class="health-metric-note">${healthMetrics.weight.note}</small>
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
@@ -857,22 +887,113 @@
                                     <i class="bi bi-thermometer-half me-2 text-warning"></i>
                                     ${currentLang === 'ar' ? 'درجة الحرارة' : 'Temperature'}
                                 </label>
-                                <div class="h6 mb-0 health-metric-value">36.8°C</div>
-                                <small class="text-success">${currentLang === 'ar' ? 'طبيعي' : 'Normal'}</small>
+                                <div class="h6 mb-0 health-metric-value">${healthMetrics.temperature.value}</div>
+                                <small class="${healthMetrics.temperature.statusClass}">${healthMetrics.temperature.status}</small>
                             </div>
                         </div>
                     </div>
+                    ${latestVitals ? `<p class="text-muted small mt-2"><i class="bi bi-clock me-1"></i>Last updated: ${new Date(latestVitals.measured_at).toLocaleDateString()}</p>` : ''}
                 `;
             } catch (error) {
                 console.error('Error loading health summary:', error);
                 container.innerHTML = `
                     <h5 class="mb-3">
                         <i class="bi bi-heart-pulse me-2"></i>
-                        <span>Health Summary</span>
+                        <span>${LanguageManager.getLanguage() === 'ar' ? 'ملخص الحالة الصحية' : 'Health Summary'}</span>
                     </h5>
                     <p class="text-center py-3">Unable to load health data at the moment.</p>
                 `;
             }
+        }
+
+        // Calculate health metrics from patient data
+        function calculateHealthMetrics(patientInfo, latestVitals) {
+            const currentLang = LanguageManager.getLanguage() || 'en';
+            
+            // Blood Pressure
+            let bloodPressure = {
+                value: currentLang === 'ar' ? 'لا توجد بيانات' : 'No data',
+                status: currentLang === 'ar' ? 'غير متوفر' : 'No data',
+                statusClass: 'text-muted'
+            };
+            
+            if (latestVitals?.systolic_bp && latestVitals?.diastolic_bp) {
+                bloodPressure.value = `${latestVitals.systolic_bp}/${latestVitals.diastolic_bp} mmHg`;
+                if (latestVitals.systolic_bp < 120 && latestVitals.diastolic_bp < 80) {
+                    bloodPressure.status = currentLang === 'ar' ? 'طبيعي' : 'Normal';
+                    bloodPressure.statusClass = 'text-success';
+                } else if (latestVitals.systolic_bp > 140 || latestVitals.diastolic_bp > 90) {
+                    bloodPressure.status = currentLang === 'ar' ? 'مرتفع' : 'High';
+                    bloodPressure.statusClass = 'text-danger';
+                } else {
+                    bloodPressure.status = currentLang === 'ar' ? 'مرتفع قليلاً' : 'Elevated';
+                    bloodPressure.statusClass = 'text-warning';
+                }
+            }
+            
+            // Heart Rate
+            let heartRate = {
+                value: currentLang === 'ar' ? 'لا توجد بيانات' : 'No data',
+                status: currentLang === 'ar' ? 'غير متوفر' : 'No data', 
+                statusClass: 'text-muted'
+            };
+            
+            if (latestVitals?.heart_rate) {
+                heartRate.value = `${latestVitals.heart_rate} bpm`;
+                if (latestVitals.heart_rate >= 60 && latestVitals.heart_rate <= 100) {
+                    heartRate.status = currentLang === 'ar' ? 'طبيعي' : 'Normal';
+                    heartRate.statusClass = 'text-success';
+                } else if (latestVitals.heart_rate < 60) {
+                    heartRate.status = currentLang === 'ar' ? 'بطء القلب' : 'Low';
+                    heartRate.statusClass = 'text-info';
+                } else {
+                    heartRate.status = currentLang === 'ar' ? 'سرعة القلب' : 'High';
+                    heartRate.statusClass = 'text-warning';
+                }
+            }
+            
+            // Weight & BMI
+            let weight = {
+                value: currentLang === 'ar' ? 'لا توجد بيانات' : 'No data',
+                note: currentLang === 'ar' ? 'غير متوفر' : 'No data'
+            };
+            
+            const currentWeight = latestVitals?.weight || patientInfo?.weight;
+            const currentHeight = latestVitals?.height || patientInfo?.height;
+            
+            if (currentWeight) {
+                let bmiText = '';
+                if (currentHeight && latestVitals?.bmi) {
+                    bmiText = ` (BMI: ${latestVitals.bmi})`;
+                }
+                weight.value = `${currentWeight} kg${bmiText}`;
+                weight.note = latestVitals ? 
+                    (currentLang === 'ar' ? `آخر قياس: ${new Date(latestVitals.measured_at).toLocaleDateString()}` : `Last measured: ${new Date(latestVitals.measured_at).toLocaleDateString()}`) :
+                    (currentLang === 'ar' ? 'من الملف الطبي' : 'From medical profile');
+            }
+            
+            // Temperature
+            let temperature = {
+                value: currentLang === 'ar' ? 'لا توجد بيانات' : 'No data',
+                status: currentLang === 'ar' ? 'غير متوفر' : 'No data',
+                statusClass: 'text-muted'
+            };
+            
+            if (latestVitals?.temperature) {
+                temperature.value = `${latestVitals.temperature}°C`;
+                if (latestVitals.temperature >= 36.0 && latestVitals.temperature <= 37.5) {
+                    temperature.status = currentLang === 'ar' ? 'طبيعي' : 'Normal';
+                    temperature.statusClass = 'text-success';
+                } else if (latestVitals.temperature > 37.5) {
+                    temperature.status = currentLang === 'ar' ? 'حمى' : 'Fever';
+                    temperature.statusClass = 'text-danger';
+                } else {
+                    temperature.status = currentLang === 'ar' ? 'منخفض' : 'Low';
+                    temperature.statusClass = 'text-info';
+                }
+            }
+            
+            return { bloodPressure, heartRate, weight, temperature };
         }
 
 
