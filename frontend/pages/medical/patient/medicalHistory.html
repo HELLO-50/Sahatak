@@ -495,7 +495,9 @@
         async function getCurrentUser() {
             try {
                 const response = await ApiHelper.makeRequest('/users/profile');
-                return response.success ? response.data : null;
+                console.log('getCurrentUser API response:', response);
+                // Backend returns user data in 'user' field, not 'data' field
+                return response.success ? { user: response.user } : null;
             } catch (error) {
                 console.error('Error getting current user:', error);
                 return null;
