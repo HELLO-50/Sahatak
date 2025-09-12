@@ -312,8 +312,20 @@ def ai_assessment():
     """
     # Handle CORS preflight request
     if request.method == 'OPTIONS':
+        origin = request.headers.get('Origin')
         response = jsonify({'status': 'ok'})
-        response.headers['Access-Control-Allow-Origin'] = '*'
+        
+        # Allow specific origins that match our CORS config
+        allowed_origins = [
+            'https://hello-50.github.io',
+            'http://localhost:5500',
+            'http://127.0.0.1:5500'
+        ]
+        
+        if origin in allowed_origins:
+            response.headers['Access-Control-Allow-Origin'] = origin
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+        
         response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
         return response
