@@ -624,12 +624,12 @@ def has_patient_access(patient_id, emergency_access=False):
         from datetime import datetime, timedelta
         
         # Define access timeframe: doctors can access patient records:
-        # - 7 days before scheduled appointment
-        # - During active appointments
-        # - Up to 90 days after completed appointments
+        # - 30 days before scheduled appointment
+        # - During active appointments (extended window)
+        # - Up to 1 year after completed appointments
         now = datetime.utcnow()
-        access_start = now - timedelta(days=7)  # 7 days before future appointments
-        access_end_past = now - timedelta(days=90)  # 90 days after past appointments
+        access_start = now - timedelta(days=30)  # 30 days before future appointments
+        access_end_past = now - timedelta(days=365)  # 1 year after past appointments
         
         # Check for appointments within valid timeframes
         valid_appointment = Appointment.query.filter(
@@ -637,18 +637,18 @@ def has_patient_access(patient_id, emergency_access=False):
                 Appointment.patient_id == patient_id,
                 Appointment.doctor_id == user_profile.id,
                 or_(
-                    # Future appointments (within 7 days)
+                    # Future appointments (within 30 days)
                     and_(
                         Appointment.appointment_date > now,
-                        Appointment.appointment_date <= now + timedelta(days=7),
+                        Appointment.appointment_date <= now + timedelta(days=30),
                         Appointment.status.in_(['scheduled', 'confirmed'])
                     ),
-                    # Active appointments
+                    # Active appointments (24-hour window)
                     and_(
-                        Appointment.status.in_(['in_progress', 'confirmed']),
-                        Appointment.appointment_date <= now + timedelta(hours=2)  # 2-hour window
+                        Appointment.status.in_(['in_progress', 'confirmed', 'completed']),
+                        Appointment.appointment_date <= now + timedelta(hours=24)  # 24-hour window
                     ),
-                    # Recent past appointments (within 90 days)
+                    # Recent past appointments (within 1 year)
                     and_(
                         Appointment.appointment_date >= access_end_past,
                         Appointment.appointment_date <= now,
