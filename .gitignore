@@ -18,10 +18,8 @@ frontend/.env*
 *.swp
 *.swo
 *.vsix
+*__pycache__/*
 
 # OS
 .DS_Store
 Thumbs.db
-
-# Deployment
-deployment/pythonanywhere/.env*

@@ -196,21 +196,28 @@ class VideoConferenceService:
             "p2p": {
                 "enabled": True,
                 "useStunTurn": True,
+                "iceTransportPolicy": "all",
+                "preferH264": True,
+                "disableH264": False,
                 "stunServers": [
-                    {"urls": "stun:meet-jit-si-turnrelay.jitsi.net:443"},
                     {"urls": "stun:stun.l.google.com:19302"},
-                    {"urls": "stun:stun1.l.google.com:19302"}
+                    {"urls": "stun:stun1.l.google.com:19302"},
+                    {"urls": "stun:stun2.l.google.com:19302"},
+                    {"urls": "stun:stun3.l.google.com:19302"},
+                    {"urls": "stun:stun4.l.google.com:19302"}
                 ]
             },
             
             # ICE Servers Configuration for NAT traversal
             "iceServers": [
-                {"urls": "stun:meet-jit-si-turnrelay.jitsi.net:443"},
                 {"urls": "stun:stun.l.google.com:19302"},
                 {"urls": "stun:stun1.l.google.com:19302"},
-                {"urls": "stun:stun2.l.google.com:19302"}
+                {"urls": "stun:stun2.l.google.com:19302"},
+                {"urls": "stun:stun3.l.google.com:19302"},
+                {"urls": "stun:stun4.l.google.com:19302"}
             ],
             "iceTransportPolicy": "all",
+            "iceCandidatePoolSize": 10,
             
             # Additional anti-lobby/membership settings
             "disableIncomingMessages": False,
