@@ -863,7 +863,6 @@
 
                 // Try medical history endpoint first (which has better User ID resolution)
                 console.log('Trying medical history endpoint first...');
-                let ehrData = null;
                 
                 try {
                     const medicalResponse = await ApiHelper.makeRequest(`/medical-history/patient/${patientId}`);
