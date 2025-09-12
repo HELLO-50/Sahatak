@@ -1,433 +1,277 @@
-// AI Symptom Assessment Component - Medical Triage System
-// Three-option recommendation system
-
-class AIAssessmentChatbot {
+class MedicalTriageChat {
     constructor() {
-        this.currentLanguage = 'en';
-        this.isProcessing = false;
-        this.apiEndpoint = 'https://sahatak.pythonanywhere.com/api/chatbot/assessment';
-        this.maxRetries = 2; 
-        this.retryDelay = 500;
-        this.conversationId = this.generateConversationId();
+        this.chatMessages = document.getElementById('chatMessages');
+        this.messageInput = document.getElementById('messageInput');
+        this.sendBtn = document.getElementById('sendBtn');
+        this.micBtn = document.getElementById('micBtn');
+        this.loadingIndicator = document.getElementById('loadingIndicator');
         
-        // Initialize translations
-        this.translations = {
-            en: {
-                page_title: "AI Symptom Assessment",
-                page_subtitle: "Get personalized healthcare recommendations based on your symptoms",
-                performance_text: "Quick Assessment",
-                chat_title: "AI Symptom Assistant",
-                chat_subtitle: "Medical Triage & Assessment",
-                offline_text: "Works Offline",
-                welcome_message: "Hello! I'm your AI symptom assessment assistant. I'll ask you follow-up questions about your symptoms and provide one of three recommendations: schedule on this platform, visit ER immediately, or see a doctor in person. Please describe your symptoms.",
-                model_info: "Model: ArabicBERT-Health | Response time: ~150ms | Works offline",
-                input_placeholder: "Describe your symptoms...",
-                input_help: "Processing happens locally on your device - no data sent to external servers",
-                btn_back: "Back to Dashboard",
-                btn_send: "Send",
-                typing_indicator: "Processing locally...",
-                speed_text: "Ultra Fast",
-                privacy_text: "100% Private",
-                offline_feature_text: "Works Offline",
-                error_network: "Local processing error. Please try again.",
-                error_processing: "Sorry, I couldn't analyze your symptoms. Please try again.",
-                error_empty_message: "Please enter your symptoms before sending.",
-                triage_emergency: "⚠️ You need to go to the nearest ER immediately.",
-                triage_telemedicine: "✅ You can be seen on this platform, please schedule an appointment.",
-                triage_in_person: "🏥 You need to be seen in person, please schedule an appointment with your primary care or with any physician."
-            },
-            ar: {
-                page_title: "تقييم الأعراض بالذكاء الاصطناعي",
-                page_subtitle: "احصل على توصيات رعاية صحية مخصصة بناءً على أعراضك",
-                performance_text: "تقييم سريع",
-                chat_title: "مساعد تقييم الأعراض",
-                chat_subtitle: "الفرز الطبي والتقييم",
-                offline_text: "يعمل بدون اتصال",
-                welcome_message: "مرحباً! أنا مساعد تقييم الأعراض بالذكاء الاصطناعي. سأطرح عليك أسئلة متابعة حول أعراضك وأقدم واحدة من ثلاث توصيات: حجز موعد على هذه المنصة، أو الذهاب للطوارئ فوراً، أو زيارة طبيب شخصياً. يرجى وصف أعراضك.",
-                model_info: "النموذج: ArabicBERT-Health | وقت الاستجابة: ~150 مللي ثانية | يعمل بدون اتصال",
-                input_placeholder: "اوصف أعراضك...",
-                input_help: "تتم المعالجة محلياً على جهازك - لا يتم إرسال بيانات لخوادم خارجية",
-                btn_back: "العودة للوحة التحكم",
-                btn_send: "إرسال",
-                typing_indicator: "معالجة محلية...",
-                speed_text: "سريع جداً",
-                privacy_text: "خصوصية 100%",
-                offline_feature_text: "يعمل بدون اتصال",
-                error_network: "خطأ في المعالجة المحلية. يرجى إعادة المحاولة.",
-                error_processing: "عذراً، لم أستطع تحليل أعراضك. يرجى إعادة المحاولة.",
-                error_empty_message: "يرجى إدخال أعراضك قبل الإرسال.",
-                triage_emergency: "⚠️ تحتاج للذهاب إلى أقرب قسم طوارئ فوراً.",
-                triage_telemedicine: "✅ يمكن فحصك على هذه المنصة، يرجى حجز موعد.",
-                triage_in_person: "🏥 تحتاج للفحص الشخصي، يرجى حجز موعد مع طبيب الرعاية الأولية أو أي طبيب."
-            }
-        };
-
-        // Local cache for faster responses
-        this.responseCache = new Map();
-        this.commonResponses = this.initializeCommonResponses();
-    }
-
-    // Generate unique conversation ID
-    generateConversationId() {
-        return 'conv_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    }
-
-    // Initialize common medical responses for offline use
-    initializeCommonResponses() {
-        return {
-            en: {
-                'headache': 'For headaches, you can usually schedule an online consultation. However, if it\'s severe or sudden, seek immediate care.',
-                'fever': 'Fever symptoms can often be managed with online consultation. If temperature is very high (>39°C) or persistent, consider emergency care.',
-                'cough': 'Cough symptoms are suitable for online consultation unless accompanied by severe breathing difficulties.',
-                'stomach pain': 'Mild stomach pain can be assessed online. Severe abdominal pain may require immediate medical attention.'
-            },
-            ar: {
-                'صداع': 'بالنسبة للصداع، يمكنك عادة حجز استشارة عبر الإنترنت. ولكن إذا كان شديداً أو مفاجئاً، اطلب الرعاية الفورية.',
-                'حمى': 'يمكن عادة إدارة أعراض الحمى من خلال استشارة عبر الإنترنت. إذا كانت درجة الحرارة عالية جداً (>39°م) أو مستمرة، فكر في الرعاية الطارئة.',
-                'سعال': 'أعراض السعال مناسبة للاستشارة عبر الإنترنت ما لم تكن مصحوبة بصعوبات تنفس شديدة.',
-                'ألم في المعدة': 'يمكن تقييم ألم المعدة الخفيف عبر الإنترنت. قد يتطلب ألم البطن الشديد عناية طبية فورية.'
-            }
-        };
-    }
-
-    // Initialize the chatbot
-    init() {
-        this.attachEventListeners();
-        this.loadSavedLanguage();
-        this.preloadModel();
-    }
-
-    // Preload model information (simulated)
-    preloadModel() {
-        // Simulate model loading for better UX
-        console.log('Local AI model ready for medical triage analysis');
-    }
-
-    // Attach event listeners
-    attachEventListeners() {
-        // Send button click
-        const sendBtn = document.getElementById('btn-send');
-        if (sendBtn) {
-            sendBtn.addEventListener('click', () => this.sendMessage());
-        }
-
-        // Enter key press
-        const chatInput = document.getElementById('chat-input');
-        if (chatInput) {
-            chatInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    this.sendMessage();
-                }
-            });
-        }
-    }
-
-    // Load saved language preference
-    loadSavedLanguage() {
-        const savedLang = localStorage.getItem('sahatak_language') || 'en';
-        this.setLanguage(savedLang);
-    }
-
-    // Set language and update UI
-    setLanguage(lang) {
-        this.currentLanguage = lang;
-        localStorage.setItem('sahatak_language', lang);
+        this.isRecording = false;
+        this.mediaRecorder = null;
+        this.audioChunks = [];
         
-        // Update language toggle buttons
-        document.querySelectorAll('.btn-language').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        document.getElementById(`btn-${lang}`)?.classList.add('active');
+        // Update API URL to match backend structure
+        this.apiBaseUrl = 'http://localhost:5000/api/chatbot';
         
-        // Update HTML dir and lang
-        document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-        document.documentElement.lang = lang;
-        
-        // Update all translatable elements
-        this.updateTranslations();
+        this.initializeEventListeners();
     }
-
-    // Update translations for all elements
-    updateTranslations() {
-        const translations = this.translations[this.currentLanguage];
-        
-        // Update all elements with translation IDs
-        Object.keys(translations).forEach(key => {
-            const element = document.getElementById(key);
-            if (element) {
-                if (element.tagName === 'INPUT') {
-                    element.placeholder = translations[key];
-                } else {
-                    element.textContent = translations[key];
-                }
+    
+    initializeEventListeners() {
+        this.sendBtn.addEventListener('click', () => this.sendMessage());
+        this.messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.sendMessage();
             }
         });
+        this.micBtn.addEventListener('click', () => this.toggleRecording());
     }
-
-    // Send message to chatbot
+    
     async sendMessage() {
-        if (this.isProcessing) return;
-
-        const chatInput = document.getElementById('chat-input');
-        const message = chatInput.value.trim();
-
-        if (!message) {
-            this.showError(this.translations[this.currentLanguage].error_empty_message);
-            return;
-        }
-
-        // Clear input and show user message
-        chatInput.value = '';
-        this.addMessage(message, 'user');
+        const message = this.messageInput.value.trim();
+        if (!message) return;
         
-        // Check cache first for faster response
-        const cachedResponse = this.getCachedResponse(message);
-        if (cachedResponse) {
-            this.addMessage(cachedResponse.response, 'ai', cachedResponse);
-            return;
-        }
-
-        this.showTypingIndicator();
-        this.isProcessing = true;
-
+        this.addUserMessage(message);
+        this.messageInput.value = '';
+        this.showLoading(true);
+        
         try {
-            // Simulate faster local processing
-            const startTime = Date.now();
-            const response = await this.callAPI(message);
-            const processingTime = Date.now() - startTime;
-            
-            this.hideTypingIndicator();
-            
-            if (response.success) {
-                // Add processing time to response data
-                response.data.processing_time_ms = processingTime;
-                this.addMessage(response.data.response, 'ai', response.data);
-                
-                // Cache the response for future use
-                this.cacheResponse(message, response.data);
-            } else {
-                this.showError(response.message || this.translations[this.currentLanguage].error_processing);
-            }
-        } catch (error) {
-            this.hideTypingIndicator();
-            console.error('Local chatbot error:', error);
-            
-            // Try fallback to cached common responses
-            const fallbackResponse = this.getFallbackResponse(message);
-            if (fallbackResponse) {
-                this.addMessage(fallbackResponse, 'ai', { 
-                    model: 'offline-cache', 
-                    triage_result: 'appointment',
-                    processing_time_ms: 50
-                });
-            } else {
-                this.showError(this.translations[this.currentLanguage].error_network);
-            }
-        } finally {
-            this.isProcessing = false;
-        }
-    }
-
-    // Get cached response for faster performance
-    getCachedResponse(message) {
-        const cacheKey = message.toLowerCase().substring(0, 50);
-        return this.responseCache.get(cacheKey);
-    }
-
-    // Cache response for future use
-    cacheResponse(message, responseData) {
-        const cacheKey = message.toLowerCase().substring(0, 50);
-        this.responseCache.set(cacheKey, responseData);
-        
-        // Limit cache size for memory management
-        if (this.responseCache.size > 50) {
-            const firstKey = this.responseCache.keys().next().value;
-            this.responseCache.delete(firstKey);
-        }
-    }
-
-    // Get fallback response from common responses
-    getFallbackResponse(message) {
-        const commonResponses = this.commonResponses[this.currentLanguage];
-        const messageLower = message.toLowerCase();
-        
-        for (const [keyword, response] of Object.entries(commonResponses)) {
-            if (messageLower.includes(keyword.toLowerCase())) {
-                return response;
-            }
-        }
-        return null;
-    }
-
-    // Call the chatbot API with optimization for local processing
-    async callAPI(message, retryCount = 0) {
-        try {
-            const response = await fetch(this.apiEndpoint, {
+            const response = await fetch(`${this.apiBaseUrl}/assessment`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                credentials: 'include',
-                body: JSON.stringify({
+                body: JSON.stringify({ 
                     message: message,
-                    language: this.currentLanguage,
-                    conversation_id: this.conversationId
+                    language: 'auto'  // Auto-detect language
                 })
             });
-
-            const data = await response.json();
             
             if (!response.ok) {
-                throw new Error(data.message || `HTTP ${response.status}`);
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-
-            return data;
+            
+            const result = await response.json();
+            
+            if (result.success && result.data) {
+                this.addBotMessage(result.data.response, result.data.triage_result);
+            } else {
+                throw new Error('Invalid response format');
+            }
+            
         } catch (error) {
-            if (retryCount < this.maxRetries) {
-                await this.delay(this.retryDelay * (retryCount + 1));
-                return this.callAPI(message, retryCount + 1);
-            }
-            throw error;
+            console.error('Error sending message:', error);
+            this.addBotMessage(
+                'Sorry, I encountered an error. Please try again later.\n\n' +
+                'عذراً، واجهت خطأ. من فضلك حاول مرة أخرى لاحقاً.'
+            );
+        } finally {
+            this.showLoading(false);
         }
     }
-
-    // Add message to chat with enhanced metadata display
-    addMessage(content, type, metadata = null) {
-        const chatMessages = document.getElementById('chat-messages');
-        if (!chatMessages) return;
-
+    
+    addUserMessage(message) {
         const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${type}`;
-
-        const avatar = document.createElement('div');
-        avatar.className = 'message-avatar';
-        avatar.innerHTML = type === 'user' ? '<i class="bi bi-person"></i>' : '<i class="bi bi-cpu"></i>';
-
-        const messageContent = document.createElement('div');
-        messageContent.className = 'message-content';
+        messageDiv.className = 'message user-message';
+        messageDiv.textContent = message;
         
-        const messageText = document.createElement('p');
-        messageText.className = 'mb-1';
-        messageText.textContent = content;
-        messageContent.appendChild(messageText);
-
-        // Add enhanced metadata for AI messages
-        if (type === 'ai' && metadata) {
-            const modelInfo = document.createElement('div');
-            modelInfo.className = 'model-info';
+        const isArabic = this.isArabicText(message);
+        if (isArabic) {
+            messageDiv.classList.add('rtl');
+        }
+        
+        this.chatMessages.appendChild(messageDiv);
+        this.scrollToBottom();
+    }
+    
+    addBotMessage(message, triageResult) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message bot-message';
+        
+        // Create message text element
+        const textElement = document.createElement('div');
+        textElement.textContent = message;
+        messageDiv.appendChild(textElement);
+        
+        // Add triage badge if result is available
+        if (triageResult) {
+            const badge = document.createElement('span');
+            badge.className = 'triage-badge';
             
-            let infoText = `Model: ${metadata.model || 'Local-AI'}`;
-            if (metadata.processing_time_ms) {
-                infoText += ` | ${metadata.processing_time_ms}ms`;
+            switch(triageResult) {
+                case 'emergency':
+                    badge.className += ' triage-emergency';
+                    badge.textContent = '⚠️ EMERGENCY / طوارئ';
+                    break;
+                case 'in_person':
+                    badge.className += ' triage-in-person';
+                    badge.textContent = '🏥 IN-PERSON VISIT / زيارة شخصية';
+                    break;
+                case 'telemedicine':
+                    badge.className += ' triage-telemedicine';
+                    badge.textContent = '💻 TELEMEDICINE / استشارة عن بُعد';
+                    break;
             }
-            if (metadata.confidence) {
-                infoText += ` | Confidence: ${Math.round(metadata.confidence * 100)}%`;
-            }
-            infoText += ` | ${metadata.timestamp || new Date().toISOString()}`;
             
-            modelInfo.textContent = infoText;
-            messageContent.appendChild(modelInfo);
-
-            // Add triage result if available
-            if (metadata.triage_result) {
-                const triageDiv = document.createElement('div');
-                triageDiv.className = `triage-result ${metadata.triage_result}`;
-                triageDiv.textContent = this.getTriageResultText(metadata.triage_result);
-                messageContent.appendChild(triageDiv);
+            if (badge.textContent) {
+                messageDiv.appendChild(badge);
             }
         }
-
-        messageDiv.appendChild(avatar);
-        messageDiv.appendChild(messageContent);
-        chatMessages.appendChild(messageDiv);
-
-        // Scroll to bottom
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        const isArabic = this.isArabicText(message);
+        if (isArabic) {
+            messageDiv.classList.add('rtl');
+        }
+        
+        this.chatMessages.appendChild(messageDiv);
+        this.scrollToBottom();
     }
-
-    // Get triage result text based on result type
-    getTriageResultText(triageResult) {
-        const translations = this.translations[this.currentLanguage];
-        switch (triageResult) {
-            case 'emergency':
-                return translations.triage_emergency;
-            case 'telemedicine':
-                return translations.triage_telemedicine;
-            case 'in_person':
-                return translations.triage_in_person;
-            default:
-                return '';
+    
+    showLoading(show) {
+        if (show) {
+            this.loadingIndicator.classList.add('show');
+            this.chatMessages.appendChild(this.loadingIndicator);
+        } else {
+            this.loadingIndicator.classList.remove('show');
+            if (this.loadingIndicator.parentNode) {
+                this.loadingIndicator.parentNode.removeChild(this.loadingIndicator);
+            }
+        }
+        this.scrollToBottom();
+    }
+    
+    scrollToBottom() {
+        this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+    }
+    
+    isArabicText(text) {
+        const arabicPattern = /[\u0600-\u06FF\u0750-\u077F]/;
+        return arabicPattern.test(text);
+    }
+    
+    async toggleRecording() {
+        if (!this.isRecording) {
+            await this.startRecording();
+        } else {
+            this.stopRecording();
         }
     }
-
-    // Show typing indicator
-    showTypingIndicator() {
-        const indicator = document.getElementById('typing-indicator');
-        if (indicator) {
-            indicator.style.display = 'block';
-            indicator.textContent = this.translations[this.currentLanguage].typing_indicator;
-        }
-    }
-
-    // Hide typing indicator
-    hideTypingIndicator() {
-        const indicator = document.getElementById('typing-indicator');
-        if (indicator) {
-            indicator.style.display = 'none';
-        }
-    }
-
-    // Show error message
-    showError(message) {
-        this.addMessage(message, 'ai', { 
-            model: 'error-handler', 
-            processing_time_ms: 0 
-        });
-    }
-
-    // Utility delay function
-    delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-}
-
-// Global functions for HTML onclick handlers
-function setLanguage(lang) {
-    if (window.aiAssessmentChatbot) {
-        window.aiAssessmentChatbot.setLanguage(lang);
-    }
-}
-
-function sendMessage() {
-    if (window.aiAssessmentChatbot) {
-        window.aiAssessmentChatbot.sendMessage();
-    }
-}
-
-// Load translations using existing LanguageManager if available
-async function loadTranslations() {
-    if (typeof LanguageManager !== 'undefined') {
+    
+    async startRecording() {
         try {
-            await LanguageManager.loadTranslations();
-            // Apply current language from LanguageManager if available
-            const currentLang = LanguageManager.currentLanguage || 'en';
-            if (window.aiAssessmentChatbot) {
-                window.aiAssessmentChatbot.setLanguage(currentLang);
-            }
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                audio: {
+                    sampleRate: 44100,
+                    channelCount: 1,
+                    volume: 1.0
+                } 
+            });
+            
+            this.mediaRecorder = new MediaRecorder(stream);
+            this.audioChunks = [];
+            
+            this.mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    this.audioChunks.push(event.data);
+                }
+            };
+            
+            this.mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
+                await this.sendAudioToServer(audioBlob);
+                
+                stream.getTracks().forEach(track => track.stop());
+            };
+            
+            this.mediaRecorder.start();
+            this.isRecording = true;
+            this.micBtn.classList.add('recording');
+            this.micBtn.innerHTML = '⏹️';
+            this.micBtn.title = 'Stop recording / توقف عن التسجيل';
+            
         } catch (error) {
-            console.warn('Could not load LanguageManager translations:', error);
+            console.error('Error accessing microphone:', error);
+            alert('Unable to access microphone. Please check your permissions.\n\nغير قادر على الوصول للميكروفون. من فضلك تحقق من الصلاحيات.');
+        }
+    }
+    
+    stopRecording() {
+        if (this.mediaRecorder && this.isRecording) {
+            this.mediaRecorder.stop();
+            this.isRecording = false;
+            this.micBtn.classList.remove('recording');
+            this.micBtn.innerHTML = '🎤';
+            this.micBtn.title = 'Voice input / إدخال صوتي';
+        }
+    }
+    
+    async sendAudioToServer(audioBlob) {
+        this.showLoading(true);
+        
+        try {
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'recording.wav');
+            
+            const response = await fetch(`${this.apiBaseUrl}/stt`, {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            
+            if (result.success && result.data && result.data.transcription) {
+                const transcription = result.data.transcription.trim();
+                
+                if (transcription) {
+                    this.addUserMessage(`🎤 ${transcription}`);
+                    
+                    // Send transcribed text to chat API
+                    const chatResponse = await fetch(`${this.apiBaseUrl}/assessment`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ 
+                            message: transcription,
+                            language: result.data.detected_language || 'auto'
+                        })
+                    });
+                    
+                    if (!chatResponse.ok) {
+                        throw new Error(`HTTP error! status: ${chatResponse.status}`);
+                    }
+                    
+                    const chatResult = await chatResponse.json();
+                    
+                    if (chatResult.success && chatResult.data) {
+                        this.addBotMessage(chatResult.data.response, chatResult.data.triage_result);
+                    }
+                } else {
+                    this.addBotMessage(
+                        'Sorry, I couldn\'t understand the audio. Please try speaking again or type your message.\n\n' +
+                        'عذراً، لم أتمكن من فهم الصوت. من فضلك حاول التحدث مرة أخرى أو اكتب رسالتك.'
+                    );
+                }
+            } else {
+                throw new Error('No transcription received');
+            }
+            
+        } catch (error) {
+            console.error('Error processing audio:', error);
+            this.addBotMessage(
+                'Sorry, there was an error processing your voice input. Please try again or type your message.\n\n' +
+                'عذراً، حدث خطأ في معالجة الإدخال الصوتي. من فضلك حاول مرة أخرى أو اكتب رسالتك.'
+            );
+        } finally {
+            this.showLoading(false);
         }
     }
 }
 
-// Initialize AI Assessment chatbot when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    window.aiAssessmentChatbot = new AIAssessmentChatbot();
-    window.aiAssessmentChatbot.init();
+// Initialize the chat when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    new MedicalTriageChat();
 });
-
-// Export for module usage
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = AIAssessmentChatbot;
-}

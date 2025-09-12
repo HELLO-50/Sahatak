@@ -491,39 +491,59 @@
             });
         }
 
+        // Helper function to get current user
+        async function getCurrentUser() {
+            try {
+                const response = await ApiHelper.makeRequest('/users/profile');
+                return response.success ? response.data : null;
+            } catch (error) {
+                console.error('Error getting current user:', error);
+                return null;
+            }
+        }
+
         // Load medical history
         async function loadMedicalHistory() {
             try {
-                const response = await ApiHelper.makeRequest('/medical-history/check-completion');
+                // Get current user to determine patient ID
+                const user = await getCurrentUser();
+                let patientId = null;
                 
-                if (response.success) {
-                    // Get patient ID from current user or URL parameter
-                    const urlParams = new URLSearchParams(window.location.search);
-                    currentPatientId = urlParams.get('patient_id') || 'current';
-                    
-                    // Load full medical history
-                    const historyUrl = currentPatientId === 'current' 
-                        ? '/medical-history/check-completion'
-                        : `/medical-history/patient/${currentPatientId}`;
-                    
-                    const historyResponse = await ApiHelper.makeRequest(historyUrl);
-                    
-                    if (historyResponse.success) {
-                        medicalHistory = historyResponse.data.patient_medical_history || historyResponse.data;
-                        historyUpdates = historyResponse.data.recent_updates || [];
-                        
-                        renderMedicalSummary();
-                        await loadHistoryUpdates();
-                        renderTimeline();
-                    } else {
-                        showError('Failed to load medical history');
-                    }
+                if (user && user.user && user.user.user_type === 'patient') {
+                    patientId = user.user.id; // Use user ID, backend will resolve to patient profile
                 } else {
-                    showError('Failed to access medical history');
+                    // Try using stored user ID as fallback
+                    patientId = localStorage.getItem('sahatak_user_id');
+                    
+                    // Check URL parameter as last fallback
+                    if (!patientId) {
+                        const urlParams = new URLSearchParams(window.location.search);
+                        patientId = urlParams.get('patient_id');
+                    }
+                }
+                
+                if (!patientId) {
+                    showError('Unable to determine patient ID');
+                    return;
+                }
+                
+                // Load full medical history using the correct endpoint
+                const historyResponse = await ApiHelper.makeRequest(`/medical-history/patient/${patientId}`);
+                
+                if (historyResponse.success) {
+                    medicalHistory = historyResponse.data.patient_medical_history;
+                    historyUpdates = historyResponse.data.recent_updates || [];
+                    
+                    renderMedicalSummary();
+                    await loadHistoryUpdates();
+                    renderTimeline();
+                } else {
+                    console.error('Failed to load medical history:', historyResponse.message);
+                    showError('Failed to load medical history: ' + (historyResponse.message || 'Unknown error'));
                 }
             } catch (error) {
                 console.error('Error loading medical history:', error);
-                showError('Error loading medical history');
+                showError('Error loading medical history: ' + error.message);
             }
         }
 
