@@ -211,7 +211,15 @@ const EHRManager = {
         
         // Render overview
         if (overviewEl) {
-            const bmi = this.calculateBMI(patient.height, patient.weight);
+            // Get latest vital signs for most current height/weight
+            const latestVitals = this.ehrData.vital_signs && this.ehrData.vital_signs.length > 0 
+                ? this.ehrData.vital_signs[0] 
+                : null;
+            
+            // Use latest vital signs data if available, otherwise fall back to patient data
+            const currentHeight = latestVitals?.height || patient.height;
+            const currentWeight = latestVitals?.weight || patient.weight;
+            const bmi = this.calculateBMI(currentHeight, currentWeight);
             
             overviewEl.innerHTML = `
                 <div class="patient-basic-info">
@@ -243,11 +251,11 @@ const EHRManager = {
                         </div>
                         <div class="info-item">
                             <span class="info-label">Height:</span>
-                            <span class="info-value">${patient.height ? patient.height + ' cm' : 'Not specified'}</span>
+                            <span class="info-value">${currentHeight ? currentHeight + ' cm' : 'Not specified'}</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Weight:</span>
-                            <span class="info-value">${patient.weight ? patient.weight + ' kg' : 'Not specified'}</span>
+                            <span class="info-value">${currentWeight ? currentWeight + ' kg' : 'Not specified'}</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">BMI:</span>
@@ -905,15 +913,33 @@ const EHRManager = {
             if (response.success) {
                 this.showAlert('success', 'تم حفظ العلامات الحيوية بنجاح');
                 
-                // Close modal and refresh data
+                // Close modal
                 const modal = bootstrap.Modal.getInstance(document.getElementById('vitalsModal'));
                 if (modal) modal.hide();
                 
                 // Reset form
                 document.getElementById('vitals-form').reset();
                 
-                // Reload EHR data
-                await this.loadEHRData();
+                // Add the new vital signs to the existing data instead of reloading
+                if (response.data && response.data.vital_signs) {
+                    // Add to beginning of array (most recent first)
+                    this.ehrData.vital_signs = this.ehrData.vital_signs || [];
+                    this.ehrData.vital_signs.unshift(response.data.vital_signs);
+                    
+                    // Re-render the displays
+                    this.renderPatientOverview();
+                    this.renderVitalSigns();
+                } else {
+                    // Fallback: try to reload data, but don't fail if it doesn't work
+                    try {
+                        await this.loadEHRData();
+                    } catch (error) {
+                        console.warn('Could not reload EHR data, but vital signs were saved successfully');
+                        // Just refresh the displays with existing data
+                        this.renderPatientOverview();
+                        this.renderVitalSigns();
+                    }
+                }
             } else {
                 throw new Error(response.message);
             }
