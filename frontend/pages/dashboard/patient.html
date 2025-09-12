@@ -830,11 +830,11 @@
                 try {
                     const profileResponse = await ApiHelper.makeRequest(`/users/profile`);
                     console.log('Profile response:', profileResponse);
-                    console.log('Profile data structure:', JSON.stringify(profileResponse.data, null, 2));
+                    console.log('Profile data structure:', JSON.stringify(profileResponse.user, null, 2));
                     
-                    if (profileResponse.success && profileResponse.data) {
-                        // Check if user data is nested under 'user' property
-                        const userData = profileResponse.data.user || profileResponse.data;
+                    // Backend returns user data in 'user' field, not 'data' field
+                    if (profileResponse.success && profileResponse.user) {
+                        const userData = profileResponse.user;
                         console.log('User data:', userData);
                         console.log('User type:', userData.user_type);
                         console.log('User profile:', userData.profile);
