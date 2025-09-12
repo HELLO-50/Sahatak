@@ -74,6 +74,10 @@ const DashboardTranslations = {
         // Past Appointments Button
         this.updateElementText('btn-view-past', t.appointments?.view_past_appointments || 'View Past Appointments');
         
+        // Upcoming Appointments Section
+        this.updateElementText('upcoming-appointments-title', t.dashboard?.patient?.sections?.upcoming_appointments || 'Upcoming Appointments');
+        this.updateElementText('no-upcoming-appointments', t.dashboard?.patient?.no_data?.no_appointments || 'No upcoming appointments');
+        
         // Health Summary
         this.updateElementText('health-summary-title', patient.health_summary.title);
         this.updateElementText('blood-pressure', patient.health_summary.blood_pressure);
