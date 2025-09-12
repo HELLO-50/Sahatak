@@ -1138,3 +1138,234 @@ body {
     margin-left: 0;
   }
 }
+
+/* AI Triage Modal - Mobile Optimized */
+.triage-chat-container {
+    height: 400px;
+    max-height: 50vh; /* Limit height on mobile */
+    overflow-y: auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    background-color: #fafafa;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
+
+/* Chat messages */
+.message {
+    margin-bottom: 15px;
+    animation: fadeIn 0.3s ease;
+}
+
+.user-message {
+    text-align: right;
+    padding: 10px 15px;
+    background: linear-gradient(135deg, var(--primary-color), #4299e1);
+    color: white;
+    border-radius: 18px 18px 4px 18px;
+    max-width: 80%;
+    margin-left: auto;
+    word-wrap: break-word;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.bot-message {
+    text-align: left;
+    padding: 10px 15px;
+    background: #f1f5f9;
+    color: #334155;
+    border-radius: 18px 18px 18px 4px;
+    max-width: 80%;
+    margin-right: auto;
+    word-wrap: break-word;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* RTL support for Arabic */
+.message.rtl {
+    text-align: right;
+    direction: rtl;
+}
+
+/* Triage badges */
+.triage-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: bold;
+    margin-top: 6px;
+    text-transform: uppercase;
+}
+
+.triage-emergency {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+.triage-in-person {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fcd34d;
+}
+
+.triage-telemedicine {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #86efac;
+}
+
+/* Loading indicator */
+.triage-loading {
+    padding: 10px;
+    margin: 5px 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* Input area mobile optimizations */
+#ai-triage-modal .input-group {
+    margin-top: 10px;
+}
+
+#ai-triage-modal .form-control {
+    border-radius: 20px;
+    border: 2px solid #e5e7eb;
+    padding: 12px 16px;
+    font-size: 16px; /* Prevent zoom on iOS */
+}
+
+#ai-triage-modal .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+}
+
+#ai-triage-modal .btn {
+    min-height: 44px; /* Touch-friendly size */
+    min-width: 44px;
+    border-radius: 20px;
+}
+
+/* Modal mobile optimizations */
+@media (max-width: 576px) {
+    .triage-chat-container {
+        height: 300px;
+        max-height: 40vh;
+        padding: 10px;
+    }
+    
+    #ai-triage-modal .modal-dialog {
+        margin: 10px;
+        max-width: calc(100% - 20px);
+    }
+    
+    #ai-triage-modal .modal-body {
+        padding: 20px 15px;
+    }
+    
+    .message {
+        font-size: 14px;
+        padding: 8px 12px;
+        margin-bottom: 10px;
+    }
+    
+    /* Stack buttons vertically on small screens */
+    #ai-triage-modal .modal-footer {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    #ai-triage-modal .modal-footer .btn {
+        width: 100%;
+    }
+    
+    /* Input group adjustments */
+    #ai-triage-modal .input-group {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    #ai-triage-modal .form-control {
+        flex-basis: 100%;
+        order: 1;
+    }
+    
+    #ai-triage-modal #sendBtn {
+        flex: 1;
+        order: 2;
+    }
+    
+    #ai-triage-modal #micBtn {
+        flex: 1;
+        order: 3;
+    }
+}
+
+/* Smooth animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Voice recording animation */
+#micBtn.recording {
+    background: linear-gradient(45deg, #ef4444, #dc2626) !important;
+    animation: pulse 1.5s infinite;
+    color: white !important;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Typing indicator */
+.typing-dots {
+    display: inline-block;
+    position: relative;
+    width: 40px;
+    height: 20px;
+}
+
+.typing-dots span {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #6b7280;
+    margin: 0 1px;
+    animation: typing 1.4s infinite;
+}
+
+.typing-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.3;
+    }
+    30% {
+        transform: translateY(-10px);
+        opacity: 1;
+    }
+}

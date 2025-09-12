@@ -363,6 +363,122 @@ def speech_to_text():
             error_code=ErrorCodes.INTERNAL_ERROR
         )
 
+@ai_bp.route('/conversation', methods=['POST', 'OPTIONS'])
+@cross_origin()
+@handle_api_errors
+def save_conversation():
+    """
+    Save AI triage conversation to AIAssessment database
+    """
+    # Handle CORS preflight request
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'ok'})
+    
+    try:
+        from models import AIAssessment, Patient, db
+        from flask_jwt_extended import get_jwt_identity
+        
+        # Get and validate request data
+        data = request.get_json()
+        required_fields = ['conversation_id', 'conversation_history']
+        validation_result = validate_json_data(data, required_fields)
+        if not validation_result['valid']:
+            return APIResponse.error(
+                message=validation_result['message'],
+                error_code=ErrorCodes.VALIDATION_ERROR
+            )
+        
+        conversation_id = data.get('conversation_id')
+        conversation_history = data.get('conversation_history', [])
+        final_triage_result = data.get('final_triage_result')
+        
+        app_logger.info(f"Saving conversation - ID: {conversation_id}, Messages: {len(conversation_history)}")
+        
+        # Get current user and patient profile
+        try:
+            current_user_id = get_jwt_identity()
+            if current_user_id:
+                patient = Patient.query.filter_by(user_id=current_user_id).first()
+                if not patient:
+                    raise Exception("Patient profile not found")
+                patient_id = patient.id
+            else:
+                raise Exception("User not authenticated")
+        except Exception as e:
+            app_logger.warning(f"Authentication issue: {str(e)}")
+            return APIResponse.error(
+                message="Authentication required to save conversation",
+                error_code=ErrorCodes.UNAUTHORIZED
+            )
+        
+        # Build symptoms input from conversation
+        symptoms_text = ""
+        ai_response_text = ""
+        
+        for exchange in conversation_history:
+            if exchange.get('user_message'):
+                symptoms_text += exchange['user_message'] + " "
+            if exchange.get('bot_response'):
+                ai_response_text += exchange['bot_response'] + " "
+        
+        # Map triage result to recommended action
+        recommended_action_map = {
+            'emergency': 'emergency',
+            'in_person': 'doctor_consultation',
+            'telemedicine': 'doctor_consultation'
+        }
+        
+        # Map to risk level
+        risk_level_map = {
+            'emergency': 'critical',
+            'in_person': 'medium',
+            'telemedicine': 'low'
+        }
+        
+        # Create AIAssessment record
+        ai_assessment = AIAssessment(
+            patient_id=patient_id,
+            assessment_type='text',
+            input_language='ar',
+            symptoms_input=symptoms_text.strip(),
+            original_text=symptoms_text.strip(),
+            ai_response=ai_response_text.strip(),
+            recommended_action=recommended_action_map.get(final_triage_result, 'doctor_consultation'),
+            risk_level=risk_level_map.get(final_triage_result, 'medium'),
+            processed_symptoms={
+                'conversation_id': conversation_id,
+                'conversation_history': conversation_history,
+                'triage_widget_session': True
+            },
+            ai_model_version='gpt-3.5-turbo-triage',
+            doctor_review_status='pending',
+            completed_at=datetime.utcnow()
+        )
+        
+        db.session.add(ai_assessment)
+        db.session.commit()
+        
+        app_logger.info(f"Conversation saved as AIAssessment ID: {ai_assessment.id}")
+        
+        return APIResponse.success(
+            data={
+                'conversation_id': conversation_id,
+                'assessment_id': ai_assessment.id,
+                'saved': True,
+                'message_count': len(conversation_history),
+                'final_result': final_triage_result,
+                'timestamp': datetime.utcnow().isoformat()
+            },
+            message="Conversation saved successfully"
+        )
+        
+    except Exception as e:
+        app_logger.error(f"Conversation save error: {str(e)}")
+        return APIResponse.error(
+            message="Failed to save conversation",
+            error_code=ErrorCodes.INTERNAL_ERROR
+        )
+
 @ai_bp.route('/health', methods=['GET'])
 def chatbot_health():
     """Health check endpoint for AI assessment service"""

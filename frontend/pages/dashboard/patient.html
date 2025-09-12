@@ -561,7 +561,88 @@
     <script>
         // Dashboard specific functions
         function bookAppointment() {
-            window.location.href = '../appointments/book-appointment.html';
+            // Show AI triage modal first
+            const triageModal = new bootstrap.Modal(document.getElementById('ai-triage-modal'));
+            triageModal.show();
+            
+            // Initialize triage widget
+            window.triageWidgetMode = true;
+            setTimeout(() => {
+                initTriageWidget({
+                    widgetMode: true,
+                    onTriageComplete: handleTriageComplete
+                });
+            }, 500);
+        }
+        
+        function handleTriageComplete(triageResult, conversationHistory) {
+            console.log('Triage completed:', triageResult, conversationHistory);
+            
+            // Update modal footer based on triage result
+            const actionsDiv = document.getElementById('triage-actions');
+            const currentLang = LanguageManager?.getLanguage() || 'ar';
+            
+            if (triageResult === 'telemedicine') {
+                // Patient can book on platform
+                actionsDiv.innerHTML = `
+                    <button type="button" 
+                            class="btn btn-success" 
+                            onclick="proceedToBooking()">
+                        <i class="bi bi-calendar-plus me-2"></i>
+                        <span>${currentLang === 'ar' ? 'حجز موعد' : 'Book Appointment'}</span>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <span>${currentLang === 'ar' ? 'إغلاق' : 'Close'}</span>
+                    </button>
+                `;
+            } else if (triageResult === 'in_person') {
+                // Recommend in-person visit
+                actionsDiv.innerHTML = `
+                    <div class="alert alert-warning w-100 mb-3">
+                        <i class="bi bi-hospital me-2"></i>
+                        <strong>${currentLang === 'ar' ? 'يُنصح بزيارة عيادة طبيب مختص' : 'In-person doctor visit recommended'}</strong>
+                    </div>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <span>${currentLang === 'ar' ? 'فهمت' : 'Understood'}</span>
+                    </button>
+                `;
+            } else if (triageResult === 'emergency') {
+                // Emergency case
+                actionsDiv.innerHTML = `
+                    <div class="alert alert-danger w-100 mb-3">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>${currentLang === 'ar' ? 'يرجى التوجه للطوارئ فوراً!' : 'Please go to emergency room immediately!'}</strong>
+                    </div>
+                    <a href="tel:999" class="btn btn-danger me-2">
+                        <i class="bi bi-telephone me-1"></i>
+                        <span>${currentLang === 'ar' ? 'اتصال طوارئ' : 'Call Emergency'}</span>
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <span>${currentLang === 'ar' ? 'فهمت' : 'Understood'}</span>
+                    </button>
+                `;
+            }
+            
+            actionsDiv.classList.remove('d-none');
+        }
+        
+        function proceedToBooking() {
+            // Save conversation first
+            if (triageWidget) {
+                triageWidget.saveConversation().then(() => {
+                    console.log('Conversation saved before booking');
+                }).catch(error => {
+                    console.error('Error saving conversation:', error);
+                });
+            }
+            
+            // Close modal and proceed to booking
+            bootstrap.Modal.getInstance(document.getElementById('ai-triage-modal')).hide();
+            
+            // Add a small delay to ensure modal closes smoothly
+            setTimeout(() => {
+                window.location.href = '../appointments/book-appointment.html';
+            }, 300);
         }
         
         function viewPastAppointments() {
@@ -1816,6 +1897,72 @@
         </div>
     </div>
 
+    <!-- AI Triage Modal -->
+    <div class="modal fade" id="ai-triage-modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title text-primary">
+                        <i class="bi bi-chat-heart me-2"></i>
+                        <span id="triage-modal-title">فحص صحي سريع</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <!-- Chat container styled to match dashboard -->
+                    <div id="chatMessages" class="triage-chat-container mb-3"></div>
+                    
+                    <!-- Loading indicator -->
+                    <div id="loadingIndicator" class="triage-loading text-center">
+                        <div class="spinner-border spinner-border-sm" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <span class="ms-2">جاري التحليل...</span>
+                    </div>
+                    
+                    <!-- Input area -->
+                    <div class="input-group">
+                        <input type="text" 
+                               class="form-control" 
+                               id="messageInput" 
+                               placeholder="اكتب الأعراض هنا..."
+                               maxlength="1000">
+                        <button class="btn btn-primary" 
+                                type="button" 
+                                id="sendBtn">
+                            <i class="bi bi-send"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary" 
+                                type="button" 
+                                id="micBtn"
+                                title="إدخال صوتي">
+                            <i class="bi bi-mic"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <small class="text-muted">أنا مساعد صحي رقمي ولست بديلاً عن الاستشارة الطبية المتخصصة.</small>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 d-none" id="triage-actions">
+                    <button type="button" 
+                            class="btn btn-success" 
+                            onclick="proceedToBooking()" 
+                            id="triage-booking-btn">
+                        <i class="bi bi-calendar-plus me-2"></i>
+                        <span>حجز موعد</span>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <span>إغلاق</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Assessment Component -->
+    <script src="../../assets/js/components/ai-assessment.js"></script>
+    
     <!-- Mobile Patient Optimization Script -->
     <script src="../../assets/js/mobile-patient.js"></script>
 </body>

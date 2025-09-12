@@ -1,5 +1,15 @@
 class MedicalTriageChat {
-    constructor() {
+    constructor(options = {}) {
+        // Widget mode configuration
+        this.isWidgetMode = options.widgetMode || false;
+        this.onTriageComplete = options.onTriageComplete || null;
+        this.modalElement = options.modalElement || null;
+        
+        // Store conversation data
+        this.conversationHistory = [];
+        this.triageResult = null;
+        this.conversationId = 'conv_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        
         // Check if required DOM elements exist
         this.chatMessages = document.getElementById('chatMessages');
         this.messageInput = document.getElementById('messageInput');
@@ -24,7 +34,20 @@ class MedicalTriageChat {
         
         this.initializeEventListeners();
         
-        console.log('Medical Triage Chat initialized successfully');
+        // Add initial welcome message in widget mode
+        if (this.isWidgetMode) {
+            this.addWelcomeMessage();
+        }
+        
+        console.log('Medical Triage Chat initialized successfully' + (this.isWidgetMode ? ' in widget mode' : ''));
+    }
+    
+    addWelcomeMessage() {
+        const currentLang = LanguageManager?.getLanguage() || 'ar';
+        const welcomeMsg = currentLang === 'ar' ? 
+            'أهلاً وسهلاً! قول لي شنو اللي حاصل ليك؟' : 
+            'Hello! Tell me what symptoms you are experiencing.';
+        this.addBotMessage(welcomeMsg);
     }
     
     initializeEventListeners() {
@@ -102,6 +125,20 @@ class MedicalTriageChat {
                 console.log('AI response:', result.data.response);
                 console.log('Triage result:', result.data.triage_result);
                 this.addBotMessage(result.data.response, result.data.triage_result);
+                
+                // Store conversation history
+                this.conversationHistory.push({
+                    user_message: message,
+                    bot_response: result.data.response,
+                    triage_result: result.data.triage_result,
+                    timestamp: new Date().toISOString()
+                });
+                
+                // Handle triage result in widget mode
+                if (this.isWidgetMode && result.data.triage_result) {
+                    this.triageResult = result.data.triage_result;
+                    this.handleTriageResult(result.data.triage_result);
+                }
             } else {
                 console.error('Invalid response format:', result);
                 throw new Error(result.message || 'Invalid response format');
@@ -363,9 +400,128 @@ class MedicalTriageChat {
             this.showLoading(false);
         }
     }
+    
+    handleTriageResult(result) {
+        if (!this.isWidgetMode) return;
+        
+        const currentLang = LanguageManager?.getLanguage() || 'ar';
+        
+        if (result === 'telemedicine') {
+            // Patient can use platform - enable booking
+            if (this.onTriageComplete) {
+                this.onTriageComplete(result, this.conversationHistory);
+            }
+            this.showBookingButton(true);
+        } else if (result === 'in_person') {
+            // Recommend in-person visit
+            const msg = currentLang === 'ar' ? 
+                'ننصحك بزيارة عيادة طبيب مختص للفحص الشخصي.' : 
+                'We recommend visiting a doctor in person for examination.';
+            this.addBotMessage(msg);
+            if (this.onTriageComplete) {
+                this.onTriageComplete(result, this.conversationHistory);
+            }
+            this.showBookingButton(false);
+        } else if (result === 'emergency') {
+            // Emergency case
+            const msg = currentLang === 'ar' ? 
+                'يرجى التوجه للطوارئ فوراً أو الاتصال بالإسعاف!' : 
+                'Please go to the emergency room immediately or call an ambulance!';
+            this.addBotMessage(msg);
+            if (this.onTriageComplete) {
+                this.onTriageComplete(result, this.conversationHistory);
+            }
+            this.showBookingButton(false);
+        }
+        
+        // Disable input after triage decision
+        this.messageInput.disabled = true;
+        this.sendBtn.disabled = true;
+    }
+    
+    showBookingButton(canBook) {
+        // Show or hide booking button in modal footer
+        const bookingBtn = document.getElementById('triage-booking-btn');
+        const actionsDiv = document.getElementById('triage-actions');
+        
+        if (actionsDiv) {
+            actionsDiv.classList.remove('d-none');
+        }
+        
+        if (bookingBtn) {
+            if (canBook) {
+                bookingBtn.classList.remove('d-none');
+            } else {
+                bookingBtn.classList.add('d-none');
+            }
+        }
+    }
+    
+    reset() {
+        // Reset chat for new session
+        this.conversationHistory = [];
+        this.triageResult = null;
+        this.conversationId = 'conv_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        
+        // Clear chat messages
+        this.chatMessages.innerHTML = '';
+        
+        // Re-enable inputs
+        this.messageInput.disabled = false;
+        this.sendBtn.disabled = false;
+        this.messageInput.value = '';
+        
+        // Hide actions
+        const actionsDiv = document.getElementById('triage-actions');
+        if (actionsDiv) {
+            actionsDiv.classList.add('d-none');
+        }
+        
+        // Add welcome message
+        if (this.isWidgetMode) {
+            this.addWelcomeMessage();
+        }
+    }
+    
+    async saveConversation() {
+        if (this.conversationHistory.length === 0) return;
+        
+        try {
+            const response = await ApiHelper.makeRequest('/chatbot/conversation', {
+                method: 'POST',
+                body: JSON.stringify({
+                    conversation_id: this.conversationId,
+                    conversation_history: this.conversationHistory,
+                    final_triage_result: this.triageResult
+                })
+            });
+            
+            console.log('Conversation saved:', response);
+            return response;
+        } catch (error) {
+            console.error('Error saving conversation:', error);
+        }
+    }
 }
 
-// Initialize the chat when the page loads
+// Global instance for widget mode
+let triageWidget = null;
+
+// Widget initialization function
+function initTriageWidget(options) {
+    if (triageWidget) {
+        triageWidget.reset();
+    } else {
+        triageWidget = new MedicalTriageChat(options);
+    }
+    return triageWidget;
+}
+
+// Initialize the chat when the page loads (for standalone page)
 document.addEventListener('DOMContentLoaded', () => {
-    new MedicalTriageChat();
+    // Only initialize if not in widget mode (check for specific elements)
+    const isStandalonePage = document.querySelector('.triage-container');
+    if (isStandalonePage && !window.triageWidgetMode) {
+        new MedicalTriageChat();
+    }
 });
