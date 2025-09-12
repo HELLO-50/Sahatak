@@ -9,9 +9,12 @@ The Electronic Health Record (EHR) system in Sahatak is a comprehensive medical 
 Electronic Health Records (EHR) are digital versions of patients' paper charts. In the Sahatak platform, EHR encompasses:
 - **Patient Medical Information**: Complete health profiles with demographics and medical history
 - **Diagnosis Management**: Recording and tracking medical diagnoses with ICD-10 coding
-- **Vital Signs Monitoring**: Time-series tracking of blood pressure, heart rate, temperature, etc.
+- **Vital Signs Monitoring**: Time-series tracking of blood pressure, heart rate, temperature, respiratory rate, oxygen saturation, and BMI
+- **Interactive Visualizations**: Real-time charts and graphs with 6 comprehensive vital sign categories
+- **Patient Dashboard Integration**: Dynamic health summaries and medical timeline for patient self-access
+- **Medical History Management**: Patient-editable medical history with timeline tracking
 - **Appointment Records**: Historical consultation data linked to medical events
-- **Access Control**: Time-based permissions ensuring doctors only access authorized patient records
+- **Access Control**: Robust Patient Profile ID resolution system with secure User ID mapping
 
 ## EHR System Architecture
 
@@ -33,6 +36,73 @@ EHR System Components
 │   ├── Time-based Access Windows
 │   ├── Audit Trail Logging
 │   └── Data Validation & Sanitization
+```
+
+---
+
+## Patient Identity Resolution System
+
+### Dual ID Architecture
+The Sahatak EHR system implements a sophisticated dual-ID architecture to handle patient identity resolution:
+
+- **User ID**: Primary authentication identifier (e.g., 157)
+- **Patient Profile ID**: Medical records identifier (e.g., 181)
+
+### Frontend ID Resolution
+**Location**: All patient-facing pages including:
+- `frontend/pages/dashboard/patient.html`
+- `frontend/pages/medical/patient/index.html`
+- `frontend/pages/medical/patient/medicalHistory.html`
+
+**Resolution Logic**:
+```javascript
+// Extract Patient Profile ID from API response
+const patientId = userData.profile?.id || userData.patient_profile?.id || userData.id;
+
+// Ensures correct ID is used for medical endpoints
+const ehrResponse = await ApiHelper.makeRequest(`/ehr/patient/${patientId}`);
+```
+
+### Backend ID Resolution
+**Location**: `backend/routes/ehr.py` and related medical endpoints
+
+**Automatic Resolution**:
+```python
+# Handles both User ID and Patient Profile ID inputs
+patient = Patient.query.get(patient_id)
+
+# If not found, resolve User ID to Patient Profile ID
+if not patient:
+    user = User.query.get(patient_id)
+    if user and user.user_type == 'patient' and user.patient_profile:
+        patient = user.patient_profile
+        patient_id = patient.id  # Use actual Patient Profile ID
+```
+
+### API Response Structure
+**Profile Endpoint** (`/users/profile`):
+```json
+{
+  "success": true,
+  "user": {
+    "id": 157,
+    "user_type": "patient",
+    "profile": {
+      "id": 181,
+      "age": 28,
+      "blood_type": "AB+",
+      "medical_history_completed": true
+    }
+  }
+}
+```
+
+**getCurrentUser() Implementation**:
+```javascript
+async function getCurrentUser() {
+    const response = await ApiHelper.makeRequest('/users/profile');
+    return response.success ? { user: response.user } : null;
+}
 ```
 
 ---
@@ -281,10 +351,110 @@ The EHR interface provides a comprehensive view of patient medical records:
 4. **Responsive Design**: Mobile-optimized for clinical use
 5. **Print/Export**: Professional medical record output
 
-### 2. EHR Manager JavaScript
+### 2. Patient Dashboard Integration
+**Location**: `frontend/pages/dashboard/patient.html`
+
+The patient dashboard provides a comprehensive health overview with real-time EHR data:
+
+#### Dynamic Health Summary
+```javascript
+async function loadHealthSummary() {
+    // Get correct Patient Profile ID
+    const patientId = userData.profile?.id || userData.patient_profile?.id || userData.id;
+    
+    // Load EHR data for health summary
+    const ehrResponse = await ApiHelper.makeRequest(`/ehr/patient/${patientId}`);
+    
+    if (ehrResponse.success) {
+        const ehrData = ehrResponse.data.ehr;
+        
+        // Calculate health metrics
+        const healthScore = calculateHealthScore(ehrData);
+        const riskFactors = identifyRiskFactors(ehrData);
+        
+        // Update dashboard display
+        updateHealthSummaryDisplay(ehrData, healthScore, riskFactors);
+    }
+}
+```
+
+#### Health Score Calculation
+```javascript
+function calculateHealthScore(ehrData) {
+    let score = 100;
+    const latestVitals = ehrData.vital_signs?.[0];
+    
+    // Deduct for abnormal vital signs
+    if (latestVitals?.systolic_bp > 140) score -= 15;
+    if (latestVitals?.bmi > 30) score -= 10;
+    
+    // Factor in active diagnoses
+    const activeDiagnoses = ehrData.diagnoses?.filter(d => !d.resolved) || [];
+    score -= activeDiagnoses.length * 10;
+    
+    return Math.max(0, score);
+}
+```
+
+### 3. Medical History Management
+**Location**: `frontend/pages/medical/patient/medicalHistory.html`
+
+Comprehensive medical history management with patient edit capabilities:
+
+#### Patient-Editable Medical History
+```javascript
+async function saveMedicalHistory() {
+    const formData = {
+        blood_type: document.getElementById('blood-type').value,
+        height: document.getElementById('height').value,
+        weight: document.getElementById('weight').value,
+        smoking_status: document.getElementById('smoking-status').value,
+        exercise_frequency: document.getElementById('exercise-frequency').value,
+        chronic_conditions: document.getElementById('chronic-conditions').value,
+        current_medications: document.getElementById('current-medications').value,
+        allergies: document.getElementById('allergies').value,
+        family_history: document.getElementById('family-history').value,
+        surgical_history: document.getElementById('surgical-history').value,
+        notes: document.getElementById('update-notes').value
+    };
+    
+    const response = await ApiHelper.makeRequest('/medical-history/update', {
+        method: 'PUT',
+        body: JSON.stringify(formData)
+    });
+}
+```
+
+#### Medical History Timeline
+```javascript
+async function loadHistoryUpdates(patientId) {
+    const response = await ApiHelper.makeRequest(`/medical-history/updates/${patientId}`);
+    
+    if (response.success) {
+        const historyUpdates = response.data.updates || [];
+        renderTimeline(historyUpdates);
+    }
+}
+
+function renderTimeline(updates) {
+    const timeline = updates.map(update => `
+        <div class="timeline-item">
+            <div class="timeline-content">
+                <h6>${getUpdateTypeTitle(update.update_type)}</h6>
+                <small class="text-muted">${formatDate(update.created_at)}</small>
+                <p>${update.notes || 'Medical history update'}</p>
+            </div>
+        </div>
+    `).join('');
+    
+    container.innerHTML = `<div class="timeline">${timeline}</div>`;
+}
+```
+
+### 4. EHR Manager JavaScript
 **Location**: `frontend/assets/js/components/ehr-manager.js`
 
-The EHR Manager handles all frontend medical data operations:
+The EHR Manager handles all frontend medical data operations for doctor access:
 
 #### Core Initialization
 ```javascript
@@ -364,35 +534,77 @@ async saveDiagnosis() {
 }
 ```
 
-#### Vital Signs Visualization
+#### Comprehensive Vital Signs Visualization System
+The EHR manager provides a complete vital signs visualization system with 6 interactive chart categories:
+
+**Overview Cards Display**:
 ```javascript
+renderVitalSigns() {
+    const overviewCards = `
+        <div class="row mb-4">
+            <div class="col-md-2 mb-3">
+                <div class="card vital-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-heart-pulse fs-1 text-danger"></i>
+                        <h6 class="card-title">Blood Pressure</h6>
+                        <p class="card-text">${latest.systolic_bp}/${latest.diastolic_bp} mmHg</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Additional cards for Heart Rate, Temperature, etc. -->
+        </div>
+    `;
+}
+```
+
+**Interactive Charts Creation**:
+```javascript
+// Blood Pressure Trend Chart
+createVitalSignsCharts() {
+    this.createBloodPressureChart(vitals);
+    this.createHeartRateChart(vitals);
+    this.createTemperatureChart(vitals);
+    this.createRespiratoryRateChart(vitals);
+    this.createOxygenSaturationChart(vitals);
+    this.createBMIChart(vitals);
+}
+
+// Enhanced Blood Pressure Chart with Medical Ranges
 createBloodPressureChart(vitals) {
-    const ctx = document.getElementById('bloodPressureChart');
-    const data = vitals.filter(v => v.systolic_bp && v.diastolic_bp);
+    const data = vitals.filter(v => 
+        v.systolic_bp !== null && v.systolic_bp > 0 &&
+        v.diastolic_bp !== null && v.diastolic_bp > 0
+    );
     
     new Chart(ctx, {
         type: 'line',
         data: {
             labels: data.map(v => new Date(v.measured_at).toLocaleDateString()),
-            datasets: [
-                {
-                    label: 'Systolic',
-                    data: data.map(v => v.systolic_bp),
-                    borderColor: '#dc3545',
-                    tension: 0.4
-                },
-                {
-                    label: 'Diastolic', 
-                    data: data.map(v => v.diastolic_bp),
-                    borderColor: '#007bff',
-                    tension: 0.4
-                }
-            ]
+            datasets: [{
+                label: 'Systolic BP',
+                data: data.map(v => v.systolic_bp),
+                borderColor: '#dc3545',
+                backgroundColor: '#dc354520'
+            }, {
+                label: 'Diastolic BP',
+                data: data.map(v => v.diastolic_bp),
+                borderColor: '#007bff',
+                backgroundColor: '#007bff20'
+            }]
         },
         options: {
             responsive: true,
-            scales: {
-                y: { beginAtZero: false, min: 40, max: 200 }
+            plugins: {
+                annotation: {
+                    annotations: {
+                        normalRange: {
+                            type: 'box',
+                            yMin: 80, yMax: 120,
+                            backgroundColor: '#28a74520',
+                            label: { content: 'Normal Range', enabled: true }
+                        }
+                    }
+                }
             }
         }
     });
