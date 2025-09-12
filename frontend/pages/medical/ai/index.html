@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Option 2 Chatbot - Hugging Face Local Model - Sahatak</title>
+    <title>AI Medical Triage Assistant - Sahatak</title>
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%230d47a1' d='m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523.942-.661 2.27.067 3.71L8 15.5l6.533-8.737c.728-1.44.59-2.768.067-3.71C13.486.878 10.4.28 8.717 2.01L8 2.748z'/></svg>">
@@ -235,7 +235,7 @@
             box-shadow: 0 0 0 3px rgba(34,211,238,.1);
         }
         
-        .btn-send {
+        .btn-send, .btn-mic {
             background: linear-gradient(135deg, var(--medical-green), var(--medical-teal));
             border: none;
             color: white;
@@ -245,14 +245,25 @@
             font-weight: 500;
         }
         
-        .btn-send:hover {
+        .btn-send:hover, .btn-mic:hover {
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
         }
 
-        .btn-send:disabled {
+        .btn-send:disabled, .btn-mic:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+        }
+
+        .btn-mic.recording {
+            background: linear-gradient(135deg, var(--danger-color), #dc3545);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
         
         .triage-result {
@@ -338,7 +349,7 @@
             border: 1px solid rgba(34,211,238, 0.2);
         }
         
-        .offline-indicator {
+        .online-indicator {
             color: var(--medical-green);
             font-size: 0.85rem;
             display: flex;
@@ -398,6 +409,33 @@
             font-size: 0.9rem;
         }
 
+        .disclaimer {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid var(--warning-color);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+            text-align: center;
+            color: var(--warning-color);
+        }
+
+        /* RTL Support */
+        .rtl {
+            direction: rtl;
+            text-align: right;
+        }
+
+        .rtl .message.user {
+            justify-content: flex-start;
+            flex-direction: row;
+        }
+
+        .rtl .message.ai {
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .chatbot-container {
@@ -441,13 +479,19 @@
         <div class="page-header">
             <h1>
                 <i class="bi bi-heart-pulse me-2" style="color: var(--medical-teal);"></i>
-                <span id="page-title">AI Symptom Assessment</span>
+                <span id="page-title">AI Medical Triage Assistant</span>
             </h1>
-            <p class="subtitle" id="page-subtitle">Get personalized healthcare recommendations based on your symptoms</p>
+            <p class="subtitle" id="page-subtitle">Get personalized healthcare recommendations and symptom assessment with AI-powered medical triage</p>
             <span class="performance-badge">
-                <i class="bi bi-shield-check me-1"></i>
-                <span id="performance-text">Quick Assessment</span>
+                <i class="bi bi-cloud-check me-1"></i>
+                <span id="performance-text">OpenAI Powered</span>
             </span>
+        </div>
+        
+        <!-- Disclaimer -->
+        <div class="disclaimer">
+            <strong>Important:</strong> This is not a substitute for professional medical advice. Always consult with a healthcare professional for medical concerns.<br>
+            <strong>مهم:</strong> هذا ليس بديلاً عن الاستشارة الطبية المهنية. استشر دائماً أخصائي رعاية صحية للمخاوف الطبية.
         </div>
         
         <!-- Language Toggle -->
@@ -463,49 +507,52 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <div class="d-flex align-items-center">
                         <div class="me-3">
-                            <i class="bi bi-cpu" style="font-size: 1.5rem; color: var(--medical-teal);"></i>
+                            <i class="bi bi-robot" style="font-size: 1.5rem; color: var(--medical-teal);"></i>
                         </div>
                         <div>
-                            <h5 id="chat-title">AI Symptom Assistant</h5>
-                            <small class="subtitle" id="chat-subtitle">Medical Triage & Assessment</small>
+                            <h5 id="chat-title">AI Triage Assistant</h5>
+                            <small class="subtitle" id="chat-subtitle">Medical Assessment & Sahatak Platform Integration</small>
                         </div>
                     </div>
-                    <div class="offline-indicator">
-                        <i class="bi bi-wifi-off me-1"></i>
-                        <span id="offline-text">Works Offline</span>
+                    <div class="online-indicator">
+                        <i class="bi bi-cloud-check me-1"></i>
+                        <span id="online-text">OpenAI Connected</span>
                     </div>
                 </div>
             </div>
             
             <!-- Chat Messages -->
-            <div class="chat-messages" id="chat-messages">
+            <div class="chat-messages" id="chatMessages">
                 <div class="message ai">
                     <div class="message-avatar">
-                        <i class="bi bi-cpu"></i>
+                        <i class="bi bi-robot"></i>
                     </div>
                     <div class="message-content">
-                        <p class="mb-1" id="welcome-message">Hello! I'm your AI symptom assessment assistant. I'll ask you follow-up questions about your symptoms and provide one of three recommendations: schedule on this platform, visit ER immediately, or see a doctor in person. Please describe your symptoms.</p>
-                        <div class="model-info" id="model-info">Model: ArabicBERT-Health | Response time: ~150ms | Works offline</div>
+                        <p class="mb-1" id="welcome-message">Hello! I'm your AI medical triage assistant. Please describe your symptoms, and I'll help determine the appropriate level of care you need: schedule on Sahatak platform, visit ER immediately, or see a doctor in person.</p>
+                        <div class="model-info" id="model-info">Model: OpenAI GPT-3.5-Turbo + Whisper | Voice input supported | Bilingual (Arabic/English)</div>
                     </div>
                 </div>
             </div>
             
             <!-- Typing Indicator -->
-            <div class="typing-indicator" id="typing-indicator">
-                Processing locally...
+            <div class="typing-indicator" id="loadingIndicator">
+                Analyzing your symptoms... / جاري تحليل أعراضك...
             </div>
             
             <!-- Chat Input -->
             <div class="chat-input-area">
                 <div class="input-group">
-                    <input type="text" class="form-control" id="chat-input" placeholder="Describe your symptoms..." maxlength="500">
-                    <button class="btn-send" type="button" onclick="sendMessage()" id="btn-send">
+                    <input type="text" class="form-control" id="messageInput" placeholder="Describe your symptoms... / صف أعراضك..." maxlength="1000">
+                    <button class="btn-mic" type="button" id="micBtn" title="Voice input / إدخال صوتي">
+                        <i class="bi bi-mic"></i>
+                    </button>
+                    <button class="btn-send" type="button" id="sendBtn">
                         <i class="bi bi-send"></i>
                     </button>
                 </div>
                 <small class="text-muted mt-2 d-block" id="input-help">
                     <i class="bi bi-shield-check me-1" style="color: var(--medical-green);"></i>
-                    Processing happens locally on your device - no data sent to external servers
+                    Powered by OpenAI GPT-3.5-Turbo for accurate medical triage assessment
                 </small>
             </div>
         </div>
@@ -513,16 +560,20 @@
         <!-- Performance Info -->
         <div class="feature-grid">
             <div class="feature-item">
-                <i class="bi bi-speedometer2"></i>
-                <div class="title" id="speed-text">Ultra Fast</div>
+                <i class="bi bi-chat-dots"></i>
+                <div class="title" id="bilingual-text">Bilingual Support</div>
             </div>
             <div class="feature-item">
-                <i class="bi bi-shield-lock"></i>
-                <div class="title" id="privacy-text">100% Private</div>
+                <i class="bi bi-mic"></i>
+                <div class="title" id="voice-text">Voice Input</div>
             </div>
             <div class="feature-item">
-                <i class="bi bi-wifi-off"></i>
-                <div class="title" id="offline-feature-text">Works Offline</div>
+                <i class="bi bi-hospital"></i>
+                <div class="title" id="triage-text">Smart Triage</div>
+            </div>
+            <div class="feature-item">
+                <i class="bi bi-calendar-plus"></i>
+                <div class="title" id="platform-text">Sahatak Integration</div>
             </div>
         </div>
         
@@ -538,7 +589,7 @@
     <!-- Bootstrap 5 JS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     
-    <!-- i18n and API helpers -->
+    <!-- Main JS and AI Assessment Component -->
     <script src="../../../assets/js/main.js"></script>
     <script src="../../../assets/js/components/ai-assessment.js"></script>
     
@@ -551,21 +602,9 @@
             } else {
                 console.warn('loadTranslations not available - continuing without translations');
             }
-            
-            // Set up enter key handling
-            document.getElementById('chat-input').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    if (typeof sendMessage === 'function') {
-                        sendMessage();
-                    } else {
-                        console.error('sendMessage function not available');
-                    }
-                }
-            });
         });
 
-        // Fallback functions if scripts don't load
+        // Language toggle functionality
         if (typeof setLanguage === 'undefined') {
             window.setLanguage = function(lang) {
                 console.log('Language set to:', lang);
@@ -578,15 +617,12 @@
                 // Update HTML dir and lang
                 document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
                 document.documentElement.lang = lang;
-            };
-        }
-
-        if (typeof sendMessage === 'undefined') {
-            window.sendMessage = function() {
-                const input = document.getElementById('chat-input');
-                if (input && input.value.trim()) {
-                    alert('Chatbot not yet connected. This is a UI preview.');
-                    input.value = '';
+                
+                // Add RTL class to body for styling
+                if (lang === 'ar') {
+                    document.body.classList.add('rtl');
+                } else {
+                    document.body.classList.remove('rtl');
                 }
             };
         }
