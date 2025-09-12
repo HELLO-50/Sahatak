@@ -46,11 +46,14 @@ def initialize_openai_client():
             app_logger.warning("OPENAI_API_KEY environment variable not set")
             return False
         
+        # Log API key info (masked for security)
+        app_logger.info(f"OPENAI_API_KEY found: {api_key[:10]}...{api_key[-4:] if len(api_key) > 14 else '****'}")
+        
         openai_client = OpenAI(api_key=api_key)
         app_logger.info("OpenAI client initialized successfully")
         return True
     except Exception as e:
-        app_logger.error(f"Failed to initialize OpenAI client: {e}")
+        app_logger.error(f"Failed to initialize OpenAI client: {type(e).__name__}: {e}")
         return False
 
 def detect_language(text):
@@ -151,12 +154,16 @@ def ai_assessment():
             language = detect_language(user_message)
         
         app_logger.info(f"AI Assessment request - Language: {language}, Message length: {len(user_message)}")
+        app_logger.info(f"OpenAI client status: {openai_client is not None}")
+        app_logger.info(f"OPENAI_API_KEY configured: {bool(os.getenv('OPENAI_API_KEY'))}")
         
         try:
             # Make OpenAI API call with configurable parameters
             chat_model = os.getenv("OPENAI_CHAT_MODEL", "gpt-3.5-turbo")
             max_tokens = int(os.getenv("OPENAI_MAX_TOKENS", "500"))
             temperature = float(os.getenv("OPENAI_TEMPERATURE", "0.7"))
+            
+            app_logger.info(f"Making OpenAI call - Model: {chat_model}, Max tokens: {max_tokens}, Temperature: {temperature}")
             
             response = openai_client.chat.completions.create(
                 model=chat_model,
@@ -169,9 +176,12 @@ def ai_assessment():
             )
             
             bot_response = response.choices[0].message.content.strip()
+            app_logger.info(f"OpenAI response received - Length: {len(bot_response)}")
+            app_logger.debug(f"OpenAI response content: {bot_response[:200]}...")
             
             # Extract triage decision
             triage_result = extract_triage_decision(bot_response)
+            app_logger.info(f"Triage decision: {triage_result}")
             
             response_data = {
                 'response': bot_response,
@@ -190,7 +200,8 @@ def ai_assessment():
             )
             
         except openai.OpenAIError as e:
-            app_logger.error(f"OpenAI API error: {e}")
+            app_logger.error(f"OpenAI API error: {type(e).__name__}: {e}")
+            app_logger.error(f"Error details: {str(e)}")
             
             # Fallback response
             if language == 'ar':
