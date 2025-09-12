@@ -660,7 +660,8 @@ const EHRManager = {
     createVitalSignsCharts() {
         if (!this.ehrData.vital_signs || this.ehrData.vital_signs.length === 0) return;
         
-        const vitals = this.ehrData.vital_signs.reverse(); // Oldest first for charts
+        // Create a copy and reverse it for charts (oldest first) without modifying original
+        const vitals = [...this.ehrData.vital_signs].reverse();
         
         // Blood Pressure Chart
         this.createBloodPressureChart(vitals);
@@ -693,10 +694,14 @@ const EHRManager = {
             return;
         }
         
+        console.log('Blood Pressure Chart - Raw vitals:', vitals);
+        console.log('Blood Pressure Chart - Sample vital:', vitals[0]);
+        
         const data = vitals.filter(v => v.systolic_bp && v.diastolic_bp);
+        console.log('Blood Pressure Chart - Filtered data:', data);
         
         if (data.length === 0) {
-            ctx.parentElement.innerHTML = '<p class="text-center text-muted">Insufficient data available</p>';
+            ctx.parentElement.innerHTML = '<p class="text-center text-muted">No blood pressure data available</p>';
             return;
         }
         
