@@ -163,6 +163,30 @@ SYMPTOM_QUESTIONNAIRES = {
             ],
             'emergency_triggers': [0, 1, 2, 3],
             'followup': "Injuries can often be treated, but some require immediate medical attention."
+        },
+        'back_pain': {
+            'questions': [
+                "Is the back pain so severe you can't stand or walk?",
+                "Are you experiencing numbness or weakness in your legs?",
+                "Do you have loss of bladder or bowel control?",
+                "Did the pain start after a fall or injury?",
+                "Is the pain shooting down your leg below the knee?",
+                "Have you had recent weight loss or night sweats?"
+            ],
+            'emergency_triggers': [0, 1, 2, 5],
+            'followup': "Back pain can range from simple muscle strain to serious conditions."
+        },
+        'joint_pain': {
+            'questions': [
+                "Is the joint red, hot, and extremely swollen?",
+                "Did the joint pain start suddenly overnight?",
+                "Can you put any weight on the affected joint?",
+                "Do you have fever along with the joint pain?",
+                "Is the joint completely stiff and immovable?",
+                "Have you had recent infection or illness?"
+            ],
+            'emergency_triggers': [0, 1, 3, 4],
+            'followup': "Joint pain can indicate various conditions from simple strain to infections."
         }
     },
     'ar': {
@@ -189,6 +213,78 @@ SYMPTOM_QUESTIONNAIRES = {
             ],
             'emergency_triggers': [0, 1, 3, 4],
             'followup': "الصداع يمكن أن يتراوح من صداع التوتر البسيط إلى حالات خطيرة."
+        },
+        'abdominal_pain': {
+            'questions': [
+                "هل الألم شديد (8-10 على مقياس الألم) ومستمر؟",
+                "هل الألم في الجهة اليمنى السفلى من البطن؟",
+                "هل تتقيأ دماً أو مادة تشبه القهوة؟",
+                "هل لديك حمى مع ألم البطن؟",
+                "هل بطنك متيبس أو حساس جداً للمس؟",
+                "هل لا تستطيع إخراج غازات أو تبرز؟"
+            ],
+            'emergency_triggers': [0, 2, 4, 5],
+            'followup': "ألم البطن يمكن أن يشير لحالات مختلفة من البسيطة للخطيرة."
+        },
+        'breathing': {
+            'questions': [
+                "هل تعاني من صعوبة شديدة في التنفس أو لا تستطيع اللحاق بأنفاسك؟",
+                "هل شفتيك أو أظافرك تتحول للأزرق؟",
+                "هل لديك ألم صدر مع صعوبة التنفس؟",
+                "هل تسعل دماً؟",
+                "هل بدأت صعوبة التنفس فجأة؟",
+                "هل لديك تاريخ مع الربو أو مشاكل القلب؟"
+            ],
+            'emergency_triggers': [0, 1, 2, 3, 4],
+            'followup': "صعوبات التنفس يمكن أن تكون خطيرة وتحتاج تقييم سريع."
+        },
+        'fever': {
+            'questions': [
+                "هل درجة حرارتك أكثر من 103°F (39.4°C)؟",
+                "هل لديك صداع شديد مع الحمى؟",
+                "هل تعاني من صعوبة في التنفس؟",
+                "هل لديك طفح جلدي لا يختفي عند الضغط؟",
+                "هل أنت في حالة ارتباك أو تغير في الحالة الذهنية؟",
+                "هل لديك ألم بطن شديد مع الحمى؟"
+            ],
+            'emergency_triggers': [0, 1, 2, 3, 4, 5],
+            'followup': "الحمى عادة قابلة للعلاج، لكن بعض التركيبات تحتاج رعاية فورية."
+        },
+        'injury': {
+            'questions': [
+                "هل هناك نزيف نشط وثقيل لا يتوقف؟",
+                "هل تشك في كسر عظم أو لا تستطيع تحريك المنطقة المصابة؟",
+                "هل هناك تشوه واضح أو عظم بارز؟",
+                "هل ضربت رأسك وفقدت الوعي؟",
+                "هل تعاني من تنميل أو وخز؟",
+                "هل المنطقة المصابة تتحول للأزرق أو متورمة جداً؟"
+            ],
+            'emergency_triggers': [0, 1, 2, 3],
+            'followup': "الإصابات يمكن علاجها غالباً، لكن بعضها يحتاج رعاية طبية فورية."
+        },
+        'back_pain': {
+            'questions': [
+                "هل ألم الظهر شديد لدرجة أنك لا تستطيع الوقوف أو المشي؟",
+                "هل تعاني من تنميل أو ضعف في ساقيك؟",
+                "هل فقدت السيطرة على المثانة أو الأمعاء؟",
+                "هل بدأ الألم بعد سقطة أو إصابة؟",
+                "هل الألم ينطلق أسفل ساقك تحت الركبة؟",
+                "هل فقدت وزناً مؤخراً أو تعاني من تعرق ليلي؟"
+            ],
+            'emergency_triggers': [0, 1, 2, 5],
+            'followup': "ألم الظهر يمكن أن يتراوح من شد عضلي بسيط لحالات خطيرة."
+        },
+        'joint_pain': {
+            'questions': [
+                "هل المفصل أحمر وحار ومتورم بشدة؟",
+                "هل بدأ ألم المفصل فجأة خلال الليل؟",
+                "هل تستطيع وضع أي وزن على المفصل المتأثر؟",
+                "هل لديك حمى مع ألم المفصل؟",
+                "هل المفصل متيبس تماماً وغير متحرك؟",
+                "هل أصبت بعدوى أو مرض مؤخراً؟"
+            ],
+            'emergency_triggers': [0, 1, 3, 4],
+            'followup': "ألم المفاصل يمكن أن يشير لحالات مختلفة من الشد البسيط للعدوى."
         }
     }
 }
@@ -215,55 +311,347 @@ def load_local_model():
         chatbot_logger.error(f"Failed to load local model: {str(e)}")
         return False
 
-def analyze_with_smart_questionnaire(symptoms, language='en'):
-    """Smart questionnaire-based medical triage system"""
+def analyze_with_conversational_ai(user_message, language='en', conversation_context=None):
+    """Full conversational AI system for medical triage"""
     
-    # Detect symptom category
-    symptom_category = detect_symptom_category(symptoms, language)
+    # Initialize conversation context if not provided
+    if conversation_context is None:
+        conversation_context = {
+            'stage': 'greeting',
+            'symptoms_mentioned': [],
+            'questions_asked': [],
+            'answers_received': [],
+            'severity_indicators': [],
+            'triage_decision': None
+        }
     
-    if symptom_category:
-        # Generate contextual response with follow-up questions
+    message_lower = user_message.lower().strip()
+    
+    # Handle different conversation stages
+    if conversation_context['stage'] == 'greeting':
+        return handle_greeting(user_message, language, conversation_context)
+    elif conversation_context['stage'] == 'symptom_gathering':
+        return handle_symptom_gathering(user_message, language, conversation_context)
+    elif conversation_context['stage'] == 'follow_up_questions':
+        return handle_follow_up_questions(user_message, language, conversation_context)
+    elif conversation_context['stage'] == 'assessment':
+        return handle_final_assessment(user_message, language, conversation_context)
+    else:
+        # Fallback to greeting for unknown stages
+        return handle_greeting(user_message, language, conversation_context)
+
+def handle_greeting(user_message, language, context):
+    """Handle initial greeting and start symptom collection"""
+    message_lower = user_message.lower()
+    
+    # Check if user is already describing symptoms in greeting
+    if has_symptom_keywords(message_lower, language):
+        context['stage'] = 'symptom_gathering'
+        return handle_symptom_gathering(user_message, language, context)
+    
+    # Check for greetings (including Sudanese dialect)
+    greetings = {
+        'en': ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening'],
+        'ar': ['مرحبا', 'أهلا', 'السلام عليكم', 'صباح الخير', 'مساء الخير', 'كيف الحال', 'شلونك', 'كيفك', 'أهلين', 'مرحبتين', 'سلام']
+    }
+    
+    is_greeting = any(greeting in message_lower for greeting in greetings.get(language, greetings['en']))
+    
+    if is_greeting or len(message_lower) < 10:
+        # Respond with greeting and symptom request
+        if language == 'ar':
+            response = "أهلاً وسهلاً! أنا مساعدك الطبي الذكي. قادر أساعدك في تقييم الأعراض وأعطيك التوصيات المناسبة.\n\nشنو المشكلة اليوم؟ قولي شنو الأعراض اللي حاسس بيها أو وصفلي وضعك."
+        else:
+            response = "Hello! I'm your AI medical assistant. I can help assess your symptoms and provide appropriate recommendations.\n\nHow can I help you today? Please describe any symptoms you're experiencing."
+        
+        context['stage'] = 'symptom_gathering'
+        
+        return {
+            'response': response,
+            'triage_result': None,
+            'model': 'conversational-ai',
+            'conversation_stage': 'greeting',
+            'tokens_generated': len(response.split())
+        }
+    else:
+        # User might be describing symptoms in their greeting
+        context['stage'] = 'symptom_gathering'
+        return handle_symptom_gathering(user_message, language, context)
+
+def handle_symptom_gathering(user_message, language, context):
+    """Gather and analyze symptoms from user"""
+    
+    # Add to symptoms mentioned
+    symptoms = extract_symptoms(user_message, language)
+    context['symptoms_mentioned'].extend(symptoms)
+    
+    # Check for immediate emergency keywords
+    if has_emergency_keywords(user_message, language):
+        context['triage_decision'] = 'emergency'
+        return provide_emergency_response(user_message, language, context)
+    
+    # Determine symptom category for targeted questions
+    symptom_category = detect_symptom_category(user_message, language)
+    
+    if symptom_category and len(context['questions_asked']) == 0:
+        # Ask specific follow-up questions based on symptom category
         questionnaire = SYMPTOM_QUESTIONNAIRES[language].get(symptom_category)
         if questionnaire:
-            questions = questionnaire['questions'][:3]  # Ask first 3 questions
-            followup = questionnaire['followup']
+            first_question = questionnaire['questions'][0]
+            context['questions_asked'].append(first_question)
+            context['current_category'] = symptom_category
+            context['stage'] = 'follow_up_questions'
             
-            # Create intelligent response
             if language == 'ar':
-                ai_response = f"أفهم أنك تعاني من هذه الأعراض. لتقييم حالتك بشكل أفضل، يرجى الإجابة على هذه الأسئلة:\n\n"
-                for i, q in enumerate(questions, 1):
-                    ai_response += f"{i}. {q}\n"
-                ai_response += f"\n{followup}"
+                response = f"فاهم إنك بتعاني من {get_symptom_name(symptom_category, language)}. خليني أسألك شوية أسئلة مهمة عشان أقدر أقيم وضعك أحسن.\n\n{first_question}"
             else:
-                ai_response = f"I understand you're experiencing these symptoms. To better assess your situation, please answer these questions:\n\n"
-                for i, q in enumerate(questions, 1):
-                    ai_response += f"{i}. {q}\n"
-                ai_response += f"\n{followup}"
-            
-            # Determine triage based on symptom severity
-            triage_result = determine_triage_from_category(symptom_category, symptoms, language)
+                response = f"I understand you're experiencing {get_symptom_name(symptom_category, language)}. Let me ask you some important questions to better assess your situation.\n\n{first_question}"
             
             return {
-                'response': ai_response,
-                'triage_result': triage_result,
-                'model': 'smart-questionnaire',
-                'questionnaire_category': symptom_category,
-                'tokens_generated': len(ai_response.split())
+                'response': response,
+                'triage_result': None,
+                'model': 'conversational-ai',
+                'conversation_stage': 'follow_up_questions',
+                'tokens_generated': len(response.split())
             }
     
-    # Fallback to enhanced rules for unrecognized symptoms
-    triage_result = analyze_symptoms_enhanced(symptoms, language)
-    ai_response = generate_local_response(symptoms, triage_result, language)
+    # General response for unclear or mild symptoms
+    if language == 'ar':
+        response = "مشكور على وصف الأعراض دي. عشان أساعدك أكتر، ممكن تقولي:\n\n• متين بدت الأعراض دي؟\n• كام شدة الأعراض من 1 لحد 10؟\n• في حاجة بتخلي الأعراض أسوأ أو أحسن؟"
+    else:
+        response = "Thank you for describing your symptoms. To help you better, can you tell me:\n\n• When did these symptoms start?\n• How severe are your symptoms on a scale of 1 to 10?\n• Is there anything that makes the symptoms worse or better?"
+    
+    context['stage'] = 'follow_up_questions'
+    
     return {
-        'response': ai_response,
-        'triage_result': triage_result,
-        'model': 'enhanced-rules-fallback',
-        'tokens_generated': 0
+        'response': response,
+        'triage_result': None,
+        'model': 'conversational-ai',
+        'conversation_stage': 'symptom_gathering',
+        'tokens_generated': len(response.split())
     }
 
+def handle_follow_up_questions(user_message, language, context):
+    """Handle follow-up questions and responses"""
+    
+    # Store the user's answer
+    context['answers_received'].append(user_message)
+    
+    # Analyze the response for severity indicators
+    severity_indicators = extract_severity_indicators(user_message, language)
+    context['severity_indicators'].extend(severity_indicators)
+    
+    # Check if we have enough information or if emergency keywords appeared
+    if has_emergency_keywords(user_message, language) or 'high_severity' in severity_indicators:
+        context['triage_decision'] = 'emergency'
+        return provide_emergency_response(user_message, language, context)
+    
+    # Ask more questions if needed
+    current_category = context.get('current_category')
+    if current_category and len(context['questions_asked']) < 3:
+        questionnaire = SYMPTOM_QUESTIONNAIRES[language].get(current_category)
+        if questionnaire:
+            next_question_index = len(context['questions_asked'])
+            if next_question_index < len(questionnaire['questions']):
+                next_question = questionnaire['questions'][next_question_index]
+                context['questions_asked'].append(next_question)
+                
+                if language == 'ar':
+                    response = f"مشكور على الإجابة دي. سؤال تاني مهم:\n\n{next_question}"
+                else:
+                    response = f"Thank you for that information. One more important question:\n\n{next_question}"
+                
+                return {
+                    'response': response,
+                    'triage_result': None,
+                    'model': 'conversational-ai',
+                    'conversation_stage': 'follow_up_questions',
+                    'tokens_generated': len(response.split())
+                }
+    
+    # Move to final assessment
+    context['stage'] = 'assessment'
+    return handle_final_assessment(user_message, language, context)
+
+def handle_final_assessment(user_message, language, context):
+    """Provide final triage assessment and recommendation"""
+    
+    # Determine final triage based on all collected information
+    if context.get('triage_decision'):
+        triage_result = context['triage_decision']
+    else:
+        triage_result = determine_final_triage(context, language)
+    
+    # Generate personalized response based on conversation history
+    symptoms_text = ', '.join(context['symptoms_mentioned'])
+    triage_response = TRIAGE_RESPONSES[triage_result][language]
+    
+    if language == 'ar':
+        response = f"بناءً على الأعراض اللي وصفتها والمعلومات اللي إدتني إياها، ده تقييمي وتوصيتي:\n\n{triage_response}\n\nلو عندك أي أسئلة تانية أو لو الأعراض اتغيرت، ما تترددش تسألني تاني."
+    else:
+        response = f"Based on the symptoms you've described and the information you've provided, here is my assessment and recommendation:\n\n{triage_response}\n\nIf you have any other questions or if your symptoms change, please don't hesitate to ask me again."
+    
+    # Reset context for new conversation
+    context['stage'] = 'greeting'
+    
+    return {
+        'response': response,
+        'triage_result': triage_result,
+        'model': 'conversational-ai',
+        'conversation_stage': 'final_assessment',
+        'tokens_generated': len(response.split())
+    }
+
+# Helper functions for conversational AI
+
+def has_symptom_keywords(message, language):
+    """Check if message contains symptom-related keywords (including Sudanese dialect)"""
+    symptom_words = {
+        'en': ['pain', 'hurt', 'ache', 'fever', 'sick', 'feel', 'symptom', 'problem', 'headache', 'stomach', 'chest', 'tired', 'dizzy', 'nausea'],
+        'ar': ['ألم', 'وجع', 'مرض', 'حمى', 'أعراض', 'مشكلة', 'صداع', 'معدة', 'صدر', 'تعب', 'دوخة', 'موجوع', 'مريض', 'حاسس', 'وجعان', 'تعبان', 'مدوخ', 'غثيان', 'قيء', 'سخونة', 'رأسي', 'بطني', 'صدري']
+    }
+    words = symptom_words.get(language, symptom_words['en'])
+    return any(word in message.lower() for word in words)
+
+def has_emergency_keywords(message, language):
+    """Check for emergency keywords in message (including Sudanese dialect)"""
+    emergency_words = {
+        'en': ['emergency', 'urgent', 'severe', 'worst', 'can\'t breathe', '10/10', 'crushing', 'sudden', 'blood', 'unconscious', 'excruciating', 'unbearable'],
+        'ar': ['طارئ', 'عاجل', 'شديد', 'لا أستطيع', 'دم', 'فجأة', 'غائب عن الوعي', 'قوي جداً', 'ما قادر', 'خلاص', 'مو طبيعي', 'كتير', 'جداً', 'مش طايق', 'وجع كتير', 'ألم رهيب', 'مو قادر أتنفس']
+    }
+    words = emergency_words.get(language, emergency_words['en'])
+    return any(word in message.lower() for word in words)
+
+def extract_symptoms(message, language):
+    """Extract mentioned symptoms from message"""
+    # Simple extraction - can be made more sophisticated
+    symptoms = []
+    symptom_patterns = {
+        'en': {
+            'headache': ['headache', 'head pain', 'migraine', 'head ache', 'skull pain'],
+            'chest_pain': ['chest pain', 'heart pain', 'cardiac pain', 'chest ache'],
+            'fever': ['fever', 'temperature', 'hot', 'chills', 'burning up'],
+            'nausea': ['nauseous', 'sick', 'vomiting', 'throw up', 'queasy'],
+            'fatigue': ['tired', 'exhausted', 'weak', 'drained', 'worn out'],
+            'dizziness': ['dizzy', 'lightheaded', 'vertigo', 'spinning'],
+            'abdominal_pain': ['stomach pain', 'belly pain', 'stomach ache', 'abdominal pain']
+        },
+        'ar': {
+            'صداع': ['صداع', 'ألم رأس', 'رأسي موجوع', 'وجع رأس', 'راسي بيوجع'],
+            'ألم صدر': ['ألم صدر', 'ألم قلب', 'صدري موجوع', 'وجع صدر', 'قلبي بيوجع'],
+            'حمى': ['حمى', 'سخونة', 'حرارة', 'سخن', 'محموم', 'جسمي سخن'],
+            'غثيان': ['غثيان', 'قيء', 'مرض', 'نفسي مقفولة', 'مقرف', 'عايز أستفرغ'],
+            'تعب': ['تعب', 'إرهاق', 'ضعف', 'تعبان', 'مرهق', 'خلاص', 'ما عندي قوة'],
+            'دوخة': ['دوخة', 'دايخ', 'مدوخ', 'الدنيا بتدور', 'حاسس بدوار'],
+            'ألم بطن': ['ألم بطن', 'بطني موجوع', 'وجع بطن', 'معدتي بتوجع', 'ألم معدة']
+        }
+    }
+    
+    patterns = symptom_patterns.get(language, symptom_patterns['en'])
+    message_lower = message.lower()
+    
+    for symptom, keywords in patterns.items():
+        for keyword in keywords:
+            if keyword in message_lower:
+                symptoms.append(symptom)
+                break
+    
+    return symptoms
+
+def extract_severity_indicators(message, language):
+    """Extract severity indicators from user response"""
+    indicators = []
+    message_lower = message.lower()
+    
+    # Severity scale indicators
+    if any(num in message_lower for num in ['8', '9', '10']):
+        indicators.append('high_severity')
+    elif any(num in message_lower for num in ['6', '7']):
+        indicators.append('moderate_severity')
+    elif any(num in message_lower for num in ['1', '2', '3', '4', '5']):
+        indicators.append('low_severity')
+    
+    # Severity descriptors
+    high_severity_words = {
+        'en': ['severe', 'worst', 'unbearable', 'excruciating', 'terrible'],
+        'ar': ['شديد', 'قوي', 'لا يحتمل', 'فظيع']
+    }
+    
+    words = high_severity_words.get(language, high_severity_words['en'])
+    if any(word in message_lower for word in words):
+        indicators.append('high_severity')
+    
+    return indicators
+
+def get_symptom_name(category, language):
+    """Get localized symptom name (including Sudanese dialect)"""
+    names = {
+        'en': {
+            'chest_pain': 'chest pain',
+            'headache': 'headache',
+            'abdominal_pain': 'abdominal pain',
+            'breathing': 'breathing difficulties',
+            'fever': 'fever',
+            'injury': 'injury',
+            'back_pain': 'back pain',
+            'joint_pain': 'joint pain',
+            'skin_issues': 'skin problems'
+        },
+        'ar': {
+            'chest_pain': 'وجع في الصدر',
+            'headache': 'صداع',
+            'abdominal_pain': 'وجع في البطن',
+            'breathing': 'مشاكل في التنفس',
+            'fever': 'سخونة',
+            'injury': 'إصابة',
+            'back_pain': 'وجع ظهر',
+            'joint_pain': 'وجع مفاصل',
+            'skin_issues': 'مشاكل جلدية'
+        }
+    }
+    return names.get(language, names['en']).get(category, category)
+
+def provide_emergency_response(message, language, context):
+    """Provide emergency response (including Sudanese dialect)"""
+    if language == 'ar':
+        response = "⚠️ بناءً على الأعراض اللي وصفتها، هذا شايف إنه حالة طارئة. لازم تروح أقرب طوارئ حالاً أو تتصل بخدمات الإسعاف.\n\nما تتأخر في طلب العلاج العاجل. صحتك مهمة!"
+    else:
+        response = "⚠️ Based on the symptoms you've described, this appears to be an emergency situation. You need to go to the nearest ER immediately or call emergency services.\n\nDo not delay in seeking urgent medical care."
+    
+    return {
+        'response': response,
+        'triage_result': 'emergency',
+        'model': 'conversational-ai',
+        'conversation_stage': 'emergency_response',
+        'tokens_generated': len(response.split())
+    }
+
+def determine_final_triage(context, language):
+    """Determine final triage based on conversation context"""
+    
+    # Check for high severity indicators
+    if 'high_severity' in context.get('severity_indicators', []):
+        return 'emergency'
+    
+    # Check symptom category
+    category = context.get('current_category')
+    if category in ['chest_pain', 'breathing']:
+        return 'emergency'
+    elif category in ['injury', 'abdominal_pain', 'headache']:
+        if 'moderate_severity' in context.get('severity_indicators', []):
+            return 'in_person'
+        else:
+            return 'telemedicine'
+    
+    # Default based on number of symptoms and answers
+    if len(context.get('symptoms_mentioned', [])) > 2:
+        return 'in_person'
+    else:
+        return 'telemedicine'
+
 def analyze_with_dialogpt(symptoms, language='en'):
-    """Legacy DialoGPT function - now redirects to smart questionnaire"""
-    return analyze_with_smart_questionnaire(symptoms, language)
+    """Legacy DialoGPT function - now redirects to conversational AI"""
+    return analyze_with_conversational_ai(symptoms, language)
     
     try:
         # Load DialoGPT model if not loaded
@@ -382,15 +770,21 @@ def detect_symptom_category(symptoms, language='en'):
             'abdominal_pain': ['stomach pain', 'belly pain', 'abdominal pain', 'stomach hurt', 'stomach ache'],
             'breathing': ['shortness of breath', 'difficulty breathing', 'can\'t breathe', 'breathing problem', 'breathless'],
             'fever': ['fever', 'high temperature', 'hot', 'chills', 'temperature'],
-            'injury': ['injury', 'hurt', 'accident', 'fell', 'cut', 'broken', 'sprain', 'wound']
+            'injury': ['injury', 'hurt', 'accident', 'fell', 'cut', 'broken', 'sprain', 'wound'],
+            'back_pain': ['back pain', 'lower back', 'spine pain', 'back ache'],
+            'joint_pain': ['joint pain', 'arthritis', 'knee pain', 'shoulder pain'],
+            'skin_issues': ['rash', 'itching', 'skin problem', 'allergy', 'hives']
         },
         'ar': {
-            'chest_pain': ['ألم في الصدر', 'ألم الصدر', 'وجع الصدر', 'ألم قلب'],
-            'headache': ['صداع', 'ألم رأس', 'ألم في الرأس', 'وجع رأس'],
-            'abdominal_pain': ['ألم في البطن', 'ألم بطن', 'وجع بطن', 'ألم معدة'],
-            'breathing': ['ضيق تنفس', 'صعوبة تنفس', 'لا أستطيع التنفس'],
-            'fever': ['حمى', 'سخونة', 'حرارة عالية'],
-            'injury': ['إصابة', 'جرح', 'كسر', 'حادث', 'سقطت']
+            'chest_pain': ['ألم في الصدر', 'ألم الصدر', 'وجع الصدر', 'ألم قلب', 'صدري بيوجع', 'قلبي موجوع'],
+            'headache': ['صداع', 'ألم رأس', 'ألم في الرأس', 'وجع رأس', 'رأسي بيوجع', 'راسي موجوع'],
+            'abdominal_pain': ['ألم في البطن', 'ألم بطن', 'وجع بطن', 'ألم معدة', 'بطني بتوجع', 'معدتي موجوعة'],
+            'breathing': ['ضيق تنفس', 'صعوبة تنفس', 'لا أستطيع التنفس', 'ما قادر أتنفس', 'نفسي قصير', 'تنفسي تقيل'],
+            'fever': ['حمى', 'سخونة', 'حرارة عالية', 'سخن', 'محموم', 'جسمي حار'],
+            'injury': ['إصابة', 'جرح', 'كسر', 'حادث', 'سقطت', 'ضربة', 'رضة'],
+            'back_pain': ['ألم ظهر', 'وجع ظهر', 'ظهري بيوجع', 'ألم في الظهر'],
+            'joint_pain': ['ألم مفاصل', 'وجع ركبة', 'ألم كتف', 'مفاصلي بتوجع'],
+            'skin_issues': ['طفح جلدي', 'حكة', 'مشكلة جلد', 'حساسية', 'جلدي مو طبيعي']
         }
     }
     
@@ -535,23 +929,38 @@ def ai_assessment():
         data = request.json
         user_message = data['message']
         language = data.get('language', 'en')
+        conversation_id = data.get('conversation_id', None)
         
-        chatbot_logger.info(f"AI Assessment chat request - Language: {language}, Message length: {len(user_message)}")
+        # Get or create conversation context from session
+        from flask import session
+        if conversation_id:
+            session_key = f"conversation_{conversation_id}"
+            conversation_context = session.get(session_key, None)
+        else:
+            conversation_context = None
+        
+        chatbot_logger.info(f"AI Assessment chat request - Language: {language}, Message length: {len(user_message)}, Conversation ID: {conversation_id}")
         
         try:
-            # Use DialoGPT local model as primary option
-            ai_result = analyze_with_dialogpt(user_message, language)
+            # Use conversational AI as primary option
+            ai_result = analyze_with_conversational_ai(user_message, language, conversation_context)
+            
+            # Save conversation context back to session
+            if conversation_id and 'conversation_context' in locals():
+                session[session_key] = conversation_context
             
             response_data = {
                 'response': ai_result['response'],
                 'triage_result': ai_result['triage_result'],
                 'language': language,
                 'model': ai_result['model'],
+                'conversation_stage': ai_result.get('conversation_stage', 'unknown'),
                 'usage_tokens': ai_result.get('tokens_generated', 0),
+                'conversation_id': conversation_id,
                 'timestamp': datetime.utcnow().isoformat()
             }
             
-            chatbot_logger.info(f"DialoGPT response successful - Triage: {ai_result['triage_result']}, Tokens: {ai_result.get('tokens_generated', 0)}")
+            chatbot_logger.info(f"Conversational AI response successful - Stage: {ai_result.get('conversation_stage')}, Triage: {ai_result['triage_result']}, Tokens: {ai_result.get('tokens_generated', 0)}")
             
             return APIResponse.success(
                 data=response_data,
@@ -559,23 +968,37 @@ def ai_assessment():
             )
             
         except Exception as e:
-            chatbot_logger.error(f"DialoGPT model error: {str(e)}")
+            chatbot_logger.error(f"Conversational AI error: {str(e)}")
             
-            # Fallback to enhanced rule-based response
-            triage_result = analyze_symptoms_enhanced(user_message, language)
-            response_text = TRIAGE_RESPONSES[triage_result][language]
-            
-            # Add fallback indicator
-            if language == 'ar':
-                ai_response = f"تم التحليل باستخدام النظام الاحتياطي. {response_text}"
+            # Fallback to basic conversational response
+            if has_symptom_keywords(user_message, language) or has_emergency_keywords(user_message, language):
+                # Emergency fallback
+                if has_emergency_keywords(user_message, language):
+                    triage_result = 'emergency'
+                else:
+                    triage_result = analyze_symptoms_enhanced(user_message, language)
+                
+                response_text = TRIAGE_RESPONSES[triage_result][language]
+                
+                # Add fallback indicator in a conversational way
+                if language == 'ar':
+                    ai_response = f"فهمت الأعراض اللي بتحكي عنها. {response_text}\n\nلو محتاج مساعدة أكتر أو الوضع اتغير، كلمني تاني."
+                else:
+                    ai_response = f"I understand the symptoms you're describing. {response_text}\n\nIf you need more help or your situation changes, please let me know."
             else:
-                ai_response = f"Analysis completed using backup system. {response_text}"
+                # Greeting fallback
+                if language == 'ar':
+                    ai_response = "أهلاً وسهلاً! أنا هنا عشان أساعدك في تقييم أي أعراض صحية. شنو اللي بيضايقك اليوم؟"
+                else:
+                    ai_response = "Hello! I'm here to help assess any health symptoms you might have. What's bothering you today?"
+                triage_result = None
             
             response_data = {
                 'response': ai_response,
                 'triage_result': triage_result,
                 'language': language,
-                'model': 'enhanced-fallback',
+                'model': 'conversational-fallback',
+                'conversation_stage': 'fallback',
                 'fallback_reason': str(e),
                 'timestamp': datetime.utcnow().isoformat()
             }

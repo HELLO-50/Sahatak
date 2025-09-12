@@ -8,6 +8,7 @@ class AIAssessmentChatbot {
         this.apiEndpoint = 'https://sahatak.pythonanywhere.com/api/chatbot/assessment';
         this.maxRetries = 2; 
         this.retryDelay = 500;
+        this.conversationId = this.generateConversationId();
         
         // Initialize translations
         this.translations = {
@@ -64,6 +65,11 @@ class AIAssessmentChatbot {
         // Local cache for faster responses
         this.responseCache = new Map();
         this.commonResponses = this.initializeCommonResponses();
+    }
+
+    // Generate unique conversation ID
+    generateConversationId() {
+        return 'conv_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     }
 
     // Initialize common medical responses for offline use
@@ -265,7 +271,8 @@ class AIAssessmentChatbot {
                 credentials: 'include',
                 body: JSON.stringify({
                     message: message,
-                    language: this.currentLanguage
+                    language: this.currentLanguage,
+                    conversation_id: this.conversationId
                 })
             });
 
