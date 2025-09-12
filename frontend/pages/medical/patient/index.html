@@ -295,11 +295,26 @@
                 const user = await getCurrentUser();
                 let patientId = null;
                 
-                if (user && user.user && user.user.user_type === 'patient') {
+                console.log('Current user data:', user);
+                
+                // Handle different user data structures
+                let userData = null;
+                if (user && user.user) {
+                    userData = user.user;
+                } else if (user) {
+                    userData = user;
+                }
+                
+                console.log('Processed user data:', userData);
+                
+                if (userData && userData.user_type === 'patient') {
                     // Use user ID as patient identifier (backend will resolve to patient profile)
-                    patientId = user.user.id;
+                    patientId = userData.id;
+                    console.log('Patient ID extracted:', patientId);
                 } else {
                     console.error('User is not a patient or user data not available');
+                    console.error('User data:', userData);
+                    console.error('User type:', userData?.user_type);
                     showError('Unable to load patient data');
                     return;
                 }
@@ -691,9 +706,17 @@
                 // Add EHR changes made by doctors from EHR endpoint
                 try {
                     const user = await getCurrentUser();
-                    if (user && user.user && user.user.user_type === 'patient') {
+                    // Handle different user data structures
+                    let userData = null;
+                    if (user && user.user) {
+                        userData = user.user;
+                    } else if (user) {
+                        userData = user;
+                    }
+                    
+                    if (userData && userData.user_type === 'patient') {
                         // Use user ID - backend will resolve to patient profile
-                        const ehrResponse = await ApiHelper.makeRequest(`/ehr/patient/${user.user.id}`);
+                        const ehrResponse = await ApiHelper.makeRequest(`/ehr/patient/${userData.id}`);
                         if (ehrResponse.success && ehrResponse.data.ehr) {
                             const ehrData = ehrResponse.data.ehr;
                             

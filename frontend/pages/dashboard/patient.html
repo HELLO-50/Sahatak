@@ -830,14 +830,20 @@
                 try {
                     const profileResponse = await ApiHelper.makeRequest(`/users/profile`);
                     console.log('Profile response:', profileResponse);
+                    console.log('Profile data structure:', JSON.stringify(profileResponse.data, null, 2));
                     
                     if (profileResponse.success && profileResponse.data) {
                         // Check if user data is nested under 'user' property
                         const userData = profileResponse.data.user || profileResponse.data;
+                        console.log('User data:', userData);
+                        console.log('User type:', userData.user_type);
+                        console.log('User profile:', userData.profile);
+                        console.log('User patient_profile:', userData.patient_profile);
                         
                         if (userData.user_type === 'patient') {
                             // Try different ways to get patient ID
                             patientId = userData.profile?.id || userData.patient_profile?.id || userData.id;
+                            console.log('Extracted patient ID:', patientId);
                         }
                     }
                 } catch (error) {
@@ -855,7 +861,29 @@
                     }
                 }
 
+                // Try medical history endpoint first (which has better User ID resolution)
+                console.log('Trying medical history endpoint first...');
+                let ehrData = null;
+                
+                try {
+                    const medicalResponse = await ApiHelper.makeRequest(`/medical-history/patient/${patientId}`);
+                    if (medicalResponse.success) {
+                        console.log('Medical history response:', medicalResponse);
+                        // Use medical history data if available, then try EHR
+                        if (medicalResponse.data.patient_medical_history) {
+                            console.log('Found patient via medical history, now trying EHR...');
+                            // Get the actual patient profile ID from the medical history response
+                            const actualPatientId = medicalResponse.data.patient_medical_history.id;
+                            console.log('Actual patient ID from medical history:', actualPatientId);
+                            patientId = actualPatientId;
+                        }
+                    }
+                } catch (error) {
+                    console.log('Medical history endpoint failed:', error.message);
+                }
+                
                 // Fetch EHR data for the patient
+                console.log('Fetching EHR data with patient ID:', patientId);
                 const ehrResponse = await ApiHelper.makeRequest(`/ehr/patient/${patientId}`);
                 
                 if (!ehrResponse.success) {
