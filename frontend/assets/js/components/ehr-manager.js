@@ -694,11 +694,7 @@ const EHRManager = {
             return;
         }
         
-        console.log('Blood Pressure Chart - Raw vitals:', vitals);
-        console.log('Blood Pressure Chart - Sample vital:', vitals[0]);
-        
         const data = vitals.filter(v => v.systolic_bp && v.diastolic_bp);
-        console.log('Blood Pressure Chart - Filtered data:', data);
         
         if (data.length === 0) {
             ctx.parentElement.innerHTML = '<p class="text-center text-muted">No blood pressure data available</p>';
