@@ -98,7 +98,22 @@ def search_patients():
 def get_patient_ehr(patient_id):
     """Get comprehensive EHR for a patient"""
     try:
-        # Verify access permissions
+        # Resolve patient ID (can be either User ID or Patient ID)
+        original_patient_id = patient_id
+        patient = Patient.query.get(patient_id)
+        
+        # If not found, try to get patient by user ID (common case from frontend)
+        if not patient:
+            user = User.query.get(patient_id)
+            if user and user.user_type == 'patient' and user.patient_profile:
+                patient = user.patient_profile
+                patient_id = patient.id  # Use the actual patient ID for access checks
+                app_logger.debug(f"Resolved user ID {original_patient_id} to patient profile ID {patient.id}")
+        
+        if not patient:
+            return APIResponse.not_found(message=f'Patient not found with ID {original_patient_id}')
+        
+        # Verify access permissions using the resolved patient ID
         if not has_patient_access(patient_id):
             # Log unauthorized access attempt
             log_user_action(
@@ -106,6 +121,7 @@ def get_patient_ehr(patient_id):
                 'unauthorized_ehr_access_attempt',
                 {
                     'patient_id': patient_id,
+                    'original_id': original_patient_id,
                     'endpoint': 'get_patient_ehr',
                     'user_type': current_user.user_type
                 },
@@ -119,13 +135,12 @@ def get_patient_ehr(patient_id):
             'ehr_access_granted',
             {
                 'patient_id': patient_id,
+                'original_id': original_patient_id,
                 'endpoint': 'get_patient_ehr',
                 'user_type': current_user.user_type
             },
             request
         )
-        
-        patient = Patient.query.get_or_404(patient_id)
         
         # Get comprehensive medical data - safely handle missing tables
         ehr_data = {
@@ -532,6 +547,21 @@ def record_vital_signs():
 def get_patient_vital_signs(patient_id):
     """Get patient's vital signs history"""
     try:
+        # Resolve patient ID (can be either User ID or Patient ID)
+        original_patient_id = patient_id
+        patient = Patient.query.get(patient_id)
+        
+        # If not found, try to get patient by user ID
+        if not patient:
+            user = User.query.get(patient_id)
+            if user and user.user_type == 'patient' and user.patient_profile:
+                patient = user.patient_profile
+                patient_id = patient.id
+                app_logger.debug(f"Resolved user ID {original_patient_id} to patient profile ID {patient.id} for vital signs")
+        
+        if not patient:
+            return APIResponse.not_found(message=f'Patient not found with ID {original_patient_id}')
+        
         if not has_patient_access(patient_id):
             return APIResponse.forbidden(message='Access denied')
         
@@ -571,6 +601,21 @@ def get_patient_vital_signs(patient_id):
 def get_patient_diagnoses(patient_id):
     """Get patient's diagnosis history"""
     try:
+        # Resolve patient ID (can be either User ID or Patient ID)
+        original_patient_id = patient_id
+        patient = Patient.query.get(patient_id)
+        
+        # If not found, try to get patient by user ID
+        if not patient:
+            user = User.query.get(patient_id)
+            if user and user.user_type == 'patient' and user.patient_profile:
+                patient = user.patient_profile
+                patient_id = patient.id
+                app_logger.debug(f"Resolved user ID {original_patient_id} to patient profile ID {patient.id} for diagnoses")
+        
+        if not patient:
+            return APIResponse.not_found(message=f'Patient not found with ID {original_patient_id}')
+        
         if not has_patient_access(patient_id):
             return APIResponse.forbidden(message='Access denied')
         
