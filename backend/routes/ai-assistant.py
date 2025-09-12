@@ -5,6 +5,7 @@ import tempfile
 from datetime import datetime
 from utils.responses import APIResponse, ErrorCodes
 from utils.logging_config import app_logger
+from utils.validators import validate_json_data, validate_text_field_length, handle_api_errors
 import openai
 from openai import OpenAI
 
@@ -99,6 +100,7 @@ def extract_triage_decision(ai_response):
 
 @chatbot_bp.route('/assessment', methods=['POST', 'OPTIONS'])
 @cross_origin()
+@handle_api_errors
 def ai_assessment():
     """
     AI Symptom Assessment - Medical triage chatbot using OpenAI
@@ -122,11 +124,13 @@ def ai_assessment():
                 message="Fallback response - OpenAI unavailable"
             )
         
-        # Get request data
+        # Get and validate request data
         data = request.get_json()
-        if not data or 'message' not in data:
+        required_fields = ['message']
+        validation_result = validate_json_data(data, required_fields)
+        if not validation_result['valid']:
             return APIResponse.error(
-                message="Message is required",
+                message=validation_result['message'],
                 error_code=ErrorCodes.VALIDATION_ERROR
             )
         
@@ -134,9 +138,11 @@ def ai_assessment():
         language = data.get('language', 'en')
         conversation_id = data.get('conversation_id', None)
         
-        if not user_message:
+        # Validate message length and content
+        message_validation = validate_text_field_length(user_message, 'Message', 1000, 1)
+        if not message_validation['valid']:
             return APIResponse.error(
-                message="Message cannot be empty",
+                message=message_validation['message'],
                 error_code=ErrorCodes.VALIDATION_ERROR
             )
         
@@ -147,15 +153,19 @@ def ai_assessment():
         app_logger.info(f"AI Assessment request - Language: {language}, Message length: {len(user_message)}")
         
         try:
-            # Make OpenAI API call
+            # Make OpenAI API call with configurable parameters
+            chat_model = os.getenv("OPENAI_CHAT_MODEL", "gpt-3.5-turbo")
+            max_tokens = int(os.getenv("OPENAI_MAX_TOKENS", "500"))
+            temperature = float(os.getenv("OPENAI_TEMPERATURE", "0.7"))
+            
             response = openai_client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model=chat_model,
                 messages=[
                     {"role": "system", "content": MEDICAL_TRIAGE_SYSTEM_PROMPT},
                     {"role": "user", "content": user_message}
                 ],
-                max_tokens=500,
-                temperature=0.7
+                max_tokens=max_tokens,
+                temperature=temperature
             )
             
             bot_response = response.choices[0].message.content.strip()
@@ -209,6 +219,7 @@ def ai_assessment():
 
 @chatbot_bp.route('/stt', methods=['POST', 'OPTIONS'])
 @cross_origin()
+@handle_api_errors
 def speech_to_text():
     """
     Speech-to-Text endpoint using OpenAI Whisper API
@@ -248,9 +259,11 @@ def speech_to_text():
                 
                 try:
                     # Use OpenAI Whisper for transcription
+                    whisper_model = os.getenv("OPENAI_WHISPER_MODEL", "whisper-1")
+                    
                     with open(temp_audio.name, "rb") as audio:
                         transcription = openai_client.audio.transcriptions.create(
-                            model="whisper-1",
+                            model=whisper_model,
                             file=audio,
                             language=None  # Auto-detect language
                         )
@@ -304,16 +317,29 @@ def chatbot_health():
                 'available': openai_available,
                 'api_key_configured': bool(os.getenv("OPENAI_API_KEY")),
                 'models': {
-                    'chat': 'gpt-3.5-turbo',
-                    'speech_to_text': 'whisper-1'
+                    'chat': os.getenv("OPENAI_CHAT_MODEL", "gpt-3.5-turbo"),
+                    'speech_to_text': os.getenv("OPENAI_WHISPER_MODEL", "whisper-1")
+                },
+                'configuration': {
+                    'max_tokens': os.getenv("OPENAI_MAX_TOKENS", "500"),
+                    'temperature': os.getenv("OPENAI_TEMPERATURE", "0.7")
                 }
             },
             'supported_languages': ['Arabic', 'English'],
+            'language_detection': 'automatic',
+            'triage_categories': ['emergency', 'in_person', 'telemedicine'],
             'endpoints': {
                 'assessment': '/api/chatbot/assessment',
                 'speech_to_text': '/api/chatbot/stt',
                 'health': '/api/chatbot/health'
             },
+            'features': [
+                'bilingual_support',
+                'voice_input',
+                'medical_triage',
+                'symptom_classification',
+                'sahatak_platform_integration'
+            ],
             'timestamp': datetime.utcnow().isoformat()
         },
         message="AI Assessment service health check completed"

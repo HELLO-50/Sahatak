@@ -1,19 +1,42 @@
 class MedicalTriageChat {
     constructor() {
+        // Check if required DOM elements exist
         this.chatMessages = document.getElementById('chatMessages');
         this.messageInput = document.getElementById('messageInput');
         this.sendBtn = document.getElementById('sendBtn');
         this.micBtn = document.getElementById('micBtn');
         this.loadingIndicator = document.getElementById('loadingIndicator');
         
+        if (!this.chatMessages || !this.messageInput || !this.sendBtn || !this.micBtn || !this.loadingIndicator) {
+            console.error('Required DOM elements not found. Check HTML structure.');
+            return;
+        }
+        
         this.isRecording = false;
         this.mediaRecorder = null;
         this.audioChunks = [];
         
-        // Update API URL to match backend structure
-        this.apiBaseUrl = 'http://localhost:5000/api/chatbot';
+        // Get API base URL from environment or use default
+        this.apiBaseUrl = this.getApiBaseUrl();
+        
+        // Initialize request timeout
+        this.requestTimeout = 30000; // 30 seconds
         
         this.initializeEventListeners();
+        
+        console.log('Medical Triage Chat initialized successfully');
+    }
+    
+    getApiBaseUrl() {
+        // Check if running in production or development
+        const hostname = window.location.hostname;
+        
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+            return 'http://localhost:5000/api/chatbot';
+        } else {
+            // For production deployment, adjust this URL accordingly
+            return `${window.location.origin}/api/chatbot`;
+        }
     }
     
     initializeEventListeners() {
@@ -28,11 +51,29 @@ class MedicalTriageChat {
     
     async sendMessage() {
         const message = this.messageInput.value.trim();
-        if (!message) return;
+        
+        // Validate message
+        if (!message) {
+            this.showNotification('Please enter a message.', 'warning');
+            return;
+        }
+        
+        if (message.length > 1000) {
+            this.showNotification('Message is too long. Please keep it under 1000 characters.', 'warning');
+            return;
+        }
+        
+        // Disable send button to prevent multiple submissions
+        this.sendBtn.disabled = true;
+        this.messageInput.disabled = true;
         
         this.addUserMessage(message);
         this.messageInput.value = '';
         this.showLoading(true);
+        
+        // Create abort controller for timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), this.requestTimeout);
         
         try {
             const response = await fetch(`${this.apiBaseUrl}/assessment`, {
@@ -42,12 +83,23 @@ class MedicalTriageChat {
                 },
                 body: JSON.stringify({ 
                     message: message,
-                    language: 'auto'  // Auto-detect language
-                })
+                    language: 'auto'
+                }),
+                signal: controller.signal
             });
             
+            clearTimeout(timeoutId);
+            
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                if (response.status === 503) {
+                    throw new Error('Service temporarily unavailable. Please try again later.');
+                } else if (response.status >= 500) {
+                    throw new Error('Server error. Please try again later.');
+                } else if (response.status === 429) {
+                    throw new Error('Too many requests. Please wait a moment before trying again.');
+                } else {
+                    throw new Error(`Request failed with status ${response.status}`);
+                }
             }
             
             const result = await response.json();
@@ -55,17 +107,28 @@ class MedicalTriageChat {
             if (result.success && result.data) {
                 this.addBotMessage(result.data.response, result.data.triage_result);
             } else {
-                throw new Error('Invalid response format');
+                throw new Error(result.message || 'Invalid response format');
             }
             
         } catch (error) {
             console.error('Error sending message:', error);
-            this.addBotMessage(
-                'Sorry, I encountered an error. Please try again later.\n\n' +
-                'عذراً، واجهت خطأ. من فضلك حاول مرة أخرى لاحقاً.'
-            );
+            
+            let errorMessage;
+            if (error.name === 'AbortError') {
+                errorMessage = 'Request timed out. Please try again.\n\nانتهت مهلة الطلب. من فضلك حاول مرة أخرى.';
+            } else if (error.message.includes('fetch')) {
+                errorMessage = 'Network error. Please check your connection and try again.\n\nخطأ في الشبكة. من فضلك تحقق من اتصالك وحاول مرة أخرى.';
+            } else {
+                errorMessage = `Error: ${error.message}\n\nعذراً، واجهت خطأ. من فضلك حاول مرة أخرى لاحقاً.`;
+            }
+            
+            this.addBotMessage(errorMessage);
         } finally {
+            clearTimeout(timeoutId);
             this.showLoading(false);
+            this.sendBtn.disabled = false;
+            this.messageInput.disabled = false;
+            this.messageInput.focus();
         }
     }
     
@@ -108,7 +171,7 @@ class MedicalTriageChat {
                     break;
                 case 'telemedicine':
                     badge.className += ' triage-telemedicine';
-                    badge.textContent = '💻 TELEMEDICINE / استشارة عن بُعد';
+                    badge.textContent = '💻 SAHATAK PLATFORM / منصة صحتك';
                     break;
             }
             
@@ -141,6 +204,47 @@ class MedicalTriageChat {
     
     scrollToBottom() {
         this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+    }
+    
+    showNotification(message, type = 'info') {
+        // Create notification element if it doesn't exist
+        let notification = document.getElementById('notification');
+        if (!notification) {
+            notification = document.createElement('div');
+            notification.id = 'notification';
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                border-radius: 8px;
+                color: white;
+                font-weight: bold;
+                z-index: 1000;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+                max-width: 300px;
+                word-wrap: break-word;
+            `;
+            document.body.appendChild(notification);
+        }
+        
+        // Set notification style based on type
+        const colors = {
+            info: '#007bff',
+            warning: '#ffc107',
+            error: '#dc3545',
+            success: '#28a745'
+        };
+        
+        notification.style.backgroundColor = colors[type] || colors.info;
+        notification.textContent = message;
+        notification.style.opacity = '1';
+        
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            notification.style.opacity = '0';
+        }, 5000);
     }
     
     isArabicText(text) {
