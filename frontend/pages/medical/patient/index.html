@@ -695,60 +695,60 @@
                         // Use user ID - backend will resolve to patient profile
                         const ehrResponse = await ApiHelper.makeRequest(`/ehr/patient/${user.user.id}`);
                         if (ehrResponse.success && ehrResponse.data.ehr) {
-                                const ehrData = ehrResponse.data.ehr;
-                                
-                                // Add vital signs updates by doctors
-                                if (ehrData.vital_signs) {
-                                    ehrData.vital_signs.forEach(vital => {
-                                        if (vital.recorded_by_doctor_id) {
-                                            totalActivities.push({
-                                                type: 'vital_signs_update',
-                                                date: new Date(vital.measured_at || vital.created_at),
-                                                title: 'Vital Signs Updated by Doctor',
-                                                description: `Doctor recorded: ${[
-                                                    vital.blood_pressure && `BP ${vital.blood_pressure}`,
-                                                    vital.heart_rate && `HR ${vital.heart_rate}`,
-                                                    vital.temperature && `Temp ${vital.temperature}°C`,
-                                                    vital.respiratory_rate && `RR ${vital.respiratory_rate}`,
-                                                    vital.oxygen_saturation && `O2 ${vital.oxygen_saturation}%`,
-                                                    vital.bmi && `BMI ${vital.bmi}`
-                                                ].filter(Boolean).join(', ')}`,
-                                                icon: 'bi-activity',
-                                                color: 'bg-info'
-                                            });
-                                        }
-                                    });
-                                }
-                                
-                                // Add diagnosis updates by doctors
-                                if (ehrData.diagnoses) {
-                                    ehrData.diagnoses.forEach(diagnosis => {
+                            const ehrData = ehrResponse.data.ehr;
+                            
+                            // Add vital signs updates by doctors
+                            if (ehrData.vital_signs) {
+                                ehrData.vital_signs.forEach(vital => {
+                                    if (vital.recorded_by_doctor_id) {
                                         totalActivities.push({
-                                            type: 'diagnosis_update',
-                                            date: new Date(diagnosis.diagnosis_date || diagnosis.created_at),
-                                            title: 'Diagnosis Added by Doctor',
-                                            description: `${diagnosis.primary_diagnosis}${diagnosis.secondary_diagnoses ? ' | ' + diagnosis.secondary_diagnoses : ''}`,
-                                            icon: 'bi-clipboard-medical-fill',
-                                            color: 'bg-primary'
+                                            type: 'vital_signs_update',
+                                            date: new Date(vital.measured_at || vital.created_at),
+                                            title: 'Vital Signs Updated by Doctor',
+                                            description: `Doctor recorded: ${[
+                                                vital.blood_pressure && `BP ${vital.blood_pressure}`,
+                                                vital.heart_rate && `HR ${vital.heart_rate}`,
+                                                vital.temperature && `Temp ${vital.temperature}°C`,
+                                                vital.respiratory_rate && `RR ${vital.respiratory_rate}`,
+                                                vital.oxygen_saturation && `O2 ${vital.oxygen_saturation}%`,
+                                                vital.bmi && `BMI ${vital.bmi}`
+                                            ].filter(Boolean).join(', ')}`,
+                                            icon: 'bi-activity',
+                                            color: 'bg-info'
                                         });
+                                    }
+                                });
+                            }
+                            
+                            // Add diagnosis updates by doctors
+                            if (ehrData.diagnoses) {
+                                ehrData.diagnoses.forEach(diagnosis => {
+                                    totalActivities.push({
+                                        type: 'diagnosis_update',
+                                        date: new Date(diagnosis.diagnosis_date || diagnosis.created_at),
+                                        title: 'Diagnosis Added by Doctor',
+                                        description: `${diagnosis.primary_diagnosis}${diagnosis.secondary_diagnoses ? ' | ' + diagnosis.secondary_diagnoses : ''}`,
+                                        icon: 'bi-clipboard-medical-fill',
+                                        color: 'bg-primary'
                                     });
-                                }
-                                
-                                // Add medical history updates by doctors
-                                if (ehrData.medical_history_updates) {
-                                    ehrData.medical_history_updates.forEach(update => {
-                                        totalActivities.push({
-                                            type: 'ehr_history_update',
-                                            date: new Date(update.created_at),
-                                            title: 'Medical Record Updated by Doctor',
-                                            description: `${update.doctor_name || 'Doctor'} updated ${update.update_type}: ${update.notes || 'Medical record changes'}`,
-                                            icon: 'bi-file-earmark-medical-fill',
-                                            color: 'bg-success'
-                                        });
+                                });
+                            }
+                            
+                            // Add medical history updates by doctors
+                            if (ehrData.medical_history_updates) {
+                                ehrData.medical_history_updates.forEach(update => {
+                                    totalActivities.push({
+                                        type: 'ehr_history_update',
+                                        date: new Date(update.created_at),
+                                        title: 'Medical Record Updated by Doctor',
+                                        description: `${update.doctor_name || 'Doctor'} updated ${update.update_type}: ${update.notes || 'Medical record changes'}`,
+                                        icon: 'bi-file-earmark-medical-fill',
+                                        color: 'bg-success'
                                     });
-                                }
-                                
-                                console.log(`Added ${ehrData.vital_signs?.length || 0} vital signs, ${ehrData.diagnoses?.length || 0} diagnoses, ${ehrData.medical_history_updates?.length || 0} EHR updates from doctor activities`);
+                                });
+                            }
+                            
+                            console.log(`Added ${ehrData.vital_signs?.length || 0} vital signs, ${ehrData.diagnoses?.length || 0} diagnoses, ${ehrData.medical_history_updates?.length || 0} EHR updates from doctor activities`);
                             }
                         }
                     }
