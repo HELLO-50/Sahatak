@@ -855,14 +855,17 @@
                     const currentUser = AuthGuard.getCurrentUser();
                     console.log('Fallback: Current user from AuthGuard:', currentUser);
                     
-                    if (currentUser && currentUser.user_type === 'patient') {
+                    // AuthGuard returns camelCase properties (userType) not snake_case (user_type)
+                    if (currentUser && (currentUser.user_type === 'patient' || currentUser.userType === 'patient')) {
                         // Try to get patient profile ID from stored user data
                         patientId = currentUser.profile?.id || currentUser.patient_profile?.id;
                         console.log('Fallback patient profile ID:', patientId);
                         
                         if (!patientId) {
-                            console.error('Cannot determine Patient Profile ID - will not proceed with User ID to avoid 403 errors');
-                            throw new Error('Patient Profile ID not available');
+                            // Use User ID temporarily - medical history endpoint can resolve it
+                            console.log('No Patient Profile ID in AuthGuard data, using User ID for medical history resolution');
+                            patientId = currentUser.id;
+                            console.log('Using User ID for initial medical history call:', patientId);
                         }
                     } else {
                         throw new Error('User not identified as patient');
@@ -878,8 +881,15 @@
                         console.log('Medical history response:', medicalResponse);
                         // Use medical history data if available, then try EHR
                         if (medicalResponse.data.patient_medical_history) {
-                            console.log('Found patient via medical history, using existing patient ID for EHR...');
-                            console.log('Patient ID already resolved to:', patientId);
+                            console.log('Found patient via medical history');
+                            // Extract the actual Patient Profile ID from the response
+                            const actualPatientId = medicalResponse.data.patient_medical_history.id;
+                            if (actualPatientId && actualPatientId !== patientId) {
+                                console.log('Updating patient ID from', patientId, 'to actual Patient Profile ID:', actualPatientId);
+                                patientId = actualPatientId;
+                            } else {
+                                console.log('Patient ID already correct:', patientId);
+                            }
                         }
                     }
                 } catch (error) {
