@@ -440,22 +440,39 @@ def record_vital_signs():
                 message=validation_result['message']
             )
         
-        # Create vital signs record
+        # Helper function to convert to int/float or None
+        def safe_int(value):
+            if value is None or value == '':
+                return None
+            try:
+                return int(value)
+            except (ValueError, TypeError):
+                return None
+        
+        def safe_float(value):
+            if value is None or value == '':
+                return None
+            try:
+                return float(value)
+            except (ValueError, TypeError):
+                return None
+        
+        # Create vital signs record with proper type conversion
         vital_signs = VitalSigns(
             patient_id=patient_id,
             appointment_id=data.get('appointment_id'),
             recorded_by_doctor_id=recorded_by_doctor_id,
-            systolic_bp=data.get('systolic_bp'),
-            diastolic_bp=data.get('diastolic_bp'),
-            heart_rate=data.get('heart_rate'),
-            temperature=data.get('temperature'),
-            respiratory_rate=data.get('respiratory_rate'),
-            oxygen_saturation=data.get('oxygen_saturation'),
-            height=data.get('height'),
-            weight=data.get('weight'),
-            pain_scale=data.get('pain_scale'),
-            pain_location=data.get('pain_location'),
-            notes=data.get('notes')
+            systolic_bp=safe_int(data.get('systolic_bp')),
+            diastolic_bp=safe_int(data.get('diastolic_bp')),
+            heart_rate=safe_int(data.get('heart_rate')),
+            temperature=safe_float(data.get('temperature')),
+            respiratory_rate=safe_int(data.get('respiratory_rate')),
+            oxygen_saturation=safe_float(data.get('oxygen_saturation')),
+            height=safe_float(data.get('height')),
+            weight=safe_float(data.get('weight')),
+            pain_scale=safe_int(data.get('pain_scale')),
+            pain_location=data.get('pain_location') if data.get('pain_location') else None,
+            notes=data.get('notes') if data.get('notes') else None
         )
         
         # Calculate BMI if possible

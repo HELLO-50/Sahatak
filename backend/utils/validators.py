@@ -920,7 +920,8 @@ def validate_vital_signs_ranges(vital_signs_data: dict) -> Dict[str, Union[bool,
     
     # Additional validation for blood pressure relationship
     if ('systolic_bp' in vital_signs_data and 'diastolic_bp' in vital_signs_data and 
-        vital_signs_data['systolic_bp'] is not None and vital_signs_data['diastolic_bp'] is not None):
+        vital_signs_data['systolic_bp'] is not None and vital_signs_data['diastolic_bp'] is not None and
+        vital_signs_data['systolic_bp'] != '' and vital_signs_data['diastolic_bp'] != ''):
         try:
             systolic = float(vital_signs_data['systolic_bp'])
             diastolic = float(vital_signs_data['diastolic_bp'])
