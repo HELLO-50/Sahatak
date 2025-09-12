@@ -95,7 +95,7 @@ const Dashboard = {
     async loadUserProfile(retries = 3, delay = 1000) {
         for (let attempt = 1; attempt <= retries; attempt++) {
             try {
-                console.log(`Loading user profile (attempt ${attempt}/${retries})...`);
+                // Loading user profile with retry logic
                 const response = await ApiHelper.makeRequest('/users/profile');
                 
                 if (response.data) {
@@ -138,17 +138,17 @@ const Dashboard = {
      * Load appointments from backend
      */
     async loadAppointments() {
-        console.log('🚀 loadAppointments called - NEW VERSION');
+        // Loading appointments with enhanced processing
         try {
             const response = await ApiHelper.makeRequest('/appointments/');
-            console.log('🔍 Full appointments API response:', response);
+            // Appointments API response received
             
             if (response.data) {
                 // Ensure data is always an array
                 const appointments = Array.isArray(response.data) ? response.data : 
                                    (response.data.appointments && Array.isArray(response.data.appointments)) ? response.data.appointments : [];
                 
-                console.log('📋 Processed appointments array:', appointments);
+                // Appointments processed and ready for display
                 this.cache.appointments = appointments;
                 this.displayAppointments(appointments);
             } else {
@@ -179,7 +179,7 @@ const Dashboard = {
         }
         
         // Debug: log all appointments
-        console.log('📅 All appointments:', appointmentsArray);
+        // Processing appointments for dashboard display
         
         // Filter relevant appointments - include recent and future appointments
         const upcoming = appointmentsArray.filter(apt => {
@@ -190,11 +190,11 @@ const Dashboard = {
             
             // Include appointments from yesterday onwards if they're scheduled/confirmed
             const isRelevant = aptDate >= yesterday && ['scheduled', 'confirmed'].includes(apt.status);
-            console.log(`📅 Appointment ${apt.id}: ${apt.appointment_date}, status: ${apt.status}, relevant: ${isRelevant}, yesterday: ${yesterday.toISOString()}`);
+            // Filtering appointment based on date and status
             return isRelevant;
         }).sort((a, b) => new Date(a.appointment_date) - new Date(b.appointment_date));
         
-        console.log('📅 Filtered upcoming appointments:', upcoming);
+        // Appointments filtered and sorted
         
         if (upcoming.length === 0) {
             // Enhanced debug info

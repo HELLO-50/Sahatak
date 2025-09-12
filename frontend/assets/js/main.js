@@ -791,10 +791,7 @@ const ApiHelper = {
             // Additional debug for session-related requests
             if (endpoint.includes('/auth/') || endpoint.includes('/users/profile')) {
                 const hasToken = requestOptions.headers.Authorization ? 'YES' : 'NO';
-                console.log(`🔐 Auth Request: ${method} ${endpoint}`);
-                console.log(`📄 Cookies being sent: ${cookieString || 'NO COOKIES'}`);
-                console.log(`🎫 JWT Token in headers: ${hasToken}`);
-                console.log(`🔗 Credentials mode: ${requestOptions.credentials}`);
+                // Auth request logging disabled to reduce console noise
             }
 
             const response = await fetch(`${this.baseUrl}${endpoint}`, requestOptions);
@@ -1675,7 +1672,7 @@ window.handleLogin = handleLogin;
 
 document.addEventListener('DOMContentLoaded', function() {
     // Skip form attachment - handled by index.html to avoid conflicts
-    console.log('Main.js DOMContentLoaded - form attachment handled by index.html');
+    // Form attachment handled by index.html to avoid conflicts
     
     // Auto-update doctor verification status on all pages
     setTimeout(() => {

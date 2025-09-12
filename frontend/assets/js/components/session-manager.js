@@ -13,15 +13,10 @@ const SessionManager = {
     init() {
         // Only initialize if user is authenticated and not in development mode
         if (AuthGuard.isAuthenticated() && !AuthGuard.isDevelopmentMode()) {
-            console.log('Initializing session management...');
-            
             // Start session monitoring (ApiHelper will check if already running)
             const started = ApiHelper.startSessionMonitoring();
             if (started) {
                 this.isMonitoring = true;
-                console.log('Session monitoring started successfully');
-            } else {
-                console.log('Session monitoring already active or conditions not met');
             }
             
             // Add page visibility change handler to pause/resume monitoring
@@ -29,10 +24,6 @@ const SessionManager = {
             
             // Add beforeunload handler to cleanup
             this.setupUnloadHandler();
-            
-            console.log('Session management initialized successfully');
-        } else {
-            console.log('Session management skipped - not authenticated or in dev mode');
         }
     },
     
@@ -43,10 +34,8 @@ const SessionManager = {
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
                 // Page is hidden, reduce session check frequency
-                console.log('Page hidden, reducing session check frequency');
             } else {
                 // Page is visible, resume normal session checking
-                console.log('Page visible, resuming normal session checks');
                 // Trigger immediate session check when page becomes visible
                 if (this.isMonitoring) {
                     ApiHelper.checkSession().catch(error => {

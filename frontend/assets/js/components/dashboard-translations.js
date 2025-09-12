@@ -5,10 +5,7 @@ const DashboardTranslations = {
     updateElementText(elementId, text) {
         const element = document.getElementById(elementId);
         if (element && text) {
-            // Debug for footer elements
-            if (elementId.includes('footer-')) {
-                console.log(`🔄 Updating ${elementId}: "${text}"`);
-            }
+            // Debug for footer elements (disabled to reduce console noise)
             element.textContent = text;
         }
     },
@@ -100,34 +97,32 @@ const DashboardTranslations = {
         this.updateElementText('no-medical-records', patient.no_data.no_records);
         
         // Profile and Settings
-        console.log('🔸 About to update patient profile and settings');
-        console.log('🔸 patient.profile exists:', !!patient.profile);
-        console.log('🔸 patient.settings exists:', !!patient.settings);
+        // Patient profile and settings update logging disabled
         try {
             this.updateProfileAndSettings(patient.profile, patient.settings);
-            console.log('🔸 Patient profile and settings updated');
+            // Profile and settings updated
         } catch (profileError) {
             console.error('❌ Patient profile and settings update failed:', profileError);
         }
         
         // Update footer using standalone function to ensure it works
-        console.log('🚀 Reached patient footer update section');
+        // Footer update section
         try {
             DashboardTranslations.updateFooter(t);
-            console.log('✅ Patient dashboard footer update completed');
+            // Footer update completed
         } catch (footerError) {
             console.error('❌ Patient footer update failed:', footerError);
         }
         
         // Refresh dynamic content that uses inline translations
         if (typeof loadHealthSummary === 'function') {
-            console.log('🔄 Refreshing Health Summary for language change');
+            // Refreshing Health Summary for language change
             loadHealthSummary();
         }
         
         // Refresh appointments list if function exists
         if (typeof loadDashboardStats === 'function') {
-            console.log('🔄 Refreshing Dashboard Stats for language change');
+            // Refreshing Dashboard Stats for language change
             setTimeout(() => loadDashboardStats(), 100); // Small delay to ensure translation is applied
         }
     },
@@ -1079,13 +1074,9 @@ DashboardTranslations.updateAvailabilityDashboard = function(lang) {
 
 // Update footer translations  
 DashboardTranslations.updateFooter = function(t) {
-    console.log('🎯 Standalone updateFooter called with:', t.footer);
+    // updateFooter called with footer data
     if (t.footer) {
-        console.log('✅ Footer data found:', {
-            links_title: t.footer.links_title,
-            support_title: t.footer.support_title,
-            emergency_text: t.footer.emergency_text
-        });
+        // Footer data found and ready for update
         this.updateElementText('footer-brand', t.footer.brand || 'Sahatak | صحتك');
         this.updateElementText('footer-links-title', t.footer.links_title || 'Quick Links');
         this.updateElementText('footer-about', t.footer.about || 'About Platform');

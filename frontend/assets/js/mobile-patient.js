@@ -655,7 +655,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.performanceMonitor = new MobilePerformanceMonitor();
     window.networkOptimizer = new NetworkAwareOptimizations();
     
-    console.log('🚀 Mobile patient optimizations loaded');
+    // Mobile patient optimizations initialized
 });
 
 // Export for use in other scripts
