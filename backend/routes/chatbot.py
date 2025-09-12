@@ -89,10 +89,108 @@ TRIAGE_RESPONSES = {
     }
 }
 
-# Emergency keywords in Arabic and English
-EMERGENCY_KEYWORDS = {
-    'en': ['chest pain', 'heart attack', 'stroke', 'bleeding', 'unconscious', 'difficulty breathing', 'severe pain', 'suicide', 'overdose'],
-    'ar': ['ألم في الصدر', 'أزمة قلبية', 'جلطة', 'نزيف', 'فقدان الوعي', 'صعوبة في التنفس', 'ألم شديد', 'انتحار', 'جرعة زائدة']
+# Smart Questionnaire System - Symptom-based decision trees
+SYMPTOM_QUESTIONNAIRES = {
+    'en': {
+        'chest_pain': {
+            'questions': [
+                "Is the chest pain severe (8-10 on pain scale)?",
+                "Is the pain crushing, squeezing, or feels like an elephant on your chest?",
+                "Do you have shortness of breath or difficulty breathing?",
+                "Is the pain radiating to your left arm, neck, jaw, or back?",
+                "Do you feel nauseous, dizzy, or sweating?",
+                "Did the pain start suddenly during physical activity?"
+            ],
+            'emergency_triggers': [0, 1, 2, 3, 4],  # Question indices that trigger emergency
+            'followup': "Based on your chest pain symptoms, this needs immediate evaluation."
+        },
+        'headache': {
+            'questions': [
+                "Is this the worst headache of your life or different from usual headaches?",
+                "Did the headache start suddenly like a 'thunderclap'?",
+                "Do you have a fever with the headache?",
+                "Are you experiencing confusion, difficulty speaking, or vision changes?",
+                "Do you have a stiff neck or sensitivity to light?",
+                "Are you nauseous or vomiting?"
+            ],
+            'emergency_triggers': [0, 1, 3, 4],
+            'followup': "Headaches can range from simple tension headaches to serious conditions."
+        },
+        'abdominal_pain': {
+            'questions': [
+                "Is the pain severe (8-10 on pain scale) and constant?",
+                "Is the pain in the lower right side of your abdomen?",
+                "Are you vomiting blood or material that looks like coffee grounds?",
+                "Do you have a fever with the abdominal pain?",
+                "Is your abdomen rigid or very tender to touch?",
+                "Are you unable to pass gas or have a bowel movement?"
+            ],
+            'emergency_triggers': [0, 2, 4, 5],
+            'followup': "Abdominal pain can indicate various conditions from mild to serious."
+        },
+        'breathing': {
+            'questions': [
+                "Are you having severe difficulty breathing or can't catch your breath?",
+                "Are your lips or fingernails turning blue?",
+                "Do you have chest pain with the breathing difficulty?",
+                "Are you coughing up blood?",
+                "Did the breathing difficulty start suddenly?",
+                "Do you have a history of asthma or heart problems?"
+            ],
+            'emergency_triggers': [0, 1, 2, 3, 4],
+            'followup': "Breathing difficulties can be serious and need prompt evaluation."
+        },
+        'fever': {
+            'questions': [
+                "Is your temperature over 103°F (39.4°C)?",
+                "Do you have a severe headache with the fever?",
+                "Are you having difficulty breathing?",
+                "Do you have a rash that doesn't fade when pressed?",
+                "Are you confused or have altered mental state?",
+                "Do you have severe abdominal pain with the fever?"
+            ],
+            'emergency_triggers': [0, 1, 2, 3, 4, 5],
+            'followup': "Fever is often manageable, but some combinations need immediate care."
+        },
+        'injury': {
+            'questions': [
+                "Is there active, heavy bleeding that won't stop?",
+                "Do you suspect a broken bone or can't move the injured area?",
+                "Is there an obvious deformity or bone sticking out?",
+                "Did you hit your head and lose consciousness?",
+                "Are you experiencing numbness or tingling?",
+                "Is the injured area turning blue or very swollen?"
+            ],
+            'emergency_triggers': [0, 1, 2, 3],
+            'followup': "Injuries can often be treated, but some require immediate medical attention."
+        }
+    },
+    'ar': {
+        'chest_pain': {
+            'questions': [
+                "هل ألم الصدر شديد (8-10 على مقياس الألم)؟",
+                "هل الألم ضاغط أو كأن فيلاً يجلس على صدرك؟",
+                "هل تعاني من ضيق في التنفس أو صعوبة في التنفس؟",
+                "هل ينتشر الألم إلى ذراعك الأيسر أو رقبتك أو فكك أو ظهرك؟",
+                "هل تشعر بالغثيان أو الدوخة أو التعرق؟",
+                "هل بدأ الألم فجأة أثناء النشاط البدني؟"
+            ],
+            'emergency_triggers': [0, 1, 2, 3, 4],
+            'followup': "بناءً على أعراض ألم الصدر، هذا يحتاج تقييماً فورياً."
+        },
+        'headache': {
+            'questions': [
+                "هل هذا أسوأ صداع في حياتك أو مختلف عن الصداع المعتاد؟",
+                "هل بدأ الصداع فجأة مثل 'صاعقة رعد'؟",
+                "هل تعاني من حمى مع الصداع؟",
+                "هل تعاني من ارتباك أو صعوبة في الكلام أو تغيرات في الرؤية؟",
+                "هل رقبتك متيبسة أو تعاني من حساسية للضوء؟",
+                "هل تشعر بالغثيان أو القيء؟"
+            ],
+            'emergency_triggers': [0, 1, 3, 4],
+            'followup': "الصداع يمكن أن يتراوح من صداع التوتر البسيط إلى حالات خطيرة."
+        }
+    }
 }
 
 def load_local_model():
@@ -117,20 +215,55 @@ def load_local_model():
         chatbot_logger.error(f"Failed to load local model: {str(e)}")
         return False
 
-def analyze_with_dialogpt(symptoms, language='en'):
-    """Analyze symptoms using DialoGPT for conversational medical triage"""
-    global local_model, local_tokenizer
+def analyze_with_smart_questionnaire(symptoms, language='en'):
+    """Smart questionnaire-based medical triage system"""
     
-    if not TRANSFORMERS_AVAILABLE:
-        chatbot_logger.info("Transformers not available - using enhanced rules fallback")
-        triage_result = analyze_symptoms_enhanced(symptoms, language)
-        ai_response = generate_local_response(symptoms, triage_result, language)
-        return {
-            'response': ai_response,
-            'triage_result': triage_result,
-            'model': 'enhanced-rules-fallback',
-            'tokens_generated': 0
-        }
+    # Detect symptom category
+    symptom_category = detect_symptom_category(symptoms, language)
+    
+    if symptom_category:
+        # Generate contextual response with follow-up questions
+        questionnaire = SYMPTOM_QUESTIONNAIRES[language].get(symptom_category)
+        if questionnaire:
+            questions = questionnaire['questions'][:3]  # Ask first 3 questions
+            followup = questionnaire['followup']
+            
+            # Create intelligent response
+            if language == 'ar':
+                ai_response = f"أفهم أنك تعاني من هذه الأعراض. لتقييم حالتك بشكل أفضل، يرجى الإجابة على هذه الأسئلة:\n\n"
+                for i, q in enumerate(questions, 1):
+                    ai_response += f"{i}. {q}\n"
+                ai_response += f"\n{followup}"
+            else:
+                ai_response = f"I understand you're experiencing these symptoms. To better assess your situation, please answer these questions:\n\n"
+                for i, q in enumerate(questions, 1):
+                    ai_response += f"{i}. {q}\n"
+                ai_response += f"\n{followup}"
+            
+            # Determine triage based on symptom severity
+            triage_result = determine_triage_from_category(symptom_category, symptoms, language)
+            
+            return {
+                'response': ai_response,
+                'triage_result': triage_result,
+                'model': 'smart-questionnaire',
+                'questionnaire_category': symptom_category,
+                'tokens_generated': len(ai_response.split())
+            }
+    
+    # Fallback to enhanced rules for unrecognized symptoms
+    triage_result = analyze_symptoms_enhanced(symptoms, language)
+    ai_response = generate_local_response(symptoms, triage_result, language)
+    return {
+        'response': ai_response,
+        'triage_result': triage_result,
+        'model': 'enhanced-rules-fallback',
+        'tokens_generated': 0
+    }
+
+def analyze_with_dialogpt(symptoms, language='en'):
+    """Legacy DialoGPT function - now redirects to smart questionnaire"""
+    return analyze_with_smart_questionnaire(symptoms, language)
     
     try:
         # Load DialoGPT model if not loaded
@@ -236,6 +369,65 @@ def analyze_with_local_model(symptoms, language='en'):
     except Exception as e:
         chatbot_logger.error(f"Local model error: {str(e)}")
         raise e
+
+def detect_symptom_category(symptoms, language='en'):
+    """Detect the main symptom category from user input"""
+    symptoms_lower = symptoms.lower()
+    
+    # Symptom keywords for categorization
+    symptom_patterns = {
+        'en': {
+            'chest_pain': ['chest pain', 'chest hurt', 'heart pain', 'cardiac pain', 'chest pressure', 'chest tightness'],
+            'headache': ['headache', 'head pain', 'head hurt', 'migraine', 'head ache'],
+            'abdominal_pain': ['stomach pain', 'belly pain', 'abdominal pain', 'stomach hurt', 'stomach ache'],
+            'breathing': ['shortness of breath', 'difficulty breathing', 'can\'t breathe', 'breathing problem', 'breathless'],
+            'fever': ['fever', 'high temperature', 'hot', 'chills', 'temperature'],
+            'injury': ['injury', 'hurt', 'accident', 'fell', 'cut', 'broken', 'sprain', 'wound']
+        },
+        'ar': {
+            'chest_pain': ['ألم في الصدر', 'ألم الصدر', 'وجع الصدر', 'ألم قلب'],
+            'headache': ['صداع', 'ألم رأس', 'ألم في الرأس', 'وجع رأس'],
+            'abdominal_pain': ['ألم في البطن', 'ألم بطن', 'وجع بطن', 'ألم معدة'],
+            'breathing': ['ضيق تنفس', 'صعوبة تنفس', 'لا أستطيع التنفس'],
+            'fever': ['حمى', 'سخونة', 'حرارة عالية'],
+            'injury': ['إصابة', 'جرح', 'كسر', 'حادث', 'سقطت']
+        }
+    }
+    
+    patterns = symptom_patterns.get(language, symptom_patterns['en'])
+    
+    for category, keywords in patterns.items():
+        for keyword in keywords:
+            if keyword in symptoms_lower:
+                return category
+    
+    return None
+
+def determine_triage_from_category(category, symptoms, language):
+    """Determine triage level based on symptom category and content"""
+    symptoms_lower = symptoms.lower()
+    
+    # High-risk categories that usually need emergency care
+    emergency_categories = ['chest_pain', 'breathing']
+    
+    # Check for emergency keywords in any category
+    emergency_words = {
+        'en': ['severe', 'worst ever', 'can\'t breathe', '10/10', 'excruciating', 'sudden', 'crushing'],
+        'ar': ['شديد', 'لا أستطيع', 'فجأة', 'قوي جداً']
+    }
+    
+    emergency_terms = emergency_words.get(language, emergency_words['en'])
+    has_emergency_terms = any(term in symptoms_lower for term in emergency_terms)
+    
+    if category in emergency_categories or has_emergency_terms:
+        return 'emergency'
+    elif category == 'injury':
+        return 'in_person'
+    elif category in ['headache', 'abdominal_pain']:
+        # These can be either emergency or in-person based on severity
+        return 'in_person' if has_emergency_terms else 'telemedicine'
+    else:
+        return 'telemedicine'
 
 def analyze_symptoms_enhanced(symptoms, language='en', confidence=0.0):
     """Enhanced rule-based analysis with confidence weighting"""
