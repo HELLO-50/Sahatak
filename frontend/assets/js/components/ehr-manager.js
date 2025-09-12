@@ -653,10 +653,7 @@ const EHRManager = {
             `;
         });
         
-        container.innerHTML = html;
-        
-        // Create charts
-        this.createVitalSignsCharts();
+        return html;
     },
     
     // Create vital signs charts
