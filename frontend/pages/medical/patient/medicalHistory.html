@@ -510,7 +510,10 @@
                 let patientId = null;
                 
                 if (user && user.user && user.user.user_type === 'patient') {
-                    patientId = user.user.id; // Use user ID, backend will resolve to patient profile
+                    // Extract Patient Profile ID from user.profile.id
+                    patientId = user.user.profile?.id || user.user.patient_profile?.id || user.user.id;
+                    console.log('Patient ID extracted:', patientId);
+                    console.log('User ID vs Patient Profile ID:', user.user.id, 'vs', patientId);
                 } else {
                     // Try using stored user ID as fallback
                     patientId = localStorage.getItem('sahatak_user_id');

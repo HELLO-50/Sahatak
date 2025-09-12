@@ -308,9 +308,10 @@
                 console.log('Processed user data:', userData);
                 
                 if (userData && userData.user_type === 'patient') {
-                    // Use user ID as patient identifier (backend will resolve to patient profile)
-                    patientId = userData.id;
+                    // Extract Patient Profile ID from user.profile.id
+                    patientId = userData.profile?.id || userData.patient_profile?.id || userData.id;
                     console.log('Patient ID extracted:', patientId);
+                    console.log('User ID vs Patient Profile ID:', userData.id, 'vs', patientId);
                 } else {
                     console.error('User is not a patient or user data not available');
                     console.error('User data:', userData);
