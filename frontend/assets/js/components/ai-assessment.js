@@ -16,8 +16,8 @@ class MedicalTriageChat {
         this.mediaRecorder = null;
         this.audioChunks = [];
         
-        // Get API base URL from environment or use default
-        this.apiBaseUrl = this.getApiBaseUrl();
+        // Use ApiHelper for consistent API calls
+        this.apiBaseUrl = ApiHelper?.baseUrl || 'https://sahatak.pythonanywhere.com/api';
         
         // Initialize request timeout
         this.requestTimeout = 30000; // 30 seconds
@@ -25,18 +25,6 @@ class MedicalTriageChat {
         this.initializeEventListeners();
         
         console.log('Medical Triage Chat initialized successfully');
-    }
-    
-    getApiBaseUrl() {
-        // Check if running in production or development
-        const hostname = window.location.hostname;
-        
-        if (hostname === 'localhost' || hostname === '127.0.0.1') {
-            return 'http://localhost:5000/api/ai';
-        } else {
-            // For production deployment, adjust this URL accordingly
-            return `${window.location.origin}/api/ai`;
-        }
     }
     
     initializeEventListeners() {
@@ -76,7 +64,7 @@ class MedicalTriageChat {
         const timeoutId = setTimeout(() => controller.abort(), this.requestTimeout);
         
         try {
-            const response = await fetch(`${this.apiBaseUrl}/assessment`, {
+            const response = await fetch(`${this.apiBaseUrl}/ai/assessment`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -112,17 +100,10 @@ class MedicalTriageChat {
             
         } catch (error) {
             console.error('Error sending message:', error);
-            
-            let errorMessage;
-            if (error.name === 'AbortError') {
-                errorMessage = 'Request timed out. Please try again.\n\nانتهت مهلة الطلب. من فضلك حاول مرة أخرى.';
-            } else if (error.message.includes('fetch')) {
-                errorMessage = 'Network error. Please check your connection and try again.\n\nخطأ في الشبكة. من فضلك تحقق من اتصالك وحاول مرة أخرى.';
-            } else {
-                errorMessage = `Error: ${error.message}\n\nعذراً، واجهت خطأ. من فضلك حاول مرة أخرى لاحقاً.`;
-            }
-            
-            this.addBotMessage(errorMessage);
+            this.addBotMessage(
+                `Sorry, I encountered an error: ${error.message}\n\n` +
+                `عذراً، واجهت خطأ: ${error.message}`
+            );
         } finally {
             clearTimeout(timeoutId);
             this.showLoading(false);
@@ -315,7 +296,7 @@ class MedicalTriageChat {
             const formData = new FormData();
             formData.append('audio', audioBlob, 'recording.wav');
             
-            const response = await fetch(`${this.apiBaseUrl}/stt`, {
+            const response = await fetch(`${this.apiBaseUrl}/ai/stt`, {
                 method: 'POST',
                 body: formData
             });
@@ -333,7 +314,7 @@ class MedicalTriageChat {
                     this.addUserMessage(`🎤 ${transcription}`);
                     
                     // Send transcribed text to chat API
-                    const chatResponse = await fetch(`${this.apiBaseUrl}/assessment`, {
+                    const chatResponse = await fetch(`${this.apiBaseUrl}/ai/assessment`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
