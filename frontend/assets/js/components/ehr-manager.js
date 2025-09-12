@@ -407,8 +407,183 @@ const EHRManager = {
             `;
             return;
         }
+
+        // Create comprehensive vital signs dashboard
+        container.innerHTML = `
+            <!-- Vital Signs Overview Cards -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="vital-signs-overview">
+                        <div class="row g-3">
+                            ${this.renderVitalSignCard('blood_pressure', 'Blood Pressure', 'bi-heart-pulse', 'mmHg')}
+                            ${this.renderVitalSignCard('heart_rate', 'Heart Rate', 'bi-heart', 'bpm')}
+                            ${this.renderVitalSignCard('temperature', 'Temperature', 'bi-thermometer', '°C')}
+                            ${this.renderVitalSignCard('respiratory_rate', 'Respiratory Rate', 'bi-lungs', '/min')}
+                            ${this.renderVitalSignCard('oxygen_saturation', 'Oxygen Saturation', 'bi-droplet', '%')}
+                            ${this.renderVitalSignCard('bmi', 'BMI', 'bi-person', '')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vital Signs Charts -->
+            <div class="row mb-4">
+                <div class="col-lg-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="mb-0"><i class="bi bi-graph-up me-2"></i>Blood Pressure Trend</h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="bloodPressureChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0"><i class="bi bi-heart me-2"></i>Heart Rate Trend</h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="heartRateChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="mb-0"><i class="bi bi-thermometer me-2"></i>Temperature Trend</h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="temperatureChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0"><i class="bi bi-lungs me-2"></i>Respiratory Rate</h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="respiratoryChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-header bg-cyan text-white" style="background-color: #0dcaf0 !important;">
+                            <h6 class="mb-0"><i class="bi bi-droplet me-2"></i>Oxygen Saturation</h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="oxygenChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-header bg-secondary text-white">
+                            <h6 class="mb-0"><i class="bi bi-person me-2"></i>BMI Trend</h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="bmiChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Vital Signs History -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="bi bi-clock-history me-2"></i>Vital Signs History</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="vital-signs-history">
+                                ${this.renderVitalSignsHistory()}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Render the charts after DOM is updated
+        setTimeout(() => {
+            this.renderVitalSignsCharts();
+        }, 100);
+    },
+
+    // Render individual vital sign card
+    renderVitalSignCard(field, label, icon, unit) {
+        const latestValue = this.getLatestVitalSign(field);
+        const trend = this.getVitalSignTrend(field);
         
-        // Render vital signs list
+        return `
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="vital-sign-card">
+                    <div class="vital-sign-icon">
+                        <i class="bi ${icon}"></i>
+                    </div>
+                    <div class="vital-sign-content">
+                        <div class="vital-sign-label">${label}</div>
+                        <div class="vital-sign-value">
+                            ${latestValue ? `${latestValue}${unit}` : '<span class="text-muted">No data</span>'}
+                        </div>
+                        <div class="vital-sign-trend ${trend.class}">
+                            <i class="bi ${trend.icon}"></i>
+                            ${trend.text}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    // Get latest vital sign value
+    getLatestVitalSign(field) {
+        if (!this.ehrData.vital_signs || this.ehrData.vital_signs.length === 0) return null;
+        
+        const latest = this.ehrData.vital_signs[0];
+        if (field === 'blood_pressure') {
+            return latest.systolic_bp && latest.diastolic_bp ? `${latest.systolic_bp}/${latest.diastolic_bp}` : null;
+        }
+        return latest[field] || null;
+    },
+
+    // Get vital sign trend (simplified)
+    getVitalSignTrend(field) {
+        if (!this.ehrData.vital_signs || this.ehrData.vital_signs.length < 2) {
+            return { class: 'text-muted', icon: 'bi-dash', text: 'No trend' };
+        }
+
+        const current = this.ehrData.vital_signs[0];
+        const previous = this.ehrData.vital_signs[1];
+        
+        let currentVal, previousVal;
+        
+        if (field === 'blood_pressure') {
+            currentVal = current.systolic_bp;
+            previousVal = previous.systolic_bp;
+        } else {
+            currentVal = current[field];
+            previousVal = previous[field];
+        }
+
+        if (!currentVal || !previousVal) {
+            return { class: 'text-muted', icon: 'bi-dash', text: 'No trend' };
+        }
+
+        if (currentVal > previousVal) {
+            return { class: 'text-warning', icon: 'bi-arrow-up', text: 'Increasing' };
+        } else if (currentVal < previousVal) {
+            return { class: 'text-info', icon: 'bi-arrow-down', text: 'Decreasing' };
+        } else {
+            return { class: 'text-success', icon: 'bi-arrow-right', text: 'Stable' };
+        }
+    },
+
+    // Render vital signs history table
+    renderVitalSignsHistory() {
         let html = '';
         this.ehrData.vital_signs.forEach(vital => {
             html += `
@@ -495,6 +670,18 @@ const EHRManager = {
         
         // Heart Rate Chart
         this.createHeartRateChart(vitals);
+        
+        // Temperature Chart
+        this.createTemperatureChart(vitals);
+        
+        // Respiratory Rate Chart
+        this.createRespiratoryRateChart(vitals);
+        
+        // Oxygen Saturation Chart
+        this.createOxygenSaturationChart(vitals);
+        
+        // BMI Chart
+        this.createBMIChart(vitals);
     },
     
     // Create blood pressure chart
@@ -593,6 +780,194 @@ const EHRManager = {
                         beginAtZero: false,
                         min: 40,
                         max: 150
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    }
+                }
+            }
+        });
+    },
+
+    // Create temperature chart
+    createTemperatureChart(vitals) {
+        const ctx = document.getElementById('temperatureChart');
+        if (!ctx) return;
+        
+        if (typeof Chart === 'undefined') {
+            ctx.parentElement.innerHTML = '<p class="text-center text-muted">Charts library not available</p>';
+            return;
+        }
+        
+        const data = vitals.filter(v => v.temperature);
+        
+        if (data.length === 0) {
+            ctx.parentElement.innerHTML = '<p class="text-center text-muted">No temperature data available</p>';
+            return;
+        }
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.map(v => new Date(v.measured_at).toLocaleDateString()),
+                datasets: [{
+                    label: 'Temperature (°C)',
+                    data: data.map(v => v.temperature),
+                    borderColor: '#ffc107',
+                    backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 35,
+                        max: 42
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    }
+                }
+            }
+        });
+    },
+
+    // Create respiratory rate chart
+    createRespiratoryRateChart(vitals) {
+        const ctx = document.getElementById('respiratoryChart');
+        if (!ctx) return;
+        
+        if (typeof Chart === 'undefined') {
+            ctx.parentElement.innerHTML = '<p class="text-center text-muted">Charts library not available</p>';
+            return;
+        }
+        
+        const data = vitals.filter(v => v.respiratory_rate);
+        
+        if (data.length === 0) {
+            ctx.parentElement.innerHTML = '<p class="text-center text-muted">No respiratory rate data available</p>';
+            return;
+        }
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.map(v => new Date(v.measured_at).toLocaleDateString()),
+                datasets: [{
+                    label: 'Respiratory Rate (/min)',
+                    data: data.map(v => v.respiratory_rate),
+                    borderColor: '#17a2b8',
+                    backgroundColor: 'rgba(23, 162, 184, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 10,
+                        max: 40
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    }
+                }
+            }
+        });
+    },
+
+    // Create oxygen saturation chart
+    createOxygenSaturationChart(vitals) {
+        const ctx = document.getElementById('oxygenChart');
+        if (!ctx) return;
+        
+        if (typeof Chart === 'undefined') {
+            ctx.parentElement.innerHTML = '<p class="text-center text-muted">Charts library not available</p>';
+            return;
+        }
+        
+        const data = vitals.filter(v => v.oxygen_saturation);
+        
+        if (data.length === 0) {
+            ctx.parentElement.innerHTML = '<p class="text-center text-muted">No oxygen saturation data available</p>';
+            return;
+        }
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.map(v => new Date(v.measured_at).toLocaleDateString()),
+                datasets: [{
+                    label: 'Oxygen Saturation (%)',
+                    data: data.map(v => v.oxygen_saturation),
+                    borderColor: '#0dcaf0',
+                    backgroundColor: 'rgba(13, 202, 240, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 85,
+                        max: 100
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    }
+                }
+            }
+        });
+    },
+
+    // Create BMI chart
+    createBMIChart(vitals) {
+        const ctx = document.getElementById('bmiChart');
+        if (!ctx) return;
+        
+        if (typeof Chart === 'undefined') {
+            ctx.parentElement.innerHTML = '<p class="text-center text-muted">Charts library not available</p>';
+            return;
+        }
+        
+        const data = vitals.filter(v => v.bmi);
+        
+        if (data.length === 0) {
+            ctx.parentElement.innerHTML = '<p class="text-center text-muted">No BMI data available</p>';
+            return;
+        }
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.map(v => new Date(v.measured_at).toLocaleDateString()),
+                datasets: [{
+                    label: 'BMI',
+                    data: data.map(v => v.bmi),
+                    borderColor: '#6c757d',
+                    backgroundColor: 'rgba(108, 117, 125, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 15,
+                        max: 35
                     }
                 },
                 plugins: {
