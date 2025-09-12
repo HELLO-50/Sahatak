@@ -785,29 +785,6 @@
                     notes: document.getElementById('update-notes').value
                 };
                 
-                // Handle development mode
-                if (typeof AuthGuard !== 'undefined' && AuthGuard.isDevelopmentMode()) {
-                    console.log('🔧 Development mode: Saving medical history to localStorage');
-                    
-                    // Save to localStorage
-                    const storageKey = 'patient_medical_history';
-                    localStorage.setItem(storageKey, JSON.stringify(formData));
-                    
-                    // Update current medicalHistory object
-                    medicalHistory = { ...medicalHistory, ...formData };
-                    
-                    // Show success
-                    showSuccess('Medical history updated successfully (Development Mode)');
-                    bootstrap.Modal.getInstance(document.getElementById('edit-history-modal')).hide();
-                    
-                    // Refresh the display
-                    renderMedicalSummary();
-                    
-                    // Restore button
-                    saveBtn.disabled = false;
-                    saveBtn.innerHTML = originalContent;
-                    return;
-                }
                 
                 const response = await ApiHelper.makeRequest('/medical-history/update', {
                     method: 'PUT',

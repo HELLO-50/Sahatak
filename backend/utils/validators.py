@@ -904,7 +904,7 @@ def validate_vital_signs_ranges(vital_signs_data: dict) -> Dict[str, Union[bool,
     }
     
     for field, range_info in ranges.items():
-        if field in vital_signs_data and vital_signs_data[field] is not None:
+        if field in vital_signs_data and vital_signs_data[field] is not None and vital_signs_data[field] != '':
             try:
                 value = float(vital_signs_data[field])
                 if value < range_info['min'] or value > range_info['max']:

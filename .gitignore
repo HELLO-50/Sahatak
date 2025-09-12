@@ -18,6 +18,7 @@ frontend/.env*
 *.swp
 *.swo
 *.vsix
+*.pyc
 *__pycache__/*
 
 # OS

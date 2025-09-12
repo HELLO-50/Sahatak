@@ -141,7 +141,7 @@ def get_patient_ehr(patient_id):
         
         # Safely get vital signs if table exists
         try:
-            vital_signs_query = patient.vital_signs.order_by(desc(VitalSigns.recorded_at)).limit(10)
+            vital_signs_query = patient.vital_signs.order_by(desc(VitalSigns.measured_at)).limit(10)
             ehr_data['vital_signs'] = [v.to_dict() for v in vital_signs_query.all()]
         except Exception as e:
             app_logger.warning(f"Vital signs table not found: {str(e)}")

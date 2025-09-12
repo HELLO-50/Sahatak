@@ -513,7 +513,7 @@ class MedicalHistoryUpdate(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     
     # Relationships
-    patient = db.relationship('Patient', backref='medical_history_updates', lazy=True)
+    patient = db.relationship('Patient', backref=db.backref('medical_history_updates', lazy='dynamic'))
     appointment = db.relationship('Appointment', backref='medical_history_updates', lazy=True)
     updated_by_doctor = db.relationship('Doctor', backref='medical_history_updates', lazy=True)
     
@@ -656,7 +656,7 @@ class VitalSigns(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     
     # Relationships
-    patient = db.relationship('Patient', backref='vital_signs', lazy=True)
+    patient = db.relationship('Patient', backref=db.backref('vital_signs', lazy='dynamic'))
     appointment = db.relationship('Appointment', backref='vital_signs', lazy=True)
     recorded_by_doctor = db.relationship('Doctor', backref='recorded_vitals', lazy=True)
     
