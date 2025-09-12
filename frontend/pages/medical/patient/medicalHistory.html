@@ -540,7 +540,7 @@
                     historyUpdates = historyResponse.data.recent_updates || [];
                     
                     renderMedicalSummary();
-                    await loadHistoryUpdates();
+                    await loadHistoryUpdates(patientId);
                     renderTimeline();
                 } else {
                     console.error('Failed to load medical history:', historyResponse.message);
@@ -553,17 +553,17 @@
         }
 
         // Load complete history updates
-        async function loadHistoryUpdates() {
+        async function loadHistoryUpdates(patientId) {
             try {
                 // Skip loading updates if we don't have a valid patient ID
-                const userId = getCurrentUserId();
-                if (!userId) {
-                    console.log('No valid user ID for loading history updates, skipping...');
+                if (!patientId) {
+                    console.log('No valid patient ID for loading history updates, skipping...');
                     historyUpdates = [];
                     return;
                 }
                 
-                const url = `/medical-history/updates/${userId}`;
+                console.log('Loading history updates for patient ID:', patientId);
+                const url = `/medical-history/updates/${patientId}`;
                 
                 console.log('Loading history updates from:', url);
                 const response = await ApiHelper.makeRequest(url);
