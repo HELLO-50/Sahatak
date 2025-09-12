@@ -816,19 +816,43 @@
                 const currentLang = LanguageManager.getLanguage() || 'en';
                 const currentUser = AuthGuard.getCurrentUser();
                 
+                // Check if user is authenticated
+                if (!AuthGuard.isAuthenticated()) {
+                    console.error('User not authenticated, redirecting to login');
+                    AuthGuard.redirectToLogin();
+                    return;
+                }
+                
+                console.log('Current user from AuthGuard:', currentUser);
+                
                 // Get patient profile ID first
                 let patientId = null;
                 try {
                     const profileResponse = await ApiHelper.makeRequest(`/users/profile`);
-                    if (profileResponse.success && profileResponse.data.user_type === 'patient') {
-                        patientId = profileResponse.data.patient_profile?.id;
+                    console.log('Profile response:', profileResponse);
+                    
+                    if (profileResponse.success && profileResponse.data) {
+                        // Check if user data is nested under 'user' property
+                        const userData = profileResponse.data.user || profileResponse.data;
+                        
+                        if (userData.user_type === 'patient') {
+                            // Try different ways to get patient ID
+                            patientId = userData.profile?.id || userData.patient_profile?.id || userData.id;
+                        }
                     }
                 } catch (error) {
                     console.error('Error getting patient profile:', error);
                 }
 
                 if (!patientId) {
-                    throw new Error('Could not get patient ID');
+                    // Fallback: try using user ID directly (backend should resolve)
+                    const currentUser = AuthGuard.getCurrentUser();
+                    if (currentUser && currentUser.id) {
+                        patientId = currentUser.id;
+                        console.log('Using fallback patient ID:', patientId);
+                    } else {
+                        throw new Error('Could not get patient ID');
+                    }
                 }
 
                 // Fetch EHR data for the patient
@@ -896,12 +920,27 @@
                 `;
             } catch (error) {
                 console.error('Error loading health summary:', error);
+                
+                // Show error state with more helpful message
+                const currentLang = LanguageManager.getLanguage() || 'en';
+                const errorMessage = error.message.includes('authentication') ? 
+                    (currentLang === 'ar' ? 'يرجى تسجيل الدخول مرة أخرى لعرض ملخصك الصحي' : 'Please log in again to view your health summary.') : 
+                    (currentLang === 'ar' ? 'لا يمكن تحميل الملخص الصحي. يرجى المحاولة مرة أخرى لاحقاً' : 'Unable to load health summary. Please try again later.');
+                
                 container.innerHTML = `
                     <h5 class="mb-3">
                         <i class="bi bi-heart-pulse me-2"></i>
-                        <span>${LanguageManager.getLanguage() === 'ar' ? 'ملخص الحالة الصحية' : 'Health Summary'}</span>
+                        <span>${currentLang === 'ar' ? 'ملخص الحالة الصحية' : 'Health Summary'}</span>
                     </h5>
-                    <p class="text-center py-3">Unable to load health data at the moment.</p>
+                    <div class="alert alert-warning" role="alert">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        ${errorMessage}
+                        <br><small class="text-muted">Error: ${error.message}</small>
+                        <br><button class="btn btn-sm btn-outline-primary mt-2" onclick="loadHealthSummary()">
+                            <i class="bi bi-arrow-clockwise me-1"></i>
+                            ${currentLang === 'ar' ? 'إعادة المحاولة' : 'Retry'}
+                        </button>
+                    </div>
                 `;
             }
         }
