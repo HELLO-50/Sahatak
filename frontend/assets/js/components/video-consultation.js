@@ -1336,6 +1336,8 @@ const VideoConsultation = {
                 
             case 'connection.dropped':
             case 'CONNECTION_DROPPED':
+            case 'conference.iceFailed':
+            case 'ICE_FAILED':
                 errorMessage = isArabic ? 'انقطع الاتصال' : 'Connection was lost';
                 recoveryAction = () => this.attemptReconnection();
                 this.showReconnectionDialog();
