@@ -509,7 +509,7 @@ const EHRManager = {
 
         // Render the charts after DOM is updated
         setTimeout(() => {
-            this.renderVitalSignsCharts();
+            this.createVitalSignsCharts();
         }, 100);
     },
 
