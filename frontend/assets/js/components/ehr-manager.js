@@ -663,6 +663,7 @@ const EHRManager = {
         // Create a copy and reverse it for charts (oldest first) without modifying original
         const vitals = [...this.ehrData.vital_signs].reverse();
         
+        
         // Blood Pressure Chart
         this.createBloodPressureChart(vitals);
         
@@ -694,7 +695,11 @@ const EHRManager = {
             return;
         }
         
-        const data = vitals.filter(v => v.systolic_bp && v.diastolic_bp);
+        const data = vitals.filter(v => 
+            v.systolic_bp !== null && v.systolic_bp !== undefined && 
+            v.diastolic_bp !== null && v.diastolic_bp !== undefined &&
+            v.systolic_bp > 0 && v.diastolic_bp > 0
+        );
         
         if (data.length === 0) {
             ctx.parentElement.innerHTML = '<p class="text-center text-muted">No blood pressure data available</p>';
@@ -752,7 +757,9 @@ const EHRManager = {
             return;
         }
         
-        const data = vitals.filter(v => v.heart_rate);
+        const data = vitals.filter(v => 
+            v.heart_rate !== null && v.heart_rate !== undefined && v.heart_rate > 0
+        );
         
         if (data.length === 0) {
             ctx.parentElement.innerHTML = '<p class="text-center text-muted">Insufficient data available</p>';
@@ -799,7 +806,9 @@ const EHRManager = {
             return;
         }
         
-        const data = vitals.filter(v => v.temperature);
+        const data = vitals.filter(v => 
+            v.temperature !== null && v.temperature !== undefined && v.temperature > 0
+        );
         
         if (data.length === 0) {
             ctx.parentElement.innerHTML = '<p class="text-center text-muted">No temperature data available</p>';
@@ -846,7 +855,9 @@ const EHRManager = {
             return;
         }
         
-        const data = vitals.filter(v => v.respiratory_rate);
+        const data = vitals.filter(v => 
+            v.respiratory_rate !== null && v.respiratory_rate !== undefined && v.respiratory_rate > 0
+        );
         
         if (data.length === 0) {
             ctx.parentElement.innerHTML = '<p class="text-center text-muted">No respiratory rate data available</p>';
@@ -893,7 +904,9 @@ const EHRManager = {
             return;
         }
         
-        const data = vitals.filter(v => v.oxygen_saturation);
+        const data = vitals.filter(v => 
+            v.oxygen_saturation !== null && v.oxygen_saturation !== undefined && v.oxygen_saturation > 0
+        );
         
         if (data.length === 0) {
             ctx.parentElement.innerHTML = '<p class="text-center text-muted">No oxygen saturation data available</p>';
@@ -940,7 +953,9 @@ const EHRManager = {
             return;
         }
         
-        const data = vitals.filter(v => v.bmi);
+        const data = vitals.filter(v => 
+            v.bmi !== null && v.bmi !== undefined && v.bmi > 0
+        );
         
         if (data.length === 0) {
             ctx.parentElement.innerHTML = '<p class="text-center text-muted">No BMI data available</p>';

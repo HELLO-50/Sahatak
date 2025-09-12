@@ -657,6 +657,122 @@
     color: #495057;
 }
 
+/* Vital Signs Overview Cards */
+.vital-signs-overview {
+    margin-bottom: 2rem;
+}
+
+.vital-sign-card {
+    background: rgba(2, 6, 23, 0.35);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.2rem;
+    height: 140px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+}
+
+.vital-sign-card:hover {
+    box-shadow: var(--shadow);
+    border-color: var(--primary);
+    background: var(--hover);
+    transform: translateY(-2px);
+}
+
+.vital-sign-icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+    opacity: 0.8;
+}
+
+.vital-sign-icon i.bi-heart-pulse {
+    color: #e74c3c;
+}
+
+.vital-sign-icon i.bi-heart {
+    color: #e91e63;
+}
+
+.vital-sign-icon i.bi-thermometer {
+    color: #ff9800;
+}
+
+.vital-sign-icon i.bi-lungs {
+    color: #2196f3;
+}
+
+.vital-sign-icon i.bi-droplet {
+    color: #00bcd4;
+}
+
+.vital-sign-icon i.bi-person {
+    color: #9c27b0;
+}
+
+.vital-sign-content {
+    width: 100%;
+}
+
+.vital-sign-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.vital-sign-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+}
+
+.vital-sign-trend {
+    font-size: 0.75rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+}
+
+.vital-sign-trend i {
+    font-size: 0.7rem;
+}
+
+.vital-sign-trend.text-success {
+    color: #28a745 !important;
+}
+
+.vital-sign-trend.text-warning {
+    color: #ffc107 !important;
+}
+
+.vital-sign-trend.text-info {
+    color: #17a2b8 !important;
+}
+
+.vital-sign-trend.text-muted {
+    color: #6c757d !important;
+}
+
+/* Fix card title visibility */
+.card-header .card-title {
+    color: var(--text) !important;
+    font-weight: 600;
+}
+
+.card-header .card-title i {
+    color: var(--primary) !important;
+}
+
 /* Enhanced Action Buttons */
 .ehr-action-toolbar {
     background: white;
