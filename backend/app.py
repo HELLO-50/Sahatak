@@ -81,10 +81,9 @@ CORS(app,
          'http://127.0.0.1:5500',
          'http://localhost:8000', 
          'http://127.0.0.1:8000',
-         'https://hmb104.github.io',
          'https://hello-50.github.io',
          'https://hello-50.github.io/Sahatak',
-         'https://hmb104.github.io/Sahatak'
+         'https://hello-50.github.io/Sahatak/frontend'
      ],
      allow_headers=['Content-Type', 'Authorization', 'Accept-Language', 'X-Requested-With', 'x-timestamp'],
      methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],

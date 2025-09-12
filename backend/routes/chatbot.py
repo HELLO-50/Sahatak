@@ -306,11 +306,18 @@ def analyze_symptoms_rule_based(symptoms, language='en'):
     return analyze_symptoms_enhanced(symptoms, language, 0.0)
 
 @chatbot_bp.route('/assessment', methods=['POST', 'OPTIONS'])
-@cross_origin(origins=['http://127.0.0.1:5500', 'http://localhost:5500'], methods=['POST', 'OPTIONS'])
 def ai_assessment():
     """
     AI Symptom Assessment - Medical triage chatbot
     """
+    # Handle CORS preflight request
+    if request.method == 'OPTIONS':
+        response = jsonify({'status': 'ok'})
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        return response
+    
     try:
         # Validate request data
         required_fields = ['message', 'language']
