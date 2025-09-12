@@ -763,6 +763,12 @@
         // Save medical history
         async function saveMedicalHistory() {
             try {
+                // Show loading state
+                const saveBtn = document.getElementById('save-history-btn');
+                const originalContent = saveBtn.innerHTML;
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Saving...';
+                
                 const formData = {
                     blood_type: document.getElementById('blood-type').value,
                     height: document.getElementById('height').value,
@@ -779,6 +785,30 @@
                     notes: document.getElementById('update-notes').value
                 };
                 
+                // Handle development mode
+                if (typeof AuthGuard !== 'undefined' && AuthGuard.isDevelopmentMode()) {
+                    console.log('🔧 Development mode: Saving medical history to localStorage');
+                    
+                    // Save to localStorage
+                    const storageKey = 'patient_medical_history';
+                    localStorage.setItem(storageKey, JSON.stringify(formData));
+                    
+                    // Update current medicalHistory object
+                    medicalHistory = { ...medicalHistory, ...formData };
+                    
+                    // Show success
+                    showSuccess('Medical history updated successfully (Development Mode)');
+                    bootstrap.Modal.getInstance(document.getElementById('edit-history-modal')).hide();
+                    
+                    // Refresh the display
+                    renderMedicalSummary();
+                    
+                    // Restore button
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = originalContent;
+                    return;
+                }
+                
                 const response = await ApiHelper.makeRequest('/medical-history/update', {
                     method: 'PUT',
                     body: JSON.stringify(formData)
@@ -788,15 +818,29 @@
                     showSuccess('Medical history updated successfully');
                     bootstrap.Modal.getInstance(document.getElementById('edit-history-modal')).hide();
                     
+                    // Update local data with response
+                    if (response.data && response.data.patient_medical_history) {
+                        medicalHistory = response.data.patient_medical_history;
+                    }
+                    
                     // Reload data to reflect changes
                     console.log('Medical history updated successfully, reloading data...');
                     await loadMedicalHistory();
                 } else {
-                    showError(response.message || 'Failed to update medical history');
+                    const errorMsg = response.message || 'Failed to update medical history';
+                    console.error('Update failed:', errorMsg);
+                    showError(errorMsg);
                 }
             } catch (error) {
                 console.error('Error saving medical history:', error);
-                showError('Error saving medical history');
+                showError(error.message || 'Error saving medical history');
+            } finally {
+                // Restore button state
+                const saveBtn = document.getElementById('save-history-btn');
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = '<i class="bi bi-check-lg me-1"></i><span id="save-btn-text">Save Changes</span>';
+                }
             }
         }
 

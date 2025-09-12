@@ -197,8 +197,23 @@ def create_diagnosis():
                     message=f'{field} is required'
                 )
         
-        # Verify patient access
-        if not has_patient_access(data['patient_id']):
+        # Resolve patient ID (can be User ID or Patient ID)
+        patient_id = data['patient_id']
+        patient = Patient.query.get(patient_id)
+        
+        # If not found, try to get patient by user ID
+        if not patient:
+            user = User.query.get(patient_id)
+            if user and user.user_type == 'patient' and user.patient_profile:
+                patient = user.patient_profile
+                patient_id = patient.id  # Use the actual patient ID
+                app_logger.debug(f"Resolved user ID {data['patient_id']} to patient ID {patient_id}")
+        
+        if not patient:
+            return APIResponse.not_found(message=f'Patient not found with ID {data["patient_id"]}')
+        
+        # Verify patient access with resolved patient ID
+        if not has_patient_access(patient_id):
             return APIResponse.forbidden(message='Access denied to this patient')
         
         # Validate appointment if provided
@@ -206,7 +221,7 @@ def create_diagnosis():
         if appointment_id:
             appointment = Appointment.query.filter_by(
                 id=appointment_id,
-                patient_id=data['patient_id'],
+                patient_id=patient_id,  # Use resolved patient ID
                 doctor_id=doctor.id
             ).first()
             if not appointment:
@@ -253,9 +268,9 @@ def create_diagnosis():
                     message='Invalid follow-up date format'
                 )
         
-        # Create diagnosis
+        # Create diagnosis with resolved patient ID
         diagnosis = Diagnosis(
-            patient_id=data['patient_id'],
+            patient_id=patient_id,  # Use resolved patient ID
             doctor_id=doctor.id,
             appointment_id=appointment_id,
             primary_diagnosis=data['primary_diagnosis'],
@@ -387,11 +402,25 @@ def record_vital_signs():
                     message='Patient ID is required'
                 )
             
-            # Verify patient access
-            if not has_patient_access(data['patient_id']):
+            # Resolve patient ID (can be User ID or Patient ID)
+            patient_id = data['patient_id']
+            patient = Patient.query.get(patient_id)
+            
+            # If not found, try to get patient by user ID
+            if not patient:
+                user = User.query.get(patient_id)
+                if user and user.user_type == 'patient' and user.patient_profile:
+                    patient = user.patient_profile
+                    patient_id = patient.id  # Use the actual patient ID
+                    app_logger.debug(f"Resolved user ID {data['patient_id']} to patient ID {patient_id}")
+            
+            if not patient:
+                return APIResponse.not_found(message=f'Patient not found with ID {data["patient_id"]}')
+            
+            # Verify patient access with resolved patient ID
+            if not has_patient_access(patient_id):
                 return APIResponse.forbidden(message='Access denied to this patient')
             
-            patient_id = data['patient_id']
             recorded_by_doctor_id = doctor.id
             
         elif current_user.user_type == 'patient':

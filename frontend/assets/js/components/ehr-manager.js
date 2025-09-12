@@ -29,7 +29,47 @@ const EHRManager = {
     loadMockEHRData() {
         console.log('🔧 Loading mock EHR data for development...');
         
-        this.ehrData = {
+        // Check localStorage first for persisted data
+        const storageKey = `ehr_data_${this.patientId}`;
+        const storedData = localStorage.getItem(storageKey);
+        
+        if (storedData) {
+            console.log('📦 Found persisted EHR data in localStorage');
+            this.ehrData = JSON.parse(storedData);
+            
+            // Ensure all required fields exist
+            if (!this.ehrData.patient_info) {
+                this.ehrData.patient_info = this.getDefaultPatientInfo();
+            }
+            if (!this.ehrData.diagnoses) {
+                this.ehrData.diagnoses = [];
+            }
+            if (!this.ehrData.vital_signs) {
+                this.ehrData.vital_signs = [];
+            }
+            if (!this.ehrData.appointments) {
+                this.ehrData.appointments = [];
+            }
+            if (!this.ehrData.medical_history_updates) {
+                this.ehrData.medical_history_updates = [];
+            }
+        } else {
+            console.log('📝 Creating new mock EHR data');
+            this.ehrData = this.getDefaultMockData();
+            // Save initial mock data to localStorage
+            localStorage.setItem(storageKey, JSON.stringify(this.ehrData));
+        }
+        
+        this.renderPatientOverview();
+        this.renderAllTabs();
+        this.showContent(true);
+        
+        console.log('✅ Mock EHR data loaded successfully');
+    },
+    
+    // Get default mock data structure
+    getDefaultMockData() {
+        return {
             patient_info: {
                 user: { full_name: 'Ahmed Mohamed - Development Patient' },
                 age: 35,
@@ -105,12 +145,30 @@ const EHRManager = {
                 }
             ]
         };
-        
-        this.renderPatientOverview();
-        this.renderAllTabs();
-        this.showContent(true);
-        
-        console.log('✅ Mock EHR data loaded successfully');
+    },
+    
+    // Get default patient info
+    getDefaultPatientInfo() {
+        return {
+            user: { full_name: 'Ahmed Mohamed - Development Patient' },
+            age: 35,
+            gender: 'male',
+            phone: '+249123456789',
+            blood_type: 'A+',
+            height: 175,
+            weight: 78,
+            emergency_contact: '+249987654321',
+            medical_history_completed: true,
+            medical_history: 'No significant medical history',
+            allergies: 'Allergic to Penicillin',
+            current_medications: 'Vitamin D daily',
+            chronic_conditions: null,
+            family_history: 'Family history of diabetes',
+            surgical_history: null,
+            smoking_status: 'never',
+            alcohol_consumption: 'none',
+            exercise_frequency: 'weekly'
+        };
     },
     
     // Search for patients (for doctors/admin)
@@ -784,6 +842,61 @@ const EHRManager = {
             saveBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>جاري الحفظ...';
             saveBtn.disabled = true;
             
+            // Handle development mode with localStorage persistence
+            if (typeof AuthGuard !== 'undefined' && AuthGuard.isDevelopmentMode()) {
+                console.log('🔧 Development mode: Saving diagnosis to localStorage');
+                
+                // Get existing EHR data from localStorage or use current
+                const storageKey = `ehr_data_${this.patientId}`;
+                let storedData = JSON.parse(localStorage.getItem(storageKey) || '{}');
+                
+                // Initialize diagnoses array if not exists
+                if (!storedData.diagnoses) {
+                    storedData.diagnoses = [];
+                }
+                
+                // Create diagnosis object with ID
+                const newDiagnosis = {
+                    ...formData,
+                    id: isEditing ? parseInt(editingId) : Date.now(),
+                    diagnosis_date: new Date().toISOString(),
+                    doctor_name: 'Dr. Development Mode',
+                    resolved: false
+                };
+                
+                if (isEditing) {
+                    // Update existing diagnosis
+                    const index = storedData.diagnoses.findIndex(d => d.id === parseInt(editingId));
+                    if (index !== -1) {
+                        storedData.diagnoses[index] = { ...storedData.diagnoses[index], ...newDiagnosis };
+                    }
+                } else {
+                    // Add new diagnosis
+                    storedData.diagnoses.push(newDiagnosis);
+                }
+                
+                // Save to localStorage
+                localStorage.setItem(storageKey, JSON.stringify(storedData));
+                
+                // Update current EHR data
+                this.ehrData.diagnoses = storedData.diagnoses;
+                
+                // Show success and refresh UI
+                this.showAlert('success', isEditing ? 'تم تحديث التشخيص بنجاح (Development Mode)' : 'تم حفظ التشخيص بنجاح (Development Mode)');
+                
+                // Close modal and refresh display
+                const modal = bootstrap.Modal.getInstance(document.getElementById('diagnosisModal'));
+                if (modal) modal.hide();
+                
+                document.getElementById('diagnosis-form').reset();
+                delete form.dataset.editingId;
+                
+                // Refresh the display
+                this.renderDiagnoses();
+                
+                return;
+            }
+            
             let response;
             if (isEditing) {
                 response = await ApiHelper.makeRequest(`/ehr/diagnoses/${editingId}`, {
@@ -815,7 +928,12 @@ const EHRManager = {
                 // Reload EHR data
                 await this.loadEHRData();
             } else {
-                throw new Error(response.message);
+                // Better error handling for validation errors
+                const errorMsg = response.message || 'فشل في حفظ التشخيص';
+                const fieldError = response.error_code === 'VALIDATION_ERROR' && response.field 
+                    ? `خطأ في ${response.field}: ${errorMsg}` 
+                    : errorMsg;
+                throw new Error(fieldError);
             }
             
         } catch (error) {

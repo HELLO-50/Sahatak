@@ -192,11 +192,25 @@ class VideoConferenceService:
             "enableEncryption": os.getenv('JITSI_ENABLE_E2EE', 'false').lower() == 'true',
             "enableRecording": os.getenv('VIDEO_CALL_RECORDING_ENABLED', 'false').lower() == 'true',
             
-            # P2P Configuration (disable to avoid lobby conflicts)
+            # P2P Configuration (enable for better video/audio transmission)
             "p2p": {
-                "enabled": False,
-                "useStunTurn": False
+                "enabled": True,
+                "useStunTurn": True,
+                "stunServers": [
+                    {"urls": "stun:meet-jit-si-turnrelay.jitsi.net:443"},
+                    {"urls": "stun:stun.l.google.com:19302"},
+                    {"urls": "stun:stun1.l.google.com:19302"}
+                ]
             },
+            
+            # ICE Servers Configuration for NAT traversal
+            "iceServers": [
+                {"urls": "stun:meet-jit-si-turnrelay.jitsi.net:443"},
+                {"urls": "stun:stun.l.google.com:19302"},
+                {"urls": "stun:stun1.l.google.com:19302"},
+                {"urls": "stun:stun2.l.google.com:19302"}
+            ],
+            "iceTransportPolicy": "all",
             
             # Additional anti-lobby/membership settings
             "disableIncomingMessages": False,
