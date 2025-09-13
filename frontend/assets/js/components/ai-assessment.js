@@ -500,6 +500,17 @@ class MedicalTriageChat {
             console.error('Error saving conversation:', error);
         }
     }
+    
+    showLoading(show) {
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        if (loadingIndicator) {
+            if (show) {
+                loadingIndicator.classList.remove('d-none');
+            } else {
+                loadingIndicator.classList.add('d-none');
+            }
+        }
+    }
 }
 
 // Global instance for widget mode
