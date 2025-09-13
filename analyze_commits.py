@@ -10,7 +10,7 @@ import re
 def run_git_command(command):
     """Run git command and return output"""
     try:
-        result = subprocess.run(command, shell=True, capture_output=True, text=True)
+        result = subprocess.run(command, shell=True, capture_output=True, text=True, encoding='utf-8', errors='ignore')
         if result.returncode == 0:
             return result.stdout.strip()
         else:

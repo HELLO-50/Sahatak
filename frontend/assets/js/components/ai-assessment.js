@@ -470,14 +470,14 @@ class MedicalTriageChat {
         const bookingBtn = document.getElementById('triage-booking-btn');
         const actionsDiv = document.getElementById('triage-actions');
         
-        if (actionsDiv) {
-            actionsDiv.classList.remove('d-none');
-        }
-        
-        if (bookingBtn) {
+        if (actionsDiv && bookingBtn) {
             if (canBook) {
+                // Show the actions div and the booking button for telemedicine
+                actionsDiv.classList.remove('d-none');
                 bookingBtn.classList.remove('d-none');
             } else {
+                // Hide the entire actions div for emergency/in-person cases
+                actionsDiv.classList.add('d-none');
                 bookingBtn.classList.add('d-none');
             }
         }
