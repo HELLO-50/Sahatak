@@ -67,19 +67,28 @@ CONVERSATIONAL PHRASES:
 - ما تشيل هم = don't worry
 - كل حاجة حتبقى كويسة = everything will be fine
 
+CONVERSATION FLOW RULES:
+1. This is ONE CONTINUOUS conversation with the SAME PERSON
+2. NEVER restart or act like you're meeting someone new
+3. Remember what they told you and build on it
+4. Ask MAXIMUM 2-3 follow-up questions, then give your recommendation
+5. After 2-3 exchanges, you MUST recommend one of the 3 options
+
 Your approach - BE A CARING FRIEND:
-1. Talk warmly and naturally, like you really care about this person
-2. VARY your responses completely - never repeat the same phrases
+1. Continue the conversation naturally - don't restart
+2. VARY your responses completely - never repeat the same phrases  
 3. Show genuine concern and empathy in every response
 4. Ask caring follow-up questions that show you're listening
 5. Be reassuring but honest
 6. Most health issues are manageable - help them feel better
 7. Only suggest emergency care for truly serious situations
-8. Offer comfort and practical advice
+8. After 2-3 questions MAX, give clear recommendation
 
 Example conversation style:
-- Start differently each time: "يا حبيبي شنو مضايقك؟" or "أهلاً، قول لي شنو بيحصل؟"
-- Give advice with care: "بالنسبة لي أشوف إنك..." or "أعتقد الأحسن ليك..."
+- Start: "أهلاً، قول لي شنو بيحصل؟" or "شنو مضايقك؟"
+- Follow-up: "من امتى بدأ؟" or "وجع كتير؟" 
+- Continue: "أها، فهمت. شنو كمان؟"
+- Then RECOMMEND: Choose emergency/in-person/telemedicine
 
 When giving recommendations, be gentle and caring but VERY SPECIFIC about next steps:
 
@@ -204,6 +213,8 @@ def ai_assessment():
         user_message = data.get('message', '').strip()
         language = data.get('language', 'en')
         conversation_id = data.get('conversation_id', None)
+        conversation_history = data.get('conversation_history', [])
+        patient_name = data.get('patient_name', '')
         
         # Validate message length and content
         message_validation = validate_text_field_length(user_message, 'Message', 1000, 1)
@@ -229,12 +240,28 @@ def ai_assessment():
             
             app_logger.info(f"Making OpenAI call - Model: {chat_model}, Max tokens: {max_tokens}, Temperature: {temperature}")
             
+            # Build messages with conversation history to maintain context
+            system_prompt = MEDICAL_TRIAGE_SYSTEM_PROMPT
+            if patient_name:
+                system_prompt += f"\n\nIMPORTANT: The patient's name is {patient_name}. Use their name naturally in conversation to show you care about them personally."
+            
+            messages = [{"role": "system", "content": system_prompt}]
+            
+            # Add conversation history to maintain context within same session
+            for exchange in conversation_history:
+                if exchange.get('user_message'):
+                    messages.append({"role": "user", "content": exchange['user_message']})
+                if exchange.get('bot_response'):
+                    messages.append({"role": "assistant", "content": exchange['bot_response']})
+            
+            # Add current user message
+            messages.append({"role": "user", "content": user_message})
+            
+            app_logger.info(f"Conversation context: {len(conversation_history)} previous exchanges")
+            
             response = openai_client.chat.completions.create(
                 model=chat_model,
-                messages=[
-                    {"role": "system", "content": MEDICAL_TRIAGE_SYSTEM_PROMPT},
-                    {"role": "user", "content": user_message}
-                ],
+                messages=messages,
                 max_tokens=max_tokens,
                 temperature=temperature
             )

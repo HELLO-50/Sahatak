@@ -95,7 +95,10 @@ class MedicalTriageChat {
                 },
                 body: JSON.stringify({ 
                     message: message,
-                    language: 'auto'
+                    language: 'auto',
+                    conversation_history: this.conversationHistory,
+                    conversation_id: this.conversationId,
+                    patient_name: this.getPatientName()
                 }),
                 signal: controller.signal
             });
@@ -254,6 +257,31 @@ class MedicalTriageChat {
         return arabicPattern.test(text);
     }
     
+    getPatientName() {
+        // Try to get patient name from various sources
+        const patientNameElement = document.querySelector('[data-patient-name]');
+        if (patientNameElement) {
+            return patientNameElement.getAttribute('data-patient-name');
+        }
+        
+        // Try from page title or header
+        const headerName = document.querySelector('.patient-name, .user-name, h1');
+        if (headerName && headerName.textContent) {
+            const name = headerName.textContent.trim();
+            // Filter out common page titles
+            if (!name.includes('Dashboard') && !name.includes('لوحة') && name.length > 2) {
+                return name;
+            }
+        }
+        
+        // Try from global patient data if available
+        if (window.patientData && window.patientData.name) {
+            return window.patientData.name;
+        }
+        
+        return ''; // Return empty if no name found
+    }
+    
     async toggleRecording() {
         if (!this.isRecording) {
             await this.startRecording();
@@ -334,7 +362,13 @@ class MedicalTriageChat {
                 if (transcription) {
                     this.addUserMessage(`🎤 ${transcription}`);
                     
-                    // Send transcribed text to chat API
+                    // Store the voice message in conversation history before sending
+                    const voiceExchange = {
+                        user_message: transcription,
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    // Send transcribed text to chat API with updated history
                     const chatResponse = await fetch(`${this.apiBaseUrl}/ai/assessment`, {
                         method: 'POST',
                         headers: {
@@ -342,7 +376,10 @@ class MedicalTriageChat {
                         },
                         body: JSON.stringify({ 
                             message: transcription,
-                            language: result.data.detected_language || 'auto'
+                            language: result.data.detected_language || 'auto',
+                            conversation_history: this.conversationHistory,
+                            conversation_id: this.conversationId,
+                            patient_name: this.getPatientName()
                         })
                     });
                     
@@ -354,6 +391,20 @@ class MedicalTriageChat {
                     
                     if (chatResult.success && chatResult.data) {
                         this.addBotMessage(chatResult.data.response, chatResult.data.triage_result);
+                        
+                        // Store conversation history for voice messages too
+                        this.conversationHistory.push({
+                            user_message: transcription,
+                            bot_response: chatResult.data.response,
+                            triage_result: chatResult.data.triage_result,
+                            timestamp: new Date().toISOString()
+                        });
+                        
+                        // Handle triage result in widget mode
+                        if (this.isWidgetMode && chatResult.data.triage_result) {
+                            this.triageResult = chatResult.data.triage_result;
+                            this.handleTriageResult(chatResult.data.triage_result);
+                        }
                     }
                 } else {
                     this.addBotMessage(
