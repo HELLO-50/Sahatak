@@ -589,7 +589,7 @@ const DashboardTranslations = {
             }
             
             this.updateElementText('user-name', displayName);
-            console.log('User name updated to:', displayName);
+            // User name updated in header
         } else {
             console.warn('User name not found in localStorage');
         }
@@ -643,7 +643,7 @@ const DashboardTranslations = {
             }
         }
         
-        console.log(`${dashboardType} dashboard initialized with language: ${savedLanguage}`);
+        // Dashboard initialized with saved language preference
     },
 
     // Initialize records pages on page load

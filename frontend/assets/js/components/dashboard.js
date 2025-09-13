@@ -23,13 +23,13 @@ const Dashboard = {
      */
     async initialize() {
         try {
-            console.log('Initializing dashboard with real data...');
+            // Initializing dashboard with backend data
             
             // Session monitoring will be handled by SessionManager component
             
             // Get user type from localStorage (stored during login)
             this.userType = localStorage.getItem('sahatak_user_type') || 'patient';
-            console.log('Dashboard userType detected:', this.userType);
+            // Dashboard userType detected and cached
             
             // Load user profile first
             await this.loadUserProfile();
@@ -41,7 +41,7 @@ const Dashboard = {
                 await this.initializeDoctorDashboard();
             }
             
-            console.log('Dashboard initialized successfully');
+            // Dashboard initialization completed
         } catch (error) {
             console.error('Error initializing dashboard:', error);
             this.showError('Failed to load dashboard data');

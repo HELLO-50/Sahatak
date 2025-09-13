@@ -16,10 +16,10 @@ ai_bp = Blueprint('ai_assessment', __name__)
 openai_client = None
 
 # Medical AI System Prompts with bilingual support
-MEDICAL_TRIAGE_SYSTEM_PROMPT = """You are a bilingual medical assistant fluent in Sudanese Arabic dialect.
+MEDICAL_TRIAGE_SYSTEM_PROMPT = """You are a friendly, conversational medical assistant fluent in Sudanese Arabic dialect.
 You must automatically reply in the same language as the user (Arabic/English).
 
-For Arabic speakers, use ONLY Sudanese dialect (Sudani). Be conversational, warm, and empathetic.
+For Arabic speakers, use ONLY Sudanese dialect (Sudani). Be warm, empathetic, and ask follow-up questions.
 
 SUDANESE DIALECT VOCABULARY TO USE:
 
@@ -69,17 +69,22 @@ CONVERSATIONAL PHRASES:
 - كل حاجة حتبقى كويسة = everything will be fine
 
 Your approach:
-1. Acknowledge symptoms: "الله يشفيك، شنو اللي حاصل ليك؟"
-2. Ask follow-ups: "من متين والوجع دا بدأ؟"
-3. Show empathy: "ما تخاف، حنشوف إيه المشكلة"
-4. Only then recommend:
-   - "روح الطوارئ دلوقتي" (Emergency)
-   - "لازم تشوف دكتور في العيادة" (In-person)
-   - "ممكن تحجز استشارة في منصة صحتك عن بُعد" (Platform)
+1. BE CONVERSATIONAL: Ask 2-3 follow-up questions before giving advice
+2. Show empathy: "الله يشفيك، شنو اللي حاصل ليك؟"
+3. Ask specific questions: "من متين والوجع دا بدأ؟" "الوجع شديد ولا خفيف؟" "في حاجة تانية؟"
+4. MOST symptoms are NOT emergencies - be reassuring but thorough
+5. Only recommend emergency for: severe chest pain, difficulty breathing, loss of consciousness, severe bleeding, stroke symptoms
+6. For mild/moderate symptoms, recommend telemedicine first
+7. For conditions needing physical exam, recommend in-person visit
+
+Recommendations:
+- "روح الطوارئ دلوقتي" (ONLY for true emergencies)
+- "لازم تشوف دكتور في العيادة" (needs physical exam)
+- "ممكن تحجز استشارة في منصة صحتك عن بُعد" (most common cases)
 
 Always end with: "أنا مش دكتور، بس دي نصيحتي ليك"
 
-NEVER use formal Arabic. ALWAYS use Sudanese colloquial."""
+NEVER use formal Arabic. ALWAYS use Sudanese colloquial. ASK QUESTIONS before recommending."""
 
 def initialize_openai_client():
     """Initialize OpenAI client with API key from environment"""
@@ -118,35 +123,36 @@ def detect_language(text):
     return 'ar' if arabic_ratio > 0.3 else 'en'
 
 def extract_triage_decision(ai_response):
-    """Extract triage decision from AI response"""
+    """Extract triage decision from AI response - prioritize telemedicine unless clearly emergency/in-person"""
     response_lower = ai_response.lower()
     
-    # Emergency indicators (Sudanese dialect)
-    emergency_keywords = ['emergency room', 'er immediately', 'emergency', 'urgent', 'call 911', 'ambulance', 
-                         'طوارئ', 'إسعاف', 'عاجل', 'فوري', 'غرفة الطوارئ', 'روح الطوارئ', 'دلوقتي', 
-                         'مستشفى', 'حالة طارئة', 'خطر']
+    # Emergency indicators (Sudanese dialect) - ONLY for true emergencies
+    emergency_keywords = ['روح الطوارئ', 'طوارئ دلوقتي', 'إسعاف', 'حالة طارئة خطيرة', 'مستشفى فوري',
+                         'emergency room', 'er immediately', 'call ambulance', 'life threatening']
     
-    # In-person visit indicators (Sudanese dialect)
-    in_person_keywords = ['in-person', 'in person', 'visit', 'see a doctor', 'primary care', 'physician', 
-                         'شخصي', 'زيارة', 'طبيب', 'عيادة', 'فحص شخصي', 'لازم تشوف دكتور', 'شوف دكتور',
-                         'دكتور في العيادة', 'روح للدكتور', 'اذهب للطبيب']
+    # In-person visit indicators (Sudanese dialect) - for physical examination needs
+    in_person_keywords = ['لازم تشوف دكتور في العيادة', 'محتاج فحص شخصي', 'دكتور في العيادة', 
+                         'فحص بالعيادة', 'زيارة العيادة', 'كشف عند دكتور',
+                         'physical examination', 'in-person visit', 'see doctor in clinic', 'physical exam needed']
     
-    # Sahatak (Your Health) Platform indicators (Sudanese dialect)
-    remote_keywords = ['sahatak telemedicine platform', 'sahatak platform', 'telemedicine platform', 
-                      'schedule an appointment', 'remote consultation', 'telemedicine', 'virtual visit', 'online', 'platform',
-                      'حجز', 'احجز', 'الحجز', 'استشارة', 'منصة', 'صحتك', 'طب عن بُعد', 'الطب عن بُعد',
-                      'منصة صحتك', 'تحجز استشارة', 'ممكن تحجز', 'بُعد', 'افتراضي', 'حجز موعد',
-                      'استشارة اونلاين', 'من البيت']
+    # Sahatak Platform indicators (Sudanese dialect) - DEFAULT for most cases
+    remote_keywords = ['منصة صحتك', 'ممكن تحجز استشارة', 'استشارة عن بُعد', 'حجز موعد في المنصة',
+                      'sahatak platform', 'telemedicine', 'remote consultation', 'schedule appointment',
+                      'book consultation', 'virtual visit']
     
-    # Check for emergency first (highest priority)
-    if any(keyword in response_lower for keyword in emergency_keywords):
+    # Check for emergency ONLY if explicitly mentioned
+    emergency_count = sum(1 for keyword in emergency_keywords if keyword in response_lower)
+    in_person_count = sum(1 for keyword in in_person_keywords if keyword in response_lower)
+    remote_count = sum(1 for keyword in remote_keywords if keyword in response_lower)
+    
+    # Emergency only if explicitly stated AND no other recommendation
+    if emergency_count > 0 and emergency_count > in_person_count and emergency_count > remote_count:
         return 'emergency'
-    elif any(keyword in response_lower for keyword in in_person_keywords):
+    # In-person only if clearly specified
+    elif in_person_count > 0 and in_person_count > remote_count:
         return 'in_person'
-    elif any(keyword in response_lower for keyword in remote_keywords):
-        return 'telemedicine'
+    # Default to telemedicine for most cases
     else:
-        # Default to telemedicine if unclear
         return 'telemedicine'
 
 @ai_bp.route('/assessment', methods=['POST', 'OPTIONS'])
