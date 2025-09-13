@@ -43,10 +43,8 @@ class MedicalTriageChat {
     }
     
     addWelcomeMessage() {
-        const currentLang = LanguageManager?.getLanguage() || 'ar';
-        const welcomeMsg = currentLang === 'ar' ? 
-            'أهلاً وسهلاً! قول لي شنو اللي حاصل ليك؟' : 
-            'Hello! Tell me what symptoms you are experiencing.';
+        const welcomeMsg = LanguageManager?.translate('dashboard.patient.ai_triage.welcome') || 
+                          'أهلاً وسهلاً! قول لي شنو اللي حاصل ليك؟';
         this.addBotMessage(welcomeMsg);
     }
     

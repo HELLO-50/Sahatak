@@ -561,6 +561,9 @@
     <script>
         // Dashboard specific functions
         function bookAppointment() {
+            // Update modal content with current language
+            updateTriageModalLanguage();
+            
             // Show AI triage modal first
             const triageModal = new bootstrap.Modal(document.getElementById('ai-triage-modal'));
             triageModal.show();
@@ -575,6 +578,24 @@
             }, 500);
         }
         
+        function updateTriageModalLanguage() {
+            // Update modal elements with current language translations
+            document.getElementById('triage-modal-title').textContent = 
+                LanguageManager?.translate('dashboard.patient.ai_triage.title') || 'Quick Health Check';
+            
+            document.getElementById('loading-text').textContent = 
+                LanguageManager?.translate('dashboard.patient.ai_triage.loading') || 'Analyzing...';
+            
+            document.getElementById('messageInput').placeholder = 
+                LanguageManager?.translate('dashboard.patient.ai_triage.placeholder') || 'Describe your symptoms here...';
+            
+            document.getElementById('micBtn').title = 
+                LanguageManager?.translate('dashboard.patient.ai_triage.voice_title') || 'Voice input';
+            
+            document.getElementById('disclaimer-text').textContent = 
+                LanguageManager?.translate('dashboard.patient.ai_triage.disclaimer') || 'I am a digital health assistant and not a replacement for professional medical consultation.';
+        }
+        
         function handleTriageComplete(triageResult, conversationHistory) {
             console.log('Triage completed:', triageResult, conversationHistory);
             
@@ -584,41 +605,51 @@
             
             if (triageResult === 'telemedicine') {
                 // Patient can book on platform
+                const bookText = LanguageManager?.translate('dashboard.patient.ai_triage.book_appointment') || 'Book Appointment';
+                const closeText = LanguageManager?.translate('dashboard.patient.ai_triage.close') || 'Close';
+                
                 actionsDiv.innerHTML = `
                     <button type="button" 
                             class="btn btn-success" 
                             onclick="proceedToBooking()">
                         <i class="bi bi-calendar-plus me-2"></i>
-                        <span>${currentLang === 'ar' ? 'حجز موعد' : 'Book Appointment'}</span>
+                        <span>${bookText}</span>
                     </button>
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                        <span>${currentLang === 'ar' ? 'إغلاق' : 'Close'}</span>
+                        <span>${closeText}</span>
                     </button>
                 `;
             } else if (triageResult === 'in_person') {
                 // Recommend in-person visit
+                const inPersonText = LanguageManager?.translate('dashboard.patient.ai_triage.results.in_person') || 'In-person doctor visit recommended';
+                const understoodText = LanguageManager?.translate('dashboard.patient.ai_triage.understood') || 'Understood';
+                
                 actionsDiv.innerHTML = `
                     <div class="alert alert-warning w-100 mb-3">
                         <i class="bi bi-hospital me-2"></i>
-                        <strong>${currentLang === 'ar' ? 'يُنصح بزيارة عيادة طبيب مختص' : 'In-person doctor visit recommended'}</strong>
+                        <strong>${inPersonText}</strong>
                     </div>
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                        <span>${currentLang === 'ar' ? 'فهمت' : 'Understood'}</span>
+                        <span>${understoodText}</span>
                     </button>
                 `;
             } else if (triageResult === 'emergency') {
                 // Emergency case
+                const emergencyText = LanguageManager?.translate('dashboard.patient.ai_triage.results.emergency') || 'Please go to emergency room immediately!';
+                const callText = LanguageManager?.translate('dashboard.patient.ai_triage.emergency_call') || 'Call Emergency';
+                const understoodText = LanguageManager?.translate('dashboard.patient.ai_triage.understood') || 'Understood';
+                
                 actionsDiv.innerHTML = `
                     <div class="alert alert-danger w-100 mb-3">
                         <i class="bi bi-exclamation-triangle me-2"></i>
-                        <strong>${currentLang === 'ar' ? 'يرجى التوجه للطوارئ فوراً!' : 'Please go to emergency room immediately!'}</strong>
+                        <strong>${emergencyText}</strong>
                     </div>
                     <a href="tel:999" class="btn btn-danger me-2">
                         <i class="bi bi-telephone me-1"></i>
-                        <span>${currentLang === 'ar' ? 'اتصال طوارئ' : 'Call Emergency'}</span>
+                        <span>${callText}</span>
                     </a>
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                        <span>${currentLang === 'ar' ? 'فهمت' : 'Understood'}</span>
+                        <span>${understoodText}</span>
                     </button>
                 `;
             }

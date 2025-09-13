@@ -704,6 +704,23 @@
           "privacy_consent": "Privacy Consent",
           "data_sharing": "Data Sharing Preferences"
         }
+      },
+      "ai_triage": {
+        "title": "Quick Health Check",
+        "loading": "Analyzing...",
+        "placeholder": "Describe your symptoms here...",
+        "voice_title": "Voice input",
+        "disclaimer": "I am a digital health assistant and not a replacement for professional medical consultation.",
+        "book_appointment": "Book Appointment",
+        "close": "Close",
+        "understood": "Understood",
+        "emergency_call": "Call Emergency",
+        "welcome": "Hello! Tell me what symptoms you are experiencing.",
+        "results": {
+          "telemedicine": "We can help you through Sahatak platform - book a remote consultation",
+          "in_person": "In-person doctor visit recommended for physical examination",
+          "emergency": "Please go to emergency room immediately or call an ambulance!"
+        }
       }
     },
     "doctor": {
