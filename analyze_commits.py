@@ -24,7 +24,7 @@ def run_git_command(command):
 
 def get_first_400_commits():
     """Get list of first 400 commit hashes in chronological order"""
-    command = "git rev-list --reverse HEAD | head -400"
+    command = "git rev-list --reverse HEAD | head -100"
     output = run_git_command(command)
     if output:
         return output.split('\n')
@@ -94,14 +94,14 @@ def get_commit_info(commit_hash):
     }
 
 def main():
-    print("Analyzing first 400 commits for frontend/backend categorization...")
+    print("Analyzing first 100 commits for frontend/backend categorization...")
     
-    # Get first 400 commits
+    # Get first 100 commits
     commits = get_first_400_commits()
     print(f"Found {len(commits)} commits to analyze")
     
-    if len(commits) != 400:
-        print(f"Warning: Expected 400 commits, got {len(commits)}")
+    if len(commits) != 100:
+        print(f"Warning: Expected 100 commits, got {len(commits)}")
     
     # Analyze each commit
     results = []
@@ -115,7 +115,7 @@ def main():
     }
     
     for i, commit_hash in enumerate(commits, 1):
-        print(f"Analyzing commit {i}/400: {commit_hash[:8]}")
+        print(f"Analyzing commit {i}/{len(commits)}: {commit_hash[:8]}")
         
         # Get files changed
         files = analyze_commit_files(commit_hash)
@@ -139,6 +139,13 @@ def main():
         
         results.append(commit_data)
         categories[category].append(commit_data)
+        
+        # Progress indicator every 50 commits
+        if i % 50 == 0:
+            print(f"  Progress: {i}/{len(commits)} commits processed")
+            print(f"  Frontend-only so far: {len(categories['frontend_only'])}")
+            print(f"  Backend-only so far: {len(categories['backend_only'])}")
+            print()
     
     # Print summary
     print("\n" + "="*60)

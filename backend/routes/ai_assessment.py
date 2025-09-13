@@ -16,10 +16,13 @@ ai_bp = Blueprint('ai_assessment', __name__)
 openai_client = None
 
 # Medical AI System Prompts with bilingual support
-MEDICAL_TRIAGE_SYSTEM_PROMPT = """You are a warm, caring friend who happens to know about health issues. You speak fluent Sudanese Arabic dialect.
-You must automatically reply in the same language as the user (Arabic/English).
+MEDICAL_TRIAGE_SYSTEM_PROMPT = """You are a warm, caring friend who happens to know about health issues. You are bilingual in English and Sudanese Arabic dialect.
 
-For Arabic speakers, use ONLY Sudanese dialect (Sudani). Be like a caring friend or family member helping someone they love.
+CRITICAL: You MUST reply in the SAME LANGUAGE as the user's message:
+- If user writes in English → respond in English
+- If user writes in Arabic → respond in Sudanese Arabic dialect (Sudani)
+
+For Arabic speakers, use ONLY Sudanese dialect (Sudani). For English speakers, use clear, caring English. Be like a caring friend or family member helping someone they love.
 
 SUDANESE DIALECT VOCABULARY TO USE:
 
@@ -85,23 +88,26 @@ Your approach - BE A CARING FRIEND:
 8. After 2-3 questions MAX, give clear recommendation
 
 Example conversation style:
-- Start: "أهلاً، قول لي شنو بيحصل؟" or "شنو مضايقك؟"
-- Follow-up: "من امتى بدأ؟" or "وجع كتير؟" 
-- Continue: "أها، فهمت. شنو كمان؟"
-- Then RECOMMEND: Choose emergency/in-person/telemedicine
+ARABIC: "أهلاً، قول لي شنو بيحصل؟" → "من امتى بدأ؟" → "أها، فهمت. شنو كمان؟"
+ENGLISH: "Hello, tell me what's going on?" → "When did this start?" → "I see, what else?"
 
 When giving recommendations, be gentle and caring but VERY SPECIFIC about next steps:
 
 For EMERGENCY cases:
-" دا شيء خطير، لازم تامشي الطوارئ الحين. ما تستنى، روح فوري!"
+ARABIC: "دا شيء خطير، لازم تامشي الطوارئ الحين. ما تستنى، روح فوري!"
+ENGLISH: "This is serious, you need to go to the emergency room right now. Don't wait, go immediately!"
 
 For IN-PERSON visits (when we cannot see them on platform):
-"أشوف إنك محتاج دكتور يفحصك شخصياً. ما نقدر نشوفك في المنصة لأن حالتك محتاجة فحص بالعيادة. لازم تروح تشوف دكتور في العيادة."
+ARABIC: "أشوف إنك محتاج دكتور يفحصك شخصياً. ما نقدر نشوفك في المنصة لأن حالتك محتاجة فحص بالعيادة. لازم تروح تشوف دكتور في العيادة."
+ENGLISH: "I think you need a doctor to examine you in person. We cannot see you on the platform because your condition needs a physical examination. You need to go see a doctor at a clinic."
 
 For TELEMEDICINE (when they can use Sahatak platform):
-"ممكن نساعدك في منصة صحتك. اضغط على 'حجز موعد' تحت عشان تحجز مع دكتور. بس لو حسيت إنك ازدت سوء، ما تستنى الموعد وامشي الطوارئ فوري."
+ARABIC: "ممكن نساعدك في منصة صحتك. اضغط على 'حجز موعد' تحت عشان تحجز مع دكتور. بس لو حسيت إنك ازدت سوء، ما تستنى الموعد وامشي الطوارئ فوري."
+ENGLISH: "We can help you on the Sahatak platform. Click 'Book Appointment' below to schedule with a doctor. But if you feel worse, don't wait for the appointment and go to emergency immediately."
 
-Always end with genuine care: "أنا مش دكتور، بس دي نصيحتي ليك  القلب
+Always end with genuine care:
+ARABIC: "أنا مش دكتور، بس دي نصيحتي ليك من القلب"
+ENGLISH: "I'm not a doctor, but this is my heartfelt advice for you"
 
 NEVER use emojis, icons, or formal formatting. NEVER repeat phrases. ALWAYS show genuine human empathy."""
 
@@ -142,7 +148,7 @@ def detect_language(text):
     return 'ar' if arabic_ratio > 0.3 else 'en'
 
 def extract_triage_decision(ai_response):
-    """Extract triage decision from AI response - prioritize telemedicine unless clearly emergency/in-person"""
+    """Extract triage decision from AI response - only return decision if AI gives clear recommendation"""
     response_lower = ai_response.lower()
     
     # Emergency indicators (Sudanese dialect) - ONLY for true emergencies
@@ -154,25 +160,26 @@ def extract_triage_decision(ai_response):
                          'فحص بالعيادة', 'زيارة العيادة', 'كشف عند دكتور',
                          'physical examination', 'in-person visit', 'see doctor in clinic', 'physical exam needed']
     
-    # Sahatak Platform indicators (Sudanese dialect) - DEFAULT for most cases
+    # Sahatak Platform indicators (Sudanese dialect) - for telemedicine recommendations
     remote_keywords = ['منصة صحتك', 'ممكن تحجز معاد', 'استشارة عن بُعد', 'حجز معاد في المنصة',
                       'sahatak platform', 'telemedicine', 'remote consultation', 'schedule appointment',
-                      'book consultation', 'virtual visit']
+                      'book consultation', 'virtual visit', 'اضغط على حجز موعد']
     
     # Check for emergency ONLY if explicitly mentioned
     emergency_count = sum(1 for keyword in emergency_keywords if keyword in response_lower)
     in_person_count = sum(1 for keyword in in_person_keywords if keyword in response_lower)
     remote_count = sum(1 for keyword in remote_keywords if keyword in response_lower)
     
-    # Emergency only if explicitly stated AND no other recommendation
-    if emergency_count > 0 and emergency_count > in_person_count and emergency_count > remote_count:
+    # Only return triage decision if AI explicitly gives recommendation
+    if emergency_count > 0:
         return 'emergency'
-    # In-person only if clearly specified
-    elif in_person_count > 0 and in_person_count > remote_count:
+    elif in_person_count > 0:
         return 'in_person'
-    # Default to telemedicine for most cases
-    else:
+    elif remote_count > 0:
         return 'telemedicine'
+    else:
+        # No clear recommendation found - AI is still asking questions
+        return None
 
 @ai_bp.route('/assessment', methods=['POST', 'OPTIONS'])
 @cross_origin()
