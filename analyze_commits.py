@@ -75,17 +75,23 @@ def categorize_commit(files):
 
 def get_commit_info(commit_hash):
     """Get commit message and author info"""
-    command = f"git show --format='%s|%an|%ae' --no-patch {commit_hash}"
-    output = run_git_command(command)
-    if output:
-        parts = output.split('|')
-        if len(parts) >= 3:
-            return {
-                'message': parts[0],
-                'author_name': parts[1], 
-                'author_email': parts[2]
-            }
-    return {'message': '', 'author_name': '', 'author_email': ''}
+    # Get commit message
+    msg_command = f'git log --format="%s" -n 1 {commit_hash}'
+    message = run_git_command(msg_command) or ''
+    
+    # Get author name  
+    name_command = f'git log --format="%an" -n 1 {commit_hash}'
+    author_name = run_git_command(name_command) or ''
+    
+    # Get author email
+    email_command = f'git log --format="%ae" -n 1 {commit_hash}'
+    author_email = run_git_command(email_command) or ''
+    
+    return {
+        'message': message,
+        'author_name': author_name,
+        'author_email': author_email
+    }
 
 def main():
     print("Analyzing first 400 commits for frontend/backend categorization...")
@@ -136,7 +142,7 @@ def main():
     
     # Print summary
     print("\n" + "="*60)
-    print("📊 CATEGORIZATION SUMMARY")
+    print("CATEGORIZATION SUMMARY")
     print("="*60)
     
     for category, commits_list in categories.items():
@@ -147,20 +153,20 @@ def main():
     
     # Show frontend-only commits
     print("\n" + "="*60)
-    print("🎨 FRONTEND-ONLY COMMITS (→ Awab7-ux)")
+    print("FRONTEND-ONLY COMMITS (-> Awab7-ux)")
     print("="*60)
     for commit in categories['frontend_only']:
         print(f"{commit['short_hash']} - {commit['message'][:60]}")
-        print(f"  📁 Files: {', '.join(commit['files'])}")
+        print(f"  Files: {', '.join(commit['files'])}")
         print()
     
     # Show backend-only commits  
     print("\n" + "="*60)
-    print("⚙️ BACKEND-ONLY COMMITS (→ network-44)")
+    print("BACKEND-ONLY COMMITS (-> network-44)")
     print("="*60)
     for commit in categories['backend_only']:
         print(f"{commit['short_hash']} - {commit['message'][:60]}")
-        print(f"  📁 Files: {', '.join(commit['files'])}")
+        print(f"  Files: {', '.join(commit['files'])}")
         print()
     
     # Save results to JSON file
@@ -171,15 +177,15 @@ def main():
             'categories': categories
         }, f, indent=2)
     
-    print(f"💾 Detailed analysis saved to 'commit_analysis.json'")
+    print(f"Detailed analysis saved to 'commit_analysis.json'")
     
     # Generate author mapping
     frontend_commits = categories['frontend_only']
     backend_commits = categories['backend_only']
     
-    print(f"\n🎯 COMMITS TO REASSIGN:")
-    print(f"   Frontend-only → Awab7-ux: {len(frontend_commits)} commits")
-    print(f"   Backend-only → network-44: {len(backend_commits)} commits")
+    print(f"\nCOMMITS TO REASSIGN:")
+    print(f"   Frontend-only -> Awab7-ux: {len(frontend_commits)} commits")
+    print(f"   Backend-only -> network-44: {len(backend_commits)} commits")
     print(f"   Total changes: {len(frontend_commits) + len(backend_commits)} commits")
 
 if __name__ == "__main__":

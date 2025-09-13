@@ -180,30 +180,7 @@ class MedicalTriageChat {
         textElement.textContent = message;
         messageDiv.appendChild(textElement);
         
-        // Add triage badge if result is available
-        if (triageResult) {
-            const badge = document.createElement('span');
-            badge.className = 'triage-badge';
-            
-            switch(triageResult) {
-                case 'emergency':
-                    badge.className += ' triage-emergency';
-                    badge.textContent = '⚠️ EMERGENCY / طوارئ';
-                    break;
-                case 'in_person':
-                    badge.className += ' triage-in-person';
-                    badge.textContent = '🏥 IN-PERSON VISIT / زيارة شخصية';
-                    break;
-                case 'telemedicine':
-                    badge.className += ' triage-telemedicine';
-                    badge.textContent = '💻 SAHATAK PLATFORM / منصة صحتك';
-                    break;
-            }
-            
-            if (badge.textContent) {
-                messageDiv.appendChild(badge);
-            }
-        }
+        // No badges - let the AI response speak naturally without tags
         
         const isArabic = this.isArabicText(message);
         if (isArabic) {
