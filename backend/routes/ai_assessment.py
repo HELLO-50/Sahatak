@@ -37,7 +37,7 @@ BASIC WORDS:
 - كدا/كده = like this (not هكذا)
 
 TIME EXPRESSIONS:
-- الحين = now (not الآن)
+- اسه= now (not الآن)
 - بكرة = tomorrow (not غداً)
 - أمبارح = yesterday (not أمس)
 - شوية = a little bit (not قليل)
@@ -88,25 +88,25 @@ Your approach - BE A CARING FRIEND:
 8. After 2-3 questions MAX, give clear recommendation
 
 Example conversation style:
-ARABIC: "أهلاً، قول لي شنو بيحصل؟" → "من امتى بدأ؟" → "أها، فهمت. شنو كمان؟"
+ARABIC: "أهلاً، قول لي شنو بيحصل؟" → "من متين بدأ؟" → "أها، فهمت. شنو كمان؟"
 ENGLISH: "Hello, tell me what's going on?" → "When did this start?" → "I see, what else?"
 
 When giving recommendations, be gentle and caring but VERY SPECIFIC about next steps:
 
 For EMERGENCY cases:
-ARABIC: "دا شيء خطير، لازم تامشي الطوارئ الحين. ما تستنى، روح فوري!"
+ARABIC: "دا شيء خطير، لازم تمشي الطوارئ اسه. ما تستنى، امشي فورا!"
 ENGLISH: "This is serious, you need to go to the emergency room right now. Don't wait, go immediately!"
 
 For IN-PERSON visits (when we cannot see them on platform):
-ARABIC: "أشوف إنك محتاج دكتور يفحصك شخصياً. ما نقدر نشوفك في المنصة لأن حالتك محتاجة فحص بالعيادة. لازم تروح تشوف دكتور في العيادة."
+ARABIC: "أشوف إنك محتاج دكتور يفحصك. ما نقدر نشوفك في المنصة لأن حالتك محتاجة فحص بالعيادة. لازم تمشي تشوف دكتور في العيادة."
 ENGLISH: "I think you need a doctor to examine you in person. We cannot see you on the platform because your condition needs a physical examination. You need to go see a doctor at a clinic."
 
 For TELEMEDICINE (when they can use Sahatak platform):
-ARABIC: "ممكن نساعدك في منصة صحتك. اضغط على 'حجز موعد' تحت عشان تحجز مع دكتور. بس لو حسيت إنك ازدت سوء، ما تستنى الموعد وامشي الطوارئ فوري."
+ARABIC: "ممكن نساعدك في منصة صحتك. اضغط على 'حجز موعد' تحت عشان تحجز مع دكتور. بس لو حسيت إنك ازدت سوء، ما تستنى الموعد وامشي الطوارئ فورا."
 ENGLISH: "We can help you on the Sahatak platform. Click 'Book Appointment' below to schedule with a doctor. But if you feel worse, don't wait for the appointment and go to emergency immediately."
 
 Always end with genuine care:
-ARABIC: "أنا مش دكتور، بس دي نصيحتي ليك من القلب"
+ARABIC: "أنا ما دكتور، بس دي نصيحتي ليك من القلب"
 ENGLISH: "I'm not a doctor, but this is my heartfelt advice for you"
 
 NEVER use emojis, icons, or formal formatting. NEVER repeat phrases. ALWAYS show genuine human empathy."""
@@ -152,18 +152,18 @@ def extract_triage_decision(ai_response):
     response_lower = ai_response.lower()
     
     # Emergency indicators (Sudanese dialect) - ONLY for true emergencies
-    emergency_keywords = ['امشي الطوارئ', 'طوارئ الحين', 'إسعاف', 'حالة طارئة خطيرة', 'مستشفى فوري',
+    emergency_keywords = ['امشي الطوارئ', 'طوارئ ن', 'إسعاف', 'حالة طارئة خطيرة', 'مستشفى فورا',
                          'emergency room', 'er immediately', 'call ambulance', 'life threatening']
     
     # In-person visit indicators (Sudanese dialect) - for physical examination needs
     in_person_keywords = ['محتاج تشوف دكتور في العيادة', 'محتاج فحص شخصي', 'دكتور في العيادة', 
-                         'فحص بالعيادة', 'زيارة العيادة', 'كشف عند دكتور',
+                         'فحص في العيادة', 'زيارة العيادة', 'كشف عند دكتور',
                          'physical examination', 'in-person visit', 'see doctor in clinic', 'physical exam needed']
     
     # Sahatak Platform indicators (Sudanese dialect) - for telemedicine recommendations
-    remote_keywords = ['منصة صحتك', 'ممكن تحجز معاد', 'استشارة عن بُعد', 'حجز معاد في المنصة',
+    remote_keywords = ['منصة صحتك', 'ممكن تحجز موعد', 'استشارة عن بُعد', 'حجز موعد في المنصة',
                       'sahatak platform', 'telemedicine', 'remote consultation', 'schedule appointment',
-                      'book consultation', 'virtual visit', 'اضغط على حجز موعد']
+                      'book consultation', 'virtual visit', 'دوس على حجز موعد']
     
     # Check for emergency ONLY if explicitly mentioned
     emergency_count = sum(1 for keyword in emergency_keywords if keyword in response_lower)
@@ -303,7 +303,7 @@ def ai_assessment():
             
             # Fallback response
             if language == 'ar':
-                fallback_response = "عذراً، أواجه صعوبات تقنية مؤقتة. من فضلك حاول مرة أخرى لاحقاً، أو إذا كانت أعراضك شديدة، توجه للطوارئ فوراً.\n\nأنا لست طبيبًا. من فضلك استشر طبيبًا مختصًا لأي مخاوف صحية."
+                fallback_response = "عذرا، عندي صعوبات تقنية مؤقتة. من فضلك حاول مرة تانيه بعد شويه كده تمام ، أو إذا كانت أعراضك شديدة، امشي للطوارئ حالن.\n\nأنا ما طبيب . من فضلك استشر شوف دكتور مختص لو عندك مخاوف صحية."
             else:
                 fallback_response = "Sorry, I'm experiencing temporary technical difficulties. Please try again later, or if your symptoms are severe, go to the emergency room immediately.\n\nI am not a doctor. Please seek professional medical advice for any health concerns."
             
