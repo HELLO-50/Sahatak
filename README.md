@@ -6,8 +6,6 @@ The comprehensive and first Sudanese telemedicine platform with bilingual suppor
 
 ## Quick Start
 
-For complete installation instructions, see [INSTALL.md](INSTALL.md).
-
 ```bash
 # Development setup
 git clone https://github.com/HELLO-50/sahatak.git
