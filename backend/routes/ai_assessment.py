@@ -260,21 +260,39 @@ def ai_assessment():
             app_logger.info(f"Making OpenAI call - Model: {chat_model}, Max tokens: {max_tokens}, Temperature: {temperature}")
             
             # Build messages with conversation history to maintain context
-            system_prompt = MEDICAL_TRIAGE_SYSTEM_PROMPT
+
+            # Detect language of current message
+            detected_lang = detect_language(user_message)
+            app_logger.info(f"Detected language: {detected_lang} for message: {user_message[:50]}...")
+
+            # Add explicit language instruction at the beginning
+            if detected_lang == 'en':
+                language_instruction = "RESPOND IN ENGLISH ONLY. The user wrote in English, so you MUST reply in English.\n\n"
+            else:
+                language_instruction = "RESPOND IN SUDANESE ARABIC. The user wrote in Arabic, so you MUST reply in Sudanese Arabic.\n\n"
+
+            system_prompt = language_instruction + MEDICAL_TRIAGE_SYSTEM_PROMPT
+
             if patient_name:
                 system_prompt += f"\n\nIMPORTANT: The patient's name is {patient_name}. Use their name naturally in conversation to show you care about them personally."
-            
+
             messages = [{"role": "system", "content": system_prompt}]
-            
+
             # Add conversation history to maintain context within same session
             for exchange in conversation_history:
                 if exchange.get('user_message'):
                     messages.append({"role": "user", "content": exchange['user_message']})
                 if exchange.get('bot_response'):
                     messages.append({"role": "assistant", "content": exchange['bot_response']})
-            
-            # Add current user message
-            messages.append({"role": "user", "content": user_message})
+
+            # Add current user message with language hint
+            user_message_with_hint = user_message
+            if detected_lang == 'en':
+                user_message_with_hint = user_message + "\n[Language: English - Respond in English]"
+            else:
+                user_message_with_hint = user_message + "\n[Language: Arabic - Respond in Sudanese Arabic]"
+
+            messages.append({"role": "user", "content": user_message_with_hint})
             
             app_logger.info(f"Conversation context: {len(conversation_history)} previous exchanges")
             
