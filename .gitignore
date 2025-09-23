@@ -20,6 +20,7 @@ frontend/.env*
 *.vsix
 *.pyc
 *__pycache__/*
+*.env
 
 # OS
 .DS_Store

@@ -123,6 +123,7 @@ def initialize_openai_client():
         # Log API key info (masked for security)
         app_logger.info(f"OPENAI_API_KEY found: {api_key[:10]}...{api_key[-4:] if len(api_key) > 14 else '****'}")
         
+        # Simple initialization for PythonAnywhere
         openai_client = OpenAI(api_key=api_key)
         app_logger.info("OpenAI client initialized successfully")
         return True
