@@ -213,14 +213,25 @@ class VideoConferenceService:
             "enableEncryption": os.getenv('JITSI_ENABLE_E2EE', 'false').lower() == 'true',
             "enableRecording": os.getenv('VIDEO_CALL_RECORDING_ENABLED', 'false').lower() == 'true',
             
-            # P2P Configuration (enable for better video/audio transmission)
+            # P2P Configuration with multiple STUN servers for better connectivity
             "p2p": {
                 "enabled": True,
                 "useStunTurn": True,
                 "stunServers": [
-                    {"urls": "stun:stun.l.google.com:19302"}
-                ]
+                    {"urls": "stun:meet.ffmuc.net:3478"},
+                    {"urls": "stun:stun.l.google.com:19302"},
+                    {"urls": "stun:stun1.l.google.com:19302"}
+                ],
+                "iceTransportPolicy": "all",
+                "preferH264": True
             },
+
+            # ICE Configuration for better connectivity
+            "iceServers": [
+                {"urls": "stun:meet.ffmuc.net:3478"},
+                {"urls": "stun:stun.l.google.com:19302"}
+            ],
+            "useTurnUdp": False,
             
             # Additional anti-lobby/membership settings
             "disableIncomingMessages": False,
@@ -245,7 +256,16 @@ class VideoConferenceService:
                 "dialog.micNotSendingData",
                 "dialog.serviceUnavailable",
                 "dialog.sessTerminated"
-            ]
+            ],
+
+            # WebRTC Configuration for better connectivity
+            "enableIceRestart": True,
+            "enableForcedReload": True,
+            "enableRemb": False,
+            "enableTcc": True,
+            "disableSimulcast": False,
+            "maxFullResolutionParticipants": 2,
+            "useNewBandwidthAllocationStrategy": True
         }
         
         return config
