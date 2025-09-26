@@ -116,6 +116,13 @@ class VideoConferenceService:
         """
         # Load all configuration from environment variables - single source of truth
         config = {
+            # CRITICAL: Force public room mode - must be first
+            "prejoinConfig": {
+                "enabled": False,
+                "hideDisplayName": True,
+                "hideExtraJoinButtons": ["no-audio", "by-phone"]
+            },
+
             # Audio/Video Settings
             "startWithAudioMuted": False,
             "startWithVideoMuted": False,
@@ -160,7 +167,7 @@ class VideoConferenceService:
             "guestsAllowed": True,
             "publicRoom": True,
             "enableUserRolesBasedOnToken": False,
-            "anonymousdomain": "guest.meet.ffmuc.net",  # Critical for public Jitsi
+            "anonymousdomain": f"guest.{os.getenv('JITSI_DOMAIN', 'meet.ffmuc.net')}",  # Match the domain
             "enableAnonymousAccess": True,
             
             # Room Configuration - Disable all restrictions for public access

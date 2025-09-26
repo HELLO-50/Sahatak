@@ -632,47 +632,20 @@ const VideoConsultation = {
         }
         
         // Debug session data
-        
-        // Trust backend configuration completely - no overrides
-        const defaultConfig = backendConfig?.config || {
-            // Minimal fallback if backend config fails to load
-            enableWelcomePage: false,
-            enableClosePage: false,
-            disableDeepLinking: true,
-            startWithAudioMuted: false,
-            startWithVideoMuted: false
-        };
-        
-        // Use backend interface config or fallback to hardcoded defaults
-        const defaultInterfaceConfig = backendConfig?.interface_config || {
-            TOOLBAR_BUTTONS: [
-                'microphone', 'camera', 'desktop', 'chat', 'raisehand',
-                'participants-pane', 'tileview', 'toggle-camera', 'hangup'
-            ],
-            // Disable lobby UI elements
-            DISABLE_JOIN_LEAVE_NOTIFICATIONS: false,
-            SHOW_LOBBY_CHAT: false,
-            ENABLE_LOBBY_CHAT: false,
-            // Remove any authentication-related UI
-            SHOW_POWERED_BY: false,
-            SHOW_JITSI_WATERMARK: false,
-            SHOW_WATERMARK_FOR_GUESTS: false,
-            // Ensure guest-friendly interface
-            DEFAULT_LOCAL_DISPLAY_NAME: 'User',
-            DEFAULT_REMOTE_DISPLAY_NAME: 'Participant'
-        };
-        
-        // FORCE PUBLIC ROOM (Free Jitsi doesn't support authentication)
-        
+        console.log('Backend config received:', backendConfig);
+
+        // ONLY use backend configuration - no hardcoded overrides
+        if (!backendConfig?.config) {
+            console.error('Backend configuration missing - cannot proceed');
+            throw new Error('Video configuration not received from backend');
+        }
+
+        // Use backend config directly - this comes from .env
+        const finalConfig = backendConfig.config;
+        const finalInterfaceConfig = backendConfig.interface_config || {};
+
         // Create deterministic room name so doctor and patient join same room
         const publicRoomName = `sahatak_appointment_${this.appointmentId}`;
-        
-        // Use configuration from backend - trust the .env settings
-        const finalConfig = { 
-            ...defaultConfig, 
-            ...(sessionData.config || {})
-            // No overrides - let backend .env control everything
-        };
         
         const options = {
             roomName: publicRoomName, // Use our public room name instead of backend room name
@@ -681,7 +654,7 @@ const VideoConsultation = {
                 displayName: `${AuthStorage.get('name') || 'User'} (Appointment ${this.appointmentId})`
             },
             configOverwrite: finalConfig,
-            interfaceConfigOverwrite: { ...defaultInterfaceConfig, ...(sessionData.interface_config || {}) }
+            interfaceConfigOverwrite: finalInterfaceConfig
             // NO JWT TOKEN - free Jitsi only supports public rooms
         };
         
