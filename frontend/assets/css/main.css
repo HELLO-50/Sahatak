@@ -735,7 +735,6 @@ body {
     color: rgba(255, 255, 255, 0.9);
 }
 
-/* Button Highlighting Fix - Remove pre-highlight when hovering over other buttons */
 /* Auth Section - Login/Register buttons */
 #auth-selection .d-grid:hover #login-btn:not(:hover) {
     background: transparent !important;

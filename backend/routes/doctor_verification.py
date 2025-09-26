@@ -188,7 +188,7 @@ def submit_for_verification():
         
         app_logger.info(f"Doctor {doctor.id} submitted profile for verification")
         
-        # TODO: Send notification to admins about new verification request
+        # Note: Admin notification system can be implemented in future versions
         
         return success_response(
             message="Profile submitted for verification successfully. You will be notified once reviewed.",
@@ -430,7 +430,7 @@ def approve_doctor(doctor_id):
         
         app_logger.info(f"Admin {current_user.id} approved doctor {doctor_id}")
         
-        # TODO: Send notification to doctor about approval
+        # Note: Doctor notification system can be implemented in future versions
         
         return success_response(
             message="Doctor verification approved successfully",
@@ -486,7 +486,7 @@ def reject_doctor(doctor_id):
         
         app_logger.info(f"Admin {current_user.id} rejected doctor {doctor_id}")
         
-        # TODO: Send notification to doctor about rejection with reason
+        # Note: Doctor notification system can be implemented in future versions
         
         return success_response(
             message="Doctor verification rejected",

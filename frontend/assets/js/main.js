@@ -662,24 +662,24 @@ const ApiHelper = {
                     if (data.data && data.data.user) {
                         localStorage.setItem('sahatak_user_data', JSON.stringify(data.data.user));
                     }
-                    console.log('✅ Session check passed');
+                    console.log('Session check passed');
                     return true;
                 }
             }
             
             // Only consider it a real failure if we get a definitive 401
             if (response.status === 401) {
-                console.log('❌ Session check failed: 401 Unauthorized');
+                console.log('Session check failed: 401 Unauthorized');
                 return false;
             }
             
             // For other errors (network, 500, etc.), assume session is still valid
-            console.log('⚠️ Session check inconclusive, assuming valid');
+            console.log('Session check inconclusive, assuming valid');
             return true;
             
         } catch (error) {
             // Network errors should not trigger logout
-            console.log('⚠️ Session check error (network/other):', error.message);
+            console.log('Session check error (network/other):', error.message);
             // Return true to avoid logout on network issues
             return true;
         }
@@ -693,16 +693,16 @@ const ApiHelper = {
                 try {
                     const isValid = await this.checkSession();
                     if (!isValid) {
-                        console.log('⚠️ Session validation failed - initiating logout');
+                        console.log('Session validation failed - initiating logout');
                         await this.handleSessionExpired();
                     }
                 } catch (error) {
-                    console.log('⚠️ Session monitoring error:', error.message);
+                    console.log('Session monitoring error:', error.message);
                     // Don't logout on monitoring errors - could be network issues
                 }
             }, 1200000); // Check every 20 minutes (longer interval to reduce load)
             
-            console.log('✅ Session monitoring started (20-minute intervals)');
+            console.log('Session monitoring started (20-minute intervals)');
             return true;
         }
         console.log('🔍 Session monitoring not started - conditions not met');
@@ -745,14 +745,14 @@ const ApiHelper = {
         const token = localStorage.getItem('sahatak_access_token');
         // Token debug info (reduced verbosity)
         if (!token) {
-            console.warn('⚠️ No token available for API call');
+            console.warn('No token available for API call');
         }
         
         const authHeaders = {};
         if (token) {
             authHeaders['Authorization'] = `Bearer ${token}`;
         } else {
-            console.log('🚨 NO TOKEN - This will likely result in 401 error');
+            console.log('NO TOKEN - This will likely result in 401 error');
         }
         
         const headers = {

@@ -85,8 +85,6 @@ class MedicalTriageChat {
         const timeoutId = setTimeout(() => controller.abort(), this.requestTimeout);
         
         try {
-            console.log('Sending message to:', `${this.apiBaseUrl}/ai/assessment`);
-            console.log('Message payload:', { message: message, language: 'auto' });
             
             const response = await fetch(`${this.apiBaseUrl}/ai/assessment`, {
                 method: 'POST',
@@ -104,8 +102,6 @@ class MedicalTriageChat {
             });
             
             clearTimeout(timeoutId);
-            console.log('Response status:', response.status);
-            console.log('Response ok:', response.ok);
             
             if (!response.ok) {
                 if (response.status === 503) {
@@ -120,11 +116,8 @@ class MedicalTriageChat {
             }
             
             const result = await response.json();
-            console.log('Response data:', result);
             
             if (result.success && result.data) {
-                console.log('AI response:', result.data.response);
-                console.log('Triage result:', result.data.triage_result);
                 this.addBotMessage(result.data.response, result.data.triage_result);
                 
                 // Store conversation history

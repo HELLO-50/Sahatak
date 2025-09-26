@@ -256,7 +256,7 @@ def queue_notification(user_id, title, message, notification_type='info', send_e
     """Queue a notification for a user (stub for compatibility)"""
     try:
         app_logger.info(f"Notification queued for user {user_id}: {title}")
-        # TODO: Implement proper notification queuing system
+        # Note: Using simple logging for notifications - can be enhanced with queuing system
         return True
     except Exception as e:
         app_logger.error(f"Error queuing notification: {str(e)}")

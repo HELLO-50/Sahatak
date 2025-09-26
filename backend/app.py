@@ -78,7 +78,7 @@ app_logger.info("WebSocket service initialized")
 from utils.db_optimize import init_db_optimization
 init_db_optimization(app)
 
-# Configure CORS with more permissive settings for cross-origin cookies
+# Configure CORS for cross-origin cookies
 CORS(app, 
      origins=[
          'http://localhost:3000', 
