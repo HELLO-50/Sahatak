@@ -139,6 +139,9 @@ class MedicalTriageChat {
                 if (this.isWidgetMode && result.data.triage_result) {
                     this.triageResult = result.data.triage_result;
                     this.handleTriageResult(result.data.triage_result);
+                } else if (this.isWidgetMode && !result.data.triage_result) {
+                    // AI is still asking questions - keep inputs enabled
+                    console.log('AI still gathering information - no triage decision yet');
                 }
             } else {
                 console.error('Invalid response format:', result);
@@ -404,6 +407,9 @@ class MedicalTriageChat {
                         if (this.isWidgetMode && chatResult.data.triage_result) {
                             this.triageResult = chatResult.data.triage_result;
                             this.handleTriageResult(chatResult.data.triage_result);
+                        } else if (this.isWidgetMode && !chatResult.data.triage_result) {
+                            // AI is still asking questions - keep inputs enabled
+                            console.log('AI still gathering information - no triage decision yet');
                         }
                     }
                 } else {
@@ -429,40 +435,46 @@ class MedicalTriageChat {
     
     handleTriageResult(result) {
         if (!this.isWidgetMode) return;
-        
-        const currentLang = LanguageManager?.getLanguage() || 'ar';
-        
+
+        console.log(`Handling triage result: ${result}`);
+
         if (result === 'telemedicine') {
             // Patient can use platform - enable booking
+            console.log('Telemedicine recommendation - showing booking button');
             if (this.onTriageComplete) {
                 this.onTriageComplete(result, this.conversationHistory);
             }
             this.showBookingButton(true);
+
+            // Disable input after decision
+            this.messageInput.disabled = true;
+            this.sendBtn.disabled = true;
+            this.micBtn.disabled = true;
         } else if (result === 'in_person') {
-            // Recommend in-person visit
-            const msg = currentLang === 'ar' ? 
-                'ننصحك بزيارة عيادة طبيب مختص للفحص الشخصي.' : 
-                'We recommend visiting a doctor in person for examination.';
-            this.addBotMessage(msg);
+            // Recommend in-person visit - no booking button
+            console.log('In-person visit recommendation - hiding booking button');
             if (this.onTriageComplete) {
                 this.onTriageComplete(result, this.conversationHistory);
             }
             this.showBookingButton(false);
+
+            // Disable input after decision
+            this.messageInput.disabled = true;
+            this.sendBtn.disabled = true;
+            this.micBtn.disabled = true;
         } else if (result === 'emergency') {
-            // Emergency case
-            const msg = currentLang === 'ar' ? 
-                'يرجى التوجه للطوارئ فوراً أو الاتصال بالإسعاف!' : 
-                'Please go to the emergency room immediately or call an ambulance!';
-            this.addBotMessage(msg);
+            // Emergency case - no booking button
+            console.log('Emergency recommendation - hiding booking button');
             if (this.onTriageComplete) {
                 this.onTriageComplete(result, this.conversationHistory);
             }
             this.showBookingButton(false);
+
+            // Disable input after decision
+            this.messageInput.disabled = true;
+            this.sendBtn.disabled = true;
+            this.micBtn.disabled = true;
         }
-        
-        // Disable input after triage decision
-        this.messageInput.disabled = true;
-        this.sendBtn.disabled = true;
     }
     
     showBookingButton(canBook) {
@@ -488,21 +500,26 @@ class MedicalTriageChat {
         this.conversationHistory = [];
         this.triageResult = null;
         this.conversationId = 'conv_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        
+
         // Clear chat messages
         this.chatMessages.innerHTML = '';
-        
-        // Re-enable inputs
+
+        // Re-enable all inputs
         this.messageInput.disabled = false;
         this.sendBtn.disabled = false;
+        this.micBtn.disabled = false;
         this.messageInput.value = '';
-        
-        // Hide actions
+
+        // Hide actions and booking button
         const actionsDiv = document.getElementById('triage-actions');
         if (actionsDiv) {
             actionsDiv.classList.add('d-none');
         }
-        
+        const bookingBtn = document.getElementById('triage-booking-btn');
+        if (bookingBtn) {
+            bookingBtn.classList.add('d-none');
+        }
+
         // Add welcome message
         if (this.isWidgetMode) {
             this.addWelcomeMessage();

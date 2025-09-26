@@ -86,7 +86,9 @@ CONVERSATION FLOW RULES:
 2. NEVER restart or act like you're meeting someone new
 3. Remember what they told you and build on it
 4. Ask MAXIMUM 2-3 follow-up questions, then give your recommendation
-5. After 2-3 exchanges, you MUST recommend one of the 3 options
+5. After 2-3 exchanges, you MUST recommend ONE clear option (emergency, in-person, or telemedicine)
+6. NEVER mix recommendations - choose only ONE based on severity
+7. Do NOT mention other options after making your recommendation
 
 Your approach - BE A CARING FRIEND:
 1. Continue the conversation naturally - don't restart
@@ -104,17 +106,17 @@ ENGLISH: "Hi, what's happening with you?" → "When did it start?" → "I see. W
 
 When giving recommendations, be gentle and caring but VERY SPECIFIC about next steps:
 
-For EMERGENCY cases:
-ARABIC: "دا شيء خطير، لازم تمشي الطوارئ اسه. ما تستنى، امشي فورا!"
-ENGLISH: "This is serious. Go to emergency room now. Do not wait."
+For EMERGENCY cases (ONLY for life-threatening symptoms):
+ARABIC: "دا شيء خطير جداً ولازم تمشي الطوارئ فوراً! ما تستنى أبداً، امشي الطوارئ اسه أو اتصل بالإسعاف!"
+ENGLISH: "This is a serious emergency! You need to go to the emergency room immediately or call an ambulance!"
 
-For IN-PERSON visits (when we cannot see them on platform):
-ARABIC: "أشوف إنك محتاج دكتور يفحصك. ما نقدر نشوفك في المنصة لأن حالتك محتاجة فحص بالعيادة. لازم تمشي تشوف دكتور في العيادة."
-ENGLISH: "You need a doctor to check you. We cannot help on the platform. You need physical exam. Please go to a clinic."
+For IN-PERSON visits (when physical examination is needed):
+ARABIC: "أشوف إنك محتاج فحص شخصي من دكتور. محتاج تمشي تشوف دكتور في عيادة للكشف."
+ENGLISH: "You need a physical examination by a doctor. Please visit a doctor at a clinic for an in-person checkup."
 
 For TELEMEDICINE (when they can use Sahatak platform):
-ARABIC: "ممكن نساعدك في منصة صحتك. اضغط على 'حجز موعد' تحت عشان تحجز مع دكتور. بس لو حسيت إنك ازدت سوء، ما تستنى الموعد وامشي الطوارئ فورا."
-ENGLISH: "We can help you on Sahatak platform. Click 'Book Appointment' below to see a doctor. If you feel worse, go to emergency. Don't wait."
+ARABIC: "ممكن نساعدك عن طريق منصة صحتك. احجز موعد مع دكتور للاستشارة عن بُعد."
+ENGLISH: "You can book an appointment on Sahatak platform for a remote consultation with a doctor."
 
 Always end with genuine care:
 ARABIC: "أنا ما دكتور، بس دي نصيحتي ليك من القلب"
@@ -162,27 +164,31 @@ def detect_language(text):
 def extract_triage_decision(ai_response):
     """Extract triage decision from AI response - only return decision if AI gives clear recommendation"""
     response_lower = ai_response.lower()
-    
-    # Emergency indicators (Sudanese dialect) - ONLY for true emergencies
-    emergency_keywords = ['امشي الطوارئ', 'طوارئ ن', 'إسعاف', 'حالة طارئة خطيرة', 'مستشفى فورا',
-                         'emergency room', 'er immediately', 'call ambulance', 'life threatening']
-    
-    # In-person visit indicators (Sudanese dialect) - for physical examination needs
-    in_person_keywords = ['محتاج تشوف دكتور في العيادة', 'محتاج فحص شخصي', 'دكتور في العيادة', 
-                         'فحص في العيادة', 'زيارة العيادة', 'كشف عند دكتور',
-                         'physical examination', 'in-person visit', 'see doctor in clinic', 'physical exam needed']
-    
-    # Sahatak Platform indicators (Sudanese dialect) - for telemedicine recommendations
-    remote_keywords = ['منصة صحتك', 'ممكن تحجز موعد', 'استشارة عن بُعد', 'حجز موعد في المنصة',
-                      'sahatak platform', 'telemedicine', 'remote consultation', 'schedule appointment',
-                      'book consultation', 'virtual visit', 'دوس على حجز موعد']
-    
-    # Check for emergency ONLY if explicitly mentioned
+
+    # Emergency indicators - ONLY for true emergencies
+    emergency_keywords = ['الطوارئ فوراً', 'امشي الطوارئ', 'اتصل بالإسعاف', 'طوارئ', 'إسعاف',
+                         'خطير جداً', 'حالة طارئة',
+                         'emergency room immediately', 'call an ambulance', 'serious emergency',
+                         'go to the emergency', 'emergency!']
+
+    # In-person visit indicators - for physical examination needs
+    in_person_keywords = ['فحص شخصي', 'دكتور في عيادة', 'تشوف دكتور في عيادة',
+                         'للكشف', 'عيادة للكشف', 'زيارة عيادة',
+                         'physical examination', 'in-person checkup', 'visit a doctor at a clinic',
+                         'see a doctor at a clinic', 'clinic for an in-person']
+
+    # Sahatak Platform indicators - for telemedicine recommendations
+    remote_keywords = ['منصة صحتك', 'احجز موعد', 'استشارة عن بُعد',
+                      'للاستشارة عن بُعد', 'موعد مع دكتور',
+                      'sahatak platform', 'book an appointment', 'remote consultation',
+                      'appointment on sahatak']
+
+    # Count keyword matches - prioritize emergency
     emergency_count = sum(1 for keyword in emergency_keywords if keyword in response_lower)
     in_person_count = sum(1 for keyword in in_person_keywords if keyword in response_lower)
     remote_count = sum(1 for keyword in remote_keywords if keyword in response_lower)
-    
-    # Only return triage decision if AI explicitly gives recommendation
+
+    # Return decision based on priority: emergency > in_person > telemedicine
     if emergency_count > 0:
         return 'emergency'
     elif in_person_count > 0:
