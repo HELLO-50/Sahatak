@@ -203,6 +203,39 @@ def register_error_handlers(app):
             details={"error_id": error_id}
         )
     
+    @app.errorhandler(BrokenPipeError)
+    def broken_pipe_error(error):
+        """Handle BrokenPipeError - client disconnected before response sent"""
+        # Log at debug level to avoid cluttering logs with common client disconnects
+        app_logger.debug(f"Client disconnected (BrokenPipeError): {request.path}", extra={
+            'endpoint': request.endpoint,
+            'method': request.method,
+            'ip_address': request.remote_addr
+        })
+        # Return None to silently fail
+        return None
+
+    @app.errorhandler(IOError)
+    def io_error(error):
+        """Handle IOError - including SIGPIPE"""
+        error_str = str(error).lower()
+        if 'broken pipe' in error_str or 'write error' in error_str:
+            # Client disconnected - log at debug level
+            app_logger.debug(f"Client disconnected (IOError): {request.path}", extra={
+                'endpoint': request.endpoint,
+                'method': request.method,
+                'error': error_str
+            })
+            return None  # Silent fail
+        else:
+            # Other IO errors - log normally
+            app_logger.error(f"IO error: {str(error)}", extra={
+                'endpoint': request.endpoint,
+                'method': request.method,
+                'ip_address': request.remote_addr
+            })
+            return APIResponse.internal_error(message="IO error occurred")
+
     @app.errorhandler(ValueError)
     def value_error(error):
         """Handle ValueError exceptions (usually validation related)"""
@@ -211,7 +244,7 @@ def register_error_handlers(app):
             'method': request.method,
             'ip_address': request.remote_addr
         })
-        
+
         return APIResponse.validation_error(
             field="unknown",
             message=str(error)

@@ -6,10 +6,16 @@ from flask_mail import Mail
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 import os
+import signal
+import sys
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
+
+# Handle SIGPIPE on Unix-like systems (not available on Windows)
+if hasattr(signal, 'SIGPIPE'):
+    signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
 # Initialize Flask app
 app = Flask(__name__)

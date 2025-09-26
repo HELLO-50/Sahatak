@@ -1218,6 +1218,17 @@ def get_video_session_status(appointment_id):
             message='Session status retrieved successfully'
         )
         
+    except BrokenPipeError:
+        # Client disconnected before response was sent - common with polling
+        app_logger.debug(f"Client disconnected during video status check for appointment {appointment_id}")
+        return None  # Silent fail for broken pipe
+    except IOError as e:
+        if 'write error' in str(e).lower() or 'broken pipe' in str(e).lower():
+            # SIGPIPE or similar write error - client disconnected
+            app_logger.debug(f"Client disconnected during video status check for appointment {appointment_id}")
+            return None  # Silent fail
+        app_logger.error(f"IO error in get video session status: {str(e)}")
+        return APIResponse.internal_error(message='Failed to get session status')
     except Exception as e:
         app_logger.error(f"Get video session status error: {str(e)}")
         return APIResponse.internal_error(message='Failed to get session status')
