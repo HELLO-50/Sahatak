@@ -142,7 +142,11 @@ class VideoConferenceService:
             "enableLobby": False,
             "disableLobby": True,
             "enableLobbyChat": False,
-            "lobby": False,  # Additional explicit disable
+            "lobby": {
+                "enabled": False,
+                "autoKnock": False,
+                "enableChat": False
+            },
             "authentication": {
                 "enabled": False
             },
@@ -159,20 +163,23 @@ class VideoConferenceService:
             "anonymousdomain": "guest.meet.ffmuc.net",  # Critical for public Jitsi
             "enableAnonymousAccess": True,
             
-            # Room Configuration (SINGLE INSTANCE) - Explicitly disable all restrictions
+            # Room Configuration - Disable all restrictions for public access
             "roomConfig": {
                 "password": None,
                 "requireAuth": False,
                 "membersOnly": False,
                 "enableLobby": False,
                 "openBridgeChannel": True,
-                "enableAnonymousAccess": True
+                "enableAnonymousAccess": True,
+                "publicRoom": True
             },
             
             # Explicitly disable membersOnly at root level too
             "membersOnly": False,
             "enableAnonymousUsers": True,
             "anonymousUsers": True,
+            "requirePassword": False,
+            "disableInviteFunctions": True,
             
             # Moderator & Access Control
             "disableModeratorIndicator": os.getenv('JITSI_DISABLE_MODERATOR_INDICATOR', 'true').lower() == 'true',
@@ -187,6 +194,13 @@ class VideoConferenceService:
             "enableInsecureRoomNameWarning": False,
             "disableThirdPartyRequests": True,
             "hiddenPrejoinButtons": ["invite"],
+
+            # Additional settings for public Jitsi
+            "enableNoAudioDetection": False,
+            "enableNoisyMicDetection": True,
+            "startAudioOnly": False,
+            "startWithAudioMuted": False,
+            "startWithVideoMuted": False,
             
             # Features
             "enableEncryption": os.getenv('JITSI_ENABLE_E2EE', 'false').lower() == 'true',
@@ -207,15 +221,16 @@ class VideoConferenceService:
             "hideConferenceTimer": False,
             "openBridgeChannel": True,
             
-            # Explicit lobby system disables (from environment)
-            "lobbyEnabled": os.getenv('JITSI_LOBBY_ENABLED', 'false').lower() == 'true',
-            "enableLobbyMode": os.getenv('JITSI_LOBBY_MODE_ENABLED', 'false').lower() == 'true',
+            # Force disable all lobby/knocking/moderation features
+            "lobbyEnabled": False,
+            "enableLobbyMode": False,
             "disableLobbyMode": True,
-            "knockingEnabled": os.getenv('JITSI_KNOCKING_ENABLED', 'false').lower() == 'true',
-            "enableKnocking": os.getenv('JITSI_ENABLE_KNOCKING', 'false').lower() == 'true',
+            "knockingEnabled": False,
+            "enableKnocking": False,
             "disableKnocking": True,
             "moderatedRoomServiceUrl": None,
-            "enableModerationMode": os.getenv('JITSI_MODERATION_ENABLED', 'false').lower() == 'true',
+            "enableModerationMode": False,
+            "disableModeration": True,
             
             # Notifications
             "notifications": [

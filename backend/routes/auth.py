@@ -24,8 +24,8 @@ def api_login_required(f):
         from flask import session
         # Only log for video endpoints to reduce noise
         if 'video' in request.endpoint or request.endpoint.endswith(('start', 'end', 'complete', 'disconnect')):
-            auth_logger.info(f"🎥 Video API auth check for {request.endpoint}")
-            auth_logger.info(f"🎥 User authenticated: {current_user.is_authenticated}, Session: {list(session.keys()) if session else 'No session'}")
+            auth_logger.info(f"Video API auth check for {request.endpoint}")
+            auth_logger.info(f"User authenticated: {current_user.is_authenticated}, Session: {list(session.keys()) if session else 'No session'}")
         
         # First try session-based authentication
         if current_user.is_authenticated:
@@ -36,13 +36,13 @@ def api_login_required(f):
         auth_header = request.headers.get('Authorization')
         # Only log auth header for video endpoints
         if 'video' in request.endpoint or request.endpoint.endswith(('start', 'end', 'complete', 'disconnect')):
-            auth_logger.info(f"🎥 Auth header: {auth_header[:50] if auth_header else 'None'}...")
+            auth_logger.info(f"Auth header: {auth_header[:50] if auth_header else 'None'}...")
         
         if auth_header and auth_header.startswith('Bearer '):
             token = auth_header[7:]  # Remove 'Bearer ' prefix
             # Only log token extraction for video endpoints to reduce noise
             if 'video' in request.endpoint or request.endpoint.endswith(('start', 'end', 'complete', 'disconnect')):
-                auth_logger.info(f"🎥 Video endpoint auth - Token: {token[:20]}...")
+                auth_logger.info(f"Video endpoint auth - Token: {token[:20]}...")
         
         if token:
             try:
@@ -53,7 +53,7 @@ def api_login_required(f):
                 if payload:
                     # Only log successful decode for video endpoints
                     if 'video' in request.endpoint or request.endpoint.endswith(('start', 'end', 'complete', 'disconnect')):
-                        auth_logger.info(f"🎥 Video JWT decoded for user {payload.get('user_id')}")
+                        auth_logger.info(f"Video JWT decoded for user {payload.get('user_id')}")
                     
                     # Load user from token
                     user_id = payload.get('user_id')
@@ -217,14 +217,14 @@ def register():
         )
         user.set_password(data['password'])
         
-        # Generate verification token (always required now)
+        # Generate verification token
         import secrets
         user.verification_token = secrets.token_urlsafe(32)
         
         db.session.add(user)
         db.session.flush()  # Get user ID without committing
         
-        # Send email confirmation EARLY to avoid network timing issues
+        # Send email confirmation
         email_sent_early = False
         try:
             email_language = data.get('language_preference', 'ar')
