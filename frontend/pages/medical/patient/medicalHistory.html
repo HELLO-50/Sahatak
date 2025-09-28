@@ -588,21 +588,22 @@
 
         // Render medical summary
         function renderMedicalSummary() {
+            const container = document.getElementById('history-summary');
+
             try {
                 console.log('Rendering medical summary...');
-                const container = document.getElementById('history-summary');
-                
+
                 if (!medicalHistory) {
                     console.log('No medical history data, showing placeholder');
                     container.innerHTML = `<p class="text-muted text-center">No information available</p>`;
                     return;
                 }
-                
+
                 console.log('Medical history data available, rendering content');
             } catch (error) {
                 console.error('Error rendering medical summary:', error);
-                const container = document.getElementById('history-summary');
                 container.innerHTML = `<p class="text-danger text-center">Error loading summary</p>`;
+                return;
             }
             
             const completionStatus = medicalHistory.medical_history_completed ? 
