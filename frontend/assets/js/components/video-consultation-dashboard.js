@@ -362,12 +362,14 @@ const VideoConsultationDashboard = {
         const isInProgress = appointment.status === 'in_progress';
         const isCompleted = appointment.status === 'completed';
         
-        // Session states (expanded to handle more cases)
-        const sessionActive = appointment.session_status === 'active' || 
-                            appointment.session_status === 'in_call' ||
-                            appointment.session_status === 'waiting_patient' ||
-                            appointment.session_status === 'waiting' ||
-                            (appointment.session_started_at && !appointment.session_status);
+        // Session states - doctor has started the session and it's joinable
+        const sessionActive = appointment.session_started_at &&
+                            (appointment.session_status === 'active' ||
+                             appointment.session_status === 'in_call' ||
+                             appointment.session_status === 'waiting_patient' ||
+                             appointment.session_status === 'waiting' ||
+                             appointment.session_status === 'connecting' ||
+                             !appointment.session_status);
         const sessionEnded = appointment.session_status === 'ended' || 
                             appointment.session_status === 'disconnected';
         
