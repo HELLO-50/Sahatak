@@ -657,14 +657,36 @@ def delete_user(user_id):
             'user_type': user.user_type
         }
         
-        # Handle appointments before deletion
+        # Handle related data before deletion
         if user.user_type == 'patient' and user.patient_profile:
+            # Delete conversations and messages first
+            from models import Conversation, Message
+            conversations = Conversation.query.filter_by(patient_id=user.patient_profile.id).all()
+            for conversation in conversations:
+                # Delete all messages in this conversation
+                messages = Message.query.filter_by(conversation_id=conversation.id).all()
+                for message in messages:
+                    db.session.delete(message)
+                # Delete the conversation
+                db.session.delete(conversation)
+
             # Delete all appointments for this patient
             appointments = Appointment.query.filter_by(patient_id=user.patient_profile.id).all()
             for appointment in appointments:
                 db.session.delete(appointment)
-                
+
         elif user.user_type == 'doctor' and user.doctor_profile:
+            # Delete conversations and messages first
+            from models import Conversation, Message
+            conversations = Conversation.query.filter_by(doctor_id=user.doctor_profile.id).all()
+            for conversation in conversations:
+                # Delete all messages in this conversation
+                messages = Message.query.filter_by(conversation_id=conversation.id).all()
+                for message in messages:
+                    db.session.delete(message)
+                # Delete the conversation
+                db.session.delete(conversation)
+
             # Delete all appointments for this doctor
             appointments = Appointment.query.filter_by(doctor_id=user.doctor_profile.id).all()
             for appointment in appointments:
