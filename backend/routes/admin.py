@@ -659,36 +659,91 @@ def delete_user(user_id):
         
         # Handle related data before deletion
         if user.user_type == 'patient' and user.patient_profile:
-            # Delete conversations and messages first
-            from models import Conversation, Message
-            conversations = Conversation.query.filter_by(patient_id=user.patient_profile.id).all()
+            from models import (Conversation, Message, Prescription, MedicalHistoryUpdate,
+                              Diagnosis, VitalSigns, AIAssessment, MessageAttachment)
+
+            # Delete all patient-related records in dependency order
+            patient_id = user.patient_profile.id
+
+            # Delete conversations and messages
+            conversations = Conversation.query.filter_by(patient_id=patient_id).all()
             for conversation in conversations:
-                # Delete all messages in this conversation
-                messages = Message.query.filter_by(conversation_id=conversation.id).all()
-                for message in messages:
+                # Delete message attachments first
+                for message in conversation.messages:
+                    attachments = MessageAttachment.query.filter_by(message_id=message.id).all()
+                    for attachment in attachments:
+                        db.session.delete(attachment)
                     db.session.delete(message)
-                # Delete the conversation
                 db.session.delete(conversation)
 
-            # Delete all appointments for this patient
-            appointments = Appointment.query.filter_by(patient_id=user.patient_profile.id).all()
+            # Delete medical records
+            ai_assessments = AIAssessment.query.filter_by(patient_id=patient_id).all()
+            for assessment in ai_assessments:
+                db.session.delete(assessment)
+
+            vital_signs = VitalSigns.query.filter_by(patient_id=patient_id).all()
+            for vital in vital_signs:
+                db.session.delete(vital)
+
+            diagnoses = Diagnosis.query.filter_by(patient_id=patient_id).all()
+            for diagnosis in diagnoses:
+                db.session.delete(diagnosis)
+
+            medical_updates = MedicalHistoryUpdate.query.filter_by(patient_id=patient_id).all()
+            for update in medical_updates:
+                db.session.delete(update)
+
+            prescriptions = Prescription.query.filter_by(patient_id=patient_id).all()
+            for prescription in prescriptions:
+                db.session.delete(prescription)
+
+            # Delete appointments
+            appointments = Appointment.query.filter_by(patient_id=patient_id).all()
             for appointment in appointments:
                 db.session.delete(appointment)
 
         elif user.user_type == 'doctor' and user.doctor_profile:
-            # Delete conversations and messages first
-            from models import Conversation, Message
-            conversations = Conversation.query.filter_by(doctor_id=user.doctor_profile.id).all()
+            from models import (Conversation, Message, Prescription, MedicalHistoryUpdate,
+                              Diagnosis, AIAssessment, MessageAttachment, DoctorVerificationLog)
+
+            # Delete all doctor-related records in dependency order
+            doctor_id = user.doctor_profile.id
+
+            # Delete conversations and messages
+            conversations = Conversation.query.filter_by(doctor_id=doctor_id).all()
             for conversation in conversations:
-                # Delete all messages in this conversation
-                messages = Message.query.filter_by(conversation_id=conversation.id).all()
-                for message in messages:
+                # Delete message attachments first
+                for message in conversation.messages:
+                    attachments = MessageAttachment.query.filter_by(message_id=message.id).all()
+                    for attachment in attachments:
+                        db.session.delete(attachment)
                     db.session.delete(message)
-                # Delete the conversation
                 db.session.delete(conversation)
 
-            # Delete all appointments for this doctor
-            appointments = Appointment.query.filter_by(doctor_id=user.doctor_profile.id).all()
+            # Delete medical records where doctor was involved
+            ai_assessments = AIAssessment.query.filter_by(reviewed_by_doctor_id=doctor_id).all()
+            for assessment in ai_assessments:
+                assessment.reviewed_by_doctor_id = None  # Set to null instead of deleting assessment
+
+            diagnoses = Diagnosis.query.filter_by(recorded_by_doctor_id=doctor_id).all()
+            for diagnosis in diagnoses:
+                diagnosis.recorded_by_doctor_id = None  # Keep diagnosis but remove doctor reference
+
+            medical_updates = MedicalHistoryUpdate.query.filter_by(updated_by_doctor_id=doctor_id).all()
+            for update in medical_updates:
+                update.updated_by_doctor_id = None  # Keep update but remove doctor reference
+
+            prescriptions = Prescription.query.filter_by(doctor_id=doctor_id).all()
+            for prescription in prescriptions:
+                db.session.delete(prescription)  # Delete prescriptions as they're doctor-specific
+
+            # Delete verification logs
+            verification_logs = DoctorVerificationLog.query.filter_by(doctor_id=doctor_id).all()
+            for log in verification_logs:
+                db.session.delete(log)
+
+            # Delete appointments
+            appointments = Appointment.query.filter_by(doctor_id=doctor_id).all()
             for appointment in appointments:
                 db.session.delete(appointment)
         
