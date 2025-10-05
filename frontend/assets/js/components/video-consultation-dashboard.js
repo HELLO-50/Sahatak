@@ -99,14 +99,22 @@ const VideoConsultationDashboard = {
     
     // Start video consultation (doctors only)
     async startVideoConsultation(appointmentId) {
+        // Prevent double-clicking/duplicate requests
+        const lockKey = `starting_${appointmentId}`;
+        if (this[lockKey]) {
+            console.log('⚠️ DOCTOR: Already starting session, ignoring duplicate request');
+            return;
+        }
+
         try {
+            this[lockKey] = true;
+            console.log('🚀 DOCTOR: Starting video session for appointment', appointmentId);
+
             const response = await ApiHelper.makeRequest(
                 `/appointments/${appointmentId}/video/start`,
                 { method: 'POST' }
             );
-            
-            
-            
+
             if (response && response.success) {
                 // Update UI first, then navigate
                 
@@ -136,6 +144,11 @@ const VideoConsultationDashboard = {
             }
         } catch (error) {
             throw new Error(error.message || 'Failed to start video consultation');
+        } finally {
+            // Clear lock after delay to allow video window to open
+            setTimeout(() => {
+                delete this[lockKey];
+            }, 2000);
         }
     },
     
