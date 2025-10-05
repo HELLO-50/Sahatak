@@ -1057,7 +1057,16 @@ def end_video_session(appointment_id):
         if appointment.session_started_at:
             duration_delta = datetime.utcnow() - appointment.session_started_at
             session_duration = int(duration_delta.total_seconds())
-        
+
+        # Prevent premature session end (network issues, accidental page close)
+        # Only mark as ended if session has been running for at least 30 seconds
+        if session_duration and session_duration < 30:
+            app_logger.info(f"Ignoring premature end request for appointment {appointment_id} (only {session_duration}s, likely network issue)")
+            return APIResponse.success(
+                data={'session_status': appointment.session_status, 'ignored': True},
+                message='Session end ignored - too soon after start'
+            )
+
         # Update appointment
         appointment.session_status = 'ended'
         appointment.session_ended_at = datetime.utcnow()
