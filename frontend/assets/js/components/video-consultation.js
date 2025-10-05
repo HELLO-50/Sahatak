@@ -723,15 +723,27 @@ const VideoConsultation = {
             this.logAnalyticsEvent('jitsi_error', { error: e });
             this.handleJitsiError(e);
         });
-        
+
         // Add window unload handler as backup to catch direct window closes
+        // IMPORTANT: Only activate after 30 seconds to avoid triggering on initial page load issues
+        this.unloadHandlersActive = false;
+
+        setTimeout(() => {
+            this.unloadHandlersActive = true;
+            console.log('✅ Emergency unload handlers activated after 30s');
+        }, 30000); // 30 seconds
+
         window.addEventListener('beforeunload', (e) => {
-            // Use sync request for immediate execution before page unloads
-            this.emergencyEndSession();
+            if (this.unloadHandlersActive) {
+                // Use sync request for immediate execution before page unloads
+                this.emergencyEndSession();
+            }
         });
-        
+
         window.addEventListener('pagehide', (e) => {
-            this.emergencyEndSession();
+            if (this.unloadHandlersActive) {
+                this.emergencyEndSession();
+            }
         });
     },
     
