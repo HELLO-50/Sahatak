@@ -268,7 +268,7 @@ const VideoConsultationDashboard = {
                 throw new Error(response.message || 'Failed to check session status');
             }
         } catch (error) {
-            console.error(`💥 Session status check error for appointment ${appointmentId}:`, error);
+            console.error(`Session status check error for appointment ${appointmentId}:`, error);
             return null;
         }
     },
@@ -554,19 +554,18 @@ const VideoConsultationDashboard = {
         if (!appointmentCard) {
             // Check if this is a completed appointment (which is expected to be removed from DOM)
             if (sessionData && sessionData.appointment_status === 'completed') {
-                console.log(`✅ Appointment ${appointmentId} is completed and removed from dashboard (expected)`);
+                console.log(`Appointment ${appointmentId} is completed and removed from dashboard (expected)`);
                 // Clear the cache for completed appointments
                 this.sessionStatusCache.delete(appointmentId);
                 return;
             }
-            console.error(`❌ Could not find appointment card for ID ${appointmentId}`);
+            console.error(`Could not find appointment card for ID ${appointmentId}`);
             return;
         }
         
         // Check if video consultation button already exists
         let existingButton = appointmentCard.querySelector('.video-consultation-btn');
         
-        // Check for truly inconsistent state that needs fixing
         // Only force reset if the session has been waiting for too long (over 5 minutes)
         const needsStatusFix = sessionData.appointment_status === 'in_progress' && 
                               sessionData.session_status === 'waiting' && 
@@ -578,7 +577,6 @@ const VideoConsultationDashboard = {
             this.forceSessionEnd(appointmentId);
         }
         
-        // Smart caching: Only skip update if status truly hasn't changed
         // This prevents unnecessary re-renders and preserves button states
         const cachedStatus = this.sessionStatusCache.get(appointmentId);
         const statusChanged = !cachedStatus ||
@@ -598,7 +596,6 @@ const VideoConsultationDashboard = {
             appointmentCard.appendChild(actionsContainer);
         }
 
-        // Regenerate button based on current session data
         // Build appointment object with updated session data for button generation
         const appointmentData = {
             id: appointmentId,
@@ -685,7 +682,7 @@ const VideoConsultationDashboard = {
             }, 1000);
             
         } catch (error) {
-            console.error(`❌ Failed to force session end for appointment ${appointmentId}:`, error);
+            console.error(`Failed to force session end for appointment ${appointmentId}:`, error);
         }
     },
     
@@ -722,7 +719,7 @@ const VideoConsultationDashboard = {
         try {
             await Promise.all(checkPromises);
         } catch (error) {
-            console.error('❌ Batch session status check error:', error);
+            console.error('Batch session status check error:', error);
         }
     },
     
