@@ -615,25 +615,25 @@ const VideoConsultationDashboard = {
             this.forceSessionEnd(appointmentId);
         }
         
-        // TEMPORARILY DISABLED: Caching check to force UI refresh for debugging
-        // This helps identify if caching was preventing the Join button from appearing
-        // TODO: Re-enable after confirming button works correctly
-        /*
+        // Smart caching: Only skip update if status truly hasn't changed
+        // BUT always update if session just started (to show Join button for patient)
         const cachedStatus = this.sessionStatusCache.get(appointmentId);
-        if (cachedStatus &&
-            cachedStatus.session_status === sessionData.session_status &&
-            cachedStatus.appointment_status === sessionData.appointment_status &&
-            !needsStatusFix) {
-            console.log(`⏭️ Skipping UI update for appointment ${appointmentId} - no changes detected`);
-            return; // Skip UI update silently
-        }
-        */
+        const statusChanged = !cachedStatus ||
+                             cachedStatus.session_status !== sessionData.session_status ||
+                             cachedStatus.appointment_status !== sessionData.appointment_status ||
+                             cachedStatus.session_started_at !== sessionData.session_started_at;
 
-        // FORCE UPDATE: Always update UI to ensure button appears
-        console.log(`🔄 Force updating UI for appointment ${appointmentId}`, {
+        if (!statusChanged && !needsStatusFix) {
+            console.log(`⏭️ Skipping UI update for appointment ${appointmentId} - no changes detected`);
+            return; // Skip UI update to preserve doctor's Complete button
+        }
+
+        // Update UI when status has changed
+        console.log(`🔄 Updating UI for appointment ${appointmentId}`, {
             session_status: sessionData.session_status,
             appointment_status: sessionData.appointment_status,
-            session_started_at: sessionData.session_started_at
+            session_started_at: sessionData.session_started_at,
+            changed: statusChanged
         });
         
         // Add video consultation actions if not present
@@ -643,17 +643,25 @@ const VideoConsultationDashboard = {
             actionsContainer.className = 'video-consultation-actions';
             appointmentCard.appendChild(actionsContainer);
         }
-        
-        // Preserve existing button content and only add session info
-        let existingContent = '';
-        if (existingButton) {
-            existingContent = existingButton.outerHTML;
-        }
-        
+
+        // Regenerate button based on current session data
+        // Build appointment object with updated session data for button generation
+        const appointmentData = {
+            id: appointmentId,
+            appointment_type: 'video',
+            status: sessionData.appointment_status,
+            session_started_at: sessionData.session_started_at,
+            session_status: sessionData.session_status,
+            session_duration: sessionData.session_duration
+        };
+
+        // Generate fresh button HTML based on current status
+        const buttonHtml = this.generateVideoConsultationButton(appointmentData);
+
         // Update session info
         const currentLang = LanguageManager?.getLanguage() || 'en';
         const isArabic = currentLang === 'ar';
-        
+
         let sessionInfo = '';
         if (sessionData.session_started_at) {
             const duration = this.calculateSessionDuration(sessionData.session_started_at, sessionData.session_duration);
@@ -667,10 +675,10 @@ const VideoConsultationDashboard = {
                 </div>
             `;
         }
-        
-        // Combine existing button with session info
-        const updatedContent = existingContent + sessionInfo;
-        
+
+        // Combine regenerated button with session info
+        const updatedContent = buttonHtml + sessionInfo;
+
         actionsContainer.innerHTML = updatedContent;
     },
     
