@@ -14,7 +14,41 @@ from utils.logging_config import app_logger
 
 class VideoConferenceService:
     """Service for managing Jitsi Meet video consultations"""
-    
+
+    @staticmethod
+    def _get_ice_servers():
+        """
+        Build ICE servers configuration including STUN and optional TURN servers
+
+        Returns:
+            List of ICE server configurations
+        """
+        ice_servers = [
+            {"urls": "stun:meet.ffmuc.net:3478"},
+            {"urls": "stun:stun.l.google.com:19302"},
+            {"urls": "stun:stun1.l.google.com:19302"}
+        ]
+
+        # Add TURN servers if configured (for restrictive networks like Egypt)
+        turn_server = os.getenv('JITSI_TURN_SERVER')
+        turn_username = os.getenv('JITSI_TURN_USERNAME')
+        turn_password = os.getenv('JITSI_TURN_PASSWORD')
+
+        if turn_server:
+            turn_config = {"urls": turn_server}
+
+            # Add credentials if provided
+            if turn_username and turn_password:
+                turn_config["username"] = turn_username
+                turn_config["credential"] = turn_password
+
+            ice_servers.append(turn_config)
+            app_logger.info(f"TURN server configured: {turn_server}")
+        else:
+            app_logger.debug("No TURN server configured, using STUN only")
+
+        return ice_servers
+
     @staticmethod
     def generate_room_name(appointment_id: int) -> str:
         """
@@ -212,26 +246,30 @@ class VideoConferenceService:
             # Features
             "enableEncryption": os.getenv('JITSI_ENABLE_E2EE', 'false').lower() == 'true',
             "enableRecording": os.getenv('VIDEO_CALL_RECORDING_ENABLED', 'false').lower() == 'true',
-            
+
+            # Check if P2P should be disabled (for restrictive ISPs like Egypt)
+            "disable_p2p_mode": os.getenv('JITSI_DISABLE_P2P', 'false').lower() == 'true',
+
             # P2P Configuration with multiple STUN servers for better connectivity
             "p2p": {
-                "enabled": True,
+                "enabled": os.getenv('JITSI_DISABLE_P2P', 'false').lower() != 'true',
                 "useStunTurn": True,
                 "stunServers": [
                     {"urls": "stun:meet.ffmuc.net:3478"},
                     {"urls": "stun:stun.l.google.com:19302"},
-                    {"urls": "stun:stun1.l.google.com:19302"}
+                    {"urls": "stun:stun1.l.google.com:19302"},
+                    {"urls": "stun:stun2.l.google.com:19302"},
+                    {"urls": "stun:stun3.l.google.com:19302"},
+                    {"urls": "stun:stun4.l.google.com:19302"}
                 ],
                 "iceTransportPolicy": "all",
                 "preferH264": True
             },
 
-            # ICE Configuration for better connectivity
-            "iceServers": [
-                {"urls": "stun:meet.ffmuc.net:3478"},
-                {"urls": "stun:stun.l.google.com:19302"}
-            ],
-            "useTurnUdp": False,
+            # ICE Configuration for better connectivity including optional TURN servers
+            # Start with STUN servers
+            "iceServers": VideoConferenceService._get_ice_servers(),
+            "useTurnUdp": os.getenv('JITSI_USE_TURN', 'false').lower() == 'true',
             
             # Additional anti-lobby/membership settings
             "disableIncomingMessages": False,
