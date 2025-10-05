@@ -902,10 +902,11 @@ def start_video_session(appointment_id):
         )
         interface_config = VideoConferenceService.get_interface_config()
         
-        # Update appointment session status
+        # Update appointment session status and start time
         appointment.session_status = 'waiting'
-        if appointment.status != 'in_progress':
-            appointment.status = 'in_progress'
+        appointment.status = 'in_progress'
+        # Always set session_started_at when doctor starts video (critical for patient UI)
+        if not appointment.session_started_at or appointment.session_status == 'ended':
             appointment.session_started_at = datetime.utcnow()
         
         db.session.commit()
