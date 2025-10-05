@@ -276,7 +276,6 @@ const VideoConsultationDashboard = {
     // Generate video consultation button HTML based on appointment and user context
     generateVideoConsultationButton(appointment) {
         if (!appointment || appointment.appointment_type !== 'video') {
-            console.log(`❌ No button: appointment type is not video`, appointment);
             return '';
         }
 
@@ -287,28 +286,15 @@ const VideoConsultationDashboard = {
         const canStart = appointment.status === 'scheduled' || appointment.status === 'confirmed';
         const isInProgress = appointment.status === 'in_progress';
 
-        console.log(`🎯 Generating button for appointment ${appointment.id}`, {
-            userType,
-            status: appointment.status,
-            canStart,
-            isInProgress,
-            session_started_at: appointment.session_started_at,
-            session_status: appointment.session_status
-        });
-
         if (!canStart && !isInProgress) {
-            console.log(`❌ No button: appointment status is ${appointment.status} (not scheduled/confirmed/in_progress)`);
             return '';
         }
 
         let buttonConfig = this.getButtonConfig(userType, appointment, isArabic);
 
         if (!buttonConfig) {
-            console.log(`❌ No button: getButtonConfig returned null`);
             return ''; // No button for completed appointments
         }
-
-        console.log(`✅ Button config generated:`, buttonConfig);
         
         // Handle dual buttons for doctor when session ended but appointment in progress
         if (buttonConfig.isDual) {
@@ -448,18 +434,8 @@ const VideoConsultationDashboard = {
             }
         } else {
             // Patient button logic
-            console.log(`👤 Patient button logic - evaluating conditions:`, {
-                sessionActive,
-                isScheduled,
-                isInProgress,
-                sessionEnded,
-                session_started_at: appointment.session_started_at,
-                session_status: appointment.session_status
-            });
-
             if (sessionActive && (isScheduled || isInProgress)) {
                 // Session is active (doctor has started) - show Join Consultation
-                console.log(`✅ PATIENT: Showing Join button (sessionActive && (isScheduled || isInProgress))`);
                 return {
                     class: 'btn-join-video',
                     action: 'join',
@@ -470,7 +446,6 @@ const VideoConsultationDashboard = {
                 };
             } else if (isInProgress && appointment.session_started_at && !sessionEnded) {
                 // Doctor has started session (in_progress + session_started_at) - allow join even if session_status unclear
-                console.log(`✅ PATIENT: Showing Join button (isInProgress && session_started_at && !sessionEnded)`);
                 return {
                     class: 'btn-join-video',
                     action: 'join',
@@ -481,7 +456,6 @@ const VideoConsultationDashboard = {
                 };
             } else if (isInProgress && !sessionEnded) {
                 // Fallback: If appointment is in_progress and not ended, allow join (more permissive)
-                console.log(`✅ PATIENT: Showing Join button (isInProgress && !sessionEnded - FALLBACK)`);
                 return {
                     class: 'btn-join-video',
                     action: 'join',
@@ -492,7 +466,6 @@ const VideoConsultationDashboard = {
                 };
             } else if (isScheduled && !sessionActive) {
                 // Scheduled but session not started - show Waiting for Doctor
-                console.log(`⏳ PATIENT: Showing Waiting button (isScheduled && !sessionActive)`);
                 return {
                     class: 'btn-waiting',
                     action: 'check-status',
@@ -503,7 +476,6 @@ const VideoConsultationDashboard = {
                 };
             } else if (isInProgress && !sessionActive && !appointment.session_started_at) {
                 // In progress but no session started yet - show waiting
-                console.log(`⏳ PATIENT: Showing Waiting button (isInProgress && !sessionActive && !session_started_at)`);
                 return {
                     class: 'btn-waiting',
                     action: 'check-status',
@@ -514,7 +486,6 @@ const VideoConsultationDashboard = {
                 };
             } else if (isInProgress && sessionEnded) {
                 // In progress but session ended - show Waiting for Doctor
-                console.log(`⏳ PATIENT: Showing Waiting-Restart button (isInProgress && sessionEnded)`);
                 return {
                     class: 'btn-waiting-restart',
                     action: 'wait-restart',
@@ -525,17 +496,9 @@ const VideoConsultationDashboard = {
                 };
             } else if (isCompleted) {
                 // Completed - no button or show completed status
-                console.log(`❌ PATIENT: No button (isCompleted)`);
                 return null;
             } else {
                 // Default waiting state
-                console.log(`⏳ PATIENT: Showing Waiting button (DEFAULT FALLBACK)`, {
-                    isScheduled,
-                    isInProgress,
-                    isCompleted,
-                    sessionActive,
-                    sessionEnded
-                });
                 return {
                     class: 'btn-waiting',
                     action: 'check-status',
@@ -616,7 +579,7 @@ const VideoConsultationDashboard = {
         }
         
         // Smart caching: Only skip update if status truly hasn't changed
-        // BUT always update if session just started (to show Join button for patient)
+        // This prevents unnecessary re-renders and preserves button states
         const cachedStatus = this.sessionStatusCache.get(appointmentId);
         const statusChanged = !cachedStatus ||
                              cachedStatus.session_status !== sessionData.session_status ||
@@ -624,17 +587,8 @@ const VideoConsultationDashboard = {
                              cachedStatus.session_started_at !== sessionData.session_started_at;
 
         if (!statusChanged && !needsStatusFix) {
-            console.log(`⏭️ Skipping UI update for appointment ${appointmentId} - no changes detected`);
             return; // Skip UI update to preserve doctor's Complete button
         }
-
-        // Update UI when status has changed
-        console.log(`🔄 Updating UI for appointment ${appointmentId}`, {
-            session_status: sessionData.session_status,
-            appointment_status: sessionData.appointment_status,
-            session_started_at: sessionData.session_started_at,
-            changed: statusChanged
-        });
         
         // Add video consultation actions if not present
         let actionsContainer = appointmentCard.querySelector('.video-consultation-actions');
