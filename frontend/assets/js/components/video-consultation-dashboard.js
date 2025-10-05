@@ -247,14 +247,21 @@ const VideoConsultationDashboard = {
     // Check video session status with enhanced synchronization
     async checkVideoSessionStatus(appointmentId, forceRefresh = false) {
         try {
-            
+            console.log(`🔍 PATIENT: Checking status for appointment ${appointmentId}`);
+
             const response = await ApiHelper.makeRequest(
                 `/appointments/${appointmentId}/video/status`,
                 'GET'
             );
-            
+
             if (response.success) {
-                
+                console.log(`📊 PATIENT: Status received for appointment ${appointmentId}:`, {
+                    appointment_status: response.data.appointment_status,
+                    session_status: response.data.session_status,
+                    session_started_at: response.data.session_started_at,
+                    can_join: response.data.can_join
+                });
+
                 this.sessionStatusCache.set(appointmentId, response.data);
                 this.updateAppointmentVideoUI(appointmentId, response.data);
                 
@@ -584,9 +591,24 @@ const VideoConsultationDashboard = {
                              cachedStatus.appointment_status !== sessionData.appointment_status ||
                              cachedStatus.session_started_at !== sessionData.session_started_at;
 
+        console.log(`🔄 PATIENT: UI update check for appointment ${appointmentId}:`, {
+            statusChanged,
+            cached: cachedStatus ? {
+                session_status: cachedStatus.session_status,
+                session_started_at: cachedStatus.session_started_at
+            } : 'none',
+            new: {
+                session_status: sessionData.session_status,
+                session_started_at: sessionData.session_started_at
+            }
+        });
+
         if (!statusChanged && !needsStatusFix) {
+            console.log(`⏭️ PATIENT: Skipping UI update for appointment ${appointmentId} - no changes`);
             return; // Skip UI update to preserve doctor's Complete button
         }
+
+        console.log(`✅ PATIENT: Updating UI for appointment ${appointmentId}`);
         
         // Add video consultation actions if not present
         let actionsContainer = appointmentCard.querySelector('.video-consultation-actions');
