@@ -902,14 +902,24 @@ def start_video_session(appointment_id):
         )
         interface_config = VideoConferenceService.get_interface_config()
         
+        # DEBUG: Log before updating status
+        app_logger.info(f"🚀 START VIDEO - Appointment {appointment_id} BEFORE: status={appointment.status}, session_status={appointment.session_status}, session_started_at={appointment.session_started_at}")
+
         # Update appointment session status and start time
+        old_session_status = appointment.session_status
         appointment.session_status = 'waiting'
         appointment.status = 'in_progress'
         # Always set session_started_at when doctor starts video (critical for patient UI)
-        if not appointment.session_started_at or appointment.session_status == 'ended':
+        if not appointment.session_started_at or old_session_status == 'ended':
             appointment.session_started_at = datetime.utcnow()
-        
+            app_logger.info(f"🔄 START VIDEO - Updated session_started_at to {appointment.session_started_at}")
+        else:
+            app_logger.info(f"⚠️ START VIDEO - Keeping old session_started_at: {appointment.session_started_at}")
+
         db.session.commit()
+
+        # DEBUG: Log after commit
+        app_logger.info(f"✅ START VIDEO - Appointment {appointment_id} AFTER COMMIT: status={appointment.status}, session_status={appointment.session_status}, session_started_at={appointment.session_started_at}")
         
         # No caching - real-time data
         
@@ -1058,10 +1068,13 @@ def end_video_session(appointment_id):
             duration_delta = datetime.utcnow() - appointment.session_started_at
             session_duration = int(duration_delta.total_seconds())
 
+        # DEBUG: Log end request
+        app_logger.info(f"🛑 END VIDEO REQUEST - Appointment {appointment_id}, user_type={current_user.user_type}, session_duration={session_duration}s, current_status={appointment.session_status}")
+
         # Prevent premature session end (network issues, accidental page close)
         # Only mark as ended if session has been running for at least 30 seconds
         if session_duration and session_duration < 30:
-            app_logger.info(f"Ignoring premature end request for appointment {appointment_id} (only {session_duration}s, likely network issue)")
+            app_logger.warning(f"⛔ END VIDEO BLOCKED - Appointment {appointment_id} (only {session_duration}s, likely network issue/spurious event)")
             return APIResponse.success(
                 data={'session_status': appointment.session_status, 'ignored': True},
                 message='Session end ignored - too soon after start'
@@ -1071,6 +1084,8 @@ def end_video_session(appointment_id):
         appointment.session_status = 'ended'
         appointment.session_ended_at = datetime.utcnow()
         appointment.session_duration = session_duration
+
+        app_logger.info(f"✅ END VIDEO - Appointment {appointment_id} marked as ended after {session_duration}s")
         
         # When video session ends, keep status as 'in_progress'
         # The appointment stays in_progress until doctor explicitly completes from dashboard
