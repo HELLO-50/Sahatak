@@ -1395,12 +1395,22 @@ def handle_video_disconnect(appointment_id):
         # If doctor disconnects unexpectedly, keep appointment in_progress for immediate completion access
         # But clear session details so doctor can restart video or complete consultation
         if is_doctor and appointment.status == 'in_progress':
-            # Keep status as in_progress but clear session to allow restart OR completion
-            appointment.session_status = 'ended'  # Mark session as ended
-            appointment.session_ended_at = datetime.utcnow()
-            appointment.session_id = None  # Clear session ID to generate new one if restarting
-            
-            app_logger.info(f"Doctor disconnected from appointment {appointment_id}, session ended but appointment remains in_progress for completion")
+            # Only mark as ended if session actually started (not just a connection timeout)
+            # Check if session has been running for at least 30 seconds to avoid premature "ended" status
+            session_duration = 0
+            if appointment.session_started_at:
+                session_duration = (datetime.utcnow() - appointment.session_started_at).total_seconds()
+
+            if session_duration > 30:
+                # Real disconnect after session was active
+                appointment.session_status = 'ended'
+                appointment.session_ended_at = datetime.utcnow()
+                appointment.session_id = None  # Clear session ID to generate new one if restarting
+                app_logger.info(f"Doctor disconnected from appointment {appointment_id} after {session_duration}s, session ended")
+            else:
+                # Premature disconnect (network issue, page didn't load) - keep session as 'waiting'
+                # This allows patient to still see "Join" button
+                app_logger.info(f"Doctor had connection issue for appointment {appointment_id} (only {session_duration}s), keeping session active")
         
         # If patient disconnects, just update session status but keep appointment in progress
         elif is_patient and appointment.status == 'in_progress':
