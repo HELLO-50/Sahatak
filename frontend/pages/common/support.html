@@ -64,21 +64,6 @@
                     </div>
                     
                     <!-- Controls - Right (Left in RTL) -->
-                    <div class="col-lg-4 text-end">
-                        <div class="dashboard-controls">
-                            <button class="btn btn-medical btn-sm me-2" onclick="bookNewAppointment()">
-                                <i class="bi bi-plus me-1"></i>
-                                <span id="btn-new-appointment">Add Comments</span>
-                            </button>
-                            <button class="btn btn-outline-medical btn-sm" onclick="showLanguageSelector()">
-                                <i class="bi bi-globe me-1"></i>
-                                <span id="current-lang">English</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Support & Supervisor Messaging -->
             <section id="support-section" class="mt-4">
                 <div class="row gy-4">
@@ -205,4 +190,59 @@
                         supervisorForm.reset();
                     });
                 })();
+            </script>
+
+            <script>
+            (function () {
+                function resolveRole() {
+                    const stored = localStorage.getItem('role');
+                    if (stored) return stored;
+                    if (document.body && document.body.dataset && document.body.dataset.protect) return document.body.dataset.protect;
+                    return 'patient';
+                }
+
+                const role = resolveRole();
+                const patientLink = document.getElementById('patient-dashboard-link');
+                const doctorLink = document.getElementById('doctor-dashboard-link');
+
+                if (patientLink) patientLink.classList.toggle('d-none', role !== 'patient');
+                if (doctorLink) doctorLink.classList.toggle('d-none', role !== 'doctor');
+
+                window.goBackToDashboard = function (evt) {
+                    if (evt && evt.preventDefault) evt.preventDefault();
+                    const r = resolveRole();
+                    if (r === 'doctor') {
+                        window.location.href = '../doctor/dashboard.html';
+                    } else {
+                        window.location.href = '../patient/dashboard.html';
+                    }
+                };
+
+                window.bookNewAppointment = function () {
+                    const r = resolveRole();
+                    if (r === 'doctor') {
+                        window.location.href = '../doctor/schedule.html';
+                    } else {
+                        window.location.href = '../patient/appointments/new.html';
+                    }
+                };
+
+                window.showLanguageSelector = function () {
+                    const current = document.getElementById('current-lang');
+                    if (!current) return;
+                    const next = current.textContent.trim() === 'English' ? 'العربية' : 'English';
+                    current.textContent = next;
+                    document.documentElement.dir = next === 'العربية' ? 'rtl' : 'ltr';
+                };
+
+                if (!window.AuthGuard) {
+                    window.AuthGuard = {
+                        logout: function () {
+                            localStorage.removeItem('token');
+                            localStorage.removeItem('role');
+                            window.location.href = '../auth/login.html';
+                        }
+                    };
+                }
+            })();
             </script>
