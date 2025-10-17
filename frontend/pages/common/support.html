@@ -79,4 +79,131 @@
                 </div>
             </div>
             <!-- Support Content -->
-             
+            <!-- Support & Supervisor Messaging -->
+            <section id="support-section" class="mt-4">
+                <div class="row gy-4">
+                    <!-- Report a Problem Card -->
+                    <div class="col-lg-6">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="bi bi-bug-fill me-2"></i>Report a Problem</h5>
+                                <p class="text-muted small">Tell us about any issues you face while using the app. Our support team will review and respond.</p>
+
+                                <div id="report-alert" class="alert d-none" role="alert"></div>
+
+                                <form id="report-form" novalidate>
+                                    <div class="mb-3">
+                                        <label for="problem-subject" class="form-label">Subject</label>
+                                        <input type="text" id="problem-subject" name="subject" class="form-control" required maxlength="120" placeholder="Short summary of the issue">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="problem-description" class="form-label">Description</label>
+                                        <textarea id="problem-description" name="description" class="form-control" rows="6" required placeholder="Describe the steps to reproduce the issue, expected vs actual behavior, and any error messages."></textarea>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="problem-screenshot" class="form-label">Attachment (optional)</label>
+                                        <input id="problem-screenshot" name="attachment" type="file" class="form-control" accept="image/*,.log,.txt,.pdf">
+                                        <div class="form-text">Attach screenshots, logs, or a short recording (max 10MB).</div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-end">
+                                        <button type="submit" class="btn btn-medical">
+                                            <i class="bi bi-send-fill me-1"></i> Send Report
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Message Supervisors Card -->
+                    <div class="col-lg-6">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="bi bi-envelope-fill me-2"></i>Message Supervisors</h5>
+                                <p class="text-muted small">Send a direct message to program supervisors for feedback, escalations or private concerns.</p>
+
+                                <div id="supervisor-alert" class="alert d-none" role="alert"></div>
+
+                                <form id="supervisor-form" novalidate>
+                                    <div class="mb-3">
+                                        <label for="supervisor-to" class="form-label">To (Supervisor)</label>
+                                        <select id="supervisor-to" name="to" class="form-select" required>
+                                            <option value="">Select a recipient</option>
+                                            <option value="lead">Lead Supervisor</option>
+                                            <option value="ops">Operations Manager</option>
+                                            <option value="tech">Technical Supervisor</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="supervisor-subject" class="form-label">Subject</label>
+                                        <input id="supervisor-subject" name="subject" type="text" class="form-control" required maxlength="120" placeholder="Brief subject">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="supervisor-message" class="form-label">Message</label>
+                                        <textarea id="supervisor-message" name="message" class="form-control" rows="6" required placeholder="Write your message to the supervisors..."></textarea>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="supervisor-phone" class="form-label">Contact (optional)</label>
+                                        <input id="supervisor-phone" name="contact" type="tel" class="form-control" placeholder="Phone or email for a reply">
+                                    </div>
+
+                                    <div class="d-flex justify-content-end">
+                                        <button type="submit" class="btn btn-outline-medical">
+                                            <i class="bi bi-chat-dots me-1"></i> Send Message
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Client-side handlers (no external submission) -->
+            <script>
+                (function () {
+                    function showAlert(container, type, text) {
+                        container.className = 'alert alert-' + type;
+                        container.textContent = text;
+                        container.classList.remove('d-none');
+                        setTimeout(() => container.classList.add('d-none'), 5000);
+                    }
+
+                    // Report form
+                    const reportForm = document.getElementById('report-form');
+                    const reportAlert = document.getElementById('report-alert');
+                    reportForm.addEventListener('submit', function (e) {
+                        e.preventDefault();
+                        if (!reportForm.checkValidity()) {
+                            showAlert(reportAlert, 'warning', 'Please complete the required fields.');
+                            return;
+                        }
+                        // Collect data (replace with real submission)
+                        const data = new FormData(reportForm);
+                        // TODO: send 'data' via fetch to your backend endpoint
+                        showAlert(reportAlert, 'success', 'Problem report sent. Our support team will contact you shortly.');
+                        reportForm.reset();
+                    });
+
+                    // Supervisor form
+                    const supervisorForm = document.getElementById('supervisor-form');
+                    const supervisorAlert = document.getElementById('supervisor-alert');
+                    supervisorForm.addEventListener('submit', function (e) {
+                        e.preventDefault();
+                        if (!supervisorForm.checkValidity()) {
+                            showAlert(supervisorAlert, 'warning', 'Please complete the required fields.');
+                            return;
+                        }
+                        const data = new FormData(supervisorForm);
+                        // TODO: send 'data' via fetch to your backend endpoint
+                        showAlert(supervisorAlert, 'success', 'Your message was sent to the supervisors.');
+                        supervisorForm.reset();
+                    });
+                })();
+            </script>
