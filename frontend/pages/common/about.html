@@ -138,6 +138,7 @@
                                                             Laboratory Test Booking
                                                         </button>
                                                     </h2>
+
                                                     <div id="collapseLab" class="accordion-collapse collapse" aria-labelledby="headingLab" data-bs-parent="#servicesAccordion">
                                                         <div class="accordion-body">
                                                             Schedule laboratory tests directly through Sahatak. Choose your test, select a lab, and book a convenient time. Results are securely delivered to your medical records and can be discussed with your doctor via video or chat.
@@ -278,3 +279,414 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <!-- Additional About Your Health Content -->
+
+                                        <div class="about-health mt-5">
+                                            <h2 id="health-title">About Your Health</h2>
+                                            <p id="health-description">
+                                                Sahatak helps you take an active role in your health with tools that make monitoring and managing care simple and secure.
+                                            </p>
+
+                                            <!-- Feature Cards -->
+                                            <div class="row g-3" id="health-features">
+                                                <div class="col-md-4">
+                                                    <div class="card h-100">
+                                                        <div class="card-body">
+                                                            <h5 class="card-title"><i class="bi bi-heart-pulse-fill me-2"></i>Symptom Checker</h5>
+                                                            <p class="card-text">Answer a few questions to get AI-guided suggestions and recommended next steps.</p>
+                                                            <button class="btn btn-outline-medical btn-sm" id="open-symptom-check">Try Symptom Checker</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="card h-100">
+                                                        <div class="card-body">
+                                                            <h5 class="card-title"><i class="bi bi-bar-chart-line-fill me-2"></i>Health Tracker</h5>
+                                                            <p class="card-text">Track vitals, mood, and activity over time. Visualize trends and share them with your doctor.</p>
+                                                            <button class="btn btn-outline-medical btn-sm" id="open-tracker">Open Tracker</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="card h-100">
+                                                        <div class="card-body">
+                                                            <h5 class="card-title"><i class="bi bi-clock-history me-2"></i>Medication Reminders</h5>
+                                                            <p class="card-text">Set reminders for medications and receive notifications so you never miss a dose.</p>
+                                                            <button class="btn btn-outline-medical btn-sm" id="open-reminders">Manage Reminders</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="card h-100">
+                                                        <div class="card-body">
+                                                            <h5 class="card-title"><i class="bi bi-file-medical-fill me-2"></i>Lab Results</h5>
+                                                            <p class="card-text">Get lab and imaging results in your records with clear summaries and doctor recommendations.</p>
+                                                            <button class="btn btn-outline-medical btn-sm" id="open-labs">View Results</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="card h-100">
+                                                        <div class="card-body">
+                                                            <h5 class="card-title"><i class="bi bi-journal-text me-2"></i>Personalized Articles</h5>
+                                                            <p class="card-text">AI-curated articles and tips tailored to your health profile and interests.</p>
+                                                            <button class="btn btn-outline-medical btn-sm" id="open-articles">Explore Articles</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="card h-100">
+                                                        <div class="card-body">
+                                                            <h5 class="card-title"><i class="bi bi-chat-dots-fill me-2"></i>Virtual Care</h5>
+                                                            <p class="card-text">Video consultations and secure chat to get advice from medical professionals any time.</p>
+                                                            <button class="btn btn-outline-medical btn-sm" id="open-virtual-care">Book a Visit</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Comments & Feedback -->
+                                        <div class="comments-section mt-5">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <h3>Your Feedback</h3>
+                                                <button class="btn btn-medical btn-sm" id="btn-add-comment"><i class="bi bi-pencil-square me-1"></i>Add Comment</button>
+                                            </div>
+
+                                            <div id="comments-list" class="list-group">
+                                                <!-- comments inserted here -->
+                                            </div>
+                                        </div>
+
+                                        <!-- FAQ -->
+                                        <div class="faq-section mt-5">
+                                            <h3>Frequently Asked Questions</h3>
+                                            <div class="accordion" id="faqAccordion">
+                                                <div class="accordion-item">
+                                                    <h2 class="accordion-header" id="faqOne">
+                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFaqOne" aria-expanded="false" aria-controls="collapseFaqOne">
+                                                            How secure is my medical data?
+                                                        </button>
+                                                    </h2>
+                                                    <div id="collapseFaqOne" class="accordion-collapse collapse" aria-labelledby="faqOne" data-bs-parent="#faqAccordion">
+                                                        <div class="accordion-body">
+                                                            Data is encrypted at rest and in transit. Access controls and audit trails help keep your information private and secure.
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="accordion-item">
+                                                    <h2 class="accordion-header" id="faqTwo">
+                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFaqTwo" aria-expanded="false" aria-controls="collapseFaqTwo">
+                                                            Can I share records with family members?
+                                                        </button>
+                                                    </h2>
+                                                    <div id="collapseFaqTwo" class="accordion-collapse collapse" aria-labelledby="faqTwo" data-bs-parent="#faqAccordion">
+                                                        <div class="accordion-body">
+                                                            Yes — you can grant controlled access to family members or caregivers from your profile settings.
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Modals -->
+
+                                        <!-- Comment Modal -->
+                                        <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
+                                          <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                              <div class="modal-header">
+                                                <h5 class="modal-title" id="commentModalLabel">Add Comment</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                              </div>
+                                              <div class="modal-body">
+                                                <form id="commentForm">
+                                                    <div class="mb-3">
+                                                        <label for="commentText" class="form-label">Your comment</label>
+                                                        <textarea id="commentText" class="form-control" rows="4" required></textarea>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="commentRating" class="form-label">Rating (optional)</label>
+                                                        <select id="commentRating" class="form-select">
+                                                            <option value="">No rating</option>
+                                                            <option>5 - Excellent</option>
+                                                            <option>4 - Good</option>
+                                                            <option>3 - Fair</option>
+                                                            <option>2 - Poor</option>
+                                                            <option>1 - Very poor</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="text-end">
+                                                        <button type="submit" class="btn btn-medical">Submit</button>
+                                                    </div>
+                                                </form>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                        <!-- Language Selector Modal -->
+                                        <div class="modal fade" id="langModal" tabindex="-1" aria-labelledby="langModalLabel" aria-hidden="true">
+                                          <div class="modal-dialog modal-sm modal-dialog-centered">
+                                            <div class="modal-content">
+                                              <div class="modal-header">
+                                                <h5 class="modal-title" id="langModalLabel">Select Language</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                              </div>
+                                              <div class="modal-body">
+                                                <div class="list-group">
+                                                    <button class="list-group-item list-group-item-action lang-option" data-lang="en">English</button>
+                                                    <button class="list-group-item list-group-item-action lang-option" data-lang="ar">العربية</button>
+                                                    <button class="list-group-item list-group-item-action lang-option" data-lang="fr">Français</button>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                        <!-- Symptom Checker Modal (simple) -->
+                                        <div class="modal fade" id="symptomModal" tabindex="-1" aria-labelledby="symptomModalLabel" aria-hidden="true">
+                                          <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                              <div class="modal-header">
+                                                <h5 class="modal-title" id="symptomModalLabel">Symptom Checker</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                              </div>
+                                              <div class="modal-body">
+                                                <form id="symptomForm">
+                                                    <div class="mb-3">
+                                                        <label for="symptomInput" class="form-label">Describe your main symptom</label>
+                                                        <input id="symptomInput" class="form-control" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Duration</label>
+                                                        <input id="symptomDuration" class="form-control" placeholder="e.g. 3 days">
+                                                    </div>
+                                                    <div class="text-end">
+                                                        <button class="btn btn-medical" type="submit">Get Suggestions</button>
+                                                    </div>
+                                                </form>
+                                                <div id="symptomResult" class="mt-3" style="display:none;"></div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                    
+                                         <!-- Footer -->
+
+                                       <footer class="footer mt-auto py-3">
+        <div class="container">
+            <div class="row g-3">
+                <!-- Brand & Description -->
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="mb-3">
+                        <i class="bi bi-heart-pulse me-2 text-primary"></i>
+                        <span id="footer-brand">Sahatak</span>
+                    </h5>
+                    <div class="d-flex gap-3 social-links">
+                        <a href="https://facebook.com/sahatak" target="_blank" rel="noopener"><i class="bi bi-facebook fs-5"></i></a>
+                        <a href="https://twitter.com/sahatak" target="_blank" rel="noopener"><i class="bi bi-twitter fs-5"></i></a>
+                        <a href="https://instagram.com/sahatak" target="_blank" rel="noopener"><i class="bi bi-instagram fs-5"></i></a>
+                        <a href="https://linkedin.com/company/sahatak" target="_blank" rel="noopener"><i class="bi bi-linkedin fs-5"></i></a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="mb-3" id="footer-links-title">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="../common/about.html" class="text-muted text-decoration-none" id="footer-about">About Platform</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="../common/services.html" class="text-muted text-decoration-none" id="footer-services">Services</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="mb-3" id="footer-support-title">Support & Help</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="../common/support.html" class="text-muted text-decoration-none" id="footer-help">Help Center</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="../common/contact-us.html" class="text-muted text-decoration-none" id="footer-contact">Contact Us</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Emergency Contact -->
+                <div class="col-lg-3 col-md-6 emergency-section">
+                    <p class="mb-2 text-danger fw-bold" id="footer-emergency-text">
+                        For medical emergencies
+                    </p>
+                    <p class="mb-3 text-danger fw-bold fs-6" id="footer-emergency-action">
+                        <i class="bi bi-hospital me-2"></i>
+                        Go to nearest ER hospital
+                    </p>
+                    <p class="mb-0 text-muted small" id="footer-emergency-note">
+                        For non-urgent consultations use the platform
+                    </p>
+                </div>
+            </div>
+
+            <!-- Bottom Bar -->
+            <hr class="my-3">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="mb-0 fw-bold" id="footer-copyright">
+                        © 2025 Sahatak. All rights reserved.
+                    </p>
+                    <p class="mb-0 text-muted small mt-1" id="footer-medical-disclaimer">
+                        This platform does not replace visiting a doctor in emergency cases
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+
+                                        <!-- Required Scripts -->
+                                        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-cC6qdqzQp1e9m3rY2b7s3o5Jc1K5mX1kJ1Qm1x2n3Z4p5t6u7v8w9x0y1z2a3b4c" crossorigin="anonymous"></script>
+                                        <script src="../../assets/js/main.js"></script>
+
+                                        <script>
+                                        /* Page utilities and lightweight feature implementations */
+
+                                        (function () {
+                                            // Helper for bootstrap modal instances
+                                            const commentModalEl = document.getElementById('commentModal');
+                                            const commentModal = new bootstrap.Modal(commentModalEl);
+                                            const langModal = new bootstrap.Modal(document.getElementById('langModal'));
+                                            const symptomModal = new bootstrap.Modal(document.getElementById('symptomModal'));
+
+                                            // Populate year
+                                            document.getElementById('current-year').textContent = new Date().getFullYear();
+
+                                            // Buttons wired to top controls
+                                            window.goBackToDashboard = function () {
+                                                // Prefer history back if available
+                                                if (document.referrer) return window.history.back();
+                                                window.location.href = '/dashboard';
+                                            };
+
+                                            window.bookNewAppointment = function () {
+                                                // Map "Add Comments" button to open comment modal
+                                                commentModal.show();
+                                            };
+
+                                            window.showLanguageSelector = function () {
+                                                langModal.show();
+                                            };
+
+                                            // Basic AuthGuard.logout fallback if not defined elsewhere
+                                            window.AuthGuard = window.AuthGuard || {
+                                                logout: function () {
+                                                    // Simple logout flow: clear token and redirect
+                                                    try { localStorage.removeItem('authToken'); } catch (e) {}
+                                                    window.location.href = '/login';
+                                                }
+                                            };
+
+                                            // Comments persistence and UI
+                                            const commentsKey = 'sahatak_comments_v1';
+                                            function loadComments() {
+                                                let data = [];
+                                                try { data = JSON.parse(localStorage.getItem(commentsKey) || '[]'); } catch (e) { data = []; }
+                                                const list = document.getElementById('comments-list');
+                                                list.innerHTML = '';
+                                                if (data.length === 0) {
+                                                    list.innerHTML = '<div class="text-muted">No comments yet. Be the first to add feedback.</div>';
+                                                    return;
+                                                }
+                                                data.reverse().forEach(c => {
+                                                    const item = document.createElement('div');
+                                                    item.className = 'list-group-item';
+                                                    item.innerHTML = '<div class="d-flex w-100 justify-content-between"><strong>' + (c.rating ? c.rating + ' • ' : '') + '</strong><small class="text-muted">' + new Date(c.time).toLocaleString() + '</small></div><p class="mb-1">' + c.text + '</p>';
+                                                    list.appendChild(item);
+                                                });
+                                            }
+
+                                            document.getElementById('btn-add-comment').addEventListener('click', function () {
+                                                commentModal.show();
+                                            });
+
+                                            document.getElementById('commentForm').addEventListener('submit', function (e) {
+                                                e.preventDefault();
+                                                const text = document.getElementById('commentText').value.trim();
+                                                const rating = document.getElementById('commentRating').value;
+                                                if (!text) return;
+                                                let data = [];
+                                                try { data = JSON.parse(localStorage.getItem(commentsKey) || '[]'); } catch (err) { data = []; }
+                                                data.push({ text: text, rating: rating, time: Date.now() });
+                                                localStorage.setItem(commentsKey, JSON.stringify(data));
+                                                document.getElementById('commentText').value = '';
+                                                document.getElementById('commentRating').value = '';
+                                                commentModal.hide();
+                                                loadComments();
+                                            });
+
+                                            // Language selection
+                                            document.querySelectorAll('.lang-option').forEach(btn => {
+                                                btn.addEventListener('click', function () {
+                                                    const lang = this.getAttribute('data-lang');
+                                                    document.getElementById('current-lang').textContent = this.textContent;
+                                                    // store preference
+                                                    try { localStorage.setItem('sahatak_lang', lang); } catch (e) {}
+                                                    langModal.hide();
+                                                    // Implement real i18n in main.js; here we only update visible label
+                                                });
+                                            });
+
+                                            // Simple Symptom Checker (demo)
+                                            document.getElementById('open-symptom-check').addEventListener('click', function () {
+                                                symptomModal.show();
+                                            });
+                                            document.getElementById('symptomForm').addEventListener('submit', function (e) {
+                                                e.preventDefault();
+                                                const symptom = document.getElementById('symptomInput').value.trim();
+                                                const dur = document.getElementById('symptomDuration').value.trim();
+                                                const res = document.getElementById('symptomResult');
+                                                if (!symptom) return;
+                                                // Lightweight suggestions (demo only)
+                                                let advice = 'Based on your input, consider monitoring symptoms and book a consultation if they persist or worsen.';
+                                                if (/fever|temperature|hot/i.test(symptom)) {
+                                                    advice = 'Possible infection sign. If fever is high or persistent, seek medical attention.';
+                                                } else if (/chest|pain|tight/i.test(symptom)) {
+                                                    advice = 'Chest symptoms can be serious. Contact emergency services if severe.';
+                                                }
+                                                res.style.display = 'block';
+                                                res.innerHTML = '<div class="alert alert-info"><strong>Suggestion:</strong> ' + advice + (dur ? (' <br><small>Duration: ' + dur + '</small>') : '') + '</div>';
+                                            });
+
+                                            // Other feature entry points (placeholders that navigate to appropriate pages)
+                                            document.getElementById('open-tracker').addEventListener('click', () => window.location.href = '/tracker');
+                                            document.getElementById('open-reminders').addEventListener('click', () => window.location.href = '/reminders');
+                                            document.getElementById('open-labs').addEventListener('click', () => window.location.href = '/labs');
+                                            document.getElementById('open-articles').addEventListener('click', () => window.location.href = '/articles');
+                                            document.getElementById('open-virtual-care').addEventListener('click', () => window.location.href = '/consultations');
+
+                                            // Load initial state
+                                            document.addEventListener('DOMContentLoaded', function () {
+                                                loadComments();
+                                                const savedLang = localStorage.getItem('sahatak_lang');
+                                                if (savedLang) {
+                                                    const label = { en: 'English', ar: 'العربية', fr: 'Français' }[savedLang] || 'English';
+                                                    document.getElementById('current-lang').textContent = label;
+                                                }
+                                                // Ensure user name placeholder is handled by existing auth code in main.js; if not, set default
+                                                const nameEl = document.getElementById('user-name');
+                                                if (nameEl && nameEl.textContent.trim() === 'Loading...') {
+                                                    nameEl.textContent = 'Patient';
+                                                }
+                                            });
+                                        })();
+                                        </script>
