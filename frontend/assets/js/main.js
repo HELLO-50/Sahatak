@@ -1721,3 +1721,137 @@ function updateDoctorVerificationDisplay(user) {
     
     console.log('🔸 Verification status updated:', isVerified ? 'Verified' : 'Unverified');
 }
+// About page module
+(function() {
+    const AboutPage = {
+        // Show the about page and hide other screens
+        show() {
+            const screensToHide = ['language-selection', 'auth-selection', 'login-form', 'user-type-selection', 'patient-register-form', 'doctor-register-form'];
+            screensToHide.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.classList.add('d-none');
+                    el.style.display = 'none';
+                }
+            });
+
+            const aboutEl = document.getElementById('about-page');
+            if (aboutEl) {
+                aboutEl.classList.remove('d-none');
+                aboutEl.style.display = '';
+            }
+
+            // Ensure about content is translated to current language
+            const lang = LanguageManager.getLanguage() || 'ar';
+            AboutPage.updateContent(lang);
+
+            // Focus first focusable element for accessibility
+            setTimeout(() => {
+                const focusable = aboutEl?.querySelector('button, a, [tabindex]') || null;
+                if (focusable) focusable.focus();
+            }, 50);
+        },
+
+        // Close about page and show target screen (defaults to auth-selection)
+        close(target = 'auth-selection') {
+            const aboutEl = document.getElementById('about-page');
+            if (aboutEl) {
+                aboutEl.classList.add('d-none');
+                aboutEl.style.display = 'none';
+            }
+
+            const targetEl = document.getElementById(target);
+            if (targetEl) {
+                targetEl.classList.remove('d-none');
+                targetEl.style.display = '';
+            }
+        },
+
+        // Update about page content from translations
+        updateContent(lang) {
+            try {
+                const t = LanguageManager.translations[lang] || {};
+                // Prefer LanguageManager.translate paths, fallback to direct access
+                const title = LanguageManager.translate('about.title', lang) || t.about?.title || 'About';
+                const body = LanguageManager.translate('about.body', lang) || t.about?.body || '';
+                const version = LanguageManager.translate('about.version', lang) || t.about?.version || '';
+                const backText = LanguageManager.translate('about.back', lang) || t.about?.back || (lang === 'ar' ? 'العودة' : 'Back');
+
+                updateElementText('about-title', title);
+                updateElementText('about-body', body);
+                updateElementText('about-version', version);
+                updateElementText('about-back', backText);
+            } catch (err) {
+                console.error('AboutPage.updateContent error:', err);
+            }
+        },
+
+        // Try to load a static about HTML fragment (optional)
+        async loadExternalHtml(path) {
+            try {
+                const resp = await fetch(path, { credentials: 'include' });
+                if (resp.ok) {
+                    const html = await resp.text();
+                    const container = document.getElementById('about-body');
+                    if (container) container.innerHTML = html;
+                }
+            } catch (err) {
+                // Ignore silently; fall back to translations
+            }
+        }
+    };
+
+    // Expose global helpers
+    window.showAboutPage = () => AboutPage.show();
+    window.closeAboutPage = (target) => AboutPage.close(target);
+
+    // Integrate with existing updateContentByLanguage by wrapping it
+    const _origUpdateContentByLanguage = window.updateContentByLanguage;
+    if (typeof _origUpdateContentByLanguage === 'function') {
+        window.updateContentByLanguage = function(lang) {
+            try { _origUpdateContentByLanguage(lang); } catch (e) { console.error(e); }
+            try { AboutPage.updateContent(lang); } catch (e) { console.error(e); }
+        };
+    } else {
+        // If original not present for some reason, provide a minimal replacer
+        window.updateContentByLanguage = function(lang) {
+            AboutPage.updateContent(lang);
+        };
+    }
+
+    // Attach click handler for any element with data-about attribute
+    document.addEventListener('click', function(e) {
+        const el = e.target.closest('[data-about]');
+        if (!el) return;
+        e.preventDefault();
+        const target = el.getAttribute('data-about-target') || 'auth-selection';
+        AboutPage.show();
+        // store return target on the about close button(s)
+        const closeBtns = document.querySelectorAll('#about-page [data-about-close]');
+        closeBtns.forEach(btn => btn.setAttribute('data-return-target', target));
+    });
+
+    // Wire close buttons inside about page to return to previously-targeted screen
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('#about-page [data-about-close]');
+        if (!btn) return;
+        e.preventDefault();
+        const returnTarget = btn.getAttribute('data-return-target') || 'auth-selection';
+        AboutPage.close(returnTarget);
+    });
+
+    // Auto-update about content on initial load if about page is present and visible
+    document.addEventListener('DOMContentLoaded', function() {
+        const aboutEl = document.getElementById('about-page');
+        if (!aboutEl) return;
+        const lang = LanguageManager.getLanguage() || 'ar';
+        AboutPage.updateContent(lang);
+
+        // Optionally try to load an external HTML fragment if attribute provided
+        const fragmentPath = aboutEl.getAttribute('data-external-fragment');
+        if (fragmentPath) {
+            // Resolve relative paths similar to translation loader (best-effort)
+            AboutPage.loadExternalHtml(fragmentPath);
+        }
+    });
+})();
