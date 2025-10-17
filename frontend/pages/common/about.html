@@ -32,6 +32,62 @@
     <div class="dashboard-container">
         <div class="container-fluid" style="padding-bottom: 120px;">
             <!-- Dashboard Header -->
+                <style>
+                /* Page background */
+                body {
+                    background-color: #e6f7ff; /* light blue page background */
+                }
+
+                /* Keep main panels and cards white for readability */
+                .card,
+                .modal-content,
+                .profile-section,
+                .public-comment-card,
+                .list-group-item,
+                .dashboard-content,
+                .about-section,
+                .about-health {
+                    background-color: #ffffff !important; /* white panels/fields */
+                }
+
+                /* Form controls and textareas explicitly white for contrast */
+                .form-control,
+                .form-select,
+                textarea.form-control {
+                    background-color: #ffffff !important;
+                    border-color: #d9e9fb;
+                    color: #062a43;
+                }
+
+                /* Footer readable (white) */
+                footer {
+                    background-color: rgba(255,255,255,0.98);
+                    border-top: 1px solid rgba(13,71,161,0.06);
+                }
+
+                /* Subtle borders and rounded corners for panels */
+                .card,
+                .modal-content,
+                .profile-section {
+                    border: 1px solid rgba(13,71,161,0.08);
+                    border-radius: 8px;
+                    box-shadow: 0 1px 4px rgba(13,71,161,0.03);
+                }
+
+                /* Ensure readable text color on white/blue backgrounds */
+                body, .card, .profile-section, .dashboard-header {
+                    color: #062a43;
+                }
+
+                /* Links and small text adjustments for contrast */
+                .card a, .list-group-item a {
+                    color: #062a43;
+                    text-decoration: underline;
+                }
+                .text-muted {
+                    color: rgba(6,42,67,0.66) !important;
+                }
+                </style>
             <div class="dashboard-header">
                 <div class="row align-items-center">
                     <!-- Profile Section - Left (Right in RTL) -->
@@ -273,6 +329,87 @@
                         Sahatak is a comprehensive healthcare platform designed to connect patients with medical professionals seamlessly. Our mission is to provide accessible and efficient healthcare services through innovative technology.
                     </p>
                     <h3 id="features-title">Key Features</h3>
+                    <div class="row g-3 mb-4" id="features-cards">
+                        <div class="col-md-4">
+                            <div class="card h-100">
+                                <div class="card-body d-flex">
+                                    <div class="me-3 align-self-start">
+                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:48px;height:48px;">
+                                            <i class="bi bi-calendar-check-fill fs-4"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h5 class="card-title mb-1">Online Appointment Booking</h5>
+                                        <p class="card-text small text-muted mb-0">Search providers, choose slots for in-person or video visits, and receive confirmations & reminders.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card h-100">
+                                <div class="card-body d-flex">
+                                    <div class="me-3 align-self-start">
+                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:48px;height:48px;">
+                                            <i class="bi bi-camera-video-fill fs-4"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h5 class="card-title mb-1">Video Consultations</h5>
+                                        <p class="card-text small text-muted mb-0">Secure private video visits for consultations, follow-ups, and medication reviews from home.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card h-100">
+                                <div class="card-body d-flex">
+                                    <div class="me-3 align-self-start">
+                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:48px;height:48px;">
+                                            <i class="bi bi-folder2-open fs-4"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h5 class="card-title mb-1">Access to Medical Records</h5>
+                                        <p class="card-text small text-muted mb-0">View test results, visit notes, and share records with clinicians to support better care decisions.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card h-100">
+                                <div class="card-body d-flex">
+                                    <div class="me-3 align-self-start">
+                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:48px;height:48px;">
+                                            <i class="bi bi-prescription2 fs-4"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h5 class="card-title mb-1">Prescription Management</h5>
+                                        <p class="card-text small text-muted mb-0">Request renewals, receive digital prescriptions, and get guidance on medication use and side effects.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card h-100">
+                                <div class="card-body d-flex">
+                                    <div class="me-3 align-self-start">
+                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:48px;height:48px;">
+                                            <i class="bi bi-journal-text fs-4"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h5 class="card-title mb-1">Health Tips & Articles</h5>
+                                        <p class="card-text small text-muted mb-0">AI-curated educational content tailored to your profile to help you make informed daily health choices.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <ul id="features-list">
                         <li>Online Appointment Booking</li>
                         <li>Video Consultations with Doctors</li>
