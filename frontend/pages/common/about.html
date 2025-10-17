@@ -411,6 +411,172 @@
                         </div>
                     </div>
                     <ul id="features-list">
+                        <style>
+                        #features-list{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;}
+                        #features-list>li{margin:0;}
+                        /* keep the original simple <li> entries hidden so the new cards are shown instead */
+                        #features-list>li:not(.feature-card){display:none;}
+                        .feature-card .card{height:100%;border:1px solid rgba(13,71,161,0.06);border-radius:8px;box-shadow:0 1px 4px rgba(13,71,161,0.03);}
+                        .feature-card .icon{width:48px;height:48px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:#0d47a1;color:#fff;margin-right:12px;flex:0 0 48px;}
+                        .feature-card .card-body{display:flex;gap:12px;align-items:flex-start;padding:16px;}
+                        .feature-card .card-title{margin:0 0 4px;font-size:1rem;font-weight:600;color:#062a43;}
+                        .feature-card .card-text{margin:0;color:#6c757d;font-size:.92rem;}
+                        </style>
+
+                        <li class="feature-card">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="icon"><i class="bi bi-calendar-check-fill fs-4"></i></div>
+                                    <div>
+                                        <h6 class="card-title">Online Appointment Booking</h6>
+                                        <p class="card-text">Find providers, pick in-person or video slots, and receive confirmations & reminders.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="feature-card">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="icon"><i class="bi bi-camera-video-fill fs-4"></i></div>
+                                    <div>
+                                        <h6 class="card-title">Video Consultations</h6>
+                                        <p class="card-text">Secure video visits for consultations, follow-ups and medication reviews from home.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="feature-card">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="icon"><i class="bi bi-folder2-open fs-4"></i></div>
+                                    <div>
+                                        <h6 class="card-title">Access to Medical Records</h6>
+                                        <p class="card-text">View test results, visit notes and share records with clinicians to improve care decisions.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="feature-card">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="icon"><i class="bi bi-prescription2 fs-4"></i></div>
+                                    <div>
+                                        <h6 class="card-title">Prescription Management</h6>
+                                        <p class="card-text">Request renewals, receive digital prescriptions and get guidance on medication use.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="feature-card">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="icon"><i class="bi bi-journal-text fs-4"></i></div>
+                                    <div>
+                                        <h6 class="card-title">Health Tips & Articles</h6>
+                                        <p class="card-text">AI-curated educational content tailored to your profile to support everyday health choices.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="feature-card">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="icon"><i class="bi bi-heart-pulse-fill fs-4"></i></div>
+                                    <div>
+                                        <h6 class="card-title">Symptom Checker</h6>
+                                        <p class="card-text">Answer a few questions to get AI-guided suggestions and recommended next steps.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="feature-card">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="icon"><i class="bi bi-box-seam fs-4"></i></div>
+                                    <div>
+                                        <h6 class="card-title">Medication Delivery</h6>
+                                        <p class="card-text">Get prescribed medicines delivered to your home and track order status.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="feature-card">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="icon"><i class="bi bi-people fs-4"></i></div>
+                                    <div>
+                                        <h6 class="card-title">Family Health Management</h6>
+                                        <p class="card-text">Manage profiles for dependents, book appointments and coordinate care from one account.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="feature-card">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="icon"><i class="bi bi-calendar-check-fill fs-4"></i></div>
+                                    <div>
+                                        <h6 class="card-title">Online Appointment Booking</h6>
+                                        <p class="card-text">Search providers, pick in-person or video slots, confirm bookings and receive reminders.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="feature-card">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="icon"><i class="bi bi-camera-video-fill fs-4"></i></div>
+                                    <div>
+                                        <h6 class="card-title">Video Consultations</h6>
+                                        <p class="card-text">Secure video visits with clinicians for minor illnesses, follow-ups and medication reviews.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="feature-card">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="icon"><i class="bi bi-folder2-open fs-4"></i></div>
+                                    <div>
+                                        <h6 class="card-title">Access to Medical Records</h6>
+                                        <p class="card-text">View test results, visit notes and share records with your care team for better-informed decisions.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="feature-card">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="icon"><i class="bi bi-prescription2 fs-4"></i></div>
+                                    <div>
+                                        <h6 class="card-title">Prescription Management</h6>
+                                        <p class="card-text">Request renewals, receive digital prescriptions and get advice on medication use and side effects.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="feature-card">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="icon"><i class="bi bi-journal-text fs-4"></i></div>
+                                    <div>
+                                        <h6 class="card-title">Health Tips & Articles</h6>
+                                        <p class="card-text">AI-curated articles and actionable tips tailored to your profile to support everyday health choices.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
                         <li>Online Appointment Booking</li>
                         <li>Video Consultations with Doctors</li>
                         <li>Access to Medical Records</li>
@@ -418,11 +584,342 @@
                         <li>Health Tips and Articles</li>
                     </ul>
                     <h3 id="contact-title">Contact Us</h3>
+                    <div class="row g-3 mb-3" id="services-cards">
+                        <style>
+                            #services-cards .service-card .icon {
+                                width:48px; height:48px; border-radius:50%;
+                                display:inline-flex; align-items:center; justify-content:center;
+                                background:#0d47a1; color:#fff; flex:0 0 48px; margin-right:12px;
+                            }
+                            #services-cards .service-card .card-body{display:flex;align-items:flex-start;gap:12px;}
+                            #services-cards .service-card .card-title{margin:0 0 4px;font-size:1rem;font-weight:600;color:#062a43;}
+                            #services-cards .service-card .card-text{margin:0;color:#6c757d;font-size:.92rem;}
+                        </style>
+
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="card h-100 service-card">
+                                <div class="card-body">
+                                    <div class="icon" aria-hidden="true"><i class="bi bi-person-badge fs-4"></i></div>
+                                    <div>
+                                        <h6 class="card-title">General Practitioner</h6>
+                                        <p class="card-text small">Book routine visits, check-ups and basic consultations.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="card h-100 service-card">
+                                <div class="card-body">
+                                    <div class="icon"><i class="bi bi-people-fill fs-4"></i></div>
+                                    <div>
+                                        <h6 class="card-title">Specialist Appointments</h6>
+                                        <p class="card-text small">Access cardiology, endocrinology, pediatrics and more.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="card h-100 service-card">
+                                <div class="card-body">
+                                    <div class="icon"><i class="bi bi-camera-video-fill fs-4"></i></div>
+                                    <div>
+                                        <h6 class="card-title">Video & In‑Person Visits</h6>
+                                        <p class="card-text small">Choose telehealth or clinic visits depending on your needs.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="card h-100 service-card">
+                                <div class="card-body">
+                                    <div class="icon"><i class="bi bi-beaker fs-4"></i></div>
+                                    <div>
+                                        <h6 class="card-title">Lab & Test Booking</h6>
+                                        <p class="card-text small">Schedule blood tests and routine laboratory work at partnered centers.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="card h-100 service-card">
+                                <div class="card-body">
+                                    <div class="icon"><i class="bi bi-file-medical-fill fs-4"></i></div>
+                                    <div>
+                                        <h6 class="card-title">Radiology & Imaging</h6>
+                                        <p class="card-text small">Book X‑ray, ultrasound, MRI and get results in your records.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="card h-100 service-card">
+                                <div class="card-body">
+                                    <div class="icon"><i class="bi bi-prescription2 fs-4"></i></div>
+                                    <div>
+                                        <h6 class="card-title">Prescription Management</h6>
+                                        <p class="card-text small">Renew prescriptions and receive digital prescriptions securely.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="card h-100 service-card">
+                                <div class="card-body">
+                                    <div class="icon"><i class="bi bi-folder2-open fs-4"></i></div>
+                                    <div>
+                                        <h6 class="card-title">Access to Records</h6>
+                                        <p class="card-text small">View test results, visit notes and share records with clinicians.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="card h-100 service-card">
+                                <div class="card-body">
+                                    <div class="icon"><i class="bi bi-shield-check fs-4"></i></div>
+                                    <div>
+                                        <h6 class="card-title">Insurance Help</h6>
+                                        <p class="card-text small">Assistance with claims, documentation and billing questions.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="card h-100 service-card">
+                                <div class="card-body">
+                                    <div class="icon"><i class="bi bi-heart-pulse fs-4"></i></div>
+                                    <div>
+                                        <h6 class="card-title">Chronic Disease Care</h6>
+                                        <p class="card-text small">Regular follow-ups, reminders and personalized care plans.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="card h-100 service-card">
+                                <div class="card-body">
+                                    <div class="icon"><i class="bi bi-person-lines-fill fs-4"></i></div>
+                                    <div>
+                                        <h6 class="card-title">Family Health Management</h6>
+                                        <p class="card-text small">Manage profiles and appointments for dependents from one account.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="card h-100 service-card">
+                                <div class="card-body">
+                                    <div class="icon"><i class="bi bi-chat-dots-fill fs-4"></i></div>
+                                    <div>
+                                        <h6 class="card-title">24/7 Support & Chat</h6>
+                                        <p class="card-text small">Secure messaging and round‑the‑clock triage for non‑emergencies.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="card h-100 service-card">
+                                <div class="card-body">
+                                    <div class="icon"><i class="bi bi-box-seam fs-4"></i></div>
+                                    <div>
+                                        <h6 class="card-title">Medication Delivery</h6>
+                                        <p class="card-text small">Home delivery and order tracking for prescribed medicines.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <p id="contact-description">
                         For any inquiries or support, please reach out to us at <a href="mailto:
                         support@sahatak.com">support@sahatak.com</a>.
                                             </p>
                                             <h3 id="services-title">Our Services</h3>
+                                            <div class="row g-3 mb-4" id="services-cards-grid">
+                                                <div class="col-sm-6 col-md-4 col-lg-3">
+                                                    <div class="card h-100 service-card">
+                                                        <div class="card-body d-flex align-items-start">
+                                                            <div class="icon" aria-hidden="true"><i class="bi bi-person-badge fs-4"></i></div>
+                                                            <div>
+                                                                <h6 class="card-title mb-1">General Practitioner</h6>
+                                                                <p class="card-text small text-muted mb-0">Primary care visits, routine examinations and referrals.</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-sm-6 col-md-4 col-lg-3">
+                                                    <div class="card h-100 service-card">
+                                                        <div class="card-body d-flex align-items-start">
+                                                            <div class="icon" aria-hidden="true"><i class="bi bi-people-fill fs-4"></i></div>
+                                                            <div>
+                                                                <h6 class="card-title mb-1">Specialist Appointments</h6>
+                                                                <p class="card-text small text-muted mb-0">Access cardiology, endocrinology, pediatrics and more.</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-sm-6 col-md-4 col-lg-3">
+                                                    <div class="card h-100 service-card">
+                                                        <div class="card-body d-flex align-items-start">
+                                                            <div class="icon" aria-hidden="true"><i class="bi bi-camera-video-fill fs-4"></i></div>
+                                                            <div>
+                                                                <h6 class="card-title mb-1">Video & In‑Person Visits</h6>
+                                                                <p class="card-text small text-muted mb-0">Choose telehealth or clinic visits depending on your needs.</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-sm-6 col-md-4 col-lg-3">
+                                                    <div class="card h-100 service-card">
+                                                        <div class="card-body d-flex align-items-start">
+                                                            <div class="icon" aria-hidden="true"><i class="bi bi-beaker fs-4"></i></div>
+                                                            <div>
+                                                                <h6 class="card-title mb-1">Laboratory Tests</h6>
+                                                                <p class="card-text small text-muted mb-0">Book blood work and routine lab appointments with partnered centers.</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-sm-6 col-md-4 col-lg-3">
+                                                    <div class="card h-100 service-card">
+                                                        <div class="card-body d-flex align-items-start">
+                                                            <div class="icon" aria-hidden="true"><i class="bi bi-file-medical-fill fs-4"></i></div>
+                                                            <div>
+                                                                <h6 class="card-title mb-1">Radiology & Imaging</h6>
+                                                                <p class="card-text small text-muted mb-0">Schedule X‑ray, ultrasound, MRI and receive results electronically.</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-sm-6 col-md-4 col-lg-3">
+                                                    <div class="card h-100 service-card">
+                                                        <div class="card-body d-flex align-items-start">
+                                                            <div class="icon" aria-hidden="true"><i class="bi bi-prescription2 fs-4"></i></div>
+                                                            <div>
+                                                                <h6 class="card-title mb-1">Prescription Management</h6>
+                                                                <p class="card-text small text-muted mb-0">Renew medications and receive secure digital prescriptions.</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-sm-6 col-md-4 col-lg-3">
+                                                    <div class="card h-100 service-card">
+                                                        <div class="card-body d-flex align-items-start">
+                                                            <div class="icon" aria-hidden="true"><i class="bi bi-folder2-open fs-4"></i></div>
+                                                            <div>
+                                                                <h6 class="card-title mb-1">Access to Records</h6>
+                                                                <p class="card-text small text-muted mb-0">View test results, visit notes and share records with clinicians.</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-sm-6 col-md-4 col-lg-3">
+                                                    <div class="card h-100 service-card">
+                                                        <div class="card-body d-flex align-items-start">
+                                                            <div class="icon" aria-hidden="true"><i class="bi bi-syringe fs-4"></i></div>
+                                                            <div>
+                                                                <h6 class="card-title mb-1">Vaccination Scheduling</h6>
+                                                                <p class="card-text small text-muted mb-0">Book immunizations and keep family vaccination records up to date.</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-sm-6 col-md-4 col-lg-3">
+                                                    <div class="card h-100 service-card">
+                                                        <div class="card-body d-flex align-items-start">
+                                                            <div class="icon" aria-hidden="true"><i class="bi bi-heart-pulse fs-4"></i></div>
+                                                            <div>
+                                                                <h6 class="card-title mb-1">Chronic Disease Care</h6>
+                                                                <p class="card-text small text-muted mb-0">Long-term condition support with reminders and care plans.</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-sm-6 col-md-4 col-lg-3">
+                                                    <div class="card h-100 service-card">
+                                                        <div class="card-body d-flex align-items-start">
+                                                            <div class="icon" aria-hidden="true"><i class="bi bi-emoji-smile fs-4"></i></div>
+                                                            <div>
+                                                                <h6 class="card-title mb-1">Mental Health Support</h6>
+                                                                <p class="card-text small text-muted mb-0">Access counseling, therapy sessions and mental wellness resources.</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-sm-6 col-md-4 col-lg-3">
+                                                    <div class="card h-100 service-card">
+                                                        <div class="card-body d-flex align-items-start">
+                                                            <div class="icon" aria-hidden="true"><i class="bi bi-journal-text fs-4"></i></div>
+                                                            <div>
+                                                                <h6 class="card-title mb-1">Health Tips & Articles</h6>
+                                                                <p class="card-text small text-muted mb-0">Curated content and actionable advice tailored to your profile.</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-sm-6 col-md-4 col-lg-3">
+                                                    <div class="card h-100 service-card">
+                                                        <div class="card-body d-flex align-items-start">
+                                                            <div class="icon" aria-hidden="true"><i class="bi bi-chat-dots-fill fs-4"></i></div>
+                                                            <div>
+                                                                <h6 class="card-title mb-1">24/7 Support & Chat</h6>
+                                                                <p class="card-text small text-muted mb-0">Secure messaging and round‑the‑clock triage for non‑emergencies.</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-sm-6 col-md-4 col-lg-3">
+                                                    <div class="card h-100 service-card">
+                                                        <div class="card-body d-flex align-items-start">
+                                                            <div class="icon" aria-hidden="true"><i class="bi bi-box-seam fs-4"></i></div>
+                                                            <div>
+                                                                <h6 class="card-title mb-1">Medication Delivery</h6>
+                                                                <p class="card-text small text-muted mb-0">Home delivery with order tracking for prescribed medicines.</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-sm-6 col-md-4 col-lg-3">
+                                                    <div class="card h-100 service-card">
+                                                        <div class="card-body d-flex align-items-start">
+                                                            <div class="icon" aria-hidden="true"><i class="bi bi-person-lines-fill fs-4"></i></div>
+                                                            <div>
+                                                                <h6 class="card-title mb-1">Family Health Management</h6>
+                                                                <p class="card-text small text-muted mb-0">Manage dependents' profiles, bookings and reminders from one account.</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-12">
+                                                    <div class="text-center mt-2">
+                                                        <button class="btn btn-outline-medical btn-sm" id="btn-view-all-services">View all services</button>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <ul id="services-list">
                                                 <li>General Practitioner Consultations</li>
                                                 <li>Specialist Doctor Appointments</li>
@@ -508,6 +1005,74 @@
                                                                     Complete your health profile for more tailored suggestions.
                                                                 </li>
                                                             </ul>
+                                                            <div id="cardDetail" class="card mt-3" style="display:none;">
+                                                                <div class="card-body">
+                                                                    <h5 id="cardDetailTitle" class="card-title"></h5>
+                                                                    <div id="cardDetailContent" class="card-text"></div>
+                                                                    <div class="text-end mt-3">
+                                                                        <button class="btn btn-outline-secondary btn-sm" id="cardDetailClose">Close</button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <style>
+                                                                /* make relevant cards appear clickable */
+                                                                .services-overview .card,
+                                                                #features-cards .card,
+                                                                #health-features .card,
+                                                                .service-card {
+                                                                    cursor: pointer;
+                                                                }
+                                                            </style>
+
+                                                            <script>
+                                                            (function () {
+                                                                const detail = document.getElementById('cardDetail');
+                                                                const titleEl = document.getElementById('cardDetailTitle');
+                                                                const contentEl = document.getElementById('cardDetailContent');
+                                                                const closeBtn = document.getElementById('cardDetailClose');
+
+                                                                function extractCardContent(card) {
+                                                                    const titleNode = card.querySelector('.card-title, h5, h4');
+                                                                    const body = card.querySelector('.card-body');
+                                                                    // Build content: clone body but remove the title node to avoid duplication
+                                                                    if (body) {
+                                                                        const clone = body.cloneNode(true);
+                                                                        const innerTitle = clone.querySelector('.card-title, h5, h4');
+                                                                        if (innerTitle) innerTitle.remove();
+                                                                        return {
+                                                                            title: titleNode ? titleNode.textContent.trim() : '',
+                                                                            html: clone.innerHTML.trim()
+                                                                        };
+                                                                    }
+                                                                    // fallback
+                                                                    return {
+                                                                        title: titleNode ? titleNode.textContent.trim() : '',
+                                                                        html: card.innerHTML
+                                                                    };
+                                                                }
+
+                                                                // Event delegation: respond to clicks on cards that belong to service/feature areas
+                                                                document.addEventListener('click', function (ev) {
+                                                                    // ignore clicks on interactive elements inside cards
+                                                                    if (ev.target.closest('button, a, input, textarea, select')) return;
+
+                                                                    const card = ev.target.closest('.services-overview .card, #features-cards .card, #health-features .card, .service-card');
+                                                                    if (!card) return;
+
+                                                                    const data = extractCardContent(card);
+                                                                    titleEl.textContent = data.title || 'Details';
+                                                                    contentEl.innerHTML = data.html || '';
+
+                                                                    detail.style.display = 'block';
+                                                                    detail.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                                                });
+
+                                                                closeBtn.addEventListener('click', function () {
+                                                                    detail.style.display = 'none';
+                                                                });
+                                                            })();
+                                                            </script>
 
                                                             <div class="mt-3">
                                                                 <small class="text-muted">Manage family health profiles or invite a caregiver for shared access.</small>
