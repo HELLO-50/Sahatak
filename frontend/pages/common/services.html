@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title-head">Support Page - Sahatak</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%230d47a1' d='m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523.942-.661 2.27.067 3.71L8 15.5l6.533-8.737c.728-1.44.59-2.768.067-3.71C13.486.878 10.4.28 8.717 2.01L8 2.748z'/></svg>">
+    
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    
+    <!-- Bootstrap Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Arabic Font - Noto Sans Arabic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <!-- Dashboard CSS -->
+    <link rel="stylesheet" href="../../assets/css/components/dashboard.css">
+    <!-- Appointments CSS -->
+    <link rel="stylesheet" href="../../assets/css/components/appointments.css">
+    <!-- Video Consultation Dashboard CSS -->
+    <link rel="stylesheet" href="../../assets/css/components/video-consultation-dashboard.css">
+</head>
+<body data-protect="patient">
+    <div class="dashboard-container">
+        <div class="container-fluid" style="padding-bottom: 120px;">
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <div class="row align-items-center">
+                    <!-- Profile Section - Left (Right in RTL) -->
+                    <div class="col-lg-4">
+                        <div class="profile-section">
+                            <div class="user-avatar">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <div class="user-details">
+                                <h5 class="mb-1" id="user-name">Loading...</h5>
+                            </div>
+                            <!-- Vertical Action Buttons -->
+                            <div class="action-buttons">
+                                <button class="btn btn-action" onclick="goBackToDashboard()" title="Back to Dashboard">
+                                    <i class="bi bi-arrow-left"></i>
+                                    <span id="btn-back">Back to Dashboard</span>
+                                </button>
+                                <button class="btn btn-action btn-logout" onclick="AuthGuard.logout()" title="Logout">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                    <span id="btn-logout">Logout</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Page Title - Center -->
+                    <div class="col-lg-4 text-center">
+                        <h1 class="dashboard-title" id="page-title">Services Sahatak</h1>
+                        <p class="dashboard-subtitle" id="page-subtitle">Services</p>
+                    </div>
+                    
+                    <!-- Controls - Right (Left in RTL) -->
+                    <div class="col-lg-4 text-end">
+                        <div class="dashboard-controls">
+                            <button class="btn btn-medical btn-sm me-2" onclick="bookNewAppointment()">
+                                <i class="bi bi-plus me-1"></i>
+                                <span id="btn-new-appointment">Add Comments</span>
+                            </button>
+                            <button class="btn btn-outline-medical btn-sm" onclick="showLanguageSelector()">
+                                <i class="bi bi-globe me-1"></i>
+                                <span id="current-lang">English</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <section id="services-section" class="services-section mt-4">
+                <div class="row mb-3">
+                    <div class="col-12 d-flex align-items-center justify-content-between">
+                        <div>
+                            <h2 class="h4 mb-1">Sahatak Services</h2>
+                            <p class="text-muted mb-0">A comprehensive list of healthcare and support services available through the Sahatak program.</p>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <input type="search" id="service-search" class="form-control form-control-sm me-2" placeholder="Search services..." aria-label="Search services">
+                            <button class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('service-search').value='';">Clear</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row" id="services-grid" role="list">
+                    <div class="col-sm-6 col-lg-4 mb-4" role="listitem" data-service="video-consultation">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start">
+                                    <div class="me-3 display-6 text-primary"><i class="bi bi-camera-video"></i></div>
+                                    <div>
+                                        <h5 class="card-title mb-1">Video Consultation</h5>
+                                        <p class="card-text small text-muted">Secure live video visits with general practitioners and specialists from home.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6 col-lg-4 mb-4" role="listitem" data-service="appointments">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start">
+                                    <div class="me-3 display-6 text-success"><i class="bi bi-calendar-check"></i></div>
+                                    <div>
+                                        <h5 class="card-title mb-1">Online Appointments</h5>
+                                        <p class="card-text small text-muted">Book, reschedule and manage clinic appointments with reminders.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6 col-lg-4 mb-4" role="listitem" data-service="prescriptions">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start">
+                                    <div class="me-3 display-6 text-warning"><i class="bi bi-file-earmark-medical"></i></div>
+                                    <div>
+                                        <h5 class="card-title mb-1">E-Prescriptions</h5>
+                                        <p class="card-text small text-muted">Receive, renew and share prescriptions electronically with pharmacies.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6 col-lg-4 mb-4" role="listitem" data-service="lab-tests">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start">
+                                    <div class="me-3 display-6 text-danger"><i class="bi bi-flask"></i></div>
+                                    <div>
+                                        <h5 class="card-title mb-1">Laboratory Tests</h5>
+                                        <p class="card-text small text-muted">Order lab tests, view results online and get clinician interpretation.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-4 mb-4" role="listitem" data-service="chronic-care">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start">
+                                    <div class="me-3 display-6 text-primary"><i class="bi bi-heart-pulse"></i></div>
+                                    <div>
+                                        <h5 class="card-title mb-1">Chronic Disease Management</h5>
+                                        <p class="card-text small text-muted">Ongoing support for diabetes, hypertension and other long‑term conditions.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6 col-lg-4 mb-4" role="listitem" data-service="nutrition">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start">
+                                    <div class="me-3 display-6 text-warning"><i class="bi bi-apple"></i></div>
+                                    <div>
+                                        <h5 class="card-title mb-1">Nutrition & Diet Counseling</h5>
+                                        <p class="card-text small text-muted">Personalized meal plans and dietary advice for health goals.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6 col-lg-4 mb-4" role="listitem" data-service="maternal-child">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start">
+                                    <div class="me-3 display-6 text-danger"><i class="bi bi-heart"></i></div>
+                                    <div>
+                                        <h5 class="card-title mb-1">Maternal & Child Health</h5>
+                                        <p class="card-text small text-muted">Antenatal care, pediatric services and postnatal follow‑up.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6 col-lg-4 mb-4" role="listitem" data-service="referral">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start">
+                                    <div class="me-3 display-6 text-success"><i class="bi bi-arrow-right-square"></i></div>
+                                    <div>
+                                        <h5 class="card-title mb-1">Specialist Referrals</h5>
+                                        <p class="card-text small text-muted">Coordinated referrals to specialist clinics and hospitals.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="text-muted small">Can't find what you need? Contact our support team for personalized assistance.</div>
+                            <div>
+                                <a href="#" class="btn btn-medical btn-sm me-2">Contact Support</a>
+                                <a href="#" class="btn btn-outline-secondary btn-sm">View Full Service Guide</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+
+        <footer class="footer mt-auto py-3">
+        <div class="container">
+            <div class="row g-3">
+                <!-- Brand & Description -->
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="mb-3">
+                        <i class="bi bi-heart-pulse me-2 text-primary"></i>
+                        <span id="footer-brand">Sahatak</span>
+                    </h5>
+                    <div class="d-flex gap-3 social-links">
+                        <a href="https://facebook.com/sahatak" target="_blank" rel="noopener"><i class="bi bi-facebook fs-5"></i></a>
+                        <a href="https://twitter.com/sahatak" target="_blank" rel="noopener"><i class="bi bi-twitter fs-5"></i></a>
+                        <a href="https://instagram.com/sahatak" target="_blank" rel="noopener"><i class="bi bi-instagram fs-5"></i></a>
+                        <a href="https://linkedin.com/company/sahatak" target="_blank" rel="noopener"><i class="bi bi-linkedin fs-5"></i></a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="mb-3" id="footer-links-title">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="../common/about.html" class="text-muted text-decoration-none" id="footer-about">About Platform</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="../common/services.html" class="text-muted text-decoration-none" id="footer-services">Services</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="mb-3" id="footer-support-title">Support & Help</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="../common/support.html" class="text-muted text-decoration-none" id="footer-help">Help Center</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="../common/contact-us.html" class="text-muted text-decoration-none" id="footer-contact">Contact Us</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Emergency Contact -->
+                <div class="col-lg-3 col-md-6 emergency-section">
+                    <p class="mb-2 text-danger fw-bold" id="footer-emergency-text">
+                        For medical emergencies
+                    </p>
+                    <p class="mb-3 text-danger fw-bold fs-6" id="footer-emergency-action">
+                        <i class="bi bi-hospital me-2"></i>
+                        Go to nearest ER hospital
+                    </p>
+                    <p class="mb-0 text-muted small" id="footer-emergency-note">
+                        For non-urgent consultations use the platform
+                    </p>
+                </div>
+            </div>
+
+            <!-- Bottom Bar -->
+            <hr class="my-3">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="mb-0 fw-bold" id="footer-copyright">
+                        © 2025 Sahatak. All rights reserved.
+                    </p>
+                    <p class="mb-0 text-muted small mt-1" id="footer-medical-disclaimer">
+                        This platform does not replace visiting a doctor in emergency cases
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+                <script>
+                    (function() {
+                        const input = document.getElementById('service-search');
+                        const grid = document.getElementById('services-grid');
+                        if (!input || !grid) return;
+                        input.addEventListener('input', function() {
+                            const q = this.value.trim().toLowerCase();
+                            Array.from(grid.querySelectorAll('[role="listitem"]')).forEach(card => {
+                                const title = (card.querySelector('.card-title')?.textContent || '').toLowerCase();
+                                const desc = (card.querySelector('.card-text')?.textContent || '').toLowerCase();
+                                card.style.display = (q === '' || title.includes(q) || desc.includes(q)) ? '' : 'none';
+                            });
+                        });
+                    })();
+                </script>
+            </section>
