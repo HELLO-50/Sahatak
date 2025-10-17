@@ -79,6 +79,193 @@
                 </div>
             </div>
             <!-- Main Content Area -->
+            <div class="dashboard-content">
+                <!-- Introduction and audience-friendly summary -->
+                <div class="card mb-4 intro-card">
+                    <div class="card-body">
+                        <h2 class="card-title" id="about-brief-title">Welcome to Sahatak — Healthcare made simple</h2>
+                        <p class="card-text" id="about-brief">
+                            Sahatak is designed for patients, caregivers, and families who want easy, reliable access to healthcare services.
+                            Whether you need a same-day appointment, a video consultation from home, help managing a chronic condition, or a
+                            quick answer about a medication — Sahatak brings tools and professionals together in one secure place.
+                        </p>
+                        <p class="card-text small text-muted">
+                            This page explains the services we provide and how they help you manage care, save time, and stay informed.
+                        </p>
+                        <div class="mt-3 d-flex flex-wrap gap-2">
+                            <button class="btn btn-medical" onclick="bookNewAppointment()" title="Book appointment">Book an appointment</button>
+                            <button class="btn btn-outline-medical" data-bs-toggle="modal" data-bs-target="#symptomModal" title="Symptom checker">Try Symptom Checker</button>
+                            <button class="btn btn-outline-secondary" onclick="showLanguageSelector()" title="Change language">Change language</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- High-level services overview (audience-friendly explanations) -->
+                <div class="services-overview mb-4">
+                    <h3 id="services-overview-title">What Sahatak offers</h3>
+                    <p class="text-muted mb-3">Short descriptions to help you understand each service and when to use it.</p>
+
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="card h-100 service-card">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="bi bi-calendar-check-fill me-2 text-primary"></i>Online Appointment Booking</h5>
+                                    <p class="card-text">
+                                        Find available slots with general practitioners and specialists, choose in-person or video visits,
+                                        and get confirmations and reminders so you never miss an appointment.
+                                    </p>
+                                    <small class="text-muted">Use to schedule routine visits, follow-ups, or specialist consultations.</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card h-100 service-card">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="bi bi-camera-video-fill me-2 text-primary"></i>Video Consultations</h5>
+                                    <p class="card-text">
+                                        Secure, private video visits with qualified healthcare providers. Join from your dashboard — ideal for
+                                        minor illnesses, follow-ups, medication reviews, and care when travel is difficult.
+                                    </p>
+                                    <small class="text-muted">Use when physical exam isn't required or for quick clinical advice.</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card h-100 service-card">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="bi bi-folder2-open me-2 text-primary"></i>Access to Medical Records</h5>
+                                    <p class="card-text">
+                                        Securely view and manage your health records, test results, and visit notes. Share records with your doctor
+                                        during consultations so care decisions are based on the full picture.
+                                    </p>
+                                    <small class="text-muted">A single place for your health history, lab results, and imaging reports.</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card h-100 service-card">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="bi bi-prescription2 me-2 text-primary"></i>Prescription Management</h5>
+                                    <p class="card-text">
+                                        Request prescription renewals, receive digital prescriptions directly in your account, and get guidance
+                                        from doctors about medication use and side effects.
+                                    </p>
+                                    <small class="text-muted">Saves time on renewals and avoids unnecessary visits.</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card h-100 service-card">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="bi bi-beaker me-2 text-primary"></i>Lab & Imaging Booking</h5>
+                                    <p class="card-text">
+                                        Book laboratory tests and radiology (X‑ray, MRI) appointments at partnered centers. Results are uploaded to
+                                        your records and can be reviewed with your clinician.
+                                    </p>
+                                    <small class="text-muted">Convenient scheduling and electronic delivery of results.</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card h-100 service-card">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="bi bi-heart-pulse me-2 text-primary"></i>Chronic Disease Management</h5>
+                                    <p class="card-text">
+                                        Tools and regular check-ins to help manage long-term conditions (diabetes, hypertension, asthma, etc.),
+                                        including medication reminders, trend charts, and specialist care plans.
+                                    </p>
+                                    <small class="text-muted">Personalized follow-up and easier coordination with care teams.</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card h-100 service-card">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="bi bi-people me-2 text-primary"></i>Family Health Management</h5>
+                                    <p class="card-text">
+                                        Manage health profiles for children, elderly relatives, or dependents from one account. Book appointments,
+                                        view records, and receive reminders for multiple family members.
+                                    </p>
+                                    <small class="text-muted">Makes household health coordination simpler and safer.</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card h-100 service-card">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="bi bi-journal-text me-2 text-primary"></i>Personalized Health Content</h5>
+                                    <p class="card-text">
+                                        Curated articles, tips, and educational resources tailored to your age, conditions, and interests so you can
+                                        make informed day-to-day choices about your health.
+                                    </p>
+                                    <small class="text-muted">AI recommends content relevant to your profile and goals.</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card h-100 service-card">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="bi bi-chat-dots-fill me-2 text-primary"></i>Secure Chat & 24/7 Support</h5>
+                                    <p class="card-text">
+                                        Use secure messaging to ask non-urgent clinical questions or get administrative help. For urgent triage, our
+                                        24/7 support provides guidance on next steps and directs you to appropriate care.
+                                    </p>
+                                    <small class="text-muted">Not a replacement for emergency services — use ER for life‑threatening issues.</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card h-100 service-card">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="bi bi-box-seam me-2 text-primary"></i>Medication Delivery</h5>
+                                    <p class="card-text">
+                                        Get prescribed medicines delivered to your home. Track orders, view delivery status, and contact support if
+                                        there are issues.
+                                    </p>
+                                    <small class="text-muted">Convenient for those with mobility challenges or busy schedules.</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card h-100 service-card">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="bi bi-shield-check me-2 text-primary"></i>Insurance & Administrative Help</h5>
+                                    <p class="card-text">
+                                        Assistance with insurance questions, claims guidance, and help submitting necessary documents to speed
+                                        approvals for visits and tests.
+                                    </p>
+                                    <small class="text-muted">Support to reduce billing surprises and paperwork.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- How to get started -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title" id="getting-started-title">How to get started</h4>
+                        <ol class="mb-2">
+                            <li>Create or update your profile so clinicians see your medical history and allergies.</li>
+                            <li>Book an appointment or start a symptom check to find the right care option.</li>
+                            <li>Use video visits or chat for follow-up, manage prescriptions online, and view results in your record.</li>
+                        </ol>
+                        <p class="small text-muted mb-0">
+                            If you're unsure which service to use, try the symptom checker or contact support — we're here to help you choose the right care.
+                        </p>
+                    </div>
+                </div>
+            </div>
             <div class="dashboard-content">           
                 <div class="about-section">
                     <h2 id="about-title">About Sahatak</h2>
@@ -117,168 +304,7 @@
                                                 <li>Health Insurance Assistance</li>
                                             </ul>
                                         </div>
-                                        <div class="service-details mt-5">
-                                            <h3>Service Details</h3>
-                                            <div class="accordion" id="servicesAccordion">
-                                                <div class="accordion-item">
-                                                    <h2 class="accordion-header" id="headingVideoConsult">
-                                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseVideoConsult" aria-expanded="true" aria-controls="collapseVideoConsult">
-                                                            Video and In-Person Consultations
-                                                        </button>
-                                                    </h2>
-                                                    <div id="collapseVideoConsult" class="accordion-collapse collapse show" aria-labelledby="headingVideoConsult" data-bs-parent="#servicesAccordion">
-                                                        <div class="accordion-body">
-                                                            Book appointments for video or in-person consultations with doctors. For video consultations, simply select your preferred doctor and time, then join the secure video call from your dashboard. Our system uses AI to assist with symptom checking and provides a chat system for sharing information and asking questions during the session.
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="accordion-item">
-                                                    <h2 class="accordion-header" id="headingLab">
-                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLab" aria-expanded="false" aria-controls="collapseLab">
-                                                            Laboratory Test Booking
-                                                        </button>
-                                                    </h2>
-
-                                                    <div id="collapseLab" class="accordion-collapse collapse" aria-labelledby="headingLab" data-bs-parent="#servicesAccordion">
-                                                        <div class="accordion-body">
-                                                            Schedule laboratory tests directly through Sahatak. Choose your test, select a lab, and book a convenient time. Results are securely delivered to your medical records and can be discussed with your doctor via video or chat.
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="accordion-item">
-                                                    <h2 class="accordion-header" id="headingRadiology">
-                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRadiology" aria-expanded="false" aria-controls="collapseRadiology">
-                                                            Radiology and Imaging Services
-                                                        </button>
-                                                    </h2>
-                                                    <div id="collapseRadiology" class="accordion-collapse collapse" aria-labelledby="headingRadiology" data-bs-parent="#servicesAccordion">
-                                                        <div class="accordion-body">
-                                                            Book radiology and imaging appointments, such as X-rays or MRIs, through our platform. Receive digital results and consult with specialists using our integrated video and chat system.
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="accordion-item">
-                                                    <h2 class="accordion-header" id="headingPrescription">
-                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePrescription" aria-expanded="false" aria-controls="collapsePrescription">
-                                                            Prescription Renewal and Management
-                                                        </button>
-                                                    </h2>
-                                                    <div id="collapsePrescription" class="accordion-collapse collapse" aria-labelledby="headingPrescription" data-bs-parent="#servicesAccordion">
-                                                        <div class="accordion-body">
-                                                            Request prescription renewals online. Doctors review your request and, if approved, prescriptions are sent directly to your account. Use our chat system to clarify medication instructions or ask questions.
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="accordion-item">
-                                                    <h2 class="accordion-header" id="headingRecords">
-                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRecords" aria-expanded="false" aria-controls="collapseRecords">
-                                                            Access to Personal Medical Records
-                                                        </button>
-                                                    </h2>
-                                                    <div id="collapseRecords" class="accordion-collapse collapse" aria-labelledby="headingRecords" data-bs-parent="#servicesAccordion">
-                                                        <div class="accordion-body">
-                                                            View and manage your medical records securely. Share records with doctors during consultations or via chat. AI tools help organize and summarize your health data for easier understanding.
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="accordion-item">
-                                                    <h2 class="accordion-header" id="headingVaccination">
-                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseVaccination" aria-expanded="false" aria-controls="collapseVaccination">
-                                                            Vaccination Scheduling
-                                                        </button>
-                                                    </h2>
-                                                    <div id="collapseVaccination" class="accordion-collapse collapse" aria-labelledby="headingVaccination" data-bs-parent="#servicesAccordion">
-                                                        <div class="accordion-body">
-                                                            Schedule vaccinations for yourself or family members. Receive reminders and access vaccination records. Use chat to ask questions about vaccine types and schedules.
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="accordion-item">
-                                                    <h2 class="accordion-header" id="headingChronic">
-                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseChronic" aria-expanded="false" aria-controls="collapseChronic">
-                                                            Chronic Disease Management
-                                                        </button>
-                                                    </h2>
-                                                    <div id="collapseChronic" class="accordion-collapse collapse" aria-labelledby="headingChronic" data-bs-parent="#servicesAccordion">
-                                                        <div class="accordion-body">
-                                                            Track and manage chronic conditions with regular check-ins, medication reminders, and AI-powered health insights. Consult with specialists via video and chat for ongoing support.
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="accordion-item">
-                                                    <h2 class="accordion-header" id="headingMentalHealth">
-                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMentalHealth" aria-expanded="false" aria-controls="collapseMentalHealth">
-                                                            Mental Health Support
-                                                        </button>
-                                                    </h2>
-                                                    <div id="collapseMentalHealth" class="accordion-collapse collapse" aria-labelledby="headingMentalHealth" data-bs-parent="#servicesAccordion">
-                                                        <div class="accordion-body">
-                                                            Access mental health professionals for counseling and therapy sessions via secure video calls. Use the chat system for ongoing support and resources tailored to your needs.
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="accordion-item">
-                                                    <h2 class="accordion-header" id="headingTips">
-                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTips" aria-expanded="false" aria-controls="collapseTips">
-                                                            Health Tips, Articles, and Resources
-                                                        </button>
-                                                    </h2>
-                                                    <div id="collapseTips" class="accordion-collapse collapse" aria-labelledby="headingTips" data-bs-parent="#servicesAccordion">
-                                                        <div class="accordion-body">
-                                                            Browse curated health tips, articles, and resources. AI recommends content based on your health profile and interests. Discuss articles with doctors or other users via chat.
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="accordion-item">
-                                                    <h2 class="accordion-header" id="headingSupport">
-                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSupport" aria-expanded="false" aria-controls="collapseSupport">
-                                                            24/7 Medical Support and Advice
-                                                        </button>
-                                                    </h2>
-                                                    <div id="collapseSupport" class="accordion-collapse collapse" aria-labelledby="headingSupport" data-bs-parent="#servicesAccordion">
-                                                        <div class="accordion-body">
-                                                            Get round-the-clock medical support through chat or video. AI-powered triage helps direct your queries to the right professionals for timely advice.
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="accordion-item">
-                                                    <h2 class="accordion-header" id="headingDelivery">
-                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDelivery" aria-expanded="false" aria-controls="collapseDelivery">
-                                                            Medication Delivery Services
-                                                        </button>
-                                                    </h2>
-                                                    <div id="collapseDelivery" class="accordion-collapse collapse" aria-labelledby="headingDelivery" data-bs-parent="#servicesAccordion">
-                                                        <div class="accordion-body">
-                                                            Order prescribed medications for home delivery. Track your orders and receive notifications. Use chat to resolve any delivery issues or ask about your medications.
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="accordion-item">
-                                                    <h2 class="accordion-header" id="headingFamily">
-                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFamily" aria-expanded="false" aria-controls="collapseFamily">
-                                                            Family Health Management
-                                                        </button>
-                                                    </h2>
-                                                    <div id="collapseFamily" class="accordion-collapse collapse" aria-labelledby="headingFamily" data-bs-parent="#servicesAccordion">
-                                                        <div class="accordion-body">
-                                                            Manage health profiles for your family members. Book appointments, track vaccinations, and consult with doctors for each member. Use chat for family-specific health advice.
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="accordion-item">
-                                                    <h2 class="accordion-header" id="headingInsurance">
-                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInsurance" aria-expanded="false" aria-controls="collapseInsurance">
-                                                            Health Insurance Assistance
-                                                        </button>
-                                                    </h2>
-                                                    <div id="collapseInsurance" class="accordion-collapse collapse" aria-labelledby="headingInsurance" data-bs-parent="#servicesAccordion">
-                                                        <div class="accordion-body">
-                                                            Get help with health insurance claims and coverage questions. Our chat system connects you with insurance experts for guidance and support.
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        
                                         <!-- Additional About Your Health Content -->
 
                                         <div class="about-health mt-5">
@@ -636,5 +662,6 @@
             </div>
         </div>
     </footer>
+                    <script src="../../assets/js/main.js"></script>
 
 
