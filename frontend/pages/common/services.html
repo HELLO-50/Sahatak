@@ -77,7 +77,26 @@
                         </div>
                     </div>
                 </div>
+                <style>
+                    /* light blue background for the services area, cards stay visually on top */
+                    #services-section {
+                        background-color: #e6f7ff; /* light blue */
+                        padding: 1.5rem;
+                        border-radius: 0.6rem;
+                    }
 
+                    /* ensure cards render above the background (so background never covers them) */
+                    #services-section .card {
+                        position: relative;
+                        z-index: 1;
+                        background-color: #fff; /* reinforce white card background */
+                    }
+
+                    /* give some extra spacing so the background doesn't touch viewport edges */
+                    @media (min-width: 992px) {
+                        #services-section { padding-left: 2rem; padding-right: 2rem; }
+                    }
+                </style>
                 <div class="row" id="services-grid" role="list">
                     <div class="col-sm-6 col-lg-4 mb-4" role="listitem" data-service="video-consultation">
                         <div class="card h-100 shadow-sm">
