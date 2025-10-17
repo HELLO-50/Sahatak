@@ -37,6 +37,32 @@ Colors:
     --admin-error-rgb: 239, 68, 68;
     --admin-info: #3b82f6;            /* Blue */
     --admin-info-rgb: 59, 130, 246;
+    /* Light-page overrides: make page/table backgrounds white, text black, light-gray borders */
+    --admin-bg: #ffffff;
+    --admin-bg-primary: #ffffff;
+    --admin-bg-card: #ffffff;
+    --admin-bg-section: #ffffff;
+    --admin-bg-tertiary: #ffffff;
+    --admin-card-bg: #ffffff;
+
+    --admin-text: #000000;
+    --admin-text-primary: #000000;
+    --admin-text-secondary: #111827;
+    --admin-text-muted: #4b5563;
+    --admin-text-placeholder: #6b7280;
+
+    --admin-border-primary: #e5e7eb;   /* light gray table/card borders */
+    --admin-border-secondary: #d1d5db;
+    --admin-border-default: #e5e7eb;
+    --admin-border-subtle: #eef2f6;
+
+    --admin-gradient-card: linear-gradient(145deg, #ffffff 0%, #ffffff 100%);
+    --admin-gradient-overlay: linear-gradient(135deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.02) 100%);
+
+    /* lighter shadows for white background */
+    --admin-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    --admin-shadow-sm: 0 2px 6px rgba(0,0,0,0.06);
+    --admin-shadow-md: 0 6px 18px rgba(0,0,0,0.08);
     
     /* Dark Theme Background System */
     --admin-bg-primary: #0f172a;      /* Deep Navy */
