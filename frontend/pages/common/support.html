@@ -525,3 +525,169 @@
                 }
             })();
             </script>
+            <script>
+            (function () {
+                const STORAGE_KEY = 'program_messages';
+                const UPDATE_KEY = 'program_messages_last_update';
+
+                // Utility to read file as DataURL if small
+                function readAttachment(file) {
+                    return new Promise((resolve) => {
+                        if (!file) return resolve(null);
+                        const maxEmbedSize = 300 * 1024; // 300 KB
+                        const info = { name: file.name, size: file.size, type: file.type, dataUrl: null };
+                        if (file.size > maxEmbedSize) return resolve(info);
+                        const fr = new FileReader();
+                        fr.onload = () => {
+                            info.dataUrl = fr.result;
+                            resolve(info);
+                        };
+                        fr.onerror = () => resolve(info);
+                        fr.readAsDataURL(file);
+                    });
+                }
+
+                function nowIso() { return (new Date()).toISOString(); }
+                function newId() { return 'msg_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9); }
+
+                function loadMessages() {
+                    try {
+                        const raw = localStorage.getItem(STORAGE_KEY);
+                        return raw ? JSON.parse(raw) : [];
+                    } catch (e) {
+                        console.error('Failed to parse program messages', e);
+                        return [];
+                    }
+                }
+
+                function saveMessages(list) {
+                    try {
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+                        // Touch extra key so other tabs receive storage event
+                        localStorage.setItem(UPDATE_KEY, Date.now().toString());
+                    } catch (e) {
+                        console.error('Failed to save program messages', e);
+                    }
+                }
+
+                async function sendMessage(payload) {
+                    // payload should contain: type, subject, body, to, contact, attachment (File or null), meta...
+                    const attachment = payload.attachment instanceof File ? await readAttachment(payload.attachment) : payload.attachment || null;
+                    const msg = {
+                        id: newId(),
+                        type: payload.type || 'program',
+                        to: payload.to || null,
+                        subject: payload.subject || '',
+                        body: payload.body || '',
+                        contact: payload.contact || '',
+                        attachment,
+                        senderRole: (function () {
+                            try {
+                                return localStorage.getItem('role') || document.body.dataset.protect || 'patient';
+                            } catch (e) {
+                                return 'patient';
+                            }
+                        })(),
+                        createdAt: nowIso(),
+                        read: false,
+                        meta: payload.meta || {}
+                    };
+
+                    const list = loadMessages();
+                    list.unshift(msg); // newest first
+                    saveMessages(list);
+
+                    // notify same-window listeners
+                    window.dispatchEvent(new CustomEvent('programMessagesUpdated', { detail: msg }));
+                    return msg;
+                }
+
+                // Public API surface for admin page or other code to use
+                window.ProgramMessages = {
+                    sendMessage,
+                    getAll: () => loadMessages(),
+                    markRead: function (id) {
+                        const list = loadMessages();
+                        const idx = list.findIndex(m => m.id === id);
+                        if (idx >= 0) {
+                            list[idx].read = true;
+                            saveMessages(list);
+                            window.dispatchEvent(new CustomEvent('programMessagesUpdated', { detail: { id, action: 'markedRead' } }));
+                        }
+                    },
+                    clearAll: function () {
+                        saveMessages([]);
+                        window.dispatchEvent(new CustomEvent('programMessagesUpdated', { detail: { action: 'cleared' } }));
+                    },
+                    onUpdate: function (cb) {
+                        if (typeof cb !== 'function') return;
+                        const handler = (e) => cb(e.detail);
+                        window.addEventListener('programMessagesUpdated', handler);
+                        // also return unsubscribe
+                        return () => window.removeEventListener('programMessagesUpdated', handler);
+                    }
+                };
+
+                // Listen for storage events so admin page in another tab can react
+                window.addEventListener('storage', (ev) => {
+                    if (ev.key === UPDATE_KEY) {
+                        // dispatch a generic update so listeners can refresh their view
+                        window.dispatchEvent(new CustomEvent('programMessagesUpdated', { detail: { action: 'storageSync' } }));
+                    }
+                });
+
+                // Attach capture-phase submit handlers so we record messages before existing handlers reset forms
+                const reportForm = document.getElementById('report-form');
+                if (reportForm) {
+                    reportForm.addEventListener('submit', async function (e) {
+                        // run in capture so it fires before previously attached listeners that reset the form
+                    }, true);
+
+                    // separate actual handler to allow async/await (can't make capture async handler reliably in some browsers)
+                    reportForm.addEventListener('submit', function (e) {
+                        // if form invalid, do nothing (existing handler will show warning)
+                        if (!reportForm.checkValidity()) return;
+                        // gather fields
+                        const subject = document.getElementById('problem-subject')?.value || '';
+                        const description = document.getElementById('problem-description')?.value || '';
+                        const fileEl = document.getElementById('problem-screenshot');
+                        const file = fileEl && fileEl.files && fileEl.files[0] ? fileEl.files[0] : null;
+
+                        // send but don't block UI
+                        sendMessage({
+                            type: 'report',
+                            subject: subject,
+                            body: description,
+                            to: 'support',
+                            attachment: file,
+                            meta: { source: 'support-page', formId: 'report-form' }
+                        }).catch(err => console.error('Failed to save report message', err));
+                    }, true); // keep capture=true to run before earlier handlers
+                }
+
+                const supervisorForm = document.getElementById('supervisor-form');
+                if (supervisorForm) {
+                    supervisorForm.addEventListener('submit', function (e) {
+                        if (!supervisorForm.checkValidity()) return;
+                        const to = document.getElementById('supervisor-to')?.value || '';
+                        const subject = document.getElementById('supervisor-subject')?.value || '';
+                        const message = document.getElementById('supervisor-message')?.value || '';
+                        const contact = document.getElementById('supervisor-phone')?.value || '';
+
+                        sendMessage({
+                            type: 'supervisor',
+                            to: to || 'supervisor',
+                            subject: subject,
+                            body: message,
+                            contact: contact,
+                            meta: { source: 'support-page', formId: 'supervisor-form' }
+                        }).catch(err => console.error('Failed to save supervisor message', err));
+                    }, true);
+                }
+
+                // Convenience UI helper: if an "Admin page" is open on same domain, it can call ProgramMessages.getAll()
+                // Example admin listener (for documentation / quick test):
+                // window.ProgramMessages.onUpdate((detail) => { console.log('Messages updated', detail, ProgramMessages.getAll()); });
+
+            })();
+            </script>
