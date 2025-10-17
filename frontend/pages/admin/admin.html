@@ -263,7 +263,29 @@
                                         </button>
                                     </div>
                                 </div>
-                                
+                                <style>
+                                /* Make the user list area white while leaving surrounding card transparent */
+                                #users .table-responsive {
+                                    background: #ffffff;
+                                    border-radius: .5rem;
+                                    padding: 0.5rem;
+                                }
+
+                                /* Ensure table cells render on white background */
+                                #users .table-responsive .table,
+                                #users .table-responsive .table > thead,
+                                #users .table-responsive .table > tbody,
+                                #users .table-responsive .table > thead > tr > th,
+                                #users .table-responsive .table > tbody > tr > td {
+                                    background: transparent;
+                                }
+
+                                /* If spinner/loading row exists, keep its container white too */
+                                #users .table-responsive .spinner-border,
+                                #users .table-responsive p {
+                                    background: transparent;
+                                }
+                                </style>
                                 <!-- User Management Controls -->
                                 <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
                                     <!-- Filters -->
