@@ -111,6 +111,37 @@
                             </div>
                         </div>
                     </div>
+                     <style>
+                        /* make all cards in the support section have a light-blue background,
+                            and ensure form fields inside those cards are white */
+                        #support-section .card {
+                          background-color: #e6f7ff;
+                          border: 1px solid rgba(13,47,93,0.06);
+                          box-shadow: 0 1px 2px rgba(13,47,93,0.04);
+                        }
+
+                        #support-section .card .card-body {
+                          background: transparent;
+                        }
+
+                        /* form controls inside cards should be white for contrast */
+                        #support-section .card .form-control,
+                        #support-section .card .form-select,
+                        #support-section .card textarea,
+                        #support-section .card input[type="text"],
+                        #support-section .card input[type="tel"],
+                        #support-section .card input[type="file"] {
+                          background-color: #ffffff;
+                          border: 1px solid #dfe7ef;
+                          box-shadow: none;
+                        }
+
+                        /* keep placeholder/text color readable */
+                        #support-section .card .form-control::placeholder,
+                        #support-section .card textarea::placeholder {
+                          color: #6c757d;
+                        }
+                        </style>
 
                     <div class="col-sm-6 col-lg-4 mb-4" role="listitem" data-service="appointments">
                         <div class="card h-100 shadow-sm">
