@@ -286,7 +286,81 @@
                                             <p id="health-description">
                                                 Sahatak helps you take an active role in your health with tools that make monitoring and managing care simple and secure.
                                             </p>
+                                            <div class="row align-items-start mb-4">
+                                                <div class="col-lg-7">
+                                                    <div class="card h-100">
+                                                        <div class="card-body">
+                                                            <h5 class="card-title">Your Health Snapshot</h5>
+                                                            <p class="text-muted small mb-3" id="last-sync">Last synced: <span class="fw-semibold">Not synced</span></p>
 
+                                                            <div class="row g-2 mb-3">
+                                                                <div class="col-4">
+                                                                    <div class="border rounded p-2 text-center">
+                                                                        <div class="text-muted small">Risk</div>
+                                                                        <div class="h4 mb-0" id="health-risk-score">—</div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-4">
+                                                                    <div class="border rounded p-2 text-center">
+                                                                        <div class="text-muted small">BMI</div>
+                                                                        <div class="h4 mb-0" id="health-bmi">—</div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-4">
+                                                                    <div class="border rounded p-2 text-center">
+                                                                        <div class="text-muted small">BP</div>
+                                                                        <div class="h4 mb-0" id="health-bp">—</div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="mb-2">
+                                                                <canvas id="healthChart" style="width:100%;height:80px;"></canvas>
+                                                            </div>
+
+                                                            <p class="small text-muted mb-0">Quick actions:</p>
+                                                            <div class="mt-2 d-flex gap-2">
+                                                                <button class="btn btn-outline-medical btn-sm" id="btn-sync-device"><i class="bi bi-phone me-1"></i>Sync Device</button>
+                                                                <button class="btn btn-outline-medical btn-sm" id="btn-update-profile"><i class="bi bi-person-lines-fill me-1"></i>Update Profile</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-lg-5">
+                                                    <div class="card h-100">
+                                                        <div class="card-body">
+                                                            <h5 class="card-title">Personalized Tips</h5>
+                                                            <ul class="list-unstyled" id="health-tips">
+                                                                <li class="mb-2">
+                                                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                                                    Stay hydrated — aim for 8 cups of water daily.
+                                                                </li>
+                                                                <li class="mb-2">
+                                                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                                                    Try a 20-minute walk after meals to support digestion.
+                                                                </li>
+                                                                <li id="dynamic-tip" class="mb-2">
+                                                                    <i class="bi bi-info-circle text-muted me-2"></i>
+                                                                    Complete your health profile for more tailored suggestions.
+                                                                </li>
+                                                            </ul>
+
+                                                            <div class="mt-3">
+                                                                <small class="text-muted">Manage family health profiles or invite a caregiver for shared access.</small>
+                                                                <div class="mt-2 d-flex gap-2">
+                                                                    <button class="btn btn-medical btn-sm" id="btn-manage-family"><i class="bi bi-people me-1"></i>Manage Family</button>
+                                                                    <button class="btn btn-outline-medical btn-sm" id="btn-view-records"><i class="bi bi-folder2-open me-1"></i>View Records</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="alert alert-light border-start border-3 border-primary small">
+                                                <strong>Note:</strong> The snapshot and tips are for guidance only. For clinical concerns, consult a healthcare professional.
+                                            </div>
                                             <!-- Feature Cards -->
                                             <div class="row g-3" id="health-features">
                                                 <div class="col-md-4">
@@ -352,6 +426,59 @@
                                         </div>
 
                                         <!-- Comments & Feedback -->
+                                        <div class="public-comment-card card mt-4">
+                                            <div class="card-body">
+                                                <h5 class="card-title mb-2">Public Comment</h5>
+                                                <p class="small text-muted mb-3">Share a quick public note — it will appear below with other feedback.</p>
+
+                                                <form id="publicCommentForm" class="d-flex gap-2">
+                                                    <textarea id="publicCommentText" class="form-control" rows="2" placeholder="Write a short comment..." required></textarea>
+                                                    <div class="d-flex flex-column">
+                                                        <button id="publicCommentSend" class="btn btn-medical" type="submit" title="Send comment">
+                                                            <i class="bi bi-send"></i>
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+
+                                        <script>
+                                        (function () {
+                                            const commentsKey = 'sahatak_comments_v1';
+                                            const form = document.getElementById('publicCommentForm');
+                                            const textEl = document.getElementById('publicCommentText');
+                                            const list = document.getElementById('comments-list');
+
+                                            function createCommentItem(c) {
+                                                const item = document.createElement('div');
+                                                item.className = 'list-group-item';
+                                                item.innerHTML = '<div class="d-flex w-100 justify-content-between"><strong>' + (c.rating ? c.rating + ' • ' : '') + '</strong><small class="text-muted">' + new Date(c.time).toLocaleString() + '</small></div><p class="mb-1">' + c.text + '</p>';
+                                                return item;
+                                            }
+
+                                            form.addEventListener('submit', function (e) {
+                                                e.preventDefault();
+                                                const text = (textEl.value || '').trim();
+                                                if (!text) return;
+                                                let data = [];
+                                                try { data = JSON.parse(localStorage.getItem(commentsKey) || '[]'); } catch (err) { data = []; }
+                                                const comment = { text: text, rating: '', time: Date.now() };
+                                                data.push(comment);
+                                                try { localStorage.setItem(commentsKey, JSON.stringify(data)); } catch (err) {}
+                                                // Update visible list: show newly added comment at top
+                                                if (list) {
+                                                    // remove "no comments" placeholder if present
+                                                    if (list.children.length === 1 && list.children[0].classList.contains('text-muted')) {
+                                                        list.innerHTML = '';
+                                                    }
+                                                    const item = createCommentItem(comment);
+                                                    list.insertBefore(item, list.firstChild);
+                                                }
+                                                textEl.value = '';
+                                                textEl.blur();
+                                            });
+                                        })();
+                                        </script>
                                         <div class="comments-section mt-5">
                                             <div class="d-flex justify-content-between align-items-center mb-3">
                                                 <h3>Your Feedback</h3>
@@ -478,9 +605,9 @@
                                           </div>
                                         </div>
                                     
-                                         <!-- Footer -->
+                                        <!-- Footer -->
 
-                                       <footer class="footer mt-auto py-3">
+        <footer class="footer mt-auto py-3">
         <div class="container">
             <div class="row g-3">
                 <!-- Brand & Description -->
