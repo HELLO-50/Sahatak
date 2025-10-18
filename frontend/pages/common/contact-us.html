@@ -60,7 +60,7 @@
                     <!-- Page Title - Center -->
                     <div class="col-lg-4 text-center">
                         <h1 class="dashboard-title" id="page-title">contact-us Sahatak</h1>
-                        <p class="dashboard-subtitle" id="page-subtitle">Services</p>
+                        <p class="dashboard-subtitle" id="page-subtitle">contact</p>
                     </div>
                     
                     <!-- Controls - Right (Left in RTL) -->
@@ -68,7 +68,7 @@
                 <div class="row mb-3">
                     <div class="col-12 d-flex align-items-center justify-content-between">
                         <div>
-                            <h2 class="h4 mb-1">Sahatak Services</h2>
+                            <h2 class="h4 mb-1">Contact page with platfrom adminstrators</h2>
                             <p class="text-muted mb-0">A comprehensive list of healthcare and support services available through the Sahatak program.</p>
                         </div>
                         <div class="d-flex align-items-center">
@@ -77,3 +77,199 @@
                         </div>
                     </div>
                 </div>
+                <div class="row g-4">
+                    <div class="col-lg-7">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h3 class="card-title mb-3">Contact Sahatak</h3>
+                                <p class="text-muted small mb-4">Use this channel for general inquiries, feedback, partnerships, or media requests.</p>
+
+                                <form id="contact-form" class="needs-validation" novalidate>
+                                    <div class="mb-3">
+                                        <label for="contact-name" class="form-label">Name</label>
+                                        <input type="text" class="form-control" id="contact-name" placeholder="Your full name" required>
+                                        <div class="invalid-feedback">Please enter your name.</div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="contact-email" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="contact-email" placeholder="you@example.com" required>
+                                        <div class="invalid-feedback">Please enter a valid email address.</div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="contact-message" class="form-label">Message</label>
+                                        <textarea class="form-control" id="contact-message" rows="6" placeholder="How can we help?" required></textarea>
+                                        <div class="invalid-feedback">Please enter a message.</div>
+                                    </div>
+
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <button type="submit" class="btn btn-primary">Send Message</button>
+                                        <button type="button" class="btn btn-outline-secondary" id="contact-reset">Clear</button>
+                                    </div>
+
+                                    <div id="contact-feedback" class="mt-3" aria-live="polite"></div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-5">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-body d-flex flex-column">
+                                <h4 class="card-title mb-3">General Contact Info</h4>
+
+                                <ul class="list-unstyled mb-4">
+                                    <li class="mb-2">
+                                        <strong>Email:</strong>
+                                        <a href="mailto:support@sahatak.com" class="ms-1">Sahatak.Sudan@gmail.com</a>
+                                    </li>
+
+                                <h5 class="mb-2">Follow Us</h5>
+                                <div class="mb-4">
+                                    <a href="#" class="btn btn-outline-primary btn-sm me-2" aria-label="Twitter">
+                                        <i class="bi bi-twitter"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-outline-primary btn-sm me-2" aria-label="Facebook">
+                                        <i class="bi bi-facebook"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-outline-primary btn-sm me-2" aria-label="LinkedIn">
+                                        <i class="bi bi-linkedin"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-outline-primary btn-sm" aria-label="Instagram">
+                                        <i class="bi bi-instagram"></i>
+                                    </a>
+                                </div>
+
+                                <div class="mt-auto">
+                                    <small class="text-muted">For urgent technical support, please include "URGENT" in the subject line of your message.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+
+        <footer class="footer mt-auto py-3">
+        <div class="container">
+            <div class="row g-3">
+                <!-- Brand & Description -->
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="mb-3">
+                        <i class="bi bi-heart-pulse me-2 text-primary"></i>
+                        <span id="footer-brand">Sahatak</span>
+                    </h5>
+                    <div class="d-flex gap-3 social-links">
+                        <a href="https://facebook.com/sahatak" target="_blank" rel="noopener"><i class="bi bi-facebook fs-5"></i></a>
+                        <a href="https://twitter.com/sahatak" target="_blank" rel="noopener"><i class="bi bi-twitter fs-5"></i></a>
+                        <a href="https://instagram.com/sahatak" target="_blank" rel="noopener"><i class="bi bi-instagram fs-5"></i></a>
+                        <a href="https://linkedin.com/company/sahatak" target="_blank" rel="noopener"><i class="bi bi-linkedin fs-5"></i></a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="mb-3" id="footer-links-title">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="../common/about.html" class="text-muted text-decoration-none" id="footer-about">About Platform</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="../common/services.html" class="text-muted text-decoration-none" id="footer-services">Services</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="mb-3" id="footer-support-title">Support & Help</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="../common/support.html" class="text-muted text-decoration-none" id="footer-help">Help Center</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="../common/contact-us.html" class="text-muted text-decoration-none" id="footer-contact">Contact Us</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Emergency Contact -->
+                <div class="col-lg-3 col-md-6 emergency-section">
+                    <p class="mb-2 text-danger fw-bold" id="footer-emergency-text">
+                        For medical emergencies
+                    </p>
+                    <p class="mb-3 text-danger fw-bold fs-6" id="footer-emergency-action">
+                        <i class="bi bi-hospital me-2"></i>
+                        Go to nearest ER hospital
+                    </p>
+                    <p class="mb-0 text-muted small" id="footer-emergency-note">
+                        For non-urgent consultations use the platform
+                    </p>
+                </div>
+            </div>
+
+            <!-- Bottom Bar -->
+            <hr class="my-3">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="mb-0 fw-bold" id="footer-copyright">
+                        © 2025 Sahatak. All rights reserved.
+                    </p>
+                    <p class="mb-0 text-muted small mt-1" id="footer-medical-disclaimer">
+                        This platform does not replace visiting a doctor in emergency cases
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+                <script>
+                    (function(){
+                        const form = document.getElementById('contact-form');
+                        const resetBtn = document.getElementById('contact-reset');
+                        const feedback = document.getElementById('contact-feedback');
+
+                        resetBtn.addEventListener('click', () => {
+                            form.reset();
+                            form.classList.remove('was-validated');
+                            feedback.innerHTML = '';
+                        });
+
+                        form.addEventListener('submit', async (e) => {
+                            e.preventDefault();
+                            form.classList.add('was-validated');
+                            if (!form.checkValidity()) return;
+
+                            const payload = {
+                                name: document.getElementById('contact-name').value.trim(),
+                                email: document.getElementById('contact-email').value.trim(),
+                                message: document.getElementById('contact-message').value.trim()
+                            };
+
+                            feedback.innerHTML = '<div class="alert alert-info py-2">Sending…</div>';
+
+                            try {
+                                const res = await fetch('/api/contact', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(payload)
+                                });
+
+                                if (!res.ok) {
+                                    // Try to read error details from API
+                                    let body = {};
+                                    try { body = await res.json(); } catch (e) { /* ignore */ }
+                                    const msg = (body && body.message) ? body.message : 'Unable to send message right now. Please try again later.';
+                                    feedback.innerHTML = `<div class="alert alert-danger py-2">${msg}</div>`;
+                                    return;
+                                }
+
+                                feedback.innerHTML = '<div class="alert alert-success py-2">Thank you — your message has been sent.</div>';
+                                form.reset();
+                                form.classList.remove('was-validated');
+                            } catch (err) {
+                                feedback.innerHTML = '<div class="alert alert-danger py-2">Unable to send message right now. Please try again later.</div>';
+                            }
+                        });
+                    })();
+                </script>

@@ -148,6 +148,9 @@
                         <p class="card-text small text-muted">
                             This page explains the services we provide and how they help you manage care, save time, and stay informed.
                         </p>
+                        <div id="api-info" class="mt-3" style="display:none;">
+                            <div class="alert alert-info p-2 small mb-0">Loading platform info…</div>
+                        </div>
                         </div>
                     </div>
                 </div>
@@ -1165,5 +1168,30 @@
         </div>
     </footer>
                     <script src="../../assets/js/main.js"></script>
+                    <script>
+                    (function(){
+                        // Remove duplicate feature cards/list items based on title text
+                        try {
+                            const seen = new Set();
+                            document.querySelectorAll('#features-cards .card, #features-list .feature-card').forEach(card => {
+                                const title = (card.querySelector('.card-title') || card.querySelector('h6') || {textContent:''}).textContent.trim();
+                                if (!title) return;
+                                if (seen.has(title)) card.remove(); else seen.add(title);
+                            });
+                        } catch (e) { /* non-fatal */ }
+
+                        // Try fetching backend API info to show version/endpoints when available
+                        const apiInfoEl = document.getElementById('api-info');
+                        fetch('/api').then(r => r.json()).then(j => {
+                            if (!j || !j.data) return;
+                            const v = j.data.version || j.data.service || '';
+                            const endpoints = j.data.endpoints ? Object.keys(j.data.endpoints) : [];
+                            apiInfoEl.style.display = 'block';
+                            apiInfoEl.innerHTML = `<div class="alert alert-info p-2 small mb-0">Platform API: <strong>${v}</strong> — Available modules: ${endpoints.join(', ')}</div>`;
+                        }).catch(()=>{
+                            // leave hidden if not reachable
+                        });
+                    })();
+                    </script>
 
 

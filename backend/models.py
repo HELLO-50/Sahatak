@@ -1565,3 +1565,26 @@ class MessageAttachment(db.Model):
     
     def __repr__(self):
         return f'<MessageAttachment {self.id}: {self.filename}>'
+
+
+# Simple ContactMessage model to store messages from the contact-us page
+class ContactMessage(db.Model):
+    __tablename__ = 'contact_messages'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    email = db.Column(db.String(200), nullable=False, index=True)
+    message = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'email': self.email,
+            'message': self.message,
+            'created_at': self.created_at.isoformat()
+        }
+
+    def __repr__(self):
+        return f'<ContactMessage {self.id} from {self.email}>'

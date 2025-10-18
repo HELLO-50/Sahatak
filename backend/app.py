@@ -124,6 +124,7 @@ from routes.user_settings import user_settings_bp
 from routes.admin import admin_bp
 from routes.doctor_verification import doctor_verification_bp
 from routes.messages import messages_bp
+from routes.contact import contact_bp
 
 # Register blueprints with logging
 app_logger.info("Registering API blueprints")
@@ -141,6 +142,7 @@ app.register_blueprint(user_settings_bp, url_prefix='/api/user-settings')
 app.register_blueprint(admin_bp, url_prefix='/api/admin')
 app.register_blueprint(doctor_verification_bp, url_prefix='/api/doctor-verification')
 app.register_blueprint(messages_bp, url_prefix='/api/messages')
+app.register_blueprint(contact_bp)
 
 @login_manager.user_loader
 def load_user(user_id):
