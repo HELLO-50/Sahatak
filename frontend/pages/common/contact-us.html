@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title-head">Contact-us - Sahatak</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%230d47a1' d='m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523.942-.661 2.27.067 3.71L8 15.5l6.533-8.737c.728-1.44.59-2.768.067-3.71C13.486.878 10.4.28 8.717 2.01L8 2.748z'/></svg>">
+    
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    
+    <!-- Bootstrap Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Arabic Font - Noto Sans Arabic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <!-- Dashboard CSS -->
+    <link rel="stylesheet" href="../../assets/css/components/dashboard.css">
+    <!-- Appointments CSS -->
+    <link rel="stylesheet" href="../../assets/css/components/appointments.css">
+    <!-- Video Consultation Dashboard CSS -->
+    <link rel="stylesheet" href="../../assets/css/components/video-consultation-dashboard.css">
+</head>
+<body data-protect="patient">
+    <div class="dashboard-container">
+        <div class="container-fluid" style="padding-bottom: 120px;">
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <div class="row align-items-center">
+                    <!-- Profile Section - Left (Right in RTL) -->
+                    <div class="col-lg-4">
+                        <div class="profile-section">
+                            <div class="user-avatar">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <div class="user-details">
+                                <h5 class="mb-1" id="user-name">Loading...</h5>
+                            </div>
+                            <!-- Vertical Action Buttons -->
+                            <div class="action-buttons">
+                                <button class="btn btn-action" onclick="goBackToDashboard()" title="Back to Dashboard">
+                                    <i class="bi bi-arrow-left"></i>
+                                    <span id="btn-back">Back to Dashboard</span>
+                                </button>
+                                <button class="btn btn-action btn-logout" onclick="AuthGuard.logout()" title="Logout">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                    <span id="btn-logout">Logout</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Page Title - Center -->
+                    <div class="col-lg-4 text-center">
+                        <h1 class="dashboard-title" id="page-title">contact-us Sahatak</h1>
+                        <p class="dashboard-subtitle" id="page-subtitle">Services</p>
+                    </div>
+                    
+                    <!-- Controls - Right (Left in RTL) -->
+            <section id="services-section" class="services-section mt-4">
+                <div class="row mb-3">
+                    <div class="col-12 d-flex align-items-center justify-content-between">
+                        <div>
+                            <h2 class="h4 mb-1">Sahatak Services</h2>
+                            <p class="text-muted mb-0">A comprehensive list of healthcare and support services available through the Sahatak program.</p>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <input type="search" id="service-search" class="form-control form-control-sm me-2" placeholder="Search services..." aria-label="Search services">
+                            <button class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('service-search').value='';">Clear</button>
+                        </div>
+                    </div>
+                </div>
