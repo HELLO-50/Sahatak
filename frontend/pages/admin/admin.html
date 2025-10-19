@@ -459,6 +459,29 @@
                                                 <th id="appointment-status">Status</th>
                                                 <th id="appointment-actions">Actions</th>
                                             </tr>
+                                            <style>
+                                            /* Make the appointments table area white */
+                                            #appointments .table-responsive {
+                                                background: #ffffff;
+                                                border-radius: 0.5rem;
+                                                padding: 0.75rem;
+                                            }
+
+                                            /* Keep inner table rows/content rendering correctly on the white background */
+                                            #appointments .table-responsive .table,
+                                            #appointments .table-responsive .table > thead,
+                                            #appointments .table-responsive .table > tbody,
+                                            #appointments .table-responsive .table > thead > tr > th,
+                                            #appointments .table-responsive .table > tbody > tr > td {
+                                                background: transparent;
+                                            }
+
+                                            /* If spinner/loading row exists, keep its container readable */
+                                            #appointments .table-responsive .spinner-border,
+                                            #appointments .table-responsive p {
+                                                background: transparent;
+                                            }
+                                            </style>
                                         </thead>
                                         <tbody id="appointments-table-body">
                                             <tr>
