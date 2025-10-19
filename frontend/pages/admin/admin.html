@@ -371,7 +371,25 @@
                                         </button>
                                     </div>
                                 </div>
-                                
+                                <style>
+                                /* Make the verification area (doctors verification table / list) white */
+                                #verification #pending-verifications,
+                                #verification .table-responsive,
+                                #verification .verification-list {
+                                    background: #ffffff;
+                                    border-radius: 0.5rem;
+                                    padding: 0.75rem;
+                                }
+
+                                /* Keep inner table rows/content rendering correctly on the white background */
+                                #verification .table-responsive .table,
+                                #verification .table-responsive .table > thead,
+                                #verification .table-responsive .table > tbody,
+                                #verification .table-responsive .table > thead > tr > th,
+                                #verification .table-responsive .table > tbody > tr > td {
+                                    background: transparent;
+                                }
+                                </style>
                                 <!-- Verification Tabs -->
                                 <div class="mb-3">
                                     <div class="btn-group" role="group">
