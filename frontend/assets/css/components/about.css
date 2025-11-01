@@ -1,0 +1,132 @@
+/* Enhanced card styling for about page */
+.service-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: none;
+    box-shadow: 0 2px 15px rgba(13, 71, 161, 0.06);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(13, 71, 161, 0.1);
+}
+
+.service-card .card-body {
+    padding: 1.5rem;
+}
+
+.service-card .card-title {
+    color: #0d47a1;
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.service-card .card-title i {
+    background: linear-gradient(135deg, #e6f7ff 0%, #b3e5fc 100%);
+    padding: 8px;
+    border-radius: 8px;
+    margin-right: 12px;
+    color: #0d47a1;
+    font-size: 1rem;
+}
+
+.service-card .card-text {
+    color: #37474f;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.service-card small.text-muted {
+    display: block;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(13, 71, 161, 0.08);
+    font-size: 0.85rem;
+    color: #78909c !important;
+}
+
+/* Grid layout improvements */
+.services-overview .row {
+    margin-left: -12px;
+    margin-right: -12px;
+}
+
+.services-overview .col-md-4 {
+    padding: 12px;
+}
+
+/* Section headings */
+.services-overview h3 {
+    color: #0d47a1;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.services-overview p.text-muted {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+}
+
+/* Intro card styling */
+.intro-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f5f9ff 100%);
+    border: none;
+    box-shadow: 0 2px 15px rgba(13, 71, 161, 0.06);
+    border-radius: 12px;
+    margin-bottom: 3rem;
+}
+
+.intro-card .card-title {
+    color: #0d47a1;
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+}
+
+.intro-card .card-text {
+    color: #37474f;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    max-width: 900px;
+}
+
+/* Public comment card styling */
+.public-comment-card {
+    background: #ffffff;
+    border: none;
+    box-shadow: 0 2px 15px rgba(13, 71, 161, 0.06);
+    border-radius: 12px;
+}
+
+.public-comment-card .card-title {
+    color: #0d47a1;
+    font-weight: 600;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .service-card {
+        margin-bottom: 1rem;
+    }
+    
+    .service-card .card-body {
+        padding: 1.25rem;
+    }
+    
+    .service-card .card-title {
+        font-size: 1.1rem;
+    }
+    
+    .intro-card .card-title {
+        font-size: 1.5rem;
+    }
+}
+
+/* RTL support */
+[dir="rtl"] .service-card .card-title i {
+    margin-right: 0;
+    margin-left: 12px;
+}
