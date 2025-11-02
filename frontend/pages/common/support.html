@@ -228,10 +228,10 @@
                         <style>
                         /* make all cards in the support section have a light-blue background,
                             and ensure form fields inside those cards are white */
-                        #support-section .card {
-                          background-color: #e6f7ff;
-                          border: 1px solid rgba(13,47,93,0.06);
-                          box-shadow: 0 1px 2px rgba(13,47,93,0.04);
+                            #support-section .card {
+                            background-color: #e6f7ff;
+                            border: 1px solid rgba(13,47,93,0.06);
+                            box-shadow: 0 1px 2px rgba(13,47,93,0.04);
                         }
                                 
                                     .container-fluid {
@@ -239,12 +239,10 @@
                                     justify-content: center; 
                                     align-items: center;     
                                     min-height: 100vh;       
-}
-
-                        #support-section .card .card-body {
-                          background: transparent;
-                        }
-
+                }
+                            #support-section .card .card-body {
+                            background: transparent;
+                            }
                         /* form controls inside cards should be white for contrast */
                         #support-section .card .form-control,
                         #support-section .card .form-select,
@@ -252,23 +250,24 @@
                         #support-section .card input[type="text"],
                         #support-section .card input[type="tel"],
                         #support-section .card input[type="file"] {
-                          background-color: #ffffff;
-                          border: 1px solid #dfe7ef;
-                          box-shadow: none;
+                                background-color: #ffffff;
+                                border: 1px solid #dfe7ef;
+                                box-shadow: none;
                         }
 
                         /* keep placeholder/text color readable */
                         #support-section .card .form-control::placeholder,
                         #support-section .card textarea::placeholder {
-                          color: #6c757d;
+                            color: #6c757d;
                         }
+                        
                         </style>
                     <div class="col-lg-6">
                         <div class="card shadow-sm">
                             <div class="card-body">
                                 <h5 class="card-title"><i class="bi bi-bug-fill me-2"></i>Report a Problem</h5>
-                                <p class="text-muted small">Tell us about any issues you face while using the app. Our support team will review and respond.</p>
-
+                                
+                            <p class="text-muted small">Tell us about any issues you face while using the app. Our support team will review and respond.</p>
                                 <div id="report-alert" class="alert d-none" role="alert"></div>
 
                                 <form id="report-form" novalidate>
