@@ -25,162 +25,7 @@
     <link rel="stylesheet" href="../../assets/css/components/dashboard.css">
     <!-- Appointments CSS -->
     <link rel="stylesheet" href="../../assets/css/components/appointments.css">
-    <!-- Video Consultation Dashboard CSS -->
-    <link rel="stylesheet" href="../../assets/css/components/video-consultation-dashboard.css">
-    <style>
-        /* Unverified doctor states */
-        .unverified-disabled {
-            opacity: 0.5;
-            cursor: not-allowed !important;
-            pointer-events: none;
-        }
-        
-        .verification-overlay {
-            position: relative;
-        }
-        
-        .verification-overlay::after {
-            content: "🔒 Verification Required";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.95);
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            color: #dc3545;
-            border: 1px solid #dc3545;
-            z-index: 10;
-            display: none;
-        }
-        
-        .unverified-disabled.verification-overlay::after {
-            display: block;
-        }
-        
-        .verification-notice {
-            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-            border: 1px solid #ffeaa7;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 20px;
-        }
-        
-        .verification-notice .notice-icon {
-            color: #856404;
-            font-size: 24px;
-        }
-        
-        /* Video consultation button styling */
-        .btn-complete-consultation {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 8px 16px;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-complete-consultation:hover {
-            background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
-            color: white;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
-        }
-        
-        .btn-consultation-ended {
-            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 8px 16px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: not-allowed;
-            opacity: 0.8;
-        }
-        
-        /* Animation for removing appointments */
-        @keyframes fadeOut {
-            0% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: scale(0.95);
-            }
-        }
-        
-        /* Pagination Styles */
-        .pagination-controls {
-            font-size: 14px;
-        }
-        
-        .pagination-controls .btn-sm {
-            padding: 0.375rem 0.75rem;
-            font-size: 0.875rem;
-            border-radius: 0.25rem;
-            transition: all 0.15s ease-in-out;
-        }
-        
-        .pagination-controls .btn-outline-secondary:hover:not(:disabled) {
-            background-color: #6c757d;
-            border-color: #6c757d;
-            color: white;
-        }
-        
-        .pagination-controls .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .pagination-controls .d-flex.gap-1 > .btn {
-            min-width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .pagination-controls .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-        }
-        
-        .pagination-controls .btn-primary:hover {
-            background-color: #0056b3;
-            border-color: #004085;
-        }
-        
-        /* Page info styling */
-        #activity-page-info, #appointments-page-info {
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-        
-        /* Responsive pagination */
-        @media (max-width: 768px) {
-            .pagination-controls {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-            
-            .pagination-controls .d-flex:first-child,
-            .pagination-controls .d-flex:last-child {
-                justify-content: center;
-            }
-            
-            #activity-page-info, #appointments-page-info {
-                text-align: center;
-                margin-bottom: 0.5rem;
-            }
-        }
-    </style>
+    
 </head>
 <body data-protect="patient">
     <div class="dashboard-container">
@@ -205,70 +50,13 @@
                                 <i class="bi bi-globe me-1"></i>
                                 <span id="current-lang">English</span>
                             </button>
-                        
-                    
-                     <style>
-                    /* light blue background for the services area, cards stay visually on top */
-                    #services-section {
-                        background-color: #e6f7ff; /* light blue */
-                        padding: 1.5rem;
-                        border-radius: 0.6rem;
-                    }
-
-                    /* ensure cards render above the background (so background never covers them) */
-                    #services-section .card {
-                        position: relative;
-                        z-index: 1;
-                        background-color: #fff; /* reinforce white card background */
-                    }
-
-                    /* give some extra spacing so the background doesn't touch viewport edges */
-                    @media (min-width: 992px) {
-                        #services-section { padding-left: 2rem; padding-right: 2rem; }
-                    }
-                </style>
-            <!-- Support & Supervisor Messaging -->
-            <section id="support-section" class="mt-4">
-                <div class="row gy-4">
-                    <!-- Report a Problem Card -->
-                        <style>
-                        /* make all cards in the support section have a light-blue background,
-                            and ensure form fields inside those cards are white */
-                            #support-section .card {
-                            background-color: #e6f7ff;
-                            border: 1px solid rgba(13,47,93,0.06);
-                            box-shadow: 0 1px 2px rgba(13,47,93,0.04);
-                        }
-                                
-                                    .container-fluid {
-                                    display: flex;
-                                    justify-content: center; 
-                                    align-items: center;     
-                                    min-height: 100vh;       
-                }
-                            #support-section .card .card-body {
-                            background: transparent;
-                            }
-                        /* form controls inside cards should be white for contrast */
-                        #support-section .card .form-control,
-                        #support-section .card .form-select,
-                        #support-section .card textarea,
-                        #support-section .card input[type="text"],
-                        #support-section .card input[type="tel"],
-                        #support-section .card input[type="file"] {
-                                background-color: #ffffff;
-                                border: 1px solid #dfe7ef;
-                                box-shadow: none;
-                        }
-
-                        /* keep placeholder/text color readable */
-                        #support-section .card .form-control::placeholder,
-                        #support-section .card textarea::placeholder {
-                            color: #6c757d;
-                        }
-                        
-                        </style>
-                    <div class="col-lg-6">
+                            
+                            <!-- Support & Supervisor Messaging -->
+                            <section id="support-section" class="mt-4">
+                                <div class="row gy-4">
+                            
+                    <!-- Contact Supervisors -->
+                    <div class="col-lg-10 col-md-12 mx-auto">
                         <div class="card shadow-sm">
                             <div class="card-body">
                                 <h5 class="card-title"><i class="bi bi-bug-fill me-2"></i>Report a Problem</h5>
@@ -281,6 +69,11 @@
                                         <label for="problem-subject" class="form-label">Subject</label>
                                         <input type="text" id="problem-subject" name="subject" class="form-control" required maxlength="120" placeholder="Short summary of the issue">
                                     </div>
+
+                                        <div class="mb-3">
+                                            <label for="problem-subject" class="form-label">Email</label>
+                                            <input type="text" id="problem-subject" name="subject" class="form-control" required maxlength="120" placeholder="Your email address for follow-up">
+                                        </div>
 
                                     <div class="mb-3">
                                         <label for="problem-description" class="form-label">Description</label>
