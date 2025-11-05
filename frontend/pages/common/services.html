@@ -85,7 +85,62 @@
                     @media (min-width: 992px) {
                         #services-section { padding-left: 2rem; padding-right: 2rem; }
                     }
-                </style>
+                    
+                    /* About page*/
+                                body {
+                                    background-color: #e6f7ff; /* light blue page background */
+                                }
+                                
+                                /* Keep main panels and cards white for readability */
+                                .card,
+                                .modal-content,
+                                .profile-section,
+                                .public-comment-card,
+                                .list-group-item,
+                                .dashboard-content,
+                                .about-section,
+                                .about-health {
+                                    background-color: #ffffff !important; /* white panels/fields */
+                                }
+
+                                /* Form controls and textareas explicitly white for contrast */
+                                .form-control,
+                                .form-select,
+                                textarea.form-control {
+                                    background-color: #ffffff !important;
+                                    border-color: #d9e9fb;
+                                    color: #062a43;
+                                }
+
+                                /* Footer readable (white) */
+                                footer {
+                                    background-color: rgba(255,255,255,0.98);
+                                    border-top: 1px solid rgba(13,71,161,0.06);
+                                }
+
+                                /* Subtle borders and rounded corners for panels */
+                                .card,
+                                .modal-content,
+                                .profile-section {
+                                    border: 1px solid rgba(13,71,161,0.08);
+                                    border-radius: 8px;
+                                    box-shadow: 0 1px 4px rgba(13,71,161,0.03);
+                                }
+
+                                /* Ensure readable text color on white/blue backgrounds */
+                                body, .card, .profile-section, .dashboard-header {
+                                    color: #062a43;
+                                }
+
+                                /* Links and small text adjustments for contrast */
+                                .card a, .list-group-item a {
+                                    color: #062a43;
+                                    text-decoration: underline;
+                                }
+                                .text-muted {
+                                    color: rgba(6,42,67,0.66) !important;
+                                }
+                                </style>
                 <div class="row" id="services-grid" role="list">
                     <div class="col-sm-6 col-lg-4 mb-4" role="listitem" data-service="video-consultation">
                         <div class="card h-100 shadow-sm">
