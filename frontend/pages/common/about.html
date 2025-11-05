@@ -30,99 +30,30 @@
     <!-- About Page CSS -->
     <link rel="stylesheet" href="../../assets/css/components/about.css">
 </head>
-<body data-protect="patient">
+            <body data-protect="patient">
     <div class="dashboard-container">
         <div class="container-fluid" style="padding-bottom: 120px;">
             <!-- Dashboard Header -->
-                <style>
-                /* Page background */
-                body {
-                    background-color: #e6f7ff; /* light blue page background */
-                }
-                
-                /* Keep main panels and cards white for readability */
-                .card,
-                .modal-content,
-                .profile-section,
-                .public-comment-card,
-                .list-group-item,
-                .dashboard-content,
-                .about-section,
-                .about-health {
-                    background-color: #ffffff !important; /* white panels/fields */
-                }
-
-                /* Form controls and textareas explicitly white for contrast */
-                .form-control,
-                .form-select,
-                textarea.form-control {
-                    background-color: #ffffff !important;
-                    border-color: #d9e9fb;
-                    color: #062a43;
-                }
-
-                /* Footer readable (white) */
-                footer {
-                    background-color: rgba(255,255,255,0.98);
-                    border-top: 1px solid rgba(13,71,161,0.06);
-                }
-
-                /* Subtle borders and rounded corners for panels */
-                .card,
-                .modal-content,
-                .profile-section {
-                    border: 1px solid rgba(13,71,161,0.08);
-                    border-radius: 8px;
-                    box-shadow: 0 1px 4px rgba(13,71,161,0.03);
-                }
-
-                /* Ensure readable text color on white/blue backgrounds */
-                body, .card, .profile-section, .dashboard-header {
-                    color: #062a43;
-                }
-
-                /* Links and small text adjustments for contrast */
-                .card a, .list-group-item a {
-                    color: #062a43;
-                    text-decoration: underline;
-                }
-                .text-muted {
-                    color: rgba(6,42,67,0.66) !important;
-                }
-                </style>
             <div class="dashboard-header">
                 <div class="row align-items-center">
                     <!-- Profile Section - Left (Right in RTL) -->
                     <div class="col-lg-4">
                         <div class="profile-section">
-                            <div class="action-buttons">
-                            </div>
                         </div>
                     </div>
                     
                     <!-- Page Title - Center -->
                     <div class="col-lg-4 text-center">
                         <h1 class="dashboard-title" id="page-title">About Sahatak</h1>
-                        <p class="dashboard-subtitle" id="page-subtitle">Know Your Sahatak</p>
+                        <p class="dashboard-subtitle" id="page-subtitle">About</p>
                     </div>
-                    
-                    <!-- Controls - Right (Left in RTL) -->
-                    <div class="col-lg-4 text-end">
-                        <div class="dashboard-controls">
-                            <button class="btn btn-medical btn-sm me-2" onclick="bookNewAppointment()">
-                                <i class="bi bi-plus me-1"></i>
-                                <span id="btn-new-appointment">Add Comments</span>
-                            </button>
+                     <!-- Controls - Right (Left in RTL) -->
                             <button class="btn btn-outline-medical btn-sm" onclick="showLanguageSelector()">
                                 <i class="bi bi-globe me-1"></i>
                                 <span id="current-lang">English</span>
                             </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Main Content Area -->
-            <div class="dashboard-content">
+                        
+
                 <!-- Introduction and audience-friendly summary -->
                 <div class="card mb-4 intro-card">
                     <div class="card-body">
@@ -290,6 +221,18 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-md-4">
+                            <div class="card h-100 service-card">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="bi bi-robot me-2 text-primary"></i>AI Healthcare Assistant</h5>
+                                    <p class="card-text">
+                                        Your smart AI companion helps answer medical questions, suggest health tips, and guide you through managing your health conditions in real-time available
+                                    </p>
+                                    <small class="text-muted">artificial intelligence to make your healthcare experience smarter and.</small>
+                                </div>
+                            </div>
+                        </div>
+
                     <p id="contact-description">
                         For any inquiries or support, please reach out to us at <a href="mailto:
                         support@sahatak.com">support@sahatak.com</a>.
