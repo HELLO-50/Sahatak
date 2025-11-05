@@ -383,6 +383,46 @@
 
             <!-- Client-side handlers (no external submission) -->
             <script>
+                // Translation helper functions for activities
+        function getActivityMessage(activityType, patientName) {
+            const currentLang = LanguageManager?.getLanguage() || 'en';
+            const t = LanguageManager?.translations?.[currentLang];
+            
+            if (t?.dashboard?.doctor?.activities?.[activityType]) {
+                return t.dashboard.doctor.activities[activityType].replace('{patient_name}', patientName);
+            }
+            
+            // Fallback to English
+            const fallbacks = {
+                'appointment_scheduled': `New appointment scheduled with ${patientName}`,
+                'appointment_completed': `Consultation completed with ${patientName}`,
+                'appointment_cancelled': `Appointment cancelled with ${patientName}`,
+                'video_session_ended': `Video call ended with ${patientName}`
+            };
+            return fallbacks[activityType] || `Activity with ${patientName}`;
+        }
+        
+        function getTimeMessage(timeType, count = null) {
+            const currentLang = LanguageManager?.getLanguage() || 'en';
+            const t = LanguageManager?.translations?.[currentLang];
+            
+            if (t?.dashboard?.doctor?.activities?.time?.[timeType]) {
+                let message = t.dashboard.doctor.activities.time[timeType];
+                if (count !== null) {
+                    message = message.replace('{count}', count);
+                }
+                return message;
+            }
+            
+            // Fallback to English
+            const fallbacks = {
+                'just_now': 'Just now',
+                'minutes_ago': `${count} minutes ago`,
+                'hours_ago': `${count} hours ago`,
+                'days_ago': `${count} days ago`
+            };
+            return fallbacks[timeType] || '';
+        }
                 (function () {
                     function showAlert(container, type, text) {
                         container.className = 'alert alert-' + type;
