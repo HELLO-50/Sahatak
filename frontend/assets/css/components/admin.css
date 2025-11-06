@@ -526,7 +526,7 @@ Colors:
 
 /* Professional Typography */
 .dashboard-title {
-    color: var(--admin-text-primary) !important;
+    color: black !important;
     font-weight: 800;
     font-size: var(--admin-text-3xl);
     line-height: 1.2;
@@ -1358,6 +1358,7 @@ Colors:
     width: 100%;
     overflow: hidden;
     border-radius: var(--admin-radius-md);
+    background-color: white;
 }
 
 .chart-container canvas {
@@ -1366,6 +1367,9 @@ Colors:
     left: 0;
     width: 100% !important;
     height: 100% !important;
+    .chart-container canvas {
+    background-color: white !important;
+}
 }
 
 .chart-title {
@@ -2804,6 +2808,8 @@ button {
     /* Settings Tabs - Stack on mobile */
     #settingsTabs {
         flex-direction: column;
+        flex-direction: column;
+        color: black;
     }
     
     #settingsTabs .nav-link {
