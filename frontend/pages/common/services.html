@@ -29,28 +29,30 @@
     <link rel="stylesheet" href="../../assets/css/components/video-consultation-dashboard.css">
 
 </head>
-<body data-protect="patient">
-    <div class="dashboard-container">
-        <div class="container-fluid" style="padding-bottom: 120px;">
-            <!-- Dashboard Header -->
-            <div class="dashboard-header">
-                <div class="row align-items-center">
-                    <!-- Profile Section - Left (Right in RTL) -->
-                    <div class="col-lg-4">
-                        <div class="profile-section">
+    <body data-protect="patient">
+        <div class="dashboard-container">
+            <div class="container-fluid" style="padding-bottom: 120px;">
+                <!-- Dashboard Header -->
+                <div class="dashboard-header">
+                    <div class="row align-items-center">
+                        <!-- Profile Section - Left (Right in RTL) -->
+                        <div class="col-lg-4">
+                            <div class="profile-section">
+                            </div>
                         </div>
-                    </div>
-                    
-                    <!-- Page Title - Center -->
-                    <div class="col-lg-4 text-center">
-                        <h1 class="dashboard-title" id="page-title">Services Sahatak</h1>
-                        <p class="dashboard-subtitle" id="page-subtitle">Services</p>
-                    </div>
-                    <!-- Controls - Right (Left in RTL) -->
-                            <button class="btn btn-outline-medical btn-sm" onclick="showLanguageSelector()">
-                                <i class="bi bi-globe me-1"></i>
-                                <span id="current-lang">English</span>
-                            </button>
+                        
+                        <!-- Page Title - Center -->
+                        <div class="col-lg-4 text-center">
+                            <h1 class="dashboard-title" id="page-title">Services Sahatak</h1>
+                            <p class="dashboard-subtitle" id="page-subtitle">Services</p>
+                        </div>
+                        <!-- Controls - Right (Left in RTL) -->
+                                <button class="btn btn-outline-medical btn-sm" onclick="showLanguageSelector()">
+                                    <i class="bi bi-globe me-1"></i>
+                                    <span id="current-lang">English</span>
+                                </button>
+                        
+
                         
                     
                     <!-- Controls - Right (Left in RTL) -->
@@ -390,7 +392,7 @@
                         <script src="../../assets/js/components/dashboard-translations.js"></script>
                                     <script>       
                                    
-                                        // Translation helper functions for activities
+                                          // Translation helper functions for activities
                         function getActivityMessage(activityType, patientName) {
                             const currentLang = LanguageManager?.getLanguage() || 'en';
                             const t = LanguageManager?.translations?.[currentLang];
@@ -430,6 +432,15 @@
                             };
                             return fallbacks[timeType] || '';
                         }
+                            // Fallback to English
+                            const fallbacks = {
+                                'just_now': 'Just now',
+                                'minutes_ago': `${count} minutes ago`,
+                                'hours_ago': `${count} hours ago`,
+                                'days_ago': `${count} days ago`
+                            };
+                            return fallbacks[timeType] || '';
+                        
 
                     (function() {
                         const input = document.getElementById('service-search');
