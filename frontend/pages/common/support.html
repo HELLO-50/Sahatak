@@ -378,7 +378,7 @@
             </div>
         </div>
     </footer>
-                        <script src="../../assets/js/components/dashboard-translations.js"></script>
+                        
 
             <!-- Client-side handlers (no external submission) -->
             <script>
@@ -422,6 +422,11 @@
             };
             return fallbacks[timeType] || '';
         }
+        // Update translations for profile section
+                const currentLang = LanguageManager.getLanguage() || 'ar';
+                const translations = LanguageManager.translations[currentLang];
+                if (translations && translations.dashboard && translations.dashboard.support && translations.dashboard.support.profile) 
+                    DashboardTranslations.updateProfileAndSettings(translations.dashboard.patient.profile, null);
                 (function () {
                     function showAlert(container, type, text) {
                         container.className = 'alert alert-' + type;
