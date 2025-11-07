@@ -377,11 +377,19 @@
                 </div>
             </div>
         </div>
-    </footer>
-                        
-
+    </footer>                
+                       
+    
+                     <script src="../../assets/js/main.js"></script>   
+                    
+                    <!-- Dashboard Translations -->
+            <script src="../../assets/js/components/dashboard-translations.js"></script>
             <!-- Client-side handlers (no external submission) -->
             <script>
+            // Language selection buttons
+            document.querySelector('[data-lang="ar"]').addEventListener('click', () => selectLanguage('ar'));
+            document.querySelector('[data-lang="en"]').addEventListener('click', () => selectLanguage('en'));
+            
                 // Translation helper functions for activities
         function getActivityMessage(activityType, patientName) {
             const currentLang = LanguageManager?.getLanguage() || 'en';
@@ -426,7 +434,7 @@
                 const currentLang = LanguageManager.getLanguage() || 'ar';
                 const translations = LanguageManager.translations[currentLang];
                 if (translations && translations.dashboard && translations.dashboard.support && translations.dashboard.support.profile) 
-                    DashboardTranslations.updateProfileAndSettings(translations.dashboard.patient.profile, null);
+                    DashboardTranslations.updateProfileAndSettings(translations.dashboard.support.profile, null);
                 (function () {
                     function showAlert(container, type, text) {
                         container.className = 'alert alert-' + type;
@@ -434,6 +442,24 @@
                         container.classList.remove('d-none');
                         setTimeout(() => container.classList.add('d-none'), 5000);
                     }
+                            function showLanguageSelector() {
+                    // Toggle between Arabic and English
+                    const currentLang = LanguageManager.getLanguage() || 'ar';
+                    const newLang = currentLang === 'ar' ? 'en' : 'ar';
+                    
+                    // Change language
+                    LanguageManager.setLanguage(newLang);
+                    LanguageManager.applyLanguage(newLang);
+                    
+                    // Update dashboard translations (call after applyLanguage to ensure footer is properly updated)
+                    if (DashboardTranslations && DashboardTranslations.updatesupportDashboard) {
+                        DashboardTranslations.updatesupportDashboard(newLang);
+                    }
+                    
+                    // Update the language button text
+                    const langBtn = document.getElementById('current-lang');
+                    langBtn.textContent = newLang === 'ar' ? 'العربية' : 'English';
+                }
 
                     // Report form
                     const reportForm = document.getElementById('report-form');
@@ -450,21 +476,7 @@
                         showAlert(reportAlert, 'success', 'Problem report sent. Our support team will contact you shortly.');
                         reportForm.reset();
                     });
-
-                    // Supervisor form
-                    const supervisorForm = document.getElementById('supervisor-form');
-                    const supervisorAlert = document.getElementById('supervisor-alert');
-                    supervisorForm.addEventListener('submit', function (e) {
-                        e.preventDefault();
-                        if (!supervisorForm.checkValidity()) {
-                            showAlert(supervisorAlert, 'warning', 'Please complete the required fields.');
-                            return;
-                        }
-                        const data = new FormData(supervisorForm);
-                        // TODO: send 'data' via fetch to your backend endpoint
-                        showAlert(supervisorAlert, 'success', 'Your message was sent to the supervisors.');
-                        supervisorForm.reset();
-                    });
+                    
                 })();
             </script>
 
