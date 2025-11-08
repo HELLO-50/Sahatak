@@ -1704,10 +1704,10 @@
     "attachment": "Attachment (optional)",
     "attach_hint": "Attach screenshots, logs, or a short recording (max 10MB).",
     "send_button": "Send Report"
+  },
+  "common": {
+    "language_button": "العربية"
   }
 }
-
-    
-    
   
 
