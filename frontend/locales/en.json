@@ -1687,20 +1687,27 @@
     "copyright": "© 2025 Sahatak. All rights reserved.",
     "medical_disclaimer": "This platform does not replace visiting a doctor in emergency cases"
   },
-  "support": {
-    "report_problem": {
-      "title": "Report a Problem",
-      "description": "Tell us about any issues you face while using the app. Our support team will review and respond.",
-      "subject": "Subject",
-      "subject_placeholder": "Short summary of the issue",
-      "email": "Email",
-      "email_placeholder": "Your email address for follow-up",
-      "description_label": "Description",
-      "description_placeholder": "Describe the steps to reproduce the issue, expected vs actual behavior, and any error messages.",
-      "attachment": "Attachment (optional)",
-      "attachment_description": "Attach screenshots, logs, or a short recording (max 10MB).",
-      "send_button": "Send Report"
-    }
-    
+  "support_page": {
+    "title": "Support Sahatak",
+    "subtitle": "Technical Support"
+  },
+  "lang_button": { "text": "العربية" },
+  "report_problem": {
+    "title": "Report a Problem",
+    "description": "Tell us about any issues you face while using the app. Our support team will review and respond.",
+    "subject": "Subject",
+    "subject_placeholder": "Short summary of the issue",
+    "email": "Email",
+    "email_placeholder": "Your email address for follow-up",
+    "description_label": "Description",
+    "description_placeholder": "Describe the steps to reproduce the issue, expected vs actual behavior, and any error messages.",
+    "attachment": "Attachment (optional)",
+    "attach_hint": "Attach screenshots, logs, or a short recording (max 10MB).",
+    "send_button": "Send Report"
   }
 }
+
+    
+    
+  
+
