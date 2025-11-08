@@ -254,7 +254,7 @@
             </div>
 
             <!-- Controls - Right (Left in RTL) -->
-                                <button class="btn btn-outline-medical btn-sm" onclick="showLanguageSelector()">
+                                <button class-i18n="btn btn-outline-medical btn-sm" onclick="showLanguageSelector()">
                                     <i class="bi bi-globe me-1"></i>
                                     <span id="current-lang">English</span>
                                 </button>
@@ -343,7 +343,7 @@
                 </div>
                 </div>
             </div>
-            </section>
+            </section>  
 
 
             <!-- Footer -->
@@ -421,43 +421,79 @@
         </div>
     </footer>                
                     <!-- Script includes - add main.js here -->
-    <script src="../../assets/js/components/dashboard-translations.js"></script>
-    <script src="../../assets/js/main.js"></script>
+        <script src="../../assets/js/main.js"></script>
+<script src="../../assets/js/components/dashboard-translations.js"></script>
 
-    <!-- Add this script block at the end for initialization -->
-    <script>
-            function showLanguageSelector() {
-            // Toggle between Arabic and English
-            const currentLang = LanguageManager.getLanguage() || 'ar';
-            const newLang = currentLang === 'ar' ? 'en' : 'ar';
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+
+    let selectedLanguage = localStorage.getItem('language') || 'ar';
+
+
+    async function applyLanguage(lang) {
+        try {
+            await LanguageManager.loadTranslations(lang);  
+            LanguageManager.applyTranslations();           
+            localStorage.setItem('language', lang);        
+
             
-            // Change language
-            LanguageManager.setLanguage(newLang);
-            LanguageManager.applyLanguage(newLang);
-            
-            // Update dashboard translations (call after applyLanguage to ensure footer is properly updated)
-            if (DashboardTranslations && DashboardTranslations.updateSupportDashboard) {
-                DashboardTranslations.updateSupportDashboard(newLang);
-            }
-            
-            // Update the language button text
             const langBtn = document.getElementById('current-lang');
-            if (langBtn) {
-                langBtn.textContent = newLang === 'ar' ? 'العربية' : 'English';
+            if (langBtn) langBtn.textContent = lang === 'ar' ? 'العربية' : 'English';
+
+            
+            if (DashboardTranslations?.updateSupportDashboard) {
+                DashboardTranslations.updateSupportDashboard(lang);
             }
+
+        } catch (err) {
+            console.error('Error applying language:', err);
         }
-        
-        function showProfile() {
-            const profileSection = document.getElementById('profile-section');
-            const settingsSection = document.getElementById('settings-section');
-                // Update translations for profile section
-                const currentLang = LanguageManager.getLanguage() || 'ar';
-                const translations = LanguageManager.translations[currentLang];
-                if (translations && translations.dashboard && translations.dashboard.Support && translations.dashboard.Support.profile) {
-                    DashboardTranslations.updateProfileAndSettings(translations.dashboard.Support.profile, null);
+    }
+
+    
+    await applyLanguage(selectedLanguage);
+
+   
+    async function switchLanguage() {
+        selectedLanguage = selectedLanguage === 'ar' ? 'en' : 'ar';
+        await applyLanguage(selectedLanguage);
+    }
+
+   
+    const langToggle = document.getElementById('langToggle');
+    if (langToggle) langToggle.addEventListener('click', switchLanguage);
+
+});
+</script>
+            <script>
+            // Initialize LanguageManager
+            const LanguageManager = {
+                translations: {},
+                async loadTranslations(lang) {
+                    try {
+                        const response = await fetch(`../../locales/${lang}.json`);
+                        if (!response.ok) throw new Error('Failed to load translations');
+                        this.translations = await response.json();
+                    } catch (err) {
+                        console.error('Error loading translations:', err);
+                        this.translations = {};
+                    }
+                },
+                applyTranslations() {
+                    document.querySelectorAll('[data-i18n]').forEach(el => {
+                        const key = el.getAttribute('data-i18n');
+                        if (this.translations[key]) {
+                            el.textContent = this.translations[key];
+                        }
+                    });
+                    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                        const key = el.getAttribute('data-i18n-placeholder');
+                        if (this.translations[key]) {
+                            el.setAttribute('placeholder', this.translations[key]);
+                        }
+                    });
                 }
-            }
-            document.getElementById('langToggle').addEventListener('click', showLanguageSelector);
+            };
 </script>
             <script>
             (function () {
