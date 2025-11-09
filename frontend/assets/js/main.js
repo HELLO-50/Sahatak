@@ -127,10 +127,16 @@ const LanguageManager = {
     },
     
     // Set user's language preference
-    setLanguage: (lang) => {
+    setLanguage: function(lang) {
         localStorage.setItem('sahatak_language', lang);
         document.documentElement.setAttribute('lang', lang);
         document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+        // Apply layout direction and body classes
+        this.applyLanguage(lang);
+        // Update content immediately (pages using updateContentByLanguage will update common elements)
+        try { updateContentByLanguage(lang); } catch (e) { /* page may not include updateContentByLanguage */ }
+        // Dispatch a global event so page-level scripts can react
+        try { window.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang } })); } catch (e) { /* ignore */ }
     },
     
     // Get current language preference

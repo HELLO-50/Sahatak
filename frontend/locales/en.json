@@ -1691,6 +1691,14 @@
     "title": "Support Sahatak",
     "subtitle": "Technical Support"
   },
+  "services_page": {
+    "title": "Services - Sahatak",
+    "subtitle": "Services",
+    "header_title": "Sahatak Services",
+    "header_subtitle": "A comprehensive list of healthcare and support services available through the Sahatak program.",
+    "search_placeholder": "Search services...",
+    "contact_support": "Contact Support"
+  },
   "lang_button": { "text": "العربية" },
   "report_problem": {
     "title": "Report a Problem",
@@ -1707,7 +1715,100 @@
   },
   "common": {
     "language_button": "العربية"
-  }
+  },
+    "about_page": {
+        "title": "About Sahatak",
+        "subtitle": "Know Your Sahatak",
+        "brief_title": "Welcome to Sahatak — Healthcare made simple",
+        "brief": "Sahatak is designed for patients, caregivers, and families who want easy, reliable access to healthcare services. Whether you need a same-day appointment, a video consultation from home, help managing a chronic condition, or a quick answer about a medication — Sahatak brings tools and professionals together in one secure place.",
+        "overview_title": "What Sahatak offers",
+    "overview_subtitle": "Short descriptions to help you understand each service and when to use it",
+    "public_comment": {
+      "title": "Public Comment",
+      "description": "Share a quick public note — it will appear below with other feedback.",
+      "placeholder": "Write a short comment...",
+      "send_button": "Send"
+    }
+    },
+    "services": {
+        "appointments": {
+            "title": "Online Appointment Booking",
+            "text": "Find available slots with general practitioners and specialists, choose in-person or video visits, and get confirmations and reminders so you never miss an appointment.",
+            "hint": "Use to schedule routine visits, follow-ups, or specialist consultations."
+        },
+        "video": {
+            "title": "Video Consultations",
+            "text": "Secure, private video visits with qualified healthcare providers. Join from your dashboard — ideal for minor illnesses, follow-ups, medication reviews, and care when travel is difficult.",
+            "hint": "Use when physical exam isn't required or for quick clinical advice."
+        },
+        "records": {
+            "title": "Access to Medical Records",
+            "text": "Securely view and manage your health records, test results, and visit notes. Share records with your doctor during consultations so care decisions are based on the full picture.",
+            "hint": "A single place for your health history, lab results, and imaging reports."
+        },
+        "prescription": {
+            "title": "Prescription Management",
+            "text": "Request prescription renewals, receive digital prescriptions directly in your account, and get guidance from doctors about medication use and side effects.",
+            "hint": "Saves time on renewals and avoids unnecessary visits."
+        },
+        "lab": {
+            "title": "Lab & Imaging Booking",
+            "text": "Book laboratory tests and radiology (X‑ray, MRI) appointments at partnered centers. Results are uploaded to your records and can be reviewed with your clinician.",
+            "hint": "Convenient scheduling and electronic delivery of results."
+        },
+        "chronic": {
+            "title": "Chronic Disease Management",
+            "text": "Tools and regular check-ins to help manage long-term conditions (diabetes, hypertension, asthma, etc.), including medication reminders, trend charts, and specialist care plans.",
+            "hint": "Personalized follow-up and easier coordination with care teams."
+        },
+        "family": {
+            "title": "Family Health Management",
+            "text": "Manage health profiles for children, elderly relatives, or dependents from one account. Book appointments, view records, and receive reminders for multiple family members.",
+            "hint": "Makes household health coordination simpler and safer."
+        },
+        "personalized": {
+            "title": "Personalized Health Content",
+            "text": "Curated articles, tips, and educational resources tailored to your age, conditions, and interests so you can make informed day-to-day choices about your health.",
+            "hint": "AI recommends content relevant to your profile and goals."
+        },
+        "chat": {
+            "title": "Secure Chat & 24/7 Support",
+            "text": "Use secure messaging to ask non-urgent clinical questions or get administrative help. For urgent triage, our 24/7 support provides guidance on next steps and directs you to appropriate care.",
+            "hint": "Not a replacement for emergency services — use ER for life‑threatening issues."
+        },
+    "nutrition": {
+      "title": "Nutrition & Diet Counseling",
+      "text": "Personalized meal plans and dietary advice to help you meet health goals.",
+      "hint": "Nutrition guidance tailored to conditions and goals."
+    },
+    "maternal_child_health": {
+      "title": "Maternal & Child Health",
+      "text": "Antenatal care, pediatric services and postnatal follow-up.",
+      "hint": "Care and follow-up for mothers and children."
+    },
+    "specialist_referrals": {
+      "title": "Specialist Referrals",
+      "text": "Coordinated referrals to specialist clinics and hospitals.",
+      "hint": "When you need care from a specialist."
+    },
+    "ai": {
+      "title": "AI Healthcare Assistant",
+      "text": "Your smart AI companion helps answer medical questions, suggest health tips, and guide you through managing conditions with contextual suggestions.",
+      "hint": "Use for quick guidance, health tips, and non-urgent medical questions."
+    },
+        "delivery": {
+            "title": "Medication Delivery",
+            "text": "Get prescribed medicines delivered to your home. Track orders, view delivery status, and contact support if there are issues.",
+            "hint": "Convenient for those with mobility challenges or busy schedules."
+        },
+        "insurance": {
+            "title": "Insurance & Administrative Help",
+            "text": "Assistance with insurance questions, claims guidance, and help submitting necessary documents to speed approvals for visits and tests.",
+            "hint": "Support to reduce billing surprises and paperwork."
+        }
+    },
+    "buttons": {
+        "add_comment": "Add Comment",
+        "language": "Change Language"
+    }
 }
-  
-
