@@ -155,6 +155,31 @@
                             
                             <!-- Platform Health & Analytics -->
                             <div class="dashboard-card admin-health-card">
+                                <style>
+                                /* Make the Platform Health & Analytics area and its analytic cards white */
+                                .admin-health-card {
+                                    background: #ffffff;
+                                    border-radius: 0.6rem;
+                                    padding: 1rem;
+                                }
+
+                                /* Analytics inner cards (charts, recent activity, metric cards) should also be white blocks */
+                                .admin-health-card .analytics-card,
+                                .admin-health-card .metric-card,
+                                .admin-health-card .recent-activity-card,
+                                .admin-health-card .chart-container {
+                                    background: #ffffff;
+                                    border-radius: 0.5rem;
+                                    padding: 0.75rem;
+                                    box-shadow: 0 1px 4px rgba(6,42,67,0.04);
+                                }
+
+                                /* Ensure chart canvases have a white background container */
+                                .admin-health-card .chart-container canvas {
+                                    background: transparent;
+                                    width: 100% !important;
+                                }
+                                </style>
                                 <h5><i class="bi bi-activity me-2"></i><span id="platform-health-title">Platform Health & Analytics</span></h5>
                                 
                                 <!-- System Performance Metrics -->
@@ -501,6 +526,31 @@
                         <!-- System Settings Section -->
                         <section id="settings" class="admin-section">
                             <div class="dashboard-card">
+                                <style>
+                                /* System Settings: color lines for lists inside settings */
+                                #settings ul {
+                                    padding-left: 0;
+                                }
+
+                                /* Show a colored separator line under each list item to make the lines visible */
+                                #settings ul li {
+                                    border-bottom: 1px solid rgba(13,71,161,0.12); /* subtle sahatak blue */
+                                    padding: 0.45rem 0;
+                                }
+
+                                /* If there are nav tabs, make their active border use the sahatak blue */
+                                #settings .nav-tabs {
+                                    border-bottom-color: rgba(13,71,161,0.12);
+                                }
+                                #settings .nav-tabs .nav-link.active {
+                                    border-color: rgba(13,71,161,0.16) rgba(13,71,161,0.16) #0d47a1; /* emphasize underline */
+                                }
+
+                                /* Ensure list-unstyled in footer or other areas keep look but still allow colored separators when inside settings */
+                                #settings .list-unstyled li {
+                                    border-bottom: 1px solid rgba(13,71,161,0.08);
+                                }
+                                </style>
                                 <div class="d-flex justify-content-between align-items-center mb-4">
                                     <h5><i class="bi bi-sliders2 me-2"></i><span id="system-settings-title">System Settings</span></h5>
                                     <button class="btn btn-success" onclick="SystemSettings.saveAllSettings()">
