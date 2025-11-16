@@ -747,7 +747,7 @@ Colors:
 .dashboard-card span,
 .dashboard-card div,
 .dashboard-card label {
-    color: var(--admin-text-primary) !important;
+    color: #000000 !important;
 }
 
 .dashboard-card .text-muted {
