@@ -1386,17 +1386,11 @@ Colors:
 }
 
 .metric-card {
-    background: #f8f9fa;
+    background: #ffffff;
     border: 1px solid #e9ecef;
     border-radius: var(--admin-radius-md);
     padding: var(--admin-space-lg);
     text-align: center;
-    transition: var(--admin-transition-base);
-}
-
-.metric-card:hover {
-    box-shadow: var(--admin-shadow-md);
-    transform: translateY(-2px);
 }
 
 .metric-value {
@@ -1425,37 +1419,12 @@ Colors:
 }
 
 .activity-stat-card {
-    background: var(--admin-bg-section);
-    border: 1px solid var(--admin-border-primary);
+    background: #ffffff;
+    border: 1px solid #e9ecef;
     border-radius: var(--admin-radius-lg);
     padding: var(--admin-space-lg);
     text-align: center;
-    transition: var(--admin-transition-base);
     margin-bottom: var(--admin-space-sm);
-    position: relative;
-    overflow: hidden;
-}
-
-.activity-stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: var(--admin-gradient-primary);
-    opacity: 0;
-    transition: var(--admin-transition-base);
-}
-
-.activity-stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--admin-shadow-lg);
-    border-color: var(--admin-primary);
-}
-
-.activity-stat-card:hover::before {
-    opacity: 1;
 }
 
 .activity-icon {
