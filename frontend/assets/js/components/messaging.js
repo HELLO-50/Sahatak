@@ -1084,7 +1084,7 @@ Please take this to your pharmacy.`;
 // Action functions
 function viewPatientRecord() {
     if (currentRecipientId && userType === 'doctor') {
-        window.open(`../ehr.html?patient_id=${currentRecipientId}`, '_blank');
+        window.open(`ehr.html?patient_id=${currentRecipientId}`, '_blank');
     }
 }
 
