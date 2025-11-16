@@ -1523,16 +1523,53 @@ def update_system_settings():
         
         # Define setting validation rules
         setting_rules = {
+            # Authentication & Security
             'maintenance_mode': {'type': bool, 'required': False},
             'registration_enabled': {'type': bool, 'required': False},
             'default_language': {'type': str, 'required': False, 'choices': ['ar', 'en']},
-            'max_appointment_days_ahead': {'type': int, 'required': False, 'min': 1, 'max': 365},
-            'session_timeout_minutes': {'type': int, 'required': False, 'min': 15, 'max': 480},
             'password_min_length': {'type': int, 'required': False, 'min': 6, 'max': 50},
+            'password_max_length': {'type': int, 'required': False, 'min': 20, 'max': 256},
             'max_login_attempts': {'type': int, 'required': False, 'min': 3, 'max': 20},
+            'lockout_duration_minutes': {'type': int, 'required': False, 'min': 5, 'max': 120},
+            'session_timeout_minutes': {'type': int, 'required': False, 'min': 15, 'max': 480},
+            'auto_logout_warning_minutes': {'type': int, 'required': False, 'min': 1, 'max': 10},
+
+            # Validation
+            'phone_min_length': {'type': int, 'required': False, 'min': 8, 'max': 15},
+            'phone_max_length': {'type': int, 'required': False, 'min': 10, 'max': 20},
+            'name_min_length': {'type': int, 'required': False, 'min': 1, 'max': 10},
+            'name_max_length': {'type': int, 'required': False, 'min': 50, 'max': 200},
+
+            # Business Settings
+            'max_appointment_days_ahead': {'type': int, 'required': False, 'min': 1, 'max': 365},
             'consultation_duration_minutes': {'type': int, 'required': False, 'min': 15, 'max': 180},
             'platform_commission_percent': {'type': float, 'required': False, 'min': 0.0, 'max': 50.0},
-            'email_notifications_enabled': {'type': bool, 'required': False}
+
+            # Notifications
+            'email_notifications_enabled': {'type': bool, 'required': False},
+            'sms_notifications_enabled': {'type': bool, 'required': False},
+            'enable_sms_reminders': {'type': bool, 'required': False},
+            'max_notification_attempts': {'type': int, 'required': False, 'min': 1, 'max': 10},
+            'notification_retry_delay_seconds': {'type': int, 'required': False, 'min': 60, 'max': 3600},
+
+            # Feature Flags
+            'enable_video_calls': {'type': bool, 'required': False},
+            'enable_prescription_module': {'type': bool, 'required': False},
+            'enable_ai_assessment': {'type': bool, 'required': False},
+
+            # Jitsi Video Settings
+            'jitsi_domain': {'type': str, 'required': False},
+            'jitsi_app_id': {'type': str, 'required': False},
+            'jitsi_room_prefix': {'type': str, 'required': False},
+            'video_call_max_duration_minutes': {'type': int, 'required': False, 'min': 15, 'max': 180},
+            'video_call_recording_enabled': {'type': bool, 'required': False},
+            'video_call_lobby_enabled': {'type': bool, 'required': False},
+            'video_call_password_protected': {'type': bool, 'required': False},
+            'jitsi_enable_chat': {'type': bool, 'required': False},
+            'jitsi_enable_screen_sharing': {'type': bool, 'required': False},
+            'jitsi_enable_e2ee': {'type': bool, 'required': False},
+            'jitsi_default_video_quality': {'type': int, 'required': False, 'min': 180, 'max': 1080},
+            'jitsi_max_video_quality': {'type': int, 'required': False, 'min': 360, 'max': 1080}
         }
         
         # Validate each setting
