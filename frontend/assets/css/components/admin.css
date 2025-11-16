@@ -1386,8 +1386,8 @@ Colors:
 }
 
 .metric-card {
-    background: #ffffff;
-    border: 1px solid #e9ecef;
+    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    border: 1px solid #2563eb;
     border-radius: var(--admin-radius-md);
     padding: var(--admin-space-lg);
     text-align: center;
@@ -1396,13 +1396,13 @@ Colors:
 .metric-value {
     font-size: var(--admin-text-2xl);
     font-weight: 700;
-    color: var(--admin-primary);
+    color: #ffffff;
     margin-bottom: var(--admin-space-xs);
 }
 
 .metric-label {
     font-size: var(--admin-text-sm);
-    color: var(--admin-primary);
+    color: #e0f2fe;
     font-weight: 500;
 }
 
@@ -1419,8 +1419,8 @@ Colors:
 }
 
 .activity-stat-card {
-    background: #ffffff;
-    border: 1px solid #e9ecef;
+    background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+    border: 1px solid #14b8a6;
     border-radius: var(--admin-radius-lg);
     padding: var(--admin-space-lg);
     text-align: center;
@@ -1433,8 +1433,8 @@ Colors:
 
 .activity-icon i {
     font-size: var(--admin-text-xl);
-    color: var(--admin-primary);
-    background: rgba(37, 99, 235, 0.1);
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.2);
     padding: var(--admin-space-sm);
     border-radius: 50%;
     width: 48px;
@@ -1448,14 +1448,14 @@ Colors:
     display: block;
     font-size: var(--admin-text-2xl);
     font-weight: 700;
-    color: var(--admin-primary) !important;
+    color: #ffffff !important;
     margin-bottom: var(--admin-space-xs);
     line-height: 1.2;
 }
 
 .activity-label {
     font-size: var(--admin-text-sm);
-    color: var(--admin-primary) !important;
+    color: #ccfbf1 !important;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.05em;
