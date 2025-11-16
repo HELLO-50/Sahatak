@@ -1831,9 +1831,18 @@ const SystemSettings = {
                 if (element.type === 'checkbox') {
                     value = element.checked;
                 } else if (element.type === 'number') {
-                    value = parseFloat(element.value) || 0;
+                    const numValue = parseFloat(element.value);
+                    // Skip empty or invalid number fields
+                    if (isNaN(numValue) || element.value === '') {
+                        return;
+                    }
+                    value = numValue;
                 } else {
                     value = element.value;
+                    // Skip empty text fields
+                    if (!value || value.trim() === '') {
+                        return;
+                    }
                 }
 
                 settings[key] = value;
