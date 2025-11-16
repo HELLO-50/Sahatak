@@ -150,6 +150,32 @@ def load_user(user_id):
 
 # Add request logging middleware
 from utils.logging_config import log_api_request
+from utils.settings_manager import SettingsManager
+
+@app.before_request
+def check_maintenance_mode():
+    """Check if maintenance mode is enabled and block non-admin users"""
+    # Skip maintenance check for admin endpoints and static files
+    excluded_paths = ['/api/admin/', '/static/', '/health']
+    if any(request.path.startswith(path) for path in excluded_paths):
+        return None
+
+    # Check if maintenance mode is enabled
+    maintenance_mode = SettingsManager.get_setting('maintenance_mode', False, 'boolean')
+
+    if maintenance_mode:
+        # Allow admins to access during maintenance
+        if hasattr(current_user, 'user_type') and current_user.is_authenticated and current_user.user_type == 'admin':
+            return None
+
+        # Block all other users
+        return APIResponse.error(
+            message='System is currently under maintenance. Please try again later.',
+            status_code=503,
+            error_code='MAINTENANCE_MODE'
+        )
+
+    return None
 
 @app.before_request
 def log_request_info():

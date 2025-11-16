@@ -802,15 +802,25 @@ const ApiHelper = {
 
             const response = await fetch(`${this.baseUrl}${endpoint}`, requestOptions);
             const duration = Date.now() - startTime;
-            
+
             // Log API call performance
             window.SahatakLogger?.apiCall(method, endpoint, response.status, duration);
-            
+
             // Performance warning for slow requests
             if (duration > 5000) {
                 window.SahatakLogger?.warn(`Slow API request: ${method} ${endpoint} took ${duration}ms`);
             }
-            
+
+            // Check for maintenance mode (503 status)
+            if (response.status === 503) {
+                const data = await response.json().catch(() => ({}));
+                if (data.error_code === 'MAINTENANCE_MODE') {
+                    window.SahatakLogger?.warn('System in maintenance mode - redirecting');
+                    window.location.href = '/pages/common/maintenance.html';
+                    throw new ApiError('System is under maintenance', 503);
+                }
+            }
+
             // Check for session invalidation (but not during login attempts, messaging calls, or video consultation pages)
             const isMessagingEndpoint = endpoint.includes('/messages') || endpoint.includes('/conversations');
             const isVideoConsultationPage = window.location.pathname.includes('video-consultation.html');
