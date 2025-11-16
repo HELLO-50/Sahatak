@@ -1849,6 +1849,8 @@ const SystemSettings = {
             });
 
             console.log('Saving settings:', settings);
+            console.log('Total settings count:', Object.keys(settings).length);
+            console.log('Settings keys:', Object.keys(settings));
 
             // Send settings to backend
             const response = await AdminAuth.apiRequest('/admin/settings', {
@@ -1861,7 +1863,10 @@ const SystemSettings = {
             if (data.success) {
                 AdminDashboard.showNotification('Settings saved successfully', 'success');
             } else {
-                AdminDashboard.showNotification(data.message || 'Failed to save settings', 'error');
+                console.error('Settings save failed:', data);
+                const errorMsg = data.message || 'Failed to save settings';
+                const details = data.details ? '\n' + JSON.stringify(data.details) : '';
+                AdminDashboard.showNotification(errorMsg + details, 'error');
             }
         } catch (error) {
             console.error('Save settings error:', error);
