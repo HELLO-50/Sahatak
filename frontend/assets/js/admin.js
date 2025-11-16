@@ -1014,7 +1014,41 @@ const AdminDashboard = {
             this.displayAppointmentsTable([]);
         }
     },
-    
+
+    // Load settings data
+    async loadSettingsData() {
+        try {
+            const response = await AdminAuth.apiRequest('/admin/settings');
+            const data = await response.json();
+
+            if (data.success && data.data) {
+                // Populate all settings fields
+                const settings = data.data.settings || data.data;
+
+                // Loop through all settings and populate form fields
+                for (const key in settings) {
+                    const element = document.getElementById(key);
+                    if (element) {
+                        const value = settings[key].value !== undefined ? settings[key].value : settings[key];
+
+                        if (element.type === 'checkbox') {
+                            element.checked = value === true || value === 'true' || value === 1;
+                        } else {
+                            element.value = value;
+                        }
+                    }
+                }
+
+                console.log('Settings loaded successfully');
+            } else {
+                console.error('Invalid settings response:', data);
+            }
+        } catch (error) {
+            console.error('Failed to load settings:', error);
+            this.showNotification('Failed to load settings: ' + error.message, 'error');
+        }
+    },
+
     // Format doctor name to avoid duplicate Dr. prefix
     formatDoctorName(fullName) {
         if (!fullName) return 'Unknown Doctor';
@@ -1780,6 +1814,54 @@ const AdminDashboard = {
     }
 };
 
+// System Settings Manager
+const SystemSettings = {
+    // Save all settings
+    async saveAllSettings() {
+        try {
+            // Find all elements with data-setting attribute
+            const settingElements = document.querySelectorAll('[data-setting]');
+            const settings = {};
+
+            // Collect all settings values
+            settingElements.forEach(element => {
+                const key = element.getAttribute('data-setting');
+                let value;
+
+                if (element.type === 'checkbox') {
+                    value = element.checked;
+                } else if (element.type === 'number') {
+                    value = parseFloat(element.value) || 0;
+                } else {
+                    value = element.value;
+                }
+
+                settings[key] = value;
+            });
+
+            console.log('Saving settings:', settings);
+
+            // Send settings to backend
+            const response = await AdminAuth.apiRequest('/admin/settings', {
+                method: 'PUT',
+                body: JSON.stringify(settings)
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                AdminDashboard.showNotification('Settings saved successfully', 'success');
+            } else {
+                AdminDashboard.showNotification(data.message || 'Failed to save settings', 'error');
+            }
+        } catch (error) {
+            console.error('Save settings error:', error);
+            AdminDashboard.showNotification('Failed to save settings: ' + error.message, 'error');
+        }
+    }
+};
+
 // Export for use in HTML pages
 window.AdminAuth = AdminAuth;
 window.AdminDashboard = AdminDashboard;
+window.SystemSettings = SystemSettings;
