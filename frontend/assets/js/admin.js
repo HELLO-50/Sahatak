@@ -960,11 +960,10 @@ const AdminDashboard = {
                 full_name: document.getElementById('admin-full-name').value,
                 email: document.getElementById('admin-email').value,
                 password: document.getElementById('admin-password').value,
-                phone: document.getElementById('admin-phone').value || null,
-                user_type: 'admin'
+                phone: document.getElementById('admin-phone').value || null
             };
-            
-            const response = await AdminAuth.apiRequest('/auth/register', {
+
+            const response = await AdminAuth.apiRequest('/admin/create-admin', {
                 method: 'POST',
                 body: JSON.stringify(formData)
             });
