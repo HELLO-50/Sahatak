@@ -115,7 +115,7 @@ class ProductionConfig(Config):
     SESSION_COOKIE_SAMESITE = None  # Allow cross-origin requests
     
     # CORS settings
-    CORS_ORIGINS = os.getenv('CORS_ORIGINS', 'https://hello-50.github.io,https://hello-50.github.io/Sahatak,https://hmb104.github.io,https://hmb104.github.io/Sahatak').split(',')
+    CORS_ORIGINS = os.getenv('CORS_ORIGINS', 'https://hello-50.github.io,https://hello-50.github.io/Sahatak').split(',')
 
 # Configuration dictionary
 config = {

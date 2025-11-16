@@ -88,7 +88,7 @@ def search_patients():
             data={'patients': search_results, 'query': query},
             message=f'Found {len(search_results)} patient(s)'
         )
-        
+
     except Exception as e:
         app_logger.error(f"Patient search error: {str(e)}")
         return APIResponse.internal_error(message='Failed to search patients')

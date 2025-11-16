@@ -1509,7 +1509,7 @@ def get_system_settings():
 @admin_bp.route('/settings', methods=['PUT'])
 @admin_required
 def update_system_settings():
-# Update system settings
+    """Update system settings"""
     try:
         data = request.get_json()
         if not data:
@@ -1571,9 +1571,9 @@ def update_system_settings():
             if 'choices' in rule and value not in rule['choices']:
                 validation_errors.append(f"{key} must be one of: {rule['choices']}")
                 continue
-            
+
             updated_settings.append((key, value, rule['type'].__name__))
-        
+
         if validation_errors:
             return APIResponse.error(
                 message="Settings validation failed",
@@ -1581,44 +1581,42 @@ def update_system_settings():
                 error_code="VALIDATION_ERROR",
                 details=validation_errors
             )
-        
-    # Update settings in database
+
+        # Update settings in database
         for key, value, data_type in updated_settings:
-            setting = SystemSettings.query.filter_by(key=key).first()
-                
+            setting = SystemSettings.query.filter_by(setting_key=key).first()
+
             if setting:
-                setting.value = str(value)
-                setting.data_type = data_type
+                setting.setting_value = str(value)
+                setting.setting_type = data_type
                 setting.updated_at = datetime.utcnow()
                 setting.updated_by = current_user.id
             else:
                 new_setting = SystemSettings(
-                    key=key,
-                    value=str(value),
-                    data_type=data_type,
+                    setting_key=key,
+                    setting_value=str(value),
+                    setting_type=data_type,
                     description=f"Updated by admin {current_user.email}",
                     created_at=datetime.utcnow(),
                     updated_at=datetime.utcnow(),
                     updated_by=current_user.id
                 )
                 db.session.add(new_setting)
-            
+
         db.session.commit()
-            
-            # Log admin action
-        log_user_action(
-                current_user.id,
-                'admin_update_settings',
-                {
-                    'updated_settings': [key for key, _, _ in updated_settings],
-                    'settings_count': len(updated_settings)
-                }
-            )
-        
+
+        # Invalidate settings cache after update
+        from utils.settings_manager import SettingsManager
+        SettingsManager.invalidate_cache()
+
+        # Log admin action
         log_user_action(
             current_user.id,
             'admin_update_settings',
-            {'updated_settings': list(data.keys())}
+            {
+                'updated_settings': [key for key, _, _ in updated_settings],
+                'settings_count': len(updated_settings)
+            }
         )
         
         return APIResponse.success(
@@ -2370,12 +2368,21 @@ def create_admin_user():
                 status_code=400,
                 error_code="WEAK_PASSWORD"
             )
-        
+
+        # Validate phone if provided
+        phone = data.get('phone', '').strip()
+        if phone and not validate_phone(phone):
+            return APIResponse.error(
+                message="Invalid phone number format",
+                status_code=400,
+                error_code="INVALID_PHONE"
+            )
+
         # Create admin user
         new_admin = User(
             email=email,
             full_name=data['full_name'].strip(),
-            phone=data.get('phone', '').strip(),
+            phone=phone,
             user_type='admin',
             is_active=True,
             is_verified=True,
@@ -2402,20 +2409,18 @@ def create_admin_user():
             from services.email_service import send_email
             welcome_subject = "Admin Account Created - Sahatak Platform"
             welcome_body = f"""
-            Dear {new_admin.full_name},
+Dear {new_admin.full_name},
 
-            Your administrator account has been created for the Sahatak Telemedicine Platform.
+Your administrator account has been created for the Sahatak Telemedicine Platform.
 
-            Login Details:
-            Email: {email}
-            Password: {data['password']}
+Login Email: {email}
 
-            Please login and change your password immediately for security.
+Your password has been set. Please contact the system administrator if you need to reset it.
 
-            Admin Dashboard: {current_app.config.get('FRONTEND_URL', '')}/pages/admin/admin.html
+Admin Dashboard: {current_app.config.get('FRONTEND_URL', '')}/pages/admin/admin.html
 
-            Best regards,
-            The Sahatak Team
+Best regards,
+The Sahatak Team
             """
             
             send_email(
