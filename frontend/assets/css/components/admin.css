@@ -1907,7 +1907,7 @@ Colors:
 }
 
 #settingsTabs .nav-link {
-    color: var(--admin-text-secondary) !important;
+    color: #000000 !important;
     border: none !important;
     background: transparent !important;
     padding: var(--admin-space-lg) var(--admin-space-xl) !important;
