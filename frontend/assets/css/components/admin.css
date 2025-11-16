@@ -1408,7 +1408,7 @@ Colors:
 
 .metric-label {
     font-size: var(--admin-text-sm);
-    color: var(--admin-text-secondary);
+    color: var(--admin-primary);
     font-weight: 500;
 }
 
@@ -1486,7 +1486,7 @@ Colors:
 
 .activity-label {
     font-size: var(--admin-text-sm);
-    color: var(--admin-text-secondary) !important;
+    color: var(--admin-primary) !important;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.05em;
