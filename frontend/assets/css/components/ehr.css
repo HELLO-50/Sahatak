@@ -212,6 +212,7 @@
     box-shadow: var(--shadow);
     border-color: var(--primary);
     background: var(--hover);
+    color: #000;
 }
 
 .vitals-header {
