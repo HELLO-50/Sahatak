@@ -2471,6 +2471,13 @@ Colors:
     color: #ffffff !important;
 }
 
+/* Settings sub-headings: keep labels white on dark cards */
+#settings .card h6,
+#settings .card h6 i,
+#settings .card h6 span {
+    color: var(--admin-text-primary) !important;
+}
+
 /* Input Focus States */
 .tab-content input[type="number"]:focus,
 .tab-content input[type="text"]:focus {

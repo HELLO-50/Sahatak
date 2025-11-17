@@ -167,6 +167,9 @@ def check_maintenance_mode():
     # Check if maintenance mode is enabled
     maintenance_mode = SettingsManager.get_setting('maintenance_mode', False, 'boolean')
 
+    # Debug logging
+    print(f"🔧 Maintenance check - Path: {request.path}, Mode: {maintenance_mode}, Type: {type(maintenance_mode)}")
+
     if maintenance_mode:
         # Allow admins to access during maintenance
         if hasattr(current_user, 'user_type') and current_user.is_authenticated and current_user.user_type == 'admin':

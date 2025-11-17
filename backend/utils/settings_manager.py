@@ -27,42 +27,60 @@ class SettingsManager:
         """Refresh the database settings cache"""
         import time
         current_time = time.time()
-        
+
         if current_time - cls._last_cache_update > cls._cache_timeout:
             try:
                 # Query all platform settings from database
                 settings = SystemSettings.query.all()
                 cls._cache = {setting.setting_key: setting.get_typed_value() for setting in settings}
                 cls._last_cache_update = current_time
-            except Exception:
+
+                # Debug: Log maintenance_mode value after cache refresh
+                if 'maintenance_mode' in cls._cache:
+                    print(f"🔧 Cache refreshed. maintenance_mode in cache: {cls._cache['maintenance_mode']} (type: {type(cls._cache['maintenance_mode'])})")
+                else:
+                    print(f"🔧 Cache refreshed. maintenance_mode NOT in cache (total settings: {len(cls._cache)})")
+            except Exception as e:
                 # If database is not available, use empty cache
+                print(f"🔧 Cache refresh failed: {e}")
                 pass
     
     @classmethod
     def get_setting(cls, key: str, default: Any = None, data_type: str = 'string') -> Any:
         """
         Get setting value with priority: Database > Environment > Default
-        
+
         Args:
             key: Setting key name
             default: Default value if not found
             data_type: Expected data type (string, integer, boolean, float)
-            
+
         Returns:
             Setting value with appropriate type conversion
         """
         cls._refresh_cache()
-        
+
         # Priority 1: Database setting (admin configurable)
         if key in cls._cache:
-            return cls._cache[key]
-        
+            value = cls._cache[key]
+            # Debug logging for maintenance_mode
+            if key == 'maintenance_mode':
+                print(f"🔧 GET maintenance_mode from cache: {value} (type: {type(value)})")
+            return value
+
         # Priority 2: Environment variable
         env_value = os.getenv(key.upper())
         if env_value is not None:
-            return cls._convert_type(env_value, data_type)
-        
+            converted = cls._convert_type(env_value, data_type)
+            # Debug logging for maintenance_mode
+            if key == 'maintenance_mode':
+                print(f"🔧 GET maintenance_mode from env: {converted} (type: {type(converted)})")
+            return converted
+
         # Priority 3: Default value
+        # Debug logging for maintenance_mode
+        if key == 'maintenance_mode':
+            print(f"🔧 GET maintenance_mode from default: {default} (type: {type(default)})")
         return default
     
     @classmethod
