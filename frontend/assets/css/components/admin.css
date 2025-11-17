@@ -1419,8 +1419,8 @@ Colors:
 }
 
 .activity-stat-card {
-    background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
-    border: 1px solid #14b8a6;
+    background: #ffffff;
+    border: 1px solid #e9ecef;
     border-radius: var(--admin-radius-lg);
     padding: var(--admin-space-lg);
     text-align: center;
@@ -1433,8 +1433,8 @@ Colors:
 
 .activity-icon i {
     font-size: var(--admin-text-xl);
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.2);
+    color: var(--admin-primary);
+    background: rgba(37, 99, 235, 0.1);
     padding: var(--admin-space-sm);
     border-radius: 50%;
     width: 48px;
@@ -1448,14 +1448,14 @@ Colors:
     display: block;
     font-size: var(--admin-text-2xl);
     font-weight: 700;
-    color: #ffffff !important;
+    color: var(--admin-primary) !important;
     margin-bottom: var(--admin-space-xs);
     line-height: 1.2;
 }
 
 .activity-label {
     font-size: var(--admin-text-sm);
-    color: #ccfbf1 !important;
+    color: var(--admin-primary) !important;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.05em;

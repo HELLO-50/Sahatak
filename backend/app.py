@@ -155,6 +155,10 @@ from utils.settings_manager import SettingsManager
 @app.before_request
 def check_maintenance_mode():
     """Check if maintenance mode is enabled and block non-admin users"""
+    # Always allow CORS preflight requests (OPTIONS)
+    if request.method == 'OPTIONS':
+        return None
+
     # Skip maintenance check for admin endpoints and static files
     excluded_paths = ['/api/admin/', '/static/', '/health']
     if any(request.path.startswith(path) for path in excluded_paths):
