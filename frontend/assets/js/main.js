@@ -815,9 +815,19 @@ const ApiHelper = {
             if (response.status === 503) {
                 const data = await response.json().catch(() => ({}));
                 if (data.error_code === 'MAINTENANCE_MODE') {
-                    window.SahatakLogger?.warn('System in maintenance mode - redirecting');
-                    window.location.href = '/Sahatak/frontend/pages/common/maintenance.html';
-                    throw new ApiError('System is under maintenance', 503);
+                    // Check if user is admin before redirecting
+                    const userType = localStorage.getItem('userType') || localStorage.getItem('sahatak_user_type');
+                    const isAdmin = userType === 'admin';
+
+                    if (!isAdmin) {
+                        window.SahatakLogger?.warn('System in maintenance mode - redirecting');
+                        window.location.href = '/Sahatak/frontend/pages/common/maintenance.html';
+                        throw new ApiError('System is under maintenance', 503);
+                    } else {
+                        console.log('Admin user - bypassing maintenance mode redirect');
+                        // For admin users, just throw the error without redirect
+                        throw new ApiError('System is under maintenance (admin bypass)', 503);
+                    }
                 }
             }
 
@@ -992,6 +1002,17 @@ async function checkMaintenanceMode() {
     try {
         // Skip check for maintenance page itself
         if (window.location.pathname.includes('maintenance.html')) {
+            return;
+        }
+
+        // Skip check for admin pages and admin users
+        const isAdminPage = window.location.pathname.includes('/admin/');
+        const userType = localStorage.getItem('userType') || localStorage.getItem('sahatak_user_type');
+        const isAdmin = userType === 'admin';
+
+        // Admins should bypass maintenance mode
+        if (isAdmin || isAdminPage) {
+            console.log('Admin user detected - skipping maintenance check');
             return;
         }
 

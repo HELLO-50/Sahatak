@@ -408,6 +408,8 @@ const AdminDashboard = {
     
     // Load section-specific data
     async loadSectionData(section) {
+        console.log('Loading data for section:', section); // Debug log
+
         const loaders = {
             'users': this.loadUsersData,
             'doctors': this.loadDoctorsData,
@@ -415,15 +417,20 @@ const AdminDashboard = {
             'analytics': this.loadAnalyticsData,
             'settings': this.loadSettingsData
         };
-        
+
         const loader = loaders[section];
         if (loader) {
+            console.log('Calling loader for section:', section); // Debug log
             await loader.call(this);
         }
-        
+
         // Also load admin users when settings section is opened
         if (section === 'settings') {
-            this.loadAdminUsers();
+            console.log('Loading admin users for settings section'); // Debug log
+            await this.loadAdminUsers();
+            // Force reload settings to ensure maintenance mode toggle is correct
+            console.log('Reloading settings to ensure UI is in sync'); // Debug log
+            await this.loadSettingsData();
         }
     },
     
@@ -1021,9 +1028,13 @@ const AdminDashboard = {
             const response = await AdminAuth.apiRequest('/admin/settings');
             const data = await response.json();
 
+            console.log('Settings data received:', data); // Debug log
+
             if (data.success && data.data) {
                 // Populate all settings fields
                 const settings = data.data.settings || data.data;
+
+                console.log('Processing settings:', settings); // Debug log
 
                 // Loop through all settings and populate form fields
                 for (const key in settings) {
@@ -1031,18 +1042,25 @@ const AdminDashboard = {
                     if (element) {
                         const value = settings[key].value !== undefined ? settings[key].value : settings[key];
 
+                        console.log(`Setting ${key} to ${value} (type: ${element.type})`); // Debug log
+
                         if (element.type === 'checkbox') {
                             // Handle Python boolean strings (True/False) and JavaScript booleans
                             element.checked = value === true || value === 'true' || value === 'True' || value === 1 || value === '1';
+                            console.log(`  Checkbox ${key} checked: ${element.checked}`); // Debug log
                         } else {
                             element.value = value;
                         }
+                    } else {
+                        console.warn(`Element not found for setting: ${key}`); // Debug log
                     }
                 }
 
                 console.log('Settings loaded successfully');
+                this.showNotification('Settings loaded successfully', 'success');
             } else {
                 console.error('Invalid settings response:', data);
+                this.showNotification('Invalid settings response', 'error');
             }
         } catch (error) {
             console.error('Failed to load settings:', error);
