@@ -987,6 +987,45 @@ class ApiError extends Error {
     }
 }
 
+// Maintenance Mode Check - Run on page load
+async function checkMaintenanceMode() {
+    try {
+        // Skip check for maintenance page itself
+        if (window.location.pathname.includes('maintenance.html')) {
+            return;
+        }
+
+        // Check a regular endpoint that would be blocked during maintenance
+        // Using /api/users/doctors as it's a simple GET that respects maintenance mode
+        const response = await fetch('https://sahatak.pythonanywhere.com/api/users/doctors', {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.status === 503) {
+            const data = await response.json().catch(() => ({}));
+            if (data.error_code === 'MAINTENANCE_MODE') {
+                // Redirect to maintenance page immediately
+                window.location.href = '/Sahatak/frontend/pages/common/maintenance.html';
+            }
+        }
+    } catch (error) {
+        // Network error or CORS issue - check if it's a maintenance mode block
+        // If we get a fetch failure, it might be due to CORS during maintenance
+        console.log('Maintenance check:', error.message);
+    }
+}
+
+// Run maintenance check on page load
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', checkMaintenanceMode);
+} else {
+    checkMaintenanceMode();
+}
+
 // Form Handling Functions
 
 // Handle login form submission

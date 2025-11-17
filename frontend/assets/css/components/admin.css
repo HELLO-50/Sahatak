@@ -749,6 +749,123 @@ Colors:
     color: var(--admin-text-secondary) !important;
 }
 
+/* Inline styles from admin.html moved here (white blocks on dark dashboard) */
+/* Platform Health & Analytics wrapper as white card */
+.admin-health-card {
+    background: #ffffff !important;
+    border-radius: 0.6rem !important;
+    padding: 1rem !important;
+}
+
+/* Inner analytics/metric/recent-activity white cards */
+.admin-health-card .analytics-card,
+.admin-health-card .metric-card,
+.admin-health-card .recent-activity-card,
+.admin-health-card .chart-container {
+    background: #ffffff !important;
+    border-radius: 0.5rem !important;
+    padding: 0.75rem !important;
+    box-shadow: 0 1px 4px rgba(6, 42, 67, 0.04) !important;
+}
+
+.admin-health-card .chart-container canvas {
+    background: transparent !important;
+    width: 100% !important;
+}
+
+/* Settings tabs container light background */
+#settingsTabs {
+    background: #ffffff !important;
+    border-radius: 0.6rem !important;
+    padding: 1rem !important;
+    color: #000 !important;
+}
+
+/* Users: table area white, inner table transparent */
+#users .table-responsive {
+    background: #ffffff !important;
+    border-radius: 0.5rem !important;
+    padding: 0.5rem !important;
+}
+
+#users .table-responsive .table,
+#users .table-responsive .table > thead,
+#users .table-responsive .table > tbody,
+#users .table-responsive .table > thead > tr > th,
+#users .table-responsive .table > tbody > tr > td,
+#users .table-responsive .spinner-border,
+#users .table-responsive p {
+    background: transparent !important;
+}
+
+/* User search placeholder emphasis */
+#user-search::placeholder {
+    font-style: italic;
+    background-color: cornsilk;
+}
+
+/* Verification: white blocks and transparent inner tables */
+#verification #pending-verifications,
+#verification .table-responsive,
+#verification .verification-list {
+    background: #ffffff !important;
+    border-radius: 0.5rem !important;
+    padding: 0.75rem !important;
+}
+
+#verification .table-responsive .table,
+#verification .table-responsive .table > thead,
+#verification .table-responsive .table > tbody,
+#verification .table-responsive .table > thead > tr > th,
+#verification .table-responsive .table > tbody > tr > td {
+    background: transparent !important;
+}
+
+/* Appointments: white table area with transparent inner table */
+#appointments .table-responsive {
+    background: #ffffff !important;
+    border-radius: 0.5rem !important;
+    padding: 0.75rem !important;
+}
+
+#appointments .table-responsive .table,
+#appointments .table-responsive .table > thead,
+#appointments .table-responsive .table > tbody,
+#appointments .table-responsive .table > thead > tr > th,
+#appointments .table-responsive .table > tbody > tr > td,
+#appointments .table-responsive .spinner-border,
+#appointments .table-responsive p {
+    background: transparent !important;
+}
+
+/* Settings area list and tabs lines */
+#settings ul {
+    padding-left: 0;
+}
+
+#settings ul li,
+#settings .list-unstyled li {
+    border-bottom: 1px solid rgba(13, 71, 161, 0.08);
+    padding: 0.45rem 0;
+}
+
+#settings .nav-tabs {
+    border-bottom-color: rgba(13, 71, 161, 0.12);
+}
+
+#settings .nav-tabs .nav-link.active {
+    border-color: rgba(13, 71, 161, 0.16) rgba(13, 71, 161, 0.16) #0d47a1;
+}
+
+#settings .card .card-body .form-label {
+    color: #0d47a1;
+    font-weight: 600;
+    display: inline-block;
+    background: rgba(13, 71, 161, 0.05);
+    padding: 0.12rem 0.4rem;
+    border-radius: 0.25rem;
+}
+
 /* Ensure white blocks inside dark dashboard cards render with dark text */
 .dashboard-card .card,
 .dashboard-card .card-body,
@@ -800,6 +917,13 @@ Colors:
     justify-content: center;
     align-items: center;
     min-height: 140px;
+}
+
+/* Ensure stat card text is white for readability on dark backgrounds */
+.admin-stat-card .stat-number,
+.admin-stat-card .stat-label,
+.admin-stat-card .stat-icon i {
+    color: #ffffff !important;
 }
 
 /* Gradient top border accent */
@@ -1791,6 +1915,26 @@ Colors:
     color: var(--admin-text-muted);
 }
 
+/* Admin Login: ensure light inputs so typed black text is readable */
+.login-container .form-control,
+.login-container .form-select {
+    background: #f8fafc !important; /* light gray */
+    color: #111827 !important;      /* near-black */
+    border: 1px solid #e5e7eb !important;
+}
+
+.login-container .form-control:focus,
+.login-container .form-select:focus {
+    background: #ffffff !important;
+    color: #111827 !important;
+    border-color: #28a745 !important; /* keep login green accent */
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.12) !important;
+}
+
+.login-container .form-control::placeholder {
+    color: #6b7280 !important; /* medium gray placeholder */
+}
+
 .form-label {
     color: var(--admin-text);
     font-weight: 500;
@@ -1838,6 +1982,11 @@ Colors:
     background: linear-gradient(45deg, var(--medical-red), #ef4444);
     border: 2px solid var(--admin-text);
     box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+/* Header avatar icon color to match primary blue */
+.dashboard-header .user-avatar i {
+    color: var(--admin-primary) !important;
 }
 
 /* Print styles */
@@ -2028,6 +2177,12 @@ Colors:
     line-height: 1.3 !important;
 }
 
+/* Maintenance Controls header must be white on dark header */
+#maintenance .card-header h6,
+#maintenance .card-header h6 i {
+    color: #ffffff !important;
+}
+
 .tab-content .card-header i {
     color: var(--admin-primary) !important;
     font-size: var(--admin-text-lg) !important;
@@ -2040,6 +2195,17 @@ Colors:
     background: var(--admin-gradient-card) !important;
     border-radius: 0 0 var(--admin-radius-xl) var(--admin-radius-xl) !important;
     color: var(--admin-text-primary) !important;
+}
+
+/* Warning alert styling in settings: make text orange and readable */
+.tab-content .alert-warning {
+    color: var(--admin-accent) !important; /* amber */
+    background: rgba(var(--admin-accent-rgb), 0.1) !important;
+    border-color: rgba(var(--admin-accent-rgb), 0.4) !important;
+}
+
+.tab-content .alert-warning i {
+    color: var(--admin-accent) !important;
 }
 
 /* ============================================================================
