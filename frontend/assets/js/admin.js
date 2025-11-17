@@ -1032,7 +1032,8 @@ const AdminDashboard = {
                         const value = settings[key].value !== undefined ? settings[key].value : settings[key];
 
                         if (element.type === 'checkbox') {
-                            element.checked = value === true || value === 'true' || value === 1;
+                            // Handle Python boolean strings (True/False) and JavaScript booleans
+                            element.checked = value === true || value === 'true' || value === 'True' || value === 1 || value === '1';
                         } else {
                             element.value = value;
                         }

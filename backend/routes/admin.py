@@ -1456,11 +1456,11 @@ def get_system_settings():
         
         settings_query = SystemSettings.query.all()
         for setting in settings_query:
-            settings_data[setting.key] = {
-                'value': setting.value,
-                'data_type': setting.data_type,
+            settings_data[setting.setting_key] = {
+                'value': setting.setting_value,
+                'data_type': setting.setting_type,
                 'description': setting.description,
-                'updated_at': setting.updated_at.isoformat(),
+                'updated_at': setting.updated_at.isoformat() if setting.updated_at else None,
                 'updated_by': setting.updated_by
             }
             

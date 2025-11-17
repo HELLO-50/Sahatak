@@ -159,8 +159,8 @@ def check_maintenance_mode():
     if request.method == 'OPTIONS':
         return None
 
-    # Skip maintenance check for admin endpoints and static files
-    excluded_paths = ['/api/admin/', '/static/', '/health']
+    # Skip maintenance check for admin endpoints, auth endpoints, static files, and health check
+    excluded_paths = ['/api/admin/', '/api/auth/login', '/api/auth/me', '/static/', '/health']
     if any(request.path.startswith(path) for path in excluded_paths):
         return None
 

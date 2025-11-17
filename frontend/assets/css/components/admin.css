@@ -742,16 +742,46 @@ Colors:
     gap: var(--admin-space-sm) !important;
 }
 
-/* All card text should be light */
-.dashboard-card p,
-.dashboard-card span,
-.dashboard-card div,
-.dashboard-card label {
-    color: #ffffff !important;
-}
-
+/* Text color handling inside cards
+   - Do not force all descendants to white; let the card/base set color.
+   - This avoids white text on white inner cards/blocks. */
 .dashboard-card .text-muted {
     color: var(--admin-text-secondary) !important;
+}
+
+/* Ensure white blocks inside dark dashboard cards render with dark text */
+.dashboard-card .card,
+.dashboard-card .card-body,
+.dashboard-card .table,
+.dashboard-card .table th,
+.dashboard-card .table td {
+    color: #0f172a !important;
+}
+
+/* Admin health/analytics section uses white blocks – enforce dark text */
+.admin-health-card,
+.admin-health-card .analytics-card,
+.admin-health-card .metric-card,
+.admin-health-card .recent-activity-card,
+.admin-health-card .chart-container,
+.admin-health-card h5,
+.admin-health-card h6,
+.admin-health-card .metric-value,
+.admin-health-card .metric-label,
+.admin-health-card .activity-value,
+.admin-health-card .activity-label {
+    color: #0f172a !important;
+}
+
+/* Users table area is white – ensure table text is dark for contrast */
+#users .table-responsive,
+#users .table-responsive .table,
+#users .table-responsive .table > thead,
+#users .table-responsive .table > tbody,
+#users .table-responsive .table > thead > tr > th,
+#users .table-responsive .table > tbody > tr > td,
+#users .table-responsive p {
+    color: #0f172a !important;
 }
 
 /* Enhanced Stat Cards - Dark Theme */
@@ -2699,16 +2729,20 @@ button {
 
 /* Fix any remaining gray text on white backgrounds */
 .admin-section .text-muted,
-.dashboard-card .text-muted {
+.admin-health-card .text-muted,
+.dashboard-card .card .text-muted,
+#users .table-responsive .text-muted {
     color: #475569 !important;
 }
 
-/* Ensure proper contrast for all text elements */
-.admin-section p,
-.admin-section span,
-.dashboard-card p,
-.dashboard-card span {
-    color: #1e293b;
+/* Ensure proper contrast for text on light blocks only */
+.admin-health-card p,
+.admin-health-card span,
+.dashboard-card .card p,
+.dashboard-card .card span,
+#users .table-responsive p,
+#users .table-responsive span {
+    color: #1e293b !important;
 }
 
 .admin-section .small,
