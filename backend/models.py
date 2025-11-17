@@ -721,7 +721,12 @@ class SystemSettings(db.Model):
     def get_typed_value(self):
         """Convert string value to appropriate type"""
         if self.setting_type == 'boolean':
-            return self.setting_value.lower() in ('true', '1', 'yes', 'on')
+            val = self.setting_value
+            if isinstance(val, bool):
+                return val
+            if val is None:
+                return False
+            return str(val).strip().lower() in ('true', '1', 'yes', 'on')
         elif self.setting_type == 'integer':
             try:
                 return int(self.setting_value)
