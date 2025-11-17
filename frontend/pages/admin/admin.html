@@ -155,40 +155,6 @@
                             
                             <!-- Platform Health & Analytics -->
                             <div class="dashboard-card admin-health-card">
-                                <style>
-                                /* Make the Platform Health & Analytics area and its analytic cards white */
-                                .admin-health-card {
-                                    background: #ffffff;
-                                    border-radius: 0.6rem;
-                                    padding: 1rem;
-                                }
-
-                                /* Analytics inner cards (charts, recent activity, metric cards) should also be white blocks */
-                                .admin-health-card .analytics-card,
-                                .admin-health-card .metric-card,
-                                .admin-health-card .recent-activity-card,
-                                .admin-health-card .chart-container {
-                                    background: #ffffff;
-                                    border-radius: 0.5rem;
-                                    padding: 0.75rem;
-                                    box-shadow: 0 1px 4px rgba(6,42,67,0.04);
-                                }
-
-                                /* Ensure chart canvases have a white background container */
-                                .admin-health-card .chart-container canvas {
-                                    background: transparent;
-                                    width: 100% !important;
-                                }
-                                settingsTabs .nav-link.active {
-                                    color: #000 !important;
-                                }
-                                #settingsTabs {
-                                    background: #ffffff;
-                                    border-radius: 0.6rem;
-                                    padding: 1rem;
-                                    color: #000 !important;
-                                }
-                                </style>
                                 <h5><i class="bi bi-activity me-2"></i><span id="platform-health-title">Platform Health & Analytics</span></h5>
                                 
                                 <!-- System Performance Metrics -->
@@ -297,29 +263,7 @@
                                         </button>
                                     </div>
                                 </div>
-                                <style>
-                                /* Make the user list area white while leaving surrounding card transparent */
-                                #users .table-responsive {
-                                    background: #ffffff;
-                                    border-radius: .5rem;
-                                    padding: 0.5rem;
-                                }
-
-                                /* Ensure table cells render on white background */
-                                #users .table-responsive .table,
-                                #users .table-responsive .table > thead,
-                                #users .table-responsive .table > tbody,
-                                #users .table-responsive .table > thead > tr > th,
-                                #users .table-responsive .table > tbody > tr > td {
-                                    background: transparent;
-                                }
-
-                                /* If spinner/loading row exists, keep its container white too */
-                                #users .table-responsive .spinner-border,
-                                #users .table-responsive p {
-                                    background: transparent;
-                                }
-                                </style>
+                                
                                 <!-- User Management Controls -->
                                 <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
                                     <!-- Filters -->
@@ -341,12 +285,6 @@
                                     <div class="ms-3" style="min-width:280px;">
                                         <input id="user-search" type="search" class="form-control" data-placeholder="search-placeholder">
                                     </div>
-                                    <style>
-                                        #user-search::placeholder {
-                                            font-style: italic;
-                                            background-color: cornsilk;
-                                        }
-                                    </style>
 
                                     <!-- Per-page -->
                                     <div class="ms-auto">
@@ -411,25 +349,7 @@
                                         </button>
                                     </div>
                                 </div>
-                                <style>
-                                /* Make the verification area (doctors verification table / list) white */
-                                #verification #pending-verifications,
-                                #verification .table-responsive,
-                                #verification .verification-list {
-                                    background: #ffffff;
-                                    border-radius: 0.5rem;
-                                    padding: 0.75rem;
-                                }
-
-                                /* Keep inner table rows/content rendering correctly on the white background */
-                                #verification .table-responsive .table,
-                                #verification .table-responsive .table > thead,
-                                #verification .table-responsive .table > tbody,
-                                #verification .table-responsive .table > thead > tr > th,
-                                #verification .table-responsive .table > tbody > tr > td {
-                                    background: transparent;
-                                }
-                                </style>
+                                
                                 <!-- Verification Tabs -->
                                 <div class="mb-3">
                                     <div class="btn-group" role="group">
@@ -499,29 +419,7 @@
                                                 <th id="appointment-status">Status</th>
                                                 <th id="appointment-actions">Actions</th>
                                             </tr>
-                                            <style>
-                                            /* Make the appointments table area white */
-                                            #appointments .table-responsive {
-                                                background: #ffffff;
-                                                border-radius: 0.5rem;
-                                                padding: 0.75rem;
-                                            }
-
-                                            /* Keep inner table rows/content rendering correctly on the white background */
-                                            #appointments .table-responsive .table,
-                                            #appointments .table-responsive .table > thead,
-                                            #appointments .table-responsive .table > tbody,
-                                            #appointments .table-responsive .table > thead > tr > th,
-                                            #appointments .table-responsive .table > tbody > tr > td {
-                                                background: transparent;
-                                            }
-
-                                            /* If spinner/loading row exists, keep its container readable */
-                                            #appointments .table-responsive .spinner-border,
-                                            #appointments .table-responsive p {
-                                                background: transparent;
-                                            }
-                                            </style>
+                                            
                                         </thead>
                                         <tbody id="appointments-table-body">
                                             <tr>
@@ -541,41 +439,7 @@
                         <!-- System Settings Section -->
                         <section id="settings" class="admin-section">
                             <div class="dashboard-card">
-                                <style>
-                                /* System Settings: color lines for lists inside settings */
-                                #settings ul {
-                                    padding-left: 0;
-                                }
-
-                                /* Show a colored separator line under each list item to make the lines visible */
-                                #settings ul li {
-                                    border-bottom: 1px solid rgba(13,71,161,0.12); /* subtle sahatak blue */
-                                    padding: 0.45rem 0;
-                                }
-
-                                /* If there are nav tabs, make their active border use the sahatak blue */
-                                #settings .nav-tabs {
-                                    border-bottom-color: rgba(13,71,161,0.12);
-                                }
-                                #settings .nav-tabs .nav-link.active {
-                                    border-color: rgba(13,71,161,0.16) rgba(13,71,161,0.16) #0d47a1; /* emphasize underline */
-                                }
-
                                 
-                                #settings .list-unstyled li {
-                                    border-bottom: 1px solid rgba(13,71,161,0.08);
-                                }
-                                
-                                /* Makes labels more visible: Sahatak blue, bolder, and a subtle highlight */
-                                #settings .card .card-body .form-label {
-                                    color: #0d47a1; /* Sahatak blue */
-                                    font-weight: 600;
-                                    display: inline-block;
-                                    background: rgba(13,71,161,0.05);
-                                    padding: 0.12rem 0.4rem;
-                                    border-radius: 0.25rem;
-                                }
-                                </style>
                                 <div class="d-flex justify-content-between align-items-center mb-4">
                                     <h5><i class="bi bi-sliders2 me-2"></i><span id="system-settings-title">System Settings</span></h5>
                                     <button class="btn btn-success" onclick="SystemSettings.saveAllSettings()">
