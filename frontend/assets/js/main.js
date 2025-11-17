@@ -816,7 +816,7 @@ const ApiHelper = {
                 const data = await response.json().catch(() => ({}));
                 if (data.error_code === 'MAINTENANCE_MODE') {
                     window.SahatakLogger?.warn('System in maintenance mode - redirecting');
-                    window.location.href = '/pages/common/maintenance.html';
+                    window.location.href = '/Sahatak/frontend/pages/common/maintenance.html';
                     throw new ApiError('System is under maintenance', 503);
                 }
             }
