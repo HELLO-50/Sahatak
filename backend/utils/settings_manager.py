@@ -62,7 +62,7 @@ class SettingsManager:
 
         # Priority 1: Database setting (admin configurable)
         if key in cls._cache:
-            value = cls._cache[key]
+            value = cls._convert_type(cls._cache[key], data_type)
             # Debug logging for maintenance_mode
             if key == 'maintenance_mode':
                 print(f"🔧 GET maintenance_mode from cache: {value} (type: {type(value)})")
