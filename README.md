@@ -4,55 +4,10 @@ The comprehensive and first Sudanese telemedicine platform with bilingual suppor
 
 ---
 
-## Quick Start
-
-```bash
-# Development setup
-git clone https://github.com/HELLO-50/sahatak.git
-cd Sahatak
-```
-
 **Deployed Application:**
 - **Frontend**: GitHub Pages
 - **Backend**: PythonAnywhere
-- **Database**: SQLite
-
----
-
-## Recent Updates (Since v1.0.0)
-
-### Latest Improvements (v1.4.0)
-- **Production Readiness**: Comprehensive console debug cleanup for production deployment
-- **Video Consultation Enhancement**: Fixed deterministic room naming for reliable doctor-patient connections  
-- **Dashboard Performance**: Improved video consultation dashboard with 2-second refresh rates
-- **Documentation Accuracy**: Updated all technical documentation to match current implementation
-- **Code Quality**: Removed 280+ debug console statements while preserving essential error logging
-
-### Major Features Added
-- **Complete Admin Dashboard**: Comprehensive admin interface with Arabic translations and full functionality
-- **Medical Records System**: Complete medical records and prescription management system
-- **Advanced Appointment System**: Calendar integration and doctor scheduling with RTL support
-- **Enhanced Notifications**: Fixed notification import errors and improved reliability
-- **Email Verification**: Complete email confirmation system with 2G-optimized templates
-- **Sudanese Arabic Dialect**: Updated speech format to include Sudanese Arabic dialect support
-- **User Management**: Enhanced user authentication, verification, and profile management
-- **Health Analytics**: Real-time health monitoring charts and platform analytics
-- **Security Improvements**: Enhanced logout functionality, authentication guards, and session management
-
-### UI/UX Improvements
-- **Blue Medical Theme**: Replaced red theme with professional medical blue throughout the platform
-- **RTL Enhancements**: Fixed Arabic RTL layout issues across admin and user interfaces
-- **Translation Fixes**: Comprehensive translation updates for admin dashboard and user interfaces
-- **Responsive Design**: Fixed stats cards layout and improved mobile responsiveness
-- **Favicon Updates**: Added medical heart-pulse icon across all pages
-- **Dashboard Enhancements**: Improved patient and doctor dashboard layouts with proper navigation
-
-### Technical Improvements
-- **Error Handling**: Enhanced error code consistency and proper JSON response formats
-- **API Stability**: Fixed authentication endpoints, registration flows, and session management
-- **Database Updates**: Migrated to single fullName field and improved data validation
-- **WSGI Configuration**: Fixed deployment issues for PythonAnywhere hosting
-- **Code Organization**: Moved JavaScript to components, improved translation patterns, and API helpers
+- **Database**: MySQL
 
 ---
 
@@ -68,7 +23,7 @@ cd Sahatak
                                                          │
                                                          ▼
                                                ┌─────────────────┐
-                                               │ SQLite Database │
+                                               │ MySQL Database │
                                                │   (Storage)     │
                                                └─────────────────┘
 ```
@@ -88,8 +43,7 @@ cd Sahatak
 - RESTful API architecture
 
 **Database:**
-- SQLite (development/production)
-- PostgreSQL support (enterprise)
+- MySQL (development/production)
 
 **Hosting:**
 - Frontend: GitHub Pages
@@ -271,16 +225,6 @@ backend/
 - Consultation notes
 - Payment tracking
 
-### Relationships
-
-```
-Users (1) ──────── (1) Patients
-Users (1) ──────── (1) Doctors
-Patients (n) ──── (n) Doctors (via Appointments)
-Appointments (1) ── (n) Prescriptions
-Appointments (1) ── (n) Medical Records
-```
-
 ---
 
 ## Development Features
@@ -392,40 +336,6 @@ Appointments (1) ── (n) Medical Records
 
 ---
 
-## Version History
-
-- **v1.0.0** - Initial release with core telemedicine features
-- **v1.1.0** - Added admin dashboard and medical records system
-- **v1.2.0** - Enhanced notifications and RTL support improvements
-- **v1.3.0** - Security enhancements and email verification system
-- **v1.4.0** - Production readiness improvements and video consultation enhancements
-
----
-
-## Documentation
-
-- **[INSTALL.md](INSTALL.md)** - Complete installation guide
-- **[UserStories.md](UserStories.md)** - Comprehensive user stories
-- **API Documentation** - Available at `/api/docs` (when deployed)
-
----
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
 ## About Sahatak
 
 Sahatak (صحتك - "Your Health") is the first comprehensive telemedicine platform designed specifically for Sudan. Our mission is to provide accessible, high-quality healthcare through innovative technology, bridging the gap between patients and healthcare providers across the country.
@@ -438,4 +348,4 @@ Sahatak (صحتك - "Your Health") is the first comprehensive telemedicine platf
 - **Secure & Private**: Medical-grade data protection
 - **AI-Powered**: Intelligent health assessments and recommendations
 
-*Made with care for the people of Sudan*
+*Made with care for our people, people of Sudan*
