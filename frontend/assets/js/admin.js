@@ -591,7 +591,7 @@ const AdminDashboard = {
             }
             
             if (this.currentUserFilters.is_active !== '') {
-                params.append('is_active', this.currentUserFilters.is_active);
+                params.append('status', this.currentUserFilters.is_active);
             }
             
             if (this.currentUserFilters.search) {
