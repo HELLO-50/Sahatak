@@ -816,9 +816,9 @@ def delete_user(user_id):
             for assessment in ai_assessments:
                 assessment.reviewed_by_doctor_id = None  # Set to null instead of deleting assessment
 
-            diagnoses = Diagnosis.query.filter_by(recorded_by_doctor_id=doctor_id).all()
+            diagnoses = Diagnosis.query.filter_by(doctor_id=doctor_id).all()
             for diagnosis in diagnoses:
-                diagnosis.recorded_by_doctor_id = None  # Keep diagnosis but remove doctor reference
+                diagnosis.doctor_id = None  # Keep diagnosis but remove doctor reference
 
             medical_updates = MedicalHistoryUpdate.query.filter_by(updated_by_doctor_id=doctor_id).all()
             for update in medical_updates:
