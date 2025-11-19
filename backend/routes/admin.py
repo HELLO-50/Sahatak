@@ -161,16 +161,22 @@ def dashboard():
         # Get recent activity data (last 30 days)
         thirty_days_ago = datetime.utcnow() - timedelta(days=30)
         seven_days_ago = datetime.utcnow() - timedelta(days=7)
-        
+
+        # Debug logging for date ranges
+        app_logger.info(f"Dashboard date ranges - 7d ago: {seven_days_ago}, 30d ago: {thirty_days_ago}, now: {datetime.utcnow()}")
+
         # Get basic statistics with simpler queries
         total_users = User.query.count()
         total_patients = User.query.filter_by(user_type='patient').count()
         total_doctors = User.query.filter_by(user_type='doctor').count()
         total_admins = User.query.filter_by(user_type='admin').count()
-        
+
         # User activity metrics
         new_users_30d = User.query.filter(User.created_at >= thirty_days_ago).count()
         new_users_7d = User.query.filter(User.created_at >= seven_days_ago).count()
+
+        # Debug: Log the counts
+        app_logger.info(f"New users 7d: {new_users_7d}, New users 30d: {new_users_30d}")
         
         # Get verified doctors count
         verified_doctors = Doctor.query.filter_by(is_verified=True).count()
@@ -187,6 +193,9 @@ def dashboard():
                 Appointment.status == 'completed'
             )
         ).count()
+
+        # Debug: Log appointment counts
+        app_logger.info(f"Appointments 7d: {appointments_7d}, Completed 7d: {completed_appointments_7d}, Total appointments: {total_appointments}")
 
         # Calculate real active users (7d) based on last_login
         try:
@@ -249,13 +258,16 @@ def dashboard():
         # Calculate real error rate from audit logs (last 24h)
         try:
             total_requests = AuditLog.query.filter(
-                AuditLog.created_at >= twenty_four_hours_ago
+                AuditLog.timestamp >= twenty_four_hours_ago
             ).count()
 
             error_requests = AuditLog.query.filter(
                 and_(
-                    AuditLog.created_at >= twenty_four_hours_ago,
-                    AuditLog.action.like('%error%')
+                    AuditLog.timestamp >= twenty_four_hours_ago,
+                    or_(
+                        AuditLog.status == 'failure',
+                        AuditLog.action_description.like('%error%')
+                    )
                 )
             ).count()
 
