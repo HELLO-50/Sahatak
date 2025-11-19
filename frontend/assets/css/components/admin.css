@@ -858,7 +858,7 @@ Colors:
 }
 
 #settings .card .card-body .form-label {
-    color: #0d47a1;
+    color: #ffffff;
     font-weight: 600;
     display: inline-block;
     background: rgba(13, 71, 161, 0.05);
@@ -866,13 +866,20 @@ Colors:
     border-radius: 0.25rem;
 }
 
-/* Ensure white blocks inside dark dashboard cards render with dark text */
+/* Ensure white text inside dark dashboard cards for readability */
 .dashboard-card .card,
 .dashboard-card .card-body,
+.dashboard-card .card-body p,
+.dashboard-card .card-body div,
+.dashboard-card .card-body span,
 .dashboard-card .table,
 .dashboard-card .table th,
 .dashboard-card .table td {
-    color: #0f172a !important;
+    color: #ffffff !important;
+}
+
+.dashboard-card .card .form-label {
+    color: #ffffff !important;
 }
 
 /* Admin health/analytics section uses white blocks – enforce dark text */
@@ -1368,7 +1375,7 @@ Colors:
 
 .form-label-admin {
     font-weight: 600;
-    color: #2c3e50;
+    color: #ffffff;
     margin-bottom: 8px;
     display: block;
 }
