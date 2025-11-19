@@ -1339,9 +1339,71 @@ const AdminDashboard = {
     },
     
     // Export users data
-    exportUsers() {
-        console.log('Export users functionality - to be implemented');
-        this.showNotification('Export functionality will be implemented soon', 'info');
+    async exportUsers() {
+        try {
+            this.showNotification('Preparing export...', 'info');
+
+            // Fetch all users (with current filters applied)
+            const params = new URLSearchParams();
+            params.append('per_page', 10000); // Get all users
+
+            if (this.currentUserFilters.user_type) {
+                params.append('user_type', this.currentUserFilters.user_type);
+            }
+
+            if (this.currentUserFilters.is_active !== '') {
+                params.append('status', this.currentUserFilters.is_active);
+            }
+
+            if (this.currentUserFilters.search) {
+                params.append('search', this.currentUserFilters.search);
+            }
+
+            const response = await AdminAuth.apiRequest(`/admin/users?${params.toString()}`);
+            const data = await response.json();
+
+            if (!data.success || !data.data || !data.data.users) {
+                throw new Error('Failed to fetch users data');
+            }
+
+            const users = data.data.users;
+
+            // Convert to CSV
+            const csvHeaders = ['ID', 'Full Name', 'Email', 'Phone', 'User Type', 'Status', 'Registration Date'];
+            const csvRows = users.map(user => [
+                user.id,
+                `"${(user.full_name || 'N/A').replace(/"/g, '""')}"`, // Escape quotes
+                user.email,
+                user.phone || 'N/A',
+                user.user_type,
+                user.is_active ? 'Active' : 'Inactive',
+                new Date(user.created_at).toLocaleDateString()
+            ]);
+
+            // Build CSV content
+            const csvContent = [
+                csvHeaders.join(','),
+                ...csvRows.map(row => row.join(','))
+            ].join('\n');
+
+            // Create blob and download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+
+            link.setAttribute('href', url);
+            link.setAttribute('download', `sahatak_users_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            this.showNotification(`Successfully exported ${users.length} users`, 'success');
+        } catch (error) {
+            console.error('Export users error:', error);
+            this.showNotification('Failed to export users: ' + error.message, 'error');
+        }
     },
     
     // Add doctor manually
