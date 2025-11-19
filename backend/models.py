@@ -18,6 +18,8 @@ class User(UserMixin, db.Model):
     is_active = db.Column(db.Boolean, default=True, nullable=False)
     is_verified = db.Column(db.Boolean, default=False, nullable=False)
     verification_token = db.Column(db.String(255), nullable=True)
+    reset_token = db.Column(db.String(255), nullable=True)
+    reset_token_expiry = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     last_login = db.Column(db.DateTime, nullable=True)

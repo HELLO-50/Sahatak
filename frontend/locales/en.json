@@ -23,6 +23,7 @@
     "login_identifier_placeholder": "Enter your email address or phone number",
     "password": "Password",
     "password_placeholder": "Enter your password",
+    "forgot_password": "Forgot Password?",
     "submit": "Login"
   },
   
@@ -197,6 +198,42 @@
     "email_required": "Please enter email address",
     "verification_required": "Please verify your email address before logging in",
     "check_email": "Check your email for verification link"
+  },
+
+  "password_reset": {
+    "forgot_title": "Forgot Your Password?",
+    "forgot_subtitle": "Enter your email address and we'll send you a link to reset your password",
+    "reset_title": "Reset Your Password",
+    "reset_subtitle": "Create New Password",
+    "reset_desc": "Please enter your new password below",
+    "email_label": "Email Address",
+    "email_placeholder": "Enter your email",
+    "new_password_label": "New Password",
+    "new_password_placeholder": "Enter new password",
+    "confirm_password_label": "Confirm Password",
+    "confirm_password_placeholder": "Confirm new password",
+    "send_reset_link": "Send Reset Link",
+    "reset_password_button": "Reset Password",
+    "back_to_home": "Back to Home",
+    "back_to_login": "Back to Login",
+    "go_to_login": "Go to Login",
+    "sending": "Sending...",
+    "resetting": "Resetting...",
+    "success_sent": "If an account with that email exists, a password reset link has been sent",
+    "success_reset": "Password Reset Successful!",
+    "success_reset_message": "Your password has been reset successfully. You can now log in with your new password",
+    "invalid_token": "Invalid reset link. Please request a new password reset",
+    "password_requirements": "Password must:",
+    "req_length": "Be at least 6 characters long",
+    "req_letter": "Contain at least one letter",
+    "req_number": "Contain at least one number",
+    "passwords_no_match": "Passwords do not match",
+    "password_too_short": "Password must be at least 6 characters long",
+    "password_weak": "Password must contain at least one letter and one number",
+    "network_error": "Network error. Please try again",
+    "failed_send": "Failed to send reset link",
+    "failed_reset": "Failed to reset password",
+    "token_expired": "Reset link has expired. Please request a new password reset"
   },
 
   "appointments": {

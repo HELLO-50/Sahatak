@@ -326,23 +326,86 @@ class EmailService:
                 app_logger.error(f"Failed to send email confirmation to {recipient_email}: {error_type} - {str(e)}")
             return False
     
+    def send_password_reset(
+        self,
+        recipient_email: str,
+        user_data: Dict[str, Any],
+        language: str = 'ar'
+    ) -> bool:
+        """
+        Send password reset email
+
+        Args:
+            recipient_email: Email address to send to
+            user_data: User details including reset_token
+            language: Language preference ('ar' or 'en')
+
+        Returns:
+            bool: True if sent successfully, False otherwise
+        """
+        try:
+            if not self.is_configured():
+                app_logger.warning("Email service not configured, skipping email")
+                return False
+
+            subject = 'إعادة تعيين كلمة المرور - صحتك' if language == 'ar' else 'Password Reset - Sahatak'
+            template_name = f'email/{language}/password_reset.html'
+
+            # Create reset URL
+            reset_url = f"{current_app.config.get('FRONTEND_URL', 'https://hello-50.github.io/Sahatak')}/frontend/pages/reset-password.html?token={user_data['reset_token']}"
+
+            template_data = {
+                **user_data,
+                'reset_url': reset_url,
+                'language': language,
+                'app_name': 'صحتك' if language == 'ar' else 'Sahatak',
+                'current_year': datetime.now().year
+            }
+
+            msg = Message(
+                subject=subject,
+                recipients=[recipient_email],
+                html=render_template(template_name, **template_data),
+                sender=current_app.config['MAIL_DEFAULT_SENDER']
+            )
+
+            # Add retry mechanism for network issues
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    self.mail.send(msg)
+                    app_logger.info(f"Password reset email sent to {recipient_email}")
+                    return True
+                except OSError as network_error:
+                    if attempt < max_retries - 1:
+                        app_logger.warning(f"Network error sending to {recipient_email}, attempt {attempt + 1}/{max_retries}: {str(network_error)}")
+                        import time
+                        time.sleep(2)  # Wait 2 seconds before retry
+                        continue
+                    else:
+                        raise network_error
+
+        except Exception as e:
+            app_logger.error(f"Failed to send password reset email to {recipient_email}: {str(e)}")
+            return False
+
     def send_custom_email(self, recipient_email: str, subject: str, body: str) -> bool:
         """Send a custom email with provided subject and body"""
         try:
             if not self.is_configured():
                 return False
-            
+
             msg = Message(
                 subject=subject,
                 recipients=[recipient_email],
                 body=body,
                 sender=current_app.config['MAIL_DEFAULT_SENDER']
             )
-            
+
             self.mail.send(msg)
             app_logger.info(f"Custom email sent to {recipient_email}")
             return True
-            
+
         except Exception as e:
             app_logger.error(f"Failed to send custom email to {recipient_email}: {str(e)}")
             return False
@@ -382,3 +445,7 @@ def send_appointment_cancellation(recipient_email: str, appointment_data: Dict[s
 def send_registration_confirmation_email(recipient_email: str, user_data: Dict[str, Any], language: str = 'ar') -> bool:
     """Convenience function for sending registration confirmation emails"""
     return email_service.send_registration_confirmation(recipient_email, user_data, language)
+
+def send_password_reset_email(recipient_email: str, user_data: Dict[str, Any], language: str = 'ar') -> bool:
+    """Convenience function for sending password reset emails"""
+    return email_service.send_password_reset(recipient_email, user_data, language)

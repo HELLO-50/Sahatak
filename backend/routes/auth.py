@@ -6,6 +6,7 @@ import datetime
 from datetime import timedelta
 import hashlib
 import json
+import secrets
 from models import db, User, Patient, Doctor
 from utils.validators import validate_email, validate_password, validate_phone
 from utils.responses import APIResponse, ErrorCodes
@@ -708,6 +709,148 @@ def update_language():
         return jsonify({
             'success': False,
             'message': 'Failed to update language preference'
+        }), 500
+
+@auth_bp.route('/forgot-password', methods=['POST'])
+def forgot_password():
+    """Request password reset - sends reset email"""
+    try:
+        data = request.get_json()
+
+        # Validate email
+        email = data.get('email', '').strip().lower()
+        if not email:
+            return jsonify({
+                'success': False,
+                'message': 'Email address is required'
+            }), 400
+
+        email_validation = validate_email(email)
+        if not email_validation['valid']:
+            return jsonify({
+                'success': False,
+                'message': email_validation['message']
+            }), 400
+
+        # Find user by email
+        user = User.query.filter_by(email=email).first()
+
+        # Always return success to prevent email enumeration
+        # But only send email if user exists
+        if user:
+            # Generate secure reset token
+            reset_token = secrets.token_urlsafe(32)
+
+            # Set token and expiry (1 hour)
+            user.reset_token = reset_token
+            user.reset_token_expiry = datetime.datetime.utcnow() + timedelta(hours=1)
+            db.session.commit()
+
+            # Send password reset email
+            from services.email_service import send_password_reset_email
+            send_password_reset_email(
+                recipient_email=user.email,
+                user_data={
+                    'full_name': user.full_name,
+                    'reset_token': reset_token
+                },
+                language=user.language_preference
+            )
+
+            # Log the action
+            log_user_action(
+                user_id=user.id,
+                action_type='password_reset_requested',
+                description='User requested password reset',
+                ip_address=request.remote_addr
+            )
+
+        # Always return success message
+        return jsonify({
+            'success': True,
+            'message': 'If an account with that email exists, a password reset link has been sent'
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Forgot password error: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'Failed to process password reset request'
+        }), 500
+
+@auth_bp.route('/reset-password', methods=['POST'])
+def reset_password():
+    """Reset password with token"""
+    try:
+        data = request.get_json()
+
+        # Validate required fields
+        token = data.get('token', '').strip()
+        new_password = data.get('new_password', '').strip()
+
+        if not token:
+            return jsonify({
+                'success': False,
+                'message': 'Reset token is required'
+            }), 400
+
+        if not new_password:
+            return jsonify({
+                'success': False,
+                'message': 'New password is required'
+            }), 400
+
+        # Validate new password
+        password_validation = validate_password(new_password)
+        if not password_validation['valid']:
+            return jsonify({
+                'success': False,
+                'message': password_validation['message']
+            }), 400
+
+        # Find user by reset token
+        user = User.query.filter_by(reset_token=token).first()
+
+        if not user:
+            return jsonify({
+                'success': False,
+                'message': 'Invalid or expired reset token'
+            }), 400
+
+        # Check if token is expired
+        if not user.reset_token_expiry or user.reset_token_expiry < datetime.datetime.utcnow():
+            return jsonify({
+                'success': False,
+                'message': 'Reset token has expired. Please request a new password reset'
+            }), 400
+
+        # Update password
+        user.set_password(new_password)
+        user.reset_token = None
+        user.reset_token_expiry = None
+        user.updated_at = datetime.datetime.utcnow()
+        db.session.commit()
+
+        # Log the action
+        log_user_action(
+            user_id=user.id,
+            action_type='password_reset_completed',
+            description='User completed password reset',
+            ip_address=request.remote_addr
+        )
+
+        return jsonify({
+            'success': True,
+            'message': 'Password has been reset successfully. You can now log in with your new password'
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Reset password error: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'Failed to reset password'
         }), 500
 
 @auth_bp.route('/verify-email', methods=['GET'])
