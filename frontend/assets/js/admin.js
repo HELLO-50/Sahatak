@@ -978,8 +978,7 @@ const AdminDashboard = {
             const formData = {
                 full_name: document.getElementById('admin-full-name').value,
                 email: document.getElementById('admin-email').value,
-                password: document.getElementById('admin-password').value,
-                phone: document.getElementById('admin-phone').value || null
+                password: document.getElementById('admin-password').value
             };
 
             const response = await AdminAuth.apiRequest('/admin/create-admin', {

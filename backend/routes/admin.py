@@ -2511,21 +2511,12 @@ def create_admin_user():
                 error_code="WEAK_PASSWORD"
             )
 
-        # Validate phone if provided
-        phone = data.get('phone', '').strip()
-        if phone and not validate_phone(phone):
-            app_logger.warning(f"Invalid phone format: {phone}")
-            return APIResponse.error(
-                message="Invalid phone number format",
-                status_code=400,
-                error_code="INVALID_PHONE"
-            )
+        # Note: Admin users don't have phone numbers (stored in Patient/Doctor profiles only)
 
         # Create admin user
         new_admin = User(
             email=email,
             full_name=data['full_name'].strip(),
-            phone=phone,
             user_type='admin',
             is_active=True,
             is_verified=True,
