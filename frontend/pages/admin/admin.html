@@ -161,30 +161,38 @@
                                 <div class="row mb-4">
                                     <div class="col-md-3 text-center">
                                         <div class="metric-card">
-                                            <div class="metric-value" id="uptime-value">99.9%</div>
+                                            <div class="metric-value" id="uptime-value">
+                                                <span class="spinner-border spinner-border-sm" role="status"></span>
+                                            </div>
                                             <div class="metric-label">Server Uptime</div>
-                                            
+
                                         </div>
                                     </div>
                                     <div class="col-md-3 text-center">
                                         <div class="metric-card">
-                                            <div class="metric-value" id="response-time-value">150ms</div>
+                                            <div class="metric-value" id="response-time-value">
+                                                <span class="spinner-border spinner-border-sm" role="status"></span>
+                                            </div>
                                             <div class="metric-label">Avg Response Time</div>
-                                            
+
                                         </div>
                                     </div>
                                     <div class="col-md-3 text-center">
                                         <div class="metric-card">
-                                            <div class="metric-value" id="error-rate-value">0.1%</div>
+                                            <div class="metric-value" id="error-rate-value">
+                                                <span class="spinner-border spinner-border-sm" role="status"></span>
+                                            </div>
                                             <div class="metric-label">Error Rate</div>
-                                        
+
                                         </div>
                                     </div>
                                     <div class="col-md-3 text-center">
                                         <div class="metric-card">
-                                            <div class="metric-value" id="active-users-7d">0</div>
+                                            <div class="metric-value" id="active-users-7d">
+                                                <span class="spinner-border spinner-border-sm" role="status"></span>
+                                            </div>
                                             <div class="metric-label">Active Users (7d)</div>
-                                    
+
                                         </div>
                                     </div>
                                 </div>
@@ -941,8 +949,8 @@
                                 <!-- Analytics Content -->
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <p><strong id="analytics-cpu-label">CPU Usage:</strong> <span id="cpuUsage">15%</span></p>
-                                        <p><strong id="analytics-memory-label">Memory Usage:</strong> <span id="memUsage">47%</span></p>
+                                        <p><strong id="analytics-cpu-label">CPU Usage:</strong> <span id="cpuUsage"><span class="spinner-border spinner-border-sm" role="status"></span></span></p>
+                                        <p><strong id="analytics-memory-label">Memory Usage:</strong> <span id="memUsage"><span class="spinner-border spinner-border-sm" role="status"></span></span></p>
                                     </div>
                                     <div class="col-md-6">
                                         <canvas id="analyticsChart" height="200"></canvas>

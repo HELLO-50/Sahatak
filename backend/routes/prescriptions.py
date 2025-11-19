@@ -8,6 +8,7 @@ from utils.responses import success_response, error_response, validation_error_r
 from utils.validators import validate_prescription_data, validate_prescription_status, validate_json_data, sanitize_input
 from utils.logging_config import app_logger
 from routes.auth import api_login_required
+from services.email_service import send_prescription_notification
 
 prescriptions_bp = Blueprint('prescriptions', __name__)
 
@@ -174,8 +175,49 @@ def create_prescription():
         
         db.session.add(prescription)
         db.session.commit()
-        
+
         app_logger.info(f"Doctor {doctor_profile.id} created prescription {prescription.id} for patient {patient.id}")
+
+        # Send prescription notification email to patient
+        try:
+            patient_email = patient.user.email if hasattr(patient.user, 'email') else None
+            patient_language = getattr(patient.user, 'language_preference', 'ar')
+
+            if patient_email:
+                # Prepare prescription data for email template
+                prescription_dict = prescription.to_dict()
+                prescription_dict.update({
+                    'doctor_name': doctor_profile.user.get_full_name(),
+                    'patient_name': patient.user.get_full_name(),
+                    'prescribed_date': prescription.prescribed_date.strftime('%Y-%m-%d')
+                })
+
+                # Add formatted dates if they exist
+                if prescription.start_date:
+                    prescription_dict['start_date'] = prescription.start_date.strftime('%Y-%m-%d')
+                if prescription.end_date:
+                    prescription_dict['end_date'] = prescription.end_date.strftime('%Y-%m-%d')
+
+                email_sent = send_prescription_notification(
+                    recipient_email=patient_email,
+                    prescription_data=prescription_dict,
+                    language=patient_language
+                )
+
+                if email_sent:
+                    app_logger.info(f"Prescription notification email sent to {patient_email}")
+                    # Update prescription to mark email as sent
+                    prescription.email_sent = True
+                    prescription.email_sent_at = datetime.utcnow()
+                    db.session.commit()
+                else:
+                    app_logger.warning(f"Failed to send prescription notification email to {patient_email}")
+            else:
+                app_logger.warning(f"Patient {patient.id} has no email address, skipping notification")
+        except Exception as e:
+            app_logger.error(f"Error sending prescription notification email: {str(e)}")
+            # Don't fail the prescription creation if email fails
+
         return success_response(
             message="Prescription created successfully",
             data={'prescription': prescription.to_dict()},

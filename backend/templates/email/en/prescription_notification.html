@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Prescription</title>
+    <style>
+        body { font-family: Arial; margin: 0; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { text-align: center; color: #198754; margin-bottom: 20px; border-bottom: 2px solid #198754; padding-bottom: 15px; }
+        .section { margin: 20px 0; }
+        .section-title { color: #198754; font-weight: bold; margin-bottom: 10px; font-size: 16px; }
+        .info { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #198754; }
+        .medication { background: #e7f5ec; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .field { margin: 8px 0; }
+        .label { font-weight: bold; color: #333; }
+        .value { color: #555; }
+        .instructions { background: #fff3cd; padding: 12px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #ffc107; }
+        .notes { background: #cfe2ff; padding: 12px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #0d6efd; }
+        .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6; }
+        .warning { background: #f8d7da; padding: 12px; border-radius: 5px; margin: 15px 0; color: #721c24; border-left: 4px solid #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>📋 New Prescription</h2>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Prescription Information</div>
+            <div class="info">
+                <div class="field">
+                    <span class="label">Doctor:</span>
+                    <span class="value">{{ doctor_name }}</span>
+                </div>
+                <div class="field">
+                    <span class="label">Patient:</span>
+                    <span class="value">{{ patient_name }}</span>
+                </div>
+                <div class="field">
+                    <span class="label">Date:</span>
+                    <span class="value">{{ prescribed_date }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Medication Details</div>
+            <div class="medication">
+                <div class="field">
+                    <span class="label">Medication Name:</span>
+                    <span class="value">{{ medication_name }}</span>
+                </div>
+                <div class="field">
+                    <span class="label">Dosage:</span>
+                    <span class="value">{{ dosage }}</span>
+                </div>
+                <div class="field">
+                    <span class="label">Frequency:</span>
+                    <span class="value">{{ frequency }}</span>
+                </div>
+                <div class="field">
+                    <span class="label">Duration:</span>
+                    <span class="value">{{ duration }}</span>
+                </div>
+                {% if quantity %}
+                <div class="field">
+                    <span class="label">Quantity:</span>
+                    <span class="value">{{ quantity }}</span>
+                </div>
+                {% endif %}
+                {% if refills_allowed > 0 %}
+                <div class="field">
+                    <span class="label">Refills Allowed:</span>
+                    <span class="value">{{ refills_allowed }}</span>
+                </div>
+                {% endif %}
+                {% if start_date %}
+                <div class="field">
+                    <span class="label">Start Date:</span>
+                    <span class="value">{{ start_date }}</span>
+                </div>
+                {% endif %}
+                {% if end_date %}
+                <div class="field">
+                    <span class="label">End Date:</span>
+                    <span class="value">{{ end_date }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if instructions %}
+        <div class="section">
+            <div class="section-title">Usage Instructions</div>
+            <div class="instructions">
+                {{ instructions }}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if notes %}
+        <div class="section">
+            <div class="section-title">Doctor's Notes</div>
+            <div class="notes">
+                {{ notes }}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="warning">
+            <strong>⚠️ Warning:</strong> Please follow the instructions carefully and do not modify the dosage without consulting your doctor. If you experience any side effects, please contact your doctor immediately.
+        </div>
+
+        <div class="footer">
+            <p>{{ app_name }}</p>
+            <p style="font-size: 11px; color: #999;">This is an automated message, please do not reply</p>
+        </div>
+    </div>
+</body>
+</html>

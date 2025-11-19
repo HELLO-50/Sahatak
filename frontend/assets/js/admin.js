@@ -1,6 +1,7 @@
 // Admin Authentication and Dashboard Management
 const AdminAuth = {
     API_BASE_URL: 'https://sahatak.pythonanywhere.com/api',
+    sessionExpiredNotified: false,
     
     // Check if user is authenticated
     isAuthenticated() {
@@ -145,7 +146,8 @@ const AdminAuth = {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
-            }
+            },
+            credentials: 'include'
         };
         
         const mergedOptions = {
@@ -161,8 +163,18 @@ const AdminAuth = {
         
         // Handle 401 Unauthorized
         if (response.status === 401) {
+            if (!this.sessionExpiredNotified) {
+                if (window.AdminDashboard && typeof window.AdminDashboard.showNotification === 'function') {
+                    window.AdminDashboard.showNotification('Session expired. Please log in again.', 'warning');
+                } else {
+                    alert('Your admin session has expired. Please log in again.');
+                }
+                this.sessionExpiredNotified = true;
+            }
             this.logout();
-            throw new Error('Session expired');
+            const sessionError = new Error('Session expired');
+            sessionError.code = 'SESSION_EXPIRED';
+            throw sessionError;
         }
         
         return response;
@@ -1350,12 +1362,19 @@ const AdminDashboard = {
         if (analytics.system_performance) {
             const uptimeEl = document.getElementById('uptime-value');
             if (uptimeEl) uptimeEl.textContent = analytics.system_performance.uptime_percentage + '%';
-            
+
             const responseEl = document.getElementById('response-time-value');
             if (responseEl) responseEl.textContent = analytics.system_performance.avg_response_time + 'ms';
-            
+
             const errorEl = document.getElementById('error-rate-value');
             if (errorEl) errorEl.textContent = analytics.system_performance.error_rate + '%';
+
+            // Update CPU and Memory usage
+            const cpuEl = document.getElementById('cpuUsage');
+            if (cpuEl) cpuEl.textContent = analytics.system_performance.cpu_usage_percent + '%';
+
+            const memEl = document.getElementById('memUsage');
+            if (memEl) memEl.textContent = analytics.system_performance.memory_usage_percent + '%';
         }
         
         // Update user activity metrics

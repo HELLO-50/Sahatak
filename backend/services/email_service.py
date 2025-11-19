@@ -206,7 +206,54 @@ class EmailService:
         except Exception as e:
             app_logger.error(f"Failed to send appointment cancellation email to {recipient_email}: {str(e)}")
             return False
-    
+
+    def send_prescription_notification(
+        self,
+        recipient_email: str,
+        prescription_data: Dict[str, Any],
+        language: str = 'ar'
+    ) -> bool:
+        """
+        Send prescription notification email to patient
+
+        Args:
+            recipient_email: Email address to send to
+            prescription_data: Prescription details
+            language: Language preference ('ar' or 'en')
+
+        Returns:
+            bool: True if sent successfully, False otherwise
+        """
+        try:
+            if not self.is_configured():
+                app_logger.warning("Email service not configured, skipping email")
+                return False
+
+            subject = 'وصفة طبية جديدة' if language == 'ar' else 'New Prescription'
+            template_name = f'email/{language}/prescription_notification.html'
+
+            template_data = {
+                **prescription_data,
+                'language': language,
+                'app_name': 'صحتك' if language == 'ar' else 'Sahatak',
+                'current_year': datetime.now().year
+            }
+
+            msg = Message(
+                subject=subject,
+                recipients=[recipient_email],
+                html=render_template(template_name, **template_data),
+                sender=current_app.config['MAIL_DEFAULT_SENDER']
+            )
+
+            self.mail.send(msg)
+            app_logger.info(f"Prescription notification email sent to {recipient_email}")
+            return True
+
+        except Exception as e:
+            app_logger.error(f"Failed to send prescription notification email to {recipient_email}: {str(e)}")
+            return False
+
     def send_registration_confirmation(
         self, 
         recipient_email: str, 
@@ -449,3 +496,7 @@ def send_registration_confirmation_email(recipient_email: str, user_data: Dict[s
 def send_password_reset_email(recipient_email: str, user_data: Dict[str, Any], language: str = 'ar') -> bool:
     """Convenience function for sending password reset emails"""
     return email_service.send_password_reset(recipient_email, user_data, language)
+
+def send_prescription_notification(recipient_email: str, prescription_data: Dict[str, Any], language: str = 'ar') -> bool:
+    """Convenience function for sending prescription notification emails"""
+    return email_service.send_prescription_notification(recipient_email, prescription_data, language)

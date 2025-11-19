@@ -377,6 +377,7 @@ function updateContentByLanguage(lang) {
     updateElementText('login-identifier-label', t.login?.login_identifier);
     updateElementText('password-label', t.login?.password);
     updateElementText('login-submit', t.login?.submit);
+    updateElementText('forgot-password-text', t.login?.forgot_password);
     updateElementText('back-to-auth', t.auth?.back);
     
     // Update user type selection

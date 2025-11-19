@@ -454,7 +454,11 @@ class Prescription(db.Model):
     # Audit fields
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
-    
+
+    # Email notification tracking
+    email_sent = db.Column(db.Boolean, default=False, nullable=False)
+    email_sent_at = db.Column(db.DateTime, nullable=True)
+
     # Relationships
     appointment = db.relationship('Appointment', backref='prescriptions', lazy=True)
     patient = db.relationship('Patient', backref='prescriptions', lazy=True)
@@ -482,6 +486,8 @@ class Prescription(db.Model):
             'end_date': self.end_date.isoformat() if self.end_date else None,
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat(),
+            'email_sent': self.email_sent,
+            'email_sent_at': self.email_sent_at.isoformat() if self.email_sent_at else None,
             # Include related data
             'doctor_name': self.doctor.user.get_full_name() if self.doctor else None,
             'patient_name': self.patient.user.get_full_name() if self.patient else None
