@@ -986,16 +986,19 @@ const AdminDashboard = {
                 method: 'POST',
                 body: JSON.stringify(formData)
             });
-            
+
             const data = await response.json();
-            
-            if (data.success) {
+
+            if (response.ok && data.success) {
                 this.showNotification('Admin user created successfully', 'success');
                 form.reset();
                 // Reload admin users table
                 this.loadAdminUsers();
             } else {
-                this.showNotification(data.message || 'Failed to create admin user', 'error');
+                // Show specific validation error from backend
+                const errorMsg = data.message || data.error || 'Failed to create admin user';
+                this.showNotification(errorMsg, 'error');
+                console.error('Create admin validation error:', data);
             }
         } catch (error) {
             console.error('Create admin error:', error);

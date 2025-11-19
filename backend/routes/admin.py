@@ -2460,17 +2460,20 @@ def create_admin_user():
     """Create a new admin user - only existing admins can create new admins"""
     try:
         data = request.get_json()
+        app_logger.info(f"Create admin request data: {data}")
+
         if not data:
             return APIResponse.error(
                 message="Request body required",
                 status_code=400,
                 error_code="MISSING_REQUEST_BODY"
             )
-        
+
         # Validate required fields
         required_fields = ['email', 'full_name', 'password']
         for field in required_fields:
             if not data.get(field):
+                app_logger.warning(f"Missing required field: {field}")
                 return APIResponse.error(
                     message=f"Field '{field}' is required",
                     status_code=400,
@@ -2481,26 +2484,29 @@ def create_admin_user():
         email = data['email'].lower().strip()
         email_validation = validate_email(email)
         if not email_validation:
+            app_logger.warning(f"Invalid email format: {email}")
             return APIResponse.error(
                 message="Invalid email format",
                 status_code=400,
                 error_code="INVALID_EMAIL"
             )
-        
+
         # Check if email already exists
         existing_user = User.query.filter_by(email=email).first()
         if existing_user:
+            app_logger.warning(f"Email already exists: {email}")
             return APIResponse.error(
                 message="Email already exists",
                 status_code=400,
                 error_code="EMAIL_EXISTS"
             )
-        
+
         # Validate password
         password_validation = validate_password(data['password'])
         if not password_validation:
+            app_logger.warning(f"Password validation failed for user: {email}")
             return APIResponse.error(
-                message="Password does not meet requirements",
+                message="Password must be at least 8 characters long and contain uppercase, lowercase, number, and special character",
                 status_code=400,
                 error_code="WEAK_PASSWORD"
             )
@@ -2508,6 +2514,7 @@ def create_admin_user():
         # Validate phone if provided
         phone = data.get('phone', '').strip()
         if phone and not validate_phone(phone):
+            app_logger.warning(f"Invalid phone format: {phone}")
             return APIResponse.error(
                 message="Invalid phone number format",
                 status_code=400,
