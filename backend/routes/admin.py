@@ -179,7 +179,14 @@ def dashboard():
         total_appointments = Appointment.query.count()
         appointments_30d = Appointment.query.filter(Appointment.created_at >= thirty_days_ago).count()
         appointments_7d = Appointment.query.filter(Appointment.created_at >= seven_days_ago).count()
-        completed_appointments = Appointment.query.filter_by(status='completed').count()
+
+        # Completed appointments in last 7 days (not all time)
+        completed_appointments_7d = Appointment.query.filter(
+            and_(
+                Appointment.created_at >= seven_days_ago,
+                Appointment.status == 'completed'
+            )
+        ).count()
 
         # Calculate real active users (7d) based on last_login
         try:
@@ -315,7 +322,7 @@ def dashboard():
                     'appointment_metrics': {
                         'appointments_30d': appointments_30d,
                         'appointments_7d': appointments_7d,
-                        'completed_appointments': completed_appointments,
+                        'completed_appointments': completed_appointments_7d,
                         'appointment_trends': appointment_trends,
                         'appointment_status': appointment_status
                     },
