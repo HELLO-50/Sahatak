@@ -732,7 +732,7 @@ Colors:
 
 /* Card Headers - Light Text */
 .dashboard-card h5 {
-    color: var(--admin-text-primary) !important;
+    color: #ffffff !important;
     font-weight: 700 !important;
     font-size: var(--admin-text-xl) !important;
     line-height: 1.3 !important;
@@ -2167,7 +2167,7 @@ Colors:
 }
 
 .tab-content .card-header h6 {
-    color: var(--admin-text-primary) !important;
+    color: #ffffff !important;
     font-weight: 700 !important;
     margin: 0 !important;
     font-size: var(--admin-text-lg) !important;
