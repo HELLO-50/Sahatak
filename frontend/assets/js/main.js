@@ -973,7 +973,10 @@ const ApiHelper = {
                     AuthGuard.redirectToLogin();
                 } else {
                     // Fallback - dynamic redirect to index.html
-                    const rootPath = window.location.origin + window.location.pathname.substring(0, window.location.pathname.indexOf('/pages/') + 1);
+                    const pagesIndex = window.location.pathname.indexOf('/pages/');
+                    const rootPath = pagesIndex >= 0
+                        ? window.location.origin + window.location.pathname.substring(0, pagesIndex + 1)
+                        : window.location.origin + '/';
                     window.location.href = rootPath + 'index.html';
                 }
             }, 1500);
@@ -981,8 +984,7 @@ const ApiHelper = {
         } catch (error) {
             window.SahatakLogger?.error('Error handling session expiration', error);
             // Fallback - dynamic redirect to index page
-            const rootPath = window.location.origin + '/';
-            window.location.href = rootPath + 'index.html';
+            window.location.href = window.location.origin + '/index.html';
         }
     }
 };
