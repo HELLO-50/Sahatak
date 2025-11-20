@@ -759,9 +759,9 @@ def forgot_password():
             # Log the action
             log_user_action(
                 user_id=user.id,
-                action_type='password_reset_requested',
-                description='User requested password reset',
-                ip_address=request.remote_addr
+                action='password_reset_requested',
+                details='User requested password reset',
+                request=request
             )
 
         # Always return success message
