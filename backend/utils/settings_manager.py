@@ -55,6 +55,9 @@ class SettingsManager:
         """
         cls._refresh_cache()
 
+        # Start with provided default
+        value = default
+
         # Priority 1: Database setting (admin configurable)
         if key in cls._cache:
             value = cls._convert_type(cls._cache[key], data_type)
@@ -62,7 +65,10 @@ class SettingsManager:
         # Priority 2: Environment variable
         env_value = os.getenv(key.upper())
         if env_value is not None:
-            converted = cls._convert_type(env_value, data_type)
+            value = cls._convert_type(env_value, data_type)
+
+        # Priority 3: Default fallback (already set in `value`)
+        return value
     
     @classmethod
     def _convert_type(cls, value: str, data_type: str) -> Any:

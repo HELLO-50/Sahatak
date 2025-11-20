@@ -808,7 +808,8 @@
     <script src="../../../assets/js/components/ehr-manager.js"></script>
     <script src="../../../assets/js/components/auth-guard.js"></script>
     <script src="../../../assets/js/components/dashboard.js"></script>
-    
+    <script src="../../../assets/js/components/medical-records.js"></script>
+
     <script>
         // Use global updateVerificationStatus function from dashboard.js
         
@@ -966,7 +967,7 @@
                     console.log('Sending prescription data:', prescriptionData);
 
                     // Call API to create prescription
-                    const result = await MedicalRecords.createPrescription(prescriptionData);
+                    const result = await PrescriptionsAPI.createPrescription(prescriptionData);
 
                     if (result.success) {
                         // Show success message
