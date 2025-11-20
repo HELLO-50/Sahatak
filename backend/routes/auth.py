@@ -725,11 +725,10 @@ def forgot_password():
                 'message': 'Email address is required'
             }), 400
 
-        email_validation = validate_email(email)
-        if not email_validation['valid']:
+        if not validate_email(email):
             return jsonify({
                 'success': False,
-                'message': email_validation['message']
+                'message': 'Invalid email format'
             }), 400
 
         # Find user by email
