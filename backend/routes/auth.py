@@ -817,9 +817,6 @@ def reset_password():
                 'message': 'Invalid or expired reset token'
             }), 400
 
-        # DEBUG: Log the types
-        current_app.logger.info(f"DEBUG: reset_token_expiry type: {type(user.reset_token_expiry)}, value: {user.reset_token_expiry}")
-
         # Check if token is expired
         if user.reset_token_expiry is None:
             return jsonify({
@@ -827,10 +824,24 @@ def reset_password():
                 'message': 'Invalid reset token'
             }), 400
 
-        if user.reset_token_expiry < datetime.datetime.utcnow():
+        # Handle both datetime and integer timestamp formats
+        try:
+            if isinstance(user.reset_token_expiry, int):
+                # Convert Unix timestamp to datetime
+                expiry_time = datetime.datetime.fromtimestamp(user.reset_token_expiry)
+            else:
+                expiry_time = user.reset_token_expiry
+
+            if expiry_time < datetime.datetime.utcnow():
+                return jsonify({
+                    'success': False,
+                    'message': 'Reset token has expired. Please request a new password reset'
+                }), 400
+        except (ValueError, OSError, OverflowError) as e:
+            current_app.logger.error(f"Invalid reset_token_expiry format: {user.reset_token_expiry}, error: {e}")
             return jsonify({
                 'success': False,
-                'message': 'Reset token has expired. Please request a new password reset'
+                'message': 'Invalid reset token'
             }), 400
 
         # Update password
