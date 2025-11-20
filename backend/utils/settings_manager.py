@@ -63,25 +63,11 @@ class SettingsManager:
         # Priority 1: Database setting (admin configurable)
         if key in cls._cache:
             value = cls._convert_type(cls._cache[key], data_type)
-            # Debug logging for maintenance_mode
-            if key == 'maintenance_mode':
-                print(f"🔧 GET maintenance_mode from cache: {value} (type: {type(value)})")
-            return value
 
         # Priority 2: Environment variable
         env_value = os.getenv(key.upper())
         if env_value is not None:
             converted = cls._convert_type(env_value, data_type)
-            # Debug logging for maintenance_mode
-            if key == 'maintenance_mode':
-                print(f"🔧 GET maintenance_mode from env: {converted} (type: {type(converted)})")
-            return converted
-
-        # Priority 3: Default value
-        # Debug logging for maintenance_mode
-        if key == 'maintenance_mode':
-            print(f"🔧 GET maintenance_mode from default: {default} (type: {type(default)})")
-        return default
     
     @classmethod
     def _convert_type(cls, value: str, data_type: str) -> Any:

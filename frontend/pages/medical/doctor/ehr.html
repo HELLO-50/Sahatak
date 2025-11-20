@@ -877,14 +877,120 @@
         // Form submission handlers
         document.addEventListener('DOMContentLoaded', function() {
             // Prescription form handler
-            document.getElementById('prescription-form')?.addEventListener('submit', function(e) {
+            document.getElementById('prescription-form')?.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 console.log('Prescription form submitted');
-                // Add prescription saving logic here
-                alert('Prescription saved successfully!');
-                bootstrap.Modal.getInstance(document.getElementById('prescriptionModal')).hide();
-                // Clear form
-                this.reset();
+
+                const submitBtn = document.getElementById('save-prescription-btn');
+                const originalBtnText = submitBtn.innerHTML;
+
+                try {
+                    // Disable submit button and show loading
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+
+                    // Get patient ID
+                    const patientId = EHRManager.patientId;
+                    if (!patientId) {
+                        throw new Error('No patient selected');
+                    }
+
+                    // Get most recent appointment for this patient
+                    let appointmentId = null;
+                    if (EHRManager.ehrData && EHRManager.ehrData.appointments && EHRManager.ehrData.appointments.length > 0) {
+                        // Sort by date and get most recent
+                        const sortedAppointments = [...EHRManager.ehrData.appointments].sort((a, b) =>
+                            new Date(b.date || b.created_at) - new Date(a.date || a.created_at)
+                        );
+                        appointmentId = sortedAppointments[0].id;
+                    }
+
+                    if (!appointmentId) {
+                        throw new Error('No appointment found for this patient. Please schedule an appointment first.');
+                    }
+
+                    // Collect form data
+                    const medicationName = document.getElementById('medication_name').value.trim();
+                    const strength = document.getElementById('medication_strength').value.trim();
+                    const dosageForm = document.getElementById('dosage_form').value;
+                    const frequency = document.getElementById('frequency').value;
+                    const durationDays = document.getElementById('duration_days').value;
+                    const timing = document.getElementById('timing').value;
+                    const quantity = document.getElementById('quantity').value;
+                    const instructions = document.getElementById('prescription_instructions').value.trim();
+                    const notes = document.getElementById('prescription_notes').value.trim();
+                    const refillAllowed = document.getElementById('refill_allowed').checked;
+
+                    // Build dosage string combining strength and form
+                    let dosage = strength || '';
+                    if (dosageForm) {
+                        dosage += dosage ? ` ${dosageForm}` : dosageForm;
+                    }
+                    if (!dosage) dosage = 'As directed';
+
+                    // Build duration string
+                    const duration = durationDays ? `${durationDays} days` : 'As directed';
+
+                    // Build full instructions combining timing and custom instructions
+                    let fullInstructions = '';
+                    if (timing) {
+                        fullInstructions = timing.replace('_', ' ').charAt(0).toUpperCase() + timing.slice(1).replace('_', ' ');
+                    }
+                    if (instructions) {
+                        fullInstructions += fullInstructions ? '. ' + instructions : instructions;
+                    }
+
+                    // Prepare prescription data
+                    const prescriptionData = {
+                        appointment_id: appointmentId,
+                        patient_id: patientId,
+                        medication_name: medicationName,
+                        dosage: dosage,
+                        frequency: frequency || 'as_needed',
+                        duration: duration,
+                        quantity: quantity || null,
+                        instructions: fullInstructions || null,
+                        notes: notes || null,
+                        refills_allowed: refillAllowed ? 1 : 0
+                    };
+
+                    // Add dates if duration is specified
+                    if (durationDays) {
+                        const startDate = new Date();
+                        const endDate = new Date();
+                        endDate.setDate(endDate.getDate() + parseInt(durationDays));
+                        prescriptionData.start_date = startDate.toISOString().split('T')[0];
+                        prescriptionData.end_date = endDate.toISOString().split('T')[0];
+                    }
+
+                    console.log('Sending prescription data:', prescriptionData);
+
+                    // Call API to create prescription
+                    const result = await MedicalRecords.createPrescription(prescriptionData);
+
+                    if (result.success) {
+                        // Show success message
+                        alert('Prescription created successfully!');
+
+                        // Close modal
+                        bootstrap.Modal.getInstance(document.getElementById('prescriptionModal')).hide();
+
+                        // Clear form
+                        document.getElementById('prescription-form').reset();
+
+                        // Reload EHR data to show new prescription
+                        await EHRManager.loadEHRData();
+                    } else {
+                        throw new Error(result.message || 'Failed to create prescription');
+                    }
+                } catch (error) {
+                    console.error('Error creating prescription:', error);
+                    alert('Error: ' + error.message);
+                } finally {
+                    // Reset button
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                }
             });
             
             // Appointment form handler  
