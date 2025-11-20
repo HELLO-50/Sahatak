@@ -818,7 +818,13 @@ def reset_password():
             }), 400
 
         # Check if token is expired
-        if not user.reset_token_expiry or user.reset_token_expiry < datetime.datetime.utcnow():
+        if user.reset_token_expiry is None:
+            return jsonify({
+                'success': False,
+                'message': 'Invalid reset token'
+            }), 400
+
+        if user.reset_token_expiry < datetime.datetime.utcnow():
             return jsonify({
                 'success': False,
                 'message': 'Reset token has expired. Please request a new password reset'
@@ -834,9 +840,9 @@ def reset_password():
         # Log the action
         log_user_action(
             user_id=user.id,
-            action_type='password_reset_completed',
-            description='User completed password reset',
-            ip_address=request.remote_addr
+            action='password_reset_completed',
+            details='User completed password reset',
+            request=request
         )
 
         return jsonify({
