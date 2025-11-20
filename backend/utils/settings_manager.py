@@ -35,11 +35,6 @@ class SettingsManager:
                 cls._cache = {setting.setting_key: setting.get_typed_value() for setting in settings}
                 cls._last_cache_update = current_time
 
-                # Debug: Log maintenance_mode value after cache refresh
-                if 'maintenance_mode' in cls._cache:
-                    print(f"🔧 Cache refreshed. maintenance_mode in cache: {cls._cache['maintenance_mode']} (type: {type(cls._cache['maintenance_mode'])})")
-                else:
-                    print(f"🔧 Cache refreshed. maintenance_mode NOT in cache (total settings: {len(cls._cache)})")
             except Exception as e:
                 # If database is not available, use empty cache
                 print(f"🔧 Cache refresh failed: {e}")

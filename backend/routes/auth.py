@@ -817,6 +817,9 @@ def reset_password():
                 'message': 'Invalid or expired reset token'
             }), 400
 
+        # DEBUG: Log the types
+        current_app.logger.info(f"DEBUG: reset_token_expiry type: {type(user.reset_token_expiry)}, value: {user.reset_token_expiry}")
+
         # Check if token is expired
         if user.reset_token_expiry is None:
             return jsonify({
