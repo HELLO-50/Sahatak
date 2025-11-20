@@ -2520,7 +2520,6 @@ def create_admin_user():
             user_type='admin',
             is_active=True,
             is_verified=True,
-            profile_completed=True,
             created_at=datetime.utcnow()
         )
         new_admin.set_password(data['password'])
@@ -2538,9 +2537,9 @@ def create_admin_user():
             }
         )
         
-        # Send welcome email
+        # Send welcome email (optional - don't fail if email fails)
         try:
-            from services.email_service import send_email
+            from services.email_service import email_service
             welcome_subject = "Admin Account Created - Sahatak Platform"
             welcome_body = f"""
 Dear {new_admin.full_name},
@@ -2556,9 +2555,9 @@ Admin Dashboard: {current_app.config.get('FRONTEND_URL', '')}/pages/admin/admin.
 Best regards,
 The Sahatak Team
             """
-            
-            send_email(
-                to_email=email,
+
+            email_service.send_custom_email(
+                recipient_email=email,
                 subject=welcome_subject,
                 body=welcome_body
             )
