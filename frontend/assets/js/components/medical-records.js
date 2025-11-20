@@ -20,7 +20,7 @@ const MedicalRecordsAPI = {
             }
         } catch (error) {
             console.error('Error getting medical history:', error);
-            return { success: false, message: 'خطأ في تحميل التاريخ الطبي' };
+            return { success: false, message: 'Error loading medical history' };
         }
     },
 
@@ -44,14 +44,14 @@ const MedicalRecordsAPI = {
                 return {
                     success: true,
                     data: response.data.patient_medical_history,
-                    message: 'تم تحديث التاريخ الطبي بنجاح'
+                    message: 'Medical history updated successfully'
                 };
             } else {
                 return { success: false, message: response.message };
             }
         } catch (error) {
             console.error('Error updating medical history:', error);
-            return { success: false, message: 'خطأ في تحديث التاريخ الطبي' };
+            return { success: false, message: 'Error updating medical history' };
         }
     },
 
@@ -67,14 +67,14 @@ const MedicalRecordsAPI = {
                 return {
                     success: true,
                     data: response.data.patient_medical_history,
-                    message: 'تم إكمال التاريخ الطبي بنجاح'
+                    message: 'Medical history completed successfully'
                 };
             } else {
                 return { success: false, message: response.message };
             }
         } catch (error) {
             console.error('Error completing medical history:', error);
-            return { success: false, message: 'خطأ في إكمال التاريخ الطبي' };
+            return { success: false, message: 'Error completing medical history' };
         }
     },
 
@@ -101,7 +101,7 @@ const MedicalRecordsAPI = {
             }
         } catch (error) {
             console.error('Error getting history updates:', error);
-            return { success: false, message: 'خطأ في تحميل تاريخ التحديثات' };
+            return { success: false, message: 'Error loading history updates' };
         }
     },
 
@@ -120,7 +120,7 @@ const MedicalRecordsAPI = {
             }
         } catch (error) {
             console.error('Error getting appointment history prompt:', error);
-            return { success: false, message: 'خطأ في تحميل تذكير التاريخ الطبي' };
+            return { success: false, message: 'Error loading medical history reminder' };
         }
     }
 };
@@ -206,7 +206,7 @@ const PrescriptionsAPI = {
             }
         } catch (error) {
             console.error('Error getting prescriptions:', error);
-            return { success: false, message: 'خطأ في تحميل الوصفات الطبية' };
+            return { success: false, message: 'Error loading prescriptions' };
         }
     },
 
@@ -225,7 +225,7 @@ const PrescriptionsAPI = {
             }
         } catch (error) {
             console.error('Error getting prescription details:', error);
-            return { success: false, message: 'خطأ في تحميل تفاصيل الوصفة' };
+            return { success: false, message: 'Error loading prescription details' };
         }
     },
 
@@ -241,14 +241,14 @@ const PrescriptionsAPI = {
                 return {
                     success: true,
                     data: response.data.prescription,
-                    message: 'تم إنشاء الوصفة الطبية بنجاح'
+                    message: 'Prescription created successfully'
                 };
             } else {
                 return { success: false, message: response.message };
             }
         } catch (error) {
             console.error('Error creating prescription:', error);
-            return { success: false, message: 'خطأ في إنشاء الوصفة الطبية' };
+            return { success: false, message: 'Error creating prescription' };
         }
     },
 
@@ -264,14 +264,14 @@ const PrescriptionsAPI = {
                 return {
                     success: true,
                     data: response.data.prescription,
-                    message: 'تم تحديث الوصفة الطبية بنجاح'
+                    message: 'Prescription updated successfully'
                 };
             } else {
                 return { success: false, message: response.message };
             }
         } catch (error) {
             console.error('Error updating prescription:', error);
-            return { success: false, message: 'خطأ في تحديث الوصفة الطبية' };
+            return { success: false, message: 'Error updating prescription' };
         }
     },
 
@@ -290,14 +290,14 @@ const PrescriptionsAPI = {
                 return {
                     success: true,
                     data: response.data.prescription,
-                    message: 'تم تحديث حالة الوصفة بنجاح'
+                    message: 'Prescription status updated successfully'
                 };
             } else {
                 return { success: false, message: response.message };
             }
         } catch (error) {
             console.error('Error updating prescription status:', error);
-            return { success: false, message: 'خطأ في تحديث حالة الوصفة' };
+            return { success: false, message: 'Error updating prescription status' };
         }
     },
 
@@ -319,7 +319,7 @@ const PrescriptionsAPI = {
             }
         } catch (error) {
             console.error('Error getting patient prescriptions:', error);
-            return { success: false, message: 'خطأ في تحميل وصفات المريض' };
+            return { success: false, message: 'Error loading patient prescriptions' };
         }
     },
 
@@ -338,7 +338,7 @@ const PrescriptionsAPI = {
             }
         } catch (error) {
             console.error('Error getting prescription stats:', error);
-            return { success: false, message: 'خطأ في تحميل إحصائيات الوصفات' };
+            return { success: false, message: 'Error loading prescription statistics' };
         }
     }
 };
