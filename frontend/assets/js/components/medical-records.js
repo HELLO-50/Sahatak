@@ -232,24 +232,23 @@ const PrescriptionsAPI = {
     // Create new prescription (doctors only)
     async createPrescription(prescriptionData) {
         try {
-            // Use consistent endpoint without double slashes
-            const response = await ApiHelper.makeRequest('/prescriptions', {
+            const response = await ApiHelper.makeRequest('/prescriptions/', {
                 method: 'POST',
                 body: JSON.stringify(prescriptionData)
             });
 
-            if (response && response.success) {
+            if (response.success) {
                 return {
                     success: true,
                     data: response.data.prescription,
                     message: 'Prescription created successfully'
                 };
             } else {
-                return { success: false, message: response?.message || 'Unknown error' };
+                return { success: false, message: response.message };
             }
         } catch (error) {
             console.error('Error creating prescription:', error);
-            return { success: false, message: error?.message || 'Error creating prescription' };
+            return { success: false, message: 'Error creating prescription' };
         }
     },
 
