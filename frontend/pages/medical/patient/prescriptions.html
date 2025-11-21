@@ -62,6 +62,12 @@
                     <div class="col-lg-4 text-center">
                         <h1 class="dashboard-title" id="prescriptions-title">Prescriptions</h1>
                         <p class="dashboard-subtitle" id="prescriptions-subtitle">Manage medical prescriptions and medications</p>
+                        <div class="mt-2">
+                            <button id="show-latest-prescription-btn" class="btn btn-outline-primary btn-sm" style="display:none;">
+                                <i class="bi bi-eye me-1"></i>
+                                عرض آخر وصفة
+                            </button>
+                        </div>
                     </div>
                     
                     <!-- Language Selector - Right (Left in RTL) -->
@@ -398,6 +404,7 @@
     <script>
         let prescriptions = [];
         let currentPrescription = null;
+        let currentUser = null;
         let currentPage = 1;
         let totalPages = 1;
         let currentFilter = '';
@@ -407,8 +414,59 @@
 
         // Initialize prescriptions page on page load
         document.addEventListener('DOMContentLoaded', async function() {
-            await DashboardTranslations.initializeDashboard('records');
+            try {
+                await DashboardTranslations.initializeDashboard('records');
+            } catch (e) {
+                console.warn('DashboardTranslations not available or failed to initialize', e);
+            }
+            // Run full page init
+            await initPage();
         });
+
+        // Full page initialization: determine user, wire events, load data
+        async function initPage() {
+            try {
+                const profile = await getCurrentUser();
+                if (profile && (profile.user || profile)) {
+                    // Support both shapes: { user: {...}} or direct user object
+                    const user = profile.user || profile;
+                    // store current user for later actions
+                    currentUser = user;
+                    userType = user.user_type || user.role || user.type || user.userType || user.userType || (user.is_doctor ? 'doctor' : (user.is_patient ? 'patient' : null));
+
+                    // Fallback: if user has doctor profile object
+                    if (!userType && user.profile && user.profile.user_type) {
+                        userType = user.profile.user_type;
+                    }
+
+                    // If still missing, try top-level property
+                    if (!userType && user.user_type) userType = user.user_type;
+
+                    // Show/hide doctor UI
+                    const createBtn = document.getElementById('create-prescription-btn');
+                    const doctorStats = document.getElementById('doctor-stats');
+                    if (userType === 'doctor') {
+                        if (createBtn) createBtn.style.display = '';
+                        if (doctorStats) doctorStats.style.display = '';
+                        // hide patient-only controls
+                        const showLatestBtn = document.getElementById('show-latest-prescription-btn');
+                        if (showLatestBtn) showLatestBtn.style.display = 'none';
+                    } else {
+                        if (createBtn) createBtn.style.display = 'none';
+                        if (doctorStats) doctorStats.style.display = 'none';
+                        // show patient-only control
+                        const showLatestBtn = document.getElementById('show-latest-prescription-btn');
+                        if (showLatestBtn) showLatestBtn.style.display = '';
+                    }
+                }
+
+                setupEventListeners();
+                await loadPrescriptionStats();
+                await loadPrescriptions(1);
+            } catch (err) {
+                console.error('Error initializing prescriptions page:', err);
+            }
+        }
 
         // Setup event listeners
         function setupEventListeners() {
@@ -419,7 +477,8 @@
             }
             
             // Save prescription button
-            document.getElementById('save-prescription-btn').addEventListener('click', savePrescription);
+            const saveBtn = document.getElementById('save-prescription-btn');
+            if (saveBtn) saveBtn.addEventListener('click', savePrescription);
             
             // Search input
             document.getElementById('search-prescriptions').addEventListener('input', debounce(handleSearch, 300));
@@ -432,6 +491,14 @@
             const patientSelect = document.getElementById('patient-select');
             if (patientSelect) {
                 patientSelect.addEventListener('change', loadPatientAppointments);
+            }
+
+            // Show latest prescription (patient)
+            const showLatestBtn = document.getElementById('show-latest-prescription-btn');
+            if (showLatestBtn) {
+                showLatestBtn.addEventListener('click', async function(){
+                    await showLatestPrescription();
+                });
             }
         }
 
@@ -495,6 +562,21 @@
                     
                     renderPrescriptions(filteredPrescriptions);
                     renderPagination();
+                    // If URL contains prescription_id, open that prescription details
+                    try {
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const pid = urlParams.get('prescription_id');
+                        if (pid) {
+                            // Ensure the prescription exists in the current page set
+                            const match = filteredPrescriptions.find(p => String(p.id) === String(pid));
+                            // If not on the current page, still attempt to open by id (API will fetch it)
+                            if (match || !match) {
+                                await showPrescriptionDetails(pid);
+                            }
+                        }
+                    } catch (e) {
+                        // ignore URL parsing errors
+                    }
                 } else {
                     showError('فشل في تحميل الوصفات الطبية');
                 }
@@ -738,6 +820,45 @@
             } catch (error) {
                 console.error('Error loading prescription details:', error);
                 showError('خطأ في تحميل تفاصيل الوصفة');
+            }
+        }
+
+        // Fetch and show the latest prescription for the current patient
+        async function showLatestPrescription() {
+            if (!currentUser || !currentUser.id) {
+                showError('غير قادر على تحديد المستخدم الحالي');
+                return;
+            }
+
+            try {
+                const response = await ApiHelper.makeRequest(`/prescriptions/patient/${currentUser.id}`);
+                if (!response || !response.success) {
+                    showError(response?.message || 'لم يتم العثور على وصفات طبية');
+                    return;
+                }
+
+                let list = response.data?.prescriptions || response.prescriptions || response.data || [];
+                if (!Array.isArray(list)) {
+                    // Try common wrappers
+                    list = response.data || [];
+                }
+
+                if (!list || list.length === 0) {
+                    showError('لا توجد وصفات طبية مسجلة لهذا المستخدم');
+                    return;
+                }
+
+                // Sort descending by created_at and open the latest
+                list.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+                const latest = list[0];
+                if (latest && latest.id) {
+                    await showPrescriptionDetails(latest.id);
+                } else {
+                    showError('تعذر فتح أحدث وصفة طبية');
+                }
+            } catch (err) {
+                console.error('Error fetching latest prescription:', err);
+                showError('خطأ في جلب أحدث وصفة طبية');
             }
         }
 
@@ -986,8 +1107,24 @@
             try {
                 const response = await ApiHelper.makeRequest('/users/profile');
                 console.log('getCurrentUser API response:', response);
-                // Backend returns user data in 'user' field, not 'data' field
-                return response.success ? { user: response.user } : null;
+
+                if (!response) return null;
+
+                // Support multiple response shapes used across the app
+                // 1) { success: true, user: { ... } }
+                if (response.success && response.user) return response.user;
+
+                // 2) { success: true, data: { user: {...} } }
+                if (response.success && response.data && response.data.user) return response.data.user;
+
+                // 3) { success: true, data: {...} } (data is the user)
+                if (response.success && response.data && !response.data.user) return response.data;
+
+                // 4) Some endpoints return user at top-level without success flag
+                if (response.user) return response.user;
+                if (response.data) return response.data;
+
+                return null;
             } catch (error) {
                 console.error('Error getting current user:', error);
                 return null;
