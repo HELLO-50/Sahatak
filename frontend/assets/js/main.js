@@ -848,10 +848,18 @@ const ApiHelper = {
                 );
             }
             
-            const data = await response.json();
-            
+            let data;
+            try {
+                data = await response.json();
+            } catch (parseError) {
+                const text = await response.text().catch(() => null);
+                const bodySnippet = text ? (text.length > 200 ? text.slice(0, 200) + '...' : text) : null;
+                window.SahatakLogger?.error(`Non-JSON API response: ${response.status} ${response.statusText}`, { body: bodySnippet });
+                throw new ApiError(`API returned ${response.status} ${response.statusText}${bodySnippet ? ': ' + bodySnippet : ''}`, response.status);
+            }
+
             // Handle standardized API response format
-            if (data.success === false) {
+            if (data && data.success === false) {
                 // Handle authentication errors (but not for messaging endpoints or video consultation pages)
                 if (data.status_code === 401 && !isMessagingEndpoint && !isVideoConsultationPage) {
                     console.log('🚨 API response 401 for non-messaging endpoint:', endpoint);

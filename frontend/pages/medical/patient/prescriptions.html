@@ -63,6 +63,7 @@
                         <h1 class="dashboard-title" id="prescriptions-title">Prescriptions</h1>
                         <p class="dashboard-subtitle" id="prescriptions-subtitle">Manage medical prescriptions and medications</p>
                     </div>
+                    
                     <!-- Language Selector - Right (Left in RTL) -->
                     <div class="col-lg-4 text-end">
                         <button class="btn btn-outline-medical btn-sm" onclick="showLanguageSelector()" id="language-toggle">
@@ -434,7 +435,6 @@
             }
         }
 
-
         // Load prescription statistics
         async function loadPrescriptionStats() {
             try {
@@ -495,7 +495,6 @@
                     
                     renderPrescriptions(filteredPrescriptions);
                     renderPagination();
-
                 } else {
                     showError('فشل في تحميل الوصفات الطبية');
                 }
@@ -742,7 +741,6 @@
             }
         }
 
-
         // Open create prescription modal
         function openCreatePrescriptionModal() {
             if (userType !== 'doctor') return;
@@ -841,7 +839,7 @@
             }
             
             try {
-                const response = await ApiHelper.makeRequest('/prescriptions/', {
+                const response = await ApiHelper.makeRequest('/prescriptions', {
                     method: 'POST',
                     body: JSON.stringify(formData)
                 });
