@@ -813,21 +813,37 @@
             if (!patientId) return;
 
             try {
+                console.log('🔍 Loading appointments for patient:', patientId);
                 const response = await ApiHelper.makeRequest(`/appointments/?patient_id=${patientId}`);
 
                 if (response.success) {
                     const appointments = response.data.appointments || [];
+                    console.log(`📋 Received ${appointments.length} appointments for patient ${patientId}`);
+
+                    // Debug: log patient IDs to verify filtering
+                    if (appointments.length > 0) {
+                        const patientIds = [...new Set(appointments.map(apt => apt.patient_id))];
+                        console.log('👥 Unique patient IDs in response:', patientIds);
+                        if (patientIds.length > 1) {
+                            console.error('⚠️ WARNING: Appointments contain multiple patient IDs!', patientIds);
+                        }
+                    }
+
                     // Show all appointments except blocked and cancelled
                     const availableAppointments = appointments.filter(apt =>
                         apt.status !== 'blocked' && apt.status !== 'cancelled'
                     ).sort((a, b) => new Date(b.appointment_date) - new Date(a.appointment_date));
+
+                    console.log(`✅ Displaying ${availableAppointments.length} available appointments`);
 
                     availableAppointments.forEach(appointment => {
                         const option = document.createElement('option');
                         option.value = appointment.id;
                         const date = new Date(appointment.appointment_date);
                         const statusBadge = appointment.status ? `[${appointment.status}]` : '';
-                        option.textContent = `${date.toLocaleDateString('ar-SA')} ${statusBadge} - ${appointment.reason_for_visit || 'استشارة'}`;
+                        const patientName = appointment.patient_name || 'Unknown';
+                        // Show patient name in dropdown for debugging
+                        option.textContent = `${date.toLocaleDateString('ar-SA')} ${statusBadge} - ${appointment.reason_for_visit || 'استشارة'} (${patientName})`;
                         appointmentSelect.appendChild(option);
                     });
                 }
