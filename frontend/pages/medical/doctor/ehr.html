@@ -431,9 +431,9 @@
                         <div class="mb-3">
                             <label for="prescription_appointment_select" class="form-label">Select Appointment *</label>
                             <select class="form-select" id="prescription_appointment_select" required>
-                                <option value="">Select a completed appointment</option>
+                                <option value="">Select an appointment</option>
                             </select>
-                            <small class="text-muted">Only completed appointments are shown</small>
+                            <small class="text-muted">All appointments with this patient are shown</small>
                         </div>
 
                         <div class="row">
@@ -902,31 +902,33 @@
                 const response = await ApiHelper.makeRequest(`/appointments/?patient_id=${patientId}`);
 
                 const appointmentSelect = document.getElementById('prescription_appointment_select');
-                appointmentSelect.innerHTML = '<option value="">Select a completed appointment</option>';
+                appointmentSelect.innerHTML = '<option value="">Select an appointment</option>';
 
                 if (response.success && response.data.appointments) {
-                    const completedAppointments = response.data.appointments
-                        .filter(apt => apt.status === 'completed')
+                    // Show ALL appointments, sorted by date (most recent first)
+                    const allAppointments = response.data.appointments
+                        .filter(apt => apt.status !== 'blocked' && apt.status !== 'cancelled') // Exclude blocked/cancelled
                         .sort((a, b) => new Date(b.appointment_date || b.created_at) - new Date(a.appointment_date || a.created_at));
 
-                    if (completedAppointments.length === 0) {
-                        appointmentSelect.innerHTML = '<option value="">No completed appointments found</option>';
-                        document.getElementById('prescription-appointment-info').textContent = 'No completed appointments available';
+                    if (allAppointments.length === 0) {
+                        appointmentSelect.innerHTML = '<option value="">No appointments found</option>';
+                        document.getElementById('prescription-appointment-info').textContent = 'No appointments available';
                         return;
                     }
 
-                    completedAppointments.forEach(appointment => {
+                    allAppointments.forEach(appointment => {
                         const option = document.createElement('option');
                         option.value = appointment.id;
                         const date = new Date(appointment.appointment_date || appointment.created_at);
                         const dateStr = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-                        option.textContent = `${dateStr} - ${appointment.reason_for_visit || 'General Consultation'}`;
+                        const statusBadge = appointment.status ? `[${appointment.status.toUpperCase()}]` : '';
+                        option.textContent = `${dateStr} ${statusBadge} - ${appointment.reason_for_visit || 'General Consultation'}`;
                         appointmentSelect.appendChild(option);
                     });
 
                     // Select most recent by default and update info
-                    appointmentSelect.value = completedAppointments[0].id;
-                    updateAppointmentInfo(completedAppointments[0]);
+                    appointmentSelect.value = allAppointments[0].id;
+                    updateAppointmentInfo(allAppointments[0]);
                 } else {
                     document.getElementById('prescription-appointment-info').textContent = 'No appointments found';
                 }

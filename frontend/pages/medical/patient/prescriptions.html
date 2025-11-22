@@ -180,6 +180,7 @@
                                 <select class="form-select" id="appointment-select" required>
                                     <option value="" id="select-appointment"></option>
                                 </select>
+                                <small class="text-muted">All appointments shown (past, present, future)</small>
                             </div>
                         </div>
 
@@ -806,23 +807,27 @@
         async function loadPatientAppointments() {
             const patientId = document.getElementById('patient-select').value;
             const appointmentSelect = document.getElementById('appointment-select');
-            
+
             appointmentSelect.innerHTML = '<option value="">اختر الموعد</option>';
-            
+
             if (!patientId) return;
-            
+
             try {
                 const response = await ApiHelper.makeRequest(`/appointments/?patient_id=${patientId}`);
-                
+
                 if (response.success) {
                     const appointments = response.data.appointments || [];
-                    const completedAppointments = appointments.filter(apt => apt.status === 'completed');
-                    
-                    completedAppointments.forEach(appointment => {
+                    // Show all appointments except blocked and cancelled
+                    const availableAppointments = appointments.filter(apt =>
+                        apt.status !== 'blocked' && apt.status !== 'cancelled'
+                    ).sort((a, b) => new Date(b.appointment_date) - new Date(a.appointment_date));
+
+                    availableAppointments.forEach(appointment => {
                         const option = document.createElement('option');
                         option.value = appointment.id;
                         const date = new Date(appointment.appointment_date);
-                        option.textContent = `موعد ${date.toLocaleDateString('ar-SA')} - ${appointment.reason_for_visit || 'استشارة'}`;
+                        const statusBadge = appointment.status ? `[${appointment.status}]` : '';
+                        option.textContent = `${date.toLocaleDateString('ar-SA')} ${statusBadge} - ${appointment.reason_for_visit || 'استشارة'}`;
                         appointmentSelect.appendChild(option);
                     });
                 }
