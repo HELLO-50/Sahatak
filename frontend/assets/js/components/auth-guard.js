@@ -96,24 +96,20 @@ class AuthGuard {
         if (!currentHref.includes('index.html') && !currentHref.endsWith('/')) {
             localStorage.setItem('sahatak_return_url', currentHref);
         }
-        
-        // For GitHub Pages, use absolute path to root
-        if (window.location.hostname.includes('github.io')) {
-            // On GitHub Pages - use absolute path from repository root
-            const repoPath = '/Sahatak/'; // Your repository name
-            window.location.href = repoPath;
+
+        // Determine login URL based on current path
+        let loginUrl;
+        if (window.location.pathname.includes('/pages/dashboard/')) {
+            loginUrl = '../../index.html';
+        } else if (window.location.pathname.includes('/pages/')) {
+            loginUrl = '../index.html';
         } else {
-            // Local development or other hosting - use relative paths
-            let loginUrl;
-            if (window.location.pathname.includes('/pages/dashboard/')) {
-                loginUrl = '../../index.html';
-            } else if (window.location.pathname.includes('/pages/')) {
-                loginUrl = '../index.html';
-            } else {
-                loginUrl = 'index.html';
-            }
-            window.location.href = loginUrl;
+            // Already at root or unknown location - use relative path
+            loginUrl = window.location.origin + window.location.pathname.split('/pages/')[0] + '/index.html';
         }
+
+        console.log('🔄 Redirecting to login:', loginUrl);
+        window.location.href = loginUrl;
     }
     
     /**
