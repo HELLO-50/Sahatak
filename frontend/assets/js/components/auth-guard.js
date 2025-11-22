@@ -102,29 +102,26 @@ class AuthGuard {
         const currentPath = window.location.pathname;
 
         if (currentPath.includes('/pages/dashboard/')) {
-            // From /frontend/pages/dashboard/*.html -> ../../index.html
-            loginUrl = '../../index.html';
-        } else if (currentPath.includes('/pages/medical/')) {
-            // From /frontend/pages/medical/*/*.html -> ../../../index.html
+            // From /frontend/pages/dashboard/*.html -> ../../../index.html (back to root)
             loginUrl = '../../../index.html';
+        } else if (currentPath.includes('/pages/medical/')) {
+            // From /frontend/pages/medical/*/*.html -> ../../../../index.html (back to root)
+            loginUrl = '../../../../index.html';
         } else if (currentPath.includes('/pages/admin/')) {
-            // From /frontend/pages/admin/*.html -> ../../index.html
-            loginUrl = '../../index.html';
+            // From /frontend/pages/admin/*.html -> ../../../index.html (back to root)
+            loginUrl = '../../../index.html';
+        } else if (currentPath.includes('/pages/common/')) {
+            // From /frontend/pages/common/*.html -> ../../../index.html (back to root)
+            loginUrl = '../../../index.html';
         } else if (currentPath.includes('/pages/')) {
-            // Generic fallback for /frontend/pages/*.html -> ../index.html
+            // Generic fallback for /frontend/pages/*.html -> ../../index.html (back to root)
+            loginUrl = '../../index.html';
+        } else if (currentPath.includes('/frontend/')) {
+            // From /frontend/*.html -> ../index.html (back to root)
             loginUrl = '../index.html';
         } else {
-            // Already at root or unknown location - construct absolute path
-            const pathParts = currentPath.split('/');
-            const frontendIndex = pathParts.indexOf('frontend');
-            if (frontendIndex >= 0) {
-                // Build path back to root
-                const backPath = '../'.repeat(pathParts.length - frontendIndex - 1);
-                loginUrl = backPath + 'index.html';
-            } else {
-                // Fallback to root
-                loginUrl = '/index.html';
-            }
+            // Already at root - use index.html
+            loginUrl = 'index.html';
         }
 
         console.log('🔄 Redirecting to login from', currentPath, 'to', loginUrl);
