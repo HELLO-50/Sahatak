@@ -852,13 +852,13 @@ const ApiHelper = {
             
             // Handle standardized API response format
             if (data.success === false) {
-                // Handle authentication errors (but not for messaging endpoints or video consultation pages)
-                if (data.status_code === 401 && !isMessagingEndpoint && !isVideoConsultationPage) {
-                    console.log('🚨 API response 401 for non-messaging endpoint:', endpoint);
-                    window.SahatakLogger?.warn('Authentication failed - auto logging out');
+                // Handle authentication errors (but not for login/register, messaging, or video consultation)
+                if (data.status_code === 401 && !isLoginEndpoint && !isMessagingEndpoint && !isVideoConsultationPage) {
+                    console.log('🚨 API response 401 for authenticated endpoint:', endpoint);
+                    window.SahatakLogger?.warn('Session expired - auto logging out');
                     await this.handleSessionExpired();
-                } else if (data.status_code === 401 && (isMessagingEndpoint || isVideoConsultationPage)) {
-                    console.log('🔸 401 ignored for messaging or video consultation to prevent logout loop');
+                } else if (data.status_code === 401 && (isLoginEndpoint || isMessagingEndpoint || isVideoConsultationPage)) {
+                    console.log('🔸 401 ignored for login/messaging/video to prevent logout loop');
                 }
                 
                 const error = new ApiError(data.message, data.status_code, data.error_code, data.field);
