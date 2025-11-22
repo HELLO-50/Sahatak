@@ -99,16 +99,35 @@ class AuthGuard {
 
         // Determine login URL based on current path
         let loginUrl;
-        if (window.location.pathname.includes('/pages/dashboard/')) {
+        const currentPath = window.location.pathname;
+
+        if (currentPath.includes('/pages/dashboard/')) {
+            // From /frontend/pages/dashboard/*.html -> ../../index.html
             loginUrl = '../../index.html';
-        } else if (window.location.pathname.includes('/pages/')) {
+        } else if (currentPath.includes('/pages/medical/')) {
+            // From /frontend/pages/medical/*/*.html -> ../../../index.html
+            loginUrl = '../../../index.html';
+        } else if (currentPath.includes('/pages/admin/')) {
+            // From /frontend/pages/admin/*.html -> ../../index.html
+            loginUrl = '../../index.html';
+        } else if (currentPath.includes('/pages/')) {
+            // Generic fallback for /frontend/pages/*.html -> ../index.html
             loginUrl = '../index.html';
         } else {
-            // Already at root or unknown location - use relative path
-            loginUrl = window.location.origin + window.location.pathname.split('/pages/')[0] + '/index.html';
+            // Already at root or unknown location - construct absolute path
+            const pathParts = currentPath.split('/');
+            const frontendIndex = pathParts.indexOf('frontend');
+            if (frontendIndex >= 0) {
+                // Build path back to root
+                const backPath = '../'.repeat(pathParts.length - frontendIndex - 1);
+                loginUrl = backPath + 'index.html';
+            } else {
+                // Fallback to root
+                loginUrl = '/index.html';
+            }
         }
 
-        console.log('🔄 Redirecting to login:', loginUrl);
+        console.log('🔄 Redirecting to login from', currentPath, 'to', loginUrl);
         window.location.href = loginUrl;
     }
     
