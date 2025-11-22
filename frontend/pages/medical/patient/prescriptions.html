@@ -411,6 +411,20 @@
         // Initialize prescriptions page on page load
         document.addEventListener('DOMContentLoaded', async function() {
             await DashboardTranslations.initializeDashboard('records');
+
+            // Read URL parameters and set initial filter
+            const urlParams = new URLSearchParams(window.location.search);
+            const statusParam = urlParams.get('status');
+
+            if (statusParam) {
+                // Set the filter dropdown to match URL parameter
+                const statusFilter = document.getElementById('status-filter');
+                if (statusFilter) {
+                    statusFilter.value = statusParam;
+                    currentFilter = statusParam;
+                    console.log(`📌 Setting initial filter from URL: ${statusParam}`);
+                }
+            }
         });
 
         // Setup event listeners
