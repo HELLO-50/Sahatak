@@ -83,7 +83,10 @@ def get_appointments():
     """Get user's appointments with optimized queries"""
     try:
         app_logger.info(f"Getting appointments for user {current_user.id}, type: {current_user.user_type}")
-        
+
+        # Check for patient_id filter (only for doctors)
+        patient_id_filter = request.args.get('patient_id', type=int)
+
         # Get appointments based on user type using optimized queries
         if current_user.user_type == 'patient':
             if not current_user.patient_profile:
@@ -97,6 +100,11 @@ def get_appointments():
             app_logger.info(f"Getting appointments for doctor {current_user.doctor_profile.id}")
             appointments = OptimizedQueries.get_doctor_appointments(current_user.doctor_profile.id)
             app_logger.info(f"Found {len(appointments)} appointments for doctor")
+
+            # Filter by patient_id if provided
+            if patient_id_filter:
+                appointments = [apt for apt in appointments if apt.patient_id == patient_id_filter]
+                app_logger.info(f"Filtered to {len(appointments)} appointments for patient {patient_id_filter}")
         else:
             return APIResponse.validation_error(field='user_type', message='Invalid user type')
         
