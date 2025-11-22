@@ -420,14 +420,30 @@
                 </div>
                 <form id="prescription-form">
                     <div class="modal-body">
+                        <!-- Patient Context Display -->
+                        <div class="alert alert-info mb-3" id="prescription-patient-context">
+                            <h6 class="mb-2"><i class="bi bi-person-badge me-2"></i>Prescribing For:</h6>
+                            <p class="mb-1"><strong>Patient:</strong> <span id="prescription-patient-name">-</span></p>
+                            <p class="mb-0"><strong>Appointment:</strong> <span id="prescription-appointment-info">-</span></p>
+                        </div>
+
+                        <!-- Appointment Selection -->
+                        <div class="mb-3">
+                            <label for="prescription_appointment_select" class="form-label">Select Appointment *</label>
+                            <select class="form-select" id="prescription_appointment_select" required>
+                                <option value="">Select a completed appointment</option>
+                            </select>
+                            <small class="text-muted">Only completed appointments are shown</small>
+                        </div>
+
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="medication_name" class="form-label">Medication Name *</label>
                                 <input type="text" class="form-control" id="medication_name" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="medication_strength" class="form-label">Strength/Dosage</label>
-                                <input type="text" class="form-control" id="medication_strength" placeholder="e.g., 500mg, 10ml">
+                                <label for="medication_strength" class="form-label">Strength/Dosage *</label>
+                                <input type="text" class="form-control" id="medication_strength" placeholder="e.g., 500mg, 10ml" required>
                             </div>
                         </div>
 
@@ -491,18 +507,15 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <div class="form-check">
+                                <label for="refills_allowed" class="form-label">Refills Allowed</label>
+                                <input type="number" class="form-control" id="refills_allowed" min="0" max="10" value="0">
+                                <small class="text-muted">Number of refills allowed (0-10)</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check mt-4">
                                     <input class="form-check-input" type="checkbox" id="generic_substitution">
                                     <label class="form-check-label" for="generic_substitution">
                                         Allow Generic Substitution
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="refill_allowed">
-                                    <label class="form-check-label" for="refill_allowed">
-                                        Refill Allowed
                                     </label>
                                 </div>
                             </div>
@@ -865,10 +878,80 @@
         });
         
         // Modal functions for new forms
-        function addNewPrescription() {
+        async function addNewPrescription() {
+            // Get patient info
+            const patientId = EHRManager.patientId;
+            if (!patientId) {
+                alert('No patient selected. Please select a patient from the EHR first.');
+                return;
+            }
+
+            // Update patient context display
+            const patientName = document.querySelector('.patient-info h3')?.textContent || 'Unknown Patient';
+            document.getElementById('prescription-patient-name').textContent = patientName;
+
+            // Load appointments for this patient
+            await loadAppointmentsForPrescription(patientId);
+
             const prescriptionModal = new bootstrap.Modal(document.getElementById('prescriptionModal'));
             prescriptionModal.show();
         }
+
+        async function loadAppointmentsForPrescription(patientId) {
+            try {
+                const response = await ApiHelper.makeRequest(`/appointments/?patient_id=${patientId}`);
+
+                const appointmentSelect = document.getElementById('prescription_appointment_select');
+                appointmentSelect.innerHTML = '<option value="">Select a completed appointment</option>';
+
+                if (response.success && response.data.appointments) {
+                    const completedAppointments = response.data.appointments
+                        .filter(apt => apt.status === 'completed')
+                        .sort((a, b) => new Date(b.appointment_date || b.created_at) - new Date(a.appointment_date || a.created_at));
+
+                    if (completedAppointments.length === 0) {
+                        appointmentSelect.innerHTML = '<option value="">No completed appointments found</option>';
+                        document.getElementById('prescription-appointment-info').textContent = 'No completed appointments available';
+                        return;
+                    }
+
+                    completedAppointments.forEach(appointment => {
+                        const option = document.createElement('option');
+                        option.value = appointment.id;
+                        const date = new Date(appointment.appointment_date || appointment.created_at);
+                        const dateStr = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+                        option.textContent = `${dateStr} - ${appointment.reason_for_visit || 'General Consultation'}`;
+                        appointmentSelect.appendChild(option);
+                    });
+
+                    // Select most recent by default and update info
+                    appointmentSelect.value = completedAppointments[0].id;
+                    updateAppointmentInfo(completedAppointments[0]);
+                } else {
+                    document.getElementById('prescription-appointment-info').textContent = 'No appointments found';
+                }
+            } catch (error) {
+                console.error('Error loading appointments:', error);
+                document.getElementById('prescription-appointment-info').textContent = 'Error loading appointments';
+            }
+        }
+
+        function updateAppointmentInfo(appointment) {
+            const date = new Date(appointment.appointment_date || appointment.created_at);
+            const dateStr = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            const info = `${dateStr} - ${appointment.reason_for_visit || 'General Consultation'}`;
+            document.getElementById('prescription-appointment-info').textContent = info;
+        }
+
+        // Update appointment info when selection changes
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('prescription_appointment_select')?.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                if (selectedOption.value) {
+                    document.getElementById('prescription-appointment-info').textContent = selectedOption.textContent;
+                }
+            });
+        });
         
         function scheduleNewAppointment() {
             const appointmentModal = new bootstrap.Modal(document.getElementById('appointmentModal'));
@@ -896,18 +979,10 @@
                         throw new Error('No patient selected');
                     }
 
-                    // Get most recent appointment for this patient
-                    let appointmentId = null;
-                    if (EHRManager.ehrData && EHRManager.ehrData.appointments && EHRManager.ehrData.appointments.length > 0) {
-                        // Sort by date and get most recent
-                        const sortedAppointments = [...EHRManager.ehrData.appointments].sort((a, b) =>
-                            new Date(b.date || b.created_at) - new Date(a.date || a.created_at)
-                        );
-                        appointmentId = sortedAppointments[0].id;
-                    }
-
+                    // Get selected appointment
+                    const appointmentId = document.getElementById('prescription_appointment_select').value;
                     if (!appointmentId) {
-                        throw new Error('No appointment found for this patient. Please schedule an appointment first.');
+                        throw new Error('Please select an appointment for this prescription');
                     }
 
                     // Collect form data
@@ -920,7 +995,7 @@
                     const quantity = document.getElementById('quantity').value;
                     const instructions = document.getElementById('prescription_instructions').value.trim();
                     const notes = document.getElementById('prescription_notes').value.trim();
-                    const refillAllowed = document.getElementById('refill_allowed').checked;
+                    const refillsAllowed = parseInt(document.getElementById('refills_allowed').value) || 0;
 
                     // Build dosage string combining strength and form
                     let dosage = strength || '';
@@ -952,7 +1027,7 @@
                         quantity: quantity || null,
                         instructions: fullInstructions || null,
                         notes: notes || null,
-                        refills_allowed: refillAllowed ? 1 : 0
+                        refills_allowed: Math.max(0, Math.min(10, refillsAllowed))
                     };
 
                     // Add dates if duration is specified

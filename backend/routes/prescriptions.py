@@ -83,28 +83,36 @@ def get_prescription_details(prescription_id):
         if not prescription:
             app_logger.warning(f"Prescription {prescription_id} not found")
             return not_found_response("Prescription", prescription_id)
-        
+
         profile = current_user.get_profile()
         if not profile:
             return not_found_response("User profile")
-        
+
         # Check access permissions
         has_access = False
         if current_user.user_type == 'patient' and prescription.patient_id == profile.id:
             has_access = True
         elif current_user.user_type == 'doctor' and prescription.doctor_id == profile.id:
             has_access = True
-        
+
         if not has_access:
             app_logger.warning(f"User {current_user.id} denied access to prescription {prescription_id}")
             return forbidden_response("Access denied to this prescription")
-        
+
+        # Check if prescription should be expired
+        if prescription.status == 'active' and prescription.end_date:
+            if prescription.end_date.date() < datetime.utcnow().date():
+                prescription.status = 'expired'
+                prescription.updated_at = datetime.utcnow()
+                db.session.commit()
+                app_logger.info(f"Auto-expired prescription {prescription_id}")
+
         app_logger.info(f"Retrieved prescription {prescription_id} for user {current_user.id}")
         return success_response(
             message="Prescription details retrieved successfully",
             data={'prescription': prescription.to_dict()}
         )
-        
+
     except Exception as e:
         app_logger.error(f"Error getting prescription {prescription_id}: {str(e)}")
         return error_response("Failed to retrieve prescription details", 500)
@@ -156,6 +164,18 @@ def create_prescription():
             app_logger.warning(f"Patient mismatch for prescription: {data['patient_id']} vs {appointment.patient_id}")
             return error_response("Invalid patient for this appointment")
         
+        # Parse dates if provided
+        start_date = None
+        end_date = None
+        if data.get('start_date'):
+            start_date = datetime.strptime(data['start_date'], '%Y-%m-%d')
+        if data.get('end_date'):
+            end_date = datetime.strptime(data['end_date'], '%Y-%m-%d')
+
+        # Validate date range
+        if start_date and end_date and start_date.date() >= end_date.date():
+            return validation_error_response('dates', 'End date must be after start date')
+
         # Create prescription
         prescription = Prescription(
             appointment_id=appointment.id,
@@ -169,8 +189,8 @@ def create_prescription():
             instructions=sanitize_input(data.get('instructions', ''), 1000) if data.get('instructions') else None,
             notes=sanitize_input(data.get('notes', ''), 1000) if data.get('notes') else None,
             refills_allowed=max(0, min(int(data.get('refills_allowed', 0)), 10)),
-            start_date=datetime.strptime(data['start_date'], '%Y-%m-%d') if data.get('start_date') else None,
-            end_date=datetime.strptime(data['end_date'], '%Y-%m-%d') if data.get('end_date') else None
+            start_date=start_date,
+            end_date=end_date
         )
         
         db.session.add(prescription)
@@ -288,18 +308,38 @@ def update_prescription(prescription_id):
                 updated_fields.append(field)
         
         # Handle date updates
+        temp_start_date = prescription.start_date
+        temp_end_date = prescription.end_date
+
         for date_field in ['start_date', 'end_date']:
             if date_field in data:
                 if data[date_field]:
                     try:
-                        setattr(prescription, date_field, datetime.strptime(data[date_field], '%Y-%m-%d'))
+                        parsed_date = datetime.strptime(data[date_field], '%Y-%m-%d')
+                        if date_field == 'start_date':
+                            temp_start_date = parsed_date
+                        else:
+                            temp_end_date = parsed_date
+                        setattr(prescription, date_field, parsed_date)
                         updated_fields.append(date_field)
                     except ValueError:
                         return validation_error_response(date_field, 'Invalid date format. Use YYYY-MM-DD')
                 else:
                     setattr(prescription, date_field, None)
+                    if date_field == 'start_date':
+                        temp_start_date = None
+                    else:
+                        temp_end_date = None
                     updated_fields.append(date_field)
-        
+
+        # Validate date range if both dates exist
+        if temp_start_date and temp_end_date:
+            start_compare = temp_start_date.date() if hasattr(temp_start_date, 'date') else temp_start_date
+            end_compare = temp_end_date.date() if hasattr(temp_end_date, 'date') else temp_end_date
+            if start_compare >= end_compare:
+                db.session.rollback()
+                return validation_error_response('dates', 'End date must be after start date')
+
         if updated_fields:
             prescription.updated_at = datetime.utcnow()
             db.session.commit()
@@ -466,3 +506,94 @@ def get_prescription_stats():
     except Exception as e:
         app_logger.error(f"Error getting prescription stats: {str(e)}")
         return error_response("Failed to retrieve prescription statistics", 500)
+
+@prescriptions_bp.route('/<int:prescription_id>/refill', methods=['POST'])
+@api_login_required
+def request_refill(prescription_id):
+    """
+    Request a refill for a prescription (patients only)
+    Increments refills_used if refills are available
+    """
+    try:
+        if current_user.user_type != 'patient':
+            return forbidden_response("Only patients can request refills")
+
+        prescription = Prescription.query.get(prescription_id)
+        if not prescription:
+            return not_found_response("Prescription", prescription_id)
+
+        profile = current_user.get_profile()
+        if not profile or prescription.patient_id != profile.id:
+            return forbidden_response("Access denied to this prescription")
+
+        # Check if prescription is active
+        if prescription.status != 'active':
+            return error_response("Can only request refills for active prescriptions")
+
+        # Check if refills are available
+        if prescription.refills_used >= prescription.refills_allowed:
+            return error_response("No refills remaining for this prescription")
+
+        # Increment refills_used
+        prescription.refills_used += 1
+        prescription.updated_at = datetime.utcnow()
+        db.session.commit()
+
+        app_logger.info(f"Patient {profile.id} requested refill for prescription {prescription_id}, refills used: {prescription.refills_used}/{prescription.refills_allowed}")
+
+        # TODO: Send notification to doctor about refill request
+        # This could be implemented as an email or in-app notification
+
+        return success_response(
+            message="Refill requested successfully",
+            data={
+                'prescription': prescription.to_dict(),
+                'refills_remaining': prescription.refills_allowed - prescription.refills_used
+            }
+        )
+
+    except Exception as e:
+        db.session.rollback()
+        app_logger.error(f"Error requesting refill for prescription {prescription_id}: {str(e)}")
+        return error_response("Failed to request refill", 500)
+
+@prescriptions_bp.route('/expire-outdated', methods=['POST'])
+@api_login_required
+def expire_outdated_prescriptions():
+    """
+    Check and expire prescriptions that have passed their end_date
+    This can be called periodically or manually by admins/system
+    """
+    try:
+        # For security, limit this to admin/system calls
+        # For now, any authenticated user can call it
+        # TODO: Add admin-only restriction
+
+        today = datetime.utcnow().date()
+
+        # Find all active prescriptions with end_date in the past
+        outdated_prescriptions = Prescription.query.filter(
+            Prescription.status == 'active',
+            Prescription.end_date.isnot(None),
+            Prescription.end_date < today
+        ).all()
+
+        expired_count = 0
+        for prescription in outdated_prescriptions:
+            prescription.status = 'expired'
+            prescription.updated_at = datetime.utcnow()
+            expired_count += 1
+
+        if expired_count > 0:
+            db.session.commit()
+            app_logger.info(f"Expired {expired_count} outdated prescriptions")
+
+        return success_response(
+            message=f"Checked prescriptions, expired {expired_count} prescriptions",
+            data={'expired_count': expired_count}
+        )
+
+    except Exception as e:
+        db.session.rollback()
+        app_logger.error(f"Error expiring outdated prescriptions: {str(e)}")
+        return error_response("Failed to expire outdated prescriptions", 500)

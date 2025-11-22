@@ -275,6 +275,28 @@ const PrescriptionsAPI = {
         }
     },
 
+    // Request prescription refill (patients only)
+    async requestRefill(prescriptionId) {
+        try {
+            const response = await ApiHelper.makeRequest(`/prescriptions/${prescriptionId}/refill`, {
+                method: 'POST'
+            });
+
+            if (response.success) {
+                return {
+                    success: true,
+                    data: response.data,
+                    message: 'Refill requested successfully'
+                };
+            } else {
+                return { success: false, message: response.message };
+            }
+        } catch (error) {
+            console.error('Error requesting refill:', error);
+            return { success: false, message: 'Error requesting refill' };
+        }
+    },
+
     // Update prescription status
     async updatePrescriptionStatus(prescriptionId, status, notes = null) {
         try {

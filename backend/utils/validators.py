@@ -429,15 +429,15 @@ def validate_appointment_type(appointment_type: str) -> Dict[str, Union[bool, st
 def validate_prescription_data(prescription_data: dict) -> Dict[str, Union[bool, str]]:
     """
     Validate prescription data
-    
+
     Args:
         prescription_data: Dictionary containing prescription details
-        
+
     Returns:
         dict: Contains 'valid' (bool) and 'message' (str)
     """
     required_fields = ['medication_name', 'dosage', 'frequency', 'duration']
-    
+
     # Check for required fields
     for field in required_fields:
         if not prescription_data.get(field):
@@ -445,7 +445,7 @@ def validate_prescription_data(prescription_data: dict) -> Dict[str, Union[bool,
                 'valid': False,
                 'message': f'{field.replace("_", " ").title()} is required'
             }
-    
+
     # Validate medication name
     medication_name = prescription_data.get('medication_name', '').strip()
     if len(medication_name) < 2 or len(medication_name) > 200:
@@ -453,7 +453,7 @@ def validate_prescription_data(prescription_data: dict) -> Dict[str, Union[bool,
             'valid': False,
             'message': 'Medication name must be between 2 and 200 characters'
         }
-    
+
     # Validate dosage
     dosage = prescription_data.get('dosage', '').strip()
     if len(dosage) < 1 or len(dosage) > 100:
@@ -461,7 +461,7 @@ def validate_prescription_data(prescription_data: dict) -> Dict[str, Union[bool,
             'valid': False,
             'message': 'Dosage must be between 1 and 100 characters'
         }
-    
+
     # Validate frequency
     frequency = prescription_data.get('frequency', '').strip()
     if len(frequency) < 1 or len(frequency) > 100:
@@ -469,7 +469,7 @@ def validate_prescription_data(prescription_data: dict) -> Dict[str, Union[bool,
             'valid': False,
             'message': 'Frequency must be between 1 and 100 characters'
         }
-    
+
     # Validate duration
     duration = prescription_data.get('duration', '').strip()
     if len(duration) < 1 or len(duration) > 100:
@@ -477,7 +477,7 @@ def validate_prescription_data(prescription_data: dict) -> Dict[str, Union[bool,
             'valid': False,
             'message': 'Duration must be between 1 and 100 characters'
         }
-    
+
     # Validate optional fields if provided
     if 'quantity' in prescription_data and prescription_data['quantity']:
         quantity = prescription_data['quantity'].strip()
@@ -486,7 +486,7 @@ def validate_prescription_data(prescription_data: dict) -> Dict[str, Union[bool,
                 'valid': False,
                 'message': 'Quantity must be less than 50 characters'
             }
-    
+
     if 'instructions' in prescription_data and prescription_data['instructions']:
         instructions = prescription_data['instructions'].strip()
         if len(instructions) > 1000:
@@ -494,7 +494,7 @@ def validate_prescription_data(prescription_data: dict) -> Dict[str, Union[bool,
                 'valid': False,
                 'message': 'Instructions must be less than 1000 characters'
             }
-    
+
     if 'notes' in prescription_data and prescription_data['notes']:
         notes = prescription_data['notes'].strip()
         if len(notes) > 1000:
@@ -502,7 +502,7 @@ def validate_prescription_data(prescription_data: dict) -> Dict[str, Union[bool,
                 'valid': False,
                 'message': 'Notes must be less than 1000 characters'
             }
-    
+
     # Validate refills if provided
     if 'refills_allowed' in prescription_data:
         try:
@@ -517,7 +517,25 @@ def validate_prescription_data(prescription_data: dict) -> Dict[str, Union[bool,
                 'valid': False,
                 'message': 'Refills allowed must be a valid number'
             }
-    
+
+    # Validate date range if both dates provided
+    if 'start_date' in prescription_data and 'end_date' in prescription_data:
+        start_date = prescription_data.get('start_date')
+        end_date = prescription_data.get('end_date')
+
+        if start_date and end_date:
+            # If they're datetime objects, compare them directly
+            if hasattr(start_date, 'date'):
+                start_date = start_date.date() if hasattr(start_date, 'date') else start_date
+            if hasattr(end_date, 'date'):
+                end_date = end_date.date() if hasattr(end_date, 'date') else end_date
+
+            if start_date >= end_date:
+                return {
+                    'valid': False,
+                    'message': 'End date must be after start date'
+                }
+
     return {
         'valid': True,
         'message': 'Prescription data is valid'

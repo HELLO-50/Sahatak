@@ -404,6 +404,8 @@
         let currentSort = 'newest';
         let currentSearch = '';
         let userType = null;
+        let isEditMode = false;
+        let editPrescriptionId = null;
 
         // Initialize prescriptions page on page load
         document.addEventListener('DOMContentLoaded', async function() {
@@ -577,6 +579,12 @@
                                     <i class="bi bi-check-circle me-1"></i>
                                     مكتمل
                                 </button>
+                                ${(prescription.refills_allowed > 0 && prescription.refills_used < prescription.refills_allowed) ? `
+                                    <button class="btn btn-outline-info btn-sm" onclick="event.stopPropagation(); requestRefill(${prescription.id})">
+                                        <i class="bi bi-arrow-repeat me-1"></i>
+                                        طلب تجديد
+                                    </button>
+                                ` : ''}
                             ` : ''}
                             ${userType === 'doctor' && prescription.status === 'active' ? `
                                 <button class="btn btn-outline-warning btn-sm" onclick="event.stopPropagation(); editPrescription(${prescription.id})">
@@ -744,21 +752,30 @@
         // Open create prescription modal
         function openCreatePrescriptionModal() {
             if (userType !== 'doctor') return;
-            
+
+            // Reset edit mode
+            isEditMode = false;
+            editPrescriptionId = null;
+
+            // Re-enable patient and appointment fields
+            document.getElementById('patient-select').disabled = false;
+            document.getElementById('appointment-select').disabled = false;
+
             // Reset form
             document.getElementById('prescription-form').reset();
             document.getElementById('prescription-modal-title').innerHTML = `
                 <i class="bi bi-prescription2 text-primary me-2"></i>
                 وصفة طبية جديدة
             `;
-            
+            document.getElementById('modal-new-prescription').textContent = 'New Prescription';
+
             // Set today as default start date
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('start-date').value = today;
-            
+
             // Load patients for selection
             loadPatients();
-            
+
             const modal = new bootstrap.Modal(document.getElementById('prescription-modal'));
             modal.show();
         }
@@ -814,7 +831,55 @@
             }
         }
 
-        // Save prescription
+        // Edit prescription
+        async function editPrescription(prescriptionId) {
+            if (userType !== 'doctor') return;
+
+            try {
+                const response = await ApiHelper.makeRequest(`/prescriptions/${prescriptionId}`);
+
+                if (response.success) {
+                    const prescription = response.data.prescription;
+
+                    // Set edit mode
+                    isEditMode = true;
+                    editPrescriptionId = prescriptionId;
+
+                    // Update modal title
+                    document.getElementById('modal-new-prescription').textContent = 'Edit Prescription';
+
+                    // Populate form fields
+                    document.getElementById('patient-select').value = prescription.patient_id;
+                    await loadPatientAppointments(); // Load appointments for this patient
+                    document.getElementById('appointment-select').value = prescription.appointment_id;
+                    document.getElementById('medication-name').value = prescription.medication_name;
+                    document.getElementById('dosage').value = prescription.dosage;
+                    document.getElementById('frequency').value = prescription.frequency;
+                    document.getElementById('duration').value = prescription.duration;
+                    document.getElementById('quantity').value = prescription.quantity || '';
+                    document.getElementById('instructions').value = prescription.instructions || '';
+                    document.getElementById('notes').value = prescription.notes || '';
+                    document.getElementById('refills-allowed').value = prescription.refills_allowed || 0;
+                    document.getElementById('start-date').value = prescription.start_date ? prescription.start_date.split('T')[0] : '';
+                    document.getElementById('end-date').value = prescription.end_date ? prescription.end_date.split('T')[0] : '';
+
+                    // Disable patient and appointment fields (cannot be changed)
+                    document.getElementById('patient-select').disabled = true;
+                    document.getElementById('appointment-select').disabled = true;
+
+                    // Open modal
+                    const modal = new bootstrap.Modal(document.getElementById('prescription-modal'));
+                    modal.show();
+                } else {
+                    showError('Failed to load prescription details');
+                }
+            } catch (error) {
+                console.error('Error loading prescription for edit:', error);
+                showError('Error loading prescription');
+            }
+        }
+
+        // Save prescription (create or update)
         async function savePrescription() {
             const formData = {
                 patient_id: document.getElementById('patient-select').value,
@@ -830,27 +895,55 @@
                 start_date: document.getElementById('start-date').value,
                 end_date: document.getElementById('end-date').value
             };
-            
+
             // Validate required fields
-            if (!formData.patient_id || !formData.appointment_id || !formData.medication_name || 
-                !formData.dosage || !formData.frequency || !formData.duration) {
+            if (!formData.medication_name || !formData.dosage || !formData.frequency || !formData.duration) {
                 showError('يرجى ملء جميع الحقول المطلوبة');
                 return;
             }
-            
+
+            // Validate dates if both provided
+            if (formData.start_date && formData.end_date) {
+                const startDate = new Date(formData.start_date);
+                const endDate = new Date(formData.end_date);
+                if (startDate >= endDate) {
+                    showError('End date must be after start date');
+                    return;
+                }
+            }
+
             try {
-                const response = await ApiHelper.makeRequest('/prescriptions/', {
-                    method: 'POST',
-                    body: JSON.stringify(formData)
-                });
-                
+                let response;
+                if (isEditMode && editPrescriptionId) {
+                    // Update existing prescription
+                    // Remove patient_id and appointment_id as they cannot be changed
+                    delete formData.patient_id;
+                    delete formData.appointment_id;
+
+                    response = await ApiHelper.makeRequest(`/prescriptions/${editPrescriptionId}`, {
+                        method: 'PUT',
+                        body: JSON.stringify(formData)
+                    });
+                } else {
+                    // Create new prescription
+                    if (!formData.patient_id || !formData.appointment_id) {
+                        showError('يرجى اختيار المريض والموعد');
+                        return;
+                    }
+
+                    response = await ApiHelper.makeRequest('/prescriptions/', {
+                        method: 'POST',
+                        body: JSON.stringify(formData)
+                    });
+                }
+
                 if (response.success) {
-                    showSuccess('تم إنشاء الوصفة الطبية بنجاح');
+                    showSuccess(isEditMode ? 'تم تحديث الوصفة الطبية بنجاح' : 'تم إنشاء الوصفة الطبية بنجاح');
                     bootstrap.Modal.getInstance(document.getElementById('prescription-modal')).hide();
                     await loadPrescriptions();
                     await loadPrescriptionStats();
                 } else {
-                    showError(response.message || 'فشل في إنشاء الوصفة الطبية');
+                    showError(response.message || (isEditMode ? 'فشل في تحديث الوصفة الطبية' : 'فشل في إنشاء الوصفة الطبية'));
                 }
             } catch (error) {
                 console.error('Error saving prescription:', error);
@@ -865,10 +958,34 @@
             modal.show();
         }
 
+        // Request refill
+        async function requestRefill(prescriptionId) {
+            if (userType !== 'patient') return;
+
+            const confirmed = confirm('هل تريد طلب تجديد هذه الوصفة الطبية؟');
+            if (!confirmed) return;
+
+            try {
+                const response = await PrescriptionsAPI.requestRefill(prescriptionId);
+
+                if (response.success) {
+                    const refillsRemaining = response.data.refills_remaining || 0;
+                    showSuccess(`تم طلب التجديد بنجاح. التجديدات المتبقية: ${refillsRemaining}`);
+                    await loadPrescriptions();
+                    await loadPrescriptionStats();
+                } else {
+                    showError(response.message || 'فشل في طلب التجديد');
+                }
+            } catch (error) {
+                console.error('Error requesting refill:', error);
+                showError('خطأ في طلب التجديد');
+            }
+        }
+
         // Confirm status change
         async function confirmStatusChange() {
             if (!currentPrescription) return;
-            
+
             try {
                 const response = await ApiHelper.makeRequest(`/prescriptions/${currentPrescription.id}/status`, {
                     method: 'PUT',
@@ -877,7 +994,7 @@
                         notes: document.getElementById('completion-notes').value
                     })
                 });
-                
+
                 if (response.success) {
                     showSuccess('تم تحديث حالة الوصفة بنجاح');
                     bootstrap.Modal.getInstance(document.getElementById('status-change-modal')).hide();
