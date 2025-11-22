@@ -887,7 +887,16 @@
             }
 
             // Update patient context display
-            const patientName = document.querySelector('.patient-info h3')?.textContent || 'Unknown Patient';
+            let patientName = 'Unknown Patient';
+            if (EHRManager.ehrData && EHRManager.ehrData.patient_info && EHRManager.ehrData.patient_info.user) {
+                patientName = EHRManager.ehrData.patient_info.user.full_name;
+            } else {
+                // Fallback: try to get from the selected patient info element
+                const selectedPatientInfo = document.getElementById('selected-patient-info');
+                if (selectedPatientInfo && selectedPatientInfo.textContent) {
+                    patientName = selectedPatientInfo.textContent;
+                }
+            }
             document.getElementById('prescription-patient-name').textContent = patientName;
 
             // Load appointments for this patient
