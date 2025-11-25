@@ -2066,14 +2066,25 @@ const AdminDashboard = {
                 return;
             }
 
+            // Debug: Log doctor data to see what we have
+            console.log('Doctor data:', doctor);
+            console.log('Document paths:', doctor.document_paths);
+            console.log('Documents submitted:', doctor.documents_submitted);
+
             // Helper function to create document link
             const createDocumentLink = (path, label) => {
                 if (path) {
-                    // Clean the path if it starts with /static/
-                    const cleanPath = path.startsWith('/static/') ? path : `/static/${path}`;
+                    console.log(`Creating link for ${label}:`, path);
+                    // Clean the path - handle both relative and absolute paths
+                    let cleanPath = path;
+                    if (!path.startsWith('http') && !path.startsWith('/')) {
+                        cleanPath = '/' + path;
+                    }
+                    // Get filename for download
+                    const filename = path.split('/').pop() || `${label.toLowerCase()}_document`;
                     return `
-                        <a href="${cleanPath}" target="_blank" class="btn btn-sm btn-outline-primary me-2">
-                            <i class="bi bi-file-earmark-pdf me-1"></i>View ${label}
+                        <a href="${cleanPath}" target="_blank" download="${filename}" class="btn btn-sm btn-outline-primary me-2">
+                            <i class="bi bi-file-earmark-pdf me-1"></i>View/Download ${label}
                         </a>
                     `;
                 }
