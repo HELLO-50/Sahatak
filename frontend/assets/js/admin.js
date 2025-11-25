@@ -184,7 +184,10 @@ const AdminAuth = {
 // Dashboard functionality
 const AdminDashboard = {
     currentSection: 'overview',
-    
+    currentAppointments: [],
+    currentAdminUsers: [],
+    currentPendingDoctors: [],
+
     // Initialize dashboard
     async init() {
         // Check authentication
