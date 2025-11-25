@@ -1214,14 +1214,14 @@ def get_pending_verifications():
                     'submitted_at': doctor.created_at.isoformat(),
                     'days_waiting': (datetime.utcnow() - doctor.created_at).days,
                     'documents_submitted': {
-                        'license_document': bool(doctor.license_document_path) if hasattr(doctor, 'license_document_path') else False,
-                        'degree_document': bool(doctor.degree_document_path) if hasattr(doctor, 'degree_document_path') else False,
-                        'id_document': bool(doctor.id_document_path) if hasattr(doctor, 'id_document_path') else False
+                        'license_document': bool(doctor.license_document_path),
+                        'degree_document': bool(doctor.degree_document_path),
+                        'id_document': bool(doctor.id_document_path)
                     },
                     'document_paths': {
-                        'license_document': doctor.license_document_path if hasattr(doctor, 'license_document_path') else None,
-                        'degree_document': doctor.degree_document_path if hasattr(doctor, 'degree_document_path') else None,
-                        'id_document': doctor.id_document_path if hasattr(doctor, 'id_document_path') else None
+                        'license_document': doctor.license_document_path,
+                        'degree_document': doctor.degree_document_path,
+                        'id_document': doctor.id_document_path
                     }
                 }
                 doctors_data.append(doctors_info)

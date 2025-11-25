@@ -2154,28 +2154,49 @@ const AdminDashboard = {
 
                     <div class="row mb-3">
                         <div class="col-12">
-                            <div class="card">
-                                <div class="card-header bg-light">
-                                    <strong><i class="bi bi-files me-2"></i>Uploaded Documents</strong>
+                            <div class="card border-primary">
+                                <div class="card-header bg-primary text-white">
+                                    <strong><i class="bi bi-files me-2"></i>Uploaded Documents for Verification</strong>
                                 </div>
                                 <div class="card-body">
-                                    <div class="mb-3">
-                                        <strong>License Document:</strong><br>
-                                        ${doctor.document_paths?.license_document ?
-                                            createDocumentLink(doctor.document_paths.license_document, 'License') :
-                                            '<span class="text-muted">Not uploaded</span>'}
+                                    <div class="mb-3 p-3 border rounded">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <i class="bi bi-file-earmark-text text-primary me-2"></i>
+                                                <strong>License Document:</strong>
+                                            </div>
+                                            <div>
+                                                ${doctor.document_paths?.license_document ?
+                                                    createDocumentLink(doctor.document_paths.license_document, 'License') :
+                                                    '<span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i>Not uploaded</span>'}
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="mb-3">
-                                        <strong>Degree Document:</strong><br>
-                                        ${doctor.document_paths?.degree_document ?
-                                            createDocumentLink(doctor.document_paths.degree_document, 'Degree') :
-                                            '<span class="text-muted">Not uploaded</span>'}
+                                    <div class="mb-3 p-3 border rounded">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <i class="bi bi-mortarboard text-primary me-2"></i>
+                                                <strong>Degree Document:</strong>
+                                            </div>
+                                            <div>
+                                                ${doctor.document_paths?.degree_document ?
+                                                    createDocumentLink(doctor.document_paths.degree_document, 'Degree') :
+                                                    '<span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i>Not uploaded</span>'}
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="mb-0">
-                                        <strong>ID Document:</strong><br>
-                                        ${doctor.document_paths?.id_document ?
-                                            createDocumentLink(doctor.document_paths.id_document, 'ID') :
-                                            '<span class="text-muted">Not uploaded</span>'}
+                                    <div class="mb-0 p-3 border rounded">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <i class="bi bi-card-heading text-primary me-2"></i>
+                                                <strong>ID Document:</strong>
+                                            </div>
+                                            <div>
+                                                ${doctor.document_paths?.id_document ?
+                                                    createDocumentLink(doctor.document_paths.id_document, 'ID') :
+                                                    '<span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i>Not uploaded</span>'}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
