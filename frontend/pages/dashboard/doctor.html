@@ -1109,37 +1109,118 @@
             document.getElementById('profileLastLogin').textContent = user.last_login || 'Today at 9:15 AM';
         }
 
-        function saveProfile() {
-            // Get current data from database
-            const currentUser = JSON.parse(localStorage.getItem('sahatak_doctor_data') || '{}');
-            
-            // Collect all profile data from form fields
-            const updatedUser = {
-                ...currentUser,
-                // Professional Information
-                experience: document.getElementById('profileExperience').value,
-                hospital_affiliations: document.getElementById('profileHospitals').value,
-                department: document.getElementById('profileDepartment').value,
-                consultation_fee: document.getElementById('profileFee').value,
-                education_details: document.getElementById('profileEducation').value,
-                certifications: document.getElementById('profileCertifications').value,
-                memberships: document.getElementById('profileMemberships').value,
-                languages: document.getElementById('profileLanguages').value,
-                consultation_areas: document.getElementById('profileConsultationAreas').value,
-                // Contact Information
-                office_phone: document.getElementById('profileOfficePhone').value,
-                emergency_contact: document.getElementById('profileEmergencyContact').value,
-                office_address: document.getElementById('profileOfficeAddress').value
-            };
-            
-            // Save to database (localStorage)
-            localStorage.setItem('sahatak_doctor_data', JSON.stringify(updatedUser));
-            
-            // Show success message
-            alert('Profile updated successfully!');
-            
-            // Update verification status if profile is more complete
-            updateVerificationStatus(updatedUser);
+        async function saveProfile() {
+            try {
+                const saveButton = document.querySelector('button[onclick="saveProfile()"]');
+                if (saveButton) {
+                    saveButton.disabled = true;
+                    saveButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+                }
+
+                // Upload documents first if any are selected
+                const licenseFile = document.getElementById('profileLicenseDoc').files[0];
+                const degreeFile = document.getElementById('profileDegreeDoc').files[0];
+                const idFile = document.getElementById('profileIdDoc').files[0];
+
+                // Upload license document
+                if (licenseFile) {
+                    await uploadDocument(licenseFile, 'license', 'license-upload-status');
+                }
+
+                // Upload degree document
+                if (degreeFile) {
+                    await uploadDocument(degreeFile, 'degree', 'degree-upload-status');
+                }
+
+                // Upload ID document
+                if (idFile) {
+                    await uploadDocument(idFile, 'id', 'id-upload-status');
+                }
+
+                // Update profile data
+                const profileData = {
+                    education_details: document.getElementById('profileEducation').value || '',
+                    certifications: document.getElementById('profileCertifications').value.split(',').map(s => s.trim()).filter(Boolean),
+                    professional_memberships: document.getElementById('profileMemberships').value.split(',').map(s => s.trim()).filter(Boolean),
+                    languages_spoken: document.getElementById('profileLanguages').value.split(',').map(s => s.trim()).filter(Boolean),
+                    consultation_areas: document.getElementById('profileConsultationAreas').value.split(',').map(s => s.trim()).filter(Boolean),
+                    office_phone: document.getElementById('profileOfficePhone').value || '',
+                    emergency_contact: document.getElementById('profileEmergencyContact').value || '',
+                    office_address: document.getElementById('profileOfficeAddress').value || ''
+                };
+
+                // Send to backend
+                const response = await fetch('/doctor-verification/complete-profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(profileData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('Profile and documents saved successfully!');
+                    // Clear file inputs
+                    document.getElementById('profileLicenseDoc').value = '';
+                    document.getElementById('profileDegreeDoc').value = '';
+                    document.getElementById('profileIdDoc').value = '';
+                } else {
+                    alert('Failed to save profile: ' + (result.message || 'Unknown error'));
+                }
+
+            } catch (error) {
+                console.error('Error saving profile:', error);
+                alert('Error saving profile: ' + error.message);
+            } finally {
+                const saveButton = document.querySelector('button[onclick="saveProfile()"]');
+                if (saveButton) {
+                    saveButton.disabled = false;
+                    saveButton.innerHTML = '<i class="bi bi-check-lg me-1"></i><span id="save-profile">Save Profile</span>';
+                }
+            }
+        }
+
+        // Helper function to upload a single document
+        async function uploadDocument(file, docType, statusElementId) {
+            const statusEl = document.getElementById(statusElementId);
+
+            try {
+                // Show uploading status
+                if (statusEl) {
+                    statusEl.innerHTML = '<span class="text-info"><i class="bi bi-upload me-1"></i>Uploading...</span>';
+                }
+
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('doc_type', docType);
+
+                const response = await fetch('/doctor-verification/upload-document', {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    if (statusEl) {
+                        statusEl.innerHTML = '<span class="text-success"><i class="bi bi-check-circle me-1"></i>Uploaded successfully</span>';
+                    }
+                    return true;
+                } else {
+                    throw new Error(result.message || 'Upload failed');
+                }
+
+            } catch (error) {
+                console.error(`Error uploading ${docType} document:`, error);
+                if (statusEl) {
+                    statusEl.innerHTML = `<span class="text-danger"><i class="bi bi-x-circle me-1"></i>${error.message}</span>`;
+                }
+                throw error;
+            }
         }
 
         function editProfile() {
