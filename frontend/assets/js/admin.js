@@ -1014,8 +1014,10 @@ const AdminDashboard = {
         try {
             const response = await AdminAuth.apiRequest('/admin/appointments?page=1&per_page=20');
             const data = await response.json();
-            
+
             if (data.success && data.data) {
+                // Store appointments for modal access
+                this.currentAppointments = data.data.appointments || [];
                 this.displayAppointmentsTable(data.data.appointments);
                 // Update pagination if needed
                 if (data.data.pagination) {
@@ -1023,15 +1025,17 @@ const AdminDashboard = {
                 }
             } else {
                 console.error('Invalid appointments response:', data);
+                this.currentAppointments = [];
                 this.displayAppointmentsTable([]);
             }
-            
+
             // Setup filter event listeners if not already done
             this.setupAppointmentFilters();
-            
+
         } catch (error) {
             console.error('Failed to load appointments:', error);
             this.showNotification('Failed to load appointments: ' + error.message, 'error');
+            this.currentAppointments = [];
             this.displayAppointmentsTable([]);
         }
     },
@@ -1250,9 +1254,73 @@ const AdminDashboard = {
     },
     
     // View appointment details
-    viewAppointment(appointmentId) {
-        // For now, just show an alert. You can implement a modal later
-        this.showNotification(`View appointment ${appointmentId} - Details modal can be implemented here`, 'info');
+    async viewAppointment(appointmentId) {
+        try {
+            // Find the appointment from the current list
+            const appointment = this.currentAppointments.find(apt => apt.id === appointmentId);
+
+            if (!appointment) {
+                this.showNotification('Appointment not found', 'error');
+                return;
+            }
+
+            // Create HTML content for the modal
+            const modalBody = document.getElementById('appointmentDetailsBody');
+            modalBody.innerHTML = `
+                <div class="container-fluid">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-2">
+                                <i class="bi bi-person me-2"></i>Patient Information
+                            </h6>
+                            <p class="mb-1"><strong>Name:</strong> ${appointment.patient.name}</p>
+                            <p class="mb-0"><strong>Email:</strong> ${appointment.patient.email}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-2">
+                                <i class="bi bi-stethoscope me-2"></i>Doctor Information
+                            </h6>
+                            <p class="mb-1"><strong>Name:</strong> ${this.formatDoctorName(appointment.doctor.name)}</p>
+                            <p class="mb-0"><strong>Specialty:</strong> ${appointment.doctor.specialty}</p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-2">
+                                <i class="bi bi-calendar-event me-2"></i>Appointment Details
+                            </h6>
+                            <p class="mb-1"><strong>Date & Time:</strong> ${appointment.appointment_date_readable}</p>
+                            <p class="mb-1"><strong>Type:</strong> ${appointment.appointment_type}</p>
+                            <p class="mb-0">
+                                <strong>Status:</strong>
+                                <span class="badge ${this.getStatusBadgeClass(appointment.status)}">
+                                    ${appointment.status}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-2">
+                                <i class="bi bi-info-circle me-2"></i>Additional Information
+                            </h6>
+                            <p class="mb-1"><strong>Appointment ID:</strong> #${appointment.id}</p>
+                            ${appointment.notes ? `<p class="mb-0"><strong>Notes:</strong> ${appointment.notes}</p>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Show the modal
+            const modalElement = document.getElementById('appointmentDetailsModal');
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+
+        } catch (error) {
+            console.error('Error displaying appointment details:', error);
+            this.showNotification('Failed to display appointment details', 'error');
+        }
     },
     
     // Get status badge class
@@ -1279,25 +1347,29 @@ const AdminDashboard = {
     async loadAdminUsers() {
         try {
             const response = await AdminAuth.apiRequest('/admin/users?user_type=admin&per_page=50');
-            
+
             if (!response.ok) {
                 console.error(`Admin users API returned ${response.status}: ${response.statusText}`);
                 const errorText = await response.text();
                 console.error('Error response:', errorText);
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
-            
+
             const data = await response.json();
             console.log('Admin users data received:', data);
-            
+
             if (data.success && data.users) {
+                // Store admin users for modal access
+                this.currentAdminUsers = data.users || [];
                 this.displayAdminUsersTable(data.users);
             } else {
                 console.error('Admin users API returned unexpected structure:', data);
+                this.currentAdminUsers = [];
                 this.displayAdminUsersTable([]);
             }
         } catch (error) {
             console.error('Failed to load admin users:', error);
+            this.currentAdminUsers = [];
             this.displayAdminUsersTable([]);
         }
     },
@@ -1727,9 +1799,76 @@ const AdminDashboard = {
     },
 
     // View admin details
-    viewAdminDetails(adminId) {
-        // For now, just show a simple alert - can be enhanced with a modal later
-        alert(`Admin details for ID: ${adminId}\n(This can be enhanced with a detailed modal)`);
+    async viewAdminDetails(adminId) {
+        try {
+            // Find the admin from the current list
+            const admin = this.currentAdminUsers.find(adm => adm.id === adminId);
+
+            if (!admin) {
+                this.showNotification('Admin not found', 'error');
+                return;
+            }
+
+            // Create HTML content for the modal
+            const modalBody = document.getElementById('adminDetailsBody');
+            modalBody.innerHTML = `
+                <div class="container-fluid">
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="text-center mb-3">
+                                <i class="bi bi-person-circle text-info" style="font-size: 4rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <th width="40%"><i class="bi bi-person me-2"></i>Full Name</th>
+                                        <td>${admin.full_name || 'N/A'}</td>
+                                    </tr>
+                                    <tr>
+                                        <th><i class="bi bi-envelope me-2"></i>Email</th>
+                                        <td>${admin.email}</td>
+                                    </tr>
+                                    <tr>
+                                        <th><i class="bi bi-phone me-2"></i>Phone</th>
+                                        <td>${admin.phone || 'N/A'}</td>
+                                    </tr>
+                                    <tr>
+                                        <th><i class="bi bi-toggle-on me-2"></i>Status</th>
+                                        <td>
+                                            <span class="badge bg-${admin.is_active ? 'success' : 'secondary'}">
+                                                ${admin.is_active ? 'Active' : 'Inactive'}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th><i class="bi bi-calendar-plus me-2"></i>Created At</th>
+                                        <td>${new Date(admin.created_at).toLocaleString()}</td>
+                                    </tr>
+                                    <tr>
+                                        <th><i class="bi bi-hash me-2"></i>Admin ID</th>
+                                        <td>#${admin.id}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Show the modal
+            const modalElement = document.getElementById('adminDetailsModal');
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+
+        } catch (error) {
+            console.error('Error displaying admin details:', error);
+            this.showNotification('Failed to display admin details', 'error');
+        }
     },
 
     // Load pending doctor verifications
@@ -1738,16 +1877,20 @@ const AdminDashboard = {
             console.log('Loading pending verifications...');
             const response = await AdminAuth.apiRequest('/admin/doctors/pending-verification');
             const data = await response.json();
-            
+
             console.log('Pending verifications data received:', data);
-            
+
             if (data.success && data.data && data.data.pending_doctors) {
+                // Store pending doctors for modal access
+                this.currentPendingDoctors = data.data.pending_doctors || [];
                 this.displayPendingVerifications(data.data.pending_doctors);
             } else {
+                this.currentPendingDoctors = [];
                 throw new Error(data.message || 'Failed to load pending verifications');
             }
         } catch (error) {
             console.error('Failed to load pending verifications:', error);
+            this.currentPendingDoctors = [];
             this.showNotification('Failed to load pending verifications', 'error');
         }
     },
@@ -1910,9 +2053,142 @@ const AdminDashboard = {
     },
 
     // View doctor details
-    viewDoctorDetails(doctorId) {
-        // For now, just show a simple alert - can be enhanced with a modal later
-        alert(`Doctor verification details for ID: ${doctorId}\n(This can be enhanced with a detailed modal)`);
+    async viewDoctorDetails(doctorId) {
+        try {
+            // Find the doctor from the current list
+            const doctor = this.currentPendingDoctors.find(doc => doc.id === doctorId);
+
+            if (!doctor) {
+                this.showNotification('Doctor not found', 'error');
+                return;
+            }
+
+            // Helper function to create document link
+            const createDocumentLink = (path, label) => {
+                if (path) {
+                    // Clean the path if it starts with /static/
+                    const cleanPath = path.startsWith('/static/') ? path : `/static/${path}`;
+                    return `
+                        <a href="${cleanPath}" target="_blank" class="btn btn-sm btn-outline-primary me-2">
+                            <i class="bi bi-file-earmark-pdf me-1"></i>View ${label}
+                        </a>
+                    `;
+                }
+                return `<span class="text-muted">Not uploaded</span>`;
+            };
+
+            // Create HTML content for the modal
+            const modalBody = document.getElementById('doctorDetailsBody');
+            modalBody.innerHTML = `
+                <div class="container-fluid">
+                    <div class="row mb-3">
+                        <div class="col-12 text-center">
+                            <i class="bi bi-stethoscope text-success" style="font-size: 4rem;"></i>
+                            <h4 class="mt-2">${doctor.name || 'Unknown Doctor'}</h4>
+                            <span class="badge bg-info">${doctor.specialty || 'No specialty'}</span>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header bg-light">
+                                    <strong><i class="bi bi-person-lines-fill me-2"></i>Personal Information</strong>
+                                </div>
+                                <div class="card-body">
+                                    <p class="mb-2"><strong>Email:</strong><br>${doctor.email || 'Not specified'}</p>
+                                    <p class="mb-2"><strong>Phone:</strong><br>${doctor.phone || 'Not specified'}</p>
+                                    <p class="mb-2"><strong>Years of Experience:</strong><br>${doctor.years_of_experience || 0} years</p>
+                                    <p class="mb-0"><strong>License Number:</strong><br>${doctor.license_number || 'Not specified'}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header bg-light">
+                                    <strong><i class="bi bi-file-earmark-text me-2"></i>Verification Status</strong>
+                                </div>
+                                <div class="card-body">
+                                    <p class="mb-2"><strong>Submitted:</strong><br>${this.formatDate(doctor.submitted_at)}</p>
+                                    <p class="mb-2">
+                                        <strong>Waiting Time:</strong><br>
+                                        <span class="badge bg-${doctor.days_waiting > 7 ? 'danger' : 'info'}">${doctor.days_waiting} days</span>
+                                    </p>
+                                    <p class="mb-0"><strong>Doctor ID:</strong><br>#${doctor.id}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    ${doctor.bio ? `
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <strong><i class="bi bi-card-text me-2"></i>Biography</strong>
+                                </div>
+                                <div class="card-body">
+                                    <p class="mb-0">${doctor.bio}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <strong><i class="bi bi-files me-2"></i>Uploaded Documents</strong>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <strong>License Document:</strong><br>
+                                        ${doctor.document_paths?.license_document ?
+                                            createDocumentLink(doctor.document_paths.license_document, 'License') :
+                                            '<span class="text-muted">Not uploaded</span>'}
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong>Degree Document:</strong><br>
+                                        ${doctor.document_paths?.degree_document ?
+                                            createDocumentLink(doctor.document_paths.degree_document, 'Degree') :
+                                            '<span class="text-muted">Not uploaded</span>'}
+                                    </div>
+                                    <div class="mb-0">
+                                        <strong>ID Document:</strong><br>
+                                        ${doctor.document_paths?.id_document ?
+                                            createDocumentLink(doctor.document_paths.id_document, 'ID') :
+                                            '<span class="text-muted">Not uploaded</span>'}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="alert alert-${doctor.days_waiting > 7 ? 'danger' : 'warning'}">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                <strong>Action Required:</strong> Please review all documents and information carefully before approving or rejecting this verification request.
+                                ${doctor.days_waiting > 7 ? '<br><strong>Note:</strong> This request has been pending for more than 7 days.' : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Show the modal
+            const modalElement = document.getElementById('doctorDetailsModal');
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+
+        } catch (error) {
+            console.error('Error displaying doctor details:', error);
+            this.showNotification('Failed to display doctor details', 'error');
+        }
     }
 };
 

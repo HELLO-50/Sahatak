@@ -1217,6 +1217,11 @@ def get_pending_verifications():
                         'license_document': bool(doctor.license_document_path) if hasattr(doctor, 'license_document_path') else False,
                         'degree_document': bool(doctor.degree_document_path) if hasattr(doctor, 'degree_document_path') else False,
                         'id_document': bool(doctor.id_document_path) if hasattr(doctor, 'id_document_path') else False
+                    },
+                    'document_paths': {
+                        'license_document': doctor.license_document_path if hasattr(doctor, 'license_document_path') else None,
+                        'degree_document': doctor.degree_document_path if hasattr(doctor, 'degree_document_path') else None,
+                        'id_document': doctor.id_document_path if hasattr(doctor, 'id_document_path') else None
                     }
                 }
                 doctors_data.append(doctors_info)
