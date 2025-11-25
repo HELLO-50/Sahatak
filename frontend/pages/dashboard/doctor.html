@@ -1111,6 +1111,9 @@
 
         async function saveProfile() {
             try {
+                // Get API base URL from ApiHelper (defined in main.js)
+                const API_BASE_URL = window.ApiHelper ? window.ApiHelper.baseUrl : 'https://sahatak.pythonanywhere.com/api';
+
                 const saveButton = document.querySelector('button[onclick="saveProfile()"]');
                 if (saveButton) {
                     saveButton.disabled = true;
@@ -1124,17 +1127,17 @@
 
                 // Upload license document
                 if (licenseFile) {
-                    await uploadDocument(licenseFile, 'license', 'license-upload-status');
+                    await uploadDocument(licenseFile, 'license', 'license-upload-status', API_BASE_URL);
                 }
 
                 // Upload degree document
                 if (degreeFile) {
-                    await uploadDocument(degreeFile, 'degree', 'degree-upload-status');
+                    await uploadDocument(degreeFile, 'degree', 'degree-upload-status', API_BASE_URL);
                 }
 
                 // Upload ID document
                 if (idFile) {
-                    await uploadDocument(idFile, 'id', 'id-upload-status');
+                    await uploadDocument(idFile, 'id', 'id-upload-status', API_BASE_URL);
                 }
 
                 // Update profile data
@@ -1150,7 +1153,7 @@
                 };
 
                 // Send to backend
-                const response = await fetch('/doctor-verification/complete-profile', {
+                const response = await fetch(`${API_BASE_URL}/doctor-verification/complete-profile`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1184,7 +1187,7 @@
         }
 
         // Helper function to upload a single document
-        async function uploadDocument(file, docType, statusElementId) {
+        async function uploadDocument(file, docType, statusElementId, apiBaseUrl) {
             const statusEl = document.getElementById(statusElementId);
 
             try {
@@ -1197,7 +1200,7 @@
                 formData.append('file', file);
                 formData.append('doc_type', docType);
 
-                const response = await fetch('/doctor-verification/upload-document', {
+                const response = await fetch(`${apiBaseUrl}/doctor-verification/upload-document`, {
                     method: 'POST',
                     credentials: 'include',
                     body: formData
