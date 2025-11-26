@@ -1261,30 +1261,44 @@ def download_doctor_file(doctor_id, file_type):
     """
     Download a doctor's document (license, degree, id)
     """
-    # Get Doctor info from database
-    doctor = Doctor.query.get(doctor_id)
-    if not doctor:
-        return abort(404, description="Doctor not found")
-    file_map = {
-        'license': doctor.license_document_path,
-        'degree': doctor.degree_document_path,
-        'id': doctor.id_document_path
-    }
+    try:
+        doctor = Doctor.query.get(doctor_id)
+        if not doctor:
+            app_logger.error(f"Download failed: Doctor {doctor_id} not found")
+            return APIResponse.error("Doctor not found", 404)
 
-    if file_type not in file_map:
-        return abort(400, description="Invalid file type")
+        file_map = {
+            'license': doctor.license_document_path,
+            'degree': doctor.degree_document_path,
+            'id': doctor.id_document_path
+        }
 
-    file_path = file_map[file_type]
+        if file_type not in file_map:
+            app_logger.error(f"Invalid file type requested: {file_type}")
+            return APIResponse.error("Invalid file type", 400)
 
-    if not file_path:
-        return abort(404, description=f"{file_type.capitalize()} document not found")
+        file_path = file_map[file_type]
 
-    #Send file to the browser
-    return send_file(
-        file_path,
-        as_attachment=True,
-        download_name=f"{doctor.user.full_name}_{file_type}.pdf"
-    )
+        if not file_path:
+            app_logger.error(f"{file_type} path missing for doctor {doctor_id}")
+            return APIResponse.error(f"{file_type.capitalize()} document not found", 404)
+
+        if not os.path.exists(file_path):
+            app_logger.error(f"File does NOT exist on server: {file_path}")
+            return APIResponse.error("File does not exist on server", 404)
+
+        app_logger.info(f"Doctor document downloaded: {file_path}")
+
+        # Important: File download is not JSON; direct send_file
+        return send_file(
+            file_path,
+            as_attachment=True,
+            download_name=f"{doctor.user.full_name}_{file_type}.pdf"
+        )
+
+    except Exception as e:
+        app_logger.error(f"Download error for doctor {doctor_id}: {str(e)}")
+        return APIResponse.error("Failed to download file", 500)
 #Verify a doctor
 @admin_bp.route('/doctors/<int:doctor_id>/verify', methods=['POST'])
 @admin_required
