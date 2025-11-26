@@ -619,10 +619,29 @@
             
             // Prepare data for submission
             const submitData = {
-                ...formData.professional,
-                ...formData.contact,
+                education_details: formData.professional.education_details,
+                certifications: formData.professional.certifications || [],
+                professional_memberships: formData.professional.memberships || [],
+                languages_spoken: formData.professional.languages_spoken || [],
+                consultation_areas: formData.professional.consultation_areas || [],
+                office_phone: formData.contact.office_phone,
+                emergency_contact: formData.contact.emergency_contact || '',
+                office_address: formData.contact.office_address,
                 profile_completed: true
             };
+
+            // Ensure required array fields have at least one item
+            if (!submitData.languages_spoken || submitData.languages_spoken.length === 0) {
+                alert('Please enter at least one language spoken');
+                return;
+            }
+
+            if (!submitData.consultation_areas || submitData.consultation_areas.length === 0) {
+                alert('Please enter at least one consultation area');
+                return;
+            }
+
+            console.log('Submitting profile data:', submitData);
             
             try {
                 // Show loading state
@@ -686,10 +705,10 @@
 
                 const result = await response.json();
 
-                if (result.success) {
+                if (response.ok && result.success) {
 
                     // Submit for verification
-                    await fetch(`${API_BASE_URL}/doctor-verification/submit-for-verification`, {
+                    const verifyResponse = await fetch(`${API_BASE_URL}/doctor-verification/submit-for-verification`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -698,10 +717,25 @@
                         credentials: 'include'
                     });
 
-                    alert('Profile submitted for verification successfully!');
-                    window.location.href = '../../dashboard/doctor.html';
+                    const verifyResult = await verifyResponse.json();
+
+                    if (verifyResponse.ok && verifyResult.success) {
+                        alert('Profile submitted for verification successfully!');
+                        window.location.href = '../../dashboard/doctor.html';
+                    } else {
+                        alert(verifyResult.message || 'Profile saved but verification submission failed');
+                    }
                 } else {
-                    alert(result.message || 'Failed to submit profile');
+                    // Show detailed error message
+                    let errorMessage = result.message || 'Failed to submit profile';
+                    if (result.error) {
+                        errorMessage += '\n' + result.error;
+                    }
+                    if (result.details) {
+                        errorMessage += '\nDetails: ' + JSON.stringify(result.details);
+                    }
+                    console.error('Profile submission error:', result);
+                    alert(errorMessage);
                 }
             } catch (error) {
                 console.error('Error submitting profile:', error);
