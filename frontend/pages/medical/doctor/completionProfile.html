@@ -646,6 +646,12 @@
                 // Production submission
                 const API_BASE_URL = window.ApiHelper ? window.ApiHelper.baseUrl : 'https://sahatak.pythonanywhere.com/api';
 
+                // Get auth token
+                const token = localStorage.getItem('sahatak_access_token');
+                if (!token) {
+                    throw new Error('Not authenticated. Please login again.');
+                }
+
                 // Upload documents first
                 for (const [docType, file] of Object.entries(formData.uploadedFiles)) {
                     const formDataUpload = new FormData();
@@ -654,6 +660,9 @@
 
                     const uploadResponse = await fetch(`${API_BASE_URL}/doctor-verification/upload-document`, {
                         method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        },
                         credentials: 'include',
                         body: formDataUpload
                     });
@@ -668,7 +677,8 @@
                 const response = await fetch(`${API_BASE_URL}/doctor-verification/complete-profile`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify(submitData),
                     credentials: 'include'
@@ -682,7 +692,8 @@
                     await fetch(`${API_BASE_URL}/doctor-verification/submit-for-verification`, {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
                         },
                         credentials: 'include'
                     });

@@ -1152,11 +1152,18 @@
                     office_address: document.getElementById('profileOfficeAddress').value || ''
                 };
 
+                // Get auth token
+                const token = localStorage.getItem('sahatak_access_token');
+                if (!token) {
+                    throw new Error('Not authenticated. Please login again.');
+                }
+
                 // Send to backend
                 const response = await fetch(`${API_BASE_URL}/doctor-verification/complete-profile`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
                     },
                     credentials: 'include',
                     body: JSON.stringify(profileData)
@@ -1196,12 +1203,23 @@
                     statusEl.innerHTML = '<span class="text-info"><i class="bi bi-upload me-1"></i>Uploading...</span>';
                 }
 
+                // Get auth token
+                const token = localStorage.getItem('sahatak_access_token');
+                if (!token) {
+                    throw new Error('Not authenticated. Please login again.');
+                }
+
                 const formData = new FormData();
                 formData.append('file', file);
                 formData.append('doc_type', docType);
 
+                const headers = {
+                    'Authorization': `Bearer ${token}`
+                };
+
                 const response = await fetch(`${apiBaseUrl}/doctor-verification/upload-document`, {
                     method: 'POST',
+                    headers: headers,
                     credentials: 'include',
                     body: formData
                 });
