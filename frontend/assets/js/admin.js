@@ -211,6 +211,8 @@ const AdminDashboard = {
         
         // Setup create admin form
         this.setupCreateAdminForm();
+        // Setup authenticated download interception for backend file links
+        this.setupAuthenticatedDownloads();
     },
     
     // Update user info in UI
@@ -392,6 +394,55 @@ const AdminDashboard = {
                 this.handleSearch(e.target.value);
             });
         }
+    },
+
+    // Intercept clicks to backend-admin file links and download via fetch with Authorization header
+    setupAuthenticatedDownloads() {
+        document.addEventListener('click', async (e) => {
+            const a = e.target.closest && e.target.closest('a');
+            if (!a) return;
+            try {
+                const href = a.getAttribute('href') || '';
+                const apiBase = AdminAuth.API_BASE_URL;
+                // Only intercept admin/download links from our API base
+                if (href.startsWith(apiBase + '/admin/doctors/')) {
+                    e.preventDefault();
+                    // Use fetch with Authorization header to include admin token
+                    const token = AdminAuth.getToken();
+                    const headers = {
+                        'Accept': 'application/octet-stream'
+                    };
+                    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+                    const resp = await fetch(href, { method: 'GET', headers: headers, credentials: 'include' });
+                    if (!resp.ok) {
+                        // fallback: open in new tab
+                        window.open(href, '_blank');
+                        return;
+                    }
+                    const blob = await resp.blob();
+                    // Derive filename from content-disposition or href
+                    let filename = '';
+                    const cd = resp.headers.get('content-disposition');
+                    if (cd && cd.indexOf('filename=') !== -1) {
+                        filename = cd.split('filename=')[1].split(';')[0].replace(/\"/g, '').trim();
+                    } else {
+                        const parts = href.split('/');
+                        filename = parts[parts.length-1] || 'download';
+                    }
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                    window.URL.revokeObjectURL(url);
+                }
+            } catch (err) {
+                console.error('Authenticated download failed:', err);
+            }
+        });
     },
     
     // Switch dashboard section
@@ -732,13 +783,44 @@ const AdminDashboard = {
                 };
 
                 // Helper function to render document links
+                // If the stored path is a server-side path (not an absolute http URL),
+                // point the link to the backend admin file download endpoint so files
+                // are served from the server instead of GitHub Pages (which would 404).
                 const renderDocument = (label, path) => {
                     if (path) {
                         let cleanPath = path;
-                        if (!path.startsWith('http') && !path.startsWith('/')) {
+                        const isHttp = path.startsWith('http');
+                        const isAbsolute = path.startsWith('/');
+
+                        // If it's not an http URL and not an absolute path, normalize
+                        if (!isHttp && !isAbsolute) {
                             cleanPath = '/' + path;
                         }
+
+                        // Determine filename
                         const filename = path.split('/').pop() || `${label.toLowerCase()}_document`;
+
+                        // If path is not an http URL, attempt to route through backend download endpoint
+                        if (!isHttp) {
+                            try {
+                                // Use admin API base and construct file download endpoint if user is a doctor
+                                // We assume `user` is in scope here (this function is used inside the user modal)
+                                if (typeof user !== 'undefined' && user.user_type === 'doctor') {
+                                    // Map label to file type
+                                    let fileType = 'license';
+                                    const low = (label || '').toLowerCase();
+                                    if (low.includes('degree')) fileType = 'degree';
+                                    else if (low.includes('id')) fileType = 'id';
+                                    else if (low.includes('license')) fileType = 'license';
+
+                                    cleanPath = `${AdminAuth.API_BASE_URL}/admin/doctors/${user.id}/file/${fileType}`;
+                                }
+                            } catch (e) {
+                                // fallback: use normalized path
+                                cleanPath = cleanPath;
+                            }
+                        }
+
                         return `
                             <div class="row mt-2">
                                 <div class="col-sm-4 fw-bold">${label}:</div>
@@ -2152,15 +2234,29 @@ const AdminDashboard = {
             console.log('Document paths:', doctor.document_paths);
             console.log('Documents submitted:', doctor.documents_submitted);
 
-            // Helper function to create document link
+            // Helper function to create document link (for doctor modal)
             const createDocumentLink = (path, label) => {
                 if (path) {
                     console.log(`Creating link for ${label}:`, path);
                     // Clean the path - handle both relative and absolute paths
                     let cleanPath = path;
-                    if (!path.startsWith('http') && !path.startsWith('/')) {
+                    const isHttp = path.startsWith('http');
+                    if (!isHttp && !path.startsWith('/')) {
                         cleanPath = '/' + path;
                     }
+
+                    // Map label to file type for backend endpoint
+                    let fileType = 'license';
+                    const low = (label || '').toLowerCase();
+                    if (low.includes('degree')) fileType = 'degree';
+                    else if (low.includes('id')) fileType = 'id';
+                    else if (low.includes('license')) fileType = 'license';
+
+                    // If the path is not an http URL, route through backend admin download endpoint
+                    if (!isHttp) {
+                        cleanPath = `${AdminAuth.API_BASE_URL}/admin/doctors/${doctor.id}/file/${fileType}`;
+                    }
+
                     // Get filename for download
                     const filename = path.split('/').pop() || `${label.toLowerCase()}_document`;
                     return `
