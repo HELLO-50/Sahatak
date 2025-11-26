@@ -732,44 +732,13 @@ const AdminDashboard = {
                 };
 
                 // Helper function to render document links
-                // If the stored path is a server-side path (not an absolute http URL),
-                // point the link to the backend admin file download endpoint so files
-                // are served from the server instead of GitHub Pages (which would 404).
                 const renderDocument = (label, path) => {
                     if (path) {
                         let cleanPath = path;
-                        const isHttp = path.startsWith('http');
-                        const isAbsolute = path.startsWith('/');
-
-                        // If it's not an http URL and not an absolute path, normalize
-                        if (!isHttp && !isAbsolute) {
+                        if (!path.startsWith('http') && !path.startsWith('/')) {
                             cleanPath = '/' + path;
                         }
-
-                        // Determine filename
                         const filename = path.split('/').pop() || `${label.toLowerCase()}_document`;
-
-                        // If path is not an http URL, attempt to route through backend download endpoint
-                        if (!isHttp) {
-                            try {
-                                // Use admin API base and construct file download endpoint if user is a doctor
-                                // We assume `user` is in scope here (this function is used inside the user modal)
-                                if (typeof user !== 'undefined' && user.user_type === 'doctor') {
-                                    // Map label to file type
-                                    let fileType = 'license';
-                                    const low = (label || '').toLowerCase();
-                                    if (low.includes('degree')) fileType = 'degree';
-                                    else if (low.includes('id')) fileType = 'id';
-                                    else if (low.includes('license')) fileType = 'license';
-
-                                    cleanPath = `${AdminAuth.API_BASE_URL}/admin/doctors/${user.id}/file/${fileType}`;
-                                }
-                            } catch (e) {
-                                // fallback: use normalized path
-                                cleanPath = cleanPath;
-                            }
-                        }
-
                         return `
                             <div class="row mt-2">
                                 <div class="col-sm-4 fw-bold">${label}:</div>
@@ -2183,29 +2152,15 @@ const AdminDashboard = {
             console.log('Document paths:', doctor.document_paths);
             console.log('Documents submitted:', doctor.documents_submitted);
 
-            // Helper function to create document link (for doctor modal)
+            // Helper function to create document link
             const createDocumentLink = (path, label) => {
                 if (path) {
                     console.log(`Creating link for ${label}:`, path);
                     // Clean the path - handle both relative and absolute paths
                     let cleanPath = path;
-                    const isHttp = path.startsWith('http');
-                    if (!isHttp && !path.startsWith('/')) {
+                    if (!path.startsWith('http') && !path.startsWith('/')) {
                         cleanPath = '/' + path;
                     }
-
-                    // Map label to file type for backend endpoint
-                    let fileType = 'license';
-                    const low = (label || '').toLowerCase();
-                    if (low.includes('degree')) fileType = 'degree';
-                    else if (low.includes('id')) fileType = 'id';
-                    else if (low.includes('license')) fileType = 'license';
-
-                    // If the path is not an http URL, route through backend admin download endpoint
-                    if (!isHttp) {
-                        cleanPath = `${AdminAuth.API_BASE_URL}/admin/doctors/${doctor.id}/file/${fileType}`;
-                    }
-
                     // Get filename for download
                     const filename = path.split('/').pop() || `${label.toLowerCase()}_document`;
                     return `
