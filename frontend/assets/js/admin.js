@@ -714,12 +714,48 @@ const AdminDashboard = {
         try {
             const response = await AdminAuth.apiRequest(`/admin/users/${userId}`);
             const data = await response.json();
-            
+
             if (data.success) {
                 const user = data.data.user;
+
+                // Helper function to render any field
+                const renderField = (label, value) => {
+                    if (value !== null && value !== undefined && value !== '') {
+                        return `
+                            <div class="row mt-2">
+                                <div class="col-sm-4 fw-bold">${label}:</div>
+                                <div class="col-sm-8">${value}</div>
+                            </div>
+                        `;
+                    }
+                    return '';
+                };
+
+                // Helper function to render document links
+                const renderDocument = (label, path) => {
+                    if (path) {
+                        let cleanPath = path;
+                        if (!path.startsWith('http') && !path.startsWith('/')) {
+                            cleanPath = '/' + path;
+                        }
+                        const filename = path.split('/').pop() || `${label.toLowerCase()}_document`;
+                        return `
+                            <div class="row mt-2">
+                                <div class="col-sm-4 fw-bold">${label}:</div>
+                                <div class="col-sm-8">
+                                    <a href="${cleanPath}" target="_blank" download="${filename}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-file-earmark-pdf me-1"></i>View/Download
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    return '';
+                };
+
                 const modalHtml = `
                     <div class="modal fade" id="viewUserModal" tabindex="-1">
-                        <div class="modal-dialog">
+                        <div class="modal-dialog modal-lg">
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h5 class="modal-title">User Details - ${user.full_name || user.email}</h5>
@@ -754,33 +790,78 @@ const AdminDashboard = {
                                             </span>
                                         </div>
                                     </div>
+                                    ${renderField('User ID', user.id)}
                                     <div class="row mt-2">
                                         <div class="col-sm-4 fw-bold">Registration Date:</div>
                                         <div class="col-sm-8">${new Date(user.created_at).toLocaleDateString()}</div>
                                     </div>
+                                    ${user.last_login ? `<div class="row mt-2">
+                                        <div class="col-sm-4 fw-bold">Last Login:</div>
+                                        <div class="col-sm-8">${new Date(user.last_login).toLocaleString()}</div>
+                                    </div>` : ''}
+
                                     ${user.profile ? `
                                         <hr>
                                         <h6>Profile Information:</h6>
-                                        ${user.profile.date_of_birth ? `<div class="row mt-2">
-                                            <div class="col-sm-4 fw-bold">Date of Birth:</div>
-                                            <div class="col-sm-8">${user.profile.date_of_birth}</div>
-                                        </div>` : ''}
-                                        ${user.profile.age ? `<div class="row mt-2">
-                                            <div class="col-sm-4 fw-bold">Age:</div>
-                                            <div class="col-sm-8">${user.profile.age}</div>
-                                        </div>` : ''}
-                                        ${user.profile.gender ? `<div class="row mt-2">
-                                            <div class="col-sm-4 fw-bold">Gender:</div>
-                                            <div class="col-sm-8">${user.profile.gender}</div>
-                                        </div>` : ''}
-                                        ${user.profile.specialization ? `<div class="row mt-2">
-                                            <div class="col-sm-4 fw-bold">Specialization:</div>
-                                            <div class="col-sm-8">${user.profile.specialization}</div>
-                                        </div>` : ''}
-                                        ${user.profile.license_number ? `<div class="row mt-2">
-                                            <div class="col-sm-4 fw-bold">License Number:</div>
-                                            <div class="col-sm-8">${user.profile.license_number}</div>
-                                        </div>` : ''}
+                                        ${renderField('Date of Birth', user.profile.date_of_birth)}
+                                        ${renderField('Age', user.profile.age)}
+                                        ${renderField('Gender', user.profile.gender)}
+                                        ${renderField('Address', user.profile.address)}
+                                        ${renderField('City', user.profile.city)}
+                                        ${renderField('State', user.profile.state)}
+                                        ${renderField('Emergency Contact', user.profile.emergency_contact)}
+                                        ${renderField('Blood Type', user.profile.blood_type)}
+                                        ${renderField('Allergies', user.profile.allergies)}
+                                        ${renderField('Chronic Conditions', user.profile.chronic_conditions)}
+                                        ${renderField('Current Medications', user.profile.current_medications)}
+                                        ${renderField('Medical History', user.profile.medical_history)}
+
+                                        ${user.user_type === 'doctor' ? `
+                                            <hr>
+                                            <h6>Doctor Information:</h6>
+                                            ${renderField('Specialization', user.profile.specialization)}
+                                            ${renderField('License Number', user.profile.license_number)}
+                                            ${renderField('Years of Experience', user.profile.years_of_experience)}
+                                            ${renderField('Consultation Fee', user.profile.consultation_fee ? '$' + user.profile.consultation_fee : null)}
+                                            ${renderField('Bio', user.profile.bio)}
+                                            ${renderField('Education', user.profile.education)}
+                                            ${renderField('Certifications', user.profile.certifications)}
+                                            ${renderField('Languages', user.profile.languages)}
+                                            ${renderField('Hospital Affiliations', user.profile.hospital_affiliations)}
+                                            ${renderField('Clinic Address', user.profile.clinic_address)}
+                                            ${renderField('Office Hours', user.profile.office_hours)}
+                                            ${user.profile.is_verified !== undefined ? `
+                                                <div class="row mt-2">
+                                                    <div class="col-sm-4 fw-bold">Verification Status:</div>
+                                                    <div class="col-sm-8">
+                                                        <span class="badge bg-${user.profile.is_verified ? 'success' : 'warning'}">
+                                                            ${user.profile.is_verified ? 'Verified' : 'Pending Verification'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            ` : ''}
+                                            ${renderField('Verification Notes', user.profile.verification_notes)}
+                                            ${user.profile.verified_at ? `
+                                                <div class="row mt-2">
+                                                    <div class="col-sm-4 fw-bold">Verified At:</div>
+                                                    <div class="col-sm-8">${new Date(user.profile.verified_at).toLocaleString()}</div>
+                                                </div>
+                                            ` : ''}
+
+                                            ${user.profile.document_paths || user.profile.license_document || user.profile.degree_document || user.profile.id_document ? `
+                                                <hr>
+                                                <h6>Uploaded Documents:</h6>
+                                                ${user.profile.document_paths ? `
+                                                    ${renderDocument('License Document', user.profile.document_paths.license_document)}
+                                                    ${renderDocument('Degree Document', user.profile.document_paths.degree_document)}
+                                                    ${renderDocument('ID Document', user.profile.document_paths.id_document)}
+                                                ` : `
+                                                    ${renderDocument('License Document', user.profile.license_document)}
+                                                    ${renderDocument('Degree Document', user.profile.degree_document)}
+                                                    ${renderDocument('ID Document', user.profile.id_document)}
+                                                `}
+                                            ` : ''}
+                                        ` : ''}
                                     ` : ''}
                                 </div>
                                 <div class="modal-footer">
@@ -790,25 +871,25 @@ const AdminDashboard = {
                         </div>
                     </div>
                 `;
-                
+
                 // Remove existing modal if present
                 const existingModal = document.getElementById('viewUserModal');
                 if (existingModal) {
                     existingModal.remove();
                 }
-                
+
                 // Add modal to body
                 document.body.insertAdjacentHTML('beforeend', modalHtml);
-                
+
                 // Show modal
                 const modal = new bootstrap.Modal(document.getElementById('viewUserModal'));
                 modal.show();
-                
+
                 // Clean up modal after hide
                 document.getElementById('viewUserModal').addEventListener('hidden.bs.modal', function () {
                     this.remove();
                 });
-                
+
             } else {
                 this.showNotification(data.message || 'Failed to load user details', 'error');
             }
