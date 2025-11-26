@@ -643,46 +643,50 @@
                     return;
                 }
                 
-                // Production submission would go here
-                const response = await fetch('http://127.0.0.1:5000/doctor-verification/complete-profile', {
+                // Production submission
+                const API_BASE_URL = window.ApiHelper ? window.ApiHelper.baseUrl : 'https://sahatak.pythonanywhere.com/api';
+
+                // Upload documents first
+                for (const [docType, file] of Object.entries(formData.uploadedFiles)) {
+                    const formDataUpload = new FormData();
+                    formDataUpload.append('file', file);
+                    formDataUpload.append('doc_type', docType);
+
+                    const uploadResponse = await fetch(`${API_BASE_URL}/doctor-verification/upload-document`, {
+                        method: 'POST',
+                        credentials: 'include',
+                        body: formDataUpload
+                    });
+
+                    const uploadResult = await uploadResponse.json();
+                    if (!uploadResult.success) {
+                        throw new Error(`Failed to upload ${docType} document: ${uploadResult.message}`);
+                    }
+                }
+
+                // Then update profile
+                const response = await fetch(`${API_BASE_URL}/doctor-verification/complete-profile`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(submitData),
                     credentials: 'include'
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
-                    // Upload documents
-                    for (const [docType, file] of Object.entries(formData.uploadedFiles)) {
-                        const formDataUpload = new FormData();
-                        formDataUpload.append('file', file);
-                        formDataUpload.append('doc_type', docType);
-                        
-                        await fetch('http://127.0.0.1:5000/doctor-verification/upload-document', {
-                            method: 'POST',
-                            headers: {
-                                'Authorization': `Bearer ${localStorage.getItem('token')}`
-                            },
-                            body: formDataUpload,
-                            credentials: 'include'
-                        });
-                    }
-                    
+
                     // Submit for verification
-                    await fetch('http://127.0.0.1:5000/doctor-verification/submit-for-verification', {
+                    await fetch(`${API_BASE_URL}/doctor-verification/submit-for-verification`, {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                            'Content-Type': 'application/json'
                         },
                         credentials: 'include'
                     });
-                    
+
                     alert('Profile submitted for verification successfully!');
                     window.location.href = '../../dashboard/doctor.html';
                 } else {
