@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, current_app, make_response
+from flask import Blueprint, request, jsonify, current_app, make_response, send_file, abort
 from flask_login import current_user
 from functools import wraps
 import hashlib
@@ -1253,6 +1253,38 @@ def get_pending_verifications():
             message="Failed to retrieve pending verifications",
             status_code=500
         )
+        
+#Download doctor file    
+@admin_bp.route('/doctors/<int:doctor_id>/file/<string:file_type>', methods=['GET'])
+@admin_required
+def download_doctor_file(doctor_id, file_type):
+    """
+    Download a doctor's document (license, degree, id)
+    """
+    # Get Doctor info from database
+    doctor = Doctor.query.get(doctor_id)
+    if not doctor:
+        return abort(404, description="Doctor not found")
+    file_map = {
+        'license': doctor.license_document_path,
+        'degree': doctor.degree_document_path,
+        'id': doctor.id_document_path
+    }
+
+    if file_type not in file_map:
+        return abort(400, description="Invalid file type")
+
+    file_path = file_map[file_type]
+
+    if not file_path:
+        return abort(404, description=f"{file_type.capitalize()} document not found")
+
+    #Send file to the browser
+    return send_file(
+        file_path,
+        as_attachment=True,
+        download_name=f"{doctor.user.full_name}_{file_type}.pdf"
+    )
 #Verify a doctor
 @admin_bp.route('/doctors/<int:doctor_id>/verify', methods=['POST'])
 @admin_required
