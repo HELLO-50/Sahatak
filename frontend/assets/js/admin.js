@@ -211,8 +211,6 @@ const AdminDashboard = {
         
         // Setup create admin form
         this.setupCreateAdminForm();
-        // Setup authenticated download interception for backend file links
-        this.setupAuthenticatedDownloads();
     },
     
     // Update user info in UI
@@ -394,78 +392,6 @@ const AdminDashboard = {
                 this.handleSearch(e.target.value);
             });
         }
-    },
-
-    // Intercept clicks to backend-admin file links and download via fetch with Authorization header
-    setupAuthenticatedDownloads() {
-        document.addEventListener('click', async (e) => {
-            const a = e.target.closest && e.target.closest('a');
-            if (!a) return;
-                try {
-                    const href = a.getAttribute('href') || '';
-                    const apiBase = AdminAuth.API_BASE_URL;
-                    // Only intercept admin/download links from our API base
-                    if (!href.startsWith(apiBase + '/admin/doctors/')) return;
-
-                    e.preventDefault();
-                    // Use fetch with Authorization header to include admin token
-                    const token = AdminAuth.getToken();
-                    const headers = {
-                        'Accept': 'application/octet-stream'
-                    };
-                    if (token) headers['Authorization'] = `Bearer ${token}`;
-
-                    // Attempt 1: fetch with Authorization header + credentials
-                    console.debug('Attempting authenticated download (with Authorization):', href, 'tokenPresent=', !!token);
-                    let resp;
-                    try {
-                        resp = await fetch(href, { method: 'GET', headers: headers, credentials: 'include', mode: 'cors' });
-                    } catch (firstErr) {
-                        console.warn('First fetch attempt failed (with Authorization):', firstErr);
-                    }
-
-                    // If first attempt failed or returned non-ok, try fallback: credentials-only (cookie-based sessions)
-                    if (!resp || !resp.ok) {
-                        console.debug('Attempting authenticated download (credentials-only):', href);
-                        try {
-                            resp = await fetch(href, { method: 'GET', credentials: 'include', mode: 'cors' });
-                        } catch (secondErr) {
-                            console.warn('Second fetch attempt failed (credentials-only):', secondErr);
-                        }
-                    }
-
-                    // If still no successful response, fallback to opening the link in a new tab/window
-                    if (!resp || !resp.ok) {
-                        console.error('Authenticated download: both fetch attempts failed or returned non-OK. Falling back to opening URL. href=', href, 'resp=', resp);
-                        // Try to open the backend URL directly (may prompt login or show error) as a last resort
-                        window.open(href, '_blank');
-                        return;
-                    }
-
-                    const blob = await resp.blob();
-                    // Derive filename from content-disposition or href
-                    let filename = '';
-                    const cd = resp.headers.get('content-disposition');
-                    if (cd && cd.indexOf('filename=') !== -1) {
-                        filename = cd.split('filename=')[1].split(';')[0].replace(/\"/g, '').trim();
-                    } else {
-                        const parts = href.split('/');
-                        filename = parts[parts.length-1] || 'download';
-                    }
-                    const url = window.URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = filename;
-                    document.body.appendChild(link);
-                    link.click();
-                    link.remove();
-                    window.URL.revokeObjectURL(url);
-                } catch (err) {
-                    console.error('Authenticated download failed:', err);
-                    // Final fallback: open link in new tab so the browser can handle it (may require login)
-                    try { window.open(a.getAttribute('href'), '_blank'); } catch (e) { /* ignore */ }
-                }
-        });
     },
     
     // Switch dashboard section
