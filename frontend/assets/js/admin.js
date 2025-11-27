@@ -211,6 +211,9 @@ const AdminDashboard = {
         
         // Setup create admin form
         this.setupCreateAdminForm();
+        
+        // Setup authenticated downloads for backend file links
+        this.setupAuthenticatedDownloads();
     },
     
     // Update user info in UI
@@ -392,6 +395,73 @@ const AdminDashboard = {
                 this.handleSearch(e.target.value);
             });
         }
+    },
+
+    // Intercept clicks on backend admin download links and fetch with Authorization header
+    setupAuthenticatedDownloads() {
+        document.addEventListener('click', async (e) => {
+            const a = e.target.closest('a');
+            if (!a) return;
+            
+            const href = a.getAttribute('href') || '';
+            const apiBase = AdminAuth.API_BASE_URL;
+            
+            // Only intercept admin doctor file download links
+            if (!href.startsWith(apiBase + '/admin/doctors/') || !href.includes('/file/')) return;
+            
+            e.preventDefault();
+            
+            try {
+                const token = AdminAuth.getToken();
+                console.log('Downloading from backend:', href, 'Token present:', !!token);
+                
+                const headers = { 'Accept': 'application/octet-stream' };
+                if (token) headers['Authorization'] = `Bearer ${token}`;
+                
+                // Fetch the file with authentication
+                const resp = await fetch(href, {
+                    method: 'GET',
+                    headers: headers,
+                    credentials: 'include',
+                    mode: 'cors'
+                });
+                
+                if (!resp.ok) {
+                    console.error('Download failed:', resp.status, resp.statusText);
+                    alert('Failed to download file. Status: ' + resp.status);
+                    return;
+                }
+                
+                const blob = await resp.blob();
+                
+                // Extract filename from content-disposition or construct from URL
+                let filename = 'document';
+                const cd = resp.headers.get('content-disposition');
+                if (cd && cd.includes('filename=')) {
+                    filename = cd.split('filename=')[1].split(';')[0].replace(/"/g, '').trim();
+                } else {
+                    // Extract from URL: /admin/doctors/77/file/license -> license.pdf
+                    const parts = href.split('/');
+                    const fileType = parts[parts.length - 1];
+                    filename = fileType + '.pdf';
+                }
+                
+                // Create blob URL and trigger download
+                const blobUrl = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                window.URL.revokeObjectURL(blobUrl);
+                
+                console.log('File downloaded:', filename);
+            } catch (err) {
+                console.error('Download error:', err);
+                alert('Error downloading file: ' + err.message);
+            }
+        });
     },
     
     // Switch dashboard section
@@ -734,16 +804,20 @@ const AdminDashboard = {
                 // Helper function to render document links
                 const renderDocument = (label, path) => {
                     if (path) {
-                        let cleanPath = path;
-                        if (!path.startsWith('http') && !path.startsWith('/')) {
-                            cleanPath = '/' + path;
+                        // For doctor users, route to backend download endpoint
+                        let downloadUrl = path;
+                        if (user.user_type === 'doctor') {
+                            // Map label to file type for backend endpoint
+                            const fileTypeMap = { 'License': 'license', 'Degree': 'degree', 'ID': 'id' };
+                            const fileType = fileTypeMap[label] || label.toLowerCase();
+                            downloadUrl = `${AdminAuth.API_BASE_URL}/admin/doctors/${user.id}/file/${fileType}`;
                         }
                         const filename = path.split('/').pop() || `${label.toLowerCase()}_document`;
                         return `
                             <div class="row mt-2">
                                 <div class="col-sm-4 fw-bold">${label}:</div>
                                 <div class="col-sm-8">
-                                    <a href="${cleanPath}" target="_blank" download="${filename}" class="btn btn-sm btn-outline-primary">
+                                    <a href="${downloadUrl}" target="_blank" download="${filename}" class="btn btn-sm btn-outline-primary" style="cursor: pointer;">
                                         <i class="bi bi-file-earmark-pdf me-1"></i>View/Download
                                     </a>
                                 </div>
@@ -2156,15 +2230,13 @@ const AdminDashboard = {
             const createDocumentLink = (path, label) => {
                 if (path) {
                     console.log(`Creating link for ${label}:`, path);
-                    // Clean the path - handle both relative and absolute paths
-                    let cleanPath = path;
-                    if (!path.startsWith('http') && !path.startsWith('/')) {
-                        cleanPath = '/' + path;
-                    }
-                    // Get filename for download
+                    // Route to backend download endpoint using doctor ID
+                    const fileTypeMap = { 'License': 'license', 'Degree': 'degree', 'ID': 'id' };
+                    const fileType = fileTypeMap[label] || label.toLowerCase();
+                    const downloadUrl = `${AdminAuth.API_BASE_URL}/admin/doctors/${doctor.id}/file/${fileType}`;
                     const filename = path.split('/').pop() || `${label.toLowerCase()}_document`;
                     return `
-                        <a href="${cleanPath}" target="_blank" download="${filename}" class="btn btn-sm btn-outline-primary me-2">
+                        <a href="${downloadUrl}" target="_blank" download="${filename}" class="btn btn-sm btn-outline-primary me-2" style="cursor: pointer;">
                             <i class="bi bi-file-earmark-pdf me-1"></i>View/Download ${label}
                         </a>
                     `;
