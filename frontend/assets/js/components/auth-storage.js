@@ -66,6 +66,14 @@ class AuthStorage {
     }
     
     /**
+     * Get authentication token (convenience method)
+     * @returns {string|null} Bearer token or null if not authenticated
+     */
+    static getToken() {
+        return this.get('token');
+    }
+    
+    /**
      * Check if user is authenticated
      * @returns {boolean} True if authenticated
      */
