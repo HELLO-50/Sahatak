@@ -685,6 +685,8 @@
         }
         
         function chatWithDoctor() {
+            // If we have a recent appointment or doctor in session, pass doctor_id as param
+            // Otherwise, comm-hub.html will load available doctors from appointments
             window.location.href = '../medical/patient/comm-hub.html';
         }
         

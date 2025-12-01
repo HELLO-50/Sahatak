@@ -1847,5 +1847,15 @@
     "buttons": {
         "add_comment": "Add Comment",
         "language": "Change Language"
+    },
+    "comm_hub": {
+        "title": "Chat with Doctor",
+        "subtitle": "Secure messaging with your healthcare provider",
+        "urgent_button": "Urgent",
+        "available": "Available",
+        "secure_note": "Secure messaging | End-to-end encrypted",
+        "no_messages": "No messages yet. Start a conversation with your doctor.",
+        "message_placeholder": "Type your message to the doctor...",
+        "secure_confidential": "Your messages are secure and confidential"
     }
 }

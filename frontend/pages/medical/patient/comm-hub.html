@@ -72,13 +72,13 @@
                     <div class="col-md-8">
                         <h1 class="dashboard-title">
                             <i class="bi bi-chat-dots me-2 text-primary"></i>
-                            Chat with Doctor
+                            <span data-i18n="comm_hub.title">Chat with Doctor</span>
                         </h1>
-                        <p class="dashboard-subtitle">Secure messaging with your healthcare provider</p>
+                        <p class="dashboard-subtitle"><span data-i18n="comm_hub.subtitle">Secure messaging with your healthcare provider</span></p>
                     </div>
                     <div class="col-md-4 text-end">
-                        <button class="btn btn-primary" onclick="requestUrgentConsultation()">
-                            <i class="bi bi-exclamation-triangle me-1"></i>Urgent
+                        <button class="btn btn-primary" onclick="requestUrgentConsultation()" data-i18n="comm_hub.urgent_button">
+                            <i class="bi bi-exclamation-triangle me-1"></i><span>Urgent</span>
                         </button>
                     </div>
                 </div>
@@ -104,7 +104,7 @@
                             
                             <div class="mb-3">
                                 <span class="badge bg-success">
-                                    <i class="bi bi-circle-fill me-1"></i>Available
+                                    <i class="bi bi-circle-fill me-1"></i><span data-i18n="comm_hub.available">Available</span>
                                 </span>
                             </div>
                         </div>
@@ -135,14 +135,14 @@
                 <div class="col-lg-8">
                     <div class="dashboard-card h-100">
                         <!-- Chat Header -->
-                        <div class="chat-header d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                                <div class="chat-header d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
                             <div class="d-flex align-items-center">
                                 <div class="doctor-avatar me-3">
                                     <i class="bi bi-person-circle fs-2 text-primary"></i>
                                 </div>
                                 <div>
                                     <h5 class="mb-0" id="chat-doctor-name">Your Doctor</h5>
-                                    <small class="text-muted">Secure messaging | End-to-end encrypted</small>
+                                    <small class="text-muted"><span data-i18n="comm_hub.secure_note">Secure messaging | End-to-end encrypted</span></small>
                                 </div>
                             </div>
                             <div class="chat-actions">
@@ -155,9 +155,9 @@
                         <!-- Chat Messages -->
                         <div class="chat-messages" id="chatMessages">
                             <!-- Messages will be loaded dynamically -->
-                            <div class="text-center text-muted py-5" id="no-messages">
+                                <div class="text-center text-muted py-5" id="no-messages">
                                 <i class="bi bi-chat-dots fs-1"></i>
-                                <p class="mt-2">No messages yet. Start a conversation with your doctor.</p>
+                                <p class="mt-2" data-i18n="comm_hub.no_messages">No messages yet. Start a conversation with your doctor.</p>
                             </div>
                         </div>
 
@@ -176,16 +176,16 @@
                                 </div>
                             </div>
                             <div class="input-group">
-                                <textarea class="form-control" id="messageInput" rows="3" placeholder="Type your message to the doctor..." onkeypress="handleKeyPress(event)"></textarea>
+                                <textarea class="form-control" id="messageInput" rows="3" placeholder="Type your message to the doctor..." data-i18n-placeholder="comm_hub.message_placeholder" onkeypress="handleKeyPress(event)"></textarea>
                                 <button class="btn btn-primary" onclick="sendMessage()">
                                     <i class="bi bi-send"></i>
                                     Send
                                 </button>
                             </div>
                             <div class="text-center mt-2">
-                                <small class="text-muted">
+                                    <small class="text-muted">
                                     <i class="bi bi-shield-check me-1"></i>
-                                    Your messages are secure and confidential
+                                    <span data-i18n="comm_hub.secure_confidential">Your messages are secure and confidential</span>
                                 </small>
                             </div>
                         </div>
@@ -314,5 +314,42 @@
     <script src="../../../assets/js/components/auth-guard.js"></script>
     <script src="../../../assets/js/components/logger.js"></script>
     <script src="../../../assets/js/components/messaging.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Set patient name from AuthStorage or localStorage
+                let displayName = 'Patient';
+                if (window.AuthStorage && AuthStorage.isAuthenticated && AuthStorage.isAuthenticated()) {
+                    const ad = AuthStorage.getAuthData();
+                    displayName = ad.name || ad.email || displayName;
+                } else {
+                    displayName = localStorage.getItem('sahatak_user_name') || localStorage.getItem('userName') || displayName;
+                }
+                const pn = document.getElementById('patient-name');
+                if (pn) pn.textContent = displayName;
+
+                // Set current language label
+                try {
+                    if (window.LanguageManager && typeof LanguageManager.getLanguage === 'function') {
+                        const lang = LanguageManager.getLanguage();
+                        const el = document.getElementById('current-lang');
+                        if (el) el.textContent = (lang === 'ar' ? 'عربي' : 'English');
+                    }
+                } catch (e) { /* ignore */ }
+
+                // Initialize messaging system (will handle patient/doctor flow)
+                if (typeof initializeMessaging === 'function') {
+                    await initializeMessaging();
+                }
+
+                // Trigger translations if LanguageManager is available
+                if (window.LanguageManager && typeof LanguageManager.translate === 'function') {
+                    document.dispatchEvent(new Event('languageChanged'));
+                }
+            } catch (err) {
+                console.error('Comm hub init error:', err);
+            }
+        });
+    </script>
 </body>
 </html>
