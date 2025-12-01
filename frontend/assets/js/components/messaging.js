@@ -1107,7 +1107,7 @@ function requestPrescriptionRefill() {
 
 function viewMedicalHistory() {
     if (userType === 'patient') {
-        window.open(`../medical-history.html`, '_blank');
+        window.location.href = '../medical/patient/medicalHistory.html';
     }
 }
 
