@@ -1857,5 +1857,26 @@
         "no_messages": "No messages yet. Start a conversation with your doctor.",
         "message_placeholder": "Type your message to the doctor...",
         "secure_confidential": "Your messages are secure and confidential"
+    },
+    "calendar_sync": {
+        "title": "Sync with External Calendars",
+        "subtitle": "Prevent double-booking by syncing with Google Calendar and Outlook",
+        "not_connected": "Not connected",
+        "connect": "Connect",
+        "disconnect": "Disconnect",
+        "sync_direction": "Sync Direction",
+        "read_only": "Read Only (from external calendar)",
+        "write_only": "Write Only (to external calendar)",
+        "bidirectional": "Bidirectional",
+        "conflict_mode": "Conflict Resolution",
+        "manual": "Manual (Ask me)",
+        "sahatak_wins": "Sahatak Priority",
+        "external_wins": "External Calendar Priority",
+        "sync_now": "Sync Now",
+        "how_it_works": "How it works",
+        "info_1": "Sync your Sahatak availability with Google Calendar and Outlook",
+        "info_2": "Prevent double-booking by marking busy times from external calendars",
+        "info_3": "Choose sync direction: one-way or bidirectional",
+        "info_4": "Set conflict resolution preferences"
     }
 }

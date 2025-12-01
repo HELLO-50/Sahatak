@@ -1601,3 +1601,117 @@ class ContactMessage(db.Model):
 
     def __repr__(self):
         return f'<ContactMessage {self.id} from {self.email}>'
+
+
+class CalendarSync(db.Model):
+    """
+    Stores calendar sync credentials and settings for doctors
+    Supports Google Calendar and Outlook/Microsoft Calendar
+    """
+    __tablename__ = 'calendar_syncs'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=False, unique=True)
+    
+    # Google Calendar integration
+    google_enabled = db.Column(db.Boolean, default=False, nullable=False)
+    google_calendar_id = db.Column(db.String(500), nullable=True)  # Stores the calendar ID
+    google_access_token = db.Column(db.Text, nullable=True)  # Encrypted in production
+    google_refresh_token = db.Column(db.Text, nullable=True)  # Encrypted in production
+    google_token_expires_at = db.Column(db.DateTime, nullable=True)
+    google_last_sync = db.Column(db.DateTime, nullable=True)
+    
+    # Outlook/Microsoft Calendar integration
+    outlook_enabled = db.Column(db.Boolean, default=False, nullable=False)
+    outlook_calendar_id = db.Column(db.String(500), nullable=True)
+    outlook_access_token = db.Column(db.Text, nullable=True)  # Encrypted in production
+    outlook_refresh_token = db.Column(db.Text, nullable=True)  # Encrypted in production
+    outlook_token_expires_at = db.Column(db.DateTime, nullable=True)
+    outlook_last_sync = db.Column(db.DateTime, nullable=True)
+    
+    # Sync settings
+    sync_direction = db.Column(db.Enum('read_only', 'write_only', 'bidirectional', name='sync_directions'), 
+                               default='bidirectional', nullable=False)
+    sync_frequency = db.Column(db.Integer, default=5, nullable=False)  # Minutes between syncs
+    last_sync_status = db.Column(db.String(50), nullable=True)  # 'success', 'error', 'partial'
+    last_sync_error = db.Column(db.Text, nullable=True)
+    conflict_resolution_mode = db.Column(db.Enum('sahatak_wins', 'external_wins', 'manual', name='conflict_modes'),
+                                        default='manual', nullable=False)
+    
+    # Metadata
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    
+    # Relationship
+    doctor = db.relationship('Doctor', backref='calendar_sync', lazy=True)
+    
+    def to_dict(self):
+        """Convert to dictionary (exclude sensitive tokens)"""
+        return {
+            'id': self.id,
+            'doctor_id': self.doctor_id,
+            'google_enabled': self.google_enabled,
+            'google_calendar_id': self.google_calendar_id,
+            'google_last_sync': self.google_last_sync.isoformat() if self.google_last_sync else None,
+            'outlook_enabled': self.outlook_enabled,
+            'outlook_calendar_id': self.outlook_calendar_id,
+            'outlook_last_sync': self.outlook_last_sync.isoformat() if self.outlook_last_sync else None,
+            'sync_direction': self.sync_direction,
+            'sync_frequency': self.sync_frequency,
+            'last_sync_status': self.last_sync_status,
+            'conflict_resolution_mode': self.conflict_resolution_mode,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
+        }
+    
+    def __repr__(self):
+        return f'<CalendarSync Doctor {self.doctor_id} - Google: {self.google_enabled}, Outlook: {self.outlook_enabled}>'
+
+
+class CalendarSyncEvent(db.Model):
+    """
+    Tracks synced events to manage conflicts and prevent duplicate syncs
+    """
+    __tablename__ = 'calendar_sync_events'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    sync_id = db.Column(db.Integer, db.ForeignKey('calendar_syncs.id'), nullable=False)
+    event_type = db.Column(db.Enum('availability_block', 'booked_time', 'break', name='sync_event_types'),
+                          nullable=False)
+    source = db.Column(db.Enum('google', 'outlook', 'sahatak', name='sync_sources'), nullable=False)
+    external_event_id = db.Column(db.String(500), nullable=True)  # ID from Google/Outlook
+    sahatak_event_id = db.Column(db.Integer, nullable=True)  # Links to AvailabilityBlock or Appointment
+    
+    # Event details
+    title = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    start_time = db.Column(db.DateTime, nullable=False)
+    end_time = db.Column(db.DateTime, nullable=False)
+    
+    # Sync metadata
+    last_synced_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
+    external_last_modified = db.Column(db.DateTime, nullable=True)  # Last modified time from external calendar
+    is_conflicted = db.Column(db.Boolean, default=False, nullable=False)
+    conflict_resolution = db.Column(db.String(100), nullable=True)  # How conflict was resolved
+    
+    # Relationship
+    sync = db.relationship('CalendarSync', backref='synced_events', lazy=True)
+    
+    def to_dict(self):
+        """Convert to dictionary"""
+        return {
+            'id': self.id,
+            'sync_id': self.sync_id,
+            'event_type': self.event_type,
+            'source': self.source,
+            'external_event_id': self.external_event_id,
+            'sahatak_event_id': self.sahatak_event_id,
+            'title': self.title,
+            'start_time': self.start_time.isoformat(),
+            'end_time': self.end_time.isoformat(),
+            'is_conflicted': self.is_conflicted,
+            'last_synced_at': self.last_synced_at.isoformat()
+        }
+    
+    def __repr__(self):
+        return f'<CalendarSyncEvent {self.external_event_id or self.sahatak_event_id} - {self.event_type}>'

@@ -98,6 +98,12 @@
                                     <span id="tab-blocked">Blocked Times</span>
                                 </button>
                             </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="sync-tab" data-bs-toggle="tab" data-bs-target="#sync" type="button" role="tab">
+                                    <i class="bi bi-cloud-sync me-1"></i>
+                                    <span id="tab-sync">Calendar Sync</span>
+                                </button>
+                            </li>
                         </ul>
 
                         <div class="tab-content" id="scheduleTabContent">
@@ -225,6 +231,133 @@
                                                 </div>
                                                 <p class="mt-2 text-muted" id="loading-blocked">Loading blocked times...</p>
                                             </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Calendar Sync Tab -->
+                            <div class="tab-pane fade" id="sync" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <h5 class="mb-4">
+                                            <i class="bi bi-cloud-sync me-2" style="color: #0d47a1;"></i>
+                                            <span data-i18n="calendar_sync.title">Sync with External Calendars</span>
+                                        </h5>
+                                        
+                                        <!-- Sync Status -->
+                                        <div class="alert alert-info mb-4" id="sync-status-container" style="display: none;">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-info-circle me-2"></i>
+                                                <span id="sync-status-text">Last synced: Never</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Google Calendar -->
+                                        <div class="card mb-4">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                                    <div>
+                                                        <h6 class="mb-1">
+                                                            <i class="bi bi-calendar-event" style="color: #4285F4;"></i>
+                                                            Google Calendar
+                                                        </h6>
+                                                        <small class="text-muted" id="google-status-text" data-i18n="calendar_sync.not_connected">Not connected</small>
+                                                    </div>
+                                                    <div>
+                                                        <button type="button" class="btn btn-sm btn-outline-primary" id="google-connect-btn" onclick="CalendarSync.connectGoogle()">
+                                                            <i class="bi bi-link-45deg me-1"></i>
+                                                            <span data-i18n="calendar_sync.connect">Connect</span>
+                                                        </button>
+                                                        <button type="button" class="btn btn-sm btn-outline-danger" id="google-disconnect-btn" onclick="CalendarSync.disconnectGoogle()" style="display: none;">
+                                                            <i class="bi bi-x-circle me-1"></i>
+                                                            <span data-i18n="calendar_sync.disconnect">Disconnect</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div id="google-settings" style="display: none;">
+                                                    <hr class="my-3">
+                                                    <div class="mb-3">
+                                                        <label class="form-label" data-i18n="calendar_sync.sync_direction">Sync Direction</label>
+                                                        <select class="form-select form-select-sm" id="google-sync-direction" onchange="CalendarSync.updateSettings('google')">
+                                                            <option value="read_only" data-i18n="calendar_sync.read_only">Read Only (from Google)</option>
+                                                            <option value="write_only" data-i18n="calendar_sync.write_only">Write Only (to Google)</option>
+                                                            <option value="bidirectional" data-i18n="calendar_sync.bidirectional">Bidirectional</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label" data-i18n="calendar_sync.conflict_mode">Conflict Resolution</label>
+                                                        <select class="form-select form-select-sm" id="google-conflict-mode" onchange="CalendarSync.updateSettings('google')">
+                                                            <option value="manual" data-i18n="calendar_sync.manual">Manual (Ask me)</option>
+                                                            <option value="sahatak_wins" data-i18n="calendar_sync.sahatak_wins">Sahatak Priority</option>
+                                                            <option value="external_wins" data-i18n="calendar_sync.external_wins">Google Priority</option>
+                                                        </select>
+                                                    </div>
+                                                    <button type="button" class="btn btn-sm btn-outline-medical" onclick="CalendarSync.syncNow('google')">
+                                                        <i class="bi bi-arrow-repeat me-1"></i>
+                                                        <span data-i18n="calendar_sync.sync_now">Sync Now</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Outlook Calendar -->
+                                        <div class="card mb-4">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                                    <div>
+                                                        <h6 class="mb-1">
+                                                            <i class="bi bi-envelope" style="color: #0078D4;"></i>
+                                                            Outlook Calendar
+                                                        </h6>
+                                                        <small class="text-muted" id="outlook-status-text" data-i18n="calendar_sync.not_connected">Not connected</small>
+                                                    </div>
+                                                    <div>
+                                                        <button type="button" class="btn btn-sm btn-outline-primary" id="outlook-connect-btn" onclick="CalendarSync.connectOutlook()">
+                                                            <i class="bi bi-link-45deg me-1"></i>
+                                                            <span data-i18n="calendar_sync.connect">Connect</span>
+                                                        </button>
+                                                        <button type="button" class="btn btn-sm btn-outline-danger" id="outlook-disconnect-btn" onclick="CalendarSync.disconnectOutlook()" style="display: none;">
+                                                            <i class="bi bi-x-circle me-1"></i>
+                                                            <span data-i18n="calendar_sync.disconnect">Disconnect</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div id="outlook-settings" style="display: none;">
+                                                    <hr class="my-3">
+                                                    <div class="mb-3">
+                                                        <label class="form-label" data-i18n="calendar_sync.sync_direction">Sync Direction</label>
+                                                        <select class="form-select form-select-sm" id="outlook-sync-direction" onchange="CalendarSync.updateSettings('outlook')">
+                                                            <option value="read_only" data-i18n="calendar_sync.read_only">Read Only (from Outlook)</option>
+                                                            <option value="write_only" data-i18n="calendar_sync.write_only">Write Only (to Outlook)</option>
+                                                            <option value="bidirectional" data-i18n="calendar_sync.bidirectional">Bidirectional</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label" data-i18n="calendar_sync.conflict_mode">Conflict Resolution</label>
+                                                        <select class="form-select form-select-sm" id="outlook-conflict-mode" onchange="CalendarSync.updateSettings('outlook')">
+                                                            <option value="manual" data-i18n="calendar_sync.manual">Manual (Ask me)</option>
+                                                            <option value="sahatak_wins" data-i18n="calendar_sync.sahatak_wins">Sahatak Priority</option>
+                                                            <option value="external_wins" data-i18n="calendar_sync.external_wins">Outlook Priority</option>
+                                                        </select>
+                                                    </div>
+                                                    <button type="button" class="btn btn-sm btn-outline-medical" onclick="CalendarSync.syncNow('outlook')">
+                                                        <i class="bi bi-arrow-repeat me-1"></i>
+                                                        <span data-i18n="calendar_sync.sync_now">Sync Now</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Info Box -->
+                                        <div class="alert alert-light border border-info">
+                                            <h6 class="mb-2" data-i18n="calendar_sync.how_it_works">How it works</h6>
+                                            <ul class="mb-0 small">
+                                                <li data-i18n="calendar_sync.info_1">Sync your Sahatak availability with Google Calendar and Outlook</li>
+                                                <li data-i18n="calendar_sync.info_2">Prevent double-booking by marking busy times from external calendars</li>
+                                                <li data-i18n="calendar_sync.info_3">Choose sync direction: one-way or bidirectional</li>
+                                                <li data-i18n="calendar_sync.info_4">Set conflict resolution preferences</li>
+                                            </ul>
                                         </div>
                                     </div>
                                 </div>
@@ -398,6 +531,9 @@
     <!-- Availability Manager -->
     <script src="../../../assets/js/components/availability-manager.js"></script>
     
+    <!-- Calendar Sync Manager -->
+    <script src="../../../assets/js/components/calendar-sync.js"></script>
+    
     <script>
         // Availability page specific functions
         function goBack() {
@@ -526,6 +662,11 @@
             // Initialize AvailabilityManager if it exists
             if (typeof AvailabilityManager !== 'undefined') {
                 await AvailabilityManager.init();
+            }
+
+            // Initialize CalendarSync if it exists
+            if (typeof CalendarSync !== 'undefined') {
+                await CalendarSync.init();
             }
         });
     </script>
