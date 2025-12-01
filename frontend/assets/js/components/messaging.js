@@ -1107,7 +1107,11 @@ function requestPrescriptionRefill() {
 
 function viewMedicalHistory() {
     if (userType === 'patient') {
-        window.location.href = './medicalHistory.html';
+        // Navigate to medical history page (same directory as comm-hub.html)
+        // Build path relative to current page location
+        const currentPath = window.location.pathname;
+        const pageDir = currentPath.substring(0, currentPath.lastIndexOf('/'));
+        window.location.href = pageDir + '/medicalHistory.html';
     }
 }
 
