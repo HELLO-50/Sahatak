@@ -12,6 +12,8 @@ const CalendarSync = {
      */
     async init() {
         console.log('🔄 Initializing Calendar Sync...');
+        console.log(`📡 API URL: ${this.apiUrl}`);
+        console.log(`🔑 Token available: ${!!AuthStorage.getToken()}`);
         try {
             // Load sync status
             await this.loadSyncStatus();
@@ -130,7 +132,16 @@ const CalendarSync = {
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
+                if (response.status === 404) {
+                    console.error('❌ Calendar Sync API endpoint not found. Backend server may need to be restarted.');
+                    this.showAlert('Calendar Sync service not available. Please contact administrator.', 'danger');
+                } else if (response.status === 401) {
+                    console.error('❌ Unauthorized. Token may be expired.');
+                    this.showAlert('Your session has expired. Please refresh the page and login again.', 'danger');
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                return;
             }
 
             const data = await response.json();
@@ -159,7 +170,16 @@ const CalendarSync = {
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
+                if (response.status === 404) {
+                    console.error('❌ Calendar Sync API endpoint not found. Backend server may need to be restarted.');
+                    this.showAlert('Calendar Sync service not available. Please contact administrator.', 'danger');
+                } else if (response.status === 401) {
+                    console.error('❌ Unauthorized. Token may be expired.');
+                    this.showAlert('Your session has expired. Please refresh the page and login again.', 'danger');
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                return;
             }
 
             const data = await response.json();
