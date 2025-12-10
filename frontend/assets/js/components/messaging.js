@@ -1116,7 +1116,29 @@ function viewMedicalHistory() {
 }
 
 function startVideoCall() {
-    alert('Video call feature coming soon');
+    // Check if we have a doctor to call
+    if (!currentRecipientId) {
+        showErrorMessage('Please select a doctor first before starting a video call.');
+        return;
+    }
+    
+    // For patients: navigate to video consultation page with doctor ID
+    if (userType === 'patient') {
+        // Build URL with doctor ID and optional appointment ID
+        const urlParams = new URLSearchParams(window.location.search);
+        const appointmentId = urlParams.get('appointment_id');
+        
+        let videoUrl = `../../appointments/video-consultation.html?doctor_id=${currentRecipientId}`;
+        if (appointmentId) {
+            videoUrl += `&appointment_id=${appointmentId}`;
+        }
+        
+        // Navigate to video consultation page
+        window.location.href = videoUrl;
+    } else {
+        // For doctors: show alert for now (can be expanded later)
+        showErrorMessage('Video call feature for doctors is coming soon.');
+    }
 }
 
 function requestUrgentConsultation() {

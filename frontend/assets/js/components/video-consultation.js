@@ -2523,10 +2523,45 @@ const VideoConsultation = {
 };
 
 // Initialize on page load if on video consultation page
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // Check if we're on the video consultation page
     const urlParams = new URLSearchParams(window.location.search);
-    const appointmentId = urlParams.get('appointmentId');
+    let appointmentId = urlParams.get('appointmentId');
+    const doctorId = urlParams.get('doctor_id');
+    
+    if (!appointmentId && doctorId) {
+        // If no appointment ID but doctor ID is provided, find or create an appointment
+        try {
+            const response = await fetch(`${ApiHelper?.baseUrl || 'https://sahatak.pythonanywhere.com/api'}/appointments/?doctor_id=${doctorId}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('sahatak_token') || AuthStorage?.getToken()}`
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                // Get the most recent appointment with this doctor
+                if (data.data && data.data.appointments && data.data.appointments.length > 0) {
+                    const appointments = data.data.appointments.filter(a => a.doctor_id == doctorId);
+                    if (appointments.length > 0) {
+                        // Sort by date and get the most recent one
+                        appointments.sort((a, b) => new Date(b.appointment_date) - new Date(a.appointment_date));
+                        appointmentId = appointments[0].id;
+                        console.log('Found appointment:', appointmentId);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Failed to find appointment for doctor:', error);
+        }
+        
+        // If still no appointment ID, create a virtual consultation session
+        if (!appointmentId) {
+            // Use doctor ID as a session identifier
+            appointmentId = `virtual_${doctorId}_${Date.now()}`;
+            console.log('Created virtual consultation session:', appointmentId);
+        }
+    }
     
     if (appointmentId && document.getElementById('video-container')) {
         // Force cache clear and public room mode
