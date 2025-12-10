@@ -148,9 +148,13 @@
 }
 
 .message-input-area textarea {
-    resize: none;
+    resize: vertical;
     border-radius: 10px 0 0 10px;
-    border: 1px solid #dee2e6;
+    border: 2px solid #dee2e6;
+    min-height: 60px;
+    padding: 12px 15px;
+    font-size: 1rem;
+    line-height: 1.5;
 }
 
 .message-input-area textarea:focus {
@@ -313,8 +317,195 @@
         margin-top: 10px;
     }
     
+    /* Enhanced mobile message input */
+    .message-input-area {
+        padding: 12px;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-top: 3px solid #2563eb;
+    }
+    
+    .message-input-area textarea {
+        min-height: 90px;
+        max-height: 150px;
+        font-size: 1rem;
+        padding: 12px 15px;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+    }
+    
+    .message-input-area textarea:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+        background-color: #ffffff;
+    }
+    
     .message-input-area .btn {
-        padding: 0 15px;
+        padding: 12px 18px;
+        min-height: 48px;
+        border-radius: 8px;
+        width: 100%;
+        margin-top: 10px;
+        font-weight: 600;
+    }
+    
+    /* Premium message input for mobile */
+    .message-input-premium {
+        padding: 12px;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+    }
+    
+    .message-input-premium textarea {
+        min-height: 90px;
+        max-height: 150px;
+        font-size: 1rem;
+        padding: 12px 15px;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        width: 100%;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+    
+    .message-input-premium textarea:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+        background-color: #ffffff;
+    }
+    
+    .message-input-premium .btn-send {
+        width: 100%;
+        margin-top: 10px;
+        min-height: 48px;
+        padding: 12px 18px;
+        font-weight: 600;
+        border-radius: 8px;
+    }
+    
+    .message-input-premium .btn-outline-secondary {
+        width: 100%;
+        margin-bottom: 8px;
+        min-height: 40px;
+    }
+    
+    .message-input-premium .row {
+        margin-bottom: 12px;
+    }
+    
+    .message-input-premium .col-auto {
+        flex: 1 1 100%;
+    }
+    
+    /* Input group styling for mobile */
+    .input-group {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .message-input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+    }
+    
+    .message-input-group .form-control,
+    .message-input-group textarea {
+        width: 100%;
+        min-width: 100%;
+        flex: 1;
+    }
+    
+    .message-input-group .btn {
+        width: 100%;
+        min-width: 100%;
+    }
+}
+
+/* Extra small mobile devices (< 576px) */
+@media (max-width: 576px) {
+    .message-input-area {
+        padding: 10px;
+        margin: 0;
+        border-top: 3px solid #2563eb;
+    }
+    
+    .message-input-area textarea {
+        min-height: 100px;
+        max-height: 150px;
+        font-size: 16px; /* Prevents iOS zoom */
+        padding: 12px 15px;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        width: 100%;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+    
+    .message-input-area textarea:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+    }
+    
+    .message-input-area .btn {
+        width: 100%;
+        margin-top: 10px;
+        min-height: 50px;
+        padding: 12px 18px;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 8px;
+    }
+    
+    /* Premium input for small mobile */
+    .message-input-premium {
+        padding: 10px;
+        background: #ffffff;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+    }
+    
+    .message-input-premium textarea {
+        min-height: 100px;
+        max-height: 150px;
+        font-size: 16px;
+        padding: 12px 15px;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        width: 100%;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+    
+    .message-input-premium textarea:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+    }
+    
+    .message-input-premium .btn-send {
+        width: 100%;
+        margin-top: 10px;
+        min-height: 50px;
+        padding: 12px 18px;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 8px;
+    }
+    
+    .message-input-premium .btn-outline-secondary {
+        width: 100%;
+        min-height: 44px;
+        margin-bottom: 8px;
+    }
+    
+    .message-input-premium .row.g-2 {
+        row-gap: 8px !important;
+        column-gap: 0 !important;
     }
 }
 
