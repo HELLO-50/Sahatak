@@ -69,13 +69,15 @@ class SupportPage {
         const form = e.target;
         const submitBtn = form.querySelector('button[type="submit"]');
         
+        console.log('🐛 Report form submission started');
+        
         // Disable submit button
         if (submitBtn) {
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> جاري الإرسال...';
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Sending...';
         }
         
-        // الحصول على البيانات من النموذج
+        // Get form data
         const formData = {
             subject: document.getElementById('problem-subject').value.trim(),
             description: document.getElementById('problem-description').value.trim(),
@@ -85,38 +87,67 @@ class SupportPage {
 
         console.log('📤 Sending report data:', formData);
 
-        // التحقق من البيانات
+        // Validate form data
         if (!this.validateReportForm(formData)) {
-            this.showAlert(reportAlert, 'warning', 'الرجاء ملء جميع الحقول المطلوبة');
-            this.enableSubmitButton(submitBtn, '<i class="bi bi-send-fill me-1"></i> إرسال التقرير');
+            console.warn('⚠️ Form validation failed');
+            this.showAlert(reportAlert, 'warning', 'Please fill all required fields');
+            this.enableSubmitButton(submitBtn, '<i class="bi bi-send-fill me-1"></i>Send Report');
             return;
         }
 
         try {
-            // إرسال البيانات للباك إند باستخدام API Helper
-            const response = await window.api.post('/support/report-problem', formData);
-            console.log('Report response:', response);
+            console.log('🌐 Making API request to /api/support/report-problem');
+            
+            // Use ApiHelper if available, otherwise use fetch
+            let response;
+            if (window.ApiHelper && window.ApiHelper.makeRequest) {
+                response = await window.ApiHelper.makeRequest('/support/report-problem', {
+                    method: 'POST',
+                    body: JSON.stringify(formData)
+                });
+            } else if (window.api && window.api.post) {
+                response = await window.api.post('/support/report-problem', formData);
+            } else {
+                // Fallback to fetch
+                const fetchResponse = await fetch('/api/support/report-problem', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData),
+                    credentials: 'include'
+                });
+                response = await fetchResponse.json();
+            }
+            
+            console.log('📥 Report response:', response);
             
             if (response.success) {
-                this.showAlert(reportAlert, 'success', response.message);
+                console.log('✅ Report sent successfully');
+                this.showAlert(reportAlert, 'success', '✅ Your bug report has been sent to Sahatak.Sudan@gmail.com. Thank you!');
                 form.reset();
+                
+                // Clear alert after 5 seconds
+                setTimeout(() => {
+                    reportAlert.classList.add('d-none');
+                }, 5000);
             } else {
-                this.showAlert(reportAlert, 'danger', response.message || 'حدث خطأ أثناء الإرسال');
+                console.warn('⚠️ API returned unsuccessful response:', response);
+                this.showAlert(reportAlert, 'danger', response.message || 'Failed to send report');
             }
             
         } catch (error) {
-            console.error('Error reporting problem:', error);
-            let errorMessage = 'حدث خطأ في الاتصال بالخادم';
+            console.error('❌ Error reporting problem:', error);
+            let errorMessage = 'Connection error. Please try again.';
             
-            if (error instanceof ApiError) {
-                errorMessage = error.message;
-            } else if (error.message) {
+            if (error.message) {
                 errorMessage = error.message;
             }
             
-            this.showAlert(reportAlert, 'danger', errorMessage);
+            this.showAlert(reportAlert, 'danger', `❌ ${errorMessage}`);
         } finally {
-            this.enableSubmitButton(submitBtn, '<i class="bi bi-send-fill me-1"></i> إرسال التقرير');
+            console.log('✨ Report form submission completed');
+            this.enableSubmitButton(submitBtn, '<i class="bi bi-send-fill me-1"></i>Send Report');
         }
     }
 

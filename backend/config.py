@@ -13,6 +13,7 @@ class Config:
     MAIL_USERNAME = os.getenv('MAIL_USERNAME')
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER', 'noreply@sahatak.com')
+    SUPPORT_EMAIL = os.getenv('SUPPORT_EMAIL', 'Sahatak.Sudan@gmail.com')  # Official Sahatak support email
     
     # JWT Configuration
     JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', SECRET_KEY)
