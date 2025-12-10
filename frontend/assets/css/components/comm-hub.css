@@ -44,58 +44,120 @@
 }
 
 /* Doctor Card - Enhanced Design */
-.doctor-card {
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+.doctor-card,
+.patient-item {
+    background: #ffffff;
     border: 1px solid #e0e7ff;
-    border-radius: 16px;
-    padding: 2rem;
-    box-shadow: 0 4px 20px rgba(13, 71, 161, 0.08);
+    border-radius: 12px;
+    padding: 1.2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
-    overflow: hidden;
+    overflow: visible;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }
 
-.doctor-card::before {
+.doctor-card::before,
+.patient-item::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 4px;
+    height: 3px;
     background: linear-gradient(90deg, #0d47a1 0%, #42a5f5 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
-.doctor-card:hover {
-    box-shadow: 0 8px 32px rgba(13, 71, 161, 0.15);
-    transform: translateY(-2px);
+.doctor-card:hover,
+.doctor-card.active,
+.patient-item:hover,
+.patient-item.active {
+    box-shadow: 0 6px 16px rgba(13, 71, 161, 0.12);
+    transform: translateY(-1px);
 }
 
-/* Doctor Avatar - Large */
-.doctor-avatar-large {
-    width: 100px;
-    height: 100px;
+.doctor-card:hover::before,
+.doctor-card.active::before,
+.patient-item:hover::before,
+.patient-item.active::before {
+    opacity: 1;
+}
+
+.doctor-card.active,
+.patient-item.active {
+    background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);
+    border-color: #42a5f5;
+}
+
+/* Doctor Avatar - Small Circle */
+.doctor-avatar,
+.patient-avatar {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
     background: linear-gradient(135deg, #42a5f5 0%, #1976d2 100%);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto;
-    font-size: 3.5rem;
+    font-size: 1.5rem;
     color: white;
-    box-shadow: 0 6px 20px rgba(25, 118, 210, 0.3);
+    box-shadow: 0 2px 8px rgba(25, 118, 210, 0.2);
 }
 
-/* Doctor Name and Specialty */
-.doctor-name {
+/* Doctor Info Container */
+.doctor-info-content,
+.patient-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.doctor-name,
+.patient-name {
     color: #0d47a1;
-    font-weight: 700;
-    font-size: 1.3rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin: 0;
+    margin-bottom: 0.25rem;
 }
 
 .doctor-specialty {
     color: #64748b;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
+    font-weight: 400;
+    margin: 0;
+    margin-bottom: 0.3rem;
+}
+
+.doctor-status,
+.patient-status {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
     font-weight: 500;
+    color: #64748b;
+}
+
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.status-indicator.online {
+    background-color: #10b981;
+}
+
+.status-indicator.offline {
+    background-color: #94a3b8;
 }
 
 /* Badge Status */
@@ -168,26 +230,46 @@
 
 /* Chat Header - Premium */
 .chat-header-premium {
-    background: linear-gradient(135deg, #f8f9fa 0%, #f0f4f8 100%);
-    margin: -2rem -2rem 0 -2rem;
-    padding: 1.5rem 2rem;
-    border-radius: 16px 16px 0 0;
-    border-bottom: 2px solid #e0e7ff;
+    background: #ffffff;
+    margin: 0;
+    padding: 1rem 0;
+    border-bottom: 1px solid #e0e7ff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 60px;
+}
+
+.chat-header-premium .d-flex {
+    align-items: center;
+    gap: 1rem;
 }
 
 /* Chat Avatar */
 .chat-avatar {
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     background: linear-gradient(135deg, #42a5f5 0%, #1976d2 100%);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     color: white;
     flex-shrink: 0;
-    box-shadow: 0 3px 12px rgba(25, 118, 210, 0.2);
+}
+
+.chat-header-premium h5 {
+    margin: 0;
+    font-weight: 600;
+    color: #0d47a1;
+    font-size: 0.95rem;
+}
+
+.chat-header-premium small {
+    color: #64748b;
+    font-size: 0.8rem;
 }
 
 /* Chat Messages Container */
@@ -217,6 +299,57 @@
     background: #94a3b8;
 }
 
+/* Message Bubble Styling */
+.message {
+    margin-bottom: 1rem;
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-end;
+}
+
+.message.sent {
+    justify-content: flex-end;
+}
+
+.message.received {
+    justify-content: flex-start;
+}
+
+/* Message Bubble */
+.message-bubble {
+    max-width: 80%;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    word-wrap: break-word;
+    line-height: 1.4;
+}
+
+.message.received .message-bubble {
+    background: #f0f4f8;
+    color: #1e293b;
+    border-radius: 12px 12px 12px 4px;
+}
+
+.message.sent .message-bubble {
+    background: #0d47a1;
+    color: white;
+    border-radius: 12px 12px 4px 12px;
+}
+
+/* Message Avatar */
+.message-avatar {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #42a5f5 0%, #1976d2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    color: white;
+    flex-shrink: 0;
+}
+
 /* Chat Actions */
 .chat-actions .btn {
     border-radius: 8px;
@@ -231,48 +364,51 @@
 
 /* Message Input - Premium */
 .message-input-premium {
-    background: #f8f9fa;
-    margin: 0 -2rem -2rem -2rem;
-    padding: 1.5rem 2rem;
-    border-radius: 0 0 16px 16px;
-    border-top: 2px solid #e0e7ff;
+    background: #ffffff;
+    padding: 1rem;
+    border-top: 1px solid #e0e7ff;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .message-input-group {
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(13, 71, 161, 0.08);
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-end;
+    width: 100%;
 }
 
 .message-textarea {
-    border: none;
-    border-radius: 12px 0 0 12px !important;
-    resize: none;
+    border: 2px solid #e0e7ff;
+    border-radius: 8px;
+    resize: vertical;
     padding: 0.75rem 1rem;
     background: white;
     font-size: 0.95rem;
+    min-height: 40px;
+    max-height: 100px;
     transition: all 0.3s ease;
+    flex: 1;
 }
 
 .message-textarea:focus {
     background: white;
-    box-shadow: inset 0 0 0 2px #e0e7ff;
-    border: none !important;
+    border-color: #0d47a1;
+    box-shadow: 0 0 0 3px rgba(13, 71, 161, 0.1);
 }
 
 .btn-send {
-    border-radius: 0 12px 12px 0 !important;
-    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    padding: 0.75rem 1.25rem;
+    min-height: 40px;
     font-weight: 600;
-    background: linear-gradient(135deg, #0d47a1 0%, #1565c0 100%);
-    border: none;
     transition: all 0.3s ease;
 }
 
 .btn-send:hover {
-    transform: translateX(2px);
-    box-shadow: 0 4px 12px rgba(13, 71, 161, 0.3);
+    box-shadow: 0 4px 12px rgba(13, 71, 161, 0.2);
+    transform: translateY(-2px);
 }
+
 
 /* Notes Card */
 .notes-card {
@@ -494,5 +630,440 @@
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+/* ========== MOBILE RESPONSIVE STYLES ========== */
+
+/* Mobile - Tablets (768px and below) */
+@media (max-width: 768px) {
+    
+    /* Doctor Cards - More Compact */
+    .doctor-card,
+    .patient-item {
+        padding: 1rem;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .doctor-avatar,
+    .patient-avatar {
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        font-size: 1.2rem;
+    }
+    
+    .doctor-name,
+    .patient-name {
+        font-size: 0.9rem;
+    }
+    
+    .doctor-specialty {
+        font-size: 0.8rem;
+    }
+    
+    .doctor-status,
+    .patient-status {
+        font-size: 0.75rem;
+    }
+    
+    /* Chat Container */
+    .chat-card {
+        padding: 1rem;
+        border-radius: 12px;
+    }
+    
+    /* Chat Header */
+    .chat-header-premium {
+        min-height: 55px;
+        padding: 0.75rem 0;
+    }
+    
+    .chat-avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 1.2rem;
+    }
+    
+    .chat-header-premium h5 {
+        font-size: 0.9rem;
+    }
+    
+    .chat-header-premium small {
+        font-size: 0.75rem;
+    }
+    
+    /* Chat Messages */
+    .chat-messages-container {
+        max-height: 400px;
+        padding: 1rem 0;
+    }
+    
+    /* Message Bubbles */
+    .message {
+        margin-bottom: 0.75rem;
+        gap: 0.5rem;
+    }
+    
+    .message-bubble {
+        max-width: 85%;
+        padding: 0.65rem 0.9rem;
+        border-radius: 10px;
+        font-size: 0.9rem;
+    }
+    
+    .message-avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 0.8rem;
+    }
+    
+    /* Message Input */
+    .message-input-premium {
+        padding: 0.75rem;
+        border-top: 1px solid #e0e7ff;
+    }
+    
+    .message-input-group {
+        gap: 0.4rem;
+    }
+    
+    .message-textarea {
+        padding: 0.65rem 0.9rem;
+        font-size: 0.9rem;
+        min-height: 38px;
+        max-height: 90px;
+    }
+    
+    .btn-send {
+        padding: 0.65rem 1rem;
+        min-height: 38px;
+        font-size: 0.9rem;
+    }
+    
+    /* Doctor Info */
+    .doctor-info {
+        padding: 1rem;
+    }
+    
+    .info-item {
+        gap: 0.75rem;
+    }
+    
+    .info-item i {
+        font-size: 1.1rem;
+    }
+    
+    .info-item p {
+        font-size: 0.9rem;
+    }
+    
+    /* Quick Actions */
+    .quick-actions .btn {
+        padding: 0.6rem 0.9rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Chat Actions */
+    .chat-actions .btn {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* Mobile - Phones (576px and below) */
+@media (max-width: 576px) {
+    
+    /* Main Container */
+    .container {
+        padding: 0 0.5rem;
+    }
+    
+    /* Doctor Selection List */
+    .doctor-card,
+    .patient-item {
+        padding: 0.9rem;
+        margin-bottom: 0.6rem;
+        flex-direction: row;
+        gap: 0.6rem;
+    }
+    
+    .doctor-card.active,
+    .patient-item.active {
+        background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);
+    }
+    
+    .doctor-avatar,
+    .patient-avatar {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        font-size: 1.1rem;
+    }
+    
+    .doctor-info-content,
+    .patient-info {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .doctor-name,
+    .patient-name {
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 0.15rem;
+    }
+    
+    .doctor-specialty {
+        font-size: 0.75rem;
+        margin-bottom: 0.2rem;
+    }
+    
+    .doctor-status,
+    .patient-status {
+        font-size: 0.7rem;
+        gap: 0.3rem;
+    }
+    
+    .status-indicator {
+        width: 6px;
+        height: 6px;
+    }
+    
+    /* Chat Header - Compact */
+    .chat-header-premium {
+        min-height: 50px;
+        padding: 0.6rem 0;
+        gap: 0.5rem;
+    }
+    
+    .chat-avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+    
+    .chat-header-premium .d-flex {
+        gap: 0.75rem;
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .chat-header-premium h5 {
+        font-size: 0.85rem;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .chat-header-premium small {
+        font-size: 0.7rem;
+    }
+    
+    /* Chat Messages Container */
+    .chat-messages-container {
+        max-height: 350px;
+        padding: 0.8rem 0;
+    }
+    
+    /* Message Bubbles - Mobile Optimized */
+    .message {
+        margin-bottom: 0.6rem;
+        gap: 0.4rem;
+    }
+    
+    .message-bubble {
+        max-width: 88%;
+        padding: 0.6rem 0.8rem;
+        border-radius: 9px;
+        font-size: 0.85rem;
+        line-height: 1.3;
+    }
+    
+    .message.sent .message-bubble {
+        border-radius: 10px 10px 3px 10px;
+    }
+    
+    .message.received .message-bubble {
+        border-radius: 10px 10px 10px 3px;
+    }
+    
+    .message-avatar {
+        width: 24px;
+        height: 24px;
+        font-size: 0.7rem;
+    }
+    
+    /* Message Input - Full Width Mobile */
+    .message-input-premium {
+        padding: 0.6rem;
+        border-top: 1px solid #e0e7ff;
+        box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
+    }
+    
+    .message-input-group {
+        display: flex;
+        flex-direction: row;
+        gap: 0.3rem;
+        align-items: flex-end;
+        width: 100%;
+    }
+    
+    .message-textarea {
+        border: 1px solid #e0e7ff;
+        border-radius: 7px;
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
+        min-height: 36px;
+        max-height: 85px;
+        flex: 1;
+        font-family: inherit;
+    }
+    
+    .message-textarea::placeholder {
+        font-size: 0.85rem;
+    }
+    
+    .message-textarea:focus {
+        outline: none;
+        border-color: #0d47a1;
+        box-shadow: 0 0 0 2px rgba(13, 71, 161, 0.1);
+    }
+    
+    .btn-send {
+        padding: 0.6rem 0.85rem;
+        min-height: 36px;
+        font-size: 0.85rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    
+    /* Chat Card */
+    .chat-card {
+        padding: 0.75rem;
+        border-radius: 10px;
+    }
+    
+    /* Doctor Info Section */
+    .doctor-info {
+        padding: 0.9rem;
+        border-radius: 10px;
+    }
+    
+    .info-item {
+        gap: 0.6rem;
+        margin-bottom: 0.6rem;
+    }
+    
+    .info-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .info-item i {
+        font-size: 1rem;
+        min-width: 1rem;
+    }
+    
+    .info-item p {
+        font-size: 0.85rem;
+        margin: 0;
+    }
+    
+    /* Quick Actions */
+    .quick-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .quick-actions .btn {
+        width: 100%;
+        padding: 0.6rem;
+        font-size: 0.85rem;
+        border-radius: 8px;
+    }
+    
+    /* Chat Actions */
+    .chat-actions {
+        display: flex;
+        gap: 0.3rem;
+        justify-content: flex-end;
+    }
+    
+    .chat-actions .btn {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.8rem;
+        border-radius: 6px;
+    }
+    
+    /* Image Preview - Mobile */
+    .image-preview-attachment {
+        gap: 0.6rem;
+        padding: 0.75rem;
+        border-radius: 6px;
+    }
+    
+    .image-preview-attachment img {
+        max-width: 150px;
+    }
+    
+    /* Text Sizing */
+    h5 {
+        font-size: 1rem;
+    }
+    
+    p {
+        font-size: 0.9rem;
+    }
+    
+    small {
+        font-size: 0.75rem;
+    }
+}
+
+/* Small Phones - Extra Small (360px and below) */
+@media (max-width: 360px) {
+    
+    .doctor-card,
+    .patient-item {
+        padding: 0.8rem;
+        gap: 0.5rem;
+    }
+    
+    .doctor-avatar,
+    .patient-avatar {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        font-size: 1rem;
+    }
+    
+    .doctor-name,
+    .patient-name {
+        font-size: 0.8rem;
+    }
+    
+    .doctor-specialty {
+        font-size: 0.7rem;
+    }
+    
+    .message-bubble {
+        max-width: 90%;
+        padding: 0.5rem 0.7rem;
+        font-size: 0.8rem;
+    }
+    
+    .message-textarea {
+        padding: 0.5rem 0.7rem;
+        font-size: 0.85rem;
+        min-height: 32px;
+    }
+    
+    .btn-send {
+        padding: 0.5rem 0.7rem;
+        min-height: 32px;
+        font-size: 0.8rem;
     }
 }
