@@ -454,3 +454,45 @@
 .doctor-selection-hidden.show {
     display: block;
 }
+
+/* Hidden Class for Message Input Area */
+.message-input-area-hidden {
+    display: none !important;
+}
+
+.message-input-area-visible {
+    display: block !important;
+}
+
+/* Image Preview Attachment Styles */
+.image-preview-attachment {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background: linear-gradient(135deg, #f0f4ff 0%, #f8f9fa 100%);
+    border: 2px dashed #0d47a1;
+    border-radius: 8px;
+    animation: slideUp 0.3s ease-out;
+}
+
+.image-preview-attachment img {
+    max-width: 200px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(13, 71, 161, 0.15);
+}
+
+.image-preview-attachment .btn-danger {
+    flex-shrink: 0;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

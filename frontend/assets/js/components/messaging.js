@@ -87,94 +87,222 @@ let availableDoctors = [];
 
 async function loadPatientDoctors() {
     try {
+        console.log('📞 Loading patient doctors from appointments...');
         // Get patient's appointments to find doctors
         const response = await ApiHelper.makeRequest('/appointments/');
         
+        console.log('📥 Appointments API Response:', response);
+        
         if (response.success) {
-            const appointments = response.data.appointments;
+            const appointments = response.data.appointments || [];
+            console.log('📋 Total appointments:', appointments.length);
             
             // Extract unique doctors from appointments
             const doctorsMap = new Map();
             
-            appointments.forEach(appointment => {
-                if (appointment.doctor_id && appointment.doctor_name) {
-                    if (!doctorsMap.has(appointment.doctor_id)) {
-                        doctorsMap.set(appointment.doctor_id, {
-                            id: appointment.doctor_id,
-                            name: appointment.doctor_name,
-                            lastAppointment: appointment.appointment_date,
-                            appointmentType: appointment.appointment_type,
+            appointments.forEach((appointment, index) => {
+                console.log(`📌 Processing appointment ${index}:`, appointment);
+                
+                // Try multiple possible field names for doctor info
+                const doctorId = appointment.doctor_id || appointment.doctorId;
+                const doctorName = appointment.doctor_name || appointment.doctorName || appointment.doctor?.name || 'Unknown Doctor';
+                const doctorSpecialty = appointment.doctor_specialty || appointment.doctorSpecialty || appointment.doctor?.specialty || 'Specialist';
+                
+                if (doctorId) {
+                    if (!doctorsMap.has(doctorId)) {
+                        const doctorData = {
+                            id: doctorId,
+                            name: doctorName,
+                            lastAppointment: appointment.appointment_date || appointment.appointmentDate,
+                            appointmentType: appointment.appointment_type || appointment.appointmentType,
                             status: appointment.status,
-                            specialty: appointment.doctor_specialty || 'Specialist'
-                        });
+                            specialty: doctorSpecialty
+                        };
+                        console.log('✅ Added doctor:', doctorData);
+                        doctorsMap.set(doctorId, doctorData);
                     }
                 }
             });
             
             availableDoctors = Array.from(doctorsMap.values());
-            console.log('Available doctors for messaging:', availableDoctors);
+            console.log('🎯 Available doctors for messaging:', availableDoctors);
             
             // Update UI with doctors
             displayPatientDoctors(availableDoctors);
+        } else {
+            console.warn('⚠️ API response not successful:', response);
+            availableDoctors = [];
+            displayPatientDoctors([]);
         }
     } catch (error) {
-        console.error('Failed to load patient doctors:', error);
+        console.error('❌ Failed to load patient doctors:', error);
         availableDoctors = [];
+        displayPatientDoctors([]);
     }
 }
 
 // Display available doctors for patient
 function displayPatientDoctors(doctorsList) {
-    if (!doctorsList || doctorsList.length === 0) {
-        // Show default "Your Doctor" if no doctors found
-        updateDoctorDisplay({ full_name: 'Your Doctor', specialty: 'Specialist' });
+    const doctorListContainer = document.getElementById('doctorList');
+    
+    if (!doctorListContainer) {
+        console.error('❌ Doctor list container not found');
         return;
     }
     
-    // Show the most recent doctor (first in list) and start conversation
-    const primaryDoctor = doctorsList[0];
-    updateDoctorDisplay({
-        full_name: primaryDoctor.name,
-        specialty: primaryDoctor.specialty,
-        id: primaryDoctor.id
+    console.log('👨‍⚕️ displayPatientDoctors called with:', doctorsList);
+    
+    // Clear the doctor list
+    doctorListContainer.innerHTML = '';
+    
+    if (!doctorsList || doctorsList.length === 0) {
+        // Show empty state
+        console.log('⚠️ No doctors to display');
+        doctorListContainer.innerHTML = `
+            <div class="text-center text-muted py-5" id="no-doctors">
+                <i class="bi bi-person-badge fs-1"></i>
+                <p class="mt-2">No doctors yet</p>
+                <small>Doctors will appear here when you have appointments with them</small>
+            </div>
+        `;
+        return;
+    }
+    
+    console.log('✅ Displaying', doctorsList.length, 'doctors');
+    
+    // Display each doctor as a selectable item
+    doctorsList.forEach((doctor, index) => {
+        console.log(`👤 Adding doctor ${index + 1}:`, doctor.name);
+        
+        const doctorItem = document.createElement('div');
+        doctorItem.className = `patient-item ${index === 0 ? 'active' : ''}`;
+        doctorItem.setAttribute('data-doctor-id', doctor.id);
+        // Use loadConversation as the click handler
+        doctorItem.onclick = () => {
+            console.log('🔄 Clicked on doctor:', doctor.name);
+            loadConversation(doctor.id);
+        };
+        
+        const specialty = doctor.specialty || 'Specialist';
+        const lastContact = doctor.lastAppointment ? new Date(doctor.lastAppointment).toLocaleDateString() : 'Recent';
+        
+        doctorItem.innerHTML = `
+            <div class="d-flex align-items-start">
+                <div class="patient-avatar me-3">
+                    <i class="bi bi-person-circle"></i>
+                </div>
+                <div class="patient-info flex-grow-1">
+                    <h6 class="patient-name" style="font-weight: 600; color: #0d47a1;">${doctor.name}</h6>
+                    <p class="last-message text-muted">${specialty}</p>
+                    <small class="text-muted">Last contact: ${lastContact}</small>
+                </div>
+            </div>
+        `;
+        
+        doctorListContainer.appendChild(doctorItem);
     });
     
-    // Automatically start conversation with primary doctor
-    currentRecipientId = primaryDoctor.id;
-    currentRecipientName = primaryDoctor.name;
-    startOrGetConversation(primaryDoctor.id);
+    console.log('✨ Doctor list rendered successfully');
     
-    // If there are multiple doctors, show selection interface
-    if (doctorsList.length > 1) {
-        const doctorSelection = document.getElementById('doctorSelection');
-        const doctorSelect = document.getElementById('doctorSelect');
+    // Automatically select the first doctor
+    if (doctorsList.length > 0) {
+        const firstDoctor = doctorsList[0];
+        loadConversation(firstDoctor.id);
+    }
+    
+    console.log(`Displaying ${doctorsList.length} doctors for patient`);
+}
+
+/**
+ * Load conversation with a specific doctor
+ * Fetches messages and updates the chat display
+ * @param {number} doctorId - The ID of the doctor to load conversation for
+ */
+async function loadConversation(doctorId) {
+    try {
+        console.log('📞 loadConversation called with doctorId:', doctorId);
         
-        if (doctorSelection && doctorSelect) {
-            // Clear existing options (keep the first default option)
-            doctorSelect.innerHTML = '<option value="">Choose a doctor to message</option>';
-            
-            // Add doctors to dropdown
-            doctorsList.forEach(doctor => {
-                const option = document.createElement('option');
-                option.value = doctor.id;
-                option.textContent = `${doctor.name} - ${doctor.specialty}`;
-                if (doctor.id === primaryDoctor.id) {
-                    option.selected = true;
-                }
-                doctorSelect.appendChild(option);
-            });
-            
-            // Show the selection dropdown
-            doctorSelection.style.display = 'block';
-            
-            console.log(`Patient has ${doctorsList.length} doctors available for messaging`);
+        if (!doctorId) {
+            console.error('❌ No doctorId provided to loadConversation');
+            return;
         }
-    } else {
-        // Hide selection if only one doctor
-        const doctorSelection = document.getElementById('doctorSelection');
-        if (doctorSelection) {
-            doctorSelection.style.display = 'none';
+        
+        // Find the doctor in the available doctors list
+        const doctor = availableDoctors.find(d => d.id == doctorId);
+        if (!doctor) {
+            console.warn('⚠️ Doctor not found in availableDoctors list');
+            return;
         }
+        
+        console.log('👨‍⚕️ Loading conversation for doctor:', doctor.name);
+        
+        // Call selectPatientDoctor to handle all UI updates and conversation loading
+        await selectPatientDoctor(doctor.id, doctor.name, doctor.specialty);
+        
+    } catch (error) {
+        console.error('❌ loadConversation error:', error);
+        showErrorMessage('Failed to load conversation with doctor');
+    }
+}
+
+// Select a doctor for conversation (for patients)
+async function selectPatientDoctor(doctorId, doctorName, specialty) {
+    try {
+        console.log('👤 selectPatientDoctor called:', { doctorId, doctorName, specialty });
+        
+        // Update UI - mark selected doctor
+        document.querySelectorAll('.patient-item').forEach(item => item.classList.remove('active'));
+        const selectedItem = document.querySelector(`[data-doctor-id="${doctorId}"]`);
+        if (selectedItem) {
+            selectedItem.classList.add('active');
+            console.log('✅ Doctor marked as active in list');
+        } else {
+            console.warn('⚠️ Doctor item not found in DOM');
+        }
+        
+        // Update chat header
+        const headerName = document.getElementById('selectedDoctorName');
+        if (headerName) {
+            headerName.textContent = doctorName;
+            console.log('✅ Chat header name updated');
+        }
+        
+        const headerSmall = document.getElementById('selectedDoctorName').parentElement.querySelector('small');
+        if (headerSmall) {
+            headerSmall.innerHTML = `<i class="bi bi-shield-check me-1"></i><span>${specialty}</span>`;
+            console.log('✅ Chat header specialty updated');
+        }
+        
+        // Enable video call button
+        const videoCallBtn = document.getElementById('videoCallBtn');
+        if (videoCallBtn) {
+            videoCallBtn.disabled = false;
+            console.log('✅ Video call button enabled');
+        }
+        
+        // Enable message input area
+        const messageInputArea = document.getElementById('messageInputArea');
+        if (messageInputArea) {
+            messageInputArea.classList.remove('message-input-area-hidden');
+            messageInputArea.classList.add('message-input-area-visible');
+            console.log('✅ Message input area shown');
+        } else {
+            console.warn('⚠️ Message input area not found');
+        }
+        
+        // Set current recipient for messaging
+        currentRecipientId = doctorId;
+        currentRecipientName = doctorName;
+        console.log('✅ Current recipient set:', { currentRecipientId, currentRecipientName });
+        
+        // Start or get conversation with this doctor
+        console.log('📞 Starting conversation with doctor:', doctorId);
+        await startOrGetConversation(doctorId);
+        
+        console.log('✅ Selected doctor for messaging:', doctorName);
+    } catch (error) {
+        console.error('❌ Failed to select doctor:', error);
+        showErrorMessage('Failed to load doctor conversation.');
     }
 }
 
@@ -261,24 +389,28 @@ async function startOrGetConversation(doctorId, appointmentId = null) {
             body.appointment_id = appointmentId;
         }
         
-        console.log('Starting conversation with doctor ID:', doctorId);
+        console.log('📡 Starting conversation with doctor ID:', doctorId);
+        console.log('📤 Sending request body:', body);
         
         const response = await ApiHelper.makeRequest('/messages/conversations', {
             method: 'POST',
             body: JSON.stringify(body)
         });
         
+        console.log('📨 Conversation API response:', response);
+        
         if (response.success) {
             currentConversationId = response.data.id;
             currentRecipientId = doctorId;
-            console.log('Conversation started/found, ID:', currentConversationId);
+            console.log('✅ Conversation started/found, ID:', currentConversationId);
+            console.log('📥 Calling loadMessages...');
             await loadMessages();
         } else {
-            console.error('Failed to start conversation:', response.message);
+            console.error('❌ Failed to start conversation:', response.message);
             showErrorMessage('Failed to start conversation: ' + response.message);
         }
     } catch (error) {
-        console.error('Failed to start conversation:', error);
+        console.error('❌ Failed to start conversation:', error);
         showErrorMessage('Failed to start conversation with doctor.');
     }
 }
@@ -784,14 +916,25 @@ async function loadMessages() {
     console.log('🔍 loadMessages called with conversationId:', currentConversationId);
     if (!currentConversationId) {
         console.warn('⚠️ No currentConversationId, cannot load messages');
+        const chatContainer = document.getElementById('chatMessages');
+        if (chatContainer) {
+            chatContainer.innerHTML = `
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-chat-dots fs-1 opacity-50"></i>
+                    <p class="mt-3">Select a doctor to view messages</p>
+                </div>
+            `;
+        }
         return;
     }
 
     try {
+        console.log('📡 Fetching messages from API...');
         const response = await ApiHelper.makeRequest(`/messages/conversations/${currentConversationId}`);
         console.log('💬 Messages API response:', response);
 
         if (!response.success) {
+            console.error('❌ API returned error:', response.message);
             throw new Error(`API Error: ${response.message}`);
         }
 
@@ -799,8 +942,18 @@ async function loadMessages() {
         console.log(`📨 Received ${messages.length} messages:`, messages);
         displayMessages(messages);
     } catch (error) {
-        console.error('Failed to load messages', error);
+        console.error('❌ Failed to load messages', error);
         showErrorMessage('Failed to load messages');
+        const chatContainer = document.getElementById('chatMessages');
+        if (chatContainer) {
+            chatContainer.innerHTML = `
+                <div class="text-center text-danger py-5">
+                    <i class="bi bi-exclamation-circle fs-1"></i>
+                    <p class="mt-3">Failed to load messages</p>
+                    <small>${error.message}</small>
+                </div>
+            `;
+        }
     }
 }
 
@@ -808,51 +961,76 @@ async function loadMessages() {
 function displayMessages(messages) {
     const chatContainer = document.getElementById('chatMessages');
     
+    if (!chatContainer) {
+        console.error('❌ Chat container not found');
+        return;
+    }
+    
+    console.log('📝 displayMessages called with', messages ? messages.length : 0, 'messages');
+    
     if (!messages || messages.length === 0) {
         chatContainer.innerHTML = `
             <div class="text-center text-muted py-5" id="no-messages">
-                <i class="bi bi-chat-dots fs-1"></i>
-                <p class="mt-2">No messages yet. Start a conversation.</p>
+                <i class="bi bi-chat-dots fs-1 opacity-50"></i>
+                <p class="mt-3">No messages yet. Start a conversation.</p>
             </div>
         `;
+        console.log('✅ Displayed empty state');
         return;
     }
 
-    chatContainer.innerHTML = messages.map(msg => {
+    const messagesHTML = messages.map(msg => {
         const isSender = msg.sender_id === userId;
         const messageClass = isSender ? 
             (userType === 'doctor' ? 'doctor-message' : 'patient-message') : 
             (userType === 'doctor' ? 'patient-message' : 'doctor-message');
         const time = formatTimestamp(msg.created_at);
         
+        // Handle image messages
+        let contentHTML = '';
+        if (msg.message_type === 'image' && msg.image_data) {
+            contentHTML = `
+                <img src="${msg.image_data}" alt="Image message" style="max-width: 250px; border-radius: 8px; margin-bottom: 8px;">
+                ${msg.content ? `<p>${msg.content}</p>` : ''}
+            `;
+        } else {
+            contentHTML = `<p>${msg.content}</p>`;
+        }
+        
         return `
             <div class="message ${messageClass}">
                 <div class="message-content">
-                    <p>${msg.content}</p>
+                    ${contentHTML}
                     <small class="message-time">${time}</small>
                 </div>
             </div>
         `;
     }).join('');
     
+    chatContainer.innerHTML = messagesHTML;
+    console.log('✅ Displayed', messages.length, 'messages');
+    
     // Scroll to bottom
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+    setTimeout(() => {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }, 100);
 }
 
 // Send message
 async function sendMessage() {
     const input = document.getElementById('messageInput');
     const content = input.value.trim();
+    const hasImage = window.attachedImage && window.attachedImage.base64;
     
-    if (!content) {
-        console.warn('No message content to send');
+    if (!content && !hasImage) {
+        console.warn('⚠️ No message content or image to send');
         return;
     }
     
     if (!currentConversationId) {
-        console.error('No conversation ID available for sending message');
+        console.error('❌ No conversation ID available for sending message');
         if (currentRecipientId) {
-            console.log('Attempting to start conversation first...');
+            console.log('🔄 Attempting to start conversation first...');
             await startOrGetConversation(currentRecipientId);
             if (!currentConversationId) {
                 showErrorMessage('Unable to start conversation. Please try again.');
@@ -865,20 +1043,34 @@ async function sendMessage() {
     }
 
     try {
+        const messagePayload = {
+            content: content,
+            message_type: 'text'
+        };
+        
+        // If there's an attached image, add it to the payload
+        if (hasImage) {
+            messagePayload.message_type = 'image';
+            messagePayload.image_data = window.attachedImage.base64;
+            messagePayload.image_name = window.attachedImage.name;
+            console.log('📸 Sending message with image attachment');
+        }
+        
         const response = await ApiHelper.makeRequest(`/messages/conversations/${currentConversationId}/messages`, {
             method: 'POST',
-            body: JSON.stringify({
-                content: content,
-                message_type: 'text'
-            })
+            body: JSON.stringify(messagePayload)
         });
 
         if (!response.success) {
             throw new Error(`API Error: ${response.message}`);
         }
         
-        // Clear input
+        // Clear input and remove image preview
         input.value = '';
+        removeImagePreview();
+        window.attachedImage = null;
+        
+        console.log('✅ Message sent successfully');
         
         // Add message to display immediately
         addMessageToDisplay(response.data);
@@ -889,7 +1081,7 @@ async function sendMessage() {
         }, 500);
         
     } catch (error) {
-        console.error('Failed to send message', error);
+        console.error('❌ Failed to send message', error);
         showErrorMessage('Failed to send message. Please try again.');
     }
 }
@@ -912,13 +1104,30 @@ function addMessageToDisplay(message) {
     
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${messageClass}`;
-    messageDiv.innerHTML = `
-        <div class="message-content">
-            <p>${message.content}</p>
-            <small class="message-time">${time}</small>
-        </div>
-    `;
     
+    // Build message content based on type
+    let messageContentHtml = '';
+    
+    if (message.message_type === 'image' && message.image_data) {
+        // Display image message
+        messageContentHtml = `
+            <div class="message-content">
+                <img src="${message.image_data}" alt="Image message" style="max-width: 250px; border-radius: 8px; margin-bottom: 8px;">
+                ${message.content ? `<p>${message.content}</p>` : ''}
+                <small class="message-time">${time}</small>
+            </div>
+        `;
+    } else {
+        // Display text message
+        messageContentHtml = `
+            <div class="message-content">
+                <p>${message.content}</p>
+                <small class="message-time">${time}</small>
+            </div>
+        `;
+    }
+    
+    messageDiv.innerHTML = messageContentHtml;
     chatContainer.appendChild(messageDiv);
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
@@ -1028,6 +1237,17 @@ function searchPatients() {
     });
 }
 
+// Search doctors (patients only)
+function searchDoctors() {
+    const searchTerm = document.getElementById('doctorSearch').value.toLowerCase();
+    const doctorItems = document.querySelectorAll('.patient-item');
+    
+    doctorItems.forEach(item => {
+        const doctorName = item.querySelector('.patient-name').textContent.toLowerCase();
+        item.style.display = doctorName.includes(searchTerm) ? 'block' : 'none';
+    });
+}
+
 // Template functions
 function insertTemplate() {
     const templates = userType === 'doctor' ? [
@@ -1056,12 +1276,124 @@ function selectCommonMessage(msg) {
     document.getElementById('messageInput').value = msg;
 }
 
-function attachFile() {
-    alert('File attachment feature coming soon');
+// Hidden file input for image attachment
+let fileInput = null;
+
+function initializeFileInput() {
+    if (!fileInput) {
+        fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.style.display = 'none';
+        fileInput.onchange = handleImageSelection;
+        document.body.appendChild(fileInput);
+        console.log('✅ File input initialized for image attachment');
+    }
+}
+
+function handleImageSelection(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    console.log('📸 Image selected:', file.name, `(${(file.size / 1024).toFixed(2)} KB)`);
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+        alert('❌ Please select a valid image file');
+        return;
+    }
+    
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+        alert('❌ Image size must be less than 5MB');
+        return;
+    }
+    
+    // Create preview and insert into message input
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const base64Image = e.target.result;
+        
+        // Get message input
+        const messageInput = document.getElementById('messageInput');
+        if (!messageInput) {
+            console.error('❌ Message input element not found');
+            return;
+        }
+        
+        // Get current message text
+        let messageText = messageInput.value.trim();
+        
+        // Create image preview in chat
+        const imagePreviewHtml = `<div class="image-preview-attachment mb-2">
+            <img src="${base64Image}" alt="Image preview" style="max-width: 200px; border-radius: 8px;">
+            <button type="button" class="btn btn-sm btn-danger ms-2" onclick="removeImagePreview()" title="Remove image">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>`;
+        
+        // Store image data temporarily
+        window.attachedImage = {
+            base64: base64Image,
+            name: file.name,
+            type: file.type,
+            size: file.size
+        };
+        
+        // Show preview area if not already visible
+        const previewArea = document.getElementById('imagePreviewArea');
+        if (previewArea) {
+            previewArea.innerHTML = imagePreviewHtml;
+            previewArea.style.display = 'block';
+        } else {
+            // Create preview area if it doesn't exist
+            const inputArea = document.getElementById('messageInputArea');
+            if (inputArea) {
+                const newPreview = document.createElement('div');
+                newPreview.id = 'imagePreviewArea';
+                newPreview.innerHTML = imagePreviewHtml;
+                newPreview.style.marginBottom = '10px';
+                inputArea.insertBefore(newPreview, inputArea.querySelector('.input-group'));
+            }
+        }
+        
+        console.log('✅ Image loaded and preview displayed');
+    };
+    
+    reader.onerror = function() {
+        console.error('❌ Error reading image file');
+        alert('❌ Error reading image file');
+    };
+    
+    reader.readAsDataURL(file);
+    
+    // Reset file input
+    if (fileInput) {
+        fileInput.value = '';
+    }
+}
+
+function removeImagePreview() {
+    const previewArea = document.getElementById('imagePreviewArea');
+    if (previewArea) {
+        previewArea.innerHTML = '';
+        previewArea.style.display = 'none';
+    }
+    window.attachedImage = null;
+    console.log('🗑️ Image preview removed');
 }
 
 function attachImage() {
-    attachFile(); // Alias for patients
+    console.log('📸 Attach image button clicked');
+    initializeFileInput();
+    if (fileInput) {
+        fileInput.click();
+    }
+}
+
+function attachFile() {
+    attachImage(); // Alias
 }
 
 function insertPrescription() {
