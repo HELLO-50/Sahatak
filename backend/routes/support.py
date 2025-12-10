@@ -259,3 +259,118 @@ def send_feedback():
     except Exception as e:
         app_logger.error(f'❌ Error processing feedback: {str(e)}')
         return APIResponse.internal_error(message='Failed to process your feedback')
+
+
+@support_bp.route('/contact-supervisor', methods=['POST'])
+def contact_supervisor():
+    """
+    Handle supervisor contact messages from users
+    Sends email to supervisor with message details
+    """
+    try:
+        data = request.get_json() or {}
+        
+        # Get form data
+        to = sanitize_input(data.get('to', ''), 100).strip()  # Supervisor identifier
+        subject = sanitize_input(data.get('subject', ''), 200).strip()
+        message = sanitize_input(data.get('message', ''), 5000).strip()
+        contact = sanitize_input(data.get('contact', ''), 20).strip()  # Phone number
+        name = sanitize_input(data.get('name', ''), 200).strip()
+        email = (data.get('email') or '').strip()
+        
+        # Validation
+        if not to:
+            return APIResponse.validation_error(field='to', message='Please select a supervisor')
+        if not subject:
+            return APIResponse.validation_error(field='subject', message='Subject is required')
+        if not message:
+            return APIResponse.validation_error(field='message', message='Message is required')
+        if not name:
+            return APIResponse.validation_error(field='name', message='Name is required')
+        if not email or not validate_email(email):
+            return APIResponse.validation_error(field='email', message='A valid email is required')
+        
+        # Get support email for now (in production, you would map 'to' to supervisor emails)
+        support_email = current_app.config.get('SUPPORT_EMAIL', 'Sahatak.Sudan@gmail.com')
+        
+        # Build email body with supervisor message details
+        email_subject = f'👤 Message to Supervisor: {subject}'
+        email_body = f"""
+<html>
+<head>
+    <style>
+        body {{ font-family: Arial, sans-serif; background-color: #f5f5f5; }}
+        .container {{ max-width: 600px; margin: 20px auto; background: white; padding: 20px; border-radius: 8px; }}
+        .header {{ background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%); color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }}
+        .header h2 {{ margin: 0; font-size: 24px; }}
+        .section {{ margin-bottom: 20px; }}
+        .label {{ font-weight: bold; color: #6f42c1; font-size: 14px; }}
+        .value {{ color: #333; margin: 5px 0 15px 0; padding: 10px; background: #f9f9f9; border-left: 3px solid #6f42c1; }}
+        .footer {{ text-align: center; color: #999; font-size: 12px; border-top: 1px solid #eee; padding-top: 15px; margin-top: 20px; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>👤 New Supervisor Message</h2>
+        </div>
+        
+        <div class="section">
+            <p class="label">Target Supervisor:</p>
+            <p class="value">{to}</p>
+        </div>
+        
+        <div class="section">
+            <p class="label">Subject:</p>
+            <p class="value">{subject}</p>
+        </div>
+        
+        <div class="section">
+            <p class="label">From:</p>
+            <p class="value">
+                Name: {name}<br>
+                Email: {email}<br>
+                Phone: {contact or 'Not provided'}
+            </p>
+        </div>
+        
+        <div class="section">
+            <p class="label">Message:</p>
+            <p class="value" style="white-space: pre-wrap; line-height: 1.6;">{message}</p>
+        </div>
+        
+        <div class="footer">
+            <p>This is an automated message from Sahatak Support System</p>
+            <p>© 2025 Sahatak - Telemedicine Platform</p>
+        </div>
+    </div>
+</body>
+</html>
+        """
+        
+        # Send email to support (supervisor routing can be implemented later)
+        try:
+            if not send_html_email(support_email, email_subject, email_body):
+                app_logger.warning('Email service not configured - unable to send supervisor message email')
+                return APIResponse.error(
+                    message='Email service is currently unavailable. Please try again later.',
+                    status_code=503
+                )
+            app_logger.info(f'✅ Supervisor message email sent to {support_email} from {email}')
+        except Exception as email_error:
+            app_logger.error(f'❌ Failed to send supervisor message email: {str(email_error)}')
+            # Don't fail the request, log the issue but inform user
+            return APIResponse.error(
+                message='Message received but email notification failed. Support team will review it.',
+                status_code=500
+            )
+        
+        return APIResponse.success(
+            data={'message': 'Thank you for your message to supervisor'},
+            message='Your message has been sent successfully to the supervisor'
+        )
+        
+    except Exception as e:
+        app_logger.error(f'❌ Error processing supervisor message: {str(e)}')
+        return APIResponse.internal_error(message='Failed to process your message')
+
