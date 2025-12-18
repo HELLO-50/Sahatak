@@ -2,7 +2,7 @@
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Patient Dashboard - Sahatak</title>
     
     <!-- Favicon -->
@@ -1870,7 +1870,7 @@
                         <i class="bi bi-calendar-event text-primary me-2"></i>
                         <span id="reschedule-modal-title">Reschedule Appointment</span>
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" title="Close"></button>
                 </div>
                 <div class="modal-body">
                     <p id="reschedule-modal-subtitle" style="color: #212529;">Select new date and time</p>
@@ -1926,7 +1926,7 @@
                         <i class="bi bi-chat-heart me-2"></i>
                         <span id="triage-modal-title">Quick Health Check</span>
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" title="Close"></button>
                 </div>
                 <div class="modal-body p-4">
                     <!-- Chat container styled to match dashboard -->
@@ -1945,11 +1945,13 @@
                         <input type="text" 
                                class="form-control" 
                                id="messageInput" 
-                               placeholder=""
+                               placeholder="Describe your symptoms here..."
+                               title="Describe your health symptoms"
                                maxlength="1000">
                         <button class="btn btn-primary" 
                                 type="button" 
-                                id="sendBtn">
+                                id="sendBtn"
+                                title="Send message">
                             <i class="bi bi-send"></i>
                         </button>
                         <button class="btn btn-outline-secondary" 
