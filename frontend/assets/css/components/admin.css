@@ -475,20 +475,21 @@ Colors:
     z-index: -1;
 }
 
-/* Premium Admin Header */
+/* Premium Admin Header - Enhanced Elegant Design */
 .dashboard-header {
-    background: var(--admin-gradient-card);
-    border: 1px solid var(--admin-border-primary);
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(226, 232, 240, 0.8);
     border-radius: var(--admin-radius-2xl);
     padding: var(--admin-space-xl);
     margin-bottom: var(--admin-space-2xl);
-    box-shadow: var(--admin-shadow-lg);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05);
     position: relative;
     overflow: hidden;
     transition: var(--admin-transition-base);
 }
 
-/* Premium gradient border */
+/* Premium gradient border - Elegant Shimmer */
 .dashboard-header::before {
     content: '';
     position: absolute;
@@ -496,7 +497,14 @@ Colors:
     left: 0;
     right: 0;
     height: 4px;
-    background: var(--admin-gradient-primary);
+    background: linear-gradient(90deg, var(--admin-primary), var(--admin-secondary), var(--admin-primary));
+    background-size: 200% 100%;
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
     border-radius: var(--admin-radius-2xl) var(--admin-radius-2xl) 0 0;
 }
 
@@ -908,32 +916,33 @@ Colors:
     color: #0f172a !important;
 }
 
-/* Enhanced Stat Cards - Dark Theme */
+/* Enhanced Stat Cards - Elegant Modern Design */
 .admin-stat-card {
-    background: var(--admin-gradient-card);
-    border: 1px solid var(--admin-border-primary);
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(226, 232, 240, 0.8);
     border-radius: var(--admin-radius-xl);
     padding: var(--admin-space-xl);
     text-align: center;
     transition: all var(--admin-transition-base);
     position: relative;
     overflow: hidden;
-    box-shadow: var(--admin-shadow-lg);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-height: 140px;
+    min-height: 160px;
 }
 
-/* Ensure stat card text is white for readability on dark backgrounds */
+/* Stat card text colors for light theme */
 .admin-stat-card .stat-number,
 .admin-stat-card .stat-label,
 .admin-stat-card .stat-icon i {
-    color: #ffffff !important;
+    color: var(--admin-text-primary, #0f172a) !important;
 }
 
-/* Gradient top border accent */
+/* Elegant gradient top border accent with shimmer */
 .admin-stat-card::before {
     content: '';
     position: absolute;
@@ -941,7 +950,14 @@ Colors:
     left: 0;
     right: 0;
     height: 4px;
-    background: var(--admin-gradient-primary);
+    background: linear-gradient(90deg, var(--admin-primary), var(--admin-secondary), var(--admin-primary));
+    background-size: 200% 100%;
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
 }
 
 /* Different colored accents for variety */
@@ -958,14 +974,18 @@ Colors:
 }
 
 .admin-stat-card:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--admin-shadow-xl);
-    border-color: var(--admin-border-secondary);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(37, 99, 235, 0.15), 0 4px 16px rgba(37, 99, 235, 0.1);
+    border-color: rgba(37, 99, 235, 0.3);
+    background: rgba(255, 255, 255, 1);
 }
 
-/* Stat Numbers - Medical Blue Bold */
+/* Stat Numbers - Elegant Gradient Text */
 .stat-number {
-    color: var(--admin-primary) !important;
+    background: linear-gradient(135deg, var(--admin-primary) 0%, var(--admin-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     font-size: var(--admin-text-4xl) !important;
     font-weight: 800 !important;
     line-height: 1 !important;
@@ -973,27 +993,43 @@ Colors:
     letter-spacing: -0.025em !important;
 }
 
-/* All stat numbers use medical blue */
+/* All stat numbers use gradient */
 .admin-stat-card .stat-number {
-    color: var(--admin-primary) !important;
+    background: linear-gradient(135deg, var(--admin-primary) 0%, var(--admin-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
-/* Stat Labels - Light Text */
+/* Stat Labels - Elegant Styling */
 .stat-label {
-    color: var(--admin-text-secondary) !important;
+    color: #64748b !important;
     font-weight: 600 !important;
     font-size: var(--admin-text-sm) !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.1em !important;
+    letter-spacing: 0.08em !important;
     line-height: 1.4 !important;
 }
 
-/* Stat Icons - Colored */
+/* Stat Icons - Enhanced with background */
 .stat-icon {
     color: var(--admin-primary) !important;
     font-size: var(--admin-text-2xl) !important;
     margin-bottom: var(--admin-space-md) !important;
-    opacity: 0.9 !important;
+    opacity: 1 !important;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(6, 182, 212, 0.1) 100%);
+    transition: all var(--admin-transition-base);
+}
+
+.admin-stat-card:hover .stat-icon {
+    transform: scale(1.1) rotate(5deg);
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.15) 0%, rgba(6, 182, 212, 0.15) 100%);
 }
 
 /* Icon color variations */
