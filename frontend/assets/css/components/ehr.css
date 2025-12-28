@@ -199,61 +199,124 @@
 }
 
 .vital-signs-card {
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1rem;
-    margin-bottom: 0.75rem;
-    background: rgba(2, 6, 23, 0.35);
-    transition: all 0.3s ease;
-    box-shadow: var(--shadow);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px) saturate(180%);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+    position: relative;
+    overflow: hidden;
+}
+
+.vital-signs-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--medical-blue, #2563eb), var(--medical-teal, #0891b2));
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .vital-signs-card:hover {
-    box-shadow: var(--shadow);
-    border-color: var(--primary);
-    background: var(--hover);
-    color: #000;
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.12), 0 4px 8px rgba(37, 99, 235, 0.08);
+    border-color: rgba(37, 99, 235, 0.3);
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 1);
+}
+
+.vital-signs-card:hover::before {
+    opacity: 1;
 }
 
 .vitals-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid #e9ecef;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.875rem;
+    border-bottom: 2px solid rgba(226, 232, 240, 0.8);
 }
 
 .vitals-date {
-    font-weight: 600;
-    color: var(--primary);
+    font-weight: 700;
+    font-size: 0.9375rem;
+    color: var(--medical-blue, #2563eb);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    letter-spacing: -0.01em;
+}
+
+.vitals-date i {
+    font-size: 1.125rem;
+    color: var(--medical-teal, #0891b2);
 }
 
 .vitals-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
 }
 
 .vital-item {
     text-align: center;
-    padding: 0.5rem;
-    background: #f8f9fa;
-    border-radius: 6px;
-    border: 1px solid #e9ecef;
+    padding: 1rem 0.875rem;
+    background: linear-gradient(135deg, rgba(241, 245, 249, 0.8) 0%, rgba(255, 255, 255, 1) 100%);
+    border-radius: 12px;
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.vital-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--medical-blue, #2563eb), var(--medical-teal, #0891b2));
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.vital-item:hover {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(240, 247, 255, 1) 100%);
+    border-color: rgba(37, 99, 235, 0.3);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+    transform: translateY(-2px);
+}
+
+.vital-item:hover::before {
+    opacity: 1;
 }
 
 .vital-value {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 0.25rem;
+    font-size: 1.375rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--medical-blue, #2563eb) 0%, var(--medical-teal, #0891b2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
 }
 
 .vital-label {
-    font-size: 0.8rem;
-    color: var(--muted);
-    font-weight: 500;
+    font-size: 0.8125rem;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    line-height: 1.3;
 }
 
 /* Vital ranges colors */
@@ -391,27 +454,151 @@
     margin-bottom: 1rem;
 }
 
-/* Empty States */
+/* Empty States - Enhanced Elegant Design */
 .empty-state {
     text-align: center;
-    padding: 3rem 1rem;
-    color: var(--muted);
+    padding: 4rem 2rem;
+    color: #64748b;
+    background: linear-gradient(135deg, rgba(241, 245, 249, 0.5) 0%, rgba(255, 255, 255, 1) 100%);
+    border-radius: 16px;
+    border: 2px dashed rgba(226, 232, 240, 0.8);
 }
 
 .empty-state i {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    color: #adb5bd;
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    color: #cbd5e1;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(8, 145, 178, 0.1) 100%);
+    width: 100px;
+    height: 100px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin-bottom: 1.5rem;
 }
 
 .empty-state h6 {
-    margin-bottom: 0.5rem;
-    font-weight: 600;
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+    font-size: 1.125rem;
+    color: #1e293b;
+    letter-spacing: -0.01em;
 }
 
 .empty-state p {
-    font-size: 0.9rem;
+    font-size: 0.9375rem;
     margin-bottom: 0;
+    color: #64748b;
+    line-height: 1.6;
+}
+
+/* Responsive Design for Vital Signs */
+@media (max-width: 768px) {
+    .vital-sign-card {
+        height: auto;
+        min-height: 140px;
+        padding: 1.25rem 1rem;
+    }
+    
+    .vital-sign-icon {
+        width: 56px;
+        height: 56px;
+        font-size: 2rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .vital-sign-value {
+        font-size: 1.25rem;
+    }
+    
+    .vitals-grid {
+        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+        gap: 0.75rem;
+    }
+    
+    .vital-item {
+        padding: 0.875rem 0.625rem;
+    }
+    
+    .vital-value {
+        font-size: 1.125rem;
+    }
+    
+    #vitalsModal .modal-body {
+        padding: 1.5rem 1.25rem;
+    }
+    
+    #vitalsModal .form-control {
+        padding: 0.75rem 1rem;
+    }
+    
+    .vital-signs-card {
+        padding: 1.25rem 1rem;
+    }
+    
+    .vitals-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .vital-signs-overview .col-lg-2,
+    .vital-signs-overview .col-md-4,
+    .vital-signs-overview .col-sm-6 {
+        margin-bottom: 1rem;
+    }
+    
+    .vital-sign-card {
+        min-height: 130px;
+        padding: 1rem 0.875rem;
+    }
+    
+    .vitals-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.625rem;
+    }
+    
+    .vital-item {
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .card-header h6 {
+        font-size: 0.875rem;
+    }
+}
+
+/* RTL Support for Vital Signs */
+[dir="rtl"] .vitals-header {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .vital-sign-icon {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+[dir="rtl"] .vital-sign-trend {
+    direction: ltr; /* Keep trend indicators left-to-right */
+}
+
+[dir="rtl"] #vitalsModal .modal-header {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] #vitalsModal .modal-footer {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] #vitalsModal .btn {
+    margin-left: 0.5rem;
+    margin-right: 0;
+}
+
+[dir="rtl"] #vitalsModal .btn:first-child {
+    margin-left: 0;
 }
 
 /* Print Styles */
@@ -658,61 +845,117 @@
     color: #495057;
 }
 
-/* Vital Signs Overview Cards */
+/* Vital Signs Overview Cards - Enhanced Elegant Design */
 .vital-signs-overview {
     margin-bottom: 2rem;
 }
 
 .vital-sign-card {
-    background: rgba(2, 6, 23, 0.35);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.2rem;
-    height: 140px;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 16px;
+    padding: 1.5rem 1.25rem;
+    height: 160px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
-    transition: all 0.3s ease;
-    box-shadow: var(--shadow);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+    position: relative;
+    overflow: hidden;
+}
+
+.vital-sign-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--medical-blue, #2563eb), var(--medical-teal, #0891b2));
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .vital-sign-card:hover {
-    box-shadow: var(--shadow);
-    border-color: var(--primary);
-    background: var(--hover);
-    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.15), 0 4px 8px rgba(37, 99, 235, 0.1);
+    border-color: rgba(37, 99, 235, 0.3);
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 1);
+}
+
+.vital-sign-card:hover::before {
+    opacity: 1;
 }
 
 .vital-sign-icon {
-    font-size: 2rem;
-    margin-bottom: 0.75rem;
-    opacity: 0.8;
+    font-size: 2.5rem;
+    margin-bottom: 0.875rem;
+    opacity: 1;
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(8, 145, 178, 0.1) 100%);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.vital-sign-card:hover .vital-sign-icon {
+    transform: scale(1.1);
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.15) 0%, rgba(8, 145, 178, 0.15) 100%);
 }
 
 .vital-sign-icon i.bi-heart-pulse {
-    color: #e74c3c;
+    color: #ef4444;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .vital-sign-icon i.bi-heart {
-    color: #e91e63;
+    color: #ec4899;
+    background: linear-gradient(135deg, #ec4899, #db2777);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .vital-sign-icon i.bi-thermometer {
-    color: #ff9800;
+    color: #f59e0b;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .vital-sign-icon i.bi-lungs {
-    color: #2196f3;
+    color: #3b82f6;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .vital-sign-icon i.bi-droplet {
-    color: #00bcd4;
+    color: #06b6d4;
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .vital-sign-icon i.bi-person {
-    color: #9c27b0;
+    color: #8b5cf6;
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .vital-sign-content {
@@ -720,58 +963,135 @@
 }
 
 .vital-sign-label {
-    font-size: 0.85rem;
+    font-size: 0.8125rem;
     font-weight: 600;
-    color: var(--text);
-    margin-bottom: 0.5rem;
+    color: #64748b;
+    margin-bottom: 0.625rem;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.05em;
+    line-height: 1.2;
 }
 
 .vital-sign-value {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--primary);
+    font-size: 1.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--medical-blue, #2563eb) 0%, var(--medical-teal, #0891b2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     margin-bottom: 0.5rem;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
 }
 
 .vital-sign-trend {
     font-size: 0.75rem;
-    font-weight: 500;
+    font-weight: 600;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.25rem;
+    gap: 0.375rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: 12px;
+    background: rgba(241, 245, 249, 0.8);
+    transition: all 0.25s ease;
+}
+
+.vital-sign-card:hover .vital-sign-trend {
+    background: rgba(241, 245, 249, 1);
 }
 
 .vital-sign-trend i {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
 }
 
 .vital-sign-trend.text-success {
-    color: #28a745 !important;
+    color: #10b981 !important;
+    background: rgba(16, 185, 129, 0.1) !important;
 }
 
 .vital-sign-trend.text-warning {
-    color: #ffc107 !important;
+    color: #f59e0b !important;
+    background: rgba(245, 158, 11, 0.1) !important;
 }
 
 .vital-sign-trend.text-info {
-    color: #17a2b8 !important;
+    color: #06b6d4 !important;
+    background: rgba(6, 182, 212, 0.1) !important;
 }
 
 .vital-sign-trend.text-muted {
-    color: #6c757d !important;
+    color: #64748b !important;
+    background: rgba(241, 245, 249, 0.8) !important;
+}
+
+/* Enhanced Chart Card Headers - Elegant Design */
+.card-header {
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    padding: 1rem 1.25rem;
+}
+
+.card-header.bg-primary {
+    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%) !important;
+    border-bottom: none;
+}
+
+.card-header.bg-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    border-bottom: none;
+}
+
+.card-header.bg-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    border-bottom: none;
+}
+
+.card-header.bg-info {
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%) !important;
+    border-bottom: none;
+}
+
+.card-header h6 {
+    color: white !important;
+    font-weight: 700;
+    font-size: 0.9375rem;
+    letter-spacing: -0.01em;
+    margin: 0;
+}
+
+.card-header h6 i {
+    color: rgba(255, 255, 255, 0.95) !important;
+    margin-right: 0.5rem;
 }
 
 /* Fix card title visibility */
 .card-header .card-title {
-    color: var(--text) !important;
-    font-weight: 600;
+    color: white !important;
+    font-weight: 700;
+    font-size: 0.9375rem;
 }
 
 .card-header .card-title i {
-    color: var(--primary) !important;
+    color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Enhanced Chart Cards */
+.card {
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.card:hover {
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.12), 0 4px 8px rgba(37, 99, 235, 0.08);
+    transform: translateY(-2px);
+}
+
+.card-body {
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.98);
 }
 
 /* Enhanced Action Buttons */
@@ -840,10 +1160,119 @@
     animation: pulse 0.5s ease-in-out;
 }
 
+/* Vital Signs Modal - Enhanced Elegant Design */
+#vitalsModal .modal-content {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+#vitalsModal .modal-header {
+    background: linear-gradient(135deg, var(--medical-blue, #2563eb) 0%, var(--medical-teal, #0891b2) 100%);
+    border-bottom: none;
+    padding: 1.5rem 1.75rem;
+}
+
+#vitalsModal .modal-title {
+    color: white;
+    font-weight: 700;
+    font-size: 1.25rem;
+    letter-spacing: -0.01em;
+}
+
+#vitalsModal .modal-title i {
+    color: rgba(255, 255, 255, 0.95);
+    margin-right: 0.625rem;
+}
+
+#vitalsModal .btn-close {
+    filter: brightness(0) invert(1);
+    opacity: 0.9;
+}
+
+#vitalsModal .btn-close:hover {
+    opacity: 1;
+}
+
+#vitalsModal .modal-body {
+    padding: 2rem 1.75rem;
+    background: rgba(255, 255, 255, 0.98);
+}
+
+#vitalsModal .modal-footer {
+    border-top: 1px solid rgba(226, 232, 240, 0.8);
+    padding: 1.25rem 1.75rem;
+    background: rgba(248, 250, 252, 0.5);
+}
+
+#vitalsModal .form-label {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 0.875rem;
+    margin-bottom: 0.625rem;
+    letter-spacing: 0.01em;
+}
+
+#vitalsModal .form-control {
+    border: 2px solid rgba(226, 232, 240, 0.8);
+    border-radius: 12px;
+    padding: 0.875rem 1.125rem;
+    font-size: 0.9375rem;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    background-color: #ffffff;
+}
+
+#vitalsModal .form-control:hover {
+    border-color: var(--medical-blue-light, #3b82f6);
+}
+
+#vitalsModal .form-control:focus {
+    border-color: var(--medical-blue, #2563eb);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1), 0 2px 4px rgba(37, 99, 235, 0.05);
+    outline: none;
+    background-color: #ffffff;
+}
+
+#vitalsModal textarea.form-control {
+    border-radius: 12px;
+    resize: vertical;
+    min-height: 80px;
+}
+
+#vitalsModal .btn-primary {
+    background: linear-gradient(135deg, var(--medical-blue, #2563eb) 0%, var(--medical-blue-light, #3b82f6) 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 0.75rem 1.75rem;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#vitalsModal .btn-primary:hover {
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+    transform: translateY(-2px);
+}
+
+#vitalsModal .btn-secondary {
+    border-radius: 12px;
+    padding: 0.75rem 1.75rem;
+    font-weight: 600;
+    border: 2px solid rgba(226, 232, 240, 0.8);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#vitalsModal .btn-secondary:hover {
+    border-color: #cbd5e1;
+    background-color: #f1f5f9;
+}
+
 /* Form Enhancements */
 .modal-lg .form-label {
-    font-weight: 500;
-    color: #495057;
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 0.875rem;
 }
 
 .modal-lg .form-control:focus,
