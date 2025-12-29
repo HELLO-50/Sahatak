@@ -5,36 +5,147 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Appointment Reminder</title>
     <style>
-        body { font-family: Arial; margin: 0; padding: 20px; background: #f5f5f5; }
-        .container { max-width: 400px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
-        .header { text-align: center; color: #0d6efd; margin-bottom: 20px; }
-        .info { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; }
-        .footer { text-align: center; color: #666; font-size: 12px; margin-top: 20px; }
+        body {
+            margin: 0;
+            padding: 0;
+            background: #eff6ff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            color: #111827;
+        }
+        .wrapper {
+            width: 100%;
+            padding: 24px 12px;
+        }
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px 22px 20px;
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+            border: 1px solid #dbeafe;
+        }
+        .brand {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        .brand-name {
+            font-weight: 700;
+            font-size: 18px;
+            color: #1d4ed8;
+            letter-spacing: 0.03em;
+        }
+        .brand-tagline {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        .header {
+            text-align: center;
+            margin: 10px 0 20px;
+        }
+        .header-title {
+            margin: 0;
+            font-size: 20px;
+            color: #1d4ed8;
+        }
+        .header-subtitle {
+            margin: 6px 0 0;
+            font-size: 13px;
+            color: #4b5563;
+        }
+        .info {
+            background: linear-gradient(135deg, #eff6ff, #e0f2fe);
+            padding: 14px 16px;
+            border-radius: 12px;
+            margin: 14px 0 18px;
+            font-size: 13px;
+            border: 1px solid #bfdbfe;
+        }
+        .info-row {
+            margin-bottom: 6px;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #111827;
+        }
+        .info-value {
+            color: #111827;
+        }
+        .message {
+            font-size: 13px;
+            line-height: 1.6;
+            color: #374151;
+            margin: 0 0 14px;
+        }
+        .footer {
+            text-align: center;
+            color: #9ca3af;
+            font-size: 11px;
+            margin-top: 8px;
+            padding-top: 10px;
+            border-top: 1px solid #e5e7eb;
+        }
+        .footer-strong {
+            color: #1d4ed8;
+            font-weight: 600;
+        }
+        .footer-note {
+            margin-top: 4px;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h2>Reminder: Your Appointment</h2>
-        </div>
-        
-        <div class="info">
-            <strong>Doctor:</strong> {{ doctor_name }}<br>
-            <strong>Date:</strong> {{ appointment_date }}<br>
-            <strong>Time:</strong> {{ appointment_time }}<br>
-            <strong>Type:</strong> {{ appointment_type }}
-        </div>
-        
-        {% if reminder_type == '1h' %}
-        <p>Your appointment is in 1 hour</p>
-        {% elif reminder_type == 'now' %}
-        <p>Your appointment is now</p>
-        {% else %}
-        <p>Your appointment is tomorrow</p>
-        {% endif %}
-        
-        <div class="footer">
-            {{ app_name }}
+    <div class="wrapper">
+        <div class="container">
+            <div class="brand">
+                <div class="brand-name">{{ app_name }}</div>
+                <div class="brand-tagline">Gentle reminder for your upcoming consultation</div>
+            </div>
+
+            <div class="header">
+                <h1 class="header-title">Appointment Reminder</h1>
+                <p class="header-subtitle">
+                    {% if reminder_type == '1h' %}
+                        Your appointment starts in about 1 hour.
+                    {% elif reminder_type == 'now' %}
+                        Your appointment is starting now.
+                    {% else %}
+                        Your appointment is scheduled for tomorrow.
+                    {% endif %}
+                </p>
+            </div>
+            
+            <div class="info">
+                <div class="info-row">
+                    <span class="info-label">Doctor:</span>
+                    <span class="info-value"> {{ doctor_name }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Date:</span>
+                    <span class="info-value"> {{ appointment_date }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Time:</span>
+                    <span class="info-value"> {{ appointment_time }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Type:</span>
+                    <span class="info-value"> {{ appointment_type }}</span>
+                </div>
+            </div>
+            
+            <p class="message">
+                Please make sure you are ready a few minutes before the scheduled time.
+                If this is a video or audio consultation, check your internet connection,
+                microphone, and camera in advance for a smooth experience.
+            </p>
+
+            <div class="footer">
+                <div class="footer-strong">{{ app_name }}</div>
+                <div class="footer-note">
+                    If you no longer need this appointment, please cancel or reschedule from your account.
+                </div>
+            </div>
         </div>
     </div>
 </body>

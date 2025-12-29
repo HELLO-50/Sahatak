@@ -5,29 +5,138 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إلغاء الموعد</title>
     <style>
-        body { font-family: Arial; margin: 0; padding: 20px; background: #f5f5f5; }
-        .container { max-width: 400px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
-        .header { text-align: center; color: #dc3545; margin-bottom: 20px; }
-        .info { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; }
-        .footer { text-align: center; color: #666; font-size: 12px; margin-top: 20px; }
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f9fafb;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            direction: rtl;
+            text-align: right;
+            color: #111827;
+        }
+        .wrapper {
+            width: 100%;
+            padding: 24px 12px;
+        }
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px 22px 20px;
+            box-shadow: 0 18px 45pxrgba(15, 23, 42, 0.08);
+            border: 1px solid #fee2e2;
+        }
+        .brand {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        .brand-name {
+            font-weight: 700;
+            font-size: 18px;
+            color: #b91c1c;
+            letter-spacing: 0.03em;
+        }
+        .brand-tagline {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        .header {
+            text-align: center;
+            margin: 10px 0 20px;
+        }
+        .header-title {
+            margin: 0;
+            font-size: 20px;
+            color: #b91c1c;
+        }
+        .header-subtitle {
+            margin: 6px 0 0;
+            font-size: 13px;
+            color: #4b5563;
+        }
+        .info {
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+            padding: 14px 16px;
+            border-radius: 12px;
+            margin: 14px 0 18px;
+            font-size: 13px;
+            border: 1px solid #fecaca;
+        }
+        .info-row {
+            margin-bottom: 6px;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #111827;
+        }
+        .info-value {
+            color: #111827;
+        }
+        .message {
+            font-size: 13px;
+            line-height: 1.6;
+            color: #374151;
+            margin: 0 0 14px;
+        }
+        .footer {
+            text-align: center;
+            color: #9ca3af;
+            font-size: 11px;
+            margin-top: 8px;
+            padding-top: 10px;
+            border-top: 1px solid #e5e7eb;
+        }
+        .footer-strong {
+            color: #b91c1c;
+            font-weight: 600;
+        }
+        .footer-note {
+            margin-top: 4px;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h2>تم إلغاء موعدك</h2>
-        </div>
-        
-        <div class="info">
-            <strong>الطبيب:</strong> {{ doctor_name }}<br>
-            <strong>التاريخ:</strong> {{ appointment_date }}<br>
-            <strong>الوقت:</strong> {{ appointment_time }}
-        </div>
-        
-        <p>تم إلغاء موعدك بنجاح</p>
-        
-        <div class="footer">
-            {{ app_name }} | صحتك
+    <div class="wrapper">
+        <div class="container">
+            <div class="brand">
+                <div class="brand-name">{{ app_name }}</div>
+                <div class="brand-tagline">تم إلغاء موعدك بنجاح</div>
+            </div>
+
+            <div class="header">
+                <h1 class="header-title">تم إلغاء الموعد الطبي</h1>
+                <p class="header-subtitle">
+                    تم تسجيل إلغاء الموعد، وتم تحرير هذا الوقت لاستخدامه لحجوزات أخرى.
+                </p>
+            </div>
+            
+            <div class="info">
+                <div class="info-row">
+                    <span class="info-label">الطبيب:</span>
+                    <span class="info-value"> {{ doctor_name }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">التاريخ:</span>
+                    <span class="info-value"> {{ appointment_date }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">الوقت:</span>
+                    <span class="info-value"> {{ appointment_time }}</span>
+                </div>
+            </div>
+            
+            <p class="message">
+                تم إلغاء موعدك بنجاح. إذا كان الإلغاء عن طريق الخطأ أو ما زلت بحاجة
+                إلى استشارة طبية، يمكنك حجز موعد جديد في أي وقت من خلال حسابك في {{ app_name }}.
+            </p>
+
+            <div class="footer">
+                <div class="footer-strong">{{ app_name }} | صحتك</div>
+                <div class="footer-note">
+                    نحن هنا دائمًا لمساعدتك، وفي الحالات الطارئة يُرجى التواصل مع خدمات الطوارئ فورًا.
+                </div>
+            </div>
         </div>
     </div>
 </body>

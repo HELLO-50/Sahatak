@@ -27,8 +27,45 @@
     <link rel="stylesheet" href="../../assets/css/components/appointments.css">
     <!-- Video Consultation Dashboard CSS -->
     <link rel="stylesheet" href="../../assets/css/components/video-consultation-dashboard.css">
+    <style>
+        /* Page-level aesthetics for appointments list */
+        body.appointments-page {
+            background: radial-gradient(circle at top left, #e3f2fd 0, #f5f5f5 45%, #e8f5e9 100%);
+        }
+
+        .appointments-page .dashboard-container {
+            min-height: 100vh;
+            padding-top: 2.5rem;
+            padding-bottom: 5rem;
+        }
+
+        .appointments-page .dashboard-header {
+            margin-bottom: 1.75rem;
+        }
+
+        .appointments-page .dashboard-card {
+            border-radius: 18px;
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            box-shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
+        }
+
+        .appointments-page .card-header {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.04), rgba(16, 185, 129, 0.04));
+            border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+            border-radius: 18px 18px 0 0;
+        }
+
+        .appointments-page #appointments-container {
+            background: linear-gradient(145deg, #ffffff 0%, #f9fafb 40%, #ffffff 100%);
+            border-radius: 16px;
+        }
+
+        .appointments-page .appointment-card {
+            border-radius: 16px;
+        }
+    </style>
 </head>
-<body data-protect="patient">
+<body data-protect="patient" class="appointments-page">
     <div class="dashboard-container">
         <div class="container-fluid" style="padding-bottom: 120px;">
             <!-- Dashboard Header -->
