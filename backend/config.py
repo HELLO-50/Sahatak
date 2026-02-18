@@ -12,8 +12,15 @@ class Config:
     MAIL_USE_TLS = True
     MAIL_USERNAME = os.getenv('MAIL_USERNAME')
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
-    MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER', 'noreply@sahatak.com')
-    SUPPORT_EMAIL = os.getenv('SUPPORT_EMAIL', 'Sahatak.Sudan@gmail.com')  # Official Sahatak support email
+    # Use a professional, Gmail-compatible sender by default.
+    # In production you should override this via environment variables and ensure
+    # proper SPF/DKIM are configured for your sending domain (if not using @gmail.com).
+    MAIL_DEFAULT_SENDER = os.getenv(
+        'MAIL_DEFAULT_SENDER',
+        'Sahatak Support System <sahatak.sudan@gmail.com>'
+    )
+    # Official Sahatak support inbox where technical support messages are delivered
+    SUPPORT_EMAIL = os.getenv('SUPPORT_EMAIL', 'sahatak.sudan@gmail.com')
     
     # JWT Configuration
     JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', SECRET_KEY)

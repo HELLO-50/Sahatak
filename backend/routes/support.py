@@ -3,7 +3,6 @@ Support and Help Routes
 Handles user support requests, bug reports, and technical issues
 """
 from flask import Blueprint, request, current_app
-from models import db
 from utils.responses import APIResponse
 from utils.validators import sanitize_input, validate_email
 from utils.logging_config import app_logger
@@ -35,7 +34,11 @@ def send_html_email(recipient_email: str, subject: str, html_body: str) -> bool:
             subject=subject,
             recipients=[recipient_email],
             html=html_body,
-            sender=current_app.config.get('MAIL_DEFAULT_SENDER', 'Sahatak.Sudan@gmail.com')
+            # Use a professional sender name to reduce spam risk
+            sender=current_app.config.get(
+                'MAIL_DEFAULT_SENDER',
+                'Sahatak Support System <sahatak.sudan@gmail.com>'
+            ),
         )
         
         # Send using the mail object
@@ -46,6 +49,76 @@ def send_html_email(recipient_email: str, subject: str, html_body: str) -> bool:
     except Exception as e:
         app_logger.error(f'❌ Failed to send HTML email to {recipient_email}: {str(e)}')
         return False
+
+
+def build_patient_auto_reply_html(name: str, subject_label: str, support_email: str) -> str:
+    """
+    Build a friendly HTML email to confirm receipt of the support request.
+    This is kept lightweight and fully inline‑CSS so it renders well in Gmail.
+    """
+    safe_name = name or "Dear patient"
+    safe_subject = subject_label or "Technical Support"
+
+    return f"""
+<html>
+<head>
+    <style>
+        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background-color: #f4f7fb; margin: 0; padding: 0; }}
+        .container {{ max-width: 640px; margin: 24px auto; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e3f2fd; }}
+        .header {{ background: linear-gradient(135deg, #0d47a1 0%, #1976d2 40%, #42a5f5 100%); color: #ffffff; padding: 20px 24px; }}
+        .header-title {{ margin: 0; font-size: 22px; font-weight: 600; letter-spacing: 0.01em; }}
+        .header-subtitle {{ margin: 6px 0 0 0; font-size: 13px; opacity: 0.9; }}
+        .content {{ padding: 22px 24px 8px 24px; background: #ffffff; font-size: 14px; color: #263238; line-height: 1.7; }}
+        .pill {{ display: inline-block; padding: 4px 10px; border-radius: 999px; background: #e3f2fd; color: #0d47a1; font-size: 11px; font-weight: 600; margin-top: 8px; }}
+        .footer {{ padding: 14px 24px 18px 24px; background: #f7f9fc; border-top: 1px solid #e3f2fd; text-align: center; }}
+        .footer-text {{ font-size: 11px; color: #90a4ae; margin: 4px 0; }}
+        .brand {{ font-weight: 600; color: #0d47a1; }}
+        a {{ color: #1565c0; text-decoration: none; }}
+        @media (max-width: 480px) {{
+            .container {{ margin: 8px; }}
+            .header, .content, .footer {{ padding-left: 16px; padding-right: 16px; }}
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2 class="header-title">✅ Support Request Received</h2>
+            <p class="header-subtitle">
+                Thank you for contacting the Sahatak technical support team.
+            </p>
+            <div class="pill">
+                Request subject: {safe_subject}
+            </div>
+        </div>
+
+        <div class="content">
+            <p>{safe_name},</p>
+            <p>
+                We have received your technical support request and it has been delivered to our team.
+                One of our support members will review your message and get back to you as soon as possible,
+                typically within <strong>24 hours</strong>.
+            </p>
+            <p>
+                Please keep an eye on your email inbox (and the spam/junk folder just in case) for our reply.
+            </p>
+            <p>
+                If your issue becomes urgent or you need to share more details, you can reply directly to this email
+                or contact us at: <a href="mailto:{support_email}">{support_email}</a>.
+            </p>
+            <p>
+                Thank you for using <span class="brand">Sahatak</span>.
+            </p>
+        </div>
+
+        <div class="footer">
+            <p class="footer-text">This is an automated confirmation from the <span class="brand">Sahatak Support System</span>.</p>
+            <p class="footer-text">© 2025 Sahatak – Telemedicine Platform</p>
+        </div>
+    </div>
+</body>
+</html>
+    """
 
 
 
@@ -83,7 +156,7 @@ def report_problem():
         if not email or not validate_email(email):
             return APIResponse.validation_error(field='email', message='A valid email is required')
         
-        # Get official support email
+        # Get official support email (admin inbox)
         support_email = current_app.config.get('SUPPORT_EMAIL', 'sahatak.sudan@gmail.com')
 
         # Build email subject for technical support
@@ -185,10 +258,21 @@ def report_problem():
                 message='Report received but email notification failed. Support team will review it.',
                 status_code=500
             )
-        
+
+        # Optional: send automatic confirmation email back to the patient.
+        # This should never block or fail the main support flow.
+        try:
+            auto_reply_html = build_patient_auto_reply_html(name=name, subject_label=subject_label, support_email=support_email)
+            if send_html_email(email, '✅ We received your support request – Sahatak', auto_reply_html):
+                app_logger.info(f'📨 Auto-reply email sent to patient {email} for support request')
+            else:
+                app_logger.warning(f'Auto-reply email service not configured or failed for patient {email}')
+        except Exception as auto_err:
+            app_logger.error(f'❌ Failed to send auto-reply email to patient {email}: {str(auto_err)}')
+
         return APIResponse.success(
             data={'message': 'Thank you for reporting this issue'},
-            message='Your bug report has been sent successfully to our support team'
+            message='Your support request has been sent successfully to our team'
         )
         
     except Exception as e:
