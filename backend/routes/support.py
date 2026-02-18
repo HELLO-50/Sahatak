@@ -58,10 +58,19 @@ def report_problem():
     try:
         data = request.get_json() or {}
         
-        # Get form data
-        subject = sanitize_input(data.get('subject', ''), 200).strip()
+        # Get form data (support both old and new field names)
+        raw_subject = data.get('subject', '') or ''
+        subject = sanitize_input(raw_subject, 200).strip()
+
         description = sanitize_input(data.get('description', ''), 5000).strip()
-        name = sanitize_input(data.get('name', ''), 200).strip()
+
+        # New public technical support page sends full_name + phone
+        full_name = sanitize_input(data.get('full_name', ''), 200).strip()
+        fallback_name = sanitize_input(data.get('name', ''), 200).strip()
+        name = full_name or fallback_name
+
+        phone = sanitize_input(data.get('phone', ''), 50).strip()
+
         email = (data.get('email') or '').strip()
         
         # Validation
@@ -75,51 +84,85 @@ def report_problem():
             return APIResponse.validation_error(field='email', message='A valid email is required')
         
         # Get official support email
-        support_email = current_app.config.get('SUPPORT_EMAIL', 'Sahatak.Sudan@gmail.com')
-        
-        # Build email body with user details
-        email_subject = f'🐛 Bug Report: {subject}'
+        support_email = current_app.config.get('SUPPORT_EMAIL', 'sahatak.sudan@gmail.com')
+
+        # Build email subject for technical support
+        email_subject = f'🩺 Technical Support Request: {subject}'
+
+        # Determine a human-friendly label for the subject/category
+        subject_label = subject or 'Technical Support'
+
+        # Build email body with user details in a medical-themed HTML layout
         email_body = f"""
 <html>
 <head>
     <style>
-        body {{ font-family: Arial, sans-serif; background-color: #f5f5f5; }}
-        .container {{ max-width: 600px; margin: 20px auto; background: white; padding: 20px; border-radius: 8px; }}
-        .header {{ background: linear-gradient(135deg, #0d47a1 0%, #1565c0 100%); color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }}
-        .header h2 {{ margin: 0; font-size: 24px; }}
-        .section {{ margin-bottom: 20px; }}
-        .label {{ font-weight: bold; color: #0d47a1; font-size: 14px; }}
-        .value {{ color: #333; margin: 5px 0 15px 0; padding: 10px; background: #f9f9f9; border-left: 3px solid #0d47a1; }}
-        .footer {{ text-align: center; color: #999; font-size: 12px; border-top: 1px solid #eee; padding-top: 15px; margin-top: 20px; }}
+        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background-color: #f4f7fb; margin: 0; padding: 0; }}
+        .container {{ max-width: 640px; margin: 24px auto; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e3f2fd; }}
+        .header {{ background: linear-gradient(135deg, #0d47a1 0%, #1976d2 40%, #42a5f5 100%); color: #ffffff; padding: 20px 24px; }}
+        .header-title {{ margin: 0; font-size: 22px; font-weight: 600; letter-spacing: 0.01em; }}
+        .header-subtitle {{ margin: 6px 0 0 0; font-size: 13px; opacity: 0.9; }}
+        .badge {{ display: inline-block; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,0.12); font-size: 11px; margin-top: 10px; }}
+        .content {{ padding: 22px 24px 8px 24px; background: #ffffff; }}
+        .section-title {{ font-size: 14px; font-weight: 600; color: #0d47a1; margin: 0 0 8px 0; }}
+        .info-table {{ width: 100%; border-collapse: collapse; margin-bottom: 18px; font-size: 13px; }}
+        .info-table th {{ text-align: left; padding: 6px 0; color: #607d8b; font-weight: 500; width: 32%; vertical-align: top; }}
+        .info-table td {{ padding: 6px 0; color: #263238; }}
+        .pill {{ display: inline-block; padding: 4px 10px; border-radius: 999px; background: #e3f2fd; color: #0d47a1; font-size: 11px; font-weight: 600; }}
+        .message-box {{ margin-top: 6px; padding: 12px 14px; background: #f5f9ff; border-radius: 10px; border: 1px solid #e3f2fd; color: #263238; font-size: 13px; line-height: 1.6; white-space: pre-wrap; }}
+        .footer {{ padding: 14px 24px 18px 24px; background: #f7f9fc; border-top: 1px solid #e3f2fd; text-align: center; }}
+        .footer-text {{ font-size: 11px; color: #90a4ae; margin: 4px 0; }}
+        .brand {{ font-weight: 600; color: #0d47a1; }}
+        a {{ color: #1565c0; text-decoration: none; }}
+        @media (max-width: 480px) {{
+            .container {{ margin: 8px; }}
+            .header, .content, .footer {{ padding-left: 16px; padding-right: 16px; }}
+        }}
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h2>🐛 New Bug Report Received</h2>
-        </div>
-        
-        <div class="section">
-            <p class="label">Subject:</p>
-            <p class="value">{subject}</p>
-        </div>
-        
-        <div class="section">
-            <p class="label">Reported by:</p>
-            <p class="value">
-                Name: {name}<br>
-                Email: {email}
+            <h2 class="header-title">🩺 New Technical Support Request</h2>
+            <p class="header-subtitle">
+                A patient has submitted a new support request from the Sahatak technical support page.
             </p>
+            <div class="badge">
+                Subject: {subject_label}
+            </div>
         </div>
         
-        <div class="section">
-            <p class="label">Description:</p>
-            <p class="value" style="white-space: pre-wrap; line-height: 1.6;">{description}</p>
+        <div class="content">
+            <p class="section-title">Patient details</p>
+            <table class="info-table" role="presentation">
+                <tr>
+                    <th>Full name</th>
+                    <td>{name}</td>
+                </tr>
+                <tr>
+                    <th>Email</th>
+                    <td><a href="mailto:{email}">{email}</a></td>
+                </tr>
+                <tr>
+                    <th>Phone number</th>
+                    <td>{phone or 'Not provided'}</td>
+                </tr>
+                <tr>
+                    <th>Request type</th>
+                    <td><span class="pill">{subject_label}</span></td>
+                </tr>
+            </table>
+
+            <p class="section-title">Issue description</p>
+            <div class="message-box">
+{description}
+            </div>
         </div>
         
         <div class="footer">
-            <p>This is an automated message from Sahatak Support System</p>
-            <p>© 2025 Sahatak - Telemedicine Platform</p>
+            <p class="footer-text">This is an automated message from the <span class="brand">Sahatak</span> technical support system.</p>
+            <p class="footer-text">Please reply directly to the patient if you need more information.</p>
+            <p class="footer-text">© 2025 Sahatak – Telemedicine Platform</p>
         </div>
     </div>
 </body>

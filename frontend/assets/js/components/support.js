@@ -68,6 +68,13 @@ class SupportPage {
         const reportAlert = document.getElementById('report-alert');
         const form = e.target;
         const submitBtn = form.querySelector('button[type="submit"]');
+
+        // Basic honeypot spam protection: if hidden "website" field is filled, abort silently
+        const honeypot = document.getElementById('website');
+        if (honeypot && honeypot.value.trim() !== '') {
+            console.warn('Spam submission detected via honeypot, aborting.');
+            return;
+        }
         
         console.log('🐛 Report form submission started');
         
@@ -79,10 +86,11 @@ class SupportPage {
         
         // Get form data
         const formData = {
-            subject: document.getElementById('problem-subject').value.trim(),
-            description: document.getElementById('problem-description').value.trim(),
-            name: this.getUserName(),
-            email: this.getUserEmail()
+            full_name: document.getElementById('patient-name')?.value.trim() || '',
+            email: document.getElementById('problem-email')?.value.trim() || '',
+            phone: document.getElementById('patient-phone')?.value.trim() || '',
+            subject: document.getElementById('problem-subject')?.value.trim() || '',
+            description: document.getElementById('problem-description')?.value.trim() || ''
         };
 
         console.log('📤 Sending report data:', formData);
@@ -90,8 +98,8 @@ class SupportPage {
         // Validate form data
         if (!this.validateReportForm(formData)) {
             console.warn('⚠️ Form validation failed');
-            this.showAlert(reportAlert, 'warning', 'Please fill all required fields');
-            this.enableSubmitButton(submitBtn, '<i class="bi bi-send-fill me-1"></i>Send Report');
+            this.showAlert(reportAlert, 'warning', 'Please fill all required fields with valid information.');
+            this.enableSubmitButton(submitBtn, '<i class="bi bi-send-fill me-1"></i>Send Support Request');
             return;
         }
 
@@ -124,7 +132,11 @@ class SupportPage {
             
             if (response.success) {
                 console.log('✅ Report sent successfully');
-                this.showAlert(reportAlert, 'success', '✅ Your bug report has been sent to Sahatak.Sudan@gmail.com. Thank you!');
+                this.showAlert(
+                    reportAlert,
+                    'success',
+                    'Your support request has been sent successfully. Our team will contact you soon.'
+                );
                 form.reset();
                 
                 // Clear alert after 5 seconds
@@ -147,7 +159,7 @@ class SupportPage {
             this.showAlert(reportAlert, 'danger', `❌ ${errorMessage}`);
         } finally {
             console.log('✨ Report form submission completed');
-            this.enableSubmitButton(submitBtn, '<i class="bi bi-send-fill me-1"></i>Send Report');
+            this.enableSubmitButton(submitBtn, '<i class="bi bi-send-fill me-1"></i>Send Support Request');
         }
     }
 
@@ -240,8 +252,19 @@ class SupportPage {
     }
 
     validateReportForm(data) {
-        const isValid = data.subject && data.description && 
-                       data.subject.length > 0 && data.description.length > 0;
+        const hasRequired =
+            data.full_name &&
+            data.email &&
+            data.subject &&
+            data.description &&
+            data.full_name.length > 1 &&
+            data.subject.length > 0 &&
+            data.description.length >= 10;
+
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const isEmailValid = emailPattern.test(data.email);
+
+        const isValid = hasRequired && isEmailValid;
         
         if (!isValid) {
             console.warn('Report form validation failed:', data);

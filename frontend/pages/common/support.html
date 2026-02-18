@@ -27,214 +27,160 @@
     <link rel="stylesheet" href="../../assets/css/components/appointments.css">
     <!-- Additional custom styles for support  -->
     <style>
-    /* Unverified doctor states */
-        .unverified-disabled {
-            opacity: 0.5;
-            cursor: not-allowed !important;
-            pointer-events: none;
+        /* Page layout */
+        body {
+            background: #f4f8fb;
         }
-        
-        .verification-overlay {
-            position: relative;
-        }
-        
-        .verification-overlay::after {
-            content: "🔒 Verification Required";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.95);
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            color: #dc3545;
-            border: 1px solid #dc3545;
-            z-index: 10;
-            display: none;
-        }
-        
-        .unverified-disabled.verification-overlay::after {
-            display: block;
-        }
-        
-        .verification-notice {
-            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-            border: 1px solid #ffeaa7;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 20px;
-        }
-        
-        .verification-notice .notice-icon {
-            color: #856404;
-            font-size: 24px;
-        }
-        
-        /* Video consultation button styling */
-        .btn-complete-consultation {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 8px 16px;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-complete-consultation:hover {
-            background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
-            color: white;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
-        }
-        
-        .btn-consultation-ended {
-            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 8px 16px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: not-allowed;
-            opacity: 0.8;
-        }
-        
-        /* Animation for removing appointments */
-        @keyframes fadeOut {
-            0% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: scale(0.95);
-            }
-        }
-        
-        /* Pagination Styles */
-        .pagination-controls {
-            font-size: 14px;
-        }
-        
-        .pagination-controls .btn-sm {
-            padding: 0.375rem 0.75rem;
-            font-size: 0.875rem;
-            border-radius: 0.25rem;
-            transition: all 0.15s ease-in-out;
-        }
-        
-        .pagination-controls .btn-outline-secondary:hover:not(:disabled) {
-            background-color: #6c757d;
-            border-color: #6c757d;
-            color: white;
-        }
-        
-        .pagination-controls .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .pagination-controls .d-flex.gap-1 > .btn {
-            min-width: 32px;
-            height: 32px;
+
+        .support-hero-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #0d47a1 0%, #42a5f5 100%);
             display: flex;
             align-items: center;
             justify-content: center;
+            color: #fff;
+            box-shadow: 0 12px 30px rgba(13, 71, 161, 0.25);
         }
-        
-        .pagination-controls .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-        }
-        
-        .pagination-controls .btn-primary:hover {
-            background-color: #0056b3;
-            border-color: #004085;
-        }
-        
-        /* Page info styling */
-        #activity-page-info, #appointments-page-info {
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-        
-        /* Responsive pagination */
-        @media (max-width: 768px) {
-            .pagination-controls {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-            
-            .pagination-controls .d-flex:first-child,
-            .pagination-controls .d-flex:last-child {
-                justify-content: center;
-            }
-            
-            #activity-page-info, #appointments-page-info {
-                text-align: center;
-                margin-bottom: 0.5rem;
-            }
-        }
-        /* light blue background for the services area, cards stay visually on top */
-                    #services-section {
-                        background-color: #e6f7ff; /* light blue */
-                        padding: 1.5rem;
-                        border-radius: 0.6rem;
-                    }
 
-                    /* ensure cards render above the background (so background never covers them) */
-                    #services-section .card {
-                        position: relative;
-                        z-index: 1;
-                        background-color: #fff; /* reinforce white card background */
-                    }
+        .support-hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+            background: rgba(13, 71, 161, 0.06);
+            color: #0d47a1;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
 
-                    /* give some extra spacing so the background doesn't touch viewport edges */
-                    @media (min-width: 992px) {
-                        #services-section { padding-left: 2rem; padding-right: 2rem; }
-                    }
-                    /* Report a Problem Card -->
-                        
-                        /* make all cards in the support section have a light-blue background,
-                            and ensure form fields inside those cards are white */
-                            #support-section .card {
-                            background-color: #e6f7ff;
-                            border: 1px solid rgba(13,47,93,0.06);
-                            box-shadow: 0 1px 2px rgba(13,47,93,0.04);
-                        }
-                                
-                                    .container-fluid {
-                                    display: flex;
-                                    justify-content: center; 
-                                    align-items: center;     
-                                    min-height: 100vh;       
-                }
-                            #support-section .card .card-body {
-                            background: transparent;
-                            }
-                        /* form controls inside cards should be white for contrast */
-                        #support-section .card .form-control,
-                        #support-section .card .form-select,
-                        #support-section .card textarea,
-                        #support-section .card input[type="text"],
-                        #support-section .card input[type="tel"],
-                        #support-section .card input[type="file"] {
-                                background-color: #ffffff;
-                                border: 1px solid #dfe7ef;
-                                box-shadow: none;
-                        }
+        /* Main support section */
+        #support-section {
+            padding-top: 1.5rem;
+        }
 
-                        /* keep placeholder/text color readable */
-                        #support-section .card .form-control::placeholder,
-                        #support-section .card textarea::placeholder {
-                            color: #6c757d;
-                        }
-                        
-</style>
+        #support-section .card {
+            background: #ffffff;
+            border-radius: 1.25rem;
+            border: 1px solid rgba(13, 71, 161, 0.06);
+            box-shadow: 0 18px 45px rgba(13, 71, 161, 0.08);
+        }
+
+        #support-section .card .card-body {
+            background: linear-gradient(135deg, #f8fbff 0%, #ffffff 55%);
+        }
+
+        .support-input {
+            border-radius: 999px;
+            border: 1px solid #dbe4f0;
+            padding: 0.65rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .support-input:focus,
+        .support-textarea:focus,
+        .support-select:focus {
+            border-color: #0d47a1;
+            box-shadow: 0 0 0 0.15rem rgba(13, 71, 161, 0.15);
+        }
+
+        .support-textarea {
+            border-radius: 1rem;
+            border: 1px solid #dbe4f0;
+            min-height: 150px;
+            resize: vertical;
+            font-size: 0.9rem;
+        }
+
+        .support-select {
+            border-radius: 999px;
+            border: 1px solid #dbe4f0;
+            padding: 0.65rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-medical-primary {
+            border-radius: 999px;
+            padding: 0.65rem 1.5rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #0d47a1 0%, #1976d2 50%, #42a5f5 100%);
+            border: none;
+            color: #fff;
+            box-shadow: 0 14px 28px rgba(13, 71, 161, 0.28);
+            transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+        }
+
+        .btn-medical-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 18px 35px rgba(13, 71, 161, 0.35);
+            filter: brightness(1.02);
+            color: #fff;
+        }
+
+        .btn-medical-primary:disabled {
+            opacity: 0.75;
+            box-shadow: none;
+        }
+
+        .support-meta-badge {
+            font-size: 0.78rem;
+            border-radius: 999px;
+            padding: 0.25rem 0.6rem;
+            background: #e3f2fd;
+            color: #0d47a1;
+        }
+
+        .support-help-card {
+            border-radius: 1.25rem;
+            background: radial-gradient(circle at top left, #e3f2fd 0, #f8fbff 55%, #ffffff 100%);
+            border: 1px solid rgba(13, 71, 161, 0.06);
+            box-shadow: 0 18px 42px rgba(13, 71, 161, 0.06);
+        }
+
+        .support-help-pill {
+            border-radius: 999px;
+            border: 1px dashed rgba(13, 71, 161, 0.2);
+            padding: 0.4rem 0.8rem;
+            font-size: 0.78rem;
+            color: #0d47a1;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .support-illustration {
+            max-width: 100%;
+        }
+
+        .support-illustration svg {
+            width: 100%;
+            height: auto;
+        }
+
+        .support-note {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        .support-required {
+            color: #d32f2f;
+        }
+
+        .support-phone-note {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        .container-fluid {
+            min-height: 100vh;
+        }
+
+        @media (max-width: 991.98px) {
+            .support-help-card {
+                margin-bottom: 1.5rem;
+            }
+        }
+    </style>
 <body data-protect="patient">
     <div class="dashboard-container">
         <div class="container-fluid" style="padding-bottom: 120px;">
@@ -249,8 +195,17 @@
                     
                    <!-- Page Title - Center -->
             <div class="col-lg-4 text-center">
-            <h1 class="dashboard-title" data-i18n="support_page.title">Support Sahatak</h1>
-            <p class="dashboard-subtitle" data-i18n="support_page.subtitle">Technical Support</p>
+                <div class="support-hero-icon mx-auto mb-3">
+                    <i class="bi bi-life-preserver fs-3"></i>
+                </div>
+                <div class="support-hero-badge mb-2">
+                    <i class="bi bi-shield-check"></i>
+                    <span data-i18n="support_page.badge">Secure Telemedicine Support</span>
+                </div>
+                <h1 class="dashboard-title mb-1" data-i18n="support_page.title">Technical Support – Contact Us</h1>
+                <p class="dashboard-subtitle mb-0" data-i18n="support_page.subtitle">
+                    We are here to help you with any technical or account issues on Sahatak.
+                </p>
             </div>
 
             <!-- Controls - Right (Left in RTL) -->
@@ -261,88 +216,225 @@
 
             <!-- Support & Supervisor Messaging -->
             <section id="support-section" class="mt-4">
-            <div class="row gy-4">
+                <div class="row gy-4 align-items-stretch">
+                    <!-- Help / Illustration column -->
+                    <div class="col-lg-5 col-md-12">
+                        <div class="support-help-card h-100 d-flex flex-column justify-content-between p-4">
+                            <div>
+                                <h5 class="mb-3 d-flex align-items-center gap-2">
+                                    <i class="bi bi-headset text-primary fs-4"></i>
+                                    <span data-i18n="support_page.help_title">Need help with Sahatak?</span>
+                                </h5>
+                                <p class="text-muted mb-3" data-i18n="support_page.help_text">
+                                    Our technical support team is available to assist you with login issues,
+                                    appointments, video consultations, and account problems.
+                                </p>
 
-                <!-- Contact Supervisors -->
-                <div class="col-lg-10 col-md-12 mx-auto">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                    <h5 class="card-title" data-i18n="report_problem.title">
-                        <i class="bi bi-bug-fill me-2"></i>Report a Problem
-                    </h5>
+                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                    <span class="support-help-pill">
+                                        <i class="bi bi-laptop me-1 text-primary"></i>
+                                        <span data-i18n="support_page.pill_technical">Technical Issues</span>
+                                    </span>
+                                    <span class="support-help-pill">
+                                        <i class="bi bi-calendar-check me-1 text-success"></i>
+                                        <span data-i18n="support_page.pill_appointments">Appointment Problems</span>
+                                    </span>
+                                    <span class="support-help-pill">
+                                        <i class="bi bi-person-badge me-1 text-info"></i>
+                                        <span data-i18n="support_page.pill_account">Account & Access</span>
+                                    </span>
+                                </div>
 
-                    <p class="text-muted small" data-i18n="report_problem.description">
-                        Tell us about any issues you face while using the app. Our support team will review and respond.
-                    </p>
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge rounded-pill bg-light text-primary border border-primary-subtle">
+                                        <i class="bi bi-clock-history me-1"></i>
+                                        <span data-i18n="support_page.response_time">Average response within 24 hours</span>
+                                    </span>
+                                </div>
 
-                    <div id="report-alert" class="alert d-none" role="alert"></div>
+                                <p class="support-note mb-1" data-i18n="support_page.security_note">
+                                    Your information is encrypted and handled securely according to our data protection standards.
+                                </p>
+                                <p class="support-note mb-0 text-danger" data-i18n="support_page.emergency_note">
+                                    This form is for technical support only. For medical emergencies, please go to the nearest emergency room.
+                                </p>
+                            </div>
 
-                    <form id="report-form" novalidate>
-                        <div class="mb-3">
-                        <label class="form-label" data-i18n="report_problem.subject">Subject</label>
-                        <input
-                            type="text"
-                            id="problem-subject"
-                            name="subject"
-                            class="form-control"
-                            required
-                            maxlength="120"
-                            data-i18n-placeholder="report_problem.subject_placeholder"
-                            placeholder="Short summary of the issue"
-                        >
+                            <div class="support-illustration mt-4">
+                                <!-- Simple medical-themed SVG illustration -->
+                                <svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Online medical support illustration">
+                                    <defs>
+                                        <linearGradient id="supportGrad" x1="0" x2="1" y1="0" y2="1">
+                                            <stop offset="0" stop-color="#e3f2fd" />
+                                            <stop offset="1" stop-color="#bbdefb" />
+                                        </linearGradient>
+                                    </defs>
+                                    <rect x="8" y="16" width="190" height="130" rx="18" fill="url(#supportGrad)" />
+                                    <rect x="24" y="34" width="158" height="18" rx="9" fill="#ffffff" opacity="0.9" />
+                                    <rect x="24" y="60" width="138" height="12" rx="6" fill="#ffffff" opacity="0.85" />
+                                    <rect x="24" y="80" width="124" height="12" rx="6" fill="#ffffff" opacity="0.85" />
+                                    <circle cx="60" cy="120" r="18" fill="#ffffff" />
+                                    <path d="M60 107c6 0 11 5 11 11v5c0 1.5-1.2 2.8-2.8 2.8H51.8C50.2 125.8 49 124.5 49 123v-5c0-6 5-11 11-11z" fill="#90caf9" />
+                                    <rect x="55" y="114" width="10" height="3" rx="1.5" fill="#ffffff" />
+                                    <rect x="58" y="111" width="4" height="10" rx="2" fill="#ffffff" />
+                                    <circle cx="142" cy="50" r="5" fill="#42a5f5" />
+                                    <circle cx="130" cy="50" r="5" fill="#90caf9" />
+                                    <circle cx="118" cy="50" r="5" fill="#bbdefb" />
+                                    <rect x="220" y="40" width="88" height="100" rx="18" fill="#ffffff" stroke="#e3f2fd" />
+                                    <circle cx="264" cy="66" r="18" fill="#e3f2fd" />
+                                    <path d="M264 53c6 0 11 5 11 11v4c0 1.3-1 2.3-2.3 2.3h-17.4c-1.3 0-2.3-1-2.3-2.3v-4c0-6 5-11 11-11z" fill="#90caf9" />
+                                    <rect x="259" y="60" width="10" height="3" rx="1.5" fill="#ffffff" />
+                                    <rect x="262" y="57" width="4" height="10" rx="2" fill="#ffffff" />
+                                    <rect x="236" y="96" width="56" height="10" rx="5" fill="#e3f2fd" />
+                                    <rect x="244" y="112" width="40" height="10" rx="5" fill="#bbdefb" />
+                                    <circle cx="46" cy="40" r="6" fill="#42a5f5" opacity="0.7" />
+                                    <circle cx="32" cy="128" r="4" fill="#90caf9" opacity="0.7" />
+                                    <circle cx="182" cy="124" r="5" fill="#42a5f5" opacity="0.7" />
+                                </svg>
+                            </div>
                         </div>
+                    </div>
 
-                        <div class="mb-3">
-                        <label class="form-label" data-i18n="report_problem.email">Email</label>
-                        <input
-                            type="text"
-                            id="problem-email"
-                            name="email"
-                            class="form-control"
-                            required
-                            maxlength="120"
-                            data-i18n-placeholder="report_problem.email_placeholder"
-                            placeholder="Your email address for follow-up"
-                        >
-                        </div>
+                    <!-- Technical support form column -->
+                    <div class="col-lg-7 col-md-12">
+                        <div class="card h-100">
+                            <div class="card-body p-4 p-lg-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div>
+                                        <h5 class="card-title mb-1" data-i18n="support_page.form_title">
+                                            <i class="bi bi-chat-dots-fill text-primary me-2"></i>
+                                            Send a technical support request
+                                        </h5>
+                                        <p class="text-muted small mb-0" data-i18n="support_page.form_subtitle">
+                                            Please provide accurate details so we can assist you as quickly as possible.
+                                        </p>
+                                    </div>
+                                    <span class="support-meta-badge">
+                                        <i class="bi bi-lock-fill me-1"></i>
+                                        <span data-i18n="support_page.meta_secure">Secure & confidential</span>
+                                    </span>
+                                </div>
 
-                        <div class="mb-3">
-                        <label class="form-label" data-i18n="report_problem.description_label">Description</label>
-                        <textarea
-                            id="problem-description"
-                            name="description"
-                            class="form-control"
-                            rows="6"
-                            required
-                            data-i18n-placeholder="report_problem.description_placeholder"
-                            placeholder="Describe the steps to reproduce the issue, expected vs actual behavior, and any error messages."
-                        ></textarea>
-                        </div>
+                                <div id="report-alert" class="alert d-none" role="alert" aria-live="polite"></div>
 
-                        <div class="mb-3">
-                        <label class="form-label" data-i18n="report_problem.attachment">Attachment (optional)</label>
-                        <input
-                            id="problem-screenshot"
-                            name="attachment"
-                            type="file"
-                            class="form-control"
-                            accept="image/*,.log,.txt,.pdf"
-                        >
-                        <div class="form-text" data-i18n="report_problem.attach_hint">
-                            Attach screenshots, logs, or a short recording (max 10MB).
-                        </div>
-                        </div>
+                                <form id="report-form" novalidate>
+                                    <!-- Honeypot field for basic spam protection -->
+                                    <div class="d-none">
+                                        <label for="website">Website</label>
+                                        <input type="text" id="website" name="website" autocomplete="off">
+                                    </div>
 
-                        <div class="d-flex justify-content-end">
-                        <button type="submit" class="btn btn-medical" data-i18n="report_problem.send_button">
-                            <i class="bi bi-send-fill me-1"></i>Send Report
-                        </button>
+                                    <div class="row g-3 mb-2">
+                                        <div class="col-md-6">
+                                            <label class="form-label mb-1" for="patient-name">
+                                                <span data-i18n="support_page.full_name">Patient Full Name</span>
+                                                <span class="support-required">*</span>
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="patient-name"
+                                                name="full_name"
+                                                class="form-control support-input"
+                                                autocomplete="name"
+                                                required
+                                                maxlength="160"
+                                                placeholder="Enter your full name"
+                                            >
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label mb-1" for="problem-email">
+                                                <span data-i18n="support_page.email">Email Address</span>
+                                                <span class="support-required">*</span>
+                                            </label>
+                                            <input
+                                                type="email"
+                                                id="problem-email"
+                                                name="email"
+                                                class="form-control support-input"
+                                                autocomplete="email"
+                                                required
+                                                maxlength="160"
+                                                placeholder="you@example.com"
+                                            >
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3 mb-2">
+                                        <div class="col-md-6">
+                                            <label class="form-label mb-1" for="patient-phone">
+                                                <span data-i18n="support_page.phone">Phone Number (optional)</span>
+                                            </label>
+                                            <input
+                                                type="tel"
+                                                id="patient-phone"
+                                                name="phone"
+                                                class="form-control support-input"
+                                                autocomplete="tel"
+                                                maxlength="30"
+                                                placeholder="+249 xx xxx xxxx"
+                                            >
+                                            <div class="support-phone-note mt-1" data-i18n="support_page.phone_note">
+                                                We may call or WhatsApp you if we need more details.
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label mb-1" for="problem-subject">
+                                                <span data-i18n="support_page.issue_type">Subject</span>
+                                                <span class="support-required">*</span>
+                                            </label>
+                                            <select
+                                                id="problem-subject"
+                                                name="subject"
+                                                class="form-select support-select"
+                                                required
+                                            >
+                                                <option value="" selected disabled data-i18n="support_page.subject_placeholder">
+                                                    Select the type of issue
+                                                </option>
+                                                <option value="Technical Issue" data-i18n="support_page.subject_technical">Technical Issue</option>
+                                                <option value="Appointment Problem" data-i18n="support_page.subject_appointment">Appointment Problem</option>
+                                                <option value="Account Issue" data-i18n="support_page.subject_account">Account Issue</option>
+                                                <option value="Other" data-i18n="support_page.subject_other">Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label mb-1" for="problem-description">
+                                            <span data-i18n="support_page.message_label">Message / Description of the problem</span>
+                                            <span class="support-required">*</span>
+                                        </label>
+                                        <textarea
+                                            id="problem-description"
+                                            name="description"
+                                            class="form-control support-textarea"
+                                            rows="5"
+                                            required
+                                            minlength="10"
+                                            maxlength="4000"
+                                            placeholder="Describe what happened, any error messages, and steps you took before the issue occurred."
+                                        ></textarea>
+                                    </div>
+
+                                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                                        <div class="support-note">
+                                            <span class="support-required">*</span>
+                                            <span data-i18n="support_page.required_note">Required fields</span>
+                                            <br>
+                                            <span data-i18n="support_page.privacy_note">
+                                                By sending this form you agree that Sahatak can use this information to contact you about your request.
+                                            </span>
+                                        </div>
+                                        <button type="submit" class="btn btn-medical-primary" data-i18n="support_page.send_button">
+                                            <i class="bi bi-send-fill me-1"></i>
+                                            Send Support Request
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
-                    </form>
                     </div>
                 </div>
-                </div>
-            </div>
             </section>  
 
 
@@ -422,7 +514,8 @@
     </footer>                
                     <!-- Script includes - add main.js here -->
         <script src="../../assets/js/main.js"></script>
-<script src="../../assets/js/components/dashboard-translations.js"></script>
+        <script src="../../assets/js/components/dashboard-translations.js"></script>
+        <script src="../../assets/js/components/support.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
