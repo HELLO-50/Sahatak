@@ -9,7 +9,9 @@ from utils.logging_config import app_logger
 from services.email_service import email_service
 from flask_mail import Message
 
-support_bp = Blueprint('support', __name__, url_prefix='/support')
+# Blueprint is registered in app.py with url_prefix='/api/support'
+# so we keep this blueprint without its own url_prefix to avoid double-prefixing.
+support_bp = Blueprint('support', __name__)
 
 
 def send_html_email(recipient_email: str, subject: str, html_body: str) -> bool:
