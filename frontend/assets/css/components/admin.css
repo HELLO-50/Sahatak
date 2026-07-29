@@ -330,6 +330,7 @@ Colors:
     position: relative;
     white-space: nowrap;
     z-index: 1;
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
 }
 
@@ -478,6 +479,7 @@ Colors:
 /* Premium Admin Header - Enhanced Elegant Design */
 .dashboard-header {
     background: rgba(255, 255, 255, 0.98);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(226, 232, 240, 0.8);
     border-radius: var(--admin-radius-2xl);
@@ -500,12 +502,12 @@ Colors:
     background: linear-gradient(90deg, var(--admin-primary), var(--admin-secondary), var(--admin-primary));
     background-size: 200% 100%;
     animation: shimmer 3s ease-in-out infinite;
+    border-radius: var(--admin-radius-2xl) var(--admin-radius-2xl) 0 0;
 }
 
 @keyframes shimmer {
     0%, 100% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
-    border-radius: var(--admin-radius-2xl) var(--admin-radius-2xl) 0 0;
 }
 
 /* Subtle glow on hover */
@@ -612,6 +614,7 @@ Colors:
 /* Horizontal Admin Navigation - Dark Theme */
 .admin-navigation {
     background: var(--admin-card-bg) !important;
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     border-radius: 15px;
     padding: 1.5rem;
@@ -919,6 +922,7 @@ Colors:
 /* Enhanced Stat Cards - Elegant Modern Design */
 .admin-stat-card {
     background: rgba(255, 255, 255, 0.98);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(226, 232, 240, 0.8);
     border-radius: var(--admin-radius-xl);
@@ -1060,6 +1064,7 @@ Colors:
 /* Admin Dashboard Header */
 .dashboard-header {
     background: var(--admin-card-bg);
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(37, 99, 235, 0.2);
     box-shadow: var(--admin-shadow);
@@ -1077,6 +1082,7 @@ Colors:
 /* Admin Sidebar */
 .dashboard-sidebar {
     background: var(--admin-card-bg);
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(220, 38, 38, 0.2);
     box-shadow: var(--admin-shadow);
@@ -1087,6 +1093,7 @@ Colors:
 /* Admin Cards */
 .dashboard-card {
     background: var(--admin-card-bg);
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(37, 99, 235, 0.2);
     box-shadow: var(--admin-shadow);
@@ -2868,6 +2875,7 @@ button {
     box-shadow: 
         var(--admin-shadow-md),
         inset 0 2px 10px rgba(0,0,0,0.2);
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
 }
 
