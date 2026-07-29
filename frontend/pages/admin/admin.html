@@ -291,12 +291,13 @@
 
                                     <!-- Search -->
                                     <div class="ms-3" style="min-width:280px;">
-                                        <input id="user-search" type="search" class="form-control" data-placeholder="search-placeholder">
+                                        <label for="user-search" class="visually-hidden" id="search-label">Search users</label>
+                                        <input id="user-search" type="search" class="form-control" placeholder="Search users" title="Search users" data-placeholder="search-placeholder">
                                     </div>
 
                                     <!-- Per-page -->
                                     <div class="ms-auto">
-                                        <select id="users-per-page" class="form-select form-select-sm">
+                                        <select id="users-per-page" class="form-select form-select-sm" aria-label="Users per page" title="Users per page">
                                             <option value="10" id="per-page-10">10 per page</option>
                                             <option value="20" selected id="per-page-20">20 per page</option>
                                             <option value="50" id="per-page-50">50 per page</option>
@@ -510,12 +511,12 @@
                                                     <div class="card-body">
                                                         <div class="row g-3">
                                                             <div class="col-md-6">
-                                                                <label class="form-label" id="password-min-length-label">Minimum Password Length</label>
-                                                                <input type="number" id="password_min_length" class="form-control" data-setting="password_min_length" min="6" max="50">
+                                                                <label class="form-label" for="password_min_length" id="password-min-length-label">Minimum Password Length</label>
+                                                                <input type="number" id="password_min_length" class="form-control" data-setting="password_min_length" min="6" max="50" placeholder="Enter minimum password length" title="Minimum Password Length">
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <label class="form-label" id="password-max-length-label">Maximum Password Length</label>
-                                                                <input type="number" id="password_max_length" class="form-control" data-setting="password_max_length" min="20" max="256">
+                                                                <input type="number" id="password_max_length" class="form-control" data-setting="password_max_length" min="20" max="256" placeholder="Enter maximum password length" title="Maximum Password Length" aria-labelledby="password-max-length-label">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -532,19 +533,19 @@
                                                         <div class="row g-3">
                                                             <div class="col-md-4">
                                                                 <label class="form-label" id="phone-min-length-label">Min Phone Length</label>
-                                                                <input type="number" id="phone_min_length" class="form-control" data-setting="phone_min_length" min="8" max="15">
+                                                                <input type="number" id="phone_min_length" class="form-control" data-setting="phone_min_length" min="8" max="15" placeholder="Enter minimum phone length" title="Minimum Phone Length" aria-labelledby="phone-min-length-label">
                                                             </div>
                                                             <div class="col-md-4">
                                                                 <label class="form-label" id="phone-max-length-label">Max Phone Length</label>
-                                                                <input type="number" id="phone_max_length" class="form-control" data-setting="phone_max_length" min="10" max="20">
+                                                                <input type="number" id="phone_max_length" class="form-control" data-setting="phone_max_length" min="10" max="20" placeholder="Enter maximum phone length" title="Maximum Phone Length" aria-labelledby="phone-max-length-label">
                                                             </div>
                                                             <div class="col-md-4">
                                                                 <label class="form-label" id="name-min-length-label">Min Name Length</label>
-                                                                <input type="number" id="name_min_length" class="form-control" data-setting="name_min_length" min="1" max="10">
+                                                                <input type="number" id="name_min_length" class="form-control" data-setting="name_min_length" min="1" max="10" placeholder="Enter minimum name length" title="Minimum Name Length" aria-labelledby="name-min-length-label">
                                                             </div>
                                                             <div class="col-md-4">
                                                                 <label class="form-label" id="name-max-length-label">Max Name Length</label>
-                                                                <input type="number" id="name_max_length" class="form-control" data-setting="name_max_length" min="50" max="200">
+                                                                <input type="number" id="name_max_length" class="form-control" data-setting="name_max_length" min="50" max="200" placeholder="Enter maximum name length" title="Maximum Name Length" aria-labelledby="name-max-length-label">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -560,20 +561,20 @@
                                                     <div class="card-body">
                                                         <div class="row g-3">
                                                             <div class="col-md-4">
-                                                                <label class="form-label" id="max-login-attempts-label">Max Login Attempts</label>
-                                                                <input type="number" id="max_login_attempts" class="form-control" data-setting="max_login_attempts" min="3" max="10">
+                                                                <label for="max_login_attempts" class="form-label" id="max-login-attempts-label">Max Login Attempts</label>
+                                                                <input type="number" id="max_login_attempts" class="form-control" data-setting="max_login_attempts" min="3" max="10" title="Maximum Login Attempts" placeholder="Enter maximum login attempts" aria-labelledby="max-login-attempts-label">
                                                             </div>
                                                             <div class="col-md-4">
                                                                 <label class="form-label" id="lockout-duration-label">Lockout Duration (minutes)</label>
-                                                                <input type="number" id="lockout_duration_minutes" class="form-control" data-setting="lockout_duration_minutes" min="5" max="120">
+                                                                <input type="number" id="lockout_duration_minutes" class="form-control" data-setting="lockout_duration_minutes" min="5" max="120" title="Lockout Duration (minutes)" placeholder="Enter lockout duration in minutes" aria-labelledby="lockout-duration-label">
                                                             </div>
                                                             <div class="col-md-4">
                                                                 <label class="form-label" id="session-timeout-label">Session Timeout (minutes)</label>
-                                                                <input type="number" id="session_timeout_minutes" class="form-control" data-setting="session_timeout_minutes" min="5" max="480">
+                                                                <input type="number" id="session_timeout_minutes" class="form-control" data-setting="session_timeout_minutes" min="5" max="480" title="Session Timeout (minutes)" placeholder="Enter session timeout in minutes" aria-labelledby="session-timeout-label">
                                                             </div>
                                                             <div class="col-md-4">
                                                                 <label class="form-label" id="auto-logout-warning-label">Auto Logout Warning (minutes)</label>
-                                                                <input type="number" id="auto_logout_warning_minutes" class="form-control" data-setting="auto_logout_warning_minutes" min="1" max="10">
+                                                                <input type="number" id="auto_logout_warning_minutes" class="form-control" data-setting="auto_logout_warning_minutes" min="1" max="10" title="Auto Logout Warning (minutes)" placeholder="Enter auto logout warning in minutes" aria-labelledby="auto-logout-warning-label">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -595,11 +596,11 @@
                                                         <div class="row g-3">
                                                             <div class="col-md-6">
                                                                 <label class="form-label" id="consultation-duration-label">Default Consultation Duration (minutes)</label>
-                                                                <input type="number" id="consultation_duration_minutes" class="form-control" data-setting="consultation_duration_minutes" min="15" max="120">
+                                                                <input type="number" id="consultation_duration_minutes" class="form-control" data-setting="consultation_duration_minutes" min="15" max="120" title="Default Consultation Duration (minutes)" placeholder="Enter consultation duration in minutes" aria-labelledby="consultation-duration-label">
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <label class="form-label" id="max-appointment-days-label">Max Appointment Days Ahead</label>
-                                                                <input type="number" id="max_appointment_days_ahead" class="form-control" data-setting="max_appointment_days_ahead" min="7" max="365">
+                                                                <input type="number" id="max_appointment_days_ahead" class="form-control" data-setting="max_appointment_days_ahead" min="7" max="365" title="Max Appointment Days Ahead" placeholder="Enter max appointment days ahead" aria-labelledby="max-appointment-days-label">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -616,7 +617,7 @@
                                                         <div class="row g-3">
                                                             <div class="col-md-6">
                                                                 <label class="form-label" id="platform-commission-label">Platform Commission (%)</label>
-                                                                <input type="number" id="platform_commission_percent" class="form-control" data-setting="platform_commission_percent" step="0.1" min="0" max="50">
+                                                                <input type="number" id="platform_commission_percent" class="form-control" data-setting="platform_commission_percent" step="0.1" min="0" max="50" title="Platform Commission (%)" placeholder="Enter platform commission percentage" aria-labelledby="platform-commission-label">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -638,19 +639,19 @@
                                                         <div class="row g-3">
                                                             <div class="col-md-6">
                                                                 <div class="form-check form-switch">
-                                                                    <input class="form-check-input" type="checkbox" id="email_notifications_enabled" data-setting="email_notifications_enabled">
+                                                                    <input class="form-check-input" type="checkbox" id="email_notifications_enabled" data-setting="email_notifications_enabled" title="Enable Email Notifications" placeholder="Email Notifications">
                                                                     <label class="form-check-label" id="email-notifications-enabled-label">Enable Email Notifications</label>
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-check form-switch">
-                                                                    <input class="form-check-input" type="checkbox" id="sms_notifications_enabled" data-setting="sms_notifications_enabled">
+                                                                    <input class="form-check-input" type="checkbox" id="sms_notifications_enabled" data-setting="sms_notifications_enabled" title="Enable SMS Notifications">
                                                                     <label class="form-check-label" id="sms-notifications-enabled-label">Enable SMS Notifications</label>
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-check form-switch">
-                                                                    <input class="form-check-input" type="checkbox" id="enable_sms_reminders" data-setting="enable_sms_reminders">
+                                                                    <input class="form-check-input" type="checkbox" id="enable_sms_reminders" data-setting="enable_sms_reminders" title="Enable SMS Reminders">
                                                                     <label class="form-check-label" id="sms-reminders-label">Enable SMS Reminders</label>
                                                                 </div>
                                                             </div>
@@ -669,11 +670,11 @@
                                                         <div class="row g-3">
                                                             <div class="col-md-6">
                                                                 <label class="form-label" id="max-notification-attempts-label">Max Notification Attempts</label>
-                                                                <input type="number" id="max_notification_attempts" class="form-control" data-setting="max_notification_attempts" min="1" max="10">
+                                                                <input type="number" id="max_notification_attempts" class="form-control" data-setting="max_notification_attempts" min="1" max="10" title="Max Notification Attempts" placeholder="Enter max attempts">
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <label class="form-label" id="notification-retry-delay-label">Retry Delay (seconds)</label>
-                                                                <input type="number" id="notification_retry_delay_seconds" class="form-control" data-setting="notification_retry_delay_seconds" min="30" max="3600">
+                                                                <input type="number" id="notification_retry_delay_seconds" class="form-control" data-setting="notification_retry_delay_seconds" min="30" max="3600" title="Retry Delay (seconds)" placeholder="Enter retry delay in seconds">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -706,8 +707,8 @@
                                                                 <input type="text" id="jitsi_room_prefix" class="form-control" data-setting="jitsi_room_prefix" placeholder="sahatak_consultation_">
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <label class="form-label" id="video-call-max-duration-label">Max Call Duration (minutes)</label>
-                                                                <input type="number" id="video_call_max_duration_minutes" class="form-control" data-setting="video_call_max_duration_minutes" min="15" max="180">
+                                                                <label class="form-label" id="video-call-max-duration-label" for="video_call_max_duration_minutes">Max Call Duration (minutes)</label>
+                                                                <input type="number" id="video_call_max_duration_minutes" class="form-control" data-setting="video_call_max_duration_minutes" min="15" max="180" title="Maximum video call duration in minutes" placeholder="e.g. 30" aria-labelledby="video-call-max-duration-label">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -724,38 +725,38 @@
                                                         <div class="row g-3">
                                                             <div class="col-md-4">
                                                                 <div class="form-check form-switch">
-                                                                    <input class="form-check-input" type="checkbox" id="video_call_recording_enabled" data-setting="video_call_recording_enabled">
-                                                                    <label class="form-check-label" id="video-recording-label">Enable Recording</label>
+                                                                    <input class="form-check-input" type="checkbox" id="video_call_recording_enabled" data-setting="video_call_recording_enabled" title="Enable or disable recording for video calls">
+                                                                    <label class="form-check-label" for="video_call_recording_enabled" id="video-recording-label">Enable Recording</label>
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-4">
                                                                 <div class="form-check form-switch">
-                                                                    <input class="form-check-input" type="checkbox" id="video_call_lobby_enabled" data-setting="video_call_lobby_enabled">
-                                                                    <label class="form-check-label" id="video-lobby-label">Enable Waiting Room</label>
+                                                                    <input class="form-check-input" type="checkbox" id="video_call_lobby_enabled" data-setting="video_call_lobby_enabled" title="Enable or disable the waiting room for video calls">
+                                                                    <label class="form-check-label" for="video_call_lobby_enabled" id="video-lobby-label">Enable Waiting Room</label>
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-4">
                                                                 <div class="form-check form-switch">
-                                                                    <input class="form-check-input" type="checkbox" id="video_call_password_protected" data-setting="video_call_password_protected">
-                                                                    <label class="form-check-label" id="video-password-label">Password Protected</label>
+                                                                    <input class="form-check-input" type="checkbox" id="video_call_password_protected" data-setting="video_call_password_protected" title="Enable or disable password protection for video calls">
+                                                                    <label class="form-check-label" for="video_call_password_protected" id="video-password-label">Password Protected</label>
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-4">
                                                                 <div class="form-check form-switch">
-                                                                    <input class="form-check-input" type="checkbox" id="jitsi_enable_chat" data-setting="jitsi_enable_chat">
-                                                                    <label class="form-check-label" id="jitsi-chat-label">Enable Chat</label>
+                                                                    <input class="form-check-input" type="checkbox" id="jitsi_enable_chat" data-setting="jitsi_enable_chat" title="Enable or disable chat in the video conference">
+                                                                    <label class="form-check-label" for="jitsi_enable_chat" id="jitsi-chat-label">Enable Chat</label>
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-4">
                                                                 <div class="form-check form-switch">
-                                                                    <input class="form-check-input" type="checkbox" id="jitsi_enable_screen_sharing" data-setting="jitsi_enable_screen_sharing">
-                                                                    <label class="form-check-label" id="jitsi-screen-sharing-label">Enable Screen Sharing</label>
+                                                                    <input class="form-check-input" type="checkbox" id="jitsi_enable_screen_sharing" data-setting="jitsi_enable_screen_sharing" title="Enable or disable screen sharing in the video conference">
+                                                                    <label class="form-check-label" for="jitsi_enable_screen_sharing" id="jitsi-screen-sharing-label">Enable Screen Sharing</label>
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-4">
                                                                 <div class="form-check form-switch">
-                                                                    <input class="form-check-input" type="checkbox" id="jitsi_enable_e2ee" data-setting="jitsi_enable_e2ee">
-                                                                    <label class="form-check-label" id="jitsi-e2ee-label">End-to-End Encryption</label>
+                                                                    <input class="form-check-input" type="checkbox" id="jitsi_enable_e2ee" data-setting="jitsi_enable_e2ee" title="Enable or disable end-to-end encryption for video calls">
+                                                                    <label class="form-check-label" for="jitsi_enable_e2ee" id="jitsi-e2ee-label">End-to-End Encryption</label>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -772,8 +773,8 @@
                                                     <div class="card-body">
                                                         <div class="row g-3">
                                                             <div class="col-md-6">
-                                                                <label class="form-label" id="jitsi-default-quality-label">Default Video Quality (p)</label>
-                                                                <select id="jitsi_default_video_quality" class="form-select" data-setting="jitsi_default_video_quality">
+                                                                <label class="form-label" for="jitsi_default_video_quality" id="jitsi-default-quality-label">Default Video Quality (p)</label>
+                                                                <select id="jitsi_default_video_quality" class="form-select" data-setting="jitsi_default_video_quality" title="Select the default video quality">
                                                                     <option value="180">180p (Low)</option>
                                                                     <option value="360">360p (Standard)</option>
                                                                     <option value="720">720p (HD)</option>
@@ -781,8 +782,8 @@
                                                                 </select>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <label class="form-label" id="jitsi-max-quality-label">Maximum Video Quality (p)</label>
-                                                                <select id="jitsi_max_video_quality" class="form-select" data-setting="jitsi_max_video_quality">
+                                                                <label class="form-label" for="jitsi_max_video_quality" id="jitsi-max-quality-label">Maximum Video Quality (p)</label>
+                                                                <select id="jitsi_max_video_quality" class="form-select" data-setting="jitsi_max_video_quality" title="Select the maximum video quality">
                                                                     <option value="360">360p (Standard)</option>
                                                                     <option value="720">720p (HD)</option>
                                                                     <option value="1080">1080p (Full HD)</option>
@@ -808,20 +809,20 @@
                                                         <div class="row g-3">
                                                             <div class="col-md-6">
                                                                 <div class="form-check form-switch">
-                                                                    <input class="form-check-input" type="checkbox" id="enable_video_calls" data-setting="enable_video_calls">
-                                                                    <label class="form-check-label" id="enable-video-calls-label">Enable Video Consultations</label>
+                                                                    <input class="form-check-input" type="checkbox" id="enable_video_calls" data-setting="enable_video_calls" title="Enable Video Consultations">
+                                                                    <label class="form-check-label" for="enable_video_calls" id="enable-video-calls-label">Enable Video Consultations</label>
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-check form-switch">
-                                                                    <input class="form-check-input" type="checkbox" id="enable_prescription_module" data-setting="enable_prescription_module">
-                                                                    <label class="form-check-label" id="enable-prescriptions-label">Enable Prescription Module</label>
+                                                                    <input class="form-check-input" type="checkbox" id="enable_prescription_module" data-setting="enable_prescription_module" title="Enable Prescription Module">
+                                                                    <label class="form-check-label" for="enable_prescription_module" id="enable-prescriptions-label">Enable Prescription Module</label>
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-check form-switch">
-                                                                    <input class="form-check-input" type="checkbox" id="enable_ai_assessment" data-setting="enable_ai_assessment">
-                                                                    <label class="form-check-label" id="enable-ai-assessment-label">Enable AI Health Assessment</label>
+                                                                    <input class="form-check-input" type="checkbox" id="enable_ai_assessment" data-setting="enable_ai_assessment" title="Enable AI Health Assessment">
+                                                                    <label class="form-check-label" for="enable_ai_assessment" id="enable-ai-assessment-label">Enable AI Health Assessment</label>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -847,8 +848,8 @@
                                                         <div class="row g-3">
                                                             <div class="col-12">
                                                                 <div class="form-check form-switch">
-                                                                    <input class="form-check-input" type="checkbox" id="maintenance_mode" data-setting="maintenance_mode">
-                                                                    <label class="form-check-label" id="maintenance-mode-label">Enable Maintenance Mode</label>
+                                                                    <input class="form-check-input" type="checkbox" id="maintenance_mode" data-setting="maintenance_mode" title="Enable or disable maintenance mode" aria-label="Enable Maintenance Mode">
+                                                                    <label class="form-check-label" id="maintenance-mode-label" for="maintenance_mode">Enable Maintenance Mode</label>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -971,16 +972,16 @@
                         <span id="footer-brand">Sahatak | Admin Dashboard</span>
                     </h5>
                     <div class="d-flex gap-3 social-links">
-                        <a href="#">
+                        <a href="#" title="Facebook" aria-label="Facebook">
                             <i class="bi bi-facebook fs-5"></i>
                         </a>
-                        <a href="#">
+                        <a href="#" title="Twitter" aria-label="Twitter">
                             <i class="bi bi-twitter fs-5"></i>
                         </a>
-                        <a href="#">
+                        <a href="#" title="Instagram" aria-label="Instagram">
                             <i class="bi bi-instagram fs-5"></i>
                         </a>
-                        <a href="#">
+                        <a href="#" title="LinkedIn" aria-label="LinkedIn">
                             <i class="bi bi-linkedin fs-5"></i>
                         </a>
                     </div>
@@ -1052,7 +1053,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">User Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" title="Close" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="userViewBody">
                     <!-- filled by JS -->
@@ -1073,7 +1074,7 @@
                         <i class="bi bi-calendar-check me-2"></i>
                         Appointment Details
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" title="Close"></button>
                 </div>
                 <div class="modal-body" id="appointmentDetailsBody">
                     <!-- Content will be filled by JavaScript -->
@@ -1094,7 +1095,7 @@
                         <i class="bi bi-person-badge me-2"></i>
                         Admin User Details
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" title="Close"></button>
                 </div>
                 <div class="modal-body" id="adminDetailsBody">
                     <!-- Content will be filled by JavaScript -->
@@ -1115,7 +1116,7 @@
                         <i class="bi bi-stethoscope me-2"></i>
                         Doctor Verification Details
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" title="Close"></button>
                 </div>
                 <div class="modal-body" id="doctorDetailsBody">
                     <!-- Content will be filled by JavaScript -->
