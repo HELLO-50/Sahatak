@@ -125,7 +125,6 @@ from routes.admin import admin_bp
 from routes.doctor_verification import doctor_verification_bp
 from routes.messages import messages_bp
 from routes.contact import contact_bp
-from routes.calendar_sync import calendar_sync_bp
 from routes.support import support_bp
 
 # Register blueprints with logging
@@ -146,7 +145,6 @@ app.register_blueprint(doctor_verification_bp, url_prefix='/api/doctor-verificat
 app.register_blueprint(messages_bp, url_prefix='/api/messages')
 app.register_blueprint(contact_bp)
 app.register_blueprint(support_bp, url_prefix='/api/support')
-app.register_blueprint(calendar_sync_bp, url_prefix='/api/calendar-sync')
 
 @login_manager.user_loader
 def load_user(user_id):
