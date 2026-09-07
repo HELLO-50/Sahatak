@@ -144,7 +144,7 @@ app.register_blueprint(user_settings_bp, url_prefix='/api/user-settings')
 app.register_blueprint(admin_bp, url_prefix='/api/admin')
 app.register_blueprint(doctor_verification_bp, url_prefix='/api/doctor-verification')
 app.register_blueprint(messages_bp, url_prefix='/api/messages')
-app.register_blueprint(contact_bp)
+app.register_blueprint(contact_bp, url_prefix='/api/contact')
 app.register_blueprint(support_bp, url_prefix='/api/support')
 app.register_blueprint(calendar_sync_bp, url_prefix='/api/calendar-sync')
 
