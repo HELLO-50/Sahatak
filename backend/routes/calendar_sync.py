@@ -2,6 +2,8 @@ from flask import Blueprint, session
 from flask_login import current_user
 from models import db, CalendarSync, Doctor, PatientCalendarConnection, Patient
 from routes.auth import api_login_required
+import requests
+from datetime import datetime, timedelta
 import os
 
 # Create a new blueprint named 'calendar_sync
@@ -63,3 +65,52 @@ def get_patient_google_auth_url():
     session['patient_id'] = current_user.patient_profile.id
 
     return {'auth_url': auth_url}, 200
+
+#Google redirects here after the user approves (or denies) calendar access.
+@calendar_sync_bp.route('/google/callback', methods=['GET'])
+def google_callback():
+    from flask import request
+
+    # Google includes a temporary "code" in the URL if the user approved access
+    code = request.args.get('code')
+
+    if not code:
+        return {'error': 'Google did not provide an authorization code'}, 400
+
+    # Exchange the temporary code for real access + refresh tokens
+    token_response = requests.post(
+        GOOGLE_CONFIG['token_uri'],
+        data={
+            'client_id': GOOGLE_CONFIG['client_id'],
+            'client_secret': GOOGLE_CONFIG['client_secret'],
+            'code': code,
+            'redirect_uri': GOOGLE_CONFIG['redirect_uri'],
+            'grant_type': 'authorization_code'
+        }
+    )
+
+    if token_response.status_code != 200:
+        return {'error': 'Failed to exchange authorization code for tokens'}, 400
+
+    tokens = token_response.json()
+
+    # Figure out who started this: was it a patient or a doctor?
+    patient_id = session.get('patient_id')
+
+    if patient_id:
+        # Find or create this patient's calendar connection record
+        connection = PatientCalendarConnection.query.filter_by(patient_id=patient_id).first()
+        if not connection:
+            connection = PatientCalendarConnection(patient_id=patient_id)
+            db.session.add(connection)
+
+        connection.google_enabled = True
+        connection.google_access_token = tokens['access_token']
+        connection.google_refresh_token = tokens.get('refresh_token')
+        connection.google_token_expires_at = datetime.utcnow() + timedelta(seconds=tokens.get('expires_in', 3600))
+
+        db.session.commit()
+
+        return {'message': 'Google Calendar connected successfully'}, 200
+
+    return {'error': 'No patient or doctor found in session'}, 400
