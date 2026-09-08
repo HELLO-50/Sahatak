@@ -7,7 +7,7 @@ from routes.auth import api_login_required
 calendar_sync_bp = Blueprint('calendar_sync', __name__)
 
 #Test route to confirm the calendar sync blueprint is registered and working
-calendar_sync_bp.route('/status', methods=['GET'])
+@calendar_sync_bp.route('/status', methods=['GET'])
 
 @api_login_required
 def get_calendar_sync_status():
