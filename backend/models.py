@@ -1715,3 +1715,21 @@ class CalendarSyncEvent(db.Model):
     
     def __repr__(self):
         return f'<CalendarSyncEvent {self.external_event_id or self.sahatak_event_id} - {self.event_type}>'
+    
+# Used to automatically add appointment events with reminders
+class PatientCalendarConnection(db.Model):
+    __tablename__ = 'patient_calendar_connections'
+
+    id = db.Column(db.Integer, primary_key=True)
+    # Links this record to one specific patient (one connection per patient)
+    patient_id = db.Column(db.Integer, db.ForeignKey('patients.id'), nullable=False, unique=True)
+
+    # Whether the patient has successfully connected Google Calendar
+    google_enabled = db.Column(db.Boolean, default=False, nullable=False)
+
+    # Credentials needed to create events on their behalf
+    google_access_token = db.Column(db.Text, nullable=True)
+    google_refresh_token = db.Column(db.Text, nullable=True)
+    google_token_expires_at = db.Column(db.DateTime, nullable=True)
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
