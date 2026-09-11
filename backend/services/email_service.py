@@ -5,6 +5,14 @@ from typing import Optional, Dict, Any
 import os
 from utils.logging_config import app_logger
 
+
+def _logo_url() -> str:
+    """Publicly-reachable logo URL for email headers (configurable via LOGO_URL)."""
+    return current_app.config.get(
+        'LOGO_URL',
+        os.getenv('LOGO_URL', 'https://hello-50.github.io/Sahatak/frontend/assets/images/icons/apple-touch-icon.png'),
+    )
+
 class EmailService:
     """
     Email service for sending appointment reminders and notifications
@@ -101,7 +109,8 @@ class EmailService:
             msg = Message(
                 subject=subject,
                 recipients=[recipient_email],
-                html=render_template(template_name, **template_data),
+                html=render_template(template_name,
+                    logo_url=_logo_url(), **template_data),
                 sender=current_app.config['MAIL_DEFAULT_SENDER']
             )
             
@@ -148,7 +157,8 @@ class EmailService:
             msg = Message(
                 subject=subject,
                 recipients=[recipient_email],
-                html=render_template(template_name, **template_data),
+                html=render_template(template_name,
+                    logo_url=_logo_url(), **template_data),
                 sender=current_app.config['MAIL_DEFAULT_SENDER']
             )
             
@@ -195,7 +205,8 @@ class EmailService:
             msg = Message(
                 subject=subject,
                 recipients=[recipient_email],
-                html=render_template(template_name, **template_data),
+                html=render_template(template_name,
+                    logo_url=_logo_url(), **template_data),
                 sender=current_app.config['MAIL_DEFAULT_SENDER']
             )
             
@@ -242,7 +253,8 @@ class EmailService:
             msg = Message(
                 subject=subject,
                 recipients=[recipient_email],
-                html=render_template(template_name, **template_data),
+                html=render_template(template_name,
+                    logo_url=_logo_url(), **template_data),
                 sender=current_app.config['MAIL_DEFAULT_SENDER']
             )
 
@@ -289,7 +301,8 @@ class EmailService:
             msg = Message(
                 subject=subject,
                 recipients=[recipient_email],
-                html=render_template(template_name, **template_data),
+                html=render_template(template_name,
+                    logo_url=_logo_url(), **template_data),
                 sender=current_app.config['MAIL_DEFAULT_SENDER']
             )
             
@@ -340,7 +353,8 @@ class EmailService:
             msg = Message(
                 subject=subject,
                 recipients=[recipient_email],
-                html=render_template(template_name, **template_data),
+                html=render_template(template_name,
+                    logo_url=_logo_url(), **template_data),
                 sender=current_app.config['MAIL_DEFAULT_SENDER']
             )
             
@@ -412,7 +426,8 @@ class EmailService:
             msg = Message(
                 subject=subject,
                 recipients=[recipient_email],
-                html=render_template(template_name, **template_data),
+                html=render_template(template_name,
+                    logo_url=_logo_url(), **template_data),
                 sender=current_app.config['MAIL_DEFAULT_SENDER']
             )
 

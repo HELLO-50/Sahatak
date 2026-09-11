@@ -1,156 +1,62 @@
-<!DOCTYPE html>
-<html dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تأكيد الموعد</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: #f3f4f6;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-            direction: rtl;
-            text-align: right;
-            color: #111827;
-        }
-        .wrapper {
-            width: 100%;
-            padding: 24px 12px;
-        }
-        .container {
-            max-width: 480px;
-            margin: 0 auto;
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 24px 22px 20px;
-            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
-            border: 1px solid #e5e7eb;
-        }
-        .brand {
-            text-align: center;
-            margin-bottom: 16px;
-        }
-        .brand-name {
-            font-weight: 700;
-            font-size: 18px;
-            color: #0f766e;
-            letter-spacing: 0.03em;
-        }
-        .brand-tagline {
-            font-size: 12px;
-            color: #6b7280;
-        }
-        .header {
-            text-align: center;
-            margin: 10px 0 20px;
-        }
-        .header-title {
-            margin: 0;
-            font-size: 20px;
-            color: #15803d;
-        }
-        .header-subtitle {
-            margin: 6px 0 0;
-            font-size: 13px;
-            color: #4b5563;
-        }
-        .info {
-            background: linear-gradient(135deg, #ecfdf3, #eff6ff);
-            padding: 14px 16px;
-            border-radius: 12px;
-            margin: 14px 0 18px;
-            font-size: 13px;
-            border: 1px solid #bbf7d0;
-        }
-        .info-row {
-            margin-bottom: 6px;
-        }
-        .info-label {
-            font-weight: 600;
-            color: #111827;
-        }
-        .info-value {
-            color: #111827;
-        }
-        .message {
-            font-size: 13px;
-            line-height: 1.6;
-            color: #374151;
-            margin: 0 0 14px;
-        }
-        .tip {
-            font-size: 12px;
-            color: #6b7280;
-            border-right: 3px solid #0ea5e9;
-            padding-right: 10px;
-            margin: 0 0 18px;
-        }
-        .footer {
-            text-align: center;
-            color: #9ca3af;
-            font-size: 11px;
-            margin-top: 8px;
-            padding-top: 10px;
-            border-top: 1px solid #e5e7eb;
-        }
-        .footer-strong {
-            color: #0f766e;
-            font-weight: 600;
-        }
-        .footer-note {
-            margin-top: 4px;
-        }
-    </style>
-</head>
-<body>
-    <div class="wrapper">
-        <div class="container">
-            <div class="brand">
-                <div class="brand-name">{{ app_name }}</div>
-                <div class="brand-tagline">منصتك الرقمية لصحتك</div>
-            </div>
+{% extends "email/base.html" %}
+{% block lang %}ar{% endblock %}
+{% block direction %}rtl{% endblock %}
+{% block align %}right{% endblock %}
+{% block title %}تأكيد الموعد{% endblock %}
+{% block heading %}{% if recipient_role == 'doctor' %}تم حجز موعد جديد معك{% else %}تم تأكيد موعدك الطبي{% endif %}{% endblock %}
+{% block subtitle %}{% if recipient_role == 'doctor' %}قام المريض {{ patient_name }} بحجز استشارة معك.{% else %}شكرًا لحجزك استشارة مع {{ doctor_name }}.{% endif %}{% endblock %}
+{% block content %}
+<!-- بطاقة تفاصيل الموعد (جداول + أنماط مضمّنة متوافقة مع Gmail/Outlook/Apple Mail) -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f0f9ff; border:1px solid #bae6fd; border-radius:10px; margin:0 0 16px 0;">
+    <tr>
+        <td style="padding:16px 18px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="font-size:13px; line-height:1.9; color:#111827;">
+                <tr>
+                    <td style="padding:4px 0; color:#64748b; width:34%;">{% if recipient_role == 'doctor' %}المريض{% else %}الطبيب{% endif %}</td>
+                    <td style="padding:4px 0; font-weight:bold;">{% if recipient_role == 'doctor' %}{{ patient_name }}{% else %}{{ doctor_name }}{% if doctor_specialty %} <span style="font-weight:normal; color:#64748b;">— {{ doctor_specialty }}</span>{% endif %}{% endif %}</td>
+                </tr>
+                <tr>
+                    <td style="padding:4px 0; color:#64748b; border-top:1px solid #e0f2fe;">{% if recipient_role == 'doctor' %}الطبيب (أنت){% else %}المريض{% endif %}</td>
+                    <td style="padding:4px 0; font-weight:bold; border-top:1px solid #e0f2fe;">{% if recipient_role == 'doctor' %}{{ doctor_name }}{% else %}{{ patient_name }}{% endif %}</td>
+                </tr>
+                <tr>
+                    <td style="padding:4px 0; color:#64748b; border-top:1px solid #e0f2fe;">التاريخ</td>
+                    <td style="padding:4px 0; font-weight:bold; border-top:1px solid #e0f2fe;">{{ appointment_date_readable }} <span style="font-weight:normal; color:#94a3b8;">({{ appointment_date }})</span></td>
+                </tr>
+                <tr>
+                    <td style="padding:4px 0; color:#64748b; border-top:1px solid #e0f2fe;">الوقت</td>
+                    <td style="padding:4px 0; font-weight:bold; border-top:1px solid #e0f2fe;">{{ appointment_time_readable }} <span style="font-weight:normal; color:#94a3b8;">(UTC)</span></td>
+                </tr>
+                <tr>
+                    <td style="padding:4px 0; color:#64748b; border-top:1px solid #e0f2fe;">نوع الاستشارة</td>
+                    <td style="padding:4px 0; font-weight:bold; border-top:1px solid #e0f2fe;"><span style="display:inline-block; padding:2px 10px; background-color:#0284c7; color:#ffffff; border-radius:999px; font-size:11px;">{{ appointment_type_label or appointment_type }}</span></td>
+                </tr>
+                {% if consultation_fee %}
+                <tr>
+                    <td style="padding:4px 0; color:#64748b; border-top:1px solid #e0f2fe;">سعر الاستشارة</td>
+                    <td style="padding:4px 0; font-weight:bold; border-top:1px solid #e0f2fe;">{{ consultation_fee }}</td>
+                </tr>
+                {% endif %}
+            </table>
+        </td>
+    </tr>
+</table>
 
-            <div class="header">
-                <h1 class="header-title">تم تأكيد موعدك الطبي</h1>
-                <p class="header-subtitle">شكرًا لاختيارك {{ app_name }} لحجز استشارتك.</p>
-            </div>
-
-            <div class="info">
-                <div class="info-row">
-                    <span class="info-label">الطبيب:</span>
-                    <span class="info-value"> {{ doctor_name }}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">التاريخ:</span>
-                    <span class="info-value"> {{ appointment_date }}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">الوقت:</span>
-                    <span class="info-value"> {{ appointment_time }}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">نوع الاستشارة:</span>
-                    <span class="info-value"> {{ appointment_type }}</span>
-                </div>
-            </div>
-
-            <p class="message">
-                تم حجز موعدك بنجاح. يُفضّل أن تكون جاهزًا قبل موعدك بعدة دقائق
-                لضمان بدء الاستشارة بكل راحة وطمأنينة.
-            </p>
-            <p class="tip">
-                نصيحة: قم بتحضير ملخص عن حالتك الصحية، الأدوية الحالية، وأي أسئلة
-                ترغب في طرحها على الطبيب للاستفادة القصوى من الاستشارة.
-            </p>
-
-            <div class="footer">
-                <div class="footer-strong">{{ app_name }} | صحتك</div>
-                <div class="footer-note">
-                    هذه الرسالة للتذكير ولا تُغني عن مراجعة الطوارئ في الحالات العاجلة.
-                </div>
-            </div>
-        </div>
-    </div>
-</body>
-</html>
+<p style="margin:0 0 12px 0; font-size:13px; line-height:1.7; color:#374151;">
+    {% if recipient_role == 'doctor' %}
+    يُرجى التأكد من جاهزيتك قبل الموعد بعدة دقائق. يمكنك بدء الاستشارة من لوحة التحكم الخاصة بك عندما تكون جاهزًا.
+    {% else %}
+    تم حجز موعدك بنجاح. يُفضّل أن تكون جاهزًا قبل موعدك بعدة دقائق
+    لضمان بدء الاستشارة بكل راحة وطمأنينة.
+    {% endif %}
+</p>
+<p style="margin:0; font-size:12px; color:#6b7280; border-right:3px solid #0ea5e9; padding-right:10px;">
+    {% if recipient_role == 'doctor' %}
+    نصيحة: راجع سبب الزيارة والتاريخ الطبي للمريض في لوحة التحكم قبل بدء الاستشارة.
+    {% else %}
+    نصيحة: قم بتحضير ملخص عن حالتك الصحية، الأدوية الحالية، وأي أسئلة
+    ترغب في طرحها على الطبيب للاستفادة القصوى من الاستشارة.
+    {% endif %}
+</p>
+{% endblock %}
+{% block footer_note %}هذه الرسالة للتذكير ولا تُغني عن مراجعة الطوارئ في الحالات العاجلة.{% endblock %}

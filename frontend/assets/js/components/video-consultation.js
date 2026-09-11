@@ -589,8 +589,17 @@ const VideoConsultation = {
             await this.initJitsi(publicSessionData);
             
         } catch (error) {
+            // BUGFIX: this catch previously discarded the real error (config fetch
+            // failure, external_api.js load failure, etc.) and showed only a generic
+            // message. Log the real details and surface the reason to the user.
             console.error('Start video session error:', error);
-            this.showError('Failed to start video session');
+            console.error('Start video session failure details:', {
+                message: error?.message,
+                name: error?.name,
+                status: error?.status
+            });
+            const detail = error?.message ? ` — ${error.message}` : '';
+            this.showError(`Failed to start video session${detail}`);
         }
     },
     
@@ -641,8 +650,25 @@ const VideoConsultation = {
         }
 
         // Use backend config directly - this comes from .env
-        const finalConfig = backendConfig.config;
-        const finalInterfaceConfig = backendConfig.interface_config || {};
+        const finalConfig = { ...(backendConfig.config || {}) };
+        const finalInterfaceConfig = { ...(backendConfig.interface_config || {}) };
+
+        // BUGFIX (doctor cannot join while patient can): the backend .env config
+        // contains guest/anonymous routing keys (anonymousdomain:
+        // guest.meet.ffmuc.net, enableGuestDomain: true, ...). Passing those into
+        // configOverwrite sends the WEB client through a separately-authenticated
+        // guest-domain join path, while the confirmed-working patient mobile
+        // client simply joins the public room on the MAIN domain
+        // (https://meet.ffmuc.net/sahatak_appointment_{id}). Strip the guest/anonymous
+        // keys so the doctor joins the exact same public room the same way as the
+        // patient. All other backend settings are preserved.
+        ['anonymousdomain', 'enableGuestDomain', 'enableGuests', 'enableAnonymousAccess',
+         'enableAnonymousUsers', 'anonymousUsers', 'guestsAllowed'].forEach(key => {
+            if (finalConfig[key] !== undefined) delete finalConfig[key];
+            if (finalInterfaceConfig[key] !== undefined) delete finalInterfaceConfig[key];
+        });
+        if (finalInterfaceConfig['ANONYMOUS_DOMAIN'] !== undefined) delete finalInterfaceConfig['ANONYMOUS_DOMAIN'];
+        if (finalInterfaceConfig['ENABLE_ANONYMOUS_DOMAIN_ACCESS'] !== undefined) delete finalInterfaceConfig['ENABLE_ANONYMOUS_DOMAIN_ACCESS'];
 
         // Create deterministic room name so doctor and patient join same room
         const publicRoomName = `sahatak_appointment_${this.appointmentId}`;
@@ -1657,8 +1683,22 @@ const VideoConsultation = {
                 'warning'
             );
             
+            // BUGFIX (ReferenceError: domain is not defined): this function is the
+            // designated fallback when the normal join path fails with a
+            // membersOnly/authentication error, but `domain` only existed in
+            // initJitsi's scope, so the emergency join crashed 100% of the time
+            // before creating the conference. Use the domain from the backend
+            // config fetched above (same source as the normal path) and make sure
+            // the external API script for that domain is loaded.
+            const emergencyDomain = emergencyBackendConfig?.jitsi_domain || 'meet.ffmuc.net';
+            try {
+                await this.loadJitsiExternalAPI(emergencyDomain);
+            } catch (loadErr) {
+                console.error('Emergency mode: failed to load Jitsi external API:', loadErr);
+                throw loadErr;
+            }
             // Initialize Jitsi with emergency settings
-            this.jitsiApi = new JitsiMeetExternalAPI(domain, emergencyOptions);
+            this.jitsiApi = new JitsiMeetExternalAPI(emergencyDomain, emergencyOptions);
             
             // Setup basic event handlers
             this.setupJitsiEventHandlers();

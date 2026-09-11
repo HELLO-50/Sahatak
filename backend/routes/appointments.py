@@ -307,38 +307,118 @@ def create_appointment():
         
         app_logger.info(f"Appointment created: ID {appointment.id} by patient {current_user.id}")
         
-        # Send appointment confirmation email using templates
+        # Send appointment confirmation emails to BOTH the patient and the doctor.
+        # The send is synchronous (the same proven-working Flask-Mail path used by
+        # support/registration emails). Booking NEVER fails because of an email
+        # problem - every failure is logged loudly with traceback.
         try:
-            patient_email = current_user.email if hasattr(current_user, 'email') else None
-            patient_language = getattr(current_user, 'language_preference', 'ar')  # Default to Arabic
+            import traceback
             
-            # Only send email if patient has an email address
+            patient_email = current_user.email if current_user.email else None
+            doctor_email = doctor.user.email if doctor.user and doctor.user.email else None
+            patient_language = getattr(current_user, 'language_preference', 'ar') or 'ar'
+            doctor_language = getattr(doctor.user, 'language_preference', 'ar') if doctor.user else 'ar'
+            
+            # Localized readable date/time strings for the email templates
+            _AR_MONTHS = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+                          'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر']
+            _AR_DAYS = ['الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت', 'الأحد']
+            _TYPE_LABELS = {
+                'en': {'video': 'Video consultation', 'audio': 'Audio consultation', 'chat': 'Chat consultation'},
+                'ar': {'video': 'استشارة مرئية', 'audio': 'استشارة صوتية', 'chat': 'استشارة نصية'}
+            }
+            
+            # English readable date: "Monday, 15 September 2026"
+            en_date_readable = appointment_date.strftime('%A, %d %B %Y')
+            # Arabic readable date: "الثلاثاء، 15 سبتمبر 2026"
+            ar_date_readable = f"{_AR_DAYS[appointment_date.weekday()]}، {appointment_date.strftime('%d')} {_AR_MONTHS[appointment_date.month - 1]} {appointment_date.strftime('%Y')}"
+            # 12-hour time: "03:30 PM" / "03:30 م"
+            en_time_readable = appointment_date.strftime('%I:%M %p').lstrip('0')
+            ar_time_readable = en_time_readable.replace('AM', 'ص').replace('PM', 'م')
+            
+            base_email_data = {
+                **appointment.to_dict(),
+                'doctor_name': doctor.user.full_name,
+                'patient_name': current_user.full_name,
+                'doctor_specialty': getattr(doctor, 'specialty', None),
+                'appointment_date': appointment_date.strftime('%Y-%m-%d'),
+                'appointment_time': appointment_date.strftime('%H:%M'),
+                'appointment_date_readable': en_date_readable,
+                'appointment_time_readable': en_time_readable,
+                'appointment_type': data['appointment_type'],
+                'appointment_id': appointment.id,
+                'status': appointment.status
+            }
+            
+            # Build per-recipient payloads (patient + doctor), then send each one.
+            # Every send failure is logged with the real exception and traceback.
+            email_payloads = []
             if patient_email:
-                # Get appointment data and add related information for template
-                appointment_dict = appointment.to_dict()
-                appointment_dict.update({
-                    'doctor_name': doctor.user.full_name,
-                    'patient_name': current_user.full_name,
-                    'appointment_date': appointment_date.strftime('%Y-%m-%d'),
-                    'appointment_time': appointment_date.strftime('%H:%M')
+                email_payloads.append({
+                    'recipient_email': patient_email,
+                    'recipient_role': 'patient',
+                    'language': patient_language,
+                    'email_data': {
+                        **base_email_data,
+                        'recipient_role': 'patient',
+                        'appointment_date_readable': en_date_readable if patient_language == 'en' else ar_date_readable,
+                        'appointment_time_readable': en_time_readable if patient_language == 'en' else ar_time_readable,
+                        'appointment_type_label': _TYPE_LABELS[patient_language].get(data['appointment_type'], data['appointment_type'])
+                    }
                 })
-                
-                email_sent = send_appointment_confirmation(
-                    recipient_email=patient_email,
-                    appointment_data=appointment_dict,
-                    language=patient_language
-                )
-                
-                if email_sent:
-                    app_logger.info(f"Appointment confirmation email sent to {patient_email}")
-                else:
-                    app_logger.warning(f"Failed to send appointment confirmation email to {patient_email}")
+            if doctor_email:
+                email_payloads.append({
+                    'recipient_email': doctor_email,
+                    'recipient_role': 'doctor',
+                    'language': doctor_language or 'ar',
+                    'email_data': {
+                        **base_email_data,
+                        'recipient_role': 'doctor',
+                        'appointment_date_readable': en_date_readable if (doctor_language or 'ar') == 'en' else ar_date_readable,
+                        'appointment_time_readable': en_time_readable if (doctor_language or 'ar') == 'en' else ar_time_readable,
+                        'appointment_type_label': _TYPE_LABELS[doctor_language or 'ar'].get(data['appointment_type'], data['appointment_type'])
+                    }
+                })
+            
+            if email_payloads:
+                for payload in email_payloads:
+                    recipient_email = payload['recipient_email']
+                    recipient_role = payload['recipient_role']
+                    try:
+                        email_sent = send_appointment_confirmation(
+                            recipient_email=recipient_email,
+                            appointment_data=payload['email_data'],
+                            language=payload['language'] or 'ar'
+                        )
+                        if email_sent:
+                            app_logger.info(
+                                f"Appointment confirmation email sent to {recipient_role} "
+                                f"{recipient_email} (appointment {appointment.id})"
+                            )
+                        else:
+                            app_logger.warning(
+                                f"Appointment confirmation email FAILED for {recipient_role} "
+                                f"{recipient_email} (appointment {appointment.id}) - "
+                                f"see email service log above for the specific reason"
+                            )
+                    except Exception as email_error:
+                        # Log the REAL error + traceback instead of swallowing it silently
+                        app_logger.error(
+                            f"Appointment confirmation email error for {recipient_role} "
+                            f"{recipient_email} (appointment {appointment.id}): {email_error}"
+                        )
+                        app_logger.error(f"Email traceback: {traceback.format_exc()}")
             else:
-                app_logger.info("No email address available for patient, skipping confirmation email")
-                
+                app_logger.info(
+                    "No email address available for patient or doctor "
+                    f"(appointment {appointment.id}), skipping confirmation emails"
+                )
+        
         except Exception as e:
-            app_logger.error(f"Error sending appointment confirmation email: {str(e)}")
-            # Don't fail the appointment creation if email fails
+            import traceback
+            # Don't fail the appointment creation if email fails - but log loudly
+            app_logger.error(f"Error sending appointment confirmation emails: {str(e)}")
+            app_logger.error(f"Email block traceback: {traceback.format_exc()}")
         
         return APIResponse.success(
             data={'appointment': appointment.to_dict()},
