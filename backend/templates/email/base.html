@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="{% block lang %}en{% endblock %}" dir="{% block direction %}ltr{% endblock %}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>{% block title %}{{ app_name }}{% endblock %}</title>
+    <!--[if mso]>
+    <style type="text/css">
+        body, table, td, p, a, h1, h2 { font-family: Arial, sans-serif !important; }
+    </style>
+    <![endif]-->
+</head>
+<body style="margin:0; padding:0; background-color:#f3f4f6; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%;">
+<!-- theme accent color: {% block accent %}#0284c7{% endblock %} -->
+    <!--[if mso]>
+    <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td>
+    <![endif]-->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f3f4f6;">
+        <tr>
+            <td align="center" style="padding:24px 12px;">
+                <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; width:100%; background-color:#ffffff; border:1px solid #e5e7eb; border-radius:16px; overflow:hidden;">
+                    <!-- Logo header -->
+                    <tr>
+                        <td align="center" style="padding:28px 24px 14px 24px; border-bottom:3px solid {{ self.accent() }}; background-color:#ffffff;">
+                            {% if logo_url %}
+                            <img src="{{ logo_url }}" width="72" height="72" alt="{{ app_name }}" style="display:block; margin:0 auto 8px auto; border:none; outline:none; text-decoration:none;" />
+                            {% endif %}
+                            <div style="font-size:20px; font-weight:bold; color:#0284c7; letter-spacing:0.03em;">{{ app_name }} <span style="font-weight:600;">صحتك</span></div>
+                        </td>
+                    </tr>
+                    <!-- Title -->
+                    <tr>
+                        <td align="center" style="padding:22px 28px 0 28px;">
+                            <h1 style="margin:0; font-size:21px; line-height:28px; font-weight:bold; color:{{ self.accent() }};">{% block heading %}{% endblock %}</h1>
+                            <p style="margin:8px 0 0 0; font-size:13px; line-height:19px; color:#4b5563;">{% block subtitle %}{% endblock %}</p>
+                        </td>
+                    </tr>
+                    <!-- Body -->
+                    <tr>
+                        <td style="padding:18px 28px 8px 28px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif; font-size:13px; line-height:1.6; color:#374151; text-align:{% block align %}left{% endblock %};">
+                            {% block content %}{% endblock %}
+                        </td>
+                    </tr>
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding:16px 28px 24px 28px;">
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid #e5e7eb;">
+                                <tr>
+                                    <td align="center" style="padding-top:12px; font-size:11px; line-height:16px; color:#9ca3af;">
+                                        <span style="font-weight:bold; color:{{ self.accent() }};">{{ app_name }} | صحتك</span>
+                                        <div style="margin-top:4px;">{% block footer_note %}{% endblock %}</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+    <!--[if mso]>
+    </td></tr></table>
+    <![endif]-->
+</body>
+</html>

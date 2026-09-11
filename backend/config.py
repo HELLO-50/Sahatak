@@ -21,6 +21,8 @@ class Config:
     )
     # Official Sahatak support inbox where technical support messages are delivered
     SUPPORT_EMAIL = os.getenv('SUPPORT_EMAIL', 'sahatak.sudan@gmail.com')
+    # Verified public GitHub Pages asset used by email clients to load the logo.
+    LOGO_URL = os.getenv('LOGO_URL', 'https://hello-50.github.io/Sahatak/frontend/assets/images/icons/apple-touch-icon.png')
     
     # JWT Configuration
     JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', SECRET_KEY)

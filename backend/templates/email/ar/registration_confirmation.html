@@ -1,33 +1,17 @@
-<!DOCTYPE html>
-<html dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تأكيد التسجيل</title>
-    <style>
-        body { font-family: Arial; margin: 0; padding: 20px; background: #f5f5f5; }
-        .container { max-width: 400px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
-        .header { text-align: center; color: #198754; margin-bottom: 20px; }
-        .info { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; }
-        .footer { text-align: center; color: #666; font-size: 12px; margin-top: 20px; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h2>مرحباً بك في صحتك</h2>
-        </div>
-        
-        <p>أهلاً {{ full_name }}</p>
-        
-        <div class="info">
-            تم إنشاء حسابك بنجاح<br>
-            يمكنك الآن حجز مواعيد طبية
-        </div>
-        
-        <div class="footer">
-            {{ app_name }} | صحتك
-        </div>
-    </div>
-</body>
-</html>
+{% extends "email/base.html" %}
+{% block lang %}ar{% endblock %}
+{% block direction %}rtl{% endblock %}
+{% block align %}right{% endblock %}
+{% block title %}تأكيد التسجيل{% endblock %}
+{% block accent %}#15803d{% endblock %}
+{% block heading %}مرحباً بك في صحتك{% endblock %}
+{% block content %}
+<p style="margin:0 0 12px 0;">أهلاً {{ full_name }}</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f0fdf4; border:1px solid #bbf7d0;">
+    <tr><td style="padding:14px 16px; font-size:13px; color:#111827;">
+        تم إنشاء حسابك بنجاح<br>
+        يمكنك الآن حجز مواعيد طبية
+    </td></tr>
+</table>
+{% endblock %}
+{% block footer_note %}{{ app_name }} | صحتك{% endblock %}
