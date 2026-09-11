@@ -164,7 +164,7 @@ def create_appointment():
         
         # Validate JSON payload structure
         required_fields = ['doctor_id', 'appointment_date', 'appointment_type']
-        optional_fields = ['notes']
+        optional_fields = ['notes', 'reason_for_visit', 'symptoms']
         validation = validate_json_payload(data, required_fields, optional_fields)
         
         if not validation['valid']:
