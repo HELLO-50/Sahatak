@@ -1,4 +1,4 @@
-from flask import Blueprint, request, current_app, jsonify
+from flask import Blueprint, request, current_app, jsonify, send_from_directory
 from flask_login import login_required, current_user
 from models import db, User, Patient, Doctor
 from utils.validators import validate_name, validate_phone, validate_age
@@ -6,8 +6,14 @@ from utils.responses import APIResponse, success_response, error_response, not_f
 from utils.logging_config import app_logger
 from datetime import datetime
 from routes.auth import api_login_required
+import os
+import uuid
 
 users_bp = Blueprint('users', __name__)
+
+# Allowed image extensions for profile picture uploads
+AVATAR_ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp', 'gif'}
+AVATAR_MAX_SIZE_BYTES = 5 * 1024 * 1024  # 5MB (MAX_CONTENT_LENGTH of 16MB still applies globally)
 
 @users_bp.route('/profile', methods=['GET'])
 @api_login_required
@@ -308,3 +314,80 @@ def deactivate_account():
             'success': False,
             'message': 'Failed to deactivate account'
         }), 500
+
+
+@users_bp.route('/profile/avatar', methods=['POST'])
+@api_login_required
+def upload_profile_avatar():
+    """
+    Upload/replace the authenticated user's profile picture.
+    Expects multipart/form-data with an 'image' field (also accepts 'file'/'avatar').
+    Returns: { success, message, data: { avatar, profile_picture, user } }
+    (Top-level 'avatar'/'user' duplicates are included for mobile-app compatibility.)
+    """
+    try:
+        file = (request.files.get('image')
+                or request.files.get('file')
+                or request.files.get('avatar'))
+
+        if not file or file.filename == '':
+            return APIResponse.validation_error(
+                field='image',
+                message='No image file provided'
+            )
+
+        filename = file.filename or ''
+        ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
+        if ext not in AVATAR_ALLOWED_EXTENSIONS:
+            return APIResponse.validation_error(
+                field='image',
+                message='File type not supported. Use PNG, JPG, JPEG, WEBP, or GIF.'
+            )
+
+        # Enforce a per-file size limit (Flask's MAX_CONTENT_LENGTH also guards the request)
+        file.seek(0, os.SEEK_END)
+        size = file.tell()
+        file.seek(0)
+        if size > AVATAR_MAX_SIZE_BYTES:
+            return APIResponse.validation_error(
+                field='image',
+                message='Image too large. Maximum size is 5MB.'
+            )
+
+        upload_dir = current_app.config.get(
+            'UPLOAD_FOLDER',
+            os.path.join(current_app.root_path, 'static', 'uploads')
+        )
+        os.makedirs(upload_dir, exist_ok=True)
+
+        safe_filename = f"avatar_{current_user.id}_{uuid.uuid4().hex[:8]}.{ext}"
+        file_path = os.path.join(upload_dir, safe_filename)
+        file.save(file_path)
+
+        avatar_url = f"/static/uploads/{safe_filename}"
+        current_user.profile_picture = avatar_url
+        db.session.commit()
+
+        app_logger.info(f"Profile picture updated for user {current_user.id}: {avatar_url}")
+
+        user_data = current_user.to_dict()
+
+        # Response shape expected by the mobile app's uploadAvatarApi():
+        # inner.avatar (or inner.profile_picture) + inner.user
+        return jsonify({
+            'success': True,
+            'message': 'Profile picture updated successfully',
+            'data': {
+                'avatar': avatar_url,
+                'profile_picture': avatar_url,
+                'user': user_data
+            },
+            'avatar': avatar_url,
+            'profile_picture': avatar_url,
+            'user': user_data
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        app_logger.error(f"Avatar upload error for user {getattr(current_user, 'id', '?')}: {str(e)}")
+        return APIResponse.internal_error(message='Failed to upload profile picture')

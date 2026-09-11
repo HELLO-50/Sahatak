@@ -32,6 +32,9 @@ class User(UserMixin, db.Model):
     # Session management (NFR_7)
     session_expires_at = db.Column(db.DateTime, nullable=True)  # 15-minute timeout tracking
     auto_logout_warnings_sent = db.Column(db.Integer, default=0, nullable=False)  # Warning count
+
+    # Profile picture (set via POST /api/users/profile/avatar)
+    profile_picture = db.Column(db.String(255), nullable=True)
     
     # Relationships
     patient_profile = db.relationship('Patient', backref='user', uselist=False, cascade='all, delete-orphan')
@@ -96,7 +99,10 @@ class User(UserMixin, db.Model):
             'last_login': self.last_login.isoformat() if self.last_login else None,
             # Online presence (FR_10)
             'is_online': self.is_online,
-            'last_seen_at': self.last_seen_at.isoformat() if self.last_seen_at else None
+            'last_seen_at': self.last_seen_at.isoformat() if self.last_seen_at else None,
+            # Profile picture (exposed under both keys for API compatibility)
+            'profile_picture': self.profile_picture,
+            'avatar': self.profile_picture
         }
         
         if include_sensitive:
