@@ -687,23 +687,162 @@ const VideoConsultation = {
         
         
         try {
-            // Initialize Jitsi API
-            this.jitsiApi = new JitsiMeetExternalAPI(domain, options);
-            
-            // Setup event handlers
-            this.setupJitsiEventHandlers();
-            
-            
+            // ROOT-CAUSE FIX (doctor gets "meet.ffmuc.net refused to connect"):
+            // CONFIRMED EVIDENCE — the Jitsi room page on meet.ffmuc.net responds with:
+            //   x-frame-options: SAMEORIGIN
+            //   content-security-policy: frame-ancestors 'self' *.ffmuc.net *.ffmeet.net
+            //       *.ffmeet.de klassenkonferenz.de *.pazufa.de weiselrichtig.de ...
+            // The Sahatak website origin is NOT in that allowlist. JitsiMeetExternalAPI
+            // works by injecting an <iframe> pointing at the Jitsi domain, and these
+            // headers apply to ANY iframe regardless of who created it — so embedding
+            // from this origin can NEVER work (script load succeeds, iframe refused).
+            // The patient mobile client works because react-native-webview performs a
+            // TOP-LEVEL navigation (frame-blocking headers do not apply).
+            // Fix: open the same room in a new browser tab via top-level navigation,
+            // mirroring the mobile client's exact URL + hash config (proven working).
+            await this.openTopLevelSession(domain, finalConfig, finalInterfaceConfig);
+
         } catch (initError) {
-            console.error('Jitsi initialization failed:', initError);
-            
-            // If initialization fails, try fallback immediately
-            if (initError.message && initError.message.includes('membersOnly')) {
-                setTimeout(() => this.retryWithFallbackConfig(), 1000);
-            } else {
-                this.handleJitsiError(initError);
-            }
+            console.error('Jitsi session start failed:', initError);
+            this.handleJitsiError(initError);
         }
+    },
+
+    // Build the Jitsi room URL with hash params, EXACTLY matching the proven
+    // working mobile client (VideoConsultationScreen.tsx hashParams list).
+    buildTopLevelRoomUrl(domain, roomName) {
+        const displayName = encodeURIComponent(
+            `${AuthStorage.get('name') || 'User'} (Appointment ${this.appointmentId})`
+        );
+        const hashParams = [
+            `userInfo.displayName="${displayName}"`,
+            'config.disableDeepLinking=true',
+            'config.enableWelcomePage=false',
+            'config.enableClosePage=false',
+            'config.prejoinPageEnabled=false',
+            'config.skipPrejoin=true',
+            'config.enableInsecureRoomNameWarning=false',
+            'config.disableModeratorIndicator=true',
+            'config.startWithAudioMuted=false',
+            'config.startWithVideoMuted=false',
+            'config.defaultLanguage="ar"',
+        ].join('&');
+        return `https://${domain}/${roomName}#${hashParams}`;
+    },
+
+    // Open the Jitsi room as a TOP-LEVEL page in a new browser tab (same
+    // approach as the mobile client). Registers the join with the backend,
+    // keeps the backend session alive with a tolerant heartbeat, and shows an
+    // in-page control panel so the doctor can reopen the tab or end the
+    // session from the website.
+    async openTopLevelSession(domain, config, interfaceConfig) {
+        const publicRoomName = `sahatak_appointment_${this.appointmentId}`;
+        const url = this.buildTopLevelRoomUrl(domain, publicRoomName);
+
+        // Store session data (same keys as the embedded path used to set)
+        this.sessionData = {
+            room_name: publicRoomName,
+            jitsi_domain: domain,
+            jwt_token: null, // No JWT - free Jitsi public rooms
+            config: config,
+            interface_config: interfaceConfig
+        };
+        this.roomName = publicRoomName;
+
+        // Backend lifecycle: try video/start (doctor only; a patient calling it
+        // gets 403, which is tolerated), then video/join (tolerated if no
+        // session exists yet). Server-side authorization is untouched.
+        try {
+            await ApiHelper.makeRequest(
+                `/appointments/${this.appointmentId}/video/start`,
+                { method: 'POST' }
+            );
+        } catch (e) {
+            console.log('video/start not applicable (tolerated):', e?.status || e?.message);
+        }
+        try {
+            await ApiHelper.makeRequest(
+                `/appointments/${this.appointmentId}/video/join`,
+                { method: 'POST' }
+            );
+        } catch (e) {
+            console.log('video/join not applicable yet (tolerated):', e?.status || e?.message);
+        }
+
+        // Open the room in a new tab (top-level navigation; happens inside the
+        // user-gesture call stack, so popup blockers allow it).
+        const win = window.open(url, '_blank', 'noopener');
+        if (!win) {
+            console.warn('Popup blocked - showing manual open button');
+        }
+
+        // Tolerant heartbeat (reuses this.heartbeatInterval so stopHeartbeat /
+        // cleanup still work): keep the backend session alive while this page
+        // is open, but never end the call from a heartbeat failure — the doctor
+        // may simply have the video tab focused with this page backgrounded.
+        this.stopHeartbeat();
+        this.heartbeatInterval = setInterval(async () => {
+            try {
+                const response = await ApiHelper.makeRequest(
+                    `/appointments/${this.appointmentId}/video/heartbeat`,
+                    { method: 'POST' }
+                );
+                if (!response.success) {
+                    console.warn('Tab-mode heartbeat not confirmed (tolerated):', response.message);
+                }
+            } catch (error) {
+                console.warn('Tab-mode heartbeat error (tolerated):', error?.message);
+            }
+        }, 30000);
+
+        // Render the in-page control panel
+        this.showTopLevelCallPanel(domain, publicRoomName, url, !!win);
+    },
+
+    // In-page panel shown while the consultation runs in the separate tab
+    showTopLevelCallPanel(domain, roomName, url, opened) {
+        const container = document.getElementById('video-container');
+        if (!container) return;
+
+        const currentLang = LanguageManager?.getLanguage() || 'en';
+        const isAr = currentLang === 'ar';
+        const heading = isAr ? 'الاستشارة المرئية جارية في نافذة جديدة' : 'Video consultation is running in a new tab';
+        const desc = isAr
+            ? 'فتحنا غرفة الفيديو في تبويب مستقل. عد إلى هذه الصفحة لإنهاء الجلسة أو إعادة فتح النافذة.'
+            : 'The video room was opened in a separate browser tab. Return to this page to end the session or reopen the tab.';
+        const reopenLabel = isAr ? 'إعادة فتح نافذة الفيديو' : 'Reopen video tab';
+        const endLabel = isAr ? 'إنهاء الجلسة' : 'End session';
+        const roomLabel = isAr ? 'الغرفة' : 'Room';
+        const blockedNote = !opened
+            ? (isAr
+                ? 'ملاحظة: منع المتصفح فتح النافذة تلقائياً — اضغط الزر أدناه.'
+                : 'Note: your browser blocked the automatic popup — press the button below to open it.')
+            : '';
+
+        container.innerHTML = `
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+                        height:100vh;padding:24px;text-align:center;font-family:sans-serif;">
+                <div style="font-size:48px;margin-bottom:16px;">🎥</div>
+                <h2 style="margin:0 0 8px;">${heading}</h2>
+                <p style="max-width:520px;color:#555;margin:0 0 8px;">${desc}</p>
+                <p style="color:#888;font-size:13px;margin:0 0 20px;">${roomLabel}: ${roomName} @ ${domain}</p>
+                ${blockedNote ? `<p style="color:#b45309;margin:0 0 12px;">${blockedNote}</p>` : ''}
+                <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+                    <button id="reopen-video-tab-btn"
+                            style="padding:12px 24px;border:none;border-radius:8px;background:#2563eb;color:#fff;
+                                   font-size:15px;cursor:pointer;">${reopenLabel}</button>
+                    <button id="end-tab-session-btn"
+                            style="padding:12px 24px;border:none;border-radius:8px;background:#dc2626;color:#fff;
+                                   font-size:15px;cursor:pointer;">${endLabel}</button>
+                </div>
+            </div>`;
+
+        document.getElementById('reopen-video-tab-btn')?.addEventListener('click', () => {
+            window.open(url, '_blank', 'noopener');
+        });
+        document.getElementById('end-tab-session-btn')?.addEventListener('click', () => {
+            this.endCall();
+        });
     },
     
     // Setup Jitsi event handlers
@@ -1691,17 +1830,14 @@ const VideoConsultation = {
             // config fetched above (same source as the normal path) and make sure
             // the external API script for that domain is loaded.
             const emergencyDomain = emergencyBackendConfig?.jitsi_domain || 'meet.ffmuc.net';
-            try {
-                await this.loadJitsiExternalAPI(emergencyDomain);
-            } catch (loadErr) {
-                console.error('Emergency mode: failed to load Jitsi external API:', loadErr);
-                throw loadErr;
-            }
-            // Initialize Jitsi with emergency settings
-            this.jitsiApi = new JitsiMeetExternalAPI(emergencyDomain, emergencyOptions);
-            
-            // Setup basic event handlers
-            this.setupJitsiEventHandlers();
+            // Same root-cause fix as initJitsi: embedding is blocked by
+            // meet.ffmuc.net's frame-ancestors policy, so use top-level
+            // navigation (new tab) exactly like the working mobile client.
+            await this.openTopLevelSession(
+                emergencyDomain,
+                emergencyConfig,
+                emergencyInterfaceConfig
+            );
             
             
         } catch (error) {
