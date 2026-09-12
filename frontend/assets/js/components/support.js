@@ -48,6 +48,12 @@ class SupportPage {
         if (reportForm) {
             reportForm.addEventListener('submit', (e) => this.handleReportSubmit(e));
             console.log('Report form event listener attached');
+
+            // Clear the inline description error as soon as the user edits the field
+            const descriptionField = document.getElementById('problem-description');
+            if (descriptionField) {
+                descriptionField.addEventListener('input', () => this.clearFieldErrors());
+            }
         }
 
         // Supervisor form submission
@@ -98,13 +104,17 @@ class SupportPage {
 
         console.log('📤 Sending report data:', formData);
 
-        // Validate form data
-        if (!this.validateReportForm(formData)) {
+        // Validate form data (field-specific feedback)
+        const validation = this.validateReportForm(formData);
+        if (!validation.isValid) {
             console.warn('⚠️ Form validation failed');
-            this.showAlert(reportAlert, 'warning', 'Please fill all required fields with valid information.');
+            this.showFieldErrors(validation.errors);
             this.enableSubmitButton(submitBtn, '<i class="bi bi-send-fill me-1"></i>Send Support Request');
             return;
         }
+
+        // Clear any previous field errors before submitting
+        this.clearFieldErrors();
 
         try {
             console.log('🌐 Making API request to /api/support/report-problem');
@@ -254,26 +264,78 @@ class SupportPage {
         return localStorage.getItem('sahatak_user_email') || 'Unknown';
     }
 
-    validateReportForm(data) {
-        const hasRequired =
-            data.full_name &&
-            data.email &&
-            data.subject &&
-            data.description &&
-            data.full_name.length > 1 &&
-            data.subject.length > 0 &&
-            data.description.length >= 10;
+    showFieldErrors(errors) {
+        if (!Array.isArray(errors)) return;
 
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        const isEmailValid = emailPattern.test(data.email);
+        const hasFieldSpecificErrors = errors.some(err =>
+            err.field === 'description' && (err.code === 'too_short' || err.code === 'required')
+        );
 
-        const isValid = hasRequired && isEmailValid;
-        
-        if (!isValid) {
-            console.warn('Report form validation failed:', data);
+        // Field-specific inline error for the description textarea
+        const descriptionField = document.getElementById('problem-description');
+        const descriptionError = document.getElementById('problem-description-error');
+        const descriptionIssue = errors.find(err => err.field === 'description');
+
+        if (descriptionIssue && descriptionError) {
+            descriptionError.textContent = descriptionIssue.code === 'too_short'
+                ? 'Please provide at least 10 characters describing the issue.'
+                : 'Message / Description is required.';
+            descriptionError.classList.remove('d-none');
         }
-        
-        return isValid;
+        if (descriptionIssue && descriptionField) {
+            descriptionField.classList.add('is-invalid');
+        }
+
+        // Fallback generic alert for everything else (keeps old behavior for
+        // non-description failures) - only shown if the failure is not purely
+        // a description issue, to avoid redundant messaging.
+        if (!hasFieldSpecificErrors || errors.length > 1) {
+            const reportAlert = document.getElementById('report-alert');
+            this.showAlert(reportAlert, 'warning', 'Please fill all required fields with valid information.');
+        }
+    }
+
+    clearFieldErrors() {
+        const descriptionField = document.getElementById('problem-description');
+        const descriptionError = document.getElementById('problem-description-error');
+        if (descriptionError) {
+            descriptionError.classList.add('d-none');
+            descriptionError.textContent = '';
+        }
+        if (descriptionField) {
+            descriptionField.classList.remove('is-invalid');
+        }
+    }
+
+    validateReportForm(data) {
+        // Returns detailed validation result instead of a bare boolean, so the
+        // UI can show field-specific feedback (e.g. description too short).
+        // NOTE: all existing rules (including the 10-character minimum on
+        // description) are intentionally preserved - only feedback improved.
+        const errors = [];
+
+        if (!data.full_name || data.full_name.length <= 1) {
+            errors.push({ field: 'full_name', code: 'required' });
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+            errors.push({ field: 'email', code: 'invalid' });
+        }
+        if (!data.subject || data.subject.length <= 0) {
+            errors.push({ field: 'subject', code: 'required' });
+        }
+        if (!data.description) {
+            errors.push({ field: 'description', code: 'required' });
+        } else if (data.description.length < 10) {
+            errors.push({ field: 'description', code: 'too_short' });
+        }
+
+        const isValid = errors.length === 0;
+
+        if (!isValid) {
+            console.warn('Report form validation failed:', errors, data);
+        }
+
+        return { isValid, errors };
     }
 
     validateSupervisorForm(data) {
