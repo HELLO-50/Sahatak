@@ -386,17 +386,6 @@ class SupportPage {
     }
 }
 
-// Custom API Error class (in case it's not available from main.js)
-class ApiError extends Error {
-    constructor(message, statusCode, errorCode, field) {
-        super(message);
-        this.name = 'ApiError';
-        this.statusCode = statusCode;
-        this.errorCode = errorCode;
-        this.field = field;
-    }
-}
-
 // Initialize Support Page when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded - Initializing support page...');
