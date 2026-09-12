@@ -1,200 +1,429 @@
-/* Electronic Health Record (EHR) System Styles - Following Medical Scheme */
+/* Electronic Health Record (EHR) System Styles - Light Medical Theme */
 
-/* Patient Overview Card */
-.patient-overview-card {
-    border-left: 4px solid var(--medical-blue);
+/* ==========================================================================
+   Page-scoped theme tokens.
+   ehr.css is loaded ONLY by pages/medical/doctor/ehr.html, so these overrides
+   safely re-map the dark-theme custom properties inherited from main.css
+   (:root) to a light clinical palette FOR THIS PAGE ONLY. No other page is
+   affected because no other page loads this stylesheet.
+   ========================================================================== */
+body[data-protect="doctor"] {
+    --primary: #1d4ed8;        /* refined medical blue (was cyan #22d3ee) */
+    --primary-color: #1d4ed8;  /* align shared accents with the brand blue */
+    --text: #1e293b;           /* slate-800 body text (was near-white #e5e7eb) */
+    --muted: #64748b;          /* slate-500 secondary text (was #9ca3af) */
+    --border: #e2e8f0;         /* slate-200 hairlines (was near-black #1f2937) */
+    --hover: #f1f5f9;          /* slate-100 hover surface (was near-black) */
+    --surface: #ffffff;
+    --surface-soft: #f8fafc;
+    --shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 24px rgba(15, 23, 42, 0.07);
+    --shadow-hover: 0 4px 12px rgba(37, 99, 235, 0.12), 0 12px 32px rgba(15, 23, 42, 0.10);
+    --radius: 14px;
+    color: var(--text);
+    background: #eef2f7;
+}
+
+/* Page canvas — calm clinical light wash replaces the loud blue gradient */
+.dashboard-container {
+    background: linear-gradient(180deg, #f8fafc 0%, #eef4fb 55%, #f1f5f9 100%);
+    padding-top: 1.75rem;
+    padding-bottom: 2.25rem;
+}
+
+.dashboard-container::before {
+    background:
+        radial-gradient(circle at 12% 18%, rgba(37, 99, 235, 0.055) 0%, transparent 42%),
+        radial-gradient(circle at 88% 85%, rgba(8, 145, 178, 0.055) 0%, transparent 42%);
+}
+
+/* Page header — crisper glass card */
+.dashboard-header {
+    border: 1px solid #e2e8f0;
     box-shadow: var(--shadow);
-    background: rgba(2, 6, 23, 0.35);
-    border: 1px solid var(--border);
+}
+
+/* Shared card surface on this page: white, hairline border, layered shadow */
+.dashboard-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
     border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1.5rem;
+    transition: box-shadow 250ms ease, border-color 250ms ease;
+}
+
+/* Cards that host a .card-header bleed the header to the edges */
+.patient-overview-card,
+.ehr-tab-content .dashboard-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+/* Plain (non-colored) section headers: soft blue-gray band + dark title.
+   Fixes invisible "white on white" card titles (old rule forced white text). */
+.dashboard-card .card-header {
+    background: linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%);
+    border-bottom: 1px solid #e3ecf6;
+    padding: 1.05rem 1.5rem;
+}
+
+.dashboard-card .card-header .card-title,
+.dashboard-card .card-header h6 {
+    color: #0f172a !important;
+    font-weight: 700;
+    font-size: 0.98rem;
+    letter-spacing: -0.01em;
+}
+
+.dashboard-card .card-header .card-title i,
+.dashboard-card .card-header h6 i {
+    color: #1d4ed8 !important;
+}
+
+/* Keep white titles on intentionally colored chart headers */
+.dashboard-card .card-header.bg-primary .card-title,
+.dashboard-card .card-header.bg-success .card-title,
+.dashboard-card .card-header.bg-warning .card-title,
+.dashboard-card .card-header.bg-info .card-title,
+.dashboard-card .card-header.bg-primary h6,
+.dashboard-card .card-header.bg-success h6,
+.dashboard-card .card-header.bg-warning h6,
+.dashboard-card .card-header.bg-info h6 {
+    color: #ffffff !important;
+}
+
+.dashboard-card .card-header.bg-primary .card-title i,
+.dashboard-card .card-header.bg-success .card-title i,
+.dashboard-card .card-header.bg-warning .card-title i,
+.dashboard-card .card-header.bg-info .card-title i {
+    color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Card bodies inside bleeding cards get their own padding */
+.ehr-tab-content .dashboard-card .card-body {
+    padding: 1.4rem 1.5rem 1.5rem;
+}
+
+/* Stacked cards inside a tab pane get consistent vertical rhythm */
+.ehr-tab-content .dashboard-card + .dashboard-card {
+    margin-top: 1.25rem;
+}
+
+/* ==========================================================================
+   Patient Overview Card
+   ========================================================================== */
+.patient-overview-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid var(--medical-blue);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
 }
 
 .patient-overview-card .card-header {
-    background: linear-gradient(135deg, var(--medical-blue), var(--medical-teal));
-    color: var(--text);
-    border-bottom: 1px solid var(--border);
+    background: linear-gradient(135deg, #1d4ed8 0%, #0891b2 100%);
+    color: #ffffff;
+    border-bottom: none;
+    padding: 1.1rem 1.5rem;
+}
+
+.patient-overview-card .card-header .card-title,
+.patient-overview-card .card-header .card-title i {
+    color: #ffffff !important;
+}
+
+.patient-overview-card .card-body {
+    padding: 1.4rem 1.5rem 1.5rem;
 }
 
 .patient-basic-info {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem;
 }
 
+/* WCAG AA fix: light info cards with dark, clearly readable text.
+   Previously: 35% dark slate background with near-white text (~1.2:1). */
 .info-group {
-    background: rgba(2, 6, 23, 0.35);
-    padding: 1rem;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
+    background: #f8fafc;
+    padding: 1.15rem 1.25rem;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    border-top: 3px solid var(--medical-blue);
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.info-group:hover {
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+    transform: translateY(-2px);
 }
 
 .info-group h6 {
-    color: var(--primary);
-    font-weight: 600;
-    margin-bottom: 0.75rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--border);
+    color: #1d4ed8;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 0.85rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.info-group h6 i {
+    color: #0891b2;
 }
 
 .info-item {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #f0f0f0;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px dashed #e2e8f0;
 }
 
 .info-item:last-child {
     border-bottom: none;
+    padding-bottom: 0.15rem;
 }
 
+/* Labels: quiet slate-500 — 4.8:1 on #f8fafc (WCAG AA) */
 .info-label {
     font-weight: 500;
-    color: var(--muted);
+    font-size: 0.84rem;
+    color: #64748b;
+    flex-shrink: 0;
 }
 
+/* Values: near-black slate-900 — ~15:1 contrast (WCAG AAA) */
 .info-value {
-    color: var(--text);
+    color: #0f172a;
     font-weight: 600;
+    text-align: right;
+    word-break: break-word;
 }
 
-/* EHR Tabs */
+/* EHR Tabs — light surface, brand-blue active state */
 .ehr-tabs {
-    background: rgba(2, 6, 23, 0.35);
-    border-bottom: 2px solid var(--border);
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
     margin-bottom: 0;
     border-radius: var(--radius) var(--radius) 0 0;
+    padding: 0.4rem 0.5rem 0;
+    gap: 0.25rem;
 }
 
 .ehr-tabs .nav-link {
-    color: var(--muted);
-    font-weight: 500;
-    padding: 1rem 1.5rem;
+    color: #64748b;
+    font-weight: 600;
+    font-size: 0.92rem;
+    padding: 0.9rem 1.25rem;
     border: none;
-    transition: all 0.3s ease;
+    border-radius: 10px 10px 0 0;
+    transition: color 0.2s ease, background-color 0.2s ease;
 }
 
 .ehr-tabs .nav-link:hover {
-    color: var(--primary);
-    background: var(--hover);
+    color: #1d4ed8;
+    background: #f1f5f9;
     border-color: transparent;
 }
 
+.ehr-tabs .nav-link:focus-visible {
+    outline: 2px solid #1d4ed8;
+    outline-offset: -2px;
+}
+
+/* Active tab: deep blue text (~8:1 on the light blue band) + solid underline */
 .ehr-tabs .nav-link.active {
-    color: var(--primary);
-    background: rgba(34, 211, 238, 0.06);
-    border-color: transparent transparent var(--primary) transparent;
-    border-width: 0 0 3px 0;
-    border-style: solid;
+    color: #1d4ed8;
+    background: #eff6ff;
+    border-color: transparent;
+    box-shadow: inset 0 -3px 0 #1d4ed8;
 }
 
 .ehr-tab-content {
-    background: rgba(2, 6, 23, 0.35);
-    padding: 0;
-    border: 1px solid var(--border);
+    background: #ffffff;
+    padding: 1.4rem 1.5rem 1.5rem;
+    border: 1px solid #e2e8f0;
     border-top: none;
     border-radius: 0 0 var(--radius) var(--radius);
+    box-shadow: var(--shadow);
 }
 
-/* Diagnosis Cards */
+/* Diagnosis Cards — white elevation cards with status-colored left rail */
 .diagnosis-card {
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid transparent;
+    border-radius: 12px;
     margin-bottom: 1rem;
-    transition: all 0.3s ease;
-    background: rgba(2, 6, 23, 0.35);
-    box-shadow: var(--shadow);
+    padding: 1.25rem 1.4rem;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 4px 12px rgba(15, 23, 42, 0.05);
 }
 
 .diagnosis-card:hover {
-    box-shadow: var(--shadow);
-    border-color: var(--primary);
-    background: var(--hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12), 0 12px 28px rgba(15, 23, 42, 0.09);
+    border-color: #bfdbfe;
+    background: #ffffff;
 }
 
 .diagnosis-card.active-diagnosis {
-    border-left: 4px solid var(--medical-green);
+    border-left-color: #10b981;
 }
 
 .diagnosis-card.resolved-diagnosis {
-    border-left: 4px solid #6c757d;
-    opacity: 0.8;
+    border-left-color: #94a3b8;
+    background: #fbfcfe;
 }
 
 .diagnosis-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    gap: 1rem;
     margin-bottom: 1rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid #eef2f7;
 }
 
 .diagnosis-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 0.25rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.01em;
+    margin-bottom: 0.4rem;
 }
 
 .diagnosis-meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 0.75rem;
+    gap: 0.45rem;
 }
 
+/* Status/severity chips: tinted pill + colored dot for at-a-glance reading */
 .diagnosis-badge {
-    padding: 0.25rem 0.5rem;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.68rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    border: 1px solid transparent;
 }
 
-.severity-mild { background: #d1ecf1; color: #0c5460; }
-.severity-moderate { background: #fff3cd; color: #856404; }
-.severity-severe { background: #f8d7da; color: #721c24; }
-.severity-critical { background: #f5c6cb; color: #721c24; }
+.diagnosis-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+}
 
-.status-provisional { background: #e2e3e5; color: #383d41; }
-.status-confirmed { background: #d4edda; color: #155724; }
-.status-differential { background: #cce5ff; color: #004085; }
-.status-rule-out { background: #f8d7da; color: #721c24; }
+/* Severity palette — every combination ≥ 4.6:1 (WCAG AA) */
+.severity-mild { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+.severity-moderate { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+.severity-severe { background: #fff7ed; color: #c2410c; border-color: #fed7aa; }
+.severity-critical { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+
+/* Status palette (JS emits status-rule_out with an underscore) */
+.status-provisional { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+.status-confirmed { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+.status-differential { background: #f5f3ff; color: #6d28d9; border-color: #ddd6fe; }
+.status-rule_out { background: #f8fafc; color: #475569; border-color: #e2e8f0; }
+.status-rule-out { background: #f8fafc; color: #475569; border-color: #e2e8f0; }
 
 .diagnosis-content {
-    padding: 0.75rem 0;
+    color: #334155;
 }
 
+/* Clinical Findings / Treatment Plan / Follow-up: separated soft sub-panels */
 .diagnosis-section {
-    margin-bottom: 0.75rem;
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+    margin-bottom: 0.7rem;
+}
+
+.diagnosis-section:last-of-type {
+    margin-bottom: 0;
 }
 
 .diagnosis-section h6 {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--primary-color);
-    margin-bottom: 0.5rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #1d4ed8;
+    margin-bottom: 0.4rem;
 }
 
 .diagnosis-section p {
     font-size: 0.9rem;
-    color: #495057;
+    color: #334155;
     margin-bottom: 0;
-    line-height: 1.4;
+    line-height: 1.6;
+}
+
+/* Footer row: doctor credit + separated, roomier action buttons */
+.diagnosis-actions {
+    padding-top: 0.95rem;
+    border-top: 1px solid #eef2f7;
+    gap: 0.75rem;
+}
+
+.diagnosis-actions .btn-group {
+    gap: 0.4rem;
+}
+
+.diagnosis-actions .btn-group > .btn {
+    padding: 0.45rem 0.8rem;
+    border-radius: 9px !important;
+}
+
+.diagnosis-actions .btn-group > .btn + .btn {
+    margin-left: 0 !important;
+}
+
+.diagnosis-actions .btn-group .btn-outline-primary:hover {
+    background-color: rgba(29, 78, 216, 0.08);
+    border-color: #1d4ed8;
+    color: #1d4ed8;
+}
+
+.diagnosis-actions .btn-group .btn-outline-success:hover {
+    background-color: rgba(5, 150, 105, 0.08);
+    border-color: #059669;
+    color: #047857;
+}
+
+.diagnosis-actions .btn-group .btn-outline-info:hover {
+    background-color: rgba(8, 145, 178, 0.08);
+    border-color: #0891b2;
+    color: #0e7490;
 }
 
 /* Vital Signs */
 .vitals-chart-container {
-    background: rgba(2, 6, 23, 0.35);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1rem;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.25rem;
     margin-bottom: 1rem;
-    box-shadow: var(--shadow);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
 }
 
 .vitals-chart-container h6 {
-    color: var(--primary);
-    font-weight: 600;
+    color: #1d4ed8;
+    font-weight: 700;
+    font-size: 0.9rem;
     margin-bottom: 1rem;
 }
 
@@ -326,28 +555,29 @@
 
 /* Medical History */
 .history-section {
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
     margin-bottom: 1rem;
-    background: rgba(2, 6, 23, 0.35);
-    box-shadow: var(--shadow);
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+    overflow: hidden;
 }
 
 .history-section-header {
-    background: var(--hover);
-    padding: 1rem;
-    border-bottom: 1px solid var(--border);
-    border-radius: var(--radius) var(--radius) 0 0;
+    background: #f8fafc;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e2e8f0;
 }
 
 .history-section-title {
-    font-weight: 600;
-    color: var(--primary);
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: #1d4ed8;
     margin: 0;
 }
 
 .history-section-content {
-    padding: 1rem;
+    padding: 1rem 1.25rem;
 }
 
 .history-list {
@@ -358,33 +588,40 @@
 
 .history-item {
     padding: 0.75rem 0;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px dashed #e8eef5;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    gap: 1rem;
 }
 
 .history-item:last-child {
     border-bottom: none;
+    padding-bottom: 0.15rem;
 }
 
 .history-content {
     flex: 1;
 }
 
+/* Label/value hierarchy: quiet label, strong value */
 .history-label {
     font-weight: 500;
-    color: var(--muted);
-    margin-bottom: 0.25rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    margin-bottom: 0.3rem;
 }
 
 .history-value {
-    color: var(--text);
-    line-height: 1.4;
+    color: #1e293b;
+    font-weight: 600;
+    line-height: 1.5;
 }
 
 .history-date {
-    color: var(--muted);
+    color: #64748b;
     font-size: 0.85rem;
     font-style: italic;
     white-space: nowrap;
@@ -393,19 +630,21 @@
 
 /* Appointments List */
 .appointment-card {
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1rem;
-    margin-bottom: 0.75rem;
-    background: rgba(2, 6, 23, 0.35);
-    transition: all 0.3s ease;
-    box-shadow: var(--shadow);
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #1d4ed8;
+    border-radius: 12px;
+    padding: 1.1rem 1.25rem;
+    margin-bottom: 0.85rem;
+    background: #ffffff;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
 }
 
 .appointment-card:hover {
-    box-shadow: var(--shadow);
-    border-color: var(--primary);
-    background: var(--hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12), 0 8px 24px rgba(15, 23, 42, 0.08);
+    border-color: #bfdbfe;
+    border-left-color: #1d4ed8;
 }
 
 .appointment-header {
@@ -416,26 +655,27 @@
 }
 
 .appointment-date {
-    font-weight: 600;
-    color: var(--primary);
-    font-size: 1rem;
+    font-weight: 700;
+    color: #1d4ed8;
+    font-size: 0.98rem;
 }
 
 .appointment-status {
-    padding: 0.25rem 0.75rem;
-    border-radius: 15px;
-    font-size: 0.8rem;
-    font-weight: 500;
+    padding: 0.28rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
 }
 
-.status-completed { background: #d4edda; color: #155724; }
-.status-scheduled { background: #cce5ff; color: #004085; }
-.status-cancelled { background: #f8d7da; color: #721c24; }
+.status-completed { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+.status-scheduled { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+.status-cancelled { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
 
 .appointment-details {
-    color: var(--muted);
+    color: #475569;
     font-size: 0.9rem;
-    line-height: 1.4;
+    line-height: 1.55;
 }
 
 /* Loading States */
@@ -641,28 +881,51 @@
         grid-template-columns: 1fr;
         gap: 1rem;
     }
-    
+
+    /* Let the tab strip scroll horizontally instead of wrapping awkwardly */
+    .ehr-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
     .ehr-tabs .nav-link {
         padding: 0.75rem 1rem;
         font-size: 0.9rem;
+        white-space: nowrap;
     }
-    
+
+    .ehr-tab-content {
+        padding: 1rem;
+    }
+
     .diagnosis-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 0.5rem;
     }
-    
+
+    .diagnosis-card {
+        padding: 1.1rem 1rem;
+    }
+
+    /* Action buttons stay comfortable and wrap instead of crushing */
+    .diagnosis-actions {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.6rem;
+    }
+
     .vitals-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .appointment-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 0.5rem;
     }
-    
+
     .vitals-chart-container {
         padding: 0.75rem;
     }
@@ -670,23 +933,35 @@
 
 @media (max-width: 576px) {
     .ehr-tabs .nav-link {
-        padding: 0.5rem 0.75rem;
+        padding: 0.6rem 0.85rem;
         font-size: 0.85rem;
     }
-    
+
     .vitals-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .diagnosis-meta {
-        flex-direction: column;
-        gap: 0.25rem;
+        gap: 0.35rem;
     }
-    
+
     .info-item {
         flex-direction: column;
         align-items: flex-start;
-        gap: 0.25rem;
+        gap: 0.15rem;
+    }
+
+    .info-value {
+        text-align: left;
+    }
+
+    .dashboard-card .card-header {
+        padding: 0.9rem 1rem;
+    }
+
+    .ehr-tab-content .dashboard-card .card-body,
+    .patient-overview-card .card-body {
+        padding: 1.1rem 1rem 1.2rem;
     }
 }
 

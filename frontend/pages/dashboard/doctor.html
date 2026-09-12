@@ -18,13 +18,19 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <!-- Clinical Glass typography: Manrope (headings) + Inter (body), local fallbacks -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+
     <!-- Main CSS -->
     <link rel="stylesheet" href="../../assets/css/main.css">
     <!-- Dashboard CSS -->
     <link rel="stylesheet" href="../../assets/css/components/dashboard.css">
     <!-- Video Consultation Dashboard CSS -->
     <link rel="stylesheet" href="../../assets/css/components/video-consultation-dashboard.css">
+    <!-- Doctor Dashboard page-scoped refinement layer (visual only) -->
+    <link rel="stylesheet" href="../../assets/css/components/doctor-dashboard.css">
+    <!-- Clinical Glass visual layer (visual only, loaded last to override) -->
+    <link rel="stylesheet" href="../../assets/css/components/doctor-dashboard-glass.css">
     <style>
         /* Unverified doctor states */
         .unverified-disabled {

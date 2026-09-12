@@ -1,0 +1,346 @@
+/* ==========================================================================
+   Doctor Dashboard — page-scoped visual refinement layer.
+   This stylesheet is linked ONLY from pages/dashboard/doctor.html, so all of
+   its rules are scoped to the doctor dashboard and cannot affect the other
+   pages that share dashboard.css. Pure CSS layer: no ids/classes/names are
+   changed by this pass; existing ids/classes are used only as style hooks.
+   Palette matches the EHR page (components/ehr.css) for cross-page harmony.
+   ========================================================================== */
+
+/* Page-scoped theme tokens — same light clinical palette as components/ehr.css */
+body[data-protect="doctor"] {
+    --primary: #1d4ed8;
+    --primary-color: #1d4ed8;  /* refined brand blue (was generic #0d6efd) */
+    --medical-blue: #2563eb;
+    --text: #1e293b;           /* slate-800 body text */
+    --muted: #64748b;          /* slate-500 secondary text */
+    --border: #e2e8f0;         /* slate-200 hairlines */
+    --hover: #f1f5f9;
+    --text-strong: #0f172a;
+    --text-soft: #475569;
+    --dd-surface: #ffffff;
+    --dd-surface-soft: #f8fafc;
+    --dd-radius: 14px;
+    --dd-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 24px rgba(15, 23, 42, 0.07);
+    --dd-shadow-hover: 0 4px 12px rgba(37, 99, 235, 0.12), 0 12px 32px rgba(15, 23, 42, 0.10);
+    color: var(--text);
+    background: #eef2f7;
+}
+
+/* Page canvas — calm clinical light wash (matches the EHR page) */
+.dashboard-container {
+    background: linear-gradient(180deg, #f8fafc 0%, #eef4fb 55%, #f1f5f9 100%);
+    padding-top: 1.75rem;
+    padding-bottom: 2.25rem;
+}
+
+.dashboard-container::before {
+    background:
+        radial-gradient(circle at 12% 18%, rgba(37, 99, 235, 0.055) 0%, transparent 42%),
+        radial-gradient(circle at 88% 85%, rgba(8, 145, 178, 0.055) 0%, transparent 42%);
+}
+
+/* ==========================================================================
+   Header — crisper glass card with clearer identity block
+   ========================================================================== */
+.dashboard-header {
+    border: 1px solid #e2e8f0;
+    box-shadow: var(--dd-shadow);
+}
+
+.dashboard-title {
+    background: linear-gradient(135deg, #1d4ed8 0%, #0891b2 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.dashboard-subtitle {
+    color: #64748b;
+    font-weight: 500;
+}
+
+/* Identity avatar: white ring + soft blue halo */
+.user-avatar {
+    background: linear-gradient(135deg, #2563eb, #0891b2);
+    border: 3px solid #ffffff;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35), 0 8px 20px rgba(15, 23, 42, 0.12);
+    color: #ffffff;
+}
+
+.user-details h5 {
+    color: #0f172a;
+    font-weight: 700;
+}
+
+/* Header action buttons: white chips with tinted hover */
+.dashboard-header .btn-action {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    color: #334155;
+    background: #ffffff;
+    transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.dashboard-header .btn-action:hover {
+    color: #1d4ed8;
+    border-color: #bfdbfe;
+    background: #eff6ff;
+}
+
+.dashboard-header .btn-action.btn-logout:hover {
+    color: #b91c1c;
+    border-color: #fecaca;
+    background: #fef2f2;
+}
+
+.dashboard-header .btn-outline-medical {
+    border-color: #cbd5e1;
+    color: #334155;
+}
+
+.dashboard-header .btn-outline-medical:hover {
+    color: #1d4ed8;
+    border-color: #93c5fd;
+    background: #eff6ff;
+}
+
+/* ==========================================================================
+   Cards — consistent surface, rhythm, and typographic hierarchy
+   ========================================================================== */
+.dashboard-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--dd-radius);
+    box-shadow: var(--dd-shadow);
+    padding: 1.5rem;
+}
+
+/* Section titles: strong navy text + brand-blue icon accent */
+.dashboard-card > h5,
+.dashboard-card h5 {
+    color: #1e293b;
+    font-weight: 700;
+    font-size: 1.02rem;
+    letter-spacing: -0.01em;
+}
+
+.dashboard-card > h5 i,
+.dashboard-card h5 i {
+    color: #1d4ed8;
+}
+
+/* Interactive cards lift on hover (quick actions are onclick cards) */
+.quick-action-card {
+    cursor: pointer;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.quick-action-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--dd-shadow-hover);
+    border-color: #bfdbfe;
+}
+
+.quick-action-card:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.35);
+    outline-offset: 2px;
+}
+
+/* Quick action icon chips: rounded + per-card accent (IDs used as style hooks) */
+.quick-action-icon {
+    border-radius: 18px;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.18);
+}
+
+#communication-card .quick-action-icon {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.14), rgba(37, 99, 235, 0.05));
+    color: #1d4ed8;
+}
+
+#records-card .quick-action-icon {
+    background: linear-gradient(135deg, rgba(8, 145, 178, 0.14), rgba(8, 145, 178, 0.05));
+    color: #0891b2;
+}
+
+#availability-card .quick-action-icon {
+    background: linear-gradient(135deg, rgba(5, 150, 105, 0.14), rgba(5, 150, 105, 0.05));
+    color: #059669;
+}
+
+/* ==========================================================================
+   Quick Statistics — quiet chips, strong numbers, AA-safe accents
+   ========================================================================== */
+#doctor-stats-container .stat-item {
+    background: var(--dd-surface-soft);
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 0.9rem 0.6rem;
+    transition: box-shadow 0.22s ease, transform 0.22s ease;
+}
+
+#doctor-stats-container .stat-item:hover {
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+    transform: translateY(-2px);
+}
+
+#doctor-stats-container .stat-number {
+    font-size: 1.85rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+#doctor-stats-container .stat-label {
+    font-size: 0.74rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748b;
+    margin-bottom: 0;
+}
+
+/* Refined accents replace generic Bootstrap blues/cyan (all AA on #f8fafc) */
+#doctor-stats-container .stat-number.text-primary { color: #1d4ed8 !important; }
+#doctor-stats-container .stat-number.text-success { color: #047857 !important; }
+#doctor-stats-container .stat-number.text-info { color: #0e7490 !important; }
+#doctor-stats-container .stat-number.text-warning { color: #b45309 !important; }
+#doctor-stats-container .stat-number.text-danger { color: #b91c1c !important; }
+
+/* ==========================================================================
+   Appointments list — white cards with status-colored left rail.
+   The inline JS emits `bg-light rounded`; Bootstrap's .bg-light is
+   !important, so white here needs !important to win. Attribute selectors
+   style rail colors by status without touching any JS or attributes.
+   ========================================================================== */
+#appointments-container .appointment-item {
+    background-color: #ffffff !important;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #1d4ed8;
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 4px 12px rgba(15, 23, 42, 0.05);
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+#appointments-container .appointment-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--dd-shadow-hover);
+    border-color: #bfdbfe;
+}
+
+#appointments-container .appointment-item[data-appointment-status="confirmed"],
+#appointments-container .appointment-item[data-appointment-status="scheduled"] {
+    border-left-color: #1d4ed8;
+}
+
+#appointments-container .appointment-item[data-appointment-status="pending"] {
+    border-left-color: #d97706;
+}
+
+#appointments-container .appointment-item[data-appointment-status="completed"] {
+    border-left-color: #059669;
+}
+
+#appointments-container .appointment-item[data-appointment-status="cancelled"] {
+    border-left-color: #94a3b8;
+}
+
+/* Status badges inside appointment rows: rounded pills, refined fills */
+#appointments-container .badge {
+    border-radius: 999px;
+    padding: 0.35em 0.8em;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+#appointments-container .badge.bg-primary { background-color: #1d4ed8 !important; }
+#appointments-container .badge.bg-success { background-color: #059669 !important; }
+#appointments-container .badge.bg-info { background-color: #0891b2 !important; }
+#appointments-container .badge.bg-danger { background-color: #dc2626 !important; }
+#appointments-container .badge.bg-warning,
+#appointments-container .badge.bg-warning.text-dark {
+    background-color: #fef3c7 !important;
+    color: #92400e !important;
+}
+
+/* Roomier action buttons in each appointment row */
+#appointments-container .appointment-item .btn {
+    border-radius: 9px;
+}
+
+#appointments-container .appointment-item .btn-sm {
+    padding: 0.4rem 0.8rem;
+}
+
+/* ==========================================================================
+   Waiting patients + recent activity rows — same white chip treatment
+   ========================================================================== */
+#waiting-card .bg-light,
+#activity-card .activity-item {
+    background-color: #ffffff !important;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+    transition: box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+#waiting-card .bg-light:hover,
+#activity-card .activity-item:hover {
+    border-color: #dbe7f6;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.10);
+}
+
+#activity-card .activity-item i {
+    color: #1d4ed8;
+}
+
+/* ==========================================================================
+   Responsive — keeps the improved layout usable at phone widths
+   ========================================================================== */
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding-top: 1.25rem;
+        padding-bottom: 1.5rem;
+    }
+
+    .dashboard-header {
+        padding: 1.1rem;
+    }
+
+    .dashboard-card {
+        padding: 1.2rem;
+    }
+
+    .dashboard-title {
+        font-size: 1.45rem;
+    }
+
+    .quick-action-icon {
+        width: 58px;
+        height: 58px;
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Appointment rows stack vertically so nothing is crushed */
+    #appointments-container .appointment-item {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.75rem;
+        padding: 0.9rem 1rem;
+    }
+
+    #appointments-container .appointment-item > .d-flex {
+        align-items: flex-start !important;
+    }
+
+    #doctor-stats-container .stat-number {
+        font-size: 1.45rem;
+    }
+
+    #doctor-stats-container .stat-item {
+        padding: 0.7rem 0.4rem;
+    }
+}

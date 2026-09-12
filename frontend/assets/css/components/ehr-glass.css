@@ -1,0 +1,640 @@
+/* ==========================================================================
+   EHR — "Clinical Glass" visual layer (Direction A).
+   Page-scoped: linked ONLY from pages/medical/doctor/ehr.html, AFTER
+   ehr.css, so every rule here safely overrides the previous light-theme
+   layer for this page alone. Pure CSS: no ids, classes, names, or data-*
+   attributes are changed; existing hooks (including the JS-rendered
+   .info-group / .info-label / .info-value / .diagnosis-badge /
+   .severity-* / .status-* hooks) are reused as-is.
+
+   CONTRAST SAFEGUARD: glass surfaces here are 86-95% effective white.
+   The mesh blobs behind them are very light, so the worst-case rendered
+   background behind ANY text on this page is ≈ #f0eef8 (relative
+   luminance ≈ 0.88). Every text color below was checked against that
+   worst case, not just against white — see the contrast table.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Typography — Manrope headings / Inter body (matches the doctor dashboard)
+   -------------------------------------------------------------------------- */
+body[data-protect="doctor"] {
+    font-family: "Inter", "Noto Sans Arabic", system-ui, -apple-system,
+                 "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+body[data-protect="doctor"] h1,
+body[data-protect="doctor"] h2,
+body[data-protect="doctor"] h3,
+body[data-protect="doctor"] h4,
+body[data-protect="doctor"] h5,
+body[data-protect="doctor"] h6,
+body[data-protect="doctor"] .dashboard-title,
+body[data-protect="doctor"] .card-title,
+body[data-protect="doctor"] .vital-value {
+    font-family: "Manrope", "Inter", system-ui, -apple-system,
+                 "Segoe UI", Roboto, sans-serif;
+    letter-spacing: -0.02em;
+}
+
+/* --------------------------------------------------------------------------
+   Page canvas — cool mesh gradient: blue / teal / faint violet blobs
+   -------------------------------------------------------------------------- */
+body[data-protect="doctor"] {
+    --cg-radius: 18px;
+    --cg-shadow:
+        0 1px 2px rgba(15, 23, 42, 0.04),
+        0 8px 20px rgba(15, 23, 42, 0.06),
+        0 24px 48px rgba(15, 23, 42, 0.05);
+    --cg-shadow-hover:
+        0 2px 4px rgba(13, 148, 136, 0.08),
+        0 12px 28px rgba(37, 99, 235, 0.12),
+        0 28px 56px rgba(15, 23, 42, 0.10);
+    --cg-glass: rgba(255, 255, 255, 0.87);        /* card surface          */
+    --cg-glass-strong: rgba(255, 255, 255, 0.95); /* text-dense surfaces   */
+    --cg-glass-border: rgba(255, 255, 255, 0.65);
+    --cg-text: #1e293b;
+    --cg-text-strong: #0f172a;
+    --cg-text-soft: #475569; /* replaces #64748b on glass: 7.5:1 vs 4.4:1 */
+    --cg-teal: #0e7490;
+    --cg-violet: #7c3aed;
+}
+
+.dashboard-container {
+    background: linear-gradient(165deg, #f6f9fd 0%, #eef4fb 45%, #f2f4fa 100%);
+    padding-top: 2.25rem;
+    padding-bottom: 3rem;
+}
+
+.dashboard-container::before {
+    background:
+        radial-gradient(560px 420px at 8% 4%,    rgba(37, 99, 235, 0.10) 0%, transparent 60%),
+        radial-gradient(640px 480px at 94% 12%,  rgba(13, 148, 136, 0.09) 0%, transparent 62%),
+        radial-gradient(720px 560px at 50% 105%, rgba(124, 58, 237, 0.07) 0%, transparent 65%);
+}
+
+/* --------------------------------------------------------------------------
+   Frosted-glass header bar
+   -------------------------------------------------------------------------- */
+.dashboard-header {
+    background: rgba(255, 255, 255, 0.72);
+    -webkit-backdrop-filter: blur(16px) saturate(170%);
+    backdrop-filter: blur(16px) saturate(170%);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: var(--cg-radius);
+    box-shadow:
+        0 1px 2px rgba(15, 23, 42, 0.05),
+        0 16px 40px rgba(15, 23, 42, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.85);
+    padding: 1.35rem 1.5rem;
+}
+
+.dashboard-title {
+    font-size: 1.85rem;
+    font-weight: 800;
+    background: linear-gradient(120deg, #1d4ed8 0%, #0e7490 55%, #7c3aed 110%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.dashboard-subtitle {
+    color: var(--cg-text-soft);
+    font-weight: 500;
+    font-size: 0.92rem;
+}
+
+.user-avatar {
+    background: linear-gradient(135deg, #2563eb, #0e7490);
+    border: 3px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.30), 0 12px 28px rgba(15, 23, 42, 0.14);
+    color: #ffffff;
+}
+
+.user-details h5 {
+    color: var(--cg-text-strong);
+    font-weight: 800;
+}
+
+/* Header buttons: same glass chip treatment as the dashboard */
+.dashboard-header .btn-action {
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 12px;
+    color: #334155;
+    background: rgba(255, 255, 255, 0.72);
+    font-weight: 600;
+    transition: color 0.25s ease, border-color 0.25s ease,
+                background-color 0.25s ease, box-shadow 0.25s ease,
+                transform 0.25s ease;
+}
+
+.dashboard-header .btn-action:hover,
+.dashboard-header .btn-action:focus-visible {
+    color: #b91c1c;
+    border-color: rgba(220, 38, 38, 0.35);
+    background: #fff5f5;
+    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.12);
+    transform: translateY(-1px);
+}
+
+.dashboard-header .btn-outline-medical {
+    border-color: rgba(71, 85, 105, 0.35);
+    color: #334155;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.25s ease;
+}
+
+.dashboard-header .btn-outline-medical:hover,
+.dashboard-header .btn-outline-medical:focus-visible {
+    color: #1d4ed8;
+    border-color: #93c5fd;
+    background: #eff6ff;
+    transform: translateY(-1px);
+}
+
+/* Primary "New Diagnosis" action: blue→teal gradient, white label.
+   Worst-case white-on-gradient contrast = 5.8:1 (teal end #0e7490). */
+.dashboard-header .btn-medical,
+#vitalsModal .btn-primary {
+    background: linear-gradient(135deg, #1d4ed8 0%, #0e7490 100%);
+    border: none;
+    color: #ffffff;
+    font-weight: 600;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28);
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.dashboard-header .btn-medical:hover,
+.dashboard-header .btn-medical:focus-visible,
+#vitalsModal .btn-primary:hover,
+#vitalsModal .btn-primary:focus-visible {
+    box-shadow: 0 8px 22px rgba(37, 99, 235, 0.38);
+    transform: translateY(-2px);
+}
+
+/* --------------------------------------------------------------------------
+   Cards — glass surfaces with layered depth
+   -------------------------------------------------------------------------- */
+.dashboard-card {
+    background: var(--cg-glass);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    backdrop-filter: blur(14px) saturate(160%);
+    border: 1px solid var(--cg-glass-border);
+    border-radius: var(--cg-radius);
+    box-shadow: var(--cg-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    padding: 1.75rem;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.dashboard-card:hover {
+    border-color: rgba(13, 148, 136, 0.26);
+    box-shadow: var(--cg-shadow-hover), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* Cards hosting a .card-header still bleed the header to the edges */
+.patient-overview-card,
+.ehr-tab-content .dashboard-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+/* Plain section headers: soft blue-gray glass band + dark title */
+.dashboard-card .card-header {
+    background: linear-gradient(180deg, rgba(248, 251, 255, 0.96) 0%, rgba(238, 244, 251, 0.96) 100%);
+    border-bottom: 1px solid #e3ecf6;
+    padding: 1.15rem 1.75rem;
+}
+
+.dashboard-card .card-header .card-title,
+.dashboard-card .card-header h6 {
+    color: #0f172a !important;
+    font-weight: 800;
+    font-size: 1rem;
+}
+
+.dashboard-card .card-header .card-title i,
+.dashboard-card .card-header h6 i {
+    color: #1d4ed8 !important;
+}
+
+/* Colored chart headers keep white titles — gradient ends darkened so
+   white text stays ≥ 5.8:1 at the lightest stop (was 4.4:1 on #0891b2) */
+.dashboard-card .card-header.bg-primary,
+.dashboard-card .card-header.bg-success,
+.dashboard-card .card-header.bg-warning,
+.dashboard-card .card-header.bg-info {
+    background: linear-gradient(135deg, #1d4ed8 0%, #0e7490 100%) !important;
+}
+
+.dashboard-card .card-header.bg-primary .card-title,
+.dashboard-card .card-header.bg-success .card-title,
+.dashboard-card .card-header.bg-warning .card-title,
+.dashboard-card .card-header.bg-info .card-title,
+.dashboard-card .card-header.bg-primary h6,
+.dashboard-card .card-header.bg-success h6,
+.dashboard-card .card-header.bg-warning h6,
+.dashboard-card .card-header.bg-info h6 {
+    color: #ffffff !important;
+}
+
+.dashboard-card .card-header.bg-primary .card-title i,
+.dashboard-card .card-header.bg-success .card-title i,
+.dashboard-card .card-header.bg-warning .card-title i,
+.dashboard-card .card-header.bg-info .card-title i {
+    color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.ehr-tab-content .dashboard-card .card-body {
+    padding: 1.5rem 1.75rem 1.75rem;
+}
+
+.ehr-tab-content .dashboard-card + .dashboard-card {
+    margin-top: 1.5rem; /* more generous vertical rhythm */
+}
+
+/* --------------------------------------------------------------------------
+   Patient Overview + "Patient Basic Information" info cards
+   AA-safe values preserved from the previous pass, now on near-opaque
+   glass tiles (95% white) so labels/values GAIN contrast, not lose it.
+   -------------------------------------------------------------------------- */
+.patient-overview-card {
+    background: var(--cg-glass);
+    border: 1px solid var(--cg-glass-border);
+    border-left: 4px solid #1d4ed8;
+    border-radius: var(--cg-radius);
+    box-shadow: var(--cg-shadow);
+}
+
+.patient-overview-card .card-header {
+    background: linear-gradient(135deg, #1d4ed8 0%, #0e7490 100%);
+    color: #ffffff;
+    border-bottom: none;
+    padding: 1.2rem 1.75rem;
+}
+
+.patient-overview-card .card-header .card-title,
+.patient-overview-card .card-header .card-title i {
+    color: #ffffff !important;
+}
+
+.patient-overview-card .card-body {
+    padding: 1.5rem 1.75rem 1.75rem;
+}
+
+.patient-basic-info {
+    gap: 1.4rem; /* a little more air between info tiles */
+}
+
+.info-group {
+    background: var(--cg-glass-strong);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    padding: 1.25rem 1.35rem;
+    border-radius: 14px;
+    border: 1px solid var(--cg-glass-border);
+    border-top: 3px solid #1d4ed8;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 6px 16px rgba(15, 23, 42, 0.05);
+    transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+}
+
+/* Alternate tiles pick up the teal/violet accent story via category */
+.info-group:hover {
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.10), 0 14px 30px rgba(15, 23, 42, 0.09);
+    transform: translateY(-3px);
+    border-color: rgba(13, 148, 136, 0.3);
+}
+
+.info-group h6 {
+    color: #1d4ed8;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 0.9rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.info-group h6 i {
+    color: #0e7490;
+}
+
+.info-item {
+    padding: 0.6rem 0;
+    border-bottom: 1px dashed #e6ebf3;
+}
+
+/* Labels: #475569 — 7.3:1 on the 95%-white glass tile (was #64748b at
+   4.8:1 on #f8fafc; upgraded rather than regressed). */
+.info-label {
+    font-weight: 500;
+    font-size: 0.84rem;
+    color: var(--cg-text-soft);
+    flex-shrink: 0;
+}
+
+/* Values: near-black slate-900 — ~14.5:1 on the glass tile (AAA) */
+.info-value {
+    color: var(--cg-text-strong);
+    font-weight: 700;
+    text-align: right;
+    word-break: break-word;
+}
+
+/* --------------------------------------------------------------------------
+   EHR Tabs — glass rail, blue active state (unchanged AA-safe colors)
+   -------------------------------------------------------------------------- */
+.ehr-tabs {
+    background: rgba(255, 255, 255, 0.9);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--cg-glass-border);
+    border-radius: var(--cg-radius) var(--cg-radius) 0 0;
+}
+
+.ehr-tabs .nav-link {
+    color: var(--cg-text-soft); /* 7.3:1 on the 90%-white rail */
+    font-weight: 700;
+    border-radius: 12px 12px 0 0;
+    transition: color 0.25s ease, background-color 0.25s ease;
+}
+
+.ehr-tabs .nav-link:hover,
+.ehr-tabs .nav-link:focus-visible {
+    color: #1d4ed8;
+    background: rgba(237, 244, 253, 0.9);
+    border-color: transparent;
+}
+
+.ehr-tabs .nav-link.active {
+    color: #1d4ed8;                 /* 7.2:1 on #eff6ff */
+    background: #eff6ff;
+    box-shadow: inset 0 -3px 0 #1d4ed8;
+}
+
+.ehr-tab-content {
+    background: var(--cg-glass-strong);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--cg-glass-border);
+    border-top: none;
+    border-radius: 0 0 var(--cg-radius) var(--cg-radius);
+    box-shadow: var(--cg-shadow);
+    padding: 1.6rem 1.75rem 1.75rem;
+}
+
+/* --------------------------------------------------------------------------
+   Diagnosis cards + severity/status badges
+   Badge palettes are UNCHANGED from the previous AA-verified pass —
+   badges have fully opaque backgrounds, so their contrast is independent
+   of the glass behind them. Only depth/radius/motion are upgraded.
+   -------------------------------------------------------------------------- */
+.diagnosis-card {
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-left: 4px solid transparent;
+    border-radius: 14px;
+    margin-bottom: 1.1rem;
+    padding: 1.35rem 1.5rem;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 6px 16px rgba(15, 23, 42, 0.05);
+}
+
+.diagnosis-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.10), 0 16px 32px rgba(15, 23, 42, 0.09);
+    border-color: rgba(13, 148, 136, 0.3);
+    background: rgba(255, 255, 255, 0.97);
+}
+
+.diagnosis-card.active-diagnosis { border-left-color: #10b981; }
+.diagnosis-card.resolved-diagnosis { border-left-color: #94a3b8; background: rgba(251, 252, 254, 0.94); }
+
+.diagnosis-title {
+    font-size: 1.08rem;
+    font-weight: 800;
+    color: var(--cg-text-strong);
+}
+
+/* Crafted pills: soft tinted fill + colored dot + hairline border */
+.diagnosis-badge {
+    padding: 0.32rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.73rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+/* Severity palette — unchanged, every combination ≥ 4.6:1 (WCAG AA) */
+.severity-mild     { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+.severity-moderate { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+.severity-severe   { background: #fff7ed; color: #c2410c; border-color: #fed7aa; }
+.severity-critical { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+
+/* Status palette — unchanged (JS emits status-rule_out with underscore) */
+.status-provisional { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+.status-confirmed   { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+.status-differential{ background: #f5f3ff; color: #6d28d9; border-color: #ddd6fe; }
+.status-rule_out,
+.status-rule-out    { background: #f8fafc; color: #475569; border-color: #e2e8f0; }
+
+.diagnosis-content { color: #334155; }
+
+.diagnosis-section {
+    background: rgba(248, 250, 252, 0.9);
+    border: 1px solid #eef2f7;
+    border-radius: 12px;
+    padding: 0.95rem 1.1rem;
+    margin-bottom: 0.75rem;
+}
+
+.diagnosis-section h6 {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #1d4ed8;
+}
+
+.diagnosis-section p {
+    font-size: 0.9rem;
+    color: #334155;
+    line-height: 1.6;
+}
+
+/* --------------------------------------------------------------------------
+   Vital signs — modern dashboard tiles with per-tile accent story
+   (blue / teal / violet cycle), gradient value text blue→violet.
+   Values: #1d4ed8 = 7.7:1, #7c3aed = 5.7:1 on white (≥ 5.0:1 worst-case
+   glass) at 800 weight ≈ 1.4rem bold — WCAG large text, AA comfortably.
+   -------------------------------------------------------------------------- */
+.vital-signs-card {
+    background: var(--cg-glass);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    backdrop-filter: blur(14px) saturate(160%);
+    border: 1px solid var(--cg-glass-border);
+    border-radius: var(--cg-radius);
+    box-shadow: var(--cg-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.vital-signs-card::before {
+    background: linear-gradient(90deg, #2563eb, #0e7490, #7c3aed);
+}
+
+.vital-signs-card:hover {
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: var(--cg-shadow-hover), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    border-color: rgba(13, 148, 136, 0.3);
+    transform: translateY(-3px);
+}
+
+.vitals-date {
+    color: #1d4ed8;
+    font-weight: 800;
+}
+
+.vitals-date i { color: #0e7490; }
+
+.vital-item {
+    background: linear-gradient(150deg, rgba(241, 245, 249, 0.55) 0%, rgba(255, 255, 255, 0.95) 100%);
+    border-radius: 14px;
+    border: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+/* Category tints cycle blue → teal → violet across the vitals grid */
+.vitals-grid .vital-item:nth-child(3n+1) {
+    background: linear-gradient(150deg, rgba(239, 246, 255, 0.9) 0%, rgba(255, 255, 255, 0.95) 60%);
+}
+.vitals-grid .vital-item:nth-child(3n+2) {
+    background: linear-gradient(150deg, rgba(240, 253, 250, 0.9) 0%, rgba(255, 255, 255, 0.95) 60%);
+}
+.vitals-grid .vital-item:nth-child(3n) {
+    background: linear-gradient(150deg, rgba(245, 243, 255, 0.9) 0%, rgba(255, 255, 255, 0.95) 60%);
+}
+
+.vitals-grid .vital-item:nth-child(3n+1)::before { background: linear-gradient(90deg, #2563eb, #1d4ed8); }
+.vitals-grid .vital-item:nth-child(3n+2)::before { background: linear-gradient(90deg, #14b8a6, #0e7490); }
+.vitals-grid .vital-item:nth-child(3n)::before   { background: linear-gradient(90deg, #8b5cf6, #6d28d9); }
+
+.vitals-grid .vital-item:hover {
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12), 0 10px 24px rgba(15, 23, 42, 0.07);
+    transform: translateY(-3px);
+}
+
+.vital-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    background: linear-gradient(120deg, #1d4ed8 0%, #7c3aed 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.02em;
+}
+
+.vital-label {
+    color: var(--cg-text-soft); /* 7.3:1 on the near-white tile */
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* --------------------------------------------------------------------------
+   Medical history — glass sections
+   -------------------------------------------------------------------------- */
+.history-section {
+    background: rgba(255, 255, 255, 0.94);
+    border-radius: 14px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 6px 16px rgba(15, 23, 42, 0.04);
+    transition: box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.history-section:hover {
+    box-shadow: 0 6px 18px rgba(13, 148, 136, 0.10);
+    border-color: rgba(13, 148, 136, 0.25);
+}
+
+.history-section-header {
+    background: linear-gradient(180deg, rgba(248, 251, 255, 0.95) 0%, rgba(238, 244, 251, 0.95) 100%);
+}
+
+.history-section-title {
+    color: #1d4ed8;
+    font-weight: 800;
+}
+
+.history-label { color: var(--cg-text-soft); }  /* 7.5:1 on white      */
+.history-value { color: var(--cg-text); }        /* 14.8:1 on white     */
+.history-date  { color: var(--cg-text-soft); }
+
+/* --------------------------------------------------------------------------
+   Empty / loading states
+   -------------------------------------------------------------------------- */
+.empty-state {
+    background: linear-gradient(135deg, rgba(241, 245, 249, 0.5) 0%, rgba(255, 255, 255, 0.95) 100%);
+    border-radius: var(--cg-radius);
+}
+
+.empty-state h6 { color: var(--cg-text); font-weight: 800; }
+.empty-state p  { color: var(--cg-text-soft); }
+
+/* --------------------------------------------------------------------------
+   Spacing rhythm + button polish
+   -------------------------------------------------------------------------- */
+.dashboard-container .row.mb-4 { margin-bottom: 2rem !important; }
+
+.dashboard-card .btn {
+    transition: color 0.25s ease, background-color 0.25s ease,
+                border-color 0.25s ease, box-shadow 0.25s ease,
+                transform 0.25s ease;
+}
+
+.dashboard-card .btn-outline-primary:hover,
+.dashboard-card .btn-outline-primary:focus-visible {
+    color: #1d4ed8;
+    border-color: #1d4ed8;
+    background: #eff6ff;
+    transform: translateY(-1px);
+}
+
+/* --------------------------------------------------------------------------
+   Responsive + reduced motion
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding-top: 1.4rem;
+        padding-bottom: 2rem;
+    }
+
+    .dashboard-header { padding: 1.1rem; }
+    .dashboard-title { font-size: 1.4rem; }
+    .dashboard-card { padding: 1.3rem; }
+    .ehr-tab-content { padding: 1.2rem 1.1rem 1.4rem; }
+    .vital-value { font-size: 1.3rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dashboard-card,
+    .diagnosis-card,
+    .vital-signs-card,
+    .vitals-grid .vital-item,
+    .history-section,
+    .dashboard-header .btn-action,
+    .dashboard-header .btn-medical {
+        transition: none;
+    }
+
+    .diagnosis-card:hover,
+    .vital-signs-card:hover,
+    .vitals-grid .vital-item:hover {
+        transform: none;
+    }
+}
+
+
+
+

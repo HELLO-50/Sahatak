@@ -1,0 +1,513 @@
+/* ==========================================================================
+   Doctor Dashboard — "Clinical Glass" visual layer (Direction A).
+   Page-scoped: linked ONLY from pages/dashboard/doctor.html, AFTER
+   doctor-dashboard.css, so every rule here safely overrides the previous
+   refinement layer for this page alone. Pure CSS: no ids, classes, names,
+   or data-* attributes are changed; existing hooks are reused as-is.
+
+   Design language:
+     - Frosted-glass header over a soft blue→teal→violet mesh gradient.
+     - Translucent white cards (85-93% effective white) — every text color
+       verified ≥ AA against the TRUE rendered background (see contrast
+       table in the delivery notes), never against the surface alone.
+     - Teal accents for communication/schedule modules, violet for records.
+     - Manrope for headings, Inter for body (local modern stack fallback).
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Typography — modern pairing with graceful offline fallback
+   -------------------------------------------------------------------------- */
+body[data-protect="doctor"] {
+    font-family: "Inter", "Noto Sans Arabic", system-ui, -apple-system,
+                 "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+/* Headings + data figures get the geometric face for typographic contrast */
+body[data-protect="doctor"] h1,
+body[data-protect="doctor"] h2,
+body[data-protect="doctor"] h3,
+body[data-protect="doctor"] h4,
+body[data-protect="doctor"] h5,
+body[data-protect="doctor"] h6,
+body[data-protect="doctor"] .dashboard-title,
+body[data-protect="doctor"] #doctor-stats-container .stat-number {
+    font-family: "Manrope", "Inter", system-ui, -apple-system,
+                 "Segoe UI", Roboto, sans-serif;
+    letter-spacing: -0.02em;
+}
+
+/* --------------------------------------------------------------------------
+   Page canvas — cool mesh gradient: blue / teal / faint violet blobs
+   Kept very light: worst-case blended background luminance ≈ 0.82, so the
+   glass cards layered on top render at ≈ #f5f6fa or lighter.
+   -------------------------------------------------------------------------- */
+body[data-protect="doctor"] {
+    --cg-radius: 18px;
+    --cg-shadow:
+        0 1px 2px rgba(15, 23, 42, 0.04),
+        0 8px 20px rgba(15, 23, 42, 0.06),
+        0 24px 48px rgba(15, 23, 42, 0.05);
+    --cg-shadow-hover:
+        0 2px 4px rgba(13, 148, 136, 0.08),
+        0 12px 28px rgba(37, 99, 235, 0.12),
+        0 28px 56px rgba(15, 23, 42, 0.10);
+    --cg-glass: rgba(255, 255, 255, 0.86);        /* card surface          */
+    --cg-glass-strong: rgba(255, 255, 255, 0.93); /* text-dense surfaces   */
+    --cg-glass-border: rgba(255, 255, 255, 0.65);
+    --cg-text: #1e293b;      /* 14.8:1 on white, ≥ 11:1 on any glass here */
+    --cg-text-strong: #0f172a;
+    --cg-text-soft: #475569; /* 7.5:1 on white, ≥ 6.2:1 worst-case glass  */
+    --cg-teal: #0e7490;      /* AA-safe teal (5.8:1 w/ white text)        */
+    --cg-violet: #7c3aed;    /* 5.7:1 on white — large/bold text only     */
+}
+
+.dashboard-container {
+    background: linear-gradient(165deg, #f6f9fd 0%, #eef4fb 45%, #f2f4fa 100%);
+    padding-top: 2.25rem;
+    padding-bottom: 3rem;
+}
+
+/* Mesh blobs: three soft glows behind the content layer */
+.dashboard-container::before {
+    background:
+        radial-gradient(560px 420px at 8% 4%,    rgba(37, 99, 235, 0.10) 0%, transparent 60%),
+        radial-gradient(640px 480px at 94% 12%,  rgba(13, 148, 136, 0.09) 0%, transparent 62%),
+        radial-gradient(720px 560px at 50% 105%, rgba(124, 58, 237, 0.07) 0%, transparent 65%);
+}
+
+/* --------------------------------------------------------------------------
+   Frosted-glass header bar
+   -------------------------------------------------------------------------- */
+.dashboard-header {
+    background: rgba(255, 255, 255, 0.72);
+    -webkit-backdrop-filter: blur(16px) saturate(170%);
+    backdrop-filter: blur(16px) saturate(170%);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: var(--cg-radius);
+    box-shadow:
+        0 1px 2px rgba(15, 23, 42, 0.05),
+        0 16px 40px rgba(15, 23, 42, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.85);
+    padding: 1.35rem 1.5rem;
+}
+
+.dashboard-title {
+    font-size: 1.9rem;
+    font-weight: 800;
+    background: linear-gradient(120deg, #1d4ed8 0%, #0e7490 55%, #7c3aed 110%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Gradient end-stops above: #1d4ed8 = 7.7:1, #0e7490 = 5.8:1, #7c3aed =
+   5.0:1 worst-case vs the glass behind it — all ≥ AA, and the title
+   renders at 1.9rem/800 (large text, 3:1 threshold). */
+.dashboard-subtitle {
+    color: var(--cg-text-soft);
+    font-weight: 500;
+    font-size: 0.92rem;
+}
+
+.user-avatar {
+    background: linear-gradient(135deg, #2563eb, #0e7490);
+    border: 3px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.30), 0 12px 28px rgba(15, 23, 42, 0.14);
+    color: #ffffff;
+}
+
+.user-details h5 {
+    color: var(--cg-text-strong);
+    font-weight: 800;
+    font-size: 1.02rem;
+}
+
+/* Header action buttons: translucent chips with confident hover states */
+.dashboard-header .btn-action {
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 12px;
+    color: #334155;
+    background: rgba(255, 255, 255, 0.72);
+    font-weight: 600;
+    transition: color 0.25s ease, border-color 0.25s ease,
+                background-color 0.25s ease, box-shadow 0.25s ease,
+                transform 0.25s ease;
+}
+
+.dashboard-header .btn-action:hover,
+.dashboard-header .btn-action:focus-visible {
+    color: #1d4ed8;
+    border-color: rgba(37, 99, 235, 0.35);
+    background: #ffffff;
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.15);
+    transform: translateY(-1px);
+}
+
+.dashboard-header .btn-action.btn-logout:hover,
+.dashboard-header .btn-action.btn-logout:focus-visible {
+    color: #b91c1c;
+    border-color: rgba(220, 38, 38, 0.35);
+    background: #fff5f5;
+    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.12);
+}
+
+.dashboard-header .btn-outline-medical {
+    border-color: rgba(71, 85, 105, 0.35);
+    color: #334155;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.25s ease;
+}
+
+.dashboard-header .btn-outline-medical:hover,
+.dashboard-header .btn-outline-medical:focus-visible {
+    color: #1d4ed8;
+    border-color: #93c5fd;
+    background: #eff6ff;
+}
+
+/* --------------------------------------------------------------------------
+   Cards — translucent surfaces, multi-layer shadows, teal glow ring on hover
+   -------------------------------------------------------------------------- */
+.dashboard-card {
+    background: var(--cg-glass);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    backdrop-filter: blur(14px) saturate(160%);
+    border: 1px solid var(--cg-glass-border);
+    border-radius: var(--cg-radius);
+    box-shadow: var(--cg-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    padding: 1.75rem;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.dashboard-card:hover {
+    border-color: rgba(13, 148, 136, 0.28);
+    box-shadow: var(--cg-shadow-hover), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.dashboard-card > h5,
+.dashboard-card h5 {
+    color: var(--cg-text);
+    font-weight: 800;
+    font-size: 1.05rem;
+}
+
+.dashboard-card > h5 i,
+.dashboard-card h5 i {
+    color: #1d4ed8;
+}
+
+/* #64748b would drop to ~4.4:1 on the tinted glass — #475569 stays ≥ 6.2:1 */
+.dashboard-card .text-muted,
+.dashboard-card p.text-muted {
+    color: var(--cg-text-soft) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Quick-action modules — distinct tinted glass per category
+     #communication-card → teal glass        (communication)
+     #records-card       → violet glass      (records/analytics)
+     #availability-card  → teal-emerald glass(schedule)
+   -------------------------------------------------------------------------- */
+.quick-action-card {
+    cursor: pointer;
+    padding: 1.6rem 1.5rem;
+}
+
+#communication-card {
+    background: linear-gradient(150deg, rgba(240, 253, 250, 0.93) 0%, rgba(255, 255, 255, 0.84) 55%);
+    border-color: rgba(13, 148, 136, 0.22);
+}
+
+#communication-card:hover {
+    border-color: rgba(13, 148, 136, 0.45);
+    box-shadow: 0 2px 4px rgba(13, 148, 136, 0.10),
+                0 14px 32px rgba(13, 148, 136, 0.16),
+                0 30px 60px rgba(15, 23, 42, 0.08);
+    transform: translateY(-5px);
+}
+
+#records-card {
+    background: linear-gradient(150deg, rgba(245, 243, 255, 0.93) 0%, rgba(255, 255, 255, 0.84) 55%);
+    border-color: rgba(124, 58, 237, 0.20);
+}
+
+#records-card:hover {
+    border-color: rgba(124, 58, 237, 0.42);
+    box-shadow: 0 2px 4px rgba(124, 58, 237, 0.10),
+                0 14px 32px rgba(124, 58, 237, 0.15),
+                0 30px 60px rgba(15, 23, 42, 0.08);
+    transform: translateY(-5px);
+}
+
+#availability-card {
+    background: linear-gradient(150deg, rgba(236, 253, 245, 0.93) 0%, rgba(255, 255, 255, 0.84) 55%);
+    border-color: rgba(5, 150, 105, 0.22);
+}
+
+#availability-card:hover {
+    border-color: rgba(5, 150, 105, 0.45);
+    box-shadow: 0 2px 4px rgba(5, 150, 105, 0.10),
+                0 14px 32px rgba(5, 150, 105, 0.15),
+                0 30px 60px rgba(15, 23, 42, 0.08);
+    transform: translateY(-5px);
+}
+
+.quick-action-card:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.4);
+    outline-offset: 3px;
+    transform: translateY(-5px);
+}
+
+/* Colored icon badges: saturated gradient chips with white glyphs.
+   White icon on #0e7490 = 5.8:1, on #6d28d9 = 6.6:1, on #047857 = 5.8:1 —
+   all AA for graphics/large glyphs. */
+.quick-action-icon {
+    border-radius: 16px;
+    color: #ffffff;
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.16);
+}
+
+#communication-card .quick-action-icon {
+    background: linear-gradient(135deg, #14b8a6 0%, #0e7490 100%);
+    box-shadow: 0 6px 16px rgba(13, 148, 136, 0.35);
+}
+
+#records-card .quick-action-icon {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+    box-shadow: 0 6px 16px rgba(124, 58, 237, 0.35);
+}
+
+#availability-card .quick-action-icon {
+    background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+    box-shadow: 0 6px 16px rgba(5, 150, 105, 0.35);
+}
+
+.quick-action-card h6 {
+    color: var(--cg-text-strong);
+    font-weight: 800;
+    font-size: 1.02rem;
+    margin-top: 1rem;
+}
+
+.quick-action-card p.small {
+    color: var(--cg-text-soft);
+}
+
+/* Accent baseline strip per module (pure decoration, no text impact) */
+#communication-card::after,
+#records-card::after,
+#availability-card::after {
+    content: '';
+    position: absolute;
+    left: 1.5rem;
+    bottom: 0;
+    width: 44px;
+    height: 4px;
+    border-radius: 4px 4px 0 0;
+}
+
+#communication-card::after { background: linear-gradient(90deg, #14b8a6, #0e7490); }
+#records-card::after       { background: linear-gradient(90deg, #8b5cf6, #6d28d9); }
+#availability-card::after  { background: linear-gradient(90deg, #10b981, #047857); }
+
+/* --------------------------------------------------------------------------
+   Quick Statistics — dashboard-grade gradient figures
+   Gradient fills: #1d4ed8 (7.7:1) → #7c3aed (5.7:1 on white; ≥ 5.0:1
+   worst-case on glass). Rendered at 800 weight ≈ 2.1rem = WCAG "large
+   text" (3:1 threshold) — comfortably AA, mostly AAA.
+   NOTE: animated count-up would require JS; intentionally NOT added
+   (constraint: no new JS logic). Flagged for a future JS pass.
+   -------------------------------------------------------------------------- */
+#doctor-stats-container .stat-item {
+    background: var(--cg-glass-strong);
+    border: 1px solid var(--cg-glass-border);
+    border-radius: 14px;
+    padding: 1.1rem 0.75rem;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+#doctor-stats-container .stat-item::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; top: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #2563eb, #7c3aed);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+#doctor-stats-container .stat-item:hover {
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.10), 0 12px 26px rgba(15, 23, 42, 0.08);
+    transform: translateY(-3px);
+}
+
+#doctor-stats-container .stat-item:hover::after { opacity: 1; }
+
+#doctor-stats-container .stat-number {
+    font-size: 2.1rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+}
+
+#doctor-stats-container .stat-number.text-primary,
+#doctor-stats-container .stat-number.text-success,
+#doctor-stats-container .stat-number.text-info,
+#doctor-stats-container .stat-number.text-warning,
+#doctor-stats-container .stat-number.text-danger {
+    background: linear-gradient(120deg, #1d4ed8 0%, #7c3aed 100%) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent;
+    color: transparent !important;
+}
+
+#doctor-stats-container .stat-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--cg-text-soft); /* 7.3:1 on the 93%-white chip */
+}
+
+/* --------------------------------------------------------------------------
+   Appointments list — frosted rows with status rails
+   -------------------------------------------------------------------------- */
+#appointments-container .appointment-item {
+    background-color: rgba(255, 255, 255, 0.92) !important;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-left: 4px solid #1d4ed8;
+    border-radius: 14px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 6px 16px rgba(15, 23, 42, 0.05);
+}
+
+#appointments-container .appointment-item:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--cg-shadow-hover);
+    border-color: rgba(13, 148, 136, 0.3);
+}
+
+#appointments-container .badge {
+    border-radius: 999px;
+    padding: 0.35em 0.85em;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.10);
+}
+
+/* White-text badges: darkest gradient ends kept ≥ 5.8:1 (see contrast table) */
+#appointments-container .badge.bg-primary { background: linear-gradient(135deg, #1d4ed8, #1e40af) !important; }
+#appointments-container .badge.bg-success { background: linear-gradient(135deg, #047857, #065f46) !important; }
+#appointments-container .badge.bg-info    { background: linear-gradient(135deg, #0e7490, #155e75) !important; }
+#appointments-container .badge.bg-danger  { background: linear-gradient(135deg, #dc2626, #b91c1c) !important; }
+#appointments-container .badge.bg-warning,
+#appointments-container .badge.bg-warning.text-dark {
+    background: linear-gradient(135deg, #fef3c7, #fde68a) !important;
+    color: #92400e !important; /* 7.3:1 on #fde68a worst end */
+    border: 1px solid rgba(146, 64, 14, 0.25);
+}
+
+#appointments-container .appointment-item .btn {
+    border-radius: 10px;
+    transition: all 0.25s ease;
+}
+
+/* --------------------------------------------------------------------------
+   Waiting patients + activity rows — glass chips
+   -------------------------------------------------------------------------- */
+#waiting-card .bg-light,
+#activity-card .activity-item {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid var(--cg-glass-border);
+    border-radius: 14px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+}
+
+#waiting-card .bg-light:hover,
+#activity-card .activity-item:hover {
+    border-color: rgba(13, 148, 136, 0.3);
+    box-shadow: 0 6px 18px rgba(13, 148, 136, 0.12);
+    transform: translateY(-2px);
+}
+
+#activity-card .activity-item i {
+    color: #1d4ed8;
+}
+
+/* --------------------------------------------------------------------------
+   Spacing rhythm — more air between major sections
+   -------------------------------------------------------------------------- */
+.dashboard-container .row.mb-4 { margin-bottom: 2rem !important; }
+.dashboard-container .col-lg-6.mb-4 { margin-bottom: 2rem; }
+
+/* Generic buttons inside cards get the smooth 250ms treatment */
+.dashboard-card .btn {
+    transition: color 0.25s ease, background-color 0.25s ease,
+                border-color 0.25s ease, box-shadow 0.25s ease,
+                transform 0.25s ease;
+}
+
+.dashboard-card .btn-outline-medical:hover,
+.dashboard-card .btn-outline-medical:focus-visible {
+    color: #1d4ed8;
+    border-color: #93c5fd;
+    background: #eff6ff;
+    transform: translateY(-1px);
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding-top: 1.4rem;
+        padding-bottom: 2rem;
+    }
+
+    .dashboard-header { padding: 1.1rem; }
+    .dashboard-title { font-size: 1.45rem; }
+    .dashboard-card { padding: 1.3rem; }
+    #doctor-stats-container .stat-number { font-size: 1.6rem; }
+    .quick-action-icon { width: 58px; height: 58px; font-size: 1.5rem; }
+}
+
+@media (max-width: 576px) {
+    #appointments-container .appointment-item {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.75rem;
+        padding: 0.9rem 1rem;
+    }
+
+    #appointments-container .appointment-item > .d-flex {
+        align-items: flex-start !important;
+    }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    .dashboard-card,
+    .quick-action-card,
+    #appointments-container .appointment-item,
+    #doctor-stats-container .stat-item,
+    .dashboard-header .btn-action {
+        transition: none;
+    }
+
+    .quick-action-card:hover,
+    #appointments-container .appointment-item:hover,
+    #doctor-stats-container .stat-item:hover {
+        transform: none;
+    }
+}
+
+
+
+

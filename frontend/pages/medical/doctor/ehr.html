@@ -14,6 +14,8 @@
     
     <!-- English Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Clinical Glass typography: Manrope (headings) + Inter (body), local fallbacks -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Chart.js for vital signs graphs -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -22,7 +24,9 @@
     <link rel="stylesheet" href="../../../assets/css/main.css">
     <link rel="stylesheet" href="../../../assets/css/components/dashboard.css">
     <link rel="stylesheet" href="../../../assets/css/components/ehr.css">
-    
+    <!-- Clinical Glass visual layer (visual only, loaded last to override) -->
+    <link rel="stylesheet" href="../../../assets/css/components/ehr-glass.css">
+
     <!-- Inline CSS for Patient Search -->
     <style>
         .patient-result-card {
