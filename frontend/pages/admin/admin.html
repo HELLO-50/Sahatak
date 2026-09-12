@@ -22,6 +22,10 @@
     <link rel="stylesheet" href="../../assets/css/components/dashboard.css">
     <!-- Admin CSS -->
     <link rel="stylesheet" href="../../assets/css/components/admin.css">
+    <!-- Clinical Glass typography: Manrope (headings) + Inter (body), local fallbacks -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Clinical Glass visual layer (visual only, loaded last to override) -->
+    <link rel="stylesheet" href="../../assets/css/components/clinical-glass.css">
     
     <!-- Chart.js -->
      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -30,10 +34,10 @@
 </head>
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
-    <div class="dashboard-container" id="main-content">
+    <div class="dashboard-container cg-page" id="main-content">
         <div class="container-fluid">
             <!-- Dashboard Header -->
-            <div class="dashboard-header">
+            <div class="dashboard-header cg-header">
                 <div class="row align-items-center">
                     <!-- Logo and Title - Left -->
                     <div class="col-lg-6">
@@ -107,54 +111,54 @@
                             <!-- Platform Statistics -->
                             <div class="row mb-4">
                                 <div class="col-xl col-lg-4 col-md-6 mb-3">
-                                    <div class="dashboard-card stat-card admin-stat-card">
-                                        <div class="stat-number" id="total-users-count">
+                                    <div class="dashboard-card stat-card admin-stat-card cg-glass">
+                                        <div class="stat-number cg-stat-text" id="total-users-count">
                                             <span class="spinner-border spinner-border-sm" role="status"></span>
                                         </div>
-                                        <div class="stat-label" id="admin-stat-total-users">Total Users</div>
+                                        <div class="stat-label cg-text-soft" id="admin-stat-total-users">Total Users</div>
                                         <div class="stat-icon"><i class="bi bi-people"></i></div>
                                     </div>
                                 </div>
                                 <div class="col-xl col-lg-4 col-md-6 mb-3">
-                                    <div class="dashboard-card stat-card admin-stat-card">
-                                        <div class="stat-number" id="total-patients-count">
+                                    <div class="dashboard-card stat-card admin-stat-card cg-glass">
+                                        <div class="stat-number cg-stat-text" id="total-patients-count">
                                             <span class="spinner-border spinner-border-sm" role="status"></span>
                                         </div>
-                                        <div class="stat-label" id="admin-stat-total-patients">Total Patients</div>
+                                        <div class="stat-label cg-text-soft" id="admin-stat-total-patients">Total Patients</div>
                                         <div class="stat-icon"><i class="bi bi-person-heart"></i></div>
                                     </div>
                                 </div>
                                 <div class="col-xl col-lg-4 col-md-6 mb-3">
-                                    <div class="dashboard-card stat-card admin-stat-card">
-                                        <div class="stat-number" id="verified-doctors-count">
+                                    <div class="dashboard-card stat-card admin-stat-card cg-glass">
+                                        <div class="stat-number cg-stat-text" id="verified-doctors-count">
                                             <span class="spinner-border spinner-border-sm" role="status"></span>
                                         </div>
-                                        <div class="stat-label" id="admin-stat-verified-doctors">Verified Doctors</div>
+                                        <div class="stat-label cg-text-soft" id="admin-stat-verified-doctors">Verified Doctors</div>
                                         <div class="stat-icon"><i class="bi bi-person-check"></i></div>
                                     </div>
                                 </div>
                                 <div class="col-xl col-lg-4 col-md-6 mb-3">
-                                    <div class="dashboard-card stat-card admin-stat-card">
-                                        <div class="stat-number" id="appointments-count">
+                                    <div class="dashboard-card stat-card admin-stat-card cg-glass">
+                                        <div class="stat-number cg-stat-text" id="appointments-count">
                                             <span class="spinner-border spinner-border-sm" role="status"></span>
                                         </div>
-                                        <div class="stat-label" id="admin-stat-appointments">Total Appointments</div>
+                                        <div class="stat-label cg-text-soft" id="admin-stat-appointments">Total Appointments</div>
                                         <div class="stat-icon"><i class="bi bi-calendar-check"></i></div>
                                     </div>
                                 </div>
                                 <div class="col-xl col-lg-4 col-md-6 mb-3">
-                                    <div class="dashboard-card stat-card admin-stat-card">
-                                        <div class="stat-number" id="system-health-percentage">
+                                    <div class="dashboard-card stat-card admin-stat-card cg-glass">
+                                        <div class="stat-number cg-stat-text" id="system-health-percentage">
                                             <span class="spinner-border spinner-border-sm" role="status"></span>
                                         </div>
-                                        <div class="stat-label" id="admin-stat-system-health">System Health</div>
+                                        <div class="stat-label cg-text-soft" id="admin-stat-system-health">System Health</div>
                                         <div class="stat-icon"><i class="bi bi-shield-check"></i></div>
                                     </div>
                                 </div>
                             </div>
                             
                             <!-- Platform Health & Analytics -->
-                            <div class="dashboard-card admin-health-card">
+                            <div class="dashboard-card admin-health-card cg-glass cg-glass-strong">
                                 <h5><i class="bi bi-activity me-2"></i><span id="platform-health-title">Platform Health & Analytics</span></h5>
                                 
                                 <!-- System Performance Metrics -->
@@ -261,7 +265,7 @@
                         <!-- User Management Section -->
                         <section id="users" class="admin-section" role="main" aria-labelledby="users-heading">
                             <h2 id="users-heading" class="visually-hidden">User Management</h2>
-                            <div class="dashboard-card">
+                            <div class="dashboard-card cg-glass cg-glass-strong">
                                 <div class="d-flex justify-content-between align-items-center mb-4">
                                     <h5><i class="bi bi-people me-2"></i><span id="user-management-title">User Management</span></h5>
                                     <div>
@@ -344,7 +348,7 @@
 
                         <!-- Doctor Verification Section -->
                         <section id="verification" class="admin-section">
-                            <div class="dashboard-card">
+                            <div class="dashboard-card cg-glass cg-glass-strong">
                                 <div class="d-flex justify-content-between align-items-center mb-4">
                                     <h5><i class="bi bi-patch-check me-2"></i><span id="doctor-verification-title">Doctor Verification</span></h5>
                                     <div>
@@ -391,7 +395,7 @@
  
                         <!-- Appointments Management Section -->
                         <section id="appointments" class="admin-section">
-                            <div class="dashboard-card">
+                            <div class="dashboard-card cg-glass cg-glass-strong">
                                 <div class="d-flex justify-content-between align-items-center mb-4">
                                     <h5><i class="bi bi-calendar-check me-2"></i><span id="appointment-management-title">Appointment Management</span></h5>
                                     <div>
@@ -447,7 +451,7 @@
                         
                         <!-- System Settings Section -->
                         <section id="settings" class="admin-section">
-                            <div class="dashboard-card">
+                            <div class="dashboard-card cg-glass cg-glass-strong">
                                 
                                 <div class="d-flex justify-content-between align-items-center mb-4">
                                     <h5><i class="bi bi-sliders2 me-2"></i><span id="system-settings-title">System Settings</span></h5>
@@ -458,7 +462,7 @@
                                 </div>
                                 
                                 <!-- Settings Tabs -->
-                                <ul class="nav nav-tabs mb-3" id="settingsTabs" role="tablist">
+                                <ul class="nav nav-tabs cg-tabs mb-3" id="settingsTabs" role="tablist">
                                     <li class="nav-item" role="presentation">
                                         <button class="nav-link active" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab">
                                             <i class="bi bi-shield-lock me-1"></i><span id="settings-security-tab">Security</span>
@@ -940,7 +944,7 @@
 
                         <!-- Analytics Section -->
                         <section id="analytics" class="admin-section">
-                            <div class="dashboard-card">
+                            <div class="dashboard-card cg-glass cg-glass-strong">
                                 <h5><i class="bi bi-graph-up me-2"></i><span id="analytics-title">Analytics</span></h5>
                                 
                                 <!-- Analytics Content -->
