@@ -25,7 +25,10 @@ class SupportPage {
             const checkAPI = () => {
                 attempts++;
                 
-                if (window.api && typeof window.api.post === 'function') {
+                if (
+                    (typeof ApiHelper !== 'undefined' && typeof ApiHelper.makeRequest === 'function') ||
+                    (window.api && typeof window.api.post === 'function')
+                ) {
                     console.log('API Helper found after', attempts, 'attempts');
                     resolve();
                 } else if (attempts >= maxAttempts) {
@@ -389,34 +392,10 @@ class SupportPage {
 // Initialize Support Page when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded - Initializing support page...');
-    
-    // Check authentication first
-    if (window.AuthGuard && !AuthGuard.isAuthenticated()) {
-        console.warn('User not authenticated - redirecting to login');
-        AuthGuard.redirectToLogin();
-        return;
-    }
-    
-    console.log('User authenticated - initializing support page');
-    
-    // Initialize support page
     window.supportPage = new SupportPage();
 });
 
 // Fallback initialization in case DOMContentLoaded already fired
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() {
-        if (window.AuthGuard && !AuthGuard.isAuthenticated()) {
-            AuthGuard.redirectToLogin();
-            return;
-        }
-        window.supportPage = new SupportPage();
-    });
-} else {
-    // DOM already loaded
-    if (window.AuthGuard && !AuthGuard.isAuthenticated()) {
-        AuthGuard.redirectToLogin();
-    } else {
-        window.supportPage = new SupportPage();
-    }
+if (document.readyState !== 'loading') {
+    window.supportPage = new SupportPage();
 }
