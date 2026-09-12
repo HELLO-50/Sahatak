@@ -25,6 +25,10 @@
     <link rel="stylesheet" href="../../assets/css/components/dashboard.css">
     <!-- Appointments CSS -->
     <link rel="stylesheet" href="../../assets/css/components/appointments.css">
+    <!-- Clinical Glass typography: Manrope (headings) + Inter (body), local fallbacks -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Clinical Glass visual layer (visual only, loaded last to override) -->
+    <link rel="stylesheet" href="../../assets/css/components/clinical-glass.css">
     <!-- Additional custom styles for support  -->
     <style>
         /* Page layout */
@@ -62,7 +66,6 @@
         }
 
         #support-section .card {
-            background: #ffffff;
             border-radius: 1.25rem;
             border: 1px solid rgba(13, 71, 161, 0.06);
             box-shadow: 0 18px 45px rgba(13, 71, 161, 0.08);
@@ -134,7 +137,6 @@
 
         .support-help-card {
             border-radius: 1.25rem;
-            background: radial-gradient(circle at top left, #e3f2fd 0, #f8fbff 55%, #ffffff 100%);
             border: 1px solid rgba(13, 71, 161, 0.06);
             box-shadow: 0 18px 42px rgba(13, 71, 161, 0.06);
         }
@@ -182,10 +184,10 @@
         }
     </style>
 <body>
-    <div class="dashboard-container">
+    <div class="dashboard-container cg-page">
         <div class="container-fluid" style="padding-bottom: 120px;">
             <!-- Dashboard Header -->
-            <div class="dashboard-header">
+            <div class="dashboard-header cg-header">
                 <div class="row align-items-center">
                     <!-- Profile Section - Left (Right in RTL) -->
                     <div class="col-lg-4">
@@ -219,7 +221,7 @@
                 <div class="row gy-4 align-items-stretch">
                     <!-- Help / Illustration column -->
                     <div class="col-lg-5 col-md-12">
-                        <div class="support-help-card h-100 d-flex flex-column justify-content-between p-4">
+                        <div class="support-help-card cg-glass cg-glass-strong h-100 d-flex flex-column justify-content-between p-4">
                             <div>
                                 <h5 class="mb-3 d-flex align-items-center gap-2">
                                     <i class="bi bi-headset text-primary fs-4"></i>
@@ -297,7 +299,7 @@
 
                     <!-- Technical support form column -->
                     <div class="col-lg-7 col-md-12">
-                        <div class="card h-100">
+                        <div class="card h-100 cg-glass cg-glass-strong">
                             <div class="card-body p-4 p-lg-4">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <div>

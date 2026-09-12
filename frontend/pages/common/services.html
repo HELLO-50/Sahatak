@@ -27,13 +27,17 @@
     <link rel="stylesheet" href="../../assets/css/components/appointments.css">
     <!-- Video Consultation Dashboard CSS -->
     <link rel="stylesheet" href="../../assets/css/components/video-consultation-dashboard.css">
+    <!-- Clinical Glass typography: Manrope (headings) + Inter (body), local fallbacks -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Clinical Glass visual layer (visual only, loaded last to override) -->
+    <link rel="stylesheet" href="../../assets/css/components/clinical-glass.css">
 
 </head>
     <body data-protect="patient">
-        <div class="dashboard-container">
+        <div class="dashboard-container cg-page">
             <div class="container-fluid" style="padding-bottom: 120px;">
                 <!-- Dashboard Header -->
-                <div class="dashboard-header">
+                <div class="dashboard-header cg-header">
                     <div class="row align-items-center">
                         <!-- Profile Section - Left (Right in RTL) -->
                         <div class="col-lg-4">
@@ -146,7 +150,7 @@
                                 </style>
                 <div class="row" id="services-grid" role="list">
                     <div class="col-sm-6 col-lg-4 mb-4" role="listitem" data-service="video-consultation">
-                        <div class="card h-100 shadow-sm">
+                        <div class="card h-100 shadow-sm cg-glass cg-glass-strong">
                             <div class="card-body">
                                 <div class="d-flex align-items-start">
                                     <div class="me-3 display-6 text-primary"><i class="bi bi-camera-video"></i></div>
@@ -191,7 +195,7 @@
                             </style>
 
                     <div class="col-sm-6 col-lg-4 mb-4" role="listitem" data-service="appointments">
-                        <div class="card h-100 shadow-sm">
+                        <div class="card h-100 shadow-sm cg-glass cg-glass-strong">
                             <div class="card-body">
                                 <div class="d-flex align-items-start">
                                     <div class="me-3 display-6 text-success"><i class="bi bi-calendar-check"></i></div>
@@ -205,7 +209,7 @@
                     </div>
 
                     <div class="col-sm-6 col-lg-4 mb-4" role="listitem" data-service="prescriptions">
-                        <div class="card h-100 shadow-sm">
+                        <div class="card h-100 shadow-sm cg-glass cg-glass-strong">
                             <div class="card-body">
                                 <div class="d-flex align-items-start">
                                     <div class="me-3 display-6 text-warning"><i class="bi bi-file-earmark-medical"></i></div>
@@ -219,7 +223,7 @@
                     </div>
 
                     <div class="col-sm-6 col-lg-4 mb-4" role="listitem" data-service="lab-tests">
-                        <div class="card h-100 shadow-sm">
+                        <div class="card h-100 shadow-sm cg-glass cg-glass-strong">
                             <div class="card-body">
                                 <div class="d-flex align-items-start">
                                     <div class="me-3 display-6 text-danger"><i class="bi bi-eyedropper"></i></div>
@@ -232,7 +236,7 @@
                         </div>
                     </div>
                     <div class="col-sm-6 col-lg-4 mb-4" role="listitem" data-service="chronic-care">
-                        <div class="card h-100 shadow-sm">
+                        <div class="card h-100 shadow-sm cg-glass cg-glass-strong">
                             <div class="card-body">
                                 <div class="d-flex align-items-start">
                                     <div class="me-3 display-6 text-primary"><i class="bi bi-heart-pulse"></i></div>
@@ -246,7 +250,7 @@
                     </div>
 
                     <div class="col-sm-6 col-lg-4 mb-4" role="listitem" data-service="nutrition">
-                        <div class="card h-100 shadow-sm">
+                        <div class="card h-100 shadow-sm cg-glass cg-glass-strong">
                             <div class="card-body">
                                 <div class="d-flex align-items-start">
                                     <div class="me-3 display-6 text-warning"><i class="bi bi-apple"></i></div>
@@ -260,7 +264,7 @@
                     </div>
 
                     <div class="col-sm-6 col-lg-4 mb-4" role="listitem" data-service="maternal-child">
-                        <div class="card h-100 shadow-sm">
+                        <div class="card h-100 shadow-sm cg-glass cg-glass-strong">
                             <div class="card-body">
                                 <div class="d-flex align-items-start">
                                     <div class="me-3 display-6 text-danger"><i class="bi bi-heart"></i></div>
@@ -274,7 +278,7 @@
                     </div>
 
                     <div class="col-sm-6 col-lg-4 mb-4" role="listitem" data-service="referral">
-                        <div class="card h-100 shadow-sm">
+                        <div class="card h-100 shadow-sm cg-glass cg-glass-strong">
                             <div class="card-body">
                                 <div class="d-flex align-items-start">
                                     <div class="me-3 display-6 text-success"><i class="bi bi-arrow-right-square"></i></div>
@@ -288,7 +292,7 @@
                     </div> 
 
                     <div class="col-sm-6 col-lg-4 mb-4" role="listitem" data-service="maternal-child">
-                        <div class="card h-100 shadow-sm">
+                        <div class="card h-100 shadow-sm cg-glass cg-glass-strong">
                             <div class="card-body">
                                 <div class="d-flex align-items-start">
                                     <div class="me-3 display-6 text-danger"><i class="bi bi-robot"></i></div>
