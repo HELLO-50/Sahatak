@@ -20,12 +20,16 @@
     <!-- Dashboard CSS -->
     <link rel="stylesheet" href="../../../assets/css/components/dashboard.css">
     <link rel="stylesheet" href="../../../assets/css/components/medical-records.css">
+    <!-- Clinical Glass typography: Manrope (headings) + Inter (body), local fallbacks -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Clinical Glass visual layer (visual only, loaded last to override) -->
+    <link rel="stylesheet" href="../../../assets/css/components/clinical-glass.css">
 </head>
 <body>
-    <div class="dashboard-container">
+    <div class="dashboard-container cg-page">
         <div class="container-fluid">
             <!-- Dashboard Header -->
-            <div class="dashboard-header">
+            <div class="dashboard-header cg-header">
                 <div class="row align-items-center">
                     <!-- Profile Section - Left (Right in RTL) -->
                     <div class="col-lg-4">
@@ -79,30 +83,30 @@
 
         <!-- Statistics Cards -->
         <div class="stats-grid mb-4">
-            <div class="stat-card">
+            <div class="stat-card cg-glass">
                 <i class="bi bi-prescription2 stat-icon text-primary"></i>
-                <div class="stat-value" id="total-prescriptions">--</div>
-                <div class="stat-label" id="stat-total-prescriptions">Total Prescriptions</div>
+                <div class="stat-value cg-stat-text" id="total-prescriptions">--</div>
+                <div class="stat-label cg-text-soft" id="stat-total-prescriptions">Total Prescriptions</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card cg-glass">
                 <i class="bi bi-check-circle stat-icon text-success"></i>
-                <div class="stat-value" id="active-prescriptions">--</div>
-                <div class="stat-label" id="stat-active-prescriptions">Active Prescriptions</div>
+                <div class="stat-value cg-stat-text" id="active-prescriptions">--</div>
+                <div class="stat-label cg-text-soft" id="stat-active-prescriptions">Active Prescriptions</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card cg-glass">
                 <i class="bi bi-clipboard-check stat-icon text-info"></i>
-                <div class="stat-value" id="completed-prescriptions">--</div>
-                <div class="stat-label" id="stat-completed-prescriptions">Completed Prescriptions</div>
+                <div class="stat-value cg-stat-text" id="completed-prescriptions">--</div>
+                <div class="stat-label cg-text-soft" id="stat-completed-prescriptions">Completed Prescriptions</div>
             </div>
-            <div class="stat-card" id="doctor-stats" style="display: none;">
+            <div class="stat-card cg-glass" id="doctor-stats" style="display: none;">
                 <i class="bi bi-people stat-icon text-warning"></i>
-                <div class="stat-value" id="patients-with-prescriptions">--</div>
-                <div class="stat-label" id="stat-patients">Patients</div>
+                <div class="stat-value cg-stat-text" id="patients-with-prescriptions">--</div>
+                <div class="stat-label cg-text-soft" id="stat-patients">Patients</div>
             </div>
         </div>
 
         <!-- Search and Filter Controls -->
-        <div class="search-controls">
+        <div class="search-controls cg-glass cg-glass-strong">
             <div class="row align-items-center">
                 <div class="col-md-6 mb-3 mb-md-0">
                     <div class="position-relative">

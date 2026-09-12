@@ -20,12 +20,16 @@
     <!-- Dashboard CSS -->
     <link rel="stylesheet" href="../../../assets/css/components/dashboard.css">
     <link rel="stylesheet" href="../../../assets/css/components/medical-records.css">
+    <!-- Clinical Glass typography: Manrope (headings) + Inter (body), local fallbacks -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Clinical Glass visual layer (visual only, loaded last to override) -->
+    <link rel="stylesheet" href="../../../assets/css/components/clinical-glass.css">
 </head>
 <body>
-    <div class="dashboard-container">
+    <div class="dashboard-container cg-page">
         <div class="container-fluid">
             <!-- Dashboard Header -->
-            <div class="dashboard-header">
+            <div class="dashboard-header cg-header">
                 <div class="row align-items-center">
                     <!-- Profile Section - Left (Right in RTL) -->
                     <div class="col-lg-4">
@@ -72,31 +76,31 @@
         <!-- Quick Stats -->
         <div class="row mb-5">
             <div class="col-md-3 mb-3">
-                <div class="stat-card">
+                <div class="stat-card cg-glass">
                     <i class="bi bi-file-medical stat-icon text-primary"></i>
-                    <div class="stat-value" id="history-completion">--</div>
-                    <div class="stat-label" id="stat-history-completion">Medical History Completion</div>
+                    <div class="stat-value cg-stat-text" id="history-completion">--</div>
+                    <div class="stat-label cg-text-soft" id="stat-history-completion">Medical History Completion</div>
                 </div>
             </div>
             <div class="col-md-3 mb-3">
-                <div class="stat-card">
+                <div class="stat-card cg-glass">
                     <i class="bi bi-prescription2 stat-icon text-success"></i>
-                    <div class="stat-value" id="active-prescriptions-count">--</div>
-                    <div class="stat-label" id="stat-active-prescriptions">Active Prescriptions</div>
+                    <div class="stat-value cg-stat-text" id="active-prescriptions-count">--</div>
+                    <div class="stat-label cg-text-soft" id="stat-active-prescriptions">Active Prescriptions</div>
                 </div>
             </div>
             <div class="col-md-3 mb-3">
-                <div class="stat-card">
+                <div class="stat-card cg-glass">
                     <i class="bi bi-clock-history stat-icon text-info"></i>
-                    <div class="stat-value" id="recent-updates-count">--</div>
-                    <div class="stat-label" id="stat-recent-updates">Recent Updates</div>
+                    <div class="stat-value cg-stat-text" id="recent-updates-count">--</div>
+                    <div class="stat-label cg-text-soft" id="stat-recent-updates">Recent Updates</div>
                 </div>
             </div>
             <div class="col-md-3 mb-3">
-                <div class="stat-card">
+                <div class="stat-card cg-glass">
                     <i class="bi bi-calendar-check stat-icon text-warning"></i>
-                    <div class="stat-value" id="last-update-days">--</div>
-                    <div class="stat-label" id="stat-days-since-update">Days Since Last Update</div>
+                    <div class="stat-value cg-stat-text" id="last-update-days">--</div>
+                    <div class="stat-label cg-text-soft" id="stat-days-since-update">Days Since Last Update</div>
                 </div>
             </div>
         </div>
@@ -105,10 +109,10 @@
         <div class="row">
             <!-- Medical History Card -->
             <div class="col-lg-6 mb-4">
-                <div class="card h-100 border-0 medical-nav-card">
+                <div class="card h-100 border-0 medical-nav-card cg-glass cg-glass-lift cg-tint-violet">
                     <div class="card-header text-white" style="background: #0d47a1 !important;">
                         <h5 class="card-title mb-0">
-                            <i class="bi bi-clipboard-medical me-2"></i>
+                            <i class="bi bi-clipboard2-pulse me-2"></i>
                             <span id="medical-history-card-title">Medical History</span>
                         </h5>
                     </div>
@@ -116,9 +120,9 @@
                         <div class="row">
                             <div class="col-8">
                                 <p class="card-text mb-3" id="medical-history-card-desc">View and manage complete medical history and timeline of updates</p>
-                                
+
                                 <div class="medical-summary mb-3" id="medical-summary-preview">
-                                    <small class="text-muted" id="medical-loading-text">Loading...</small>
+                                    <small class="text-muted cg-text-soft" id="medical-loading-text">Loading...</small>
                                 </div>
                                 
                                 <div class="d-flex flex-wrap gap-2">
@@ -136,7 +140,7 @@
 
             <!-- Prescriptions Card -->
             <div class="col-lg-6 mb-4">
-                <div class="card h-100 border-0 medical-nav-card">
+                <div class="card h-100 border-0 medical-nav-card cg-glass cg-glass-lift cg-tint-teal">
                     <div class="card-header text-white" style="background: #0d47a1 !important;">
                         <h5 class="card-title mb-0">
                             <i class="bi bi-prescription2 me-2"></i>
@@ -147,9 +151,9 @@
                         <div class="row">
                             <div class="col-8">
                                 <p class="card-text mb-3" id="prescriptions-card-desc">Manage medical prescriptions and current and completed medications</p>
-                                
+
                                 <div class="prescription-summary mb-3" id="prescription-summary-preview">
-                                    <small class="text-muted" id="prescription-loading-text">Loading...</small>
+                                    <small class="text-muted cg-text-soft" id="prescription-loading-text">Loading...</small>
                                 </div>
                                 
                                 <div class="d-flex flex-wrap gap-2">
@@ -169,7 +173,7 @@
         <!-- Recent Activity -->
         <div class="row">
             <div class="col-12">
-                <div class="card recent-activity">
+                <div class="card recent-activity cg-glass cg-glass-strong">
                     <div class="card-header text-white d-flex justify-content-between align-items-center" style="background: #0d47a1 !important;">
                         <h5 class="card-title mb-0">
                             <i class="bi bi-activity me-2"></i>

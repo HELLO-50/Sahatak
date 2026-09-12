@@ -42,12 +42,16 @@
     <link rel="stylesheet" href="../../assets/css/components/video-consultation-dashboard.css">
     <!-- Mobile Patient Optimizations -->
     <link rel="stylesheet" href="../../assets/css/components/mobile-patient.css">
+    <!-- Clinical Glass typography: Manrope (headings) + Inter (body), local fallbacks -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Clinical Glass visual layer (visual only, loaded last to override) -->
+    <link rel="stylesheet" href="../../assets/css/components/clinical-glass.css">
 </head>
 <body data-protect="patient">
-    <div class="dashboard-container">
+    <div class="dashboard-container cg-page">
         <div class="container-fluid">
             <!-- Dashboard Header -->
-            <div class="dashboard-header">
+            <div class="dashboard-header cg-header">
                 <div class="row align-items-center">
                     <!-- Profile Section - Left (Right in RTL) -->
                     <div class="col-lg-4">
@@ -98,30 +102,30 @@
                     <!-- Quick Actions -->
                     <div class="row mb-4">
                         <div class="col-lg-4 col-md-6 mb-3">
-                            <div class="dashboard-card quick-action-card" onclick="bookAppointment()">
-                                <div class="quick-action-icon">
+                            <div class="dashboard-card quick-action-card cg-glass cg-glass-lift cg-tint-teal" onclick="bookAppointment()">
+                                <div class="quick-action-icon cg-icon-badge cg-icon-blue">
                                     <i class="bi bi-plus-circle"></i>
                                 </div>
                                 <h6 id="action-book">Book New Appointment</h6>
-                                <p class="text-muted small" id="action-book-desc">Schedule consultation with doctor</p>
+                                <p class="text-muted small cg-text-soft" id="action-book-desc">Schedule consultation with doctor</p>
                             </div>
                         </div>
                         <div class="col-lg-4 col-md-6 mb-3">
-                            <div class="dashboard-card quick-action-card" onclick="viewRecords()">
-                                <div class="quick-action-icon">
+                            <div class="dashboard-card quick-action-card cg-glass cg-glass-lift cg-tint-violet" onclick="viewRecords()">
+                                <div class="quick-action-icon cg-icon-badge cg-icon-violet">
                                     <i class="bi bi-clipboard-data"></i>
                                 </div>
                                 <h6 id="action-records">My Medical Records</h6>
-                                <p class="text-muted small" id="action-records-desc">View reports and results</p>
+                                <p class="text-muted small cg-text-soft" id="action-records-desc">View reports and results</p>
                             </div>
                         </div>
                         <div class="col-lg-4 col-md-6 mb-3">
-                            <div class="dashboard-card quick-action-card" onclick="chatWithDoctor()">
-                                <div class="quick-action-icon">
+                            <div class="dashboard-card quick-action-card cg-glass cg-glass-lift cg-tint-emerald" onclick="chatWithDoctor()">
+                                <div class="quick-action-icon cg-icon-badge cg-icon-emerald">
                                     <i class="bi bi-chat-dots"></i>
                                 </div>
                                 <h6 id="action-chat">Chat with Doctor</h6>
-                                <p class="text-muted small" id="action-chat-desc">Text messages with doctor</p>
+                                <p class="text-muted small cg-text-soft" id="action-chat-desc">Text messages with doctor</p>
                             </div>
                         </div>
                     </div>
@@ -129,21 +133,21 @@
                     <!-- Statistics Row -->
                     <div class="row mb-4">
                         <div class="col-lg-4 col-md-6 mb-3">
-                            <div class="dashboard-card stat-card">
-                                <div class="stat-number" id="stat-appointments-count">-</div>
-                                <div class="stat-label" id="stat-appointments">Scheduled Appointments</div>
+                            <div class="dashboard-card stat-card cg-glass">
+                                <div class="stat-number cg-stat-text" id="stat-appointments-count">-</div>
+                                <div class="stat-label cg-text-soft" id="stat-appointments">Scheduled Appointments</div>
                             </div>
                         </div>
                         <div class="col-lg-4 col-md-6 mb-3">
-                            <div class="dashboard-card stat-card">
-                                <div class="stat-number" id="stat-prescriptions-count">-</div>
-                                <div class="stat-label" id="stat-prescriptions">Active Prescriptions</div>
+                            <div class="dashboard-card stat-card cg-glass">
+                                <div class="stat-number cg-stat-text" id="stat-prescriptions-count">-</div>
+                                <div class="stat-label cg-text-soft" id="stat-prescriptions">Active Prescriptions</div>
                             </div>
                         </div>
                         <div class="col-lg-4 col-md-6 mb-3">
-                            <div class="dashboard-card stat-card">
-                                <div class="stat-number" id="stat-reports-count">-</div>
-                                <div class="stat-label" id="stat-reports">Medical Reports</div>
+                            <div class="dashboard-card stat-card cg-glass">
+                                <div class="stat-number cg-stat-text" id="stat-reports-count">-</div>
+                                <div class="stat-label cg-text-soft" id="stat-reports">Medical Reports</div>
                             </div>
                         </div>
                     </div>
@@ -152,7 +156,7 @@
                     <div class="row">
                         <!-- Upcoming Appointments -->
                         <div class="col-lg-6 mb-4">
-                            <div class="dashboard-card">
+                            <div class="dashboard-card cg-glass cg-glass-strong">
                                 <div id="appointments-container">
                                     <!-- Appointments will be loaded dynamically -->
                                     <div class="text-center py-4">
@@ -167,7 +171,7 @@
 
                         <!-- Health Summary -->
                         <div class="col-lg-6 mb-4">
-                            <div class="dashboard-card">
+                            <div class="dashboard-card cg-glass cg-glass-strong">
                                 <div id="health-summary-container">
                                     <!-- Health summary will be loaded dynamically -->
                                     <div class="text-center py-4">
@@ -188,7 +192,7 @@
             <!-- Profile Section (Hidden by default) -->
             <div id="profile-section" class="row mt-4" style="display: none;">
                 <div class="col-12">
-                    <div class="dashboard-card">
+                    <div class="dashboard-card cg-glass cg-glass-strong">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h5><i class="bi bi-person me-2"></i><span id="profile-title">Patient Profile</span></h5>
                             <button class="btn btn-outline-secondary btn-sm" onclick="hideProfile()">
@@ -344,7 +348,7 @@
             <!-- Settings Section (Hidden by default) -->
             <div id="settings-section" class="row mt-4" style="display: none;">
                 <div class="col-12">
-                    <div class="dashboard-card">
+                    <div class="dashboard-card cg-glass cg-glass-strong">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h5><i class="bi bi-gear me-2"></i><span id="settings-title">Settings</span></h5>
                             <button class="btn btn-outline-secondary btn-sm" onclick="hideSettings()">
