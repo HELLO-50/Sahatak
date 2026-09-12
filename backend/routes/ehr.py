@@ -664,7 +664,14 @@ def has_patient_access(patient_id, emergency_access=False):
         return True
     
     if current_user.user_type == 'patient':
-        return patient_id == user_profile.id
+        if patient_id != user_profile.id:
+            app_logger.warning(
+                f"Patient access denied: requested patient_id={patient_id} "
+                f"does not match user_profile.id={user_profile.id} "
+                f"(user.id={current_user.id})"
+            )
+            return False
+        return True
     elif current_user.user_type == 'doctor':
         from datetime import datetime, timedelta
         
