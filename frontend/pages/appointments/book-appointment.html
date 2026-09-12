@@ -27,6 +27,10 @@
     <link rel="stylesheet" href="../../assets/css/components/appointments.css">
     <!-- Mobile Patient Optimizations -->
     <link rel="stylesheet" href="../../assets/css/components/mobile-patient.css">
+    <!-- Clinical Glass typography: Manrope (headings) + Inter (body), local fallbacks -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Clinical Glass visual layer (visual only, loaded last to override) -->
+    <link rel="stylesheet" href="../../assets/css/components/clinical-glass.css">
     <style>
         /* Page-level aesthetics for booking flow */
         body.book-appointment-page {
@@ -66,10 +70,10 @@
     </style>
 </head>
 <body data-protect="patient" class="book-appointment-page">
-    <div class="dashboard-container">
+    <div class="dashboard-container cg-page">
         <div class="container-fluid">
             <!-- Dashboard Header -->
-            <div class="dashboard-header">
+            <div class="dashboard-header cg-header">
                 <div class="row align-items-center">
                     <!-- Profile Section - Left (Right in RTL) -->
                     <div class="col-lg-4">
@@ -117,7 +121,7 @@
                     <div class="row justify-content-center">
                         <div class="col-lg-10">
                             <!-- Booking Steps Card -->
-                            <div class="dashboard-card">
+                            <div class="dashboard-card cg-glass cg-glass-strong">
                                 <div class="d-flex justify-content-between align-items-center mb-4">
                                     <h5 class="mb-0">
                                         <i class="bi bi-calendar-plus me-2 text-primary"></i>
