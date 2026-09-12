@@ -111,8 +111,8 @@ class SupportPage {
             
             // Use ApiHelper if available, otherwise use fetch
             let response;
-            if (window.ApiHelper && window.ApiHelper.makeRequest) {
-                response = await window.ApiHelper.makeRequest('/support/report-problem', {
+            if (typeof ApiHelper !== 'undefined' && typeof ApiHelper.makeRequest === 'function') {
+                response = await ApiHelper.makeRequest('/support/report-problem', {
                     method: 'POST',
                     body: JSON.stringify(formData)
                 });
@@ -120,7 +120,7 @@ class SupportPage {
                 response = await window.api.post('/support/report-problem', formData);
             } else {
                 // Fallback to fetch
-                const fetchResponse = await fetch('/api/support/report-problem', {
+                const fetchResponse = await fetch(`${ApiHelper.baseUrl}/support/report-problem`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
