@@ -25,12 +25,16 @@
     <link rel="stylesheet" href="../../../assets/css/components/dashboard.css">
     <!-- Availability CSS -->
     <link rel="stylesheet" href="../../../assets/css/components/availability.css">
+    <!-- Clinical Glass typography: Manrope (headings) + Inter (body), local fallbacks -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Clinical Glass visual layer (visual only, loaded last to override) -->
+    <link rel="stylesheet" href="../../../assets/css/components/clinical-glass.css">
 </head>
 <body data-protect="doctor">
-    <div class="dashboard-container">
+    <div class="dashboard-container cg-page">
         <div class="container-fluid">
             <!-- Dashboard Header -->
-            <div class="dashboard-header">
+            <div class="dashboard-header cg-header">
                 <div class="row align-items-center">
                     <!-- Profile Section - Left (Right in RTL) -->
                     <div class="col-lg-4">
@@ -254,7 +258,7 @@
                                         </div>
 
                                         <!-- Google Calendar -->
-                                        <div class="card mb-4">
+                                        <div class="card mb-4 cg-glass cg-glass-strong">
                                             <div class="card-body">
                                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                                     <div>
@@ -302,7 +306,7 @@
                                         </div>
 
                                         <!-- Outlook Calendar -->
-                                        <div class="card mb-4">
+                                        <div class="card mb-4 cg-glass cg-glass-strong">
                                             <div class="card-body">
                                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                                     <div>

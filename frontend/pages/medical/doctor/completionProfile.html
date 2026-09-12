@@ -19,12 +19,16 @@
     <link rel="stylesheet" href="../../../assets/css/main.css">
     <!-- Dashboard CSS -->
     <link rel="stylesheet" href="../../../assets/css/components/dashboard.css">
+    <!-- Clinical Glass typography: Manrope (headings) + Inter (body), local fallbacks -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Clinical Glass visual layer (visual only, loaded last to override) -->
+    <link rel="stylesheet" href="../../../assets/css/components/clinical-glass.css">
 </head>
 <body data-protect="doctor">
-    <div class="dashboard-container">
+    <div class="dashboard-container cg-page">
         <div class="container-fluid">
             <!-- Dashboard Header -->
-            <div class="dashboard-header">
+            <div class="dashboard-header cg-header">
                 <div class="row align-items-center">
                     <!-- Profile Section - Left (Right in RTL) -->
                     <div class="col-lg-4">
@@ -85,7 +89,7 @@
             <!-- Progress Steps -->
             <div class="row mt-4">
                 <div class="col-12">
-                    <div class="dashboard-card">
+                    <div class="dashboard-card cg-glass cg-glass-strong">
                         <div class="d-flex justify-content-center">
                             <div class="progress-steps">
                                 <div class="step active" id="step-1">
@@ -113,7 +117,7 @@
             <!-- Form Content -->
             <div class="row mt-4">
                 <div class="col-12">
-                    <div class="dashboard-card">
+                    <div class="dashboard-card cg-glass cg-glass-strong">
                         <form id="profileCompletionForm">
                             <!-- Step 1: Professional Information -->
                             <div class="form-step active" id="form-step-1">
