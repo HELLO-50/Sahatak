@@ -47,10 +47,11 @@
             margin-bottom: 1.75rem;
         }
 
+        /* Card depth (3-layer shadow + inset highlight + glass border +
+           translucency) comes from the shared .cg-glass base in
+           clinical-glass.css. Only the page radius is tuned here. */
         .appointments-page .dashboard-card {
             border-radius: 18px;
-            border: 1px solid rgba(15, 23, 42, 0.06);
-            box-shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
         }
 
         .appointments-page .card-header {

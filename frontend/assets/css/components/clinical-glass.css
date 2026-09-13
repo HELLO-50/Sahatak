@@ -61,6 +61,10 @@
     --cg-coral: #c2410c;
     --cg-emerald: #047857;
     --cg-focus: rgba(37, 99, 235, 0.40);
+    --cg-shadow-header:
+        0 1px 2px rgba(15, 23, 42, 0.05),
+        0 16px 40px rgba(15, 23, 42, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.85);
 
     position: relative;
     background: linear-gradient(165deg, #f6f9fd 0%, #eef4fb 45%, #f2f4fa 100%);
@@ -74,15 +78,18 @@
 }
 
 /* Mesh blobs: three soft glows behind the content layer (pointer-safe) */
+/* Mesh blobs: three soft glows behind the content layer (pointer-safe).
+   CANONICAL mesh — identical to doctor-dashboard-glass.css / ehr-glass.css:
+   same colors, same positions, same sizes. Do not vary per page. */
 .cg-page::before {
     content: "";
     position: absolute;
     inset: 0;
     pointer-events: none;
     background:
-        radial-gradient(620px 340px at 12% -4%,  rgba(96, 165, 250, 0.16), transparent 62%),
-        radial-gradient(560px 320px at 92% 6%,   rgba(45, 212, 191, 0.13), transparent 60%),
-        radial-gradient(640px 420px at 55% 108%, rgba(167, 139, 250, 0.10), transparent 65%);
+        radial-gradient(560px 420px at 8% 4%,    rgba(37, 99, 235, 0.10) 0%, transparent 60%),
+        radial-gradient(640px 480px at 94% 12%,  rgba(13, 148, 136, 0.09) 0%, transparent 62%),
+        radial-gradient(720px 560px at 50% 105%, rgba(124, 58, 237, 0.07) 0%, transparent 65%);
     z-index: 0;
 }
 
@@ -142,6 +149,10 @@
 }
 
 /* Interactive variant: lifts on hover like the doctor quick-action cards */
+.cg-glass-lift {
+    position: relative; /* anchor for the accent baseline strip */
+}
+
 .cg-glass-lift:hover,
 .cg-glass-lift:focus-visible {
     transform: translateY(-5px);
@@ -150,6 +161,59 @@
                 0 14px 32px rgba(37, 99, 235, 0.16),
                 0 30px 60px rgba(15, 23, 42, 0.08);
 }
+
+/* Per-tint hover glows — the card glows in ITS OWN accent color on hover,
+   exactly like #communication-card / #records-card / #availability-card
+   on the doctor dashboard. Same 3-layer structure, same -5px lift. */
+.cg-tint-teal.cg-glass-lift:hover,
+.cg-tint-teal.cg-glass-lift:focus-visible {
+    border-color: rgba(13, 148, 136, 0.45);
+    box-shadow: 0 2px 4px rgba(13, 148, 136, 0.10),
+                0 14px 32px rgba(13, 148, 136, 0.16),
+                0 30px 60px rgba(15, 23, 42, 0.08);
+}
+.cg-tint-violet.cg-glass-lift:hover,
+.cg-tint-violet.cg-glass-lift:focus-visible {
+    border-color: rgba(124, 58, 237, 0.42);
+    box-shadow: 0 2px 4px rgba(124, 58, 237, 0.10),
+                0 14px 32px rgba(124, 58, 237, 0.15),
+                0 30px 60px rgba(15, 23, 42, 0.08);
+}
+.cg-tint-emerald.cg-glass-lift:hover,
+.cg-tint-emerald.cg-glass-lift:focus-visible {
+    border-color: rgba(5, 150, 105, 0.45);
+    box-shadow: 0 2px 4px rgba(5, 150, 105, 0.10),
+                0 14px 32px rgba(5, 150, 105, 0.15),
+                0 30px 60px rgba(15, 23, 42, 0.08);
+}
+.cg-tint-coral.cg-glass-lift:hover,
+.cg-tint-coral.cg-glass-lift:focus-visible {
+    border-color: rgba(194, 65, 12, 0.42);
+    box-shadow: 0 2px 4px rgba(194, 65, 12, 0.10),
+                0 14px 32px rgba(194, 65, 12, 0.15),
+                0 30px 60px rgba(15, 23, 42, 0.08);
+}
+
+/* Accent baseline strip per module — the doctor cards' 44×4px gradient
+   strip at the card's bottom edge, revealed on hover. Pure decoration. */
+.cg-glass-lift::after {
+    content: '';
+    position: absolute;
+    left: 1.5rem;
+    bottom: 0;
+    width: 44px;
+    height: 4px;
+    border-radius: 4px 4px 0 0;
+    background: linear-gradient(90deg, #2563eb, #7c3aed);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+.cg-glass-lift:hover::after,
+.cg-glass-lift:focus-visible::after { opacity: 1; }
+.cg-tint-teal.cg-glass-lift::after    { background: linear-gradient(90deg, #14b8a6, #0e7490); }
+.cg-tint-violet.cg-glass-lift::after  { background: linear-gradient(90deg, #8b5cf6, #6d28d9); }
+.cg-tint-emerald.cg-glass-lift::after { background: linear-gradient(90deg, #10b981, #047857); }
+.cg-tint-coral.cg-glass-lift::after   { background: linear-gradient(90deg, #f97316, #c2410c); }
 
 .cg-glass-lift:focus-visible {
     outline: 3px solid var(--cg-focus);
@@ -182,12 +246,13 @@
    3. Frosted header bar — page/section headers over the mesh
    -------------------------------------------------------------------------- */
 .cg-header {
-    background: rgba(255, 255, 255, 0.78);
+    /* Exact frosted recipe shared with doctor-dashboard-glass.css / ehr-glass.css */
+    background: rgba(255, 255, 255, 0.72);
     -webkit-backdrop-filter: blur(16px) saturate(170%);
     backdrop-filter: blur(16px) saturate(170%);
-    border: 1px solid rgba(255, 255, 255, 0.70);
+    border: 1px solid rgba(255, 255, 255, 0.7);
     border-radius: var(--cg-radius);
-    box-shadow: var(--cg-shadow);
+    box-shadow: var(--cg-shadow-header);
 }
 
 .cg-header .cg-text-soft,
@@ -195,27 +260,124 @@
     color: var(--cg-text-soft) !important;
 }
 
+/* Canonical gradient page title — identical on EVERY page (doctor dashboard,
+   EHR, patient, admin): Manrope 800, blue→teal→violet gradient text */
+.cg-header .dashboard-title {
+    font-size: 1.9rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    background: linear-gradient(120deg, #1d4ed8 0%, #0e7490 55%, #7c3aed 110%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Canonical header children — the doctor pages' frosted-chip recipe,
+   now inherited by every page that uses .cg-header (no per-page
+   redefinition needed). Title gradient stops: #1d4ed8 7.7:1,
+   #0e7490 5.8:1, #7c3aed 5.0:1 worst-case — all ≥ AA (large text). */
+.cg-header .dashboard-subtitle {
+    color: var(--cg-text-soft);
+    font-weight: 500;
+    font-size: 0.92rem;
+}
+
+.cg-header .btn-action {
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 12px;
+    color: #334155;
+    background: rgba(255, 255, 255, 0.72);
+    font-weight: 600;
+    transition: color 0.25s ease, border-color 0.25s ease,
+                background-color 0.25s ease, box-shadow 0.25s ease,
+                transform 0.25s ease;
+}
+
+.cg-header .btn-action:hover,
+.cg-header .btn-action:focus-visible {
+    color: #1d4ed8;
+    border-color: rgba(37, 99, 235, 0.35);
+    background: #ffffff;
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.15);
+    transform: translateY(-1px);
+}
+
+/* Logout slot keeps the canonical red treatment */
+.cg-header .btn-action.btn-logout:hover,
+.cg-header .btn-action.btn-logout:focus-visible {
+    color: #b91c1c;
+    border-color: rgba(220, 38, 38, 0.35);
+    background: #fff5f5;
+    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.12);
+}
+
+/* Avatar chip — canonical blue→teal gradient with dual shadow */
+.cg-header .user-avatar {
+    background: linear-gradient(135deg, #2563eb, #0e7490);
+    border: 3px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.30), 0 12px 28px rgba(15, 23, 42, 0.14);
+    color: #ffffff;
+}
+
 /* --------------------------------------------------------------------------
    4. Icon badge — circular tinted disc behind an icon (Bootstrap Icons)
       Use: <span class="cg-icon-badge cg-icon-teal"><i class="bi bi-chat"></i></span>
    -------------------------------------------------------------------------- */
+/* --------------------------------------------------------------------------
+   4. Icon badge — doctor-grade saturated gradient chip with white glyph.
+      Upgraded to full parity with doctor-dashboard-glass.css
+      .quick-action-icon: gradient surface, white icon, colored drop shadow.
+      White-glyph contrast on the chip (WCAG 1.4.11 graphics, ≥ 3:1):
+      blue 5.2:1 · teal 3.7:1 (#0d9488 light stop) · violet 4.1:1 ·
+      coral 4.0:1 (#ea580c light stop) · emerald 3.7:1 (#059669 light stop).
+      -------------------------------------------------------------------------- */
 .cg-icon-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 52px;
-    height: 52px;
-    flex: 0 0 52px;
-    border-radius: 14px;
-    font-size: 1.35rem;
+    width: 58px;
+    height: 58px;
+    flex: 0 0 58px;
+    border-radius: 16px;
+    font-size: 1.5rem;
     line-height: 1;
+    color: #ffffff;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-.cg-icon-blue    { background: #dbeafe; color: #1d4ed8; }  /* 6.3:1 on #dbeafe */
-.cg-icon-teal    { background: #cffafe; color: #0e7490; }  /* 5.8:1 on #cffafe */
-.cg-icon-violet  { background: #ede9fe; color: #6d28d9; }  /* 7.0:1 on #ede9fe */
-.cg-icon-coral   { background: #ffedd5; color: #c2410c; }  /* 5.4:1 on #ffedd5 */
-.cg-icon-emerald { background: #d1fae5; color: #047857; }  /* 6.4:1 on #d1fae5 */
+.cg-icon-blue    { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35); }
+.cg-icon-teal    { background: linear-gradient(135deg, #0d9488 0%, #0e7490 100%); box-shadow: 0 6px 16px rgba(13, 148, 136, 0.35); }
+.cg-icon-violet  { background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); box-shadow: 0 6px 16px rgba(124, 58, 237, 0.35); }
+.cg-icon-coral   { background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%); box-shadow: 0 6px 16px rgba(194, 65, 12, 0.35); }
+.cg-icon-emerald { background: linear-gradient(135deg, #059669 0%, #047857 100%); box-shadow: 0 6px 16px rgba(5, 150, 105, 0.35); }
+
+/* Icon animation on interactive cards — mirrors the doctor quick-action
+   cards (scale + slight rotate + deeper accent glow on hover). */
+.cg-glass-lift:hover .cg-icon-badge,
+.cg-glass-lift:focus-visible .cg-icon-badge {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.cg-glass-lift:hover .cg-icon-blue,
+.cg-glass-lift:focus-visible .cg-icon-blue {
+    box-shadow: 0 8px 28px rgba(37, 99, 235, 0.40), 0 4px 12px rgba(37, 99, 235, 0.30);
+}
+.cg-glass-lift:hover .cg-icon-teal,
+.cg-glass-lift:focus-visible .cg-icon-teal {
+    box-shadow: 0 8px 28px rgba(13, 148, 136, 0.40), 0 4px 12px rgba(13, 148, 136, 0.30);
+}
+.cg-glass-lift:hover .cg-icon-violet,
+.cg-glass-lift:focus-visible .cg-icon-violet {
+    box-shadow: 0 8px 28px rgba(124, 58, 237, 0.40), 0 4px 12px rgba(124, 58, 237, 0.30);
+}
+.cg-glass-lift:hover .cg-icon-coral,
+.cg-glass-lift:focus-visible .cg-icon-coral {
+    box-shadow: 0 8px 28px rgba(194, 65, 12, 0.40), 0 4px 12px rgba(194, 65, 12, 0.30);
+}
+.cg-glass-lift:hover .cg-icon-emerald,
+.cg-glass-lift:focus-visible .cg-icon-emerald {
+    box-shadow: 0 8px 28px rgba(5, 150, 105, 0.40), 0 4px 12px rgba(5, 150, 105, 0.30);
+}
 
 .cg-icon-sm { width: 40px; height: 40px; flex-basis: 40px; font-size: 1.1rem; border-radius: 11px; }
 .cg-icon-lg { width: 64px; height: 64px; flex-basis: 64px; font-size: 1.7rem; border-radius: 17px; }
@@ -289,8 +451,14 @@
 
 /* Reduced-motion respect */
 @media (prefers-reduced-motion: reduce) {
-    .cg-glass, .cg-glass-lift:hover, .cg-glass-lift:focus-visible {
+    .cg-glass, .cg-glass-lift:hover, .cg-glass-lift:focus-visible,
+    .cg-icon-badge {
         transition: none;
+        transform: none;
+    }
+
+    .cg-glass-lift:hover .cg-icon-badge,
+    .cg-glass-lift:focus-visible .cg-icon-badge {
         transform: none;
     }
 }

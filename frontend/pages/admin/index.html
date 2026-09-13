@@ -60,7 +60,10 @@
         .login-logo {
             width: 80px;
             height: 80px;
-            background: linear-gradient(135deg, #28a745, #20c997);
+            /* Emerald color slot of the canonical avatar gradient pattern */
+            background: linear-gradient(135deg, #047857, #065f46);
+            border: 3px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.30), 0 12px 28px rgba(15, 23, 42, 0.14);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -71,14 +74,16 @@
         }
         
         .login-title {
+            font-family: "Manrope", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
             font-size: 28px;
-            font-weight: 600;
-            color: #333;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--cg-text-strong);
             margin-bottom: 10px;
         }
         
         .login-subtitle {
-            color: #666;
+            color: var(--cg-text-soft);
             font-size: 14px;
         }
         
@@ -89,25 +94,25 @@
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
+            color: var(--cg-text-soft);
+            font-weight: 600;
             font-size: 14px;
         }
         
         .form-control {
             width: 100%;
             padding: 12px 15px;
-            border: 2px solid #e0e0e0;
+            border: 2px solid rgba(148, 163, 184, 0.45);
             border-radius: 10px;
             font-size: 15px;
-            transition: all 0.3s;
+            transition: all 0.25s ease;
             background: white;
         }
         
         .form-control:focus {
-            border-color: #28a745;
+            border-color: #047857;
             outline: none;
-            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.40);
         }
         
         .password-wrapper {
@@ -125,7 +130,7 @@
         }
         
         .toggle-password:hover {
-            color: #28a745;
+            color: #047857;
         }
         
         .form-options {
@@ -162,25 +167,27 @@
         }
         
         .forgot-password:hover {
-            color: #20c997;
+            color: #065f46;
         }
         
         .btn-login {
             width: 100%;
             padding: 14px;
-            background: linear-gradient(135deg, #28a745, #20c997);
+            /* Emerald slot of the canonical blue→teal action-button gradient */
+            background: linear-gradient(135deg, #047857 0%, #065f46 100%);
             color: white;
             border: none;
             border-radius: 10px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 14px rgba(5, 150, 105, 0.28);
+            transition: box-shadow 0.25s ease, transform 0.25s ease;
         }
         
         .btn-login:hover {
+            box-shadow: 0 8px 22px rgba(5, 150, 105, 0.38);
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(40, 167, 69, 0.3);
         }
         
         .btn-login:disabled {
@@ -223,7 +230,7 @@
         .footer-text {
             text-align: center;
             margin-top: 30px;
-            color: #999;
+            color: var(--cg-text-soft);
             font-size: 13px;
         }
         
@@ -244,7 +251,7 @@
         }
     </style>
 </head>
-<body>
+<body class="cg-page">
     <div class="login-container cg-glass">
         <div class="login-header">
             <div class="login-logo">

@@ -1,0 +1,224 @@
+/* ==========================================================================
+   Admin Dashboard — Clinical Glass page wiring.
+   pages/admin/admin.html links this AFTER clinical-glass.css.
+
+   This file contains ONLY page-specific wiring: which admin module gets
+   which shared Clinical Glass treatment. It defines NO new tokens — every
+   value references the shared custom properties scoped on .cg-page by
+   clinical-glass.css (colors, blur, shadows, radii, transitions).
+   ========================================================================== */
+
+/* Horizontal navigation — glass segmented bar (cg-tabs chip pattern) */
+.admin-navigation {
+    background: var(--cg-glass-strong) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    backdrop-filter: blur(14px) saturate(160%);
+    border: 1px solid var(--cg-glass-border);
+    border-radius: var(--cg-radius);
+    box-shadow: var(--cg-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.admin-navigation .btn-admin-nav {
+    border: 1px solid transparent;
+    border-radius: var(--cg-radius-sm);
+    color: var(--cg-text-soft);
+    font-family: "Manrope", "Inter", sans-serif;
+    font-weight: 600;
+    background: transparent;
+    transition: color 0.25s ease, background-color 0.25s ease,
+                border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.admin-navigation .btn-admin-nav:hover,
+.admin-navigation .btn-admin-nav:focus-visible {
+    color: var(--cg-blue);
+    background: rgba(219, 234, 254, 0.55);
+}
+
+.admin-navigation .btn-admin-nav.active {
+    color: #1d4ed8;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(148, 163, 184, 0.30);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+/* Stat cards — lift + gradient rail on hover (canonical stat-item pattern) */
+.admin-stat-card {
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow 0.25s ease, transform 0.25s ease,
+                border-color 0.25s ease;
+}
+
+.admin-stat-card::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; top: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #2563eb, #7c3aed);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.admin-stat-card:hover {
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.10), 0 12px 26px rgba(15, 23, 42, 0.08);
+    transform: translateY(-3px);
+}
+
+.admin-stat-card:hover::after { opacity: 1; }
+
+.admin-stat-card .stat-number {
+    font-family: "Manrope", "Inter", sans-serif;
+    font-size: 2.1rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+}
+
+.admin-stat-card .stat-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.admin-stat-card .stat-icon { color: var(--cg-blue); }
+
+/* Platform health + analytics modules — text-dense glass surfaces */
+.admin-health-card,
+.analytics-card {
+    border-radius: var(--cg-radius);
+}
+
+.analytics-card > h6 {
+    color: var(--cg-text-strong);
+    font-family: "Manrope", "Inter", sans-serif;
+    font-weight: 800;
+}
+
+.analytics-card > h6 i { color: var(--cg-blue); }
+
+/* Activity tiles — canonical vital-item tile treatment */
+.activity-stat-card {
+    background: linear-gradient(150deg, rgba(241, 245, 249, 0.55) 0%, rgba(255, 255, 255, 0.95) 100%);
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    border-radius: 14px;
+    transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+}
+
+.activity-stat-card:hover {
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12), 0 10px 24px rgba(15, 23, 42, 0.07);
+    border-color: rgba(37, 99, 235, 0.25);
+    transform: translateY(-3px);
+}
+
+.activity-stat-card .activity-icon {
+    background: #dbeafe;
+    color: #1d4ed8;
+    border-radius: 12px;
+}
+
+.activity-stat-card .activity-value {
+    font-family: "Manrope", "Inter", sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    background: linear-gradient(120deg, #1d4ed8 0%, #7c3aed 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+}
+
+.activity-stat-card .activity-label { color: var(--cg-text-soft); }
+
+/* Section cards inside admin tabs (users / verification / settings) —
+   text-dense forms: high-opacity glass with canonical section header */
+.admin-section .card {
+    background: var(--cg-glass-strong);
+    border: 1px solid var(--cg-glass-border);
+    border-radius: var(--cg-radius);
+    box-shadow: var(--cg-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    transition: box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.admin-section .card:hover {
+    border-color: rgba(13, 148, 136, 0.28);
+    box-shadow: var(--cg-shadow-hover), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.admin-section .card-header {
+    background: linear-gradient(180deg, rgba(248, 251, 255, 0.95) 0%, rgba(238, 244, 251, 0.95) 100%);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+    border-radius: var(--cg-radius) var(--cg-radius) 0 0 !important;
+}
+
+.admin-section .card-header h6 {
+    color: var(--cg-text-strong);
+    font-family: "Manrope", "Inter", sans-serif;
+    font-weight: 800;
+}
+
+.admin-section .card-header h6 i { color: var(--cg-blue); }
+
+.admin-section .form-label { color: var(--cg-text); font-weight: 600; }
+.admin-section .form-control { border-color: rgba(148, 163, 184, 0.45); }
+.admin-section .form-control:focus {
+    border-color: #1d4ed8;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.40);
+}
+
+/* Header buttons — canonical frosted chip treatment (logout slot: red) */
+.cg-header .btn {
+    border-radius: 12px;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    color: #334155;
+    background: rgba(255, 255, 255, 0.72);
+    transition: color 0.25s ease, border-color 0.25s ease,
+                background-color 0.25s ease, box-shadow 0.25s ease,
+                transform 0.25s ease;
+}
+
+.cg-header .btn:hover,
+.cg-header .btn:focus-visible {
+    color: #b91c1c;
+    border-color: rgba(220, 38, 38, 0.35);
+    background: #fff5f5;
+    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.12);
+    transform: translateY(-1px);
+}
+/* Dashboard cards carrying the glass upgrade must use the shared 3-layer
+   cg-shadow. admin.css (SHARED with pages/admin/index.html) hard-codes the
+   legacy dark admin shadow with !important on .dashboard-card (0,1,0) and
+   .dashboard-card:hover (0,2,0). Do NOT weaken admin.css — instead beat it
+   from this admin-only file inside the same !important tier using higher
+   specificity: .cg-page .dashboard-card.cg-glass = (0,3,0) > (0,2,0) and
+   (0,1,0), and the :hover twin = (0,4,0). Scoped strictly to glass-upgraded
+   cards inside the .cg-page canvas, so admin/index.html is unaffected. */
+.cg-page .dashboard-card.cg-glass {
+    box-shadow: var(--cg-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+}
+
+.cg-page .dashboard-card.cg-glass:hover {
+    border-color: rgba(13, 148, 136, 0.28);
+    box-shadow: var(--cg-shadow-hover), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+
+
+
+/* Reduced motion — same contract as the shared layer */
+@media (prefers-reduced-motion: reduce) {
+    .admin-stat-card,
+    .activity-stat-card,
+    .admin-section .card,
+    .admin-navigation .btn-admin-nav,
+    .cg-header .btn {
+        transition: none;
+    }
+
+    .admin-stat-card:hover,
+    .activity-stat-card:hover {
+        transform: none;
+    }
+}

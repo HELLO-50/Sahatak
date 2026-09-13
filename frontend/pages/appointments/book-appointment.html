@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title id="page-title-head">Book Appointment - Sahatak</title>
     
     <!-- Favicon -->
@@ -47,11 +47,11 @@
             margin-bottom: 1.75rem;
         }
 
+        /* Card depth (3-layer shadow + inset highlight + glass border +
+           translucent blur surface) comes from the shared .cg-glass base in
+           clinical-glass.css. Only the page radius is tuned here. */
         .book-appointment-page .dashboard-card {
-            border-radius: 20px;
-            border: 1px solid rgba(148, 163, 184, 0.35);
-            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
-            background: linear-gradient(145deg, #ffffff 0%, #f9fafb 40%, #ffffff 100%);
+            border-radius: 18px;
         }
 
         .book-appointment-page .booking-step h4 {
